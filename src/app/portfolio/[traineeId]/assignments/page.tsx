@@ -10,6 +10,7 @@ import {
   ASSIGNMENT_WORD_COUNT,
   ASSIGNMENT_STATUS_PILL_CLASS as STATUS_PILL_CLASS,
   ASSIGNMENT_STATUS_LABEL as STATUS_LABEL,
+  resolveAssignmentResult,
 } from "@/lib/assignment-info";
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -79,9 +80,14 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
     .filter((a) => a.assignment_type !== "Plagiarism Reflection")
     .sort((a, b) => ASSIGNMENT_ORDER.indexOf(a.assignment_type) - ASSIGNMENT_ORDER.indexOf(b.assignment_type));
   const reflectionAssignments = (assignmentsRaw ?? []).filter((a) => a.assignment_type === "Plagiarism Reflection");
-  const passedCount = standardAssignments.filter(
-    (a) => a.first_status === "approved" || a.resubmission_status === "approved"
-  ).length;
+  // A pass is a pass, not a closed round: a resubmission FAIL also carries
+  // resubmission_status "approved", so counting that as passed inflated the
+  // "X of 4 passed" heading (a failed candidate read as one closer to the
+  // 3-of-4 rule than they were). resolveAssignmentResult checks the outcome.
+  const passedCount = standardAssignments.filter((a) => {
+    const r = resolveAssignmentResult(a);
+    return r === "pass_first" || r === "pass_resub";
+  }).length;
   // for-claude-code-trainee-interface.md: "Heading: what's due, e.g. '1 due
   // today'" -- plus an "Open Assignment N" shortcut straight to it. Was
   // missing entirely; only the passed-count showed. due_date tracks
@@ -174,6 +180,7 @@ function AssignmentCard({
   accentClass?: string;
 }) {
   const info = ASSIGNMENT_INFO[a.assignment_type];
+  const result = resolveAssignmentResult(a);
   if (locked) {
     // "Not yet open" is one of the spec's own named outcome states
     // (for-claude-code-trainee-interface.md §4) -- gated, not hidden, so a
@@ -199,7 +206,11 @@ function AssignmentCard({
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
           <h3 className="font-serif text-lg text-ink">{info.title}</h3>
         </div>
-        <span className={`pill ${STATUS_PILL_CLASS[a.first_status]}`}>{STATUS_LABEL[a.first_status]}</span>
+        {result === "fail" ? (
+          <span className="pill pill-danger">Fail</span>
+        ) : (
+          <span className={`pill ${STATUS_PILL_CLASS[a.first_status]}`}>{STATUS_LABEL[a.first_status]}</span>
+        )}
       </div>
 
       <p className="mt-2 line-clamp-2 text-sm text-muted">{info.description}</p>
@@ -218,7 +229,7 @@ function AssignmentCard({
           .flatMap((node, idx) => (idx > 0 ? [" · ", node] : [node]))}
       </p>
 
-      {a.first_status === "resubmission_required" ? (
+      {a.first_status === "resubmission_required" && result !== "fail" ? (
         <div className="mt-3 flex items-center justify-between border-t border-border-faint pt-3">
           <span className="text-xs text-muted">Resubmission</span>
           <span className={`pill ${STATUS_PILL_CLASS[a.resubmission_status]}`}>{STATUS_LABEL[a.resubmission_status]}</span>

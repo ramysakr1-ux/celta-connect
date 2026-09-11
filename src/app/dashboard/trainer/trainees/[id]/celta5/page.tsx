@@ -87,7 +87,7 @@ export default async function Celta5RecordPage({
       .order("lesson_date"),
     supabase
       .from("assignments")
-      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, final_grade")
+      .select("id, assignment_type, first_status, resubmission_status, resubmission_outcome, first_own_work_confirmed, resubmission_own_work_confirmed, final_grade")
       .eq("trainee_id", id),
     supabase.from("tp_feedback").select("*").eq("trainee_id", id),
     supabase

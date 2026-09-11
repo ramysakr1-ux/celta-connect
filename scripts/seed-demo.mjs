@@ -1300,30 +1300,8 @@ async function main() {
       provisional_grade_upper: def.upper,
     }))
   );
-  await supabase.from("assignments").insert([
-    {
-      course_id: course.id,
-      trainee_id: trainees["Amara Okafor"],
-      assignment_type: "Focus on Learner",
-      first_status: "approved",
-      first_content_grade: "pass",
-      first_english_grade: "pass",
-      first_submitted_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-      marker_id: trainerId,
-      final_grade: "Pass", // capital P: reads compare against "Pass" exactly
-    },
-    {
-      course_id: course.id,
-      trainee_id: trainees["Amara Okafor"],
-      assignment_type: "LRT",
-      first_status: "approved",
-      first_content_grade: "pass",
-      first_english_grade: "pass",
-      first_submitted_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-      marker_id: trainerId,
-      final_grade: "Pass", // capital P: reads compare against "Pass" exactly
-    },
-  ]);
+  // Written assignments for every candidate are seeded together further down
+  // (see "Written assignments -- the whole cycle"), not per-candidate here.
 
   // Daniel: average, 2 TPs, one resubmission in progress, a recurring action point (at-risk)
   for (const [i, cfg] of [
@@ -1350,17 +1328,6 @@ async function main() {
     course_id: course.id,
     trainee_id: trainees["Daniel Kim"],
     hours_attended: Math.round(hoursSoFar * 0.72), // Daniel -- the genuine attendance concern
-  });
-  await supabase.from("assignments").insert({
-    course_id: course.id,
-    trainee_id: trainees["Daniel Kim"],
-    assignment_type: "Focus on Learner",
-    first_status: "resubmission_required",
-    first_content_grade: "fail",
-    first_english_grade: "pass",
-    first_submitted_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    marker_id: trainerId,
-    due_date: isoDaysFromNow(-2),
   });
   // Open concern -- gives the trainer/course layer a live "needs you" item,
   // deliberately kept off the centre-admin account (spec: centre admin's
@@ -1400,6 +1367,368 @@ async function main() {
     trainee_id: trainees["Priya Sharma"],
     hours_attended: Math.round(hoursSoFar * 0.95), // Priya
   });
+
+  // ============================================================
+  // Written assignments -- the whole cycle
+  //
+  // Ramy, 10-11 Sep 2026, walking the demo: "the whole assignment cycle...
+  // submission, instructions, announcements, link to the timetable, when
+  // they're out, when they're back in, deadlines, warnings. Re submission...
+  // and let's not forget about assignment five... in case of plagiarism."
+  //
+  // So every state a real cohort holds mid-course is present somewhere across
+  // the twelve, and each is CONSISTENT with the timetable's own gating (an
+  // assignment reads "Not yet open" until a course_timetable_events row tagged
+  // with its linked_assignment_type has reached today -- see the assignments
+  // page). Focus on the Learner, LRT and Skills are set and open; Lessons from
+  // the Classroom is genuinely the last assignment, set in the final week, so
+  // it stays "Not yet open" for everyone -- a real cycle state, not a gap.
+  //
+  // States covered: passed first round; passed on resubmission; returned for
+  // resubmission with tutor feedback; resubmission handed back in and awaiting
+  // the second marker; under review; not started; a deadline gone past
+  // (overdue); a terminal Fail after resubmission with its formal warning
+  // letter; and Assignment 5, the Plagiarism Reflection, off a real upheld
+  // malpractice case. The status encodings match the trainer marking action
+  // exactly (returnAssignment) so nothing here is a state the app cannot
+  // itself produce.
+  // ============================================================
+  {
+    const cDay = (n) => courseDay(courseStart, n);
+    const daysAgoIso = (n) => new Date(Date.now() - n * 86400000).toISOString();
+    const secondMarkerId = trainer2Id;
+
+    // When each type is SET, and when each is DUE. LfC has no set day on or
+    // before today on purpose.
+    const DUE_DAY = { "Focus on Learner": 6, LRT: 10, Skills: 16, LfC: 19 };
+
+    // --- State builders. Each returns the mark-state columns for one row;
+    //     the loop adds course_id/trainee_id/assignment_type/due_date. ---
+    const notStarted = () => ({ first_status: "not_submitted" });
+    const underReview = (submittedDaysAgo = 3) => ({
+      first_status: "submitted",
+      first_submitted_at: daysAgoIso(submittedDaysAgo),
+      first_own_work_confirmed: true,
+    });
+    const passedFirst = (submittedDaysAgo = 8) => ({
+      first_status: "approved",
+      first_submitted_at: daysAgoIso(submittedDaysAgo),
+      first_content_grade: "pass",
+      first_english_grade: "pass",
+      first_own_work_confirmed: true,
+      marker_id: trainerId,
+      final_grade: "Pass",
+    });
+    const returnedForResub = (feedback, submittedDaysAgo = 6) => ({
+      first_status: "resubmission_required",
+      first_submitted_at: daysAgoIso(submittedDaysAgo),
+      first_content_grade: "fail",
+      first_english_grade: "pass",
+      first_own_work_confirmed: true,
+      marker_id: trainerId,
+      tutor_feedback: feedback,
+    });
+    const resubHandedBack = (feedback) => ({
+      ...returnedForResub(feedback, 9),
+      resubmission_status: "submitted",
+      resubmission_submitted_at: daysAgoIso(1),
+      resubmission_own_work_confirmed: true,
+    });
+    const passedOnResub = (feedback) => ({
+      ...returnedForResub(feedback, 11),
+      resubmission_status: "approved",
+      resubmission_submitted_at: daysAgoIso(4),
+      resubmission_content_grade: "pass",
+      resubmission_english_grade: "pass",
+      resubmission_own_work_confirmed: true,
+      resubmission_outcome: "pass",
+      second_marker_id: secondMarkerId,
+      second_marker_recorded_at: daysAgoIso(2),
+      final_grade: "Pass",
+    });
+    const failedFinal = (feedback) => ({
+      ...returnedForResub(feedback, 12),
+      resubmission_status: "approved",
+      resubmission_submitted_at: daysAgoIso(5),
+      resubmission_content_grade: "fail",
+      resubmission_english_grade: "pass",
+      resubmission_own_work_confirmed: true,
+      resubmission_outcome: "fail",
+      second_marker_id: secondMarkerId,
+      second_marker_recorded_at: daysAgoIso(3),
+      final_grade: "Fail",
+    });
+
+    // --- Who is where. Kofi's LRT is deliberately absent -- it is created by
+    //     the malpractice flow further down, not as a plain state. ---
+    const DEFAULT_PLAN = {
+      "Focus on Learner": passedFirst(9),
+      LRT: passedFirst(6),
+      Skills: underReview(3),
+      LfC: notStarted(),
+    };
+    const PLAN = {
+      "Amara Okafor": {
+        "Focus on Learner": passedFirst(9),
+        LRT: passedFirst(6),
+        Skills: underReview(2),
+        LfC: notStarted(),
+      },
+      "Daniel Kim": {
+        // FoL bounced back with feedback; LRT never came in and is now overdue.
+        "Focus on Learner": returnedForResub(
+          "A solid needs analysis, but the language problem is described, not analysed -- I could not see meaning, form and phonology treated separately, and the two remedial activities have no source. Rework section 3 and resubmit.",
+          6
+        ),
+        LRT: notStarted(),
+        Skills: underReview(3),
+        LfC: notStarted(),
+      },
+      "Priya Sharma": {
+        "Focus on Learner": passedFirst(10),
+        LRT: passedOnResub(
+          "First version had the form right but the concept-checking questions gave the answer away. Reworked CCQs on the resubmission do the job -- passed."
+        ),
+        Skills: underReview(2),
+        LfC: notStarted(),
+      },
+      "Leila Haddad": {
+        "Focus on Learner": passedFirst(9),
+        // Resubmission is back in and waiting on the second marker.
+        LRT: resubHandedBack(
+          "Meaning and form are fine; phonology was thin -- no sentence stress or weak forms marked. Add a marked-up model and resubmit."
+        ),
+        Skills: underReview(3),
+        LfC: notStarted(),
+      },
+      "Ines Marchetti": {
+        // A terminal Fail after resubmission -- carries the warning letter.
+        "Focus on Learner": failedFinal(
+          "The resubmission still does not analyse the language problem: meaning, form and phonology are asserted rather than worked through, and the remedial activities remain unreferenced. As the one resubmission is used, this is recorded as a Fail."
+        ),
+        LRT: passedFirst(7),
+        Skills: underReview(4),
+        LfC: notStarted(),
+      },
+      "Kofi Mensah": {
+        "Focus on Learner": passedFirst(8),
+        Skills: notStarted(),
+        LfC: notStarted(),
+      },
+    };
+
+    // Brief sections by type, for the submitted-text responses.
+    const sectionsByType = new Map(BRIEFS.map((b) => [b.type, b.sections]));
+
+    const activeDefs = traineeDefs.filter((d) => !d.withdrawn);
+    // trainee_id + assignment_type is unique; capture ids for responses/letter.
+    const assignmentIds = {};
+
+    for (const def of activeDefs) {
+      const name = def.name;
+      const base = { ...DEFAULT_PLAN, ...(PLAN[name] ?? {}) };
+      if (name === "Kofi Mensah") delete base.LRT; // seeded by malpractice below
+      assignmentIds[name] = {};
+      for (const [assignment_type, state] of Object.entries(base)) {
+        const { data: row, error } = await supabase
+          .from("assignments")
+          .insert({
+            course_id: course.id,
+            trainee_id: trainees[name],
+            assignment_type,
+            due_date: cDay(DUE_DAY[assignment_type]),
+            ...state,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        assignmentIds[name][assignment_type] = row.id;
+
+        // Submitted text, so an opened assignment shows real work, not empty
+        // sections. Seed a first_response for anything that has been handed in
+        // once, and a resubmission_response for anything on its second round.
+        const sections = sectionsByType.get(assignment_type);
+        const submittedOnce = Boolean(state.first_submitted_at);
+        const submittedTwice = Boolean(state.resubmission_submitted_at);
+        if (sections && submittedOnce) {
+          const first = name.split(" ")[0];
+          const rows = sections.map((sec) => ({
+            assignment_id: row.id,
+            section_key: sec.key,
+            section_title: sec.title,
+            first_response: `${sec.instruction} ${first} answers this from the course so far, with specific examples from their own lessons and the pooled observation log.`,
+            resubmission_response: submittedTwice
+              ? `Revised after feedback: ${first} reworks this section, addressing the tutor's comment directly.`
+              : null,
+          }));
+          const { error: rErr } = await supabase.from("assignment_section_responses").insert(rows);
+          if (rErr) throw rErr;
+        }
+      }
+    }
+
+    // --- The formal warning letter for the one terminal Fail (Ines, FoL).
+    //     Cambridge Letters.dc.html: any assignment reaching a Fail after its
+    //     one resubmission gets a written notice, filed in CELTA 5 Section A.
+    //     Shaped exactly like buildAssignmentWarningDraft's output so the
+    //     trainee/assessor letter page renders it. ---
+    const gb = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const inesFol = assignmentIds["Ines Marchetti"]["Focus on Learner"];
+    await supabase.from("formal_letters").insert({
+      course_id: course.id,
+      trainee_id: trainees["Ines Marchetti"],
+      letter_type: "assignment_warning",
+      related_assignment_id: inesFol,
+      issued_by: trainerId,
+      issued_at: daysAgoIso(2),
+      snapshot: {
+        centerName: "Connect CELTA Istanbul",
+        centerSubtitle: "Cambridge CELTA centre · DEMO-IST",
+        centerLogoUrl: null,
+        kicker: "Formal notice · written assignments",
+        docTitle: "Notice following a failed assignment",
+        dateLabel: gb(isoDaysFromNow(-2)),
+        dayLine: null,
+        facts: [
+          { label: "Candidate", value: "Ines Marchetti" },
+          { label: "Course", value: `${course.name} (${gb(startDate)} – ${gb(endDate)})` },
+          { label: "Assignment", value: "Focus on Learner · Focus on the Learner" },
+          { label: "Outcome", value: "Fail on resubmission" },
+        ],
+        body: [
+          "Dear Ines,",
+          "Your resubmission of Focus on Learner, Focus on the Learner, has not met the assessment criteria. As you have already used the one resubmission available for that assignment, it is recorded as a Fail.",
+          "A candidate must pass three of the four written assignments to be eligible for a Pass on this course. You have passed 1 and failed 1, with 2 still to submit. This means you cannot fail another assignment.",
+        ],
+        list: {
+          title: "Criteria not met on the resubmission",
+          items: [
+            "Analyse the target language: meaning, form and phonology treated separately",
+            "Reference remedial activities to the source they were taken or adapted from",
+          ],
+        },
+        closing:
+          "Language Skills Related Tasks and Lessons from the Classroom still need to pass. Please talk to your tutor before you submit.",
+        signatures: [
+          { label: "Course tutor", value: `Jordan Blake · ${gb(isoDaysFromNow(-2))}`, filled: true },
+          { label: "Marker", value: "Marcus Webb", filled: true },
+          { label: "Received by candidate", value: "Awaiting acknowledgement", filled: false },
+        ],
+        filedNote:
+          "Filed in CELTA 5 Section A · attached to the assignment record · visible to the assessor. This is Connect CELTA Istanbul's document; Connect produced it and does not appear on it.",
+      },
+    });
+
+    // --- Assignment 5: the Plagiarism Reflection, off a real upheld case.
+    //     Kofi's LRT: two paragraphs match an uncited online reference. The
+    //     case is opened on the first round, the candidate gives an account,
+    //     the centre decides it upheld with the "fails assignment" outcome --
+    //     which fails that round (resubmission_required) and sets a one-chance
+    //     Plagiarism Reflection. This mirrors decideCase() exactly. ---
+    const PLAGIARISM_REFLECTION_SECTIONS = [
+      { key: "what_happened", title: "What happened", instruction: "In your own words: what you submitted and how it came about. Not an apology -- an account." },
+      { key: "which_rule", title: "Which rule it breached", instruction: "Quote the centre's policy and the Cambridge guidance you accepted at enrolment: which clause, and why it applies here." },
+      { key: "why_it_matters", title: "Why it matters here", instruction: "What it would mean for a learner, a colleague, or the centre if a teacher's materials or claims were not their own." },
+      { key: "going_forward", title: "What you will do differently", instruction: "Be specific: how you will note sources while reading, how you will use and declare AI, what you will do at 1am with a deadline in seven hours." },
+    ];
+
+    const { data: kofiLrt, error: kofiLrtErr } = await supabase
+      .from("assignments")
+      .insert({
+        course_id: course.id,
+        trainee_id: trainees["Kofi Mensah"],
+        assignment_type: "LRT",
+        first_status: "resubmission_required",
+        first_submitted_at: daysAgoIso(7),
+        first_own_work_confirmed: true,
+        marker_id: trainerId,
+        due_date: cDay(17),
+        tutor_feedback:
+          "A plagiarism case on this submission was upheld. The assignment fails this round and must be resubmitted in your own words, with sources cited. See the decision on your record, and complete the Plagiarism Reflection that has been set.",
+      })
+      .select("id")
+      .single();
+    if (kofiLrtErr) throw kofiLrtErr;
+    assignmentIds["Kofi Mensah"].LRT = kofiLrt.id;
+    // Kofi's submitted LRT text.
+    {
+      const sections = sectionsByType.get("LRT");
+      await supabase.from("assignment_section_responses").insert(
+        sections.map((sec) => ({
+          assignment_id: kofiLrt.id,
+          section_key: sec.key,
+          section_title: sec.title,
+          first_response: `${sec.instruction} Kofi's analysis of the target language, submitted in the first round.`,
+          resubmission_response: null,
+        }))
+      );
+    }
+
+    const { data: kase, error: kaseErr } = await supabase
+      .from("malpractice_cases")
+      .insert({
+        course_id: course.id,
+        trainee_id: trainees["Kofi Mensah"],
+        assignment_id: kofiLrt.id,
+        assignment_round: "first",
+        opened_by: trainerId,
+        opened_at: daysAgoIso(5),
+        concern_kind: "unattributed_source",
+        initial_findings:
+          "Two paragraphs of the meaning analysis match an online grammar reference word for word, with no quotation marks and no citation.",
+        candidate_account:
+          "I used an online grammar reference to check my analysis and did not realise I had kept its wording. I understand now that this needed quoting and a citation, and I take responsibility for it.",
+        candidate_account_recorded_at: daysAgoIso(4),
+        status: "decided",
+        outcome: "Upheld — assignment fails, resubmission required",
+        fails_assignment: true,
+        flagged_for_referral: false,
+        decision_notes:
+          "Unattributed copying confirmed. The candidate's account is accepted as honest and cooperative; the assignment fails this round and must be resubmitted, and a Plagiarism Reflection is set as a centre sanction.",
+        decided_by: trainerId,
+        decided_at: daysAgoIso(3),
+      })
+      .select("id")
+      .single();
+    if (kaseErr) throw kaseErr;
+
+    // Ensure the centre has the Plagiarism Reflection type + a system template
+    // (idempotent, exactly as decideCase does it).
+    await supabase
+      .from("assignment_type_definitions")
+      .upsert(
+        { center_id: center.id, code: "Plagiarism Reflection", title: "Plagiarism reflection", counts_toward_pass: false },
+        { onConflict: "center_id,code" }
+      );
+    await supabase.from("assignment_templates").insert({
+      center_id: center.id,
+      assignment_type: "Plagiarism Reflection",
+      storage_path: "system:plagiarism-reflection",
+      sections: PLAGIARISM_REFLECTION_SECTIONS,
+      format: "prose",
+      generation_status: "completed",
+      published_at: new Date().toISOString(),
+    });
+
+    const { data: reflection, error: reflErr } = await supabase
+      .from("assignments")
+      .insert({
+        course_id: course.id,
+        trainee_id: trainees["Kofi Mensah"],
+        assignment_type: "Plagiarism Reflection",
+        due_date: endDate,
+        reflection_for_case_id: kase.id,
+        first_status: "not_submitted",
+      })
+      .select("id")
+      .single();
+    if (reflErr) throw reflErr;
+    await supabase.from("malpractice_cases").update({ reflection_assignment_id: reflection.id }).eq("id", kase.id);
+
+    console.log(
+      `written assignments: ${activeDefs.length} candidates, full cycle + 1 warning letter + Assignment 5 (plagiarism reflection)`
+    );
+  }
 
   // --- Criteria ratings, so the Grades Report has something to derive ---
   //
@@ -1551,7 +1880,7 @@ async function main() {
     { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 1, b: 8, type: "input_session", title: "Classroom management / Zoom", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 1, b: 9, type: "input_session", title: "Focus on the Learner", tag: "whole_group", detail: "The assignment session", linked: null, tp: null },
+    { d: 1, b: 9, type: "input_session", title: "Focus on the Learner", tag: "whole_group", detail: "The assignment session", linked: "Focus on Learner", tp: null },
     { d: 2, b: 1, type: "tp", title: "TP1 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 2, b: 2, type: "tp", title: "TP1 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 2, b: 3, type: "tp", title: "TP1 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 1 },
@@ -1560,7 +1889,7 @@ async function main() {
     { d: 2, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 2, b: 9, type: "assignment_due", title: "Assignment 3 Q&A", tag: null, detail: "Released the evening before", linked: null, tp: null },
+    { d: 2, b: 9, type: "assignment_due", title: "Assignment 3 (Skills) Q&A", tag: null, detail: "Released the evening before", linked: "Skills", tp: null },
     { d: 3, b: 1, type: "tp", title: "TP1 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 2, type: "tp", title: "TP1 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 3, type: "tp", title: "TP1 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 1 },

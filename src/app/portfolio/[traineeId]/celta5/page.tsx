@@ -21,6 +21,7 @@ import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues, computeAssessedTpStats, computeAssessedHoursByMode, computeCurrentTpRound } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { resolveAssignmentResult } from "@/lib/assignment-info";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
@@ -324,9 +325,14 @@ export default async function PortfolioCelta5Page({
     const assignmentsGraded = (assignments ?? []).filter(
       (a) => a.first_status === "approved" || a.resubmission_status === "approved" || a.first_status === "resubmission_required"
     ).length;
-    const assignmentsPassed = (assignments ?? []).filter(
-      (a) => a.first_status === "approved" || a.resubmission_status === "approved"
-    ).length;
+    const assignmentsPassed = (assignments ?? []).filter((a) => {
+      // The Plagiarism Reflection is a sanction, not one of the four, and a
+      // resubmission fail carries resubmission_status "approved" -- neither is
+      // a pass toward the 3-of-4 rule.
+      if (a.assignment_type === "Plagiarism Reflection") return false;
+      const r = resolveAssignmentResult(a);
+      return r === "pass_first" || r === "pass_resub";
+    }).length;
     const observationRows = (observations ?? []).map((o) => ({
       date: o.observation_date ?? "",
       minutes: o.length_minutes,
@@ -401,15 +407,19 @@ export default async function PortfolioCelta5Page({
     const writtenAssignmentRows = ASSIGNMENT_ORDER.map(({ type, title }) => {
       const a = assignmentByType.get(type);
       const onResubmission = !!a && a.resubmission_status !== "not_submitted";
+      // Fail is checked first (resolveAssignmentResult), because a resubmission
+      // fail carries resubmission_status "approved" -- reading that as a pass
+      // is what put "Pass 2nd submission" on a failed assignment here.
+      const resultState = a ? resolveAssignmentResult(a) : null;
       const result = !a
         ? "— not yet submitted"
-        : a.resubmission_status === "approved"
-          ? "Pass 2nd submission"
-          : a.first_status === "approved"
-            ? "Pass 1st submission"
-            : a.final_grade?.toLowerCase() === "fail"
-              ? "Fail"
-              : a.first_status === "resubmission_required"
+        : resultState === "fail"
+          ? "Fail"
+          : resultState === "pass_resub"
+            ? "Pass 2nd submission"
+            : resultState === "pass_first"
+              ? "Pass 1st submission"
+              : resultState === "resubmission_required"
                 ? "Resubmission required"
                 : "— not yet graded";
       return {
@@ -1071,7 +1081,7 @@ export default async function PortfolioCelta5Page({
       .order("lesson_date"),
     supabase
       .from("assignments")
-      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at, final_grade")
+      .select("id, assignment_type, first_status, resubmission_status, resubmission_outcome, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at, final_grade")
       .eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
     supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),

@@ -20,6 +20,7 @@ export function AssignmentResultSignature({
   assignmentId,
   round,
   status,
+  failed,
   signedAt,
   signatureName,
   viewerSignatureName,
@@ -28,6 +29,12 @@ export function AssignmentResultSignature({
   assignmentId: string;
   round: "first" | "resubmission";
   status: string;
+  // A closed marking round can be a FAIL, not a pass: the marker records a
+  // fail as status "approved" + resubmission_outcome "fail" (and a one-chance
+  // Plagiarism Reflection fails the same way on its first round). Without this
+  // flag "approved" read as "Passed", so a failed candidate was told they had
+  // passed and nothing further was needed -- the opposite of the truth.
+  failed: boolean;
   signedAt: string | null;
   signatureName: string | null;
   viewerSignatureName: string | null;
@@ -40,15 +47,19 @@ export function AssignmentResultSignature({
   const hasResult = status === "approved" || status === "resubmission_required";
   if (!hasResult) return null;
 
-  const resultLine =
-    status === "approved"
+  const resultLine = failed
+    ? "Did not pass."
+    : status === "approved"
       ? round === "resubmission"
         ? "Passed on resubmission."
         : "Passed on first submission."
       : "Resubmission required.";
 
-  const consequence =
-    status === "approved"
+  const consequence = failed
+    ? round === "resubmission"
+      ? "This was your resubmission, and the one resubmission for this assignment is now used. Speak to your tutor about what happens next."
+      : "This assignment had one chance and did not pass. Speak to your tutor about what happens next."
+    : status === "approved"
       ? "Nothing further is needed for this assignment."
       : round === "resubmission"
         ? "This was your resubmission. Speak to your tutor about what happens next."

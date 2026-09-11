@@ -4,6 +4,7 @@ import {
   ASSIGNMENT_ORDER,
   ASSIGNMENT_STATUS_LABEL,
   ASSIGNMENT_STATUS_PILL_CLASS,
+  resolveAssignmentResult,
 } from "@/lib/assignment-info";
 import { StandardRatingPill } from "@/lib/status-pill";
 import { MIN_LEVELS_REQUIRED, type AssessedTpStats, type AssessedHoursByMode } from "@/lib/course-progress";
@@ -58,7 +59,14 @@ export function AssignmentsSummary({
   traineeId: string;
   assignments: Pick<
     AssignmentRow,
-    "id" | "assignment_type" | "first_status" | "resubmission_status" | "first_own_work_confirmed" | "resubmission_own_work_confirmed" | "final_grade"
+    | "id"
+    | "assignment_type"
+    | "first_status"
+    | "resubmission_status"
+    | "resubmission_outcome"
+    | "first_own_work_confirmed"
+    | "resubmission_own_work_confirmed"
+    | "final_grade"
   >[];
 }) {
   if (assignments.length === 0) return null;
@@ -84,6 +92,10 @@ export function AssignmentsSummary({
               const isResubmissionRound = a.first_status === "resubmission_required";
               const status = isResubmissionRound ? a.resubmission_status : a.first_status;
               const ownWorkConfirmed = isResubmissionRound ? a.resubmission_own_work_confirmed : a.first_own_work_confirmed;
+              // A resubmission fail carries status "approved" -- so read the
+              // outcome, not the round-closed flag, or a failed assignment
+              // prints a green "Pass" next to a "Fail" final grade.
+              const failed = resolveAssignmentResult(a) === "fail";
               return (
                 <tr key={a.id}>
                   <td className="text-ink">
@@ -92,9 +104,13 @@ export function AssignmentsSummary({
                     </Link>
                   </td>
                   <td>
-                    <span className={`pill ${ASSIGNMENT_STATUS_PILL_CLASS[status]}`}>
-                      {ASSIGNMENT_STATUS_LABEL[status]}
-                    </span>
+                    {failed ? (
+                      <span className="pill pill-danger">Fail</span>
+                    ) : (
+                      <span className={`pill ${ASSIGNMENT_STATUS_PILL_CLASS[status]}`}>
+                        {ASSIGNMENT_STATUS_LABEL[status]}
+                      </span>
+                    )}
                   </td>
                   <td className="text-muted">{status === "not_submitted" ? "--" : ownWorkConfirmed ? "Confirmed" : "Not confirmed"}</td>
                   <td className="text-muted">{a.final_grade ?? "--"}</td>

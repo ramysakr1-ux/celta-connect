@@ -6,7 +6,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { ASSIGNMENT_INFO, resolveAssignmentResult } from "@/lib/assignment-info";
 import { AssignmentAuthoringForm } from "@/app/dashboard/trainee/assignments/[assignmentId]/assignment-form";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
@@ -203,6 +203,7 @@ export default async function AssignmentDetailPage({
         assignmentId={assignment.id}
         round={round}
         status={roundStatus}
+        failed={resolveAssignmentResult(assignment) === "fail"}
         signedAt={round === "resubmission" ? assignment.resubmission_outcome_signed_at : assignment.first_outcome_signed_at}
         signatureName={
           round === "resubmission" ? assignment.resubmission_outcome_signature_name : assignment.first_outcome_signature_name

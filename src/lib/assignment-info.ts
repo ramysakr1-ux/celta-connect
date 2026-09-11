@@ -60,3 +60,37 @@ export const ASSIGNMENT_INFO: Record<AssignmentType, { title: string; descriptio
     description: "A centre sanction, not a Cambridge assignment -- set when a plagiarism case is upheld.",
   },
 };
+
+// The one correct reading of an assignment's overall result.
+//
+// The trainer marking action (returnAssignment) records a FAIL on the
+// resubmission as resubmission_status = "approved" + resubmission_outcome =
+// "fail" -- "approved" there means "the marking round is closed", not "passed".
+// A first-round Plagiarism Reflection fail is the same shape (first_status
+// "approved", resubmission_outcome "fail"). Any view that reads
+// resubmission_status === "approved" as a pass, without first checking the
+// outcome, prints "Pass" on a failed assignment -- which several did until a
+// seeded terminal-fail state finally exercised the path (11 Sep 2026). Check
+// the fail FIRST, here, once, so no screen has to remember to.
+export type AssignmentResultState =
+  | "not_submitted"
+  | "under_review"
+  | "resubmission_required"
+  | "pass_first"
+  | "pass_resub"
+  | "fail";
+
+export function resolveAssignmentResult(a: {
+  first_status: SubmissionStatus;
+  resubmission_status: SubmissionStatus;
+  resubmission_outcome: "pass" | "fail" | null;
+  final_grade: string | null;
+}): AssignmentResultState {
+  if (a.resubmission_outcome === "fail" || a.final_grade?.toLowerCase() === "fail") return "fail";
+  if (a.first_status === "approved") return "pass_first";
+  if (a.resubmission_status === "approved") return "pass_resub";
+  if (a.resubmission_status === "submitted" || a.resubmission_status === "pending") return "under_review";
+  if (a.first_status === "resubmission_required") return "resubmission_required";
+  if (a.first_status === "submitted" || a.first_status === "pending") return "under_review";
+  return "not_submitted";
+}
