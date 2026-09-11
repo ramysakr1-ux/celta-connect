@@ -260,9 +260,25 @@ alter policy "concerns: trainee reads and creates their own" on public.concerns
 alter policy "concerns: trainee submits their own" on public.concerns
   with check (((trainee_id = (select auth.uid())) AND (course_id = (select current_course_id()))));
 
-alter policy "concerns: trainer manages their course's concerns" on public.concerns
-  using (((select is_trainer()) AND (course_id = (select current_course_id()))))
-  with check (((select is_trainer()) AND (course_id = (select current_course_id()))));
+-- 0280 drops this policy (the concerns manager route went private), so on a
+-- database where 0280 has already run this ALTER has nothing to alter and
+-- fails with 42704 -- which is what stopped a migration batch on 12 Sep 2026.
+-- ALTER POLICY has no IF EXISTS, so it is guarded by hand: 0272 stays
+-- re-runnable whichever order the two land in.
+do $$
+begin
+  if exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'concerns'
+      and policyname = 'concerns: trainer manages their course''s concerns'
+  ) then
+    execute $q$
+      alter policy "concerns: trainer manages their course's concerns" on public.concerns
+        using (((select is_trainer()) AND (course_id = (select current_course_id()))))
+        with check (((select is_trainer()) AND (course_id = (select current_course_id()))))
+    $q$;
+  end if;
+end $$;
 
 alter policy "course_access_tokens: trainer/admin manage their course" on public.course_access_tokens
   using ((((select is_trainer()) OR (select is_admin())) AND (course_id IN ( SELECT courses.id
