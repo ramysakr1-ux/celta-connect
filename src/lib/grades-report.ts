@@ -44,7 +44,7 @@ export async function computeCohortRows(
 
   const { data: trainees } = await supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, course_status")
     .eq("course_id", courseId)
     .eq("role", "trainee")
     .order("full_name");
@@ -120,6 +120,7 @@ export async function computeCohortRows(
       tpsRemaining: Math.max(8 - taughtForTrainee, 0),
       hasProvisional: Boolean(record?.provisional_grade) && (!approvedOnly || Boolean(record?.provisional_approved_at)),
       provisionalApproved: Boolean(record?.provisional_approved_at),
+      withdrawn: trainee.course_status === "withdrawn",
     };
   });
 

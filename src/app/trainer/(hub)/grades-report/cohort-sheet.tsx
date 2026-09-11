@@ -37,6 +37,7 @@ export interface CohortSheetRow {
   tpsRemaining: number;
   provisionalApproved: boolean;
   hasProvisional: boolean;
+  withdrawn: boolean;
 }
 
 const STAGE3_PILL: Record<Stage3Status, { label: string; cls: string }> = {
@@ -79,8 +80,15 @@ export function CohortSheet({
   isMct: boolean;
 }) {
   const [state, action, pending] = useActionState(releaseAllFinalReports, initialState);
-  const withProvisional = rows.filter((r) => r.hasProvisional);
-  const approvedCount = withProvisional.filter((r) => r.provisionalApproved).length;
+  // "Confirmed" counts grades among the candidates who need one -- the active
+  // cohort -- not among everyone with something recorded. A withdrawal is a
+  // settled outcome, not a grade the MCT proposes and confirms, so it belongs
+  // in neither the numerator nor the denominator; counting it made the sheet
+  // read "11 of 11 confirmed" while the assessor-pack header, which already
+  // scopes to active candidates, read "10 of 11". Same definition now, so the
+  // one still-unconfirmed candidate (ungraded) shows in both.
+  const gradeCandidates = rows.filter((r) => !r.withdrawn);
+  const approvedCount = gradeCandidates.filter((r) => r.provisionalApproved).length;
 
   const undecidedRows = rows.filter((r) => r.wasSlashed && !r.justified);
   const settledRows = rows.filter((r) => !(r.wasSlashed && !r.justified));
@@ -142,7 +150,7 @@ export function CohortSheet({
         derived={provisionalDueDerived}
         isMct={isMct}
         approvedCount={approvedCount}
-        totalCount={withProvisional.length}
+        totalCount={gradeCandidates.length}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
