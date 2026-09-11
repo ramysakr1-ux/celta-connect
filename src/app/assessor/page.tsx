@@ -1119,11 +1119,28 @@ export default async function AssessorPage({
                 // the app itself, not the resources upload table -- see
                 // marking-guidance.ts's hasMarkingGuidance.
                 const isMarkingGuidance = doc.name === "Marking guidance";
+                // The candidate agreement is a document Connect itself hosts
+                // (/candidate-agreement, built to Handbook §6.3 -- attendance,
+                // plagiarism, complaints and the rest), the same shape as
+                // marking guidance: it is always available, so this row opens
+                // it rather than ever reading "Not uploaded". A centre that
+                // has uploaded its own fuller version takes precedence.
+                const isCandidateAgreement = doc.name === "Candidate agreement & policies";
                 const uploaded = isMarkingGuidance
                   ? null
                   : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
-                const present = isMarkingGuidance ? markingGuidancePresent : Boolean(uploaded?.file_url);
-                const href = isMarkingGuidance ? "/assessor/marking-guidance" : uploaded?.file_url;
+                const present = isMarkingGuidance
+                  ? markingGuidancePresent
+                  : isCandidateAgreement
+                    ? true
+                    : Boolean(uploaded?.file_url);
+                const href = isMarkingGuidance
+                  ? "/assessor/marking-guidance"
+                  : isCandidateAgreement
+                    ? uploaded?.file_url ?? "/candidate-agreement"
+                    : uploaded?.file_url;
+                // App routes open in place; an uploaded file opens in a new tab.
+                const opensInApp = isMarkingGuidance || (isCandidateAgreement && !uploaded?.file_url);
                 // The authorisation certificate's own datum is the centre's
                 // Cambridge number, and that IS on file even before the
                 // certificate is attached -- so name it rather than the
@@ -1160,8 +1177,8 @@ export default async function AssessorPage({
                   <a
                     key={doc.name}
                     href={href}
-                    target={isMarkingGuidance ? undefined : "_blank"}
-                    rel={isMarkingGuidance ? undefined : "noreferrer"}
+                    target={opensInApp ? undefined : "_blank"}
+                    rel={opensInApp ? undefined : "noreferrer"}
                     className="assessor-hover no-underline"
                     style={rowStyle}
                   >
