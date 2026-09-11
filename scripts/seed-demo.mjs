@@ -70,6 +70,41 @@ function courseDay(start, n) {
   return isoOf(d);
 }
 
+// A minimal, valid single-page text PDF, so the demo's Resource Hub sample
+// materials are real downloadable files rather than broken links. Not a
+// typesetting engine -- one font, left-aligned lines -- which is all a
+// worked-example handout needs.
+function makeTextPdf(title, lines) {
+  const esc = (s) => String(s).replace(/([()\\])/g, "\\$1");
+  const parts = [`BT /F1 15 Tf 56 782 Td (${esc(title)}) Tj ET`];
+  let y = 752;
+  for (const line of lines) {
+    parts.push(`BT /F1 11 Tf 56 ${y} Td (${esc(line)}) Tj ET`);
+    y -= 17;
+  }
+  const stream = parts.join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  let pdf = "%PDF-1.4\n";
+  const offsets = [];
+  objects.forEach((obj, i) => {
+    offsets.push(pdf.length);
+    pdf += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+  });
+  const xrefStart = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.forEach((o) => {
+    pdf += `${String(o).padStart(10, "0")} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  return Buffer.from(pdf, "latin1");
+}
+
 // ------------------------------------------------------------------ clock ---
 // WHERE IN ITS LIFE the demo course is planted.
 //
@@ -1128,6 +1163,95 @@ async function main() {
     }))
   );
   console.log("marking guidance:", MARKING_GUIDANCE.length, "criteria standardised");
+
+  // --- Resource Hub sample materials (the "your tutor adds these" categories)
+  // The Library's sample categories are populated over a course by tutors, and
+  // the seed left them empty, so the trainee's Resource Hub read "0 items" down
+  // most of the Library. A few worked examples -- what a tutor would have added
+  // by now -- so the samples feature isn't a row of blanks (Ramy, 11 Sep 2026).
+  const SAMPLE_RESOURCES = [
+    {
+      category: "lesson_planning",
+      title: "Sample lesson plan — PPP, present simple (A2)",
+      description: "A completed plan from a previous cohort. Look at how the stages build and how the aims are worded before you write your own.",
+      lines: [
+        "Main aim: by the end learners will be better able to use the present",
+        "simple for daily routines in the context of a typical weekday.",
+        "Subsidiary aim: fluency practice describing habits.",
+        "",
+        "Stage 1 - Lead-in (5 min): picture of a daily routine; learners predict.",
+        "Stage 2 - Presentation (10 min): elicit target forms from a short text;",
+        "   board meaning, form and pronunciation; CCQs for 'every day'.",
+        "Stage 3 - Controlled practice (10 min): gap-fill, peer-check, open class.",
+        "Stage 4 - Freer practice (12 min): mingle - find someone who...",
+        "Stage 5 - Feedback (5 min): content then a short language upgrade.",
+        "",
+        "Anticipated problem: third-person -s dropped. Solution: drill and a",
+        "quick board correction slot after the freer stage.",
+      ],
+    },
+    {
+      category: "lesson_planning",
+      title: "Sample language analysis sheet — present perfect",
+      description: "How to lay out meaning, form and pronunciation for a grammar point, with anticipated problems.",
+      lines: [
+        "Target: 'I have visited Rome.' (present perfect for life experience)",
+        "",
+        "Meaning: a past experience, with the time unimportant/unstated.",
+        "CCQ: Do we know exactly when? (No.) Is the experience finished? (Yes.)",
+        "Form: subject + have/has + past participle.",
+        "Pronunciation: 'have' weak form /hev/; contraction I've /aIv/.",
+        "",
+        "Anticipated problems: confusion with the past simple; overuse of the",
+        "full form. Solutions: timeline on the board; drill the contraction.",
+      ],
+    },
+    {
+      category: "teaching_practice",
+      title: "Sample self-evaluation — TP2",
+      description: "A worked example so you can see the shape of a good self-evaluation before you write your first.",
+      lines: [
+        "What went well: instructions were staged and checked with ICQs, and",
+        "the freer stage produced a lot of learner talk.",
+        "",
+        "What I would change: I spent too long on the lead-in and had to rush",
+        "feedback. Next time I will set a firmer time limit and cut one example.",
+        "",
+        "Action point I am taking into TP3: monitor the freer stage for a",
+        "delayed correction slot rather than correcting on the spot.",
+      ],
+    },
+  ];
+  {
+    const sampleRows = [];
+    for (const s of SAMPLE_RESOURCES) {
+      const storagePath = `${center.id}/samples/${crypto.randomUUID()}.pdf`;
+      const { error: upErr } = await supabase.storage
+        .from("resource-hub-files")
+        .upload(storagePath, makeTextPdf(s.title, s.lines), { contentType: "application/pdf" });
+      if (upErr) {
+        console.warn("  sample upload failed:", s.title, upErr.message);
+        continue;
+      }
+      sampleRows.push({
+        center_id: center.id,
+        course_id: course.id,
+        title: s.title,
+        description: s.description,
+        storage_path: storagePath,
+        content_type: "file",
+        category: s.category,
+        resource_type: "template",
+        visible_to_trainee: true,
+        uploaded_by: trainerId,
+      });
+    }
+    if (sampleRows.length > 0) {
+      const { error: resErr } = await supabase.from("resources").insert(sampleRows);
+      if (resErr) throw resErr;
+    }
+    console.log(`resource hub samples: ${sampleRows.length} worked examples`);
+  }
 
   // --- TP feedback helper -- returns the tp_plans.id so callers can attach
   // shared materials to a specific plan. ---
