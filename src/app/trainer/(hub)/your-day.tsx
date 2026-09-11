@@ -56,7 +56,16 @@ export function YourDay({ slots, serverNowMs, accent }: { slots: DaySlot[]; serv
   const firstFuture = slots.find((s) => now < s.startsAtMs)?.id ?? null;
 
   return (
-    <section className="flex flex-col rounded-[14px] border border-border bg-frame">
+    // Ramy, 11 Sep 2026: the whole box takes the soft-gold tint the
+    // Announcements/Concerns pills use (also-under.tsx), so "Your day" reads
+    // as the same family of thing on the hub rather than a plain frame.
+    <section
+      className="flex flex-col rounded-[14px] border"
+      style={{
+        background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))",
+        borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)",
+      }}
+    >
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
         <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Your day</h3>
         <span className="text-[12.5px] text-muted">
