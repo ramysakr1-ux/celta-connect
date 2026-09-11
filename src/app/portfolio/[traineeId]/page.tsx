@@ -14,7 +14,6 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
-import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { AssessorPortfolioLanding } from "./assessor-landing";
 import { AssessorViewNotice } from "./assessor-view-notice";
 import { buildDeferralDraft } from "@/lib/letters/deferral";
@@ -124,6 +123,11 @@ export default async function CourseStreamPage({
         centerId={trainee.center_id}
         courseName={course?.name ?? null}
         timeZone={timeZone}
+        // Only the candidate themselves may ask to speak with the assessor --
+        // not a staff member previewing this landing (who also lands here,
+        // isStaff being false under ?preview=trainee). The request action is
+        // guarded server-side too; this just keeps the control off a preview.
+        viewerIsCandidate={viewer?.id === traineeId}
       />
     );
   }
@@ -218,10 +222,6 @@ export default async function CourseStreamPage({
   // §3 -- once deferred, the frozen transfer record itself is the fuller
   // status detail worth showing (reasons, hours carried, whether it's been
   // linked to a destination course yet), not just the generic status note.
-  const { data: courseForVisit } = trainee.course_id
-    ? await supabase.from("courses").select("assessor_visit_date").eq("id", trainee.course_id).maybeSingle()
-    : { data: null };
-
   let deferralTransfer:
     | { id: string; reasons: string; hours_carried: number; reintegration_deadline: string | null; linked_at: string | null }
     | null = null;
@@ -251,26 +251,11 @@ export default async function CourseStreamPage({
     }
   }
 
-  // Handbook 14.2's candidate-concerns meeting. Only offered to the candidate
-  // themselves, and only when a visit is actually scheduled -- a permanent
-  // control would read as an invitation to complain, and a tutor viewing the
-  // portfolio must never be able to raise or cancel one on someone's behalf.
-  // Ramy, 29 Aug 2026, viewing Daniel as the assessor: "there's
-  // something that says ask to speak with the assessor. I thought the
-  // assessor was supposed to be the one taking a look at this." The gate
-  // was `!isStaff`, which on these pages has always meant "the candidate
-  // themselves" -- but an assessor carries no Supabase session at all, so
-  // isStaff is false for them too and they fell straight through it into
-  // the candidate's own controls. Needs the assessor excluded explicitly.
-  const ownVisitDate = !isStaff && !assessorCourseId && trainee.course_id ? (courseForVisit?.assessor_visit_date ?? null) : null;
-  const { data: ownMeetingRequest } = ownVisitDate
-    ? await supabase
-        .from("assessor_meeting_requests")
-        .select("id")
-        .eq("trainee_id", traineeId)
-        .is("withdrawn_at", null)
-        .maybeSingle()
-    : { data: null };
+  // Handbook 14.2's candidate-concerns meeting -- the candidate's control to
+  // ask to speak with the assessor -- now lives on the Today tab (today-tab.tsx),
+  // which is where a real candidate actually lands. This Course Stream page is
+  // only ever rendered for staff and the assessor, neither of whom may raise or
+  // cancel a request, so the control was moved rather than duplicated here.
 
   // Ramy, 27 Aug 2026: decorative teal/garnet alternation down the sidebar
   // stack (This week / Outside Connect / Course tutors / Candidate status) --
@@ -589,19 +574,6 @@ export default async function CourseStreamPage({
           ) : null}
         </div>
       </div>
-
-      {ownVisitDate ? (
-        <div className="lg:col-start-2">
-          <AssessorMeetingCard
-            traineeId={traineeId}
-            visitDate={new Date(`${ownVisitDate}T00:00:00`).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-            })}
-            alreadyRequested={Boolean(ownMeetingRequest)}
-          />
-        </div>
-      ) : null}
 
     </div>
   );

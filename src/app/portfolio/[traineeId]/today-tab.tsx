@@ -8,6 +8,7 @@ import { computeWeekOf } from "@/lib/course-progress";
 import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 import { getTraineeStreamDay } from "@/lib/trainee-day";
 import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
@@ -83,6 +84,7 @@ export async function TodayTab({
   centerId,
   courseName,
   timeZone,
+  viewerIsCandidate = false,
 }: {
   supabase: SupabaseClient<Database>;
   traineeId: string;
@@ -90,6 +92,9 @@ export async function TodayTab({
   centerId: string;
   courseName: string | null;
   timeZone: string;
+  /** True only when the person viewing is this candidate, so the "ask to speak
+   *  with the assessor" control shows for them and not a staff preview. */
+  viewerIsCandidate?: boolean;
 }) {
   const today = toLocalIso(new Date(), timeZone);
   const tomorrow = addDaysIso(today, 1);
@@ -107,7 +112,7 @@ export async function TodayTab({
     // time_bands: the course's real daily structure, which is what gives the
     // Course Stream day track its window and every session its end -- events
     // carry a start time and nothing else.
-    supabase.from("courses").select("start_date, end_date, time_bands").eq("id", courseId).maybeSingle(),
+    supabase.from("courses").select("start_date, end_date, time_bands, assessor_visit_date").eq("id", courseId).maybeSingle(),
     supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId),
     supabase.from("tp_plans").select("tp_number, submitted_at").eq("trainee_id", traineeId),
     supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", traineeId),
@@ -153,6 +158,23 @@ export async function TodayTab({
   const { data: authors } =
     authorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", authorIds) : { data: [] };
   const authorNameById = new Map((authors ?? []).map((a) => [a.id, a.full_name]));
+
+  // §14.2: the candidate's own control to ask for a private word with the
+  // assessor. Shown only to the candidate (not a staff preview) and only for
+  // an upcoming visit; the assessor sees only an anonymised count of how many
+  // have asked. This card used to live on the full portfolio page, gated on a
+  // condition only a candidate met -- but a candidate now lands on this Today
+  // tab instead, so the control had become unreachable (11 Sep 2026).
+  const assessorVisitIso = course?.assessor_visit_date ?? null;
+  const showAssessorMeeting = viewerIsCandidate && Boolean(assessorVisitIso) && (assessorVisitIso as string) >= today;
+  const { data: ownMeetingRequest } = showAssessorMeeting
+    ? await supabase
+        .from("assessor_meeting_requests")
+        .select("id")
+        .eq("trainee_id", traineeId)
+        .is("withdrawn_at", null)
+        .maybeSingle()
+    : { data: null };
 
   const { data: tutorialInvites } = await supabase
     .from("individual_tutorial_invites")
@@ -906,6 +928,14 @@ export async function TodayTab({
               );
             })}
           </section>
+        ) : null}
+
+        {showAssessorMeeting && assessorVisitIso ? (
+          <AssessorMeetingCard
+            traineeId={traineeId}
+            visitDate={new Date(`${assessorVisitIso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
+            alreadyRequested={Boolean(ownMeetingRequest)}
+          />
         ) : null}
 
         {broadcastsCapped.length > 0 ? (
