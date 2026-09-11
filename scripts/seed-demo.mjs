@@ -329,6 +329,11 @@ async function main() {
       // /assessor/lesson-plans page has no day to draw plans from, so the
       // whole visit half of the pack demos as empty.
       assessor_visit_date: isoOf(new Date(courseStart.getTime() + 21 * 86400000)),
+      // Entry form went to Cambridge a few days into the course. This is what
+      // makes a mid-course withdrawal reportable (see Marek below): once the
+      // form is in, a withdrawal is recorded and reported as Withdrawn, which
+      // is the case the assessor's §14.2 check actually examines.
+      entry_form_sent_at: new Date(courseStart.getTime() + 3 * 86400000).toISOString(),
     })
     .select("id")
     .single();
@@ -730,6 +735,17 @@ async function main() {
       course_id: course.id,
       course_status: def.withdrawn ? "withdrawn" : "active",
       course_status_set_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
+      // A withdrawn candidate's letter is generated from these three fields
+      // (see api/withdrawal-letter + letters/withdrawal.ts). The seed set the
+      // status but left them null, so the letter came out nearly blank and the
+      // assessor's §14.2 check had nothing to read. Give the withdrawal a real
+      // reason, an issuer (the course administrator actioned it), and mark it
+      // reportable -- the entry form was already with Cambridge by week 2.
+      course_status_note: def.withdrawn
+        ? "Personal circumstances meant the candidate could not continue after the second week. Discussed with the course tutor and the centre, and the decision was the candidate's own."
+        : null,
+      course_status_set_by: def.withdrawn ? courseAdminId : null,
+      withdrawal_reportable: def.withdrawn ? true : null,
       // Withdrawn candidates are not part of a moderation sample.
       selected_for_assessor_visit: !def.withdrawn && ASSESSOR_SAMPLE.has(def.name),
     });

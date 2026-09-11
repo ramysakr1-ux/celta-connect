@@ -1,28 +1,38 @@
 import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { renderFormalLetterBuffer } from "@/lib/formal-letter-pdf/document";
 import { buildWithdrawalLetterInput } from "@/lib/letters/withdrawal";
 
-// Trainer/admin only -- unlike the final report, a withdrawn candidate's
-// own portal access isn't a designed flow anywhere else in this app, so
-// there's no trainee-self branch to support here.
+// Trainer/admin, or a Cambridge assessor holding this course's pack token.
+// Handbook §14.2 has the assessor check the withdrawn candidate's letter, so
+// it must be reachable from the read-only pack -- validated the same way every
+// other assessor-reachable portfolio read is: the token resolves to a course
+// (getAssessorCourseId) and the candidate must be on that course. The
+// candidate's own portal access still isn't a flow here.
 export async function GET(_request: Request, { params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
+  const assessorCourseId = await getAssessorCourseId();
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
-  if (!viewer || (viewer.role !== "trainer" && viewer.role !== "admin")) {
+  const isStaff = Boolean(viewer && (viewer.role === "trainer" || viewer.role === "admin"));
+  if (!isStaff && !assessorCourseId) {
     return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   }
 
-  const supabase = await createClient();
+  // An assessor has no RLS session -- read through the admin client, exactly
+  // as the assessor-facing portfolio pages do, then gate on the course.
+  const supabase = assessorCourseId && !isStaff ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
     .select("full_name, course_id, center_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable, course_status_set_by")
     .eq("id", traineeId)
     .maybeSingle();
 
-  if (!trainee || !trainee.course_id || trainee.course_id !== viewer.course_id) {
+  const inScope = assessorCourseId && !isStaff ? trainee?.course_id === assessorCourseId : trainee?.course_id === viewer?.course_id;
+  if (!trainee || !trainee.course_id || !inScope) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
   if (trainee.course_status !== "withdrawn") {

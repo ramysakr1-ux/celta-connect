@@ -189,7 +189,11 @@ export async function proxy(request: NextRequest) {
       request.nextUrl.pathname === "/trainer" ||
       request.nextUrl.pathname.startsWith("/trainer/") ||
       request.nextUrl.pathname.startsWith("/dashboard/") ||
-      request.nextUrl.pathname.startsWith("/portfolio/"));
+      request.nextUrl.pathname.startsWith("/portfolio/") ||
+      // Handbook §14.2: the assessor checks a withdrawn candidate's letter,
+      // reached from the read-only pack. The route validates the token and
+      // the candidate's course itself (same division of labour as the pages).
+      request.nextUrl.pathname.startsWith("/api/withdrawal-letter/"));
 
   if (!user && !isPublicRoute && !isAssessorReachableRoute) {
     const url = request.nextUrl.clone();

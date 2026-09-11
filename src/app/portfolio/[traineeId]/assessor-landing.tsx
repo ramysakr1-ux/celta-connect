@@ -39,10 +39,11 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   // would touch a query five other blocks on that page read.
   const { data: person } = await admin
     .from("profiles")
-    .select("full_name, special_consideration, special_consideration_arrangements")
+    .select("full_name, special_consideration, special_consideration_arrangements, course_status")
     .eq("id", traineeId)
     .maybeSingle();
   const traineeName = person?.full_name ?? "This candidate";
+  const isWithdrawn = person?.course_status === "withdrawn";
 
   const [{ data: course }, { data: record }, cards, { data: assignments }, { data: pctResponses }, { data: letters }, { data: malpractice }] =
     await Promise.all([
@@ -291,6 +292,31 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
           href={formalRecordCount > 0 ? `/portfolio/${traineeId}/letters` : null}
         />
       </div>
+
+      {/* Handbook §14.2: for a withdrawn candidate the assessor checks the
+          letter confirming withdrawal. It is generated on demand rather than
+          stored as a formal_letters row, so it never appeared in the "Letters
+          and cases" pill above -- the one document the Handbook names for a
+          withdrawn candidate was unreachable in the pack until this. */}
+      {isWithdrawn ? (
+        <a
+          href={`/api/withdrawal-letter/${traineeId}`}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-between gap-3 rounded-[9px] border border-border bg-card px-4 py-3"
+          style={{ borderLeft: `3px solid ${AMBER}` }}
+        >
+          <span>
+            <span className="block text-[13px] font-semibold text-ink">Withdrawal letter</span>
+            <span className="block text-[12px] text-muted">
+              The candidate&apos;s signed withdrawal, countersigned by the centre — Handbook §14.2. Opens as a PDF.
+            </span>
+          </span>
+          <span className="shrink-0 text-[12px] font-semibold" style={{ color: AMBER }}>
+            Open
+          </span>
+        </a>
+      ) : null}
 
       <p className="text-xs text-muted">
         Read-only. Nothing here can be edited, and nothing you open is recorded against the candidate.
