@@ -1047,6 +1047,88 @@ async function main() {
   }
   console.log("assignment briefs:", BRIEFS.length);
 
+  // --- Marking guidance: the centre's own standardisation evidence
+  // (marking_guidance_entries, migration 0177), which the assessor pack's
+  // /assessor/marking-guidance page shows beside each criterion. The seed
+  // wrote none, so every one of the 31 criteria read "Not written yet",
+  // making a well-run centre look as though it had standardised nothing. A
+  // representative sample instead (Ramy, 11 Sep 2026): the substantive
+  // criteria tutors actually align on at a standardisation meeting -- two per
+  // assignment -- with the mechanical ones (word count) and the more
+  // self-evident ones left blank, which is how a real centre's notes look.
+  // criterion_key matches ASSIGNMENT_CRITERIA (src/lib/assignment-criteria.ts).
+  const MARKING_GUIDANCE = [
+    {
+      type: "Focus on Learner", key: "terminology",
+      met: "Terms from language analysis are used accurately and only where they earn their place -- 'weak form', 'schwa', 'past participle' correct and in context.",
+      grey: "An occasional loose term ('grammar' where 'tense' is meant) is still a pass if the surrounding analysis is sound.",
+      notYet: "Terminology is avoided altogether, or a key claim rests on a term used wrongly.",
+      agreed: "One or two slips do not fail this; a pattern of misuse in the language analysis does.",
+    },
+    {
+      type: "Focus on Learner", key: "referencing",
+      met: "At least one source is named in the body and tied to the point it supports, with a matching entry in a reference list.",
+      grey: "A source named but only loosely connected to its claim -- accept if the rest of the referencing is sound.",
+      notYet: "No sources referenced in the body, or a bibliography with nothing cited in the text.",
+      agreed: "We look for referencing WITHIN the body, not just a list at the end. A list alone does not meet it.",
+    },
+    {
+      type: "LRT", key: "analysis",
+      met: "Meaning, form and phonology each analysed correctly for every target item, with an accurate CCQ and expected answer.",
+      grey: "One item analysed thinly among several strong ones is a pass; a wrong form, or a CCQ that gives the answer away on a key item, is not.",
+      notYet: "Form written incorrectly, meaning confused with use, or phonology missing for most items.",
+      agreed: "Phonology is the most-missed strand -- check every item carries stress and any relevant weak forms before passing.",
+    },
+    {
+      type: "LRT", key: "reference_materials",
+      met: "At least one grammar or reference book is named by title in the body and used to support the analysis.",
+      grey: "A recognised online reference used well in place of a book is fine; a random blog is not.",
+      notYet: "No reference named, or 'a grammar book' with no title.",
+      agreed: "The candidate must NAME the book. 'I used a grammar reference' does not meet it.",
+    },
+    {
+      type: "Skills", key: "task_design",
+      met: "A gist and a detail task, each with a rationale tying it to the text and the level, and a productive task that follows from the receptive work.",
+      grey: "A rationale that describes the task rather than justifying it passes only if the design itself is clearly appropriate.",
+      notYet: "Tasks listed with no rationale, or a productive task unconnected to the text.",
+      agreed: "The rationale must say WHY this task for this text and group, not just what the task is.",
+    },
+    {
+      type: "Skills", key: "background_reading",
+      met: "At least one sourced quote in the body, correctly attributed and used to support a point about skills teaching.",
+      grey: "A quote present but weakly tied to the argument is a pass if attribution is correct and the rest is sound.",
+      notYet: "No sourced quote in the body, or a quote with no attribution.",
+      agreed: "One correctly-attributed quote in the body is the bar. A reading list alone does not meet it.",
+    },
+    {
+      type: "LfC", key: "strengths_weaknesses",
+      met: "Two strengths and two weaknesses, each evidenced from a specific lesson AND from tutor or peer feedback, not self-assertion.",
+      grey: "A strength evidenced from a lesson but not from feedback passes if the others are fully evidenced.",
+      notYet: "Strengths and weaknesses asserted with no evidence, or lifted verbatim from tutor feedback with no reflection.",
+      agreed: "'Instructions' is not a weakness; 'staging instructions for a jigsaw reading' is. Look for specificity.",
+    },
+    {
+      type: "LfC", key: "post_celta_development",
+      met: "A specific, realistic development plan naming what, how and by when -- a course, a reading, a peer-observation habit.",
+      grey: "A plan that is specific but optimistic is fine; a vague 'keep improving' is not.",
+      notYet: "No plan, or generic intentions with nothing concrete or time-bound.",
+      agreed: "One or two concrete next steps, not a wish list. Specific beats ambitious.",
+    },
+  ];
+  await supabase.from("marking_guidance_entries").insert(
+    MARKING_GUIDANCE.map((g) => ({
+      center_id: center.id,
+      assignment_type: g.type,
+      criterion_key: g.key,
+      met_text: g.met,
+      grey_text: g.grey,
+      not_text: g.notYet,
+      agreed_text: g.agreed,
+      updated_by: trainerId,
+    }))
+  );
+  console.log("marking guidance:", MARKING_GUIDANCE.length, "criteria standardised");
+
   // --- TP feedback helper -- returns the tp_plans.id so callers can attach
   // shared materials to a specific plan. ---
   // Criteria the seeded feedback wording actually evidences. Planning codes
