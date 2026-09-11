@@ -11,7 +11,9 @@ import type { Database } from "@/lib/supabase/types";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandIndexFor } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { computeWeekOf } from "@/lib/course-progress";
+import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
+import { formatDate } from "@/lib/format-date";
+import type { CourseCloseOutStatus } from "@/lib/supabase/types";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { resolveProvisionalDeadline, REMINDER_DAYS_BEFORE_DUE } from "@/lib/provisional-deadline";
@@ -50,6 +52,66 @@ import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSize
 // T00:00:00 parses and formats in the same zone and the day is preserved.
 function shortDate(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
+// What is left once the course is over. Ramy, 12 Sep 2026: the candidate's
+// landing said "That's your course finished" while the MCT's Today still read
+// "week 4 of 4" over an empty day -- no sign the course was over or what
+// remained. This replaces the day track with the closing-out sequence, each
+// line a door: Administration Handbook 14.4 (finals, the centre grade
+// approval form, Cambridge's confirmation) and then close-out.
+const CLOSE_OUT_LABEL: Record<CourseCloseOutStatus, string> = {
+  not_started: "Not started",
+  verifying: "Verifying",
+  verify_failed: "Verification found gaps",
+  ready_to_export: "Ready to export to Drive",
+  exporting: "Exporting to Drive",
+  export_failed: "Export failed",
+  awaiting_receipt: "Exported -- awaiting your signed receipt",
+  grace_period: "Receipt signed -- clears after the grace period",
+  wiped: "Closed out",
+};
+
+function ClosingOutCard({
+  items,
+  accent,
+}: {
+  items: { label: string; status: string; done: boolean; href: string }[];
+  accent: string;
+}) {
+  const remaining = items.filter((i) => !i.done).length;
+  return (
+    <section
+      className="flex flex-col rounded-[14px] border"
+      style={{ background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)" }}
+    >
+      <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
+        <h3 className="font-serif text-[20px] font-semibold text-ink-warm">What remains</h3>
+        <span className="text-[12.5px] text-muted">{remaining === 0 ? "All done" : `${remaining} of ${items.length} left`}</span>
+      </div>
+      <div className="flex flex-col px-2.5 pb-2">
+        {items.map((it) => (
+          <Link
+            key={it.label}
+            href={it.href}
+            className="trainer-hover-fill grid grid-cols-[14px_1fr] items-start gap-2.5 rounded-[8px] px-1.5 py-[9px] no-underline"
+          >
+            <span
+              className="mt-[5px] size-2 rounded-full border-[1.5px]"
+              style={it.done ? { background: accent, borderColor: accent } : { borderColor: "var(--color-muted)" }}
+            />
+            <span className="min-w-0">
+              <span className={`text-[13.5px] ${it.done ? "text-muted" : "font-semibold text-ink"}`}>{it.label}</span>
+              <span className="block text-[11.5px] text-muted">{it.status}</span>
+            </span>
+          </Link>
+        ))}
+      </div>
+      <p className="border-t border-border-faint px-[18px] py-2.5 text-[11.5px] text-muted">
+        Handbook 14.4, then close-out. Each line opens where it is done.
+      </p>
+    </section>
+  );
 }
 
 export default async function TodayPage() {
@@ -779,14 +841,76 @@ export default async function TodayPage() {
     month: "long",
   });
 
+  // Over, in the centre's own day -- the same rule the trainee landing and
+  // Course Admin use (computeCourseState). Two small reads only then: what
+  // the bundle does not carry (reports released) and the close-out row.
+  const courseFinished =
+    Boolean(course?.start_date && course?.end_date) && computeCourseState(course!.start_date!, course!.end_date!, today) === "closed";
+  let closingOutItems: { label: string; status: string; done: boolean; href: string }[] = [];
+  if (courseFinished && isMct) {
+    const [{ count: releasedCount }, { data: closeOutRow }] = await Promise.all([
+      admin.from("celta5_records").select("id", { count: "exact", head: true }).eq("course_id", courseId).not("final_report_released_at", "is", null),
+      admin.from("course_close_outs").select("status").eq("course_id", courseId).maybeSingle(),
+    ]);
+    const activeCount = rows.filter((r) => r.courseStatus !== "withdrawn").length;
+    const finalsRecommended = (celta5Rows ?? []).filter(
+      (r) => r.final_recommended_grade && r.final_recommended_grade !== "Withdrawn"
+    ).length;
+    const approvalAt = (course as { grade_approval_form_submitted_at?: string | null } | null)?.grade_approval_form_submitted_at ?? null;
+    const confirmedAt = course?.cambridge_grades_confirmed_at ?? null;
+    const closeOutStatus = (closeOutRow?.status ?? "not_started") as CourseCloseOutStatus;
+    closingOutItems = [
+      {
+        label: "Final recommended grades",
+        status: `${finalsRecommended} of ${activeCount} recommended -- agreed with the assessor (14.4)`,
+        done: activeCount > 0 && finalsRecommended >= activeCount,
+        href: "/trainer/grades-report",
+      },
+      {
+        label: "Final reports released to candidates",
+        status: `${releasedCount ?? 0} of ${activeCount} released`,
+        done: activeCount > 0 && (releasedCount ?? 0) >= activeCount,
+        href: "/trainer/grades-report",
+      },
+      {
+        label: "Centre grade approval form in Appian",
+        status: approvalAt ? `Marked submitted ${formatDate(approvalAt, timeZone, { year: "numeric" })}` : "Not yet marked as submitted",
+        done: Boolean(approvalAt),
+        href: "/trainer/grades-report",
+      },
+      {
+        label: "Cambridge's confirmation of final grades",
+        status: confirmedAt ? `Confirmed ${formatDate(confirmedAt, timeZone, { year: "numeric" })}` : "Not yet confirmed",
+        done: Boolean(confirmedAt),
+        href: "/trainer/grades-report",
+      },
+      {
+        label: "Close-out",
+        status: CLOSE_OUT_LABEL[closeOutStatus],
+        done: closeOutStatus === "wiped",
+        href: "/trainer/grades-report",
+      },
+    ];
+  }
+
   return (
     <div className="flex flex-col gap-[18px]">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">{overline}</p>
+          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">
+            {courseFinished
+              ? [trainer?.full_name, course?.name, "course finished", todayHeading].filter(Boolean).join(" · ")
+              : overline}
+          </p>
           <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">
-            {todayHeading}
-            <LiveClock timeZone={timeZone} serverNowMs={serverNowMs} accent={accentDeep} />
+            {courseFinished ? (
+              "Closing out"
+            ) : (
+              <>
+                {todayHeading}
+                <LiveClock timeZone={timeZone} serverNowMs={serverNowMs} accent={accentDeep} />
+              </>
+            )}
           </h1>
           {/* Ramy, 10 Sep 2026, on porting the trainee landing's day bar:
               "keep the bar colour relevant to the trainer role, MCT or ACT."
@@ -798,7 +922,7 @@ export default async function TodayPage() {
               between them, so "where am I in this day" is a harder question
               here than on a trainee's single thread. Same daySlots YourDay
               renders below; nothing is fetched twice. */}
-          {dayBarItems.length > 0 ? (
+          {!courseFinished && dayBarItems.length > 0 ? (
             <div className="mt-2 flex max-w-[560px] min-w-[320px]">
               <DayBar
                 items={dayBarItems}
@@ -907,7 +1031,11 @@ export default async function TodayPage() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <YourDay slots={daySlots} serverNowMs={serverNowMs} accent={accentDeep} />
+          {courseFinished && isMct ? (
+            <ClosingOutCard items={closingOutItems} accent={accentDeep} />
+          ) : (
+            <YourDay slots={daySlots} serverNowMs={serverNowMs} accent={accentDeep} />
+          )}
 
           {isMct && course?.assessor_visit_date ? (
             <Link
