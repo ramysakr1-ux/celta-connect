@@ -6,6 +6,8 @@ import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 const VALID_LISTS = new Set(["planningStrengths", "planningActionPoints", "teachingStrengths", "teachingActionPoints"]);
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { assignmentGradeCeiling, PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { checkStage1RecordsMilestone, checkFinalGradeMilestone } from "@/lib/cohort-milestones";
@@ -950,11 +952,16 @@ async function finalDayBlock(
   supabase: Awaited<ReturnType<typeof createClient>>,
   courseId: string
 ): Promise<string | null> {
-  const { data: course } = await supabase.from("courses").select("end_date, name").eq("id", courseId).maybeSingle();
+  const { data: course } = await supabase.from("courses").select("end_date, name, center_id").eq("id", courseId).maybeSingle();
   if (!course?.end_date) {
     return "This course has no end date set, so reports can't be released yet -- set the course dates first.";
   }
-  const today = new Date().toISOString().slice(0, 10);
+  // "Today" in the centre's own day. This was the UTC day until 12 Sep 2026:
+  // for a centre west of Greenwich the block lifted the evening before the
+  // final day -- exactly the early release this function exists to prevent
+  // -- and for one east of it the final morning was still "yesterday".
+  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
   if (today < course.end_date) {
     const finalDay = new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", {
       day: "numeric",

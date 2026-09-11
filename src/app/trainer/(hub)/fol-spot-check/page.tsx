@@ -3,6 +3,8 @@ import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { computeCourseDayProgress } from "@/lib/course-day";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // specs/for-claude-code-fol-spot-check.md, extending
 // for-claude-code-fol-pooled-evidence.md's "Trainer UX / Days 2-9": "a spot-
@@ -39,7 +41,9 @@ export default async function FolSpotCheckPage() {
   // part-time skeletons place the milestone there).
   const distinctDates = Array.from(new Set((timetableDates ?? []).map((d) => d.event_date))).sort();
   const divergenceDate = distinctDates[9] ?? null;
-  const today = new Date().toISOString().slice(0, 10);
+  // The centre's day, not the UTC day, so the countdown does not slip a day
+  // every evening (12 Sep 2026).
+  const today = toLocalIso(new Date(), (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
   const daysUntilDivergence = divergenceDate
     ? Math.max(0, Math.round((new Date(divergenceDate).getTime() - new Date(today).getTime()) / 86_400_000))
     : null;

@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Checkpoint 12 -- "aggregate view for the tutor" (build-spec.md item 18).
 //
@@ -79,7 +82,10 @@ export default async function TrainerPreCourseTaskPage() {
   const supplementSections = (sections ?? []).filter((s) => s.source === "centre_supplement");
   const orderedSections = [...cambridgeSections, ...supplementSections];
 
-  const today = new Date().toISOString().slice(0, 10);
+  // The centre's day, not the UTC day: the answer key opens 48 hours before
+  // the course starts, and a gate on the UTC day opened it hours early or
+  // late depending on the centre's zone (12 Sep 2026).
+  const today = toLocalIso(new Date(), (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
   const answerKeyDate = course.start_date ? answerKeyOpensOn(course.start_date) : null;
   const answerKeyOpen = Boolean(answerKeyDate && today >= answerKeyDate);
 
@@ -94,7 +100,7 @@ export default async function TrainerPreCourseTaskPage() {
         </p>
         {answerKeyDate ? (
           <p className="mt-1 text-xs text-muted">
-            Answer key {answerKeyOpen ? "opened" : "opens"} {answerKeyDate} -- 48 hours before the course starts,
+            Answer key {answerKeyOpen ? "opened" : "opens"} {answerKeyDate ? formatCalendarDate(answerKeyDate, { year: "numeric" }) : "--"} -- 48 hours before the course starts,
             cohort-wide. A candidate only sees the answer to a task once they have answered it themselves; you see all
             of them regardless.
           </p>
