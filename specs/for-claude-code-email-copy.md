@@ -229,7 +229,9 @@ Sent when a reading finds clear problems. No email goes to the applicant. Carrie
 >
 > The pack for C2/2024 at Meridian English Centre is prepared and read-only: portfolios, the timetable, teaching practice arrangements for the day, written assignment titles, the application file and the attendance registers.
 >
-> Facts: Visit · Thursday 30 November / Portfolios · 6, including 2 potential fails / Access ends · when the course closes, 7 Dec
+> Facts: Visit · Thursday 30 November / Portfolios · 6, including 2 potential fails / Access ends · two weeks after the course closes, 21 Dec
+>
+> (Ramy, 12 Sep 2026: "Access ends" was "when the course closes, 7 Dec". Administration Handbook §15 has the assessor submit their report within two weeks of the course end date, so the link and this line now run two weeks past the close.)
 > CTA: **Open the assessment pack**
 > Footnote: No account and no password. The link identifies you; opening it is all that is needed.
 >
