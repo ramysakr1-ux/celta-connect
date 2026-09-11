@@ -325,6 +325,15 @@ export default async function AssessorPage({
 
   const atRiskCount = candidates.filter((c) => c.provisionalLabel?.includes("Fail")).length;
   const selectedCount = candidates.filter((c) => c.selectedForAssessorVisit).length;
+  // Every requirement below counts candidates *being assessed*: the portfolios
+  // to sample, the centre's selection, the double-marking band. The withdrawn
+  // candidate is not one of them -- they are handled entirely by their own
+  // `withdrawnCount` line ("check the withdrawal letter and application"), so
+  // counting them here would put "12" on lines the rest of the pack frames as
+  // "11 active / 1 withdrawn" (the grades header, the readiness figures). The
+  // card grid still lists all 12 -- an assessor may look at the withdrawn
+  // candidate -- but the Handbook denominators are the active cohort.
+  const activeCandidateCount = candidates.filter((c) => c.courseStatus !== "withdrawn").length;
   const requirements = buildAssessorRequirements({
     // Cast rather than a regenerated type: migration 0254 adds this column
     // and Ramy runs migrations, so the generated Database type won't carry it
@@ -332,12 +341,12 @@ export default async function AssessorPage({
     // the fallback is the Handbook's own default, so the pack reads correctly
     // either side of the migration running.
     assessmentKind: ((course as { assessment_kind?: string }).assessment_kind ?? "regular") as AssessmentKind,
-    candidateCount: candidates.length,
+    candidateCount: activeCandidateCount,
     atRiskCount,
     selectedCount,
     withdrawnCount: withdrawnCandidateCount ?? 0,
   });
-  const doubleMarkPerAssignment = doubleMarkingPerAssignment(candidates.length);
+  const doubleMarkPerAssignment = doubleMarkingPerAssignment(activeCandidateCount);
 
   // for-claude-code-assessor-pack-decisions.md §3: "don't hardcode the
   // list -- let the centre add/remove supplementary documents." Resource
@@ -749,7 +758,7 @@ export default async function AssessorPage({
                   <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§11</span>
                 </div>
                 <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>
-                  {doubleMarkPerAssignment} of each assignment on a course of {candidates.length}. Not the assessor&apos;s task, but
+                  {doubleMarkPerAssignment} of each assignment on a course of {activeCandidateCount}. Not the assessor&apos;s task, but
                   the record may be asked for -- and this is the count that scales with cohort size, unlike anything above it.
                 </p>
               </div>
