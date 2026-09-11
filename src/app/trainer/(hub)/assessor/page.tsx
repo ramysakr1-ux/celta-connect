@@ -493,8 +493,14 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
             <div className="flex flex-col gap-[3px]">
               <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Hand over the pack</p>
               <p className="text-sm text-muted">
+                {/* "every portfolio on the course", not "every selected portfolio":
+                    computeAssessorReadiness gates on every active candidate, and
+                    rightly -- the selection is only the default view, and "View
+                    full cohort" opens any portfolio, so a gap anywhere is a gap
+                    the assessor can reach. The sentence said "selected" until
+                    11 Sep 2026 while the list beneath it named eleven candidates. */}
                 Choose which candidates the assessor sees, then share the read-only link or email it to them. The link refuses to open until every
-                selected portfolio is complete, and names what is missing.
+                portfolio on the course is complete, and names what is missing.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
