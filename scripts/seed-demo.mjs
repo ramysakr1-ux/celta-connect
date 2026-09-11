@@ -286,6 +286,25 @@ async function main() {
     return Math.min(1, weekdaysBetween(startDate, todayIso < endDate ? todayIso : endDate) / total);
   })();
   const hoursSoFar = Math.max(1, Math.round(COURSE_TOTAL_HOURS * elapsed));
+
+  // The CELTA "kind of lesson" (src/lib/aim-type.ts): grammar/lexis/function
+  // are language-systems aims, the four skills are receptive/productive split
+  // by mode. plan_assignments.aim_type drives the "Main aims so far" coverage
+  // matrix on the Rotation screen -- the thing that keeps each candidate's six
+  // lessons varied and fair. It was null on every seeded plan, so that matrix
+  // rendered blank and the whole fairness mechanism was invisible in the demo.
+  // Classified from the aim text, the same way a tutor would tag it.
+  const aimTypeOf = (aim) => {
+    const a = (aim || "").toLowerCase();
+    if (/\bwriting\b|write a|writing task/.test(a)) return "writing";
+    if (/\bspeaking\b|discussion|role.?play|giving opinions|telling a story|conversation/.test(a)) return "speaking";
+    if (/\breading\b|read for|reading for/.test(a)) return "reading";
+    if (/\blisten|listening/.test(a)) return "listening";
+    if (/vocabulary|lexis|collocation|word|phrases|describing/.test(a)) return "lexis";
+    if (/function|suggestion|advice|apologi|arrangement|invit|request|complain|offer/.test(a)) return "function";
+    if (/grammar|tense|present |past |future |conditional|perfect|continuous|used to|comparative|quantifier|modal|article/.test(a)) return "grammar";
+    return "grammar";
+  };
   // Everyone at or near a full record except two. Kofi is the borderline case
   // an MCT would want to see; Daniel (below) is the real problem.
   const ATTENDANCE_RATE = { "Kofi Mensah": 0.70 };
@@ -999,6 +1018,7 @@ async function main() {
       trainee_id: traineeId,
       tp_number: tpNumber,
       main_lesson_aim: aim,
+      aim_type: aimTypeOf(aim),
       density_tier: tpNumber <= 2 ? "scripted" : tpNumber <= 4 ? "framework" : "minimal",
       assigned_by: trainerId,
       // The library entry this lesson came from. Without it CELTA 5 Section 6
@@ -2109,6 +2129,7 @@ async function main() {
         tp_number: tp.tp_number,
         short_title: tp.short_title,
         main_lesson_aim: tp.main_lesson_aim,
+        aim_type: aimTypeOf(tp.short_title || tp.main_lesson_aim),
         density_tier: "coaching_prose",
         class_grouping: "whole_class",
         assigned_by: trainerId,
