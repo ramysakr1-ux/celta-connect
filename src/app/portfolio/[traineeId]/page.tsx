@@ -130,6 +130,29 @@ export default async function CourseStreamPage({
 
   const today = toLocalIso(new Date(), timeZone);
 
+  // Broadcasts carry three scope columns (visible_to_trainee_id / _tp_group_id
+  // / _subgroup_id); the marking action, Stage 2 nudges and rotation releases
+  // all set them. Without this filter the Course Stream landing showed every
+  // trainee every personal broadcast -- "Daniel: resubmission needed" on the
+  // whole cohort's stream. today-tab.tsx already scoped its own copy with the
+  // same filter and the same reasoning; this is that filter applied where the
+  // landing had been fetching unscoped (11 Sep 2026). Scope is the portfolio
+  // owner's, so a staff viewer sees exactly what this candidate sees.
+  const { data: subgroupMember } = await supabase
+    .from("course_subgroup_members")
+    .select("subgroup_id")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  const subgroupRow = subgroupMember
+    ? (await supabase.from("course_subgroups").select("tp_group_id").eq("id", subgroupMember.subgroup_id).maybeSingle()).data
+    : null;
+  const broadcastScope = [
+    "and(visible_to_trainee_id.is.null,visible_to_tp_group_id.is.null,visible_to_subgroup_id.is.null)",
+    `visible_to_trainee_id.eq.${traineeId}`,
+  ];
+  if (subgroupRow?.tp_group_id) broadcastScope.push(`visible_to_tp_group_id.eq.${subgroupRow.tp_group_id}`);
+  if (subgroupMember) broadcastScope.push(`visible_to_subgroup_id.eq.${subgroupMember.subgroup_id}`);
+
   const [{ data: broadcasts }, { data: timetableEvents }, { data: tutors }, { data: assignments }] =
     await Promise.all([
       supabase
@@ -143,6 +166,7 @@ export default async function CourseStreamPage({
         // actually fires -- see /trainer/announcements for the trainer-side
         // Scheduled panel that shows those.
         .not("sent_at", "is", null)
+        .or(broadcastScope.join(","))
         .order("pinned", { ascending: false })
         .order("created_at", { ascending: false }),
       supabase

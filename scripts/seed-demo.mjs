@@ -1520,6 +1520,23 @@ async function main() {
     // Brief sections by type, for the submitted-text responses.
     const sectionsByType = new Map(BRIEFS.map((b) => [b.type, b.sections]));
 
+    // Display titles for the per-candidate feedback announcements below --
+    // the same strings ASSIGNMENT_INFO carries, so a seeded broadcast reads
+    // exactly like one the marking action writes.
+    const ASSIGNMENT_TITLES = {
+      "Focus on Learner": "Focus on the Learner",
+      LRT: "Language Related Tasks",
+      Skills: "Language Skills Related Tasks",
+      LfC: "Lessons from the Classroom",
+    };
+    // When a trainer marks or returns an assignment, returnAssignment() fires
+    // a personal broadcast to that one candidate (visible_to_trainee_id set).
+    // The seed sets the marked states directly, so those announcements have to
+    // be written here too, or the trainee never sees the loop close -- Ramy
+    // listed "announcements" as part of the cycle to walk. Collected and
+    // inserted in one batch after the loop.
+    const feedbackBroadcasts = [];
+
     const activeDefs = traineeDefs.filter((d) => !d.withdrawn);
     // trainee_id + assignment_type is unique; capture ids for responses/letter.
     const assignmentIds = {};
@@ -1564,7 +1581,43 @@ async function main() {
           const { error: rErr } = await supabase.from("assignment_section_responses").insert(rows);
           if (rErr) throw rErr;
         }
+
+        // The announcement that closes the loop, matching returnAssignment's
+        // own titles/bodies. A resubmission that has been marked (pass OR
+        // fail) reads "feedback is ready"; a first round returned for
+        // resubmission reads "needs resubmission"; a first-round pass reads
+        // "feedback is ready". Under review / not started fire nothing yet.
+        const bTitle = ASSIGNMENT_TITLES[assignment_type] ?? assignment_type;
+        // When the nudge was sent, kept realistic so the recent ones surface
+        // in the trainee's top-of-feed (the Today tab shows only the three
+        // most recent): a resubmission just marked is a day old; a first-round
+        // LRT (set/due later than FoL) was marked a couple of days ago; a
+        // first-round FoL was marked earlier in the course.
+        const sent = state.resubmission_status === "approved" ? daysAgoIso(1) : assignment_type === "LRT" ? daysAgoIso(2) : daysAgoIso(6);
+        let bc = null;
+        if (state.resubmission_status === "approved") {
+          bc = { title: `${bTitle} feedback is ready`, body: "Open your Written Assignments tab to see the full feedback.", sent };
+        } else if (state.first_status === "resubmission_required") {
+          bc = { title: `${bTitle} needs resubmission`, body: "Check the brief for what to revise before resubmitting.", sent };
+        } else if (state.first_status === "approved") {
+          bc = { title: `${bTitle} feedback is ready`, body: "Open your Written Assignments tab to see the full feedback.", sent };
+        }
+        if (bc) {
+          feedbackBroadcasts.push({
+            course_id: course.id,
+            author_id: trainerId,
+            title: bc.title,
+            body: bc.body,
+            visible_to_trainee_id: trainees[name],
+            sent_at: bc.sent,
+          });
+        }
       }
+    }
+
+    if (feedbackBroadcasts.length > 0) {
+      const { error: bErr } = await supabase.from("course_broadcasts").insert(feedbackBroadcasts);
+      if (bErr) throw bErr;
     }
 
     // --- The formal warning letter for the one terminal Fail (Ines, FoL).
@@ -1724,6 +1777,18 @@ async function main() {
       .single();
     if (reflErr) throw reflErr;
     await supabase.from("malpractice_cases").update({ reflection_assignment_id: reflection.id }).eq("id", kase.id);
+
+    // Kofi's own loop-closing announcement: his LRT was set back to
+    // resubmission by the decided case, not the ordinary marking path, so its
+    // broadcast is written here rather than in the batch above.
+    await supabase.from("course_broadcasts").insert({
+      course_id: course.id,
+      author_id: trainerId,
+      title: "Language Related Tasks needs resubmission",
+      body: "Following the plagiarism decision on your record: resubmit in your own words with sources cited, and complete the Plagiarism Reflection that has been set.",
+      visible_to_trainee_id: trainees["Kofi Mensah"],
+      sent_at: daysAgoIso(3),
+    });
 
     console.log(
       `written assignments: ${activeDefs.length} candidates, full cycle + 1 warning letter + Assignment 5 (plagiarism reflection)`
