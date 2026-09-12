@@ -161,6 +161,32 @@ export function LessonPlanForm({
           <ReadOnlyField label="Main Aims" value={plan?.main_aims} />
           <ReadOnlyField label="Subsidiary Aims" value={plan?.subsidiary_aims} />
           <ReadOnlyField label="Personal Aims" value={plan?.personal_aims} />
+          {/* The candidate wrote these, and then could not see them again:
+              the editable form has the field but this -- the submitted
+              record, the thing the page itself calls "your record of the
+              lesson" -- dropped it. Anticipating difficulties with tasks,
+              materials and learners is criterion 4j, assessed from the plan
+              and moderated from the portfolio, so the evidence cannot
+              vanish at the moment of submitting. The tutor's view and the
+              PDF always showed it; only the candidate's own did not.
+              Ramy, 12 Sep 2026. */}
+          {(plan?.anticipated_problems ?? []).some((p) => p.problem || p.solution) ? (
+            <div>
+              <p className="text-sm text-muted">Anticipated Problems &amp; Solutions</p>
+              <ul className="mt-1 flex flex-col gap-1.5">
+                {(plan?.anticipated_problems ?? []).map((p, i) =>
+                  p.problem || p.solution ? (
+                    <li key={i} className="text-sm text-ink">
+                      <span className="whitespace-pre-line">{p.problem}</span>
+                      {p.solution ? (
+                        <span className="mt-0.5 block whitespace-pre-line text-muted">{p.solution}</span>
+                      ) : null}
+                    </li>
+                  ) : null
+                )}
+              </ul>
+            </div>
+          ) : null}
           <ReadOnlyField label="Class Profile" value={plan?.class_profile} />
           <ReadOnlyField label="Materials" value={plan?.materials_description} />
           <div>
