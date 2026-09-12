@@ -17,3 +17,6 @@ export interface TraineeNote {
   /** Signed for this page load -- never stored. */
   audio_url?: string | null;
 }
+
+/** The private bucket voice notes live in (migration 0294). */
+export const NOTEBOOK_AUDIO_BUCKET = "trainee-notebook-audio";

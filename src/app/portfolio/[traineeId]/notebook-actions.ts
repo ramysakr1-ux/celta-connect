@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { transcribeAudio } from "@/lib/openai/transcribe";
-import type { TraineeNote } from "@/lib/trainee-notebook";
+import { NOTEBOOK_AUDIO_BUCKET, type TraineeNote } from "@/lib/trainee-notebook";
 
 // Migration 0293. The generated types lag until Ramy regenerates them, so
 // the two notebook tables are read through an untyped handle on the same
@@ -65,7 +65,6 @@ export async function setNotebookPaper(paper: NotebookPaper): Promise<void> {
   await db.from("trainee_notebook_settings").upsert({ trainee_id: trainee.id, paper, updated_at: new Date().toISOString() });
 }
 
-export const NOTEBOOK_AUDIO_BUCKET = "trainee-notebook-audio";
 const SIGNED_URL_SECONDS = 4 * 60 * 60;
 
 /**
