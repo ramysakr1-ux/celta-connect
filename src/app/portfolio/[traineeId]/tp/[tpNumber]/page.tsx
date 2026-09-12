@@ -689,6 +689,15 @@ export default async function TpDetailPage({
                 feedback={feedback ?? null}
               />
             </div>
+            {/* The candidate sees the criteria their tutor tagged, same as
+                staff do. Removing the right-hand column on 12 Sep 2026 left
+                this panel only in the staff branch, so the one person it was
+                written for lost it -- caught walking the cycle as Amara the
+                same day. It renders only once feedback is released, and the
+                trainee cannot read feedback until their own self-evaluation
+                is in (RLS, migration 0022), so it appears exactly when the
+                rest of the feedback does. */}
+            {criteriaEvidenced}
           </>
         )}
 
