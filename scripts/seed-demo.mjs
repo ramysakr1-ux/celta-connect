@@ -2599,8 +2599,11 @@ async function main() {
     { d: 6, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
     { d: 6, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 6, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 6, b: 7, type: "input_session", title: "Connected speech", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 6, b: 8, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null },
+    // Stage 1 after TP2 (Ramy, 12 Sep 2026; Handbook 10.2: first third of the
+    // course). The ported design had these on day 10, the day AFTER Stage 2;
+    // swapped with day 10's two pronunciation input sessions.
+    { d: 6, b: 7, type: "milestone", title: "Stage 1 tutorials \u00b7 ABC", tag: "stage1_tutorial", detail: "DEF supervised \u00b7 assignments", linked: null, tp: null },
+    { d: 6, b: 8, type: "milestone", title: "Stage 1 tutorials \u00b7 DEF", tag: "stage1_tutorial", detail: "One-to-one, own tutor", linked: null, tp: null },
     { d: 6, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 7, b: 1, type: "tp", title: "TP3 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 3 },
     { d: 7, b: 2, type: "tp", title: "TP3 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 3 },
@@ -2636,9 +2639,9 @@ async function main() {
     { d: 10, b: 3, type: "supervised_session", title: "Unassessed teach / GTKY", tag: "group_room", detail: "New level", linked: null, tp: null },
     { d: 10, b: 4, type: "supervised_session", title: "Unassessed teach / GTKY", tag: "group_room", detail: "New level", linked: null, tp: null },
     { d: 10, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 10, b: 6, type: "supervised_session", title: "Stage 1 tutorials \u00b7 ABC", tag: "group_room", detail: "DEF supervised \u00b7 assignments", linked: null, tp: null },
+    { d: 10, b: 6, type: "input_session", title: "Connected speech", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 10, b: 7, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Tutors marking", linked: null, tp: null },
-    { d: 10, b: 8, type: "supervised_session", title: "Stage 1 tutorials \u00b7 DEF", tag: "group_room", detail: "One-to-one, own tutor", linked: null, tp: null },
+    { d: 10, b: 8, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 10, b: 9, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Early finish, if done", linked: null, tp: null },
     { d: 11, b: 1, type: "tp", title: "TP5 \u00b7 A", tag: "group_room", detail: "New level", linked: null, tp: 5 },
     { d: 11, b: 2, type: "tp", title: "TP5 \u00b7 B", tag: "group_room", detail: "New level", linked: null, tp: 5 },
@@ -2938,12 +2941,13 @@ async function main() {
   });
   console.log("Stage 2: halfway sheets, bookings and CELTA 5 records for the active cohort");
   for (const [name, day, confirmed] of [
+    // Inside the ABC block on day 6 (band 7), not on top of DEF's.
     ["Amara Okafor", 6, true],
     ["Daniel Kim", 7, false],
   ]) {
     const { data: ev } = await supabase
       .from("course_timetable_events")
-      .insert({ course_id: course.id, type: "milestone", tag: "stage1_tutorial", title: `Stage 1 tutorial — ${name}`, ...tutorialAt(day, 8), created_by: trainer2Id })
+      .insert({ course_id: course.id, type: "milestone", tag: "stage1_tutorial", title: `Stage 1 tutorial — ${name}`, ...tutorialAt(day, 7), created_by: trainer2Id })
       .select("id")
       .single();
     await supabase.from("individual_tutorial_invites").insert({
