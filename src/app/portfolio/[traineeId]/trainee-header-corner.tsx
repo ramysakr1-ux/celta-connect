@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/avatar";
-import { PagePalettePicker } from "@/app/portfolio/[traineeId]/page-palette-picker";
+import { AvatarPaletteButton } from "@/app/portfolio/[traineeId]/page-palette-picker";
 import type { PagePalette } from "@/lib/trainee-notebook";
 
 // Ramy, 2026-08-24: only the bare landing route gets the credit pill (same
@@ -52,8 +52,9 @@ export function TraineeHeaderCorner({
           one of four separate initials implementations in the app. All of
           them are this component now, and the colour comes from the name
           rather than being the same teal for everyone. */}
-      {pagePalette ? <PagePalettePicker current={pagePalette} /> : null}
-      <Avatar name={traineeName} size="xs" />
+      {/* On the trainee's own portfolio the avatar is the page-colour
+          control (page-palette-picker.tsx); anyone else sees the plain tile. */}
+      {pagePalette ? <AvatarPaletteButton name={traineeName} current={pagePalette} /> : <Avatar name={traineeName} size="xs" />}
     </div>
   );
 }

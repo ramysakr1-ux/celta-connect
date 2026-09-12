@@ -1,80 +1,52 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Palette } from "lucide-react";
+import { useState } from "react";
 import { setPagePalette } from "@/app/portfolio/[traineeId]/notebook-actions";
-import { PAGE_PALETTES, PAGE_PALETTE_LABEL, pagePaletteSwatch, pagePaletteVars, type PagePalette } from "@/lib/trainee-notebook";
+import { Avatar } from "@/components/avatar";
+import { PAGE_PALETTES, PAGE_PALETTE_LABEL, pagePaletteVars, type PagePalette } from "@/lib/trainee-notebook";
 
-// Ramy, 12 Sep 2026: "personalised pages... I'll go with the first one" --
-// paper, not a theme. A small palette button in the header corner; a row of
-// five swatches; the page ground, frame and cards take the colour at once
-// (the variables are set on the trainee surface directly, no reload) and the
-// choice is saved to the trainee's settings for every page after.
-export function PagePalettePicker({ current }: { current: PagePalette }) {
-  const [open, setOpen] = useState(false);
+// Ramy, 12 Sep 2026: "instead of having that colour palette next to the
+// avatar, why not make the avatar the colour palette? You click on it and it
+// changes colour -- you don't even have to open anything." So the avatar is
+// the control: each click moves to the next paper -- Linen, Sky, Sage, Rose,
+// Lavender, round again -- the page takes it at once, the avatar tile takes
+// the same hue (at the avatar's own depth, so the initials stay readable),
+// and the choice is saved. On Linen the tile is the person's own colour, as
+// everywhere else in Connect.
+
+const AVATAR_TONE: Record<PagePalette, string | undefined> = {
+  linen: undefined,
+  sky: "oklch(45% 0.10 235)",
+  sage: "oklch(45% 0.10 160)",
+  rose: "oklch(45% 0.10 350)",
+  lavender: "oklch(45% 0.10 300)",
+};
+
+export function AvatarPaletteButton({ name, current }: { name: string; current: PagePalette }) {
   const [palette, setPalette] = useState<PagePalette>(current);
-  const ref = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    window.addEventListener("mousedown", onDown);
-    return () => window.removeEventListener("mousedown", onDown);
-  }, [open]);
-
-  const choose = (p: PagePalette) => {
-    setPalette(p);
+  const cycle = () => {
+    const next = PAGE_PALETTES[(PAGE_PALETTES.indexOf(palette) + 1) % PAGE_PALETTES.length];
+    setPalette(next);
     const surface = document.getElementById("trainee-surface");
     if (surface) {
       for (const k of ["--color-background", "--color-frame", "--color-card", "--color-card-inset", "--color-surface-muted", "--color-border"]) {
         surface.style.removeProperty(k);
       }
-      for (const [k, v] of Object.entries(pagePaletteVars(p))) surface.style.setProperty(k, v);
+      for (const [k, v] of Object.entries(pagePaletteVars(next))) surface.style.setProperty(k, v);
     }
-    void setPagePalette(p);
-    setOpen(false);
+    void setPagePalette(next);
   };
 
   return (
-    <div ref={ref} className="relative flex items-center">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-label="Page colour"
-        title="Page colour"
-        className="flex size-7 items-center justify-center rounded-full transition-colors hover:bg-[oklch(98.5%_0.006_90_/_0.12)]"
-        style={{ color: "oklch(78% 0.02 80)" }}
-      >
-        <Palette size={15} />
-      </button>
-      {open ? (
-        <div
-          role="menu"
-          aria-label="Page colour"
-          className="absolute top-9 right-0 z-50 flex items-center gap-2 rounded-full px-3 py-2 shadow-[0_8px_24px_oklch(23.5%_0.017_65_/_0.22)]"
-          style={{ background: "oklch(98.5% 0.006 90)", border: "1px solid oklch(88% 0.016 82)" }}
-        >
-          {PAGE_PALETTES.map((p) => (
-            <button
-              key={p}
-              type="button"
-              role="menuitemradio"
-              aria-checked={p === palette}
-              aria-label={`${PAGE_PALETTE_LABEL[p]} paper`}
-              title={PAGE_PALETTE_LABEL[p]}
-              onClick={() => choose(p)}
-              className="size-6 rounded-full transition-transform hover:scale-110"
-              style={{
-                background: pagePaletteSwatch(p),
-                border: `1.5px solid ${p === palette ? "oklch(23.5% 0.017 65)" : "oklch(80% 0.014 82)"}`,
-                boxShadow: p === palette ? "0 0 0 2px oklch(98.5% 0.006 90), 0 0 0 3px oklch(23.5% 0.017 65)" : "none",
-              }}
-            />
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <button
+      type="button"
+      onClick={cycle}
+      aria-label={`Page colour: ${PAGE_PALETTE_LABEL[palette]}. Click for the next.`}
+      title={`Page colour · ${PAGE_PALETTE_LABEL[palette]} · click to change`}
+      className="rounded-[8px] transition-transform hover:scale-105"
+    >
+      <Avatar name={name} size="xs" tone={AVATAR_TONE[palette]} />
+    </button>
   );
 }
