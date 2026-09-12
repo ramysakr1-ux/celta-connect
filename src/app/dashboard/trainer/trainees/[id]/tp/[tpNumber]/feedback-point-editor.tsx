@@ -5,7 +5,31 @@ import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { matchCriteriaCodes } from "@/lib/criteria-glossary";
 import { emptyFeedbackPoint, type FeedbackPoint } from "@/lib/tp-plan-content";
 import { cleanupFeedbackToneForCourse } from "@/app/dashboard/trainer/tone-cleanup-actions";
+import { autosizeOnInput, useAutosize } from "@/lib/autosize";
+import { bulletListProps } from "@/lib/bullet-list";
+import {
+  BORDER,
+  DESTRUCTIVE,
+  FAINT,
+  GOLD,
+  GOLD_INK,
+  INK,
+  INK_WARM,
+  MUTED,
+  SHEET,
+  TEAL,
+  plainField,
+} from "@/components/tp-sheet";
 import type { FeedbackTone } from "@/lib/supabase/types";
+
+// design_handoff_tp_feedback_cycle §1c.
+//
+// A point is a dot, the text, and its criteria tags. The dot takes the
+// SECTION's hue -- teal for strengths, gold-ink for action points -- and stays
+// faint until something is written, the same "colour arrives as you write"
+// rule the lesson plan uses. The column around it is a different hue again
+// (Planning ink-warm, Teaching garnet), so at a glance you can see which half
+// of the assessment a point belongs to and whether it praises or asks.
 
 const PLANNING_SECTIONS = ["4"];
 const TEACHING_SECTIONS = ["1", "2", "3", "5"];
@@ -19,6 +43,8 @@ export function FeedbackPointEditor({
   starable,
   autoTagEnabled,
   toneAssistEnabled = false,
+  sectionHue,
+  tpNumber,
 }: {
   label: string;
   guide: string;
@@ -28,24 +54,36 @@ export function FeedbackPointEditor({
   starable: boolean;
   autoTagEnabled: boolean;
   toneAssistEnabled?: boolean;
+  /** Teal for strengths, gold-ink for action points. */
+  sectionHue: string;
+  tpNumber: number;
 }) {
   const sections = CELTA_CRITERIA_SECTIONS.filter((s) =>
     (scope === "planning" ? PLANNING_SECTIONS : TEACHING_SECTIONS).includes(s.section)
   );
 
   return (
-    <div className="rounded-[6px] border border-border-faint p-4">
-      <h3 className="font-serif text-ink">{label}</h3>
-      <p className="text-xs italic text-muted">{guide}</p>
-      <div className="mt-3 flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5" style={{ padding: "16px 26px 20px", borderBottom: `1px solid ${FAINT}` }}>
+      <div className="flex items-center gap-2">
+        <span style={{ width: 3, height: 12, borderRadius: 2, background: sectionHue, display: "inline-block" }} />
+        <span className="uppercase" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: sectionHue }}>
+          {label}
+        </span>
+      </div>
+      <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+        {guide}
+      </p>
+      <div className="flex flex-col">
         {points.map((point, i) => (
           <PointRow
             key={i}
             point={point}
             sections={sections}
+            sectionHue={sectionHue}
             starable={starable}
             autoTagEnabled={autoTagEnabled}
             toneAssistEnabled={toneAssistEnabled}
+            tpNumber={tpNumber}
             onChange={(patch) => onChange(points.map((p, x) => (x === i ? { ...p, ...patch } : p)))}
             onRemove={() => onChange(points.filter((_, x) => x !== i))}
           />
@@ -54,7 +92,8 @@ export function FeedbackPointEditor({
       <button
         type="button"
         onClick={() => onChange([...points, emptyFeedbackPoint()])}
-        className="mt-3 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+        className="self-start rounded-full"
+        style={{ border: `1px dashed ${BORDER}`, padding: "5px 13px", fontSize: 12.5, color: MUTED }}
       >
         + Add point
       </button>
@@ -65,28 +104,84 @@ export function FeedbackPointEditor({
 function PointRow({
   point,
   sections,
+  sectionHue,
   starable,
   autoTagEnabled,
   toneAssistEnabled,
+  tpNumber,
   onChange,
   onRemove,
 }: {
   point: FeedbackPoint;
   sections: typeof CELTA_CRITERIA_SECTIONS extends readonly (infer T)[] ? T[] : never;
+  sectionHue: string;
   starable: boolean;
   autoTagEnabled: boolean;
   toneAssistEnabled: boolean;
+  tpNumber: number;
   onChange: (patch: Partial<FeedbackPoint>) => void;
   onRemove: () => void;
 }) {
+  const autosize = useAutosize();
   const [panelOpen, setPanelOpen] = useState(false);
-  // Feedback Assist (design_handoff_feedback_assist) -- local only, never
-  // saved with the point. null means "not yet rewritten", so the pill shows
-  // a neutral label rather than falsely claiming the trainer's own freeform
-  // text already matches one tone.
   const [tone, setTone] = useState<FeedbackTone | null>(null);
   const [isRewriting, startRewrite] = useTransition();
   const [toneError, setToneError] = useState<string | null>(null);
+  const [autoTagged, setAutoTagged] = useState(false);
+
+  // The criteria auto-tagger. It is meant to behave like autocorrect -- and
+  // the point of autocorrect is that you can undo it. Unchecking a code used
+  // to put it straight back 600ms later, because the effect listed
+  // criteria_codes among its own dependencies and so re-ran on its own output.
+  // Criteria codes are the assessment evidence the assessor and Cambridge
+  // read, so a tutor has to be able to refuse one (Ramy, 12 Sep 2026).
+  //
+  //  - `rejected` remembers what the tutor took off; never re-added.
+  //  - matches are filtered to the codes THIS point's panel offers, so a
+  //    planning point can no longer pick up a teaching code it has no
+  //    checkbox for.
+  //  - codes the tagger added itself come off when the text stops matching;
+  //    anything ticked by hand stays.
+  const allowedCodes = useMemo(() => new Set<string>(sections.flatMap((s) => s.codes)), [sections]);
+  const autoAdded = useRef<Set<string>>(new Set());
+  const rejected = useRef<Set<string>>(new Set());
+  const pointRef = useRef(point);
+  pointRef.current = point;
+
+  useEffect(() => {
+    if (!autoTagEnabled) return;
+    const timeout = setTimeout(() => {
+      const current = pointRef.current;
+      const matched = matchCriteriaCodes(current.text).filter((c) => allowedCodes.has(c));
+      const kept = current.criteria_codes.filter((c) => !autoAdded.current.has(c) || matched.includes(c));
+      for (const code of current.criteria_codes) {
+        if (autoAdded.current.has(code) && !matched.includes(code)) autoAdded.current.delete(code);
+      }
+      const added = matched.filter((c) => !kept.includes(c) && !rejected.current.has(c));
+      for (const code of added) autoAdded.current.add(code);
+      const next = [...kept, ...added];
+      if (next.length !== current.criteria_codes.length || next.some((c, i) => c !== current.criteria_codes[i])) {
+        onChange({ criteria_codes: next });
+        if (added.length > 0) setAutoTagged(true);
+      }
+    }, 600);
+    return () => clearTimeout(timeout);
+  }, [point.text, autoTagEnabled, allowedCodes, onChange]);
+
+  function toggleCriteria(code: string) {
+    const has = point.criteria_codes.includes(code);
+    if (has) {
+      rejected.current.add(code);
+      autoAdded.current.delete(code);
+    } else {
+      rejected.current.delete(code);
+      autoAdded.current.delete(code);
+    }
+    setAutoTagged(false);
+    onChange({
+      criteria_codes: has ? point.criteria_codes.filter((c) => c !== code) : [...point.criteria_codes, code],
+    });
+  }
 
   function toggleTone() {
     const nextTone: FeedbackTone = tone === "direct" ? "supportive" : "direct";
@@ -107,158 +202,177 @@ function PointRow({
     });
   }
 
-  // project_grading_feedback_trainer_awareness.md §2 -- "as the trainer
-  // types a bullet, the matching criterion code silently appends... no
-  // popup/click/confirm, behaves like autocorrect". The point of autocorrect
-  // is that you can undo it, and this could not be undone. Walking TP8 as
-  // Jordan Blake, 12 Sep 2026, unchecking a code put it straight back 600ms
-  // later -- the effect re-ran on its own output. Three faults, all fixed
-  // here; criteria codes are assessment evidence the assessor and Cambridge
-  // read, so a tutor has to be able to say no. (Ramy's standing rule:
-  // manual override by default.)
-  //
-  //  1. UN-REMOVABLE. Unchecking a code re-matched it a moment later.
-  //     `rejected` remembers what the tutor took off and the tagger never
-  //     puts those back.
-  //  2. OUT OF SCOPE. matchCriteriaCodes searches the whole glossary, so a
-  //     PLANNING point could be auto-tagged 3a -- a teaching code the
-  //     planning panel has no checkbox for, so it could not be reached at
-  //     all, by hand or otherwise. Matches are now filtered to the codes
-  //     this point's own panel offers.
-  //  3. STALE. Rewriting a point never dropped the codes matched from the
-  //     old wording. Codes this editor added itself now come off when the
-  //     text stops matching; anything the tutor ticked by hand stays.
-  const allowedCodes = useMemo(() => new Set<string>(sections.flatMap((s) => s.codes)), [sections]);
-  const autoAdded = useRef<Set<string>>(new Set());
-  const rejected = useRef<Set<string>>(new Set());
-  // Read the live point inside the debounce without making it a dependency:
-  // criteria_codes as a dependency is what made the effect answer itself.
-  const pointRef = useRef(point);
-  pointRef.current = point;
-
-  useEffect(() => {
-    if (!autoTagEnabled) return;
-    const timeout = setTimeout(() => {
-      const current = pointRef.current;
-      const matched = matchCriteriaCodes(current.text).filter((c) => allowedCodes.has(c));
-      const kept = current.criteria_codes.filter((c) => !autoAdded.current.has(c) || matched.includes(c));
-      for (const code of current.criteria_codes) {
-        if (autoAdded.current.has(code) && !matched.includes(code)) autoAdded.current.delete(code);
-      }
-      const added = matched.filter((c) => !kept.includes(c) && !rejected.current.has(c));
-      for (const code of added) autoAdded.current.add(code);
-      const next = [...kept, ...added];
-      if (next.length !== current.criteria_codes.length || next.some((c, i) => c !== current.criteria_codes[i])) {
-        onChange({ criteria_codes: next });
-      }
-    }, 600);
-    return () => clearTimeout(timeout);
-  }, [point.text, autoTagEnabled, allowedCodes, onChange]);
-
-  function toggleCriteria(code: string) {
-    const has = point.criteria_codes.includes(code);
-    if (has) {
-      // Taking a code off is a decision, not a slip: remember it so the
-      // tagger stops offering it for this point.
-      rejected.current.add(code);
-      autoAdded.current.delete(code);
-    } else {
-      rejected.current.delete(code);
-      autoAdded.current.delete(code);
-    }
-    onChange({
-      criteria_codes: has ? point.criteria_codes.filter((c) => c !== code) : [...point.criteria_codes, code],
-    });
-  }
+  const written = Boolean(point.text.trim());
 
   return (
-    <div className="border-b border-dashed border-border-faint pb-3 last:border-none">
-      <div className="flex items-start gap-2">
+    <div
+      className="relative grid items-start gap-2.5"
+      style={{ gridTemplateColumns: "12px minmax(0,1fr) auto", borderTop: `1px dashed ${FAINT}`, paddingTop: 10, paddingBottom: 6 }}
+    >
+      <span
+        className="rounded-full"
+        style={{ width: 6, height: 6, marginTop: 7, background: written ? sectionHue : FAINT, display: "inline-block" }}
+      />
+
+      <div className="flex min-w-0 flex-col gap-1.5">
         <textarea
-          rows={2}
+          ref={autosize}
+          rows={1}
           value={point.text}
-          onChange={(e) => onChange({ text: e.target.value })}
-          placeholder="Write one point -- then tag it"
-          className="flex-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          onInput={autosizeOnInput}
+          onChange={(e) => {
+            setAutoTagged(false);
+            onChange({ text: e.target.value });
+          }}
+          placeholder="Write one point — then tag it"
+          data-dictate-label="a feedback point"
+          {...bulletListProps}
+          style={plainField(13.5)}
         />
-        {toneAssistEnabled ? (
+        {toneError ? <p style={{ fontSize: 11, color: DESTRUCTIVE }}>{toneError}</p> : null}
+
+        <div className="flex flex-wrap items-center gap-1">
+          {point.criteria_codes.map((code) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => toggleCriteria(code)}
+              title={`${CRITERIA_LABELS[code] ?? code} — click to remove`}
+              style={{
+                borderRadius: 4,
+                background: sectionHue,
+                padding: "1px 7px",
+                fontSize: 10.5,
+                fontWeight: 700,
+                color: SHEET,
+              }}
+            >
+              {code}
+            </button>
+          ))}
           <button
             type="button"
-            title="Rewrite tone"
-            disabled={isRewriting}
-            onClick={toggleTone}
-            className="flex h-7 shrink-0 items-center gap-1.5 rounded-[6px] border border-border px-2.5 text-[11.5px] font-semibold disabled:opacity-60"
-            style={
-              tone === "supportive"
-                ? { background: "color-mix(in srgb, oklch(58% 0.1 195) 12%, white)", color: "oklch(58% 0.1 195)" }
-                : tone === "direct"
-                  ? { background: "color-mix(in srgb, var(--color-primary) 12%, white)", color: "var(--color-primary)" }
-                  : undefined
-            }
+            onClick={() => setPanelOpen(!panelOpen)}
+            style={{
+              borderRadius: 4,
+              border: `1px dashed ${BORDER}`,
+              padding: "1px 7px",
+              fontSize: 10.5,
+              fontWeight: 700,
+              color: MUTED,
+            }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M12 2v20M2 12h20" />
-            </svg>
-            {isRewriting ? "Rewriting…" : tone === "supportive" ? "Encouraging" : tone === "direct" ? "Direct" : "Tone"}
+            {point.criteria_codes.length === 0 ? "+ tag criteria" : "+ criteria"}
           </button>
+          {autoTagged ? (
+            <span className="italic" style={{ fontSize: 10.5, color: MUTED }}>
+              auto-tagged
+            </span>
+          ) : null}
+          {toneAssistEnabled ? (
+            <button
+              type="button"
+              onClick={toggleTone}
+              disabled={isRewriting}
+              style={{ fontSize: 10.5, color: MUTED, marginLeft: 4 }}
+            >
+              {isRewriting ? "Rewriting…" : tone === "supportive" ? "Encouraging" : tone === "direct" ? "Direct" : "Tone"}
+            </button>
+          ) : null}
+        </div>
+
+        {panelOpen ? (
+          <div
+            className="absolute left-0 right-0"
+            style={{
+              top: "calc(100% - 4px)",
+              zIndex: 40,
+              maxHeight: 300,
+              overflowY: "auto",
+              borderRadius: 10,
+              border: `1px solid ${MUTED}`,
+              background: SHEET,
+              boxShadow: "0 18px 44px oklch(23.5% 0.017 65 / 0.3)",
+              padding: 8,
+            }}
+          >
+            {sections.map((section) => (
+              <div key={section.section} className="mb-1.5 last:mb-0">
+                <p
+                  className="uppercase"
+                  style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", color: TEAL, padding: "2px 8px 4px" }}
+                >
+                  {section.title}
+                </p>
+                {section.codes.map((code) => {
+                  const on = point.criteria_codes.includes(code);
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => toggleCriteria(code)}
+                      className="grid w-full items-start gap-1.5 text-left transition-colors hover:bg-card-inset"
+                      style={{
+                        gridTemplateColumns: "14px 26px 1fr",
+                        borderRadius: 6,
+                        padding: "5px 8px",
+                        fontSize: 12,
+                        lineHeight: 1.4,
+                        color: on ? INK : INK_WARM,
+                        background: on ? `color-mix(in oklab, ${TEAL} 12%, transparent)` : undefined,
+                      }}
+                    >
+                      <span style={{ fontSize: 11, color: TEAL }}>{on ? "✓" : ""}</span>
+                      <span style={{ fontWeight: 700, color: TEAL }}>{code}</span>
+                      <span>{CRITERIA_LABELS[code]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+            <div style={{ borderTop: `1px solid ${FAINT}`, marginTop: 4, paddingTop: 4 }}>
+              <button
+                type="button"
+                onClick={() => setPanelOpen(false)}
+                className="w-full text-left"
+                style={{ fontSize: 12, color: MUTED, padding: "4px 8px" }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
         ) : null}
+      </div>
+
+      <div className="flex items-center gap-1">
         {starable ? (
           <button
             type="button"
             onClick={() => onChange({ starred: !point.starred })}
-            title="Prioritise this in the next TP"
-            className={`shrink-0 rounded-full border px-2 py-1 text-sm ${
-              point.starred ? "border-status-warning-text bg-status-warning-text text-ink" : "border-border-faint text-muted"
-            }`}
+            title={`Prioritise this in TP${tpNumber + 1} — starred points carry into the Personal Aims of their next plan`}
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 26,
+              height: 26,
+              border: `1px solid ${point.starred ? GOLD_INK : FAINT}`,
+              background: point.starred ? GOLD : "transparent",
+              color: point.starred ? INK : MUTED,
+              fontSize: 13,
+            }}
           >
             ★
           </button>
         ) : null}
         <button
           type="button"
-          onClick={() => setPanelOpen(!panelOpen)}
-          className="shrink-0 rounded-full border border-primary px-2 py-1 text-xs font-medium text-primary"
+          onClick={onRemove}
+          title="Remove"
+          className="flex items-center justify-center opacity-50 transition-opacity hover:opacity-100"
+          style={{ width: 26, height: 26, color: DESTRUCTIVE, fontSize: 13 }}
         >
-          + criteria
-        </button>
-        <button type="button" onClick={onRemove} className="shrink-0 text-destructive" title="Remove">
           ✕
         </button>
       </div>
-      {toneError ? <p className="mt-1 text-xs text-destructive">{toneError}</p> : null}
-
-      {point.criteria_codes.length > 0 ? (
-        <p className="mt-1 flex flex-wrap gap-1">
-          {point.criteria_codes.map((code) => (
-            <span key={code} className="badge-solid" title={CRITERIA_LABELS[code] ?? ""}>
-              {code}
-            </span>
-          ))}
-        </p>
-      ) : null}
-
-      {panelOpen ? (
-        <div className="mt-2 max-h-56 overflow-y-auto rounded-[6px] border border-border-faint bg-card p-3">
-          {sections.map((section) => (
-            <div key={section.section} className="mb-2 last:mb-0">
-              <p className="text-xs font-medium uppercase tracking-wide text-primary">{section.title}</p>
-              {section.codes.map((code) => (
-                <label key={code} className="flex items-start gap-2 py-0.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={point.criteria_codes.includes(code)}
-                    onChange={() => toggleCriteria(code)}
-                    className="mt-1"
-                  />
-                  <span>
-                    <b className="text-primary">{code}</b> {CRITERIA_LABELS[code]}
-                  </span>
-                </label>
-              ))}
-            </div>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }

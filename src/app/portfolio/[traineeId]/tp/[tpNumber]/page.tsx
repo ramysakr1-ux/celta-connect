@@ -699,10 +699,16 @@ export default async function TpDetailPage({
               <FeedbackForm
                 planId={plan.id}
                 traineeId={traineeId}
+                traineeName={trainee.full_name}
                 tpNumber={tpNumber}
                 feedback={feedback ?? null}
+                plan={plan}
+                languageAnalysis={languageAnalysis ?? null}
                 selfEvaluation={selfEvaluation ?? null}
                 autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
+                lessonTitle={assignment.main_lesson_aim}
+                lessonWhen={lessonWhen}
+                level={coursebook?.level ?? null}
               />
             ) : plan ? (
               <div className="sheet sheet-garnet p-6">
