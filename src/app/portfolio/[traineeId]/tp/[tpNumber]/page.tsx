@@ -283,10 +283,24 @@ export default async function TpDetailPage({
         .eq("tp_plan_id", previousPlan.id)
         .maybeSingle();
       const planningPoints = (previousFeedback?.action_points_planning ?? []).filter((p) => p.starred);
+      // De-duplicated by text. The same action point is often written under
+      // both planning and teaching -- CELTA 5 codes it differently on each
+      // side (4x is what the plan shows, 5x what the lesson shows) but it is
+      // one thing to have done something about. Without this the candidate
+      // was asked "what I did about it" twice for a single point, which is
+      // what showed on Tomas Novak's TP6, 12 Sep 2026.
+      const seen = new Set<string>();
       previousActionPoints = [
         ...planningPoints,
         ...(previousFeedback?.action_points_teaching ?? []).filter((p) => p.starred),
-      ].map((p) => p.text);
+      ]
+        .map((p) => p.text)
+        .filter((text) => {
+          const key = text.trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
       previousPlanningActionPoint = planningPoints[0]?.text ?? null;
     }
   }

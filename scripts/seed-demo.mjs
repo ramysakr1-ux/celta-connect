@@ -1484,9 +1484,19 @@ async function main() {
       // planning and teaching because that is the distinction CELTA 5 draws:
       // 4x is what the plan shows, 5x is what the lesson shows.
       strengths_planning: strengths.map((s) => ({ text: s, starred: false, criteria_codes: PLANNING_CODES[s] ?? [] })),
-      action_points_planning: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: PLANNING_CODES[s] ?? [] })),
+      // The FIRST action point in each list is starred, which is what a tutor
+      // actually does -- the form's own line is "star the ones you want them
+      // to prioritise in the next TP". Every seeded point was starred: false,
+      // so two built features had nothing to show on the demo: the next
+      // plan's "From TP{n-1}: ... Tap to use it" personal-aim suggestion, and
+      // the self-evaluation's "Action points from the last TP" carry-in,
+      // which read "brought in automatically from your tutor's starred
+      // points" above an empty row on every lesson of every candidate.
+      // Found walking Tomas Novak's TP6 self-evaluation, 12 Sep 2026.
+      // Strengths are never starred -- only action points carry forward.
+      action_points_planning: actionPoints.map((s, i) => ({ text: s, starred: i === 0, criteria_codes: PLANNING_CODES[s] ?? [] })),
       strengths_teaching: strengths.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
-      action_points_teaching: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
+      action_points_teaching: actionPoints.map((s, i) => ({ text: s, starred: i === 0, criteria_codes: TEACHING_CODES[s] ?? [] })),
       // Handbook 10.2: "an unambiguous comment on the overall standard of the
       // lesson" -- so the comment says the standard the grade says.
       overall_comment:

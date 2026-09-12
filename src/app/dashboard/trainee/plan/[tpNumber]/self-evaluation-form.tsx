@@ -8,7 +8,7 @@ import {
 } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-actions";
 import { FormSubmitBar } from "@/components/form-submit-bar";
 import { MobileFormWizard, type WizardStep } from "@/components/mobile-form-wizard";
-import { VoiceTextarea } from "@/components/voice-textarea";
+import { DictateAnywhere } from "@/components/dictate-anywhere";
 import type { SelfEvalActionPoint } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
 
@@ -52,7 +52,13 @@ export function SelfEvaluationForm({
       key: "what_went_well",
       content: (
         <Field label="What went to plan?" hint="Be specific -- a stage, a moment, something a learner said or did.">
-          <VoiceTextarea name="what_went_well" rows={4} defaultValue={selfEvaluation?.what_went_well ?? ""} className={inputClass} />
+          <textarea
+            name="what_went_well"
+            rows={4}
+            defaultValue={selfEvaluation?.what_went_well ?? ""}
+            data-dictate-label="What went to plan?"
+            className={inputClass}
+          />
         </Field>
       ),
     },
@@ -60,10 +66,11 @@ export function SelfEvaluationForm({
       key: "what_not_as_planned",
       content: (
         <Field label="What didn't go as planned, and why?" hint="Which stage, and what caused it.">
-          <VoiceTextarea
+          <textarea
             name="what_not_as_planned"
             rows={4}
             defaultValue={selfEvaluation?.what_not_as_planned ?? ""}
+            data-dictate-label="What didn't go as planned"
             className={inputClass}
           />
         </Field>
@@ -73,10 +80,11 @@ export function SelfEvaluationForm({
       key: "evidence_of_learning",
       content: (
         <Field label="What evidence did you see that the learners had learnt?">
-          <VoiceTextarea
+          <textarea
             name="evidence_of_learning"
             rows={4}
             defaultValue={selfEvaluation?.evidence_of_learning ?? ""}
+            data-dictate-label="Evidence of learning"
             className={inputClass}
           />
         </Field>
@@ -86,10 +94,11 @@ export function SelfEvaluationForm({
       key: "what_differently",
       content: (
         <Field label="What would you do differently if you taught it again?">
-          <VoiceTextarea
+          <textarea
             name="what_differently"
             rows={4}
             defaultValue={selfEvaluation?.what_differently ?? ""}
+            data-dictate-label="What you would do differently"
             className={inputClass}
           />
         </Field>
@@ -134,6 +143,7 @@ export function SelfEvaluationForm({
                             )
                           }
                           placeholder="Your own point"
+                          data-dictate-label="your own action point"
                           className={inputClass}
                         />
                       )}
@@ -146,6 +156,7 @@ export function SelfEvaluationForm({
                           setActionPoints(actionPoints.map((p, x) => (x === i ? { ...p, what_i_did: e.target.value } : p)))
                         }
                         placeholder="What I did about it"
+                        data-dictate-label={`what you did about "${point.previous_point.slice(0, 40)}"`}
                         className={inputClass}
                       />
                     </td>
@@ -168,14 +179,20 @@ export function SelfEvaluationForm({
       key: "next_tp_focus",
       content: (
         <Field label="What do you want to work on in the next TP?" hint="Your own priorities, before you read your tutor's.">
-          <VoiceTextarea name="next_tp_focus" rows={3} defaultValue={selfEvaluation?.next_tp_focus ?? ""} className={inputClass} />
+          <textarea
+            name="next_tp_focus"
+            rows={3}
+            defaultValue={selfEvaluation?.next_tp_focus ?? ""}
+            data-dictate-label="What to work on next TP"
+            className={inputClass}
+          />
         </Field>
       ),
     },
   ];
 
   return (
-    <form action={draftAction} className="card rounded-[9px] border-t-[var(--trainee-plum)] flex flex-col gap-4 p-6">
+    <form id="self-evaluation" action={draftAction} className="card rounded-[9px] border-t-[var(--trainee-plum)] flex flex-col gap-4 p-6">
       <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
       <p className="text-sm text-muted">
         Write this before you read your tutor&apos;s feedback -- that&apos;s the point of it.
@@ -188,8 +205,14 @@ export function SelfEvaluationForm({
         <MobileFormWizard steps={steps} />
       </div>
 
+      {/* One microphone for the whole form, following the cursor -- the same
+          change made on the lesson plan the same day. This form had five, one
+          under each box, and none at all on the two fields in the action
+          points table, which is the box a candidate most needs to talk
+          through. (Ramy, 12 Sep 2026.) */}
       <FormSubmitBar
         raiseForMobileNav
+        leading={<DictateAnywhere scopeId="self-evaluation" />}
         warning="Submitting locks your self-evaluation -- you won't be able to edit it afterwards."
         draftPending={draftPending}
         submitPending={submitPending}
