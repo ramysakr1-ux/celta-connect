@@ -31,6 +31,13 @@ import { distinctTpDates, halfTpDates, type TpTimetableEvent } from "@/lib/rotat
 //   half's TP7 date specifically, symmetric for both, leaving TP8 (the
 //   final assessed lesson) out of the reflection's own deadline pressure.
 //
+// Ramy, 12 Sep 2026, settling three sources that disagreed: "the timetable
+// due event wins." An `assignment_due` event carrying linked_assignment_type
+// sets the date for the candidates it addresses -- the whole cohort, one TP
+// group (tp_group_scope_id, as the add-event form scopes it), or one half
+// when its title names the half's letters ("Assignment 2 (LRT) due · DEF").
+// The rules below fill in only where the timetable is silent on a type.
+//
 // SRT/LfC's anchor rounds are the one interpretive judgment call here --
 // tune SRT_ANCHOR_ROUND / LFC_ANCHOR_ROUND if the intended round differs.
 const SRT_ANCHOR_ROUND = 3;
@@ -44,6 +51,43 @@ const COHORT_DAY_ASSIGNMENTS: Partial<Record<Database["public"]["Tables"]["assig
 interface TraineeGroupInfo {
   traineeId: string;
   halfOrder: 1 | 2 | null; // null = unpaired subgroup, or no subgroup at all
+  tpGroupId: string | null;
+}
+
+interface TimetableDue {
+  type: string;
+  date: string;
+  tpGroupId: string | null;
+  half: 1 | 2 | null;
+}
+
+/** "· ABC" names the first half (Day A), "· DEF" the second -- letters are per group. */
+export function halfFromTitle(title: string): 1 | 2 | null {
+  if (/\bABC\b/i.test(title)) return 1;
+  if (/\bDEF\b/i.test(title)) return 2;
+  return null;
+}
+
+/**
+ * The timetable's own due date for one candidate and type, if any: the most
+ * specific event that addresses them (half and group beat group beats half
+ * beats cohort-wide), earliest date on a tie.
+ */
+export function timetableDueFor(
+  events: TimetableDue[],
+  type: string,
+  trainee: { halfOrder: 1 | 2 | null; tpGroupId: string | null }
+): string | null {
+  const matching = events.filter(
+    (e) =>
+      e.type === type &&
+      (e.tpGroupId === null || e.tpGroupId === trainee.tpGroupId) &&
+      (e.half === null || e.half === trainee.halfOrder)
+  );
+  if (matching.length === 0) return null;
+  const score = (e: TimetableDue) => (e.tpGroupId ? 2 : 0) + (e.half ? 1 : 0);
+  matching.sort((a, b) => score(b) - score(a) || a.date.localeCompare(b.date));
+  return matching[0].date;
 }
 
 export interface DueDateResult {
@@ -72,7 +116,7 @@ export async function resolveAssignmentDueDates(
   //      only to filter type = 'tp'. Ask for the type once and split in
   //      memory; the rows are the same rows.
   const [{ data: allEvents }, { data: trainees }, { data: subgroups }] = await Promise.all([
-    supabase.from("course_timetable_events").select("event_date, type").eq("course_id", courseId),
+    supabase.from("course_timetable_events").select("event_date, type, title, linked_assignment_type, tp_group_scope_id").eq("course_id", courseId),
     supabase.from("profiles").select("id").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("course_subgroups").select("id, tp_group_id, half_order").eq("course_id", courseId),
   ]);
@@ -89,8 +133,14 @@ export async function resolveAssignmentDueDates(
     const subgroupId = memberBySubgroupId.get(t.id);
     const subgroup = subgroupId ? subgroupById.get(subgroupId) : null;
     const halfOrder = subgroup?.half_order === 1 || subgroup?.half_order === 2 ? subgroup.half_order : null;
-    return { traineeId: t.id, halfOrder };
+    return { traineeId: t.id, halfOrder, tpGroupId: subgroup?.tp_group_id ?? null };
   });
+
+  // The timetable's own word on due dates -- wins wherever it speaks.
+  const timetableDue: TimetableDue[] = (allEvents ?? [])
+    .filter((e) => e.type === "assignment_due" && e.linked_assignment_type)
+    .map((e) => ({ type: e.linked_assignment_type as string, date: e.event_date, tpGroupId: e.tp_group_scope_id ?? null, half: halfFromTitle(e.title ?? "") }));
+  const fromTimetable = (type: string, trainee: TraineeGroupInfo) => timetableDueFor(timetableDue, type, trainee);
 
   const cohortTpDates = distinctTpDates(tpEvents);
   const allDistinctDates = distinctTpDates((allEvents ?? []) as TpTimetableEvent[]);
@@ -102,7 +152,7 @@ export async function resolveAssignmentDueDates(
     const cohortDay = COHORT_DAY_ASSIGNMENTS[assignmentType]!;
     const dueDate = allDistinctDates[cohortDay - 1] ?? null;
     for (const trainee of traineeGroups) {
-      results.push({ traineeId: trainee.traineeId, assignmentType, dueDate });
+      results.push({ traineeId: trainee.traineeId, assignmentType, dueDate: fromTimetable(assignmentType, trainee) ?? dueDate });
     }
   }
 
@@ -117,7 +167,7 @@ export async function resolveAssignmentDueDates(
       // fall back to the cohort's own round-3 date.
       dueDate = cohortTpDates[SRT_ANCHOR_ROUND - 1] ?? null;
     }
-    results.push({ traineeId: trainee.traineeId, assignmentType: "Skills", dueDate });
+    results.push({ traineeId: trainee.traineeId, assignmentType: "Skills", dueDate: fromTimetable("Skills", trainee) ?? dueDate });
   }
 
   // LfC -- due on the OTHER half's fixed round-7 date.
@@ -130,7 +180,7 @@ export async function resolveAssignmentDueDates(
     } else {
       dueDate = cohortTpDates[LFC_ANCHOR_ROUND - 1] ?? null;
     }
-    results.push({ traineeId: trainee.traineeId, assignmentType: "LfC", dueDate });
+    results.push({ traineeId: trainee.traineeId, assignmentType: "LfC", dueDate: fromTimetable("LfC", trainee) ?? dueDate });
   }
 
   return results;

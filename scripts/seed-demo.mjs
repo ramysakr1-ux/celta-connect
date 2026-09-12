@@ -1713,9 +1713,15 @@ async function main() {
     const daysAgoIso = (n) => new Date(Date.now() - n * 86400000).toISOString();
     const secondMarkerId = trainer2Id;
 
-    // When each type is SET, and when each is DUE. LfC has no set day on or
-    // before today on purpose.
-    const DUE_DAY = { "Focus on Learner": 6, LRT: 10, Skills: 16, LfC: 19 };
+    // When each type is DUE -- what src/lib/assignment-due-dates.ts resolves
+    // for this course (Ramy, 12 Sep 2026: "the timetable due event wins"):
+    // LRT and LfC from the ported timetable's own due events (LRT · DEF day
+    // 17, LRT · ABC day 18, LfC day 19); Focus on the Learner from the rule
+    // (cohort day 12); Skills the TP date after the half's own TP3 (half 1
+    // teaches TP3 on day 6, so day 7; half 2 on day 7, so day 8). A half is
+    // def.half; the seed's DUE_DAY is a function of it for that reason.
+    const DUE_DAY = (assignment_type, half) =>
+      ({ "Focus on Learner": 12, LRT: half === 2 ? 17 : 18, Skills: half === 2 ? 8 : 7, LfC: 19 })[assignment_type];
 
     // --- State builders. Each returns the mark-state columns for one row;
     //     the loop adds course_id/trainee_id/assignment_type/due_date. ---
@@ -1870,13 +1876,13 @@ async function main() {
             course_id: course.id,
             trainee_id: trainees[name],
             assignment_type,
-            due_date: cDay(DUE_DAY[assignment_type]),
+            due_date: cDay(DUE_DAY(assignment_type, def.half)),
             ...state,
             // What submit_assignment_round would have written: handed in after
             // the deadline is late. The submitted-days-ago states above are
             // relative to today and the deadlines are course days, so the two
             // can cross -- the flag has to follow the dates, not be assumed.
-            first_submitted_late: Boolean(state.first_submitted_at) && state.first_submitted_at.slice(0, 10) > cDay(DUE_DAY[assignment_type]),
+            first_submitted_late: Boolean(state.first_submitted_at) && state.first_submitted_at.slice(0, 10) > cDay(DUE_DAY(assignment_type, def.half)),
           })
           .select("id")
           .single();
@@ -2038,7 +2044,7 @@ async function main() {
         first_submitted_at: daysAgoIso(7),
         first_own_work_confirmed: true,
         marker_id: trainerId,
-        due_date: cDay(17),
+        due_date: cDay(DUE_DAY("LRT", 1)), // Kofi is half 1 -- LRT · ABC
         tutor_feedback:
           "A plagiarism case on this submission was upheld. The assignment fails this round and must be resubmitted in your own words, with sources cited. See the decision on your record, and complete the Plagiarism Reflection that has been set.",
       })

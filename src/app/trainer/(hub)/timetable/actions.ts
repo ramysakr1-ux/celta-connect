@@ -121,6 +121,9 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     return { error: "Could not save the event. It may already be locked." };
   }
 
+  // A due event on the timetable IS the due date (Ramy, 12 Sep 2026).
+  if (type === "assignment_due") await syncAssignmentDueDates(supabase, trainer.course_id);
+
   revalidatePath("/trainer/timetable");
   return { error: null };
 }
@@ -315,17 +318,20 @@ export async function moveTimetableEvent(eventId: string, newDate: string): Prom
 
   const supabase = await createClient();
   if (!(await requireTimetableEditAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
-  const { error } = await supabase
+  const { data: moved, error } = await supabase
     .from("course_timetable_events")
     .update({ event_date: newDate })
     .eq("id", eventId)
-    .eq("course_id", trainer.course_id);
+    .eq("course_id", trainer.course_id)
+    .select("type")
+    .maybeSingle();
 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable:moveTimetableEvent]", error);
     return { error: "Could not move the event -- the timetable may be locked." };
   }
+  if (moved?.type === "assignment_due") await syncAssignmentDueDates(supabase, trainer.course_id);
 
   revalidatePath("/trainer/timetable");
   return { error: null };
@@ -338,11 +344,15 @@ export async function deleteTimetableEvent(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
   if (!(await requireTimetableEditAccess(supabase, trainer))) return;
-  await supabase
+  const { data: gone } = await supabase
     .from("course_timetable_events")
     .delete()
     .eq("id", eventId)
-    .eq("course_id", trainer.course_id ?? "");
+    .eq("course_id", trainer.course_id ?? "")
+    .select("type")
+    .maybeSingle();
+  // Deleting a due event hands the date back to the roster rule.
+  if (gone?.type === "assignment_due" && trainer.course_id) await syncAssignmentDueDates(supabase, trainer.course_id);
 
   revalidatePath("/trainer/timetable");
 }
