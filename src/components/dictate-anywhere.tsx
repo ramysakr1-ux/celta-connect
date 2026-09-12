@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Mic, Square } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { dictationSupported, isDictationField, startDictation, type DictationField } from "@/lib/dictation";
 
-// One microphone for a whole form, instead of a small one clipped under five
+// One microphone for a whole form, instead of a small one clipped under some
 // of its boxes and missing from the rest.
 //
 // Ramy, 12 Sep 2026: "Why do we have [microphones] under main aims, sub aims,
@@ -12,17 +11,27 @@ import { dictationSupported, isDictationField, startDictation, type DictationFie
 // have just one microphone... whichever box has the cursor, that's when it
 // starts dictating."
 //
-// It follows the cursor: the last text box you clicked inside `scopeId` is the
-// one it types into, and clicking a different box mid-session moves the
-// dictation there. Sitting in the sticky submit bar, it is on screen wherever
-// you are in the form -- including the procedure table, which never had
-// dictation at all.
+// design_handoff_trainee_lesson_plan §8 then asked for TWO buttons -- one in
+// the identity band, one in the fixed bottom bar -- driving ONE recogniser, so
+// the control is in reach whether you are at the top of the plan or the
+// bottom. Hence the provider: the buttons are views onto a single session, and
+// the session follows the cursor.
 
-export function DictateAnywhere({ scopeId }: { scopeId: string }) {
+type DictationState = {
+  supported: boolean;
+  listening: boolean;
+  error: string | null;
+  fieldLabel: string | null;
+  toggle: () => void;
+};
+
+const DictationContext = createContext<DictationState | null>(null);
+
+export function DictationScope({ scopeId, children }: { scopeId: string; children: React.ReactNode }) {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [label, setLabel] = useState<string | null>(null);
+  const [fieldLabel, setFieldLabel] = useState<string | null>(null);
   const fieldRef = useRef<DictationField | null>(null);
   const sessionRef = useRef<{ stop: () => void } | null>(null);
 
@@ -34,7 +43,7 @@ export function DictateAnywhere({ scopeId }: { scopeId: string }) {
       if (!isDictationField(target)) return;
       if (!document.getElementById(scopeId)?.contains(target)) return;
       fieldRef.current = target;
-      setLabel(describeField(target));
+      setFieldLabel(describeField(target));
     };
     window.addEventListener("focusin", onFocusIn);
     return () => {
@@ -43,16 +52,16 @@ export function DictateAnywhere({ scopeId }: { scopeId: string }) {
     };
   }, [scopeId]);
 
-  const stop = useCallback(() => {
-    sessionRef.current?.stop();
-    sessionRef.current = null;
-    setListening(false);
-  }, []);
-
-  function start() {
+  const toggle = useCallback(() => {
+    if (sessionRef.current) {
+      sessionRef.current.stop();
+      sessionRef.current = null;
+      setListening(false);
+      return;
+    }
     const field = fieldRef.current;
     if (!field || !field.isConnected) {
-      setError("Click inside a box first, then Dictate.");
+      setError("Click into a field first.");
       return;
     }
     setError(null);
@@ -75,37 +84,62 @@ export function DictateAnywhere({ scopeId }: { scopeId: string }) {
     if (!session) return;
     sessionRef.current = session;
     setListening(true);
-  }
+  }, [scopeId]);
 
-  if (!supported) return null;
+  const value = useMemo(
+    () => ({ supported, listening, error, fieldLabel, toggle }),
+    [supported, listening, error, fieldLabel, toggle]
+  );
+  return <DictationContext.Provider value={value}>{children}</DictationContext.Provider>;
+}
+
+const TEAL = "oklch(37.5% 0.058 195)";
+const DESTRUCTIVE = "oklch(52% 0.19 32)";
+const INK_WARM = "oklch(30% 0.042 58)";
+const HEADER_GOLD = "oklch(86% 0.09 82)";
+const SHEET = "oklch(98.5% 0.006 90)";
+
+/**
+ * `header` sits on the dark identity band (gold fill); `bar` sits in the fixed
+ * bottom bar (teal outline). Both drive the same recogniser.
+ */
+export function DictateButton({ variant }: { variant: "header" | "bar" }) {
+  const ctx = useContext(DictationContext);
+  if (!ctx) return null;
+  const { supported, listening, fieldLabel, toggle } = ctx;
+
+  const label = !supported
+    ? "Not supported here"
+    : listening
+      ? "Listening — speak into the field"
+      : fieldLabel
+        ? "Dictate"
+        : "Click into a field first";
+
+  const style: React.CSSProperties = listening
+    ? { background: DESTRUCTIVE, borderColor: DESTRUCTIVE, color: SHEET }
+    : variant === "header"
+      ? { background: HEADER_GOLD, borderColor: HEADER_GOLD, color: INK_WARM }
+      : { background: `color-mix(in oklab, ${TEAL} 10%, transparent)`, borderColor: TEAL, color: TEAL };
 
   return (
-    <div className="flex flex-col gap-1">
-      <button
-        type="button"
-        onClick={listening ? stop : start}
-        aria-pressed={listening}
-        className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-          listening
-            ? "border-destructive bg-status-warning-bg text-destructive"
-            : "border-border text-ink trainee-hover-fill"
-        }`}
-      >
-        {listening ? <Square size={13} className="fill-current" /> : <Mic size={14} />}
-        {listening ? "Stop" : "Dictate"}
-      </button>
-      <p className="text-[11px] leading-tight text-muted">
-        {error ? (
-          <span className="text-destructive">{error}</span>
-        ) : listening ? (
-          `Listening — speak into ${label ?? "the box"}`
-        ) : label ? (
-          `Into ${label}`
-        ) : (
-          "Click a box, then speak"
-        )}
-      </p>
-    </div>
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={!supported}
+      aria-pressed={listening}
+      title={listening && fieldLabel ? `Dictating into ${fieldLabel}` : undefined}
+      className="inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-full border-2 font-bold disabled:opacity-60"
+      style={{
+        ...style,
+        padding: variant === "header" ? "8px 18px" : "7px 16px",
+        fontSize: variant === "header" ? 13.5 : 13,
+        boxShadow: variant === "header" ? "0 2px 10px oklch(23.5% 0.017 65 / 0.25)" : undefined,
+      }}
+    >
+      <span aria-hidden>{listening ? "●" : "🎙"}</span>
+      {label}
+    </button>
   );
 }
 
@@ -127,4 +161,45 @@ function describeField(field: DictationField): string | null {
   const placeholder = field.getAttribute("placeholder")?.trim();
   if (placeholder) return placeholder;
   return null;
+}
+
+/** Kept for the self-evaluation form, which wants one button and its own scope. */
+export function DictateAnywhere({ scopeId }: { scopeId: string }) {
+  return (
+    <DictationScope scopeId={scopeId}>
+      <InlineDictate />
+    </DictationScope>
+  );
+}
+
+function InlineDictate() {
+  const ctx = useContext(DictationContext);
+  if (!ctx?.supported) return null;
+  const { listening, error, fieldLabel, toggle } = ctx;
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={listening}
+        className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+          listening ? "border-destructive bg-status-warning-bg text-destructive" : "border-border text-ink trainee-hover-fill"
+        }`}
+      >
+        <span aria-hidden>{listening ? "●" : "🎙"}</span>
+        {listening ? "Stop" : "Dictate"}
+      </button>
+      <p className="text-[11px] leading-tight text-muted">
+        {error ? (
+          <span className="text-destructive">{error}</span>
+        ) : listening ? (
+          `Listening — speak into ${fieldLabel ?? "the box"}`
+        ) : fieldLabel ? (
+          `Into ${fieldLabel}`
+        ) : (
+          "Click a box, then speak"
+        )}
+      </p>
+    </div>
+  );
 }

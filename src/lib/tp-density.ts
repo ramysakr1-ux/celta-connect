@@ -113,12 +113,20 @@ export function showsTips(tier: DensityTier): boolean {
   return tier !== "minimal";
 }
 
-// The lesson-shape picker on the candidate's own plan is scaffolding like any
-// other: it hands over the usual stages of a framework so a candidate who has
-// never staged a lesson has somewhere to start. Ramy, 12 Sep 2026: "maybe this
-// should stop after TP4 -- it should only be for the first half of the
-// course." By TP5 the candidate stages their own lesson, which is what the
-// syllabus expects of them by then. Still openable by hand at any TP.
-export function offersLessonShapes(tier: DensityTier): boolean {
-  return tier === "scripted" || tier === "framework";
+// The lesson-shape picker on the candidate's own plan is scaffolding: it hands
+// over the usual stages of a framework so a candidate who has never staged a
+// lesson has somewhere to start.
+//
+// Ramy, 13 Sep 2026: "I would like to have the lesson shape option up to TP6,
+// and then for TP7 and TP8 they should be able to decide on the lesson shape
+// and write it down themselves. So only one to six."
+//
+// Deliberately a TP number and not a density tier: the tiers step down at
+// 3, 5 and 6 (scripted / framework / coaching prose / minimal) and the line he
+// drew is at 6, which no tier boundary matches. The shape picker is still
+// openable by hand at TP7 and TP8 -- nothing the system decides is final.
+export function offersLessonShapes(tpNumber: number): boolean {
+  return tpNumber <= LAST_TP_WITH_LESSON_SHAPES;
 }
+
+export const LAST_TP_WITH_LESSON_SHAPES = 6;

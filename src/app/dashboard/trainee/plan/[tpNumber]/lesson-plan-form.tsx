@@ -1,27 +1,28 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import {
   saveLessonPlanDraft,
   submitLessonPlan,
   type FormState,
 } from "@/app/dashboard/trainee/plan/[tpNumber]/actions";
 import { LanguageAnalysisEditor } from "@/app/dashboard/trainee/plan/[tpNumber]/language-analysis-editor";
-import { FormSubmitBar } from "@/components/form-submit-bar";
-import { DictateAnywhere } from "@/components/dictate-anywhere";
+import { DictateButton, DictationScope } from "@/components/dictate-anywhere";
 import { bulletListProps } from "@/lib/bullet-list";
-import { InteractionPatternPopup } from "@/components/interaction-pattern-popup";
-import { FrameworkPicker } from "@/components/framework-picker";
-import { getDensityTier, offersLessonShapes } from "@/lib/tp-density";
+import { autosizeOnInput, useAutosize } from "@/lib/autosize";
+import { offersLessonShapes } from "@/lib/tp-density";
 import {
+  INTERACTION_PATTERNS,
   LESSON_FRAMEWORKS,
   TP_LESSON_LENGTH_MINUTES,
-  normalizeFrameworkName,
   emptyAnalysisBlock,
+  normalizeFrameworkName,
   sumProcedureMinutes,
+  timeValue,
   type AnalysisBlock,
   type LanguageAnalysisType,
   type PlanProcedureRow,
+  type ProblemSolutionPair,
   type VocabRow,
 } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
@@ -29,30 +30,58 @@ import type { Database } from "@/lib/supabase/types";
 type TpPlan = Database["public"]["Tables"]["tp_plans"]["Row"];
 type TpLanguageAnalysis = Database["public"]["Tables"]["tp_language_analyses"]["Row"];
 
+// design_handoff_trainee_lesson_plan (v3), 13 Sep 2026.
+//
+// The old form was a stack of cards in two columns. This reads as ONE CELTA
+// plan document: a dark identity band, a shape + time-budget strip, the three
+// aims across the top, the procedure as a numbered colour-coded timeline, the
+// problems and the room at the foot, the language analysis sheet unfolding
+// below.
+//
+// Colour is load-bearing -- it is how a trainee reads the plan at a glance,
+// and the handoff's colour map is deliberate:
+//   teal      the teacher sets up / structure
+//   gold-ink  language work, and warnings
+//   ink-warm  reading / receptive work
+//   garnet    learners produce, and risk
+//   muted     feedback / close, and everything not yet written
+// A stage with nothing written in it is drawn in faint: hollow dot, faint
+// spine, faint bar segment, dashed chip. The colour arrives as the trainee
+// writes, which is the point of it.
+//
+// NEUTRALS come from the CSS tokens, not from the handoff's literals, even
+// though the two agree: --color-card IS oklch(96.4% 0.014 85), --color-border
+// IS oklch(88% 0.016 82), and so on down the ladder. Going through the tokens
+// keeps the candidate's own page palette alive (five papers, chosen from their
+// avatar); hardcoding the linen values would freeze this one page on linen
+// while every page around it shifted hue.
+//
+// The named HUES below are the exception -- the handoff says not to substitute
+// or approximate them, and they carry meaning rather than depth.
+
+const SHEET = "oklch(99.2% 0.005 90)";
+const TEAL = "var(--color-primary)";
+const GOLD_INK = "oklch(44% 0.095 68)";
+const INK_WARM = "var(--color-ink-warm)";
+const GARNET = "var(--color-garnet)";
+const MUTED = "var(--color-muted)";
+const FAINT = "var(--color-border-faint)";
+const BORDER = "var(--color-border)";
+const CARD = "var(--color-card)";
+const INK = "var(--color-ink)";
+const BAND_GOLD_EYEBROW = "oklch(79% 0.06 78)";
+const BAND_TEXT = "oklch(98.5% 0.006 90)";
+
+// §4a -- the sequence a CELTA lesson actually moves through: set up, clarify,
+// read, read, produce, close, and round again.
+const STAGE_HUES = [TEAL, GOLD_INK, INK_WARM, INK_WARM, GARNET, MUTED, TEAL];
+
 const initialState: FormState = { error: null };
-const inputClass =
-  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
 
 function emptyProcedureRow(): PlanProcedureRow {
   return { stage: "", aim: "", procedure: "", interaction: "", time: "" };
 }
 
-// Was `new Date(submitted_at).toLocaleString()` -- no locale, no timeZone.
-// In a client component that renders on the server too, that is two
-// different strings: the server formats in ITS locale and zone (UTC on
-// Vercel), the browser in the reader's. React then reports a hydration
-// mismatch, and this was the only console error anywhere in the app --
-// React #418 on every TP lesson-plan page. Found 31 Aug 2026 in the
-// pre-demo sweep.
-//
-// It also produced the third date format in one workspace: "8/29/2026,
-// 4:10:40 PM" beside "31 Aug" and "2026-08-25".
-//
-// Fixed locale and an explicit UTC zone makes both renders identical, and
-// the format now matches the rest of the app. UTC rather than the centre's
-// zone only because this component is not given one; a submission
-// timestamp to the day is what the sentence needs, and the exact minute
-// never was.
 function formatSubmittedAt(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -67,37 +96,53 @@ export function LessonPlanForm({
   plan,
   languageAnalysis,
   previousPlanningActionPoint,
+  lessonTitle = null,
+  lessonWhen = null,
+  level = null,
 }: {
   tpNumber: number;
   plan: TpPlan | null;
   languageAnalysis: TpLanguageAnalysis | null;
-  /** Starred planning action point from the previous TP's feedback, if any -- tap-to-use suggestion under Personal Aims. */
+  /** Starred planning action point from the previous TP's feedback, if any. */
   previousPlanningActionPoint?: string | null;
+  /** The brief's main aim -- the identity band's title. */
+  lessonTitle?: string | null;
+  /** "Monday 10:00", already formatted in the centre's zone. */
+  lessonWhen?: string | null;
+  /** The class level, e.g. "B1+". */
+  level?: string | null;
 }) {
   const locked = Boolean(plan?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveLessonPlanDraft, initialState);
   const [submitState, submitActionFn, submitPending] = useActionState(submitLessonPlan, initialState);
+  const autosize = useAutosize();
 
   const [procedure, setProcedure] = useState<PlanProcedureRow[]>(
     plan?.procedure && plan.procedure.length > 0
       ? plan.procedure
-      : [{ ...emptyProcedureRow(), stage: "LEAD-IN" }, ...Array.from({ length: 4 }, emptyProcedureRow)]
+      : [{ ...emptyProcedureRow(), stage: "Lead-in" }, ...Array.from({ length: 4 }, emptyProcedureRow)]
   );
   const [frameworkName, setFrameworkName] = useState(normalizeFrameworkName(plan?.framework_used));
-  // The chosen framework's aim for each stage, shown as placeholder text in the
-  // empty aim box -- never written into the plan. Parallel to `procedure`, so
-  // every mutation of that array moves this one with it.
+  // The chosen shape's aim for each stage, shown as PLACEHOLDER text in the
+  // empty aim box -- never written into the plan. Ramy, 12 Sep 2026: "choosing
+  // the framework is kind of cheating a bit, because it tells them the stage
+  // aims... they should at least write that part." The v3 handoff was drawn
+  // from the form as it stood before that ruling, and still has applyFramework
+  // filling the aims in. His ruling is the newer decision, so it stands.
   const [aimHints, setAimHints] = useState<string[]>([]);
-  const scaffoldedByDefault = offersLessonShapes(getDensityTier(tpNumber));
-  const [showShapes, setShowShapes] = useState(scaffoldedByDefault);
-  const personalAimsRef = useRef<HTMLTextAreaElement>(null);
+  const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
+  const [showShapes, setShowShapes] = useState(offersLessonShapes(tpNumber));
+  const personalAimsRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const [problems, setProblems] = useState<ProblemSolutionPair[]>(() => {
+    const existing = (plan?.anticipated_problems ?? []).filter((p) => p.problem || p.solution);
+    return existing.length > 0 ? existing : [{ problem: "", solution: "" }, { problem: "", solution: "" }];
+  });
 
   const [laOpen, setLaOpen] = useState(
     Boolean(
       languageAnalysis &&
-        (languageAnalysis.context ||
-          languageAnalysis.blocks.length > 0 ||
-          languageAnalysis.vocab_rows.length > 0)
+        (languageAnalysis.context || languageAnalysis.blocks.length > 0 || languageAnalysis.vocab_rows.length > 0)
     )
   );
   const [laType, setLaType] = useState<LanguageAnalysisType>(languageAnalysis?.type ?? "grammar");
@@ -112,58 +157,39 @@ export function LessonPlanForm({
   const totalMinutes = sumProcedureMinutes(procedure);
   const overBy = totalMinutes - TP_LESSON_LENGTH_MINUTES;
 
-  // Fills the STAGE names only. The stage aims are the candidate's to write --
-  // the framework's own wording goes in as placeholder text, so they can see
-  // what that stage is for and then say it for their own lesson. Ramy, 12 Sep
-  // 2026: "it tells them the stage aims... they should at least write that part."
-  function applyFramework() {
-    const framework = LESSON_FRAMEWORKS.find((f) => f.name === frameworkName);
-    if (!framework) return;
-    const hasTyped = procedure.some((row) => row.procedure.trim() || row.aim.trim());
-    if (
-      hasTyped &&
-      !window.confirm("This will rename the stages. Your stage aims and procedure stay -- continue?")
-    ) {
+  // §4a: with no shape chosen every stage is drawn in plain border colour --
+  // the timeline is there, but it is not saying anything yet.
+  const hueFor = (i: number) => (frameworkName ? STAGE_HUES[i % STAGE_HUES.length] : BORDER);
+
+  function applyFramework(name: string) {
+    setFrameworkName(name);
+    setShapeMenuOpen(false);
+    if (!name) {
+      setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })));
+      setAimHints([]);
       return;
     }
-    // Any stage past the end of the framework is KEPT. This used to map over
-    // the framework's stages alone, so filling a 5-stage shape into a plan
-    // that had grown to 7 rows deleted the last two outright, procedure and
-    // all -- while the confirm box promised the procedure stays.
+    const framework = LESSON_FRAMEWORKS.find((f) => f.name === name);
+    if (!framework) return;
+    // Stages past the end of the shape are KEPT, with everything typed in them.
     const extra = procedure.slice(framework.stages.length);
     setProcedure([
-      ...framework.stages.map((stage, i) => ({
-        ...(procedure[i] ?? emptyProcedureRow()),
-        stage: stage.name,
-      })),
+      ...framework.stages.map((stage, i) => ({ ...(procedure[i] ?? emptyProcedureRow()), stage: stage.name })),
       ...extra,
     ]);
-    setAimHints([...framework.stages.map((stage) => stage.aim), ...extra.map(() => "")]);
+    setAimHints([...framework.stages.map((s) => s.aim), ...extra.map(() => "")]);
   }
 
-  function updateProcedureRow(index: number, patch: Partial<PlanProcedureRow>) {
+  function updateRow(index: number, patch: Partial<PlanProcedureRow>) {
     setProcedure(procedure.map((row, i) => (i === index ? { ...row, ...patch } : row)));
-  }
-
-  function addProcedureRow() {
-    setProcedure([...procedure, emptyProcedureRow()]);
-    setAimHints([...aimHints, ""]);
-  }
-
-  function removeProcedureRow(index: number) {
-    setProcedure(procedure.filter((_, i) => i !== index));
-    setAimHints(aimHints.filter((_, i) => i !== index));
-  }
-
-  function clearStages() {
-    setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })));
-    setAimHints([]);
   }
 
   function useCarriedPersonalAim() {
     const textarea = personalAimsRef.current;
     if (!textarea || !previousPlanningActionPoint) return;
-    const joined = textarea.value.trim() ? `${textarea.value.trim()}\n${previousPlanningActionPoint}` : previousPlanningActionPoint;
+    const joined = textarea.value.trim()
+      ? `${textarea.value.trim()}\n• ${previousPlanningActionPoint}`
+      : `• ${previousPlanningActionPoint}`;
     textarea.value = joined;
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
@@ -180,444 +206,1056 @@ export function LessonPlanForm({
 
   if (locked) {
     return (
-      <div className="card rounded-[9px] p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
-          <span className="status-pill status-pill-on-track">Submitted -- locked</span>
-        </div>
-        <p className="mt-1 text-sm text-muted">
-          Submitted {plan!.submitted_at ? formatSubmittedAt(plan!.submitted_at) : ""}. This is now your
-          record of the lesson -- ask your trainer if it needs reopening.
-        </p>
-        <div className="mt-4 flex flex-col gap-4">
-          <ReadOnlyField label="Main Aims" value={plan?.main_aims} />
-          <ReadOnlyField label="Subsidiary Aims" value={plan?.subsidiary_aims} />
-          <ReadOnlyField label="Personal Aims" value={plan?.personal_aims} />
-          {/* The candidate wrote these, and then could not see them again:
-              the editable form has the field but this -- the submitted
-              record, the thing the page itself calls "your record of the
-              lesson" -- dropped it. Anticipating difficulties with tasks,
-              materials and learners is criterion 4j, assessed from the plan
-              and moderated from the portfolio, so the evidence cannot
-              vanish at the moment of submitting. The tutor's view and the
-              PDF always showed it; only the candidate's own did not.
-              Ramy, 12 Sep 2026. */}
-          {(plan?.anticipated_problems ?? []).some((p) => p.problem || p.solution) ? (
-            <div>
-              <p className="text-sm text-muted">Anticipated Problems &amp; Solutions</p>
-              <ul className="mt-1 flex flex-col gap-1.5">
-                {(plan?.anticipated_problems ?? []).map((p, i) =>
-                  p.problem || p.solution ? (
-                    <li key={i} className="text-sm text-ink">
-                      <span className="whitespace-pre-line">{p.problem}</span>
-                      {p.solution ? (
-                        <span className="mt-0.5 block whitespace-pre-line text-muted">{p.solution}</span>
-                      ) : null}
-                    </li>
-                  ) : null
-                )}
-              </ul>
-            </div>
-          ) : null}
-          <ReadOnlyField label="Class Profile" value={plan?.class_profile} />
-          <ReadOnlyField label="Materials" value={plan?.materials_description} />
-          <div>
-            <p className="text-sm text-muted">Procedure</p>
-            <div className="mt-2 overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
-                <colgroup>
-                  <col className="w-[168px]" />
-                  <col className="w-[92px]" />
-                  <col className="w-[62px]" />
-                  <col />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {procedure.map((row, i) => (
-                    <tr key={i} className="even:bg-background">
-                      <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
-                        {row.stage}
-                        {row.aim ? (
-                          <p className="mt-1 text-xs italic text-muted">{row.aim}</p>
-                        ) : null}
-                      </td>
-                      <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
-                      <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
-                      <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
-                        {row.procedure}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-1.5 text-xs text-muted">
-              {totalMinutes} of {TP_LESSON_LENGTH_MINUTES} min{overBy > 0 ? ` · Over by ${overBy} min` : ""}
-            </p>
-          </div>
-          {languageAnalysis ? (
-            <div className="border-t border-border-faint pt-4">
-              <p className="text-sm text-muted">Language Analysis ({languageAnalysis.type})</p>
-              {languageAnalysis.context ? <p className="mt-1 text-ink">{languageAnalysis.context}</p> : null}
-              {languageAnalysis.type === "vocab" ? (
-                <ul className="mt-2 flex flex-col gap-2 text-sm">
-                  {languageAnalysis.vocab_rows.map((row, i) => (
-                    <li key={i} className="text-ink">
-                      <b>{row.item}</b> -- {row.definition}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="mt-2 flex flex-col gap-3">
-                  {languageAnalysis.blocks.map((block, i) => (
-                    <div key={i} className="text-sm text-ink">
-                      <p className="font-medium">{block.item}</p>
-                      {block.meaning ? <p className="text-muted">{block.meaning}</p> : null}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </div>
+      <LockedPlan
+        plan={plan!}
+        procedure={procedure}
+        totalMinutes={totalMinutes}
+        overBy={overBy}
+        languageAnalysis={languageAnalysis}
+      />
     );
   }
 
+  const eyebrow = [`Teaching Practice ${tpNumber}`, lessonWhen, level, `${TP_LESSON_LENGTH_MINUTES} minutes`]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    // Ramy, 12 Sep 2026: "the top part -- main aims, problem solutions, class
-    // profile -- could be side by side. But once you start the procedure, it
-    // needs to be the full page. Need space for that." The three short cards
-    // are written once and read at a glance; the procedure table is what a
-    // candidate works on for hours, and it was living in a column beside them.
-    <form id="plan" action={draftAction} className="scroll-mt-20 flex flex-col gap-4">
-      <input type="hidden" name="tp_number" value={tpNumber} />
+    <DictationScope scopeId="plan">
+      <form id="plan" action={draftAction} className="scroll-mt-20">
+        <input type="hidden" name="tp_number" value={tpNumber} />
+        <input type="hidden" name="framework_used" value={frameworkName} />
+        <input type="hidden" name="procedure" value={JSON.stringify(procedure)} />
+        {[0, 1, 2].map((i) => (
+          <span key={i}>
+            <input type="hidden" name={`problem_${i + 1}`} value={problems[i]?.problem ?? ""} />
+            <input type="hidden" name={`solution_${i + 1}`} value={problems[i]?.solution ?? ""} />
+          </span>
+        ))}
 
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:items-start">
-        <div className="card rounded-[9px] flex flex-col gap-4 p-5">
-          <Field label="Main Aims" hint="What the learners will be able to do by the end.">
-            <textarea
-              name="main_aims"
-              rows={3}
-              defaultValue={plan?.main_aims ?? ""}
-              data-dictate-label="Main Aims"
-              className={inputClass}
-              {...bulletListProps}
-            />
-          </Field>
-          <Field label="Subsidiary Aims" hint="What else the lesson develops along the way.">
-            <textarea
-              name="subsidiary_aims"
-              rows={3}
-              defaultValue={plan?.subsidiary_aims ?? ""}
-              data-dictate-label="Subsidiary Aims"
-              className={inputClass}
-              {...bulletListProps}
-            />
-          </Field>
-          <Field label="Personal Aims" hint="Take these from the action points in your last feedback.">
-            <textarea
-              ref={personalAimsRef}
-              name="personal_aims"
-              rows={3}
-              defaultValue={plan?.personal_aims ?? ""}
-              data-dictate-label="Personal Aims"
-              className={inputClass}
-              {...bulletListProps}
-            />
-          </Field>
-          {previousPlanningActionPoint ? (
-            <button
-              type="button"
-              onClick={useCarriedPersonalAim}
-              className="flex items-start gap-2 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg p-2.5 text-left"
+        {/* The sheet sits on a ground one step darker than the app's, so it
+            reads as paper on a desk. Derived from the palette rather than the
+            handoff's literal oklch(88% 0.03 78), so a candidate who has chosen
+            Sky or Sage still gets their own paper here. */}
+        <div
+          className="rounded-[14px] p-3 sm:p-5"
+          style={{ background: "color-mix(in oklab, var(--color-background) 84%, var(--color-ink) 7%)" }}
+        >
+          <div
+            className="mx-auto rounded-[14px]"
+            style={{
+              maxWidth: 1240,
+              background: SHEET,
+              boxShadow: "0 1px 2px oklch(23.5% 0.017 65 / 0.06), 0 18px 44px oklch(23.5% 0.017 65 / 0.12)",
+            }}
+          >
+            {/* ---------- 1. Identity band ---------- */}
+            <div
+              className="flex flex-wrap items-end justify-between gap-6 rounded-t-[14px]"
+              style={{ background: INK_WARM, padding: "18px 26px 16px" }}
             >
-              <span className="mt-0.5 shrink-0 text-xs text-status-warning-text">★</span>
-              <span className="text-xs leading-relaxed text-ink">
-                From TP{tpNumber - 1}: {previousPlanningActionPoint}
-                <span className="ml-1.5 font-semibold text-primary">Tap to use it.</span>
-              </span>
-            </button>
-          ) : null}
-        </div>
+              <div className="flex min-w-0 flex-col gap-[3px]">
+                <p
+                  className="font-bold uppercase"
+                  style={{ fontSize: 10.5, letterSpacing: "0.16em", color: BAND_GOLD_EYEBROW }}
+                >
+                  {eyebrow}
+                </p>
+                <h2 className="font-serif" style={{ fontSize: 29, fontWeight: 400, color: BAND_TEXT, lineHeight: 1.15 }}>
+                  {lessonTitle || "Your lesson plan"}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <SaveStatus pending={draftPending || submitPending} savedAt={plan?.updated_at ?? null} />
+                <DictateButton variant="header" />
+              </div>
+            </div>
 
-        <div className="card rounded-[9px] p-5">
-          <label className="text-sm text-muted">Anticipated Problems &amp; Solutions</label>
-          <p className="text-xs italic text-muted">
-            Problems with tasks and materials, technology, classroom management, interaction patterns (NOT
-            language).
-          </p>
-          <div className="mt-2 flex flex-col gap-3">
-            {[1, 2, 3].map((n) => {
-              const existing = plan?.anticipated_problems?.[n - 1];
-              return (
-                <div key={n} className="flex flex-col gap-1.5 border-b border-dashed border-border-faint pb-2.5 last:border-b-0 last:pb-0">
-                  <textarea
-                    name={`problem_${n}`}
-                    rows={2}
-                    defaultValue={existing?.problem ?? ""}
-                    placeholder={`Problem #${n}`}
-                    data-dictate-label={`Problem #${n}`}
-                    className={inputClass}
-                    {...bulletListProps}
+            {/* ---------- 2. Shape + time budget ---------- */}
+            <div
+              className="flex flex-wrap items-center gap-[26px]"
+              style={{ background: CARD, borderBottom: `1px solid ${FAINT}`, padding: "14px 26px" }}
+            >
+              {showShapes ? (
+                <ShapePicker value={frameworkName} open={shapeMenuOpen} onOpenChange={setShapeMenuOpen} onPick={applyFramework} />
+              ) : (
+                // TP7-8: the shape is theirs to decide and to name. Ramy,
+                // 13 Sep 2026 -- "only one to six". Still one click away,
+                // because nothing the system decides is final.
+                <div className="flex flex-col gap-1">
+                  <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
+                    Shape
+                  </p>
+                  <button type="button" onClick={() => setShowShapes(true)} className="text-left" style={{ fontSize: 13, color: MUTED }}>
+                    Yours to decide and to name —{" "}
+                    <span style={{ color: TEAL, fontWeight: 600 }}>show the shapes anyway</span>
+                  </button>
+                </div>
+              )}
+              <TimeBudget procedure={procedure} total={totalMinutes} overBy={overBy} hueFor={hueFor} />
+            </div>
+
+            {/* ---------- 3. Aims ---------- */}
+            <div className="grid grid-cols-1 md:grid-cols-3" style={{ borderBottom: `1px solid ${FAINT}` }}>
+              <AimColumn
+                label="Main aims"
+                colour={TEAL}
+                name="main_aims"
+                defaultValue={plan?.main_aims ?? ""}
+                placeholder="What the learners will be able to do by the end."
+                autosize={autosize}
+              />
+              <AimColumn
+                label="Subsidiary aims"
+                colour={INK_WARM}
+                name="subsidiary_aims"
+                defaultValue={plan?.subsidiary_aims ?? ""}
+                placeholder="What else the lesson develops along the way."
+                autosize={autosize}
+                bordered
+              />
+              <AimColumn
+                label="Personal aims"
+                colour={GOLD_INK}
+                name="personal_aims"
+                defaultValue={plan?.personal_aims ?? ""}
+                placeholder="Take these from the action points in your last feedback."
+                autosize={autosize}
+                fieldRef={personalAimsRef}
+                bordered
+              >
+                {previousPlanningActionPoint ? (
+                  <button
+                    type="button"
+                    onClick={useCarriedPersonalAim}
+                    className="mt-1 text-left"
+                    style={{
+                      borderRadius: 7,
+                      borderLeft: "3px solid var(--color-gold)",
+                      background: "oklch(94.5% 0.065 85)",
+                      padding: "8px 10px",
+                    }}
+                  >
+                    <span style={{ fontSize: 11, color: GOLD_INK }}>★ </span>
+                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: INK }}>
+                      {previousPlanningActionPoint} <span style={{ fontWeight: 700, color: TEAL }}>Tap to use it.</span>
+                    </span>
+                  </button>
+                ) : null}
+              </AimColumn>
+            </div>
+
+            {/* ---------- 4. Procedure ---------- */}
+            <div style={{ padding: "20px 26px 22px" }}>
+              <div className="flex flex-wrap items-baseline gap-3">
+                <h3 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: INK_WARM }}>
+                  Procedure
+                </h3>
+                <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+                  {frameworkName
+                    ? "One action per line. Tap a stage name to rename it."
+                    : "No shape chosen — the stages are yours to name."}
+                </p>
+              </div>
+
+              <div className="mt-2">
+                {procedure.map((row, i) => (
+                  <StageRow
+                    key={i}
+                    index={i}
+                    row={row}
+                    hue={hueFor(i)}
+                    aimHint={aimHints[i] ?? ""}
+                    isFirst={i === 0}
+                    isLast={i === procedure.length - 1}
+                    autosize={autosize}
+                    onChange={(patch) => updateRow(i, patch)}
+                    onRemove={() => {
+                      setProcedure(procedure.filter((_, x) => x !== i));
+                      setAimHints(aimHints.filter((_, x) => x !== i));
+                    }}
                   />
+                ))}
+              </div>
+
+              <div style={{ borderTop: `1px solid ${FAINT}`, paddingTop: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProcedure([...procedure, emptyProcedureRow()]);
+                    setAimHints([...aimHints, ""]);
+                  }}
+                  className="rounded-full"
+                  style={{ border: `1px dashed ${BORDER}`, padding: "7px 16px", fontSize: 13, color: MUTED }}
+                >
+                  + Add stage
+                </button>
+              </div>
+            </div>
+
+            {/* ---------- 5. Foot band ---------- */}
+            <div
+              className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]"
+              style={{ borderTop: `1px solid ${FAINT}`, background: CARD }}
+            >
+              <div className="flex flex-col gap-3" style={{ padding: "18px 22px 22px 26px" }}>
+                <MarkerLabel colour={GARNET} label="Anticipated problems & solutions" />
+                <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+                  Tasks and materials, technology, classroom management, interaction patterns — not language.
+                </p>
+                <div className="flex flex-col">
+                  {problems.map((p, i) => (
+                    <div
+                      key={i}
+                      className="grid items-start gap-2"
+                      style={{
+                        gridTemplateColumns: "18px minmax(0,1fr) 18px minmax(0,1fr)",
+                        borderTop: i > 0 ? `1px dashed ${FAINT}` : undefined,
+                        paddingTop: i > 0 ? 10 : 0,
+                        marginTop: i > 0 ? 10 : 0,
+                      }}
+                    >
+                      <span style={{ fontSize: 11, fontWeight: 700, color: GARNET, paddingTop: 4 }}>{i + 1}</span>
+                      <textarea
+                        ref={autosize}
+                        rows={1}
+                        value={p.problem}
+                        data-dictate-label={`Problem ${i + 1}`}
+                        placeholder="What could go wrong?"
+                        onInput={autosizeOnInput}
+                        onChange={(e) => setProblems(problems.map((x, n) => (n === i ? { ...x, problem: e.target.value } : x)))}
+                        {...bulletListProps}
+                        style={fieldStyle(13, INK)}
+                      />
+                      <span style={{ fontSize: 12, color: TEAL, paddingTop: 3 }}>→</span>
+                      <textarea
+                        ref={autosize}
+                        rows={1}
+                        value={p.solution}
+                        data-dictate-label={`Solution ${i + 1}`}
+                        placeholder="What you'll do about it"
+                        onInput={autosizeOnInput}
+                        onChange={(e) => setProblems(problems.map((x, n) => (n === i ? { ...x, solution: e.target.value } : x)))}
+                        {...bulletListProps}
+                        style={fieldStyle(13, INK_WARM)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {problems.length < 3 ? (
+                  <button
+                    type="button"
+                    onClick={() => setProblems([...problems, { problem: "", solution: "" }])}
+                    className="self-start"
+                    style={{ fontSize: 12.5, color: TEAL }}
+                  >
+                    + Add another
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="flex flex-col gap-3.5" style={{ borderLeft: `1px solid ${FAINT}`, padding: "18px 26px 22px 22px" }}>
+                <div className="flex flex-col gap-1.5">
+                  <MarkerLabel colour={TEAL} label="Class profile" />
                   <textarea
-                    name={`solution_${n}`}
-                    rows={2}
-                    defaultValue={existing?.solution ?? ""}
-                    placeholder="Solution"
-                    data-dictate-label={`Solution #${n}`}
+                    ref={autosize}
+                    name="class_profile"
+                    rows={1}
+                    defaultValue={plan?.class_profile ?? ""}
+                    data-dictate-label="Class profile"
+                    placeholder="Who you are teaching — two or three lines is enough."
+                    onInput={autosizeOnInput}
                     {...bulletListProps}
-                    className={`${inputClass} ml-3.5`}
+                    style={{ ...fieldStyle(13, INK), marginLeft: 12, lineHeight: 1.55 }}
                   />
                 </div>
-              );
-            })}
+                <div className="flex flex-col gap-1.5">
+                  <MarkerLabel colour={TEAL} label="Materials" />
+                  <textarea
+                    ref={autosize}
+                    name="materials_description"
+                    rows={1}
+                    defaultValue={plan?.materials_description ?? ""}
+                    data-dictate-label="Materials"
+                    placeholder="Everything you and the learners will need, and where it came from."
+                    onInput={autosizeOnInput}
+                    {...bulletListProps}
+                    style={{ ...fieldStyle(13, INK), marginLeft: 12, lineHeight: 1.55 }}
+                  />
+                </div>
+
+                <div className="mt-auto flex items-center justify-between gap-3" style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: INK }}>Language analysis</p>
+                    <p style={{ fontSize: 11, color: MUTED }}>
+                      {laOpen
+                        ? `${laType === "grammar" ? "Grammar" : laType === "vocab" ? "Vocabulary" : "Functional language"} sheet open`
+                        : "Not started · optional here"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLaOpen(!laOpen)}
+                    style={{
+                      borderRadius: 8,
+                      border: `1px solid ${BORDER}`,
+                      background: SHEET,
+                      padding: "7px 15px",
+                      fontWeight: 600,
+                      fontSize: 12.5,
+                      color: INK,
+                    }}
+                  >
+                    {laOpen ? "Hide" : "Open"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ---------- 6. Language analysis ---------- */}
+            <input type="hidden" name="la_type" value={laType} />
+            <input type="hidden" name="la_main_aim" value={laMainAim ? "Yes" : "No"} />
+            <input type="hidden" name="la_context" value={laContext} />
+            <input type="hidden" name="la_blocks" value={JSON.stringify(laBlocks)} />
+            <input type="hidden" name="la_vocab_rows" value={JSON.stringify(laVocabRows)} />
+            <input type="hidden" name="la_vocab_reference" value={laVocabReference} />
+            <input type="hidden" name="la_has_content" value={laHasContent ? "1" : "0"} />
+            {laOpen ? (
+              <div id="analysis" className="scroll-mt-20">
+                <LanguageAnalysisEditor
+                  open
+                  onToggle={() => setLaOpen(false)}
+                  type={laType}
+                  onTypeChange={setLaType}
+                  isMainAim={laMainAim}
+                  onMainAimChange={setLaMainAim}
+                  context={laContext}
+                  onContextChange={setLaContext}
+                  blocks={laBlocks}
+                  onBlocksChange={setLaBlocks}
+                  vocabRows={laVocabRows}
+                  onVocabRowsChange={setLaVocabRows}
+                  vocabReference={laVocabReference}
+                  onVocabReferenceChange={setLaVocabReference}
+                  locked={false}
+                />
+              </div>
+            ) : null}
           </div>
         </div>
 
-        <div className="card rounded-[9px] flex flex-col gap-4 p-5 md:col-span-2 xl:col-span-1">
-          <Field label="Class Profile" hint="Who you are teaching -- two or three lines is enough.">
-            <textarea
-              name="class_profile"
-              rows={3}
-              defaultValue={plan?.class_profile ?? ""}
-              data-dictate-label="Class Profile"
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Materials" hint="Everything you and the learners will need, including where it came from.">
-            <textarea
-              name="materials_description"
-              rows={3}
-              defaultValue={plan?.materials_description ?? ""}
-              data-dictate-label="Materials"
-              className={inputClass}
-            />
-          </Field>
-        </div>
-      </div>
-
-      <input type="hidden" name="framework_used" value={frameworkName} />
-      {showShapes ? (
-        <div className="card rounded-[9px] flex flex-wrap items-center justify-between gap-3 p-4">
-          <div>
-            <h3 className="font-serif text-base text-ink">Lesson shape</h3>
-            <p className="text-xs text-muted">
-              Choosing a shape names the stages for you. The stage aims are yours to write.
+        {/* ---------- 7. Bottom bar ----------
+            The handoff fixes this to the viewport. Sticky instead, and only
+            that: the plan is one section of the TP page, not the whole page,
+            so a viewport-fixed bar would sit over the materials and the
+            self-evaluation below it for as long as the page was open. Sticky
+            puts the same bar in the same place while the plan is on screen and
+            releases it when the reader scrolls past. */}
+        <div
+          className="sticky bottom-40 z-20 mt-3 flex flex-wrap items-center justify-between gap-3 md:bottom-4"
+          style={{
+            border: "1px solid oklch(83% 0.028 78)",
+            borderRadius: 10,
+            background: "color-mix(in oklab, var(--color-card-inset) 94%, transparent)",
+            backdropFilter: "blur(6px)",
+            padding: "11px 24px",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="size-[5px] shrink-0 rounded-full" style={{ background: GOLD_INK }} />
+            <p style={{ fontSize: 11.5, color: GOLD_INK }}>
+              Submitting locks this lesson plan — you won&apos;t be able to edit it afterwards.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-48">
-              <FrameworkPicker value={frameworkName} onChange={setFrameworkName} />
-            </div>
-            <button
-              type="button"
-              onClick={applyFramework}
-              className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
-            >
-              Fill in the stages
-            </button>
-            <button
-              type="button"
-              onClick={clearStages}
-              className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted trainee-hover-fill"
-            >
-              Clear
-            </button>
-            {scaffoldedByDefault ? null : (
-              <button
-                type="button"
-                onClick={() => setShowShapes(false)}
-                className="text-xs text-muted hover:text-ink"
-              >
-                Hide
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        // Scaffolding fades: by TP5 a candidate stages their own lesson. Still
-        // one click away, because nothing the system decides is final.
-        <button
-          type="button"
-          onClick={() => setShowShapes(true)}
-          className="self-start text-xs text-muted underline-offset-4 hover:text-ink hover:underline"
-        >
-          Show lesson shapes
-        </button>
-      )}
-
-      <div className="card rounded-[9px] p-5">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="font-serif text-lg text-ink">Lesson Procedure</h2>
-            <p className="text-xs italic text-muted">Write the procedure in short bullet points -- one action per line.</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2.5">
-            <span className="font-serif text-xl leading-none text-ink">{totalMinutes}</span>
-            <span className="text-xs text-muted">of {TP_LESSON_LENGTH_MINUTES} min</span>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                overBy > 0 ? "bg-status-warning-bg text-status-warning-text" : "bg-status-neutral-bg text-ink"
-              }`}
-            >
-              <span className="size-1 rounded-full bg-current" />
-              {overBy > 0 ? `Over by ${overBy} min` : "Fits"}
+            {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+            <span className="mr-2">
+              <DictateButton variant="bar" />
             </span>
+            <button
+              type="submit"
+              disabled={draftPending || submitPending}
+              style={{
+                borderRadius: 8,
+                border: "1px solid oklch(83% 0.028 78)",
+                background: SHEET,
+                padding: "8px 15px",
+                fontSize: 13.5,
+                color: INK,
+              }}
+            >
+              {draftPending ? "Saving…" : "Save draft"}
+            </button>
+            <button
+              type="submit"
+              formAction={submitActionFn}
+              disabled={draftPending || submitPending}
+              style={{
+                borderRadius: 8,
+                background: TEAL,
+                padding: "8px 17px",
+                fontWeight: 600,
+                fontSize: 13.5,
+                color: BAND_TEXT,
+              }}
+            >
+              {submitPending ? "Submitting…" : "Submit lesson plan"}
+            </button>
           </div>
         </div>
-        <input type="hidden" name="procedure" value={JSON.stringify(procedure)} />
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[700px] border-collapse text-sm">
-            <colgroup>
-              <col className="w-[200px]" />
-              <col className="w-[104px]" />
-              <col className="w-[68px]" />
-              <col />
-              <col className="w-[30px]" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                <th className="border-b border-border-faint p-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {procedure.map((row, i) => (
-                <tr key={i} className="group even:bg-background">
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <textarea
-                      rows={2}
-                      value={row.stage}
-                      onChange={(e) => updateProcedureRow(i, { stage: e.target.value })}
-                      data-dictate-label={`Stage ${i + 1}`}
-                      className={`${inputClass} resize-none`}
-                    />
-                    <textarea
-                      rows={2}
-                      value={row.aim}
-                      onChange={(e) => updateProcedureRow(i, { aim: e.target.value })}
-                      placeholder={aimHints[i] || "Stage aim"}
-                      data-dictate-label={`Stage ${i + 1} aim`}
-                      className="mt-1 w-full resize-none bg-transparent text-xs italic text-muted outline-none placeholder:text-muted/70"
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <InteractionPatternPopup
-                      placeholder="e.g. GW + PW"
-                      value={row.interaction}
-                      onChange={(v) => updateProcedureRow(i, { interaction: v })}
-                      className={`${inputClass} min-h-[60px]`}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <input
-                      type="text"
-                      value={row.time}
-                      onChange={(e) => updateProcedureRow(i, { time: e.target.value })}
-                      className={`${inputClass} min-h-[60px]`}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <textarea
-                      rows={3}
-                      value={row.procedure}
-                      onChange={(e) => updateProcedureRow(i, { procedure: e.target.value })}
-                      data-dictate-label={`Stage ${i + 1} procedure`}
-                      className={inputClass}
-                      {...bulletListProps}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <button
-                      type="button"
-                      onClick={() => removeProcedureRow(i)}
-                      className="text-destructive opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
-                      title="Delete this stage"
-                    >
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={addProcedureRow}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
-          >
-            + Add stage
-          </button>
-          <span className="text-xs text-muted">Interaction patterns and the phonemic keyboard open from the cell.</span>
-        </div>
-      </div>
-
-      <input type="hidden" name="la_type" value={laType} />
-      <input type="hidden" name="la_main_aim" value={laMainAim ? "Yes" : "No"} />
-      <input type="hidden" name="la_context" value={laContext} />
-      <input type="hidden" name="la_blocks" value={JSON.stringify(laBlocks)} />
-      <input type="hidden" name="la_vocab_rows" value={JSON.stringify(laVocabRows)} />
-      <input type="hidden" name="la_vocab_reference" value={laVocabReference} />
-      <input type="hidden" name="la_has_content" value={laHasContent ? "1" : "0"} />
-
-      <div id="analysis" className="scroll-mt-20">
-        <LanguageAnalysisEditor
-          open={laOpen}
-          onToggle={() => setLaOpen(!laOpen)}
-          type={laType}
-          onTypeChange={setLaType}
-          isMainAim={laMainAim}
-          onMainAimChange={setLaMainAim}
-          context={laContext}
-          onContextChange={setLaContext}
-          blocks={laBlocks}
-          onBlocksChange={setLaBlocks}
-          vocabRows={laVocabRows}
-          onVocabRowsChange={setLaVocabRows}
-          vocabReference={laVocabReference}
-          onVocabReferenceChange={setLaVocabReference}
-          locked={false}
-        />
-      </div>
-
-      <FormSubmitBar
-        raiseForMobileNav
-        leading={<DictateAnywhere scopeId="plan" />}
-        warning="Submitting locks this lesson plan -- you won't be able to edit it afterwards."
-        draftPending={draftPending}
-        submitPending={submitPending}
-        onSubmitAction={submitActionFn}
-        submitLabel="Submit lesson plan"
-        error={state.error}
-      />
-    </form>
+      </form>
+    </DictationScope>
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+// ---------------------------------------------------------------- pieces
+
+function fieldStyle(size: number, colour: string): React.CSSProperties {
+  return {
+    width: "100%",
+    boxSizing: "border-box",
+    border: "none",
+    background: "transparent",
+    padding: 0,
+    fontSize: size,
+    lineHeight: 1.5,
+    color: colour,
+    outline: "none",
+    resize: "none",
+    overflowY: "hidden",
+    minHeight: "1.5em",
+  };
+}
+
+function MarkerLabel({ colour, label }: { colour: string; label: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm text-muted">{label}</label>
-      {hint ? <p className="text-xs italic text-muted">{hint}</p> : null}
+    <div className="flex items-center gap-2">
+      <span style={{ width: 3, height: 12, borderRadius: 2, background: colour, display: "inline-block" }} />
+      <span className="uppercase" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: colour }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function SaveStatus({ pending, savedAt }: { pending: boolean; savedAt: string | null }) {
+  const [label, setLabel] = useState("Draft");
+  useEffect(() => {
+    if (!savedAt) return;
+    const tick = () => {
+      const seconds = Math.max(0, Math.round((Date.now() - new Date(savedAt).getTime()) / 1000));
+      setLabel(
+        seconds < 60
+          ? "Draft · saved just now"
+          : seconds < 3600
+            ? `Draft · saved ${Math.round(seconds / 60)} min ago`
+            : seconds < 86400
+              ? `Draft · saved ${Math.round(seconds / 3600)} h ago`
+              : `Draft · saved ${Math.round(seconds / 86400)} d ago`
+      );
+    };
+    tick();
+    const id = setInterval(tick, 30000);
+    return () => clearInterval(id);
+  }, [savedAt]);
+
+  return (
+    <span className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: "oklch(82% 0.03 78)" }}>
+      <span className="size-[5px] rounded-full" style={{ background: "oklch(75% 0.13 80)" }} />
+      {pending ? "Saving…" : label}
+    </span>
+  );
+}
+
+function ShapePicker({
+  value,
+  open,
+  onOpenChange,
+  onPick,
+}: {
+  value: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onPick: (name: string) => void;
+}) {
+  const wrap = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrap.current && !wrap.current.contains(e.target as Node)) onOpenChange(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onOpenChange(false);
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onOpenChange]);
+
+  const chosen = Boolean(value);
+  return (
+    <div ref={wrap} className="relative flex flex-col gap-1">
+      <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
+        Shape
+      </p>
+      <button
+        type="button"
+        onClick={() => onOpenChange(!open)}
+        className="inline-flex items-center gap-2"
+        style={{
+          borderRadius: 8,
+          padding: "7px 14px",
+          fontWeight: 600,
+          fontSize: 13.5,
+          border: chosen ? `1px solid color-mix(in oklab, ${TEAL} 35%, transparent)` : `1px solid ${BORDER}`,
+          background: chosen ? `color-mix(in oklab, ${TEAL} 9%, transparent)` : SHEET,
+          color: chosen ? TEAL : MUTED,
+        }}
+      >
+        {value || "Choose a lesson shape"}
+        <span style={{ fontSize: 9, opacity: 0.65 }}>▼</span>
+      </button>
+
+      {open ? (
+        <div
+          role="menu"
+          className="absolute"
+          style={{
+            zIndex: 50,
+            top: "calc(100% + 8px)",
+            left: 0,
+            width: 356,
+            borderRadius: 11,
+            border: `1px solid ${MUTED}`,
+            background: SHEET,
+            boxShadow: "0 20px 50px oklch(23.5% 0.017 65 / 0.28)",
+            padding: 7,
+          }}
+        >
+          <ShapeItem label="No shape chosen" meta="clears the names" selected={!value} onClick={() => onPick("")} />
+          <div style={{ borderTop: `1px solid ${FAINT}`, margin: "3px 0" }} />
+          {LESSON_FRAMEWORKS.map((f) => (
+            <ShapeItem
+              key={f.key}
+              label={f.name}
+              meta={`${f.stages.length} stages`}
+              selected={value === f.name}
+              onClick={() => onPick(f.name)}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ShapeItem({
+  label,
+  meta,
+  selected,
+  onClick,
+}: {
+  label: string;
+  meta: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="flex w-full items-baseline justify-between gap-3 text-left transition-colors hover:bg-card-inset"
+      style={{
+        borderRadius: 8,
+        padding: "9px 11px",
+        fontSize: 13,
+        fontWeight: selected ? 700 : 500,
+        color: selected ? TEAL : INK,
+        background: selected ? `color-mix(in oklab, ${TEAL} 10%, transparent)` : undefined,
+      }}
+    >
+      <span>{label}</span>
+      <span style={{ fontSize: 11, color: MUTED }}>{meta}</span>
+    </button>
+  );
+}
+
+function TimeBudget({
+  procedure,
+  total,
+  overBy,
+  hueFor,
+}: {
+  procedure: PlanProcedureRow[];
+  total: number;
+  overBy: number;
+  hueFor: (i: number) => string;
+}) {
+  const spare = -overBy;
+  return (
+    <div className="flex flex-col gap-1.5" style={{ flex: 1, minWidth: 280 }}>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
+          Time budget
+        </p>
+        <p className="flex-none whitespace-nowrap" style={{ fontSize: 12, color: MUTED }}>
+          <span className="font-serif tabular-nums" style={{ fontSize: 18, color: INK }}>
+            {total}
+          </span>{" "}
+          of {TP_LESSON_LENGTH_MINUTES} min ·{" "}
+          <span style={{ fontWeight: 600, color: overBy > 0 ? GOLD_INK : TEAL }}>
+            {overBy > 0 ? `over by ${overBy} min` : overBy === 0 ? "fits exactly" : `${spare} min spare`}
+          </span>
+        </p>
+      </div>
+      <div className="flex gap-[2px]" style={{ height: 10 }}>
+        {procedure.map((row, i) => {
+          const minutes = timeValue(row.time);
+          const written = Boolean(row.procedure.trim());
+          return (
+            <span
+              key={i}
+              title={`${row.stage || `Stage ${i + 1}`} · ${minutes} min`}
+              style={{ flex: Math.max(1, minutes), borderRadius: 3, background: written ? hueFor(i) : FAINT }}
+            />
+          );
+        })}
+        {spare > 0 ? <span style={{ flex: spare, borderRadius: 3, background: FAINT }} /> : null}
+      </div>
+    </div>
+  );
+}
+
+function AimColumn({
+  label,
+  colour,
+  name,
+  defaultValue,
+  placeholder,
+  autosize,
+  fieldRef,
+  bordered = false,
+  children,
+}: {
+  label: string;
+  colour: string;
+  name: string;
+  defaultValue: string;
+  placeholder: string;
+  autosize: (el: HTMLTextAreaElement | null) => void;
+  fieldRef?: React.MutableRefObject<HTMLTextAreaElement | null>;
+  bordered?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-1.5"
+      style={{ padding: "16px 22px 18px", borderLeft: bordered ? `1px solid ${FAINT}` : undefined }}
+    >
+      <MarkerLabel colour={colour} label={label} />
+      <textarea
+        ref={(el) => {
+          autosize(el);
+          if (fieldRef) fieldRef.current = el;
+        }}
+        name={name}
+        rows={1}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        data-dictate-label={label}
+        onInput={autosizeOnInput}
+        {...bulletListProps}
+        style={{ ...fieldStyle(13.5, INK), lineHeight: 1.55 }}
+      />
       {children}
+    </div>
+  );
+}
+
+function StageRow({
+  index,
+  row,
+  hue,
+  aimHint,
+  isFirst,
+  isLast,
+  autosize,
+  onChange,
+  onRemove,
+}: {
+  index: number;
+  row: PlanProcedureRow;
+  hue: string;
+  aimHint: string;
+  isFirst: boolean;
+  isLast: boolean;
+  autosize: (el: HTMLTextAreaElement | null) => void;
+  onChange: (patch: Partial<PlanProcedureRow>) => void;
+  onRemove: () => void;
+}) {
+  const written = Boolean(row.procedure.trim());
+  const spine = written ? hue : FAINT;
+  const minutes = timeValue(row.time);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const selected = row.interaction
+    ? row.interaction
+        .split(/[,+]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  function toggleInteraction(code: string) {
+    const next = selected.includes(code) ? selected.filter((c) => c !== code) : [...selected, code];
+    onChange({ interaction: next.join(", ") });
+  }
+
+  return (
+    <div
+      className="group relative grid"
+      style={{ gridTemplateColumns: "44px minmax(0,232px) minmax(0,1fr)", borderTop: `1px solid ${FAINT}` }}
+    >
+      {/* gutter: spine + numbered dot */}
+      <div className="relative flex justify-center" style={{ padding: "16px 0 18px" }}>
+        <span
+          aria-hidden
+          className="absolute"
+          style={{
+            width: 2,
+            left: "calc(50% - 1px)",
+            top: isFirst ? 16 : 0,
+            bottom: isLast ? "calc(100% - 40px)" : 0,
+            background: spine,
+          }}
+        />
+        <span
+          className="relative flex size-6 items-center justify-center rounded-full"
+          style={{
+            border: `2px solid ${hue}`,
+            background: written ? hue : SHEET,
+            color: written ? SHEET : MUTED,
+            fontSize: 11,
+            fontWeight: 700,
+          }}
+        >
+          {index + 1}
+        </span>
+      </div>
+
+      {/* stage name / aim / chips */}
+      <div className="relative flex flex-col gap-[7px]" style={{ padding: "14px 18px 18px 0" }}>
+        <textarea
+          ref={autosize}
+          rows={1}
+          value={row.stage}
+          placeholder="Name this stage"
+          data-dictate-label={`Stage ${index + 1} name`}
+          onInput={autosizeOnInput}
+          onChange={(e) => onChange({ stage: e.target.value })}
+          className="font-serif"
+          style={{ ...fieldStyle(16, row.stage ? INK : MUTED), fontWeight: 600, lineHeight: 1.25 }}
+        />
+        <textarea
+          ref={autosize}
+          rows={1}
+          value={row.aim}
+          placeholder={aimHint || "Stage aim"}
+          data-dictate-label={`Stage ${index + 1} aim`}
+          onInput={autosizeOnInput}
+          onChange={(e) => onChange({ aim: e.target.value })}
+          style={{ ...fieldStyle(12.5, MUTED), fontStyle: "italic" }}
+        />
+
+        <div className="flex flex-wrap items-center gap-[5px]">
+          <span
+            className="inline-flex items-center"
+            style={{
+              borderRadius: 6,
+              padding: "2px 4px",
+              background: written ? `color-mix(in oklab, ${hue} 13%, transparent)` : CARD,
+              color: written ? hue : MUTED,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => onChange({ time: String(Math.max(0, minutes - 1)) })}
+              style={{ fontSize: 13, opacity: 0.55, padding: "0 3px" }}
+              aria-label="One minute less"
+            >
+              −
+            </button>
+            <span className="text-center tabular-nums" style={{ fontSize: 12.5, fontWeight: 700, minWidth: 30 }}>
+              {row.time ? `${minutes}′` : "—′"}
+            </span>
+            <button
+              type="button"
+              onClick={() => onChange({ time: String(Math.min(60, minutes + 1)) })}
+              style={{ fontSize: 13, opacity: 0.55, padding: "0 3px" }}
+              aria-label="One minute more"
+            >
+              ＋
+            </button>
+          </span>
+
+          {selected.map((code) => (
+            <span
+              key={code}
+              style={{
+                borderRadius: 6,
+                border: `1px solid ${BORDER}`,
+                background: CARD,
+                padding: "2px 8px",
+                fontWeight: 600,
+                fontSize: 11.5,
+                color: INK_WARM,
+              }}
+            >
+              {code}
+            </span>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              borderRadius: 6,
+              border: `1px dashed ${BORDER}`,
+              padding: "2px 8px",
+              fontWeight: 600,
+              fontSize: 11.5,
+              color: MUTED,
+            }}
+          >
+            {selected.length === 0 ? "add interaction" : "edit"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onRemove}
+            title="Delete this stage"
+            className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+            style={{ fontSize: 12, color: "var(--color-destructive)", marginLeft: 2 }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {menuOpen ? (
+          <InteractionMenu selected={selected} onToggle={toggleInteraction} onClose={() => setMenuOpen(false)} />
+        ) : null}
+      </div>
+
+      {/* the bullets */}
+      <div style={{ borderLeft: `1px solid ${FAINT}`, padding: "14px 0 18px 20px" }}>
+        <textarea
+          ref={autosize}
+          rows={1}
+          value={row.procedure}
+          placeholder="• What you and the learners will do — Enter starts the next bullet"
+          data-dictate-label={`Stage ${index + 1} procedure`}
+          onInput={autosizeOnInput}
+          onChange={(e) => onChange({ procedure: e.target.value })}
+          {...bulletListProps}
+          style={{ ...fieldStyle(14, INK), lineHeight: 1.6, textWrap: "pretty" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function InteractionMenu({
+  selected,
+  onToggle,
+  onClose,
+}: {
+  selected: string[];
+  onToggle: (code: string) => void;
+  onClose: () => void;
+}) {
+  const wrap = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (wrap.current && !wrap.current.contains(e.target as Node)) onClose();
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      ref={wrap}
+      className="absolute"
+      style={{
+        zIndex: 40,
+        top: "calc(100% - 8px)",
+        left: 0,
+        width: 268,
+        borderRadius: 10,
+        border: `1px solid ${MUTED}`,
+        background: SHEET,
+        boxShadow: "0 18px 44px oklch(23.5% 0.017 65 / 0.3)",
+        padding: 7,
+      }}
+    >
+      <p
+        className="uppercase"
+        style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", color: TEAL, padding: "2px 9px 5px" }}
+      >
+        Tap to add or remove
+      </p>
+      {INTERACTION_PATTERNS.map((p) => {
+        const on = selected.includes(p.code);
+        return (
+          <button
+            key={p.code}
+            type="button"
+            onClick={() => onToggle(p.code)}
+            className="flex w-full items-center gap-1.5 text-left transition-colors hover:bg-card-inset"
+            style={{
+              borderRadius: 7,
+              padding: "7px 9px",
+              fontSize: 12.5,
+              fontWeight: on ? 700 : 400,
+              color: on ? INK : INK_WARM,
+              background: on ? `color-mix(in oklab, ${TEAL} 12%, transparent)` : undefined,
+            }}
+          >
+            <span style={{ width: 14, fontSize: 12, color: TEAL }}>{on ? "✓" : ""}</span>
+            {p.label}
+          </button>
+        );
+      })}
+      <div style={{ borderTop: `1px solid ${FAINT}`, marginTop: 4, paddingTop: 4 }}>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full text-left"
+          style={{ fontSize: 12, color: MUTED, padding: "4px 9px" }}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// The submitted record. Deliberately not restyled: the handoff covers the
+// EDITOR, and a locked plan is a different object -- nothing to fill in, and
+// the tutor's view, the portfolio and the PDF each render it their own way.
+function LockedPlan({
+  plan,
+  procedure,
+  totalMinutes,
+  overBy,
+  languageAnalysis,
+}: {
+  plan: TpPlan;
+  procedure: PlanProcedureRow[];
+  totalMinutes: number;
+  overBy: number;
+  languageAnalysis: TpLanguageAnalysis | null;
+}) {
+  return (
+    <div className="card rounded-[9px] p-6">
+      <div className="flex items-center justify-between">
+        <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
+        <span className="status-pill status-pill-on-track">Submitted — locked</span>
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        Submitted {plan.submitted_at ? formatSubmittedAt(plan.submitted_at) : ""}. This is now your record of the
+        lesson — ask your trainer if it needs reopening.
+      </p>
+      <div className="mt-4 flex flex-col gap-4">
+        <ReadOnlyField label="Main Aims" value={plan.main_aims} />
+        <ReadOnlyField label="Subsidiary Aims" value={plan.subsidiary_aims} />
+        <ReadOnlyField label="Personal Aims" value={plan.personal_aims} />
+        {(plan.anticipated_problems ?? []).some((p) => p.problem || p.solution) ? (
+          <div>
+            <p className="text-sm text-muted">Anticipated Problems &amp; Solutions</p>
+            <ul className="mt-1 flex flex-col gap-1.5">
+              {(plan.anticipated_problems ?? []).map((p, i) =>
+                p.problem || p.solution ? (
+                  <li key={i} className="text-sm text-ink">
+                    <span className="whitespace-pre-line">{p.problem}</span>
+                    {p.solution ? <span className="mt-0.5 block whitespace-pre-line text-muted">{p.solution}</span> : null}
+                  </li>
+                ) : null
+              )}
+            </ul>
+          </div>
+        ) : null}
+        <ReadOnlyField label="Class Profile" value={plan.class_profile} />
+        <ReadOnlyField label="Materials" value={plan.materials_description} />
+        <div>
+          <p className="text-sm text-muted">Procedure</p>
+          <div className="mt-2 overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <colgroup>
+                <col className="w-[200px]" />
+                <col className="w-[92px]" />
+                <col className="w-[62px]" />
+                <col />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
+                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
+                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
+                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                </tr>
+              </thead>
+              <tbody>
+                {procedure.map((row, i) => (
+                  <tr key={i} className="even:bg-background">
+                    <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
+                      {row.stage}
+                      {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
+                    </td>
+                    <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
+                    <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
+                    <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
+                      {row.procedure}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-1.5 text-xs text-muted">
+            {totalMinutes} of {TP_LESSON_LENGTH_MINUTES} min{overBy > 0 ? ` · Over by ${overBy} min` : ""}
+          </p>
+        </div>
+        {languageAnalysis ? (
+          <div className="border-t border-border-faint pt-4">
+            <p className="text-sm text-muted">Language Analysis ({languageAnalysis.type})</p>
+            {languageAnalysis.context ? <p className="mt-1 text-ink">{languageAnalysis.context}</p> : null}
+            {languageAnalysis.type === "vocab" ? (
+              <ul className="mt-2 flex flex-col gap-2 text-sm">
+                {languageAnalysis.vocab_rows.map((row, i) => (
+                  <li key={i} className="text-ink">
+                    <b>{row.item}</b> — {row.definition}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="mt-2 flex flex-col gap-3">
+                {languageAnalysis.blocks.map((block, i) => (
+                  <div key={i} className="text-sm text-ink">
+                    <p className="font-medium">{block.item}</p>
+                    {block.meaning ? <p className="text-muted">{block.meaning}</p> : null}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

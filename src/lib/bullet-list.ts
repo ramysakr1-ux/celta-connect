@@ -1,10 +1,16 @@
+import { setFieldValue } from "@/lib/dictation";
+
 // Shared "auto-bullet" behaviour for free-text fields where trainees write in
 // bullet points (lesson plan aims/procedure, language analysis prose fields).
-// Operates directly on the textarea DOM node (same value-mutation +
-// dispatchEvent("input") technique VoiceTextarea already uses for dictation),
-// so it works unchanged whether the field is an uncontrolled defaultValue
-// textarea (Main/Subsidiary/Personal Aims, Procedure) or a controlled
-// value/onChange one (Language Analysis) -- no per-field state plumbing.
+// Operates directly on the textarea DOM node, so it needs no per-field state
+// plumbing and works on uncontrolled and controlled fields alike.
+//
+// It writes through setFieldValue (the PROTOTYPE's value setter), not a plain
+// `target.value = next`. React keeps its own tracker on the node, and a plain
+// assignment updates that tracker too -- so the input event that follows is
+// deduped as "nothing changed" and a controlled field's onChange never fires.
+// design_handoff_trainee_lesson_plan §8 is explicit about this, and the
+// redesigned procedure table is controlled where the old aims fields were not.
 //
 // Behaviour: focusing an empty field seeds the first bullet; Enter starts a
 // new bulleted line; Backspace on a bullet with nothing typed after it yet
@@ -14,8 +20,7 @@
 const BULLET = "• ";
 
 function setValue(target: HTMLTextAreaElement, next: string, cursor: number) {
-  target.value = next;
-  target.dispatchEvent(new Event("input", { bubbles: true }));
+  setFieldValue(target, next);
   requestAnimationFrame(() => target.setSelectionRange(cursor, cursor));
 }
 
@@ -49,7 +54,18 @@ export function handleBulletKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>)
   }
 }
 
+// §8: "blurring a field holding only a bare bullet clears it" -- otherwise
+// tabbing through the plan leaves a trail of lone bullets in boxes nobody
+// wrote in, and an empty-looking field saves as "•".
+export function handleBulletBlur(e: React.FocusEvent<HTMLTextAreaElement>) {
+  const target = e.currentTarget;
+  if (target.value.trim() === "•" || target.value.trim() === BULLET.trim()) {
+    setFieldValue(target, "");
+  }
+}
+
 export const bulletListProps = {
   onFocus: handleBulletFocus,
   onKeyDown: handleBulletKeyDown,
+  onBlur: handleBulletBlur,
 };

@@ -311,6 +311,34 @@ export default async function TpDetailPage({
       : { data: [] };
   const sharedMaterialIds = new Set((sharedRows ?? []).map((r) => r.tp_material_id));
 
+  // The redesigned plan opens with an identity band naming the lesson: which
+  // TP, when it is taught, at what level, for how long. The day and the level
+  // were on the page already in pieces; the time of day and the level come
+  // from the timetable slot and the assigned TP point.
+  const [{ data: slot }, { data: point }] = await Promise.all([
+    lessonDate
+      ? supabase
+          .from("course_timetable_events")
+          .select("event_time")
+          .eq("course_id", trainee.course_id!)
+          .eq("event_date", lessonDate)
+          .eq("linked_tp_number", tpNumber)
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    assignment.tp_point_id
+      ? supabase.from("tp_points").select("tp_coursebook_id").eq("id", assignment.tp_point_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const { data: coursebook } = point?.tp_coursebook_id
+    ? await supabase.from("tp_coursebooks").select("level").eq("id", point.tp_coursebook_id).maybeSingle()
+    : { data: null };
+  const lessonWhen = lessonDate
+    ? [formatCalendarDate(lessonDate, { weekday: "long", day: "numeric", month: "long" }), slot?.event_time?.slice(0, 5)]
+        .filter(Boolean)
+        .join(" ")
+    : null;
+
   const tier = assignment.density_tier;
   const densityLabel = DENSITY_TIER_LABELS[tier];
   const criteriaCodes = collectCriteriaCodes(feedback ?? null);
@@ -691,6 +719,9 @@ export default async function TpDetailPage({
               plan={plan}
               languageAnalysis={languageAnalysis ?? null}
               previousPlanningActionPoint={previousPlanningActionPoint}
+              lessonTitle={assignment.main_lesson_aim}
+              lessonWhen={lessonWhen}
+              level={coursebook?.level ?? null}
             />
 
             <div id="materials" className="scroll-mt-20">
