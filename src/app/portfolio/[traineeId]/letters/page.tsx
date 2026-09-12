@@ -2,8 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 
 // Handbook 12.1.1 Section A, "where appropriate": a fail warning letter and a
 // candidate letter of withdrawal belong in the portfolio. 14.2 also has the
@@ -33,7 +32,7 @@ function longDate(iso: string): string {
 export default async function CandidateLettersPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
 
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin" || viewer?.role === "platform_owner";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;

@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 
 // Handbook 12.2: "completed selection tasks and interview notes/record sheets
 // of both accepted and rejected candidates must be available to assessors."
@@ -37,7 +36,7 @@ const BAND_LABEL: Record<string, string> = { above: "Above standard", at: "At st
 export default async function CandidateApplicationPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
 
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin" || viewer?.role === "platform_owner";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;

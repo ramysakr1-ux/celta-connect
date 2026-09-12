@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { notFound, redirect } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AcknowledgeButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/acknowledge-button";
@@ -21,7 +20,7 @@ const LETTER_TITLE: Record<string, string> = {
 // the trainee's own rows, so this is "render what the scoped client
 // returns", same pattern as every other candidate detail page.
 export default async function FormalLetterPage({ params }: { params: Promise<{ traineeId: string; letterId: string }> }) {
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const { traineeId, letterId } = await params;
   // Handbook 12.1.1 Section A puts these letters in the portfolio, so an
   // assessor has to be able to open one. They carry no Supabase session, so

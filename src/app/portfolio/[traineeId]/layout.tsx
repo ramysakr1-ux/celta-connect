@@ -2,10 +2,9 @@ import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import { notFound, redirect } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId, getPortfolioTrainee } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioTrainee, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
@@ -62,7 +61,7 @@ export default async function PortfolioLayout({
   params: Promise<{ traineeId: string }>;
 }) {
   const { traineeId } = await params;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
 
   // specs/build-spec.md "Peer observation" -- the one legitimate reason a

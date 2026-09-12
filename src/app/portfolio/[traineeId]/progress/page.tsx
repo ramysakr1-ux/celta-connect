@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
@@ -26,7 +25,7 @@ import { ObservationTaskForm } from "@/app/portfolio/[traineeId]/celta5/observat
 // a faked view.
 export default async function ProgressPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;

@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getTpCardStatus, TP_LESSON_LENGTH_MINUTES, type TpCardStatus } from "@/lib/tp-plan-content";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -97,7 +96,7 @@ export default async function TpHubPage({
 }) {
   const { traineeId } = await params;
   const { preview } = await searchParams;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();

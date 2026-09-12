@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import {
   DENSITY_TIER_LABELS,
   ABBREVIATIONS_GLOSSARY,
@@ -86,7 +85,7 @@ export default async function TpDetailPage({
   const tpNumber = Number(tpNumberParam);
   if (!Number.isInteger(tpNumber) || tpNumber < 1 || tpNumber > 8) notFound();
 
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   // Raw role check -- used ONLY for the access gate below. Must NOT fold in
   // previewAsTrainee, or a staff member previewing this exact page would

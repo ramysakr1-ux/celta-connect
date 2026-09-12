@@ -26,6 +26,31 @@ export const ASSESSOR_TOUR_COOKIE = "assessor_tour_mode";
 // terms_accepted_at on the assessor's behalf. Cleared by /assessor/exit.
 export const ASSESSOR_PREVIEW_COOKIE = "assessor_preview";
 
+// getCurrentProfile(), except that an explicit "Preview as the assessor"
+// reports NO session at all.
+//
+// The preview's whole promise is on the button: "the preview opens the pack
+// through the same link the assessor gets". It held on /assessor/*, which
+// consults isAssessorPreview() to skip the terms gate -- and broke the moment
+// the MCT clicked into a candidate's portfolio, which is the main thing an
+// assessor does. Every portfolio page reads the assessor token only when
+// there is no session (`!viewer ? await getAssessorCourseId() : null`), so an
+// MCT previewing saw their own staff view: the roster rail, "Tracking / At
+// risk", "Preview as trainee", and the staff editing controls. They were
+// checking what the assessor would see and were shown something else.
+//
+// Nulling the viewer here rather than patching fourteen pages means every
+// downstream derivation -- isStaff, isEditableStaff, isStaffViewer, the
+// assessor course itself -- falls out correctly with no per-page reasoning.
+// Nothing changes for anyone not in preview: the cookie is set only by
+// /trainer/assessor/preview and cleared by /assessor/exit, and the read-only
+// banner's "Assessor pack" pill is always there to get back out.
+// Found walking the assessor side, 12 Sep 2026.
+export const getPortfolioViewer = cache(async () => {
+  if (await isAssessorPreview()) return null;
+  return getCurrentProfile();
+});
+
 export async function isAssessorPreview(): Promise<boolean> {
   const cookieStore = await cookies();
   return cookieStore.get(ASSESSOR_PREVIEW_COOKIE)?.value === "1";

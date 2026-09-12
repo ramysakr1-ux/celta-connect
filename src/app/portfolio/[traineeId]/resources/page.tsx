@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG } from "@/lib/input-session-registry-links";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -242,7 +241,7 @@ export default async function ResourceHubPage({
 }) {
   const { traineeId } = await params;
   const { preview } = await searchParams;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   const isEditableStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;

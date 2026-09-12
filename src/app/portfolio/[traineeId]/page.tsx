@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { Video, Paperclip } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
 import { TodayTab } from "@/app/portfolio/[traineeId]/today-tab";
 import { CandidateStatusCard } from "@/app/portfolio/[traineeId]/withdraw-card";
@@ -54,7 +53,7 @@ export default async function CourseStreamPage({
 }) {
   const { traineeId } = await params;
   const { preview } = await searchParams;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   // The assessor token, read whether or not someone is signed in. Two
   // separate questions hang off it and they are NOT the same question:

@@ -2,10 +2,9 @@ import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { AssignmentResultSignature } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/result-signature";
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { ASSIGNMENT_INFO, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
 import { SecondMarkingPanel } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/second-marking-panel";
 import { formatCalendarDate } from "@/lib/format-date";
@@ -37,7 +36,7 @@ export default async function AssignmentDetailPage({
 }) {
   const { traineeId, assignmentId } = await params;
   const { preview } = await searchParams;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   // Raw role check for the access gate -- see the TP detail page's
   // identical comment for why this can't fold in previewAsTrainee.

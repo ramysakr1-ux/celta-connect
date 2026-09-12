@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 import { PreCourseTaskSections } from "@/app/portfolio/[traineeId]/pre-course-task/pre-course-task-sections";
 import { ScavengerHuntPanel } from "@/app/portfolio/[traineeId]/pre-course-task/scavenger-hunt-panel";
@@ -26,7 +25,7 @@ type Item = Database["public"]["Tables"]["pre_course_task_items"]["Row"];
 // unlocks cohort-wide 48 hours before start, not per-candidate.
 export default async function PreCourseTaskPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;

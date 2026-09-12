@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import {
   ASSIGNMENT_INFO,
   ASSIGNMENT_ORDER,
@@ -26,7 +25,7 @@ type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 // can view any trainee's assignments too.
 export default async function AssignmentsPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const assessorCourseId = !session?.profile ? await getAssessorCourseId() : null;
   if (!session?.profile && !assessorCourseId) notFound();
 

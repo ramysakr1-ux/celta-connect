@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId, getPortfolioTrainee } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioTrainee, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import {
   CELTA_CRITERIA_SECTIONS,
@@ -96,7 +95,7 @@ export default async function PortfolioCelta5Page({
 }) {
   const { traineeId } = await params;
   const { preview } = await searchParams;
-  const session = await getCurrentProfile();
+  const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   // Raw role check for the access gate -- see the TP detail page's
   // identical comment for why this can't fold in previewAsTrainee.
