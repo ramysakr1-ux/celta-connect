@@ -136,6 +136,13 @@ export function FinalGradeForm({
         <input type="hidden" name="overall_notes" value={record.overall_notes ?? ""} />
       )}
 
+      {record.final_recommended_grade === "Fail" && !record.trainee_signoff_final_at ? (
+        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-xs text-status-warning-text">
+          Handbook 11.4.1: an unsuccessful candidate who attends to the end and hands in a portfolio is a Fail. One who
+          does not attend the final day and has not signed the declaration at the end of the CELTA 5 is Withdrawn, not
+          Fail. This candidate has not signed yet.
+        </p>
+      ) : null}
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
       <button

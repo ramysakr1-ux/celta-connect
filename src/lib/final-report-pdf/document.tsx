@@ -156,6 +156,9 @@ export interface FinalReportInput {
   courseStartDate: string;
   courseEndDate: string;
   totalHours: number;
+  /** Handbook 7.11: the report states the course delivery mode and the hours attended. */
+  deliveryMode: "f2f" | "online" | "mixed" | null;
+  hoursAttended: number | null;
   finalGrade: FinalGrade;
   teachingGrade: string | null;
   assignmentsGrade: string | null;
@@ -187,6 +190,8 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
     courseStartDate,
     courseEndDate,
     totalHours,
+    deliveryMode,
+    hoursAttended,
     finalGrade,
     teachingGrade,
     assignmentsGrade,
@@ -228,6 +233,14 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
             <Text style={styles.body}>at {centerName}</Text>
             <Text style={styles.body}>
               from {formatDate(courseStartDate)} to {formatDate(courseEndDate)}
+            </Text>
+            <Text style={styles.body}>
+              {deliveryMode === "online"
+                ? "Course delivery mode: online (teaching practice online)"
+                : deliveryMode === "mixed"
+                  ? "Course delivery mode: mixed mode (teaching practice partly face-to-face, partly online)"
+                  : "Course delivery mode: face-to-face (teaching practice face-to-face)"}
+              {hoursAttended !== null ? ` · Hours attended: ${hoursAttended} of ${totalHours}` : ""}
             </Text>
 
             <Text style={styles.gradeLabel}>The following provisional grade was awarded</Text>

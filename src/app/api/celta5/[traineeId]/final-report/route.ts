@@ -54,7 +54,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   const isTraineeSelf = !isStaff && !assessorCourseId;
 
   const [{ data: course }, { data: center }, { data: record }, { data: trainers }] = await Promise.all([
-    supabase.from("courses").select("name, start_date, end_date, total_hours").eq("id", trainee.course_id).maybeSingle(),
+    supabase.from("courses").select("name, start_date, end_date, total_hours, delivery_mode").eq("id", trainee.course_id).maybeSingle(),
     supabase.from("centers").select("name, logo_url").eq("id", trainee.center_id).maybeSingle(),
     admin.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
     // Admin client regardless of viewer: profiles RLS only lets a trainee
@@ -92,6 +92,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
     courseStartDate: course.start_date,
     courseEndDate: course.end_date,
     totalHours: course.total_hours,
+    deliveryMode: course.delivery_mode ?? null,
+    hoursAttended: record.hours_attended,
     finalGrade: record.final_recommended_grade,
     teachingGrade: record.final_teaching_grade,
     assignmentsGrade: record.final_assignments_grade,

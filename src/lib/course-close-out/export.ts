@@ -466,6 +466,8 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
             courseStartDate: course.start_date,
             courseEndDate: course.end_date,
             totalHours: course.total_hours,
+            deliveryMode: course.delivery_mode ?? null,
+            hoursAttended: record.hours_attended,
             finalGrade: record.final_recommended_grade,
             teachingGrade: record.final_teaching_grade,
             assignmentsGrade: record.final_assignments_grade,

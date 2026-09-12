@@ -21,6 +21,7 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import { seedStage2Demo } from "./lib/stage2-demo.mjs";
 import { seedStage3Demo } from "./lib/stage3-demo.mjs";
+import { seedFinalDayDemo } from "./lib/final-day-demo.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -2954,6 +2955,20 @@ async function main() {
     center: { name: center.name, center_number: "DEMO-IST" },
   });
   console.log("Stage 3: three invites, three records, two fail letters on day 15");
+  if (STAGE === "finished") {
+    // A finished course has had its final day: grades, both signatures on the
+    // CELTA 5's last page, reports released the morning after (14.4).
+    await seedFinalDayDemo(supabase, {
+      courseId: course.id,
+      endDate,
+      defs: traineeDefs,
+      traineeIdByName: trainees,
+      groupByName: Object.fromEntries(traineeDefs.map((d) => [d.name, d.group])),
+      tutorSignatureByGroup: { A: "M. Webb", B: "J. Blake" },
+      assignmentFailByName: { "Ines Marchetti": true },
+    });
+    console.log("Final day: grades, signatures and released reports for the finished course");
+  }
   for (const [name, day, confirmed] of [
     // Inside the ABC block on day 6 (band 7), not on top of DEF's.
     ["Amara Okafor", 6, true],

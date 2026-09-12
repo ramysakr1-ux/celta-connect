@@ -444,6 +444,30 @@ export async function finalizeRecord(
   }
 
   const supabase = await createClient();
+  // "Accepted by Tutor" on the CELTA 5's final page is the tutor saying the
+  // record is complete. Handbook 10.2: the final progress record for all,
+  // and the whole Stage 3 record where one was owed; 7.11: the end-of-course
+  // report states hours attended, the overall grade, the planning-and-
+  // teaching grade and the written-assignments grade -- so a record that
+  // cannot produce that report is not finished.
+  if (finalized) {
+    const { data: rec } = await supabase
+      .from("celta5_records")
+      .select("final_recommended_grade, final_teaching_grade, final_assignments_grade, hours_attended, stage3_tutorial_required, stage3_finalized_at")
+      .eq("trainee_id", traineeId)
+      .maybeSingle();
+    if (!rec?.final_recommended_grade) return { error: "Recommend the final grade first (section 12 above) -- the record is accepted with a grade on it." };
+    const graded = ["Pass", "Pass B", "Pass A", "Fail"].includes(rec.final_recommended_grade);
+    if (graded && (!rec.final_teaching_grade || !rec.final_assignments_grade)) {
+      return { error: "Record the planning-and-teaching grade and the written-assignments grade too -- the end-of-course report states both (Handbook 7.11)." };
+    }
+    if (graded && rec.hours_attended === null) {
+      return { error: "Record the hours attended -- the end-of-course report states them (Handbook 7.11)." };
+    }
+    if (rec.stage3_tutorial_required && !rec.stage3_finalized_at) {
+      return { error: "This candidate was owed a Stage 3 tutorial and record -- finalize Stage 3 before accepting the portfolio (Handbook 10.2)." };
+    }
+  }
   const { error } = await supabase
     .from("celta5_records")
     .update({
@@ -491,6 +515,24 @@ export async function updateFinalGrade(
   const assignmentsGrade = assignmentsGradeRaw === "Pass" || assignmentsGradeRaw === "Fail" ? assignmentsGradeRaw : null;
 
   const supabase = await createClient();
+  // Handbook 11.6, the same ceiling the provisional grade already respects
+  // (and the same recorded override lifts): one failed written assignment
+  // rules out Pass A; more than one rules out a Pass at all. The final
+  // grade skipped this check until 12 Sep 2026.
+  if (grade && grade !== "Withdrawn" && grade !== "Extension" && grade !== "Deferred") {
+    const [{ data: written }, { data: overrideRow }] = await Promise.all([
+      supabase.from("assignments").select("final_grade, resubmission_outcome").eq("trainee_id", traineeId),
+      supabase.from("celta5_records").select("assignment_fail_override_reason").eq("trainee_id", traineeId).maybeSingle(),
+    ]);
+    const ceiling = assignmentGradeCeiling(
+      written ?? [],
+      (overrideRow as { assignment_fail_override_reason?: string | null } | null)?.assignment_fail_override_reason ?? null
+    );
+    if (ceiling.blocked.includes(grade)) return { error: ceiling.reason ?? "That grade is not available for this candidate (Handbook 11.6)." };
+    if (ceiling.failCount > 1 && !ceiling.overridden && assignmentsGrade !== "Fail") {
+      return { error: "More than one written assignment failed -- the written-assignments grade is Fail (Handbook 11.6)." };
+    }
+  }
   const { error } = await supabase
     .from("celta5_records")
     .update({

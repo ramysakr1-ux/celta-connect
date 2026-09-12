@@ -903,6 +903,14 @@ export default async function TodayPage() {
         done: activeCount > 0 && (releasedCount ?? 0) >= activeCount,
         href: "/trainer/grades-report",
       },
+      // Handbook 12.1.3: "The final day section of CELTA 5 must be signed by
+      // the course tutor and the candidate at the end of the course."
+      {
+        label: "CELTA 5 final page signed by candidate and tutor",
+        status: `${rows.filter((r) => r.courseStatus !== "withdrawn" && r.celta5SignoffStatus === "both_signed").length} of ${activeCount} signed (12.1.3)`,
+        done: activeCount > 0 && rows.filter((r) => r.courseStatus !== "withdrawn" && r.celta5SignoffStatus === "both_signed").length >= activeCount,
+        href: "/trainer/roster",
+      },
       {
         label: "Centre grade approval form in Appian",
         status: approvalAt ? `Marked submitted ${formatDate(approvalAt, timeZone, { year: "numeric" })}` : "Not yet marked as submitted",
