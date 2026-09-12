@@ -160,6 +160,10 @@ const PARAM_SOURCE = {
   "/dashboard/admin/coursebooks/[id]": { id: "coursebookId" },
   "/dashboard/admissions/[id]": { id: "applicantId" },
   "/portfolio/[traineeId]/supervised/[eventId]": { eventId: "supervisedEventId" },
+  // This one needs a filmed-observation event, not any event on the course:
+  // the page 404s on anything else, quite correctly. It was passing the
+  // generic eventId and reporting "route missing" for a route that is there.
+  "/trainer/timetable/filmed-observation/[eventId]": { eventId: "filmedEventId" },
   // Only a trainee who came through the admissions pipeline HAS an
   // application, so this page needs that trainee, not just any trainee.
   "/portfolio/[traineeId]/application": { traineeId: "enrolledApplicantTraineeId" },
@@ -194,6 +198,8 @@ async function fixtures() {
   const invite = await one("individual_tutorial_invites", "id", (q) => q.eq("trainee_id", trainee?.id));
   const session = await one("input_sessions_delivered", "id", (q) => q.eq("course_id", course?.id));
   const event = await one("course_timetable_events", "id", (q) => q.eq("course_id", course?.id));
+  const filmed = await one("course_timetable_events", "id", (q) =>
+    q.eq("course_id", course?.id).eq("type", "milestone").ilike("title", "Filmed observation%"));
 
   // Scoped to the demo centre. Unscoped, this picked up Elmswood's templates
   // and every brief page 404'd -- correctly, since a demo trainer cannot open
@@ -221,6 +227,7 @@ async function fixtures() {
     inviteId: invite?.id ?? null,
     sessionId: session?.id ?? null,
     eventId: event?.id ?? null,
+    filmedEventId: filmed?.id ?? null,
     tpNumber: "1",
     slug: "learner-profiles",
     // No sensible fixture: these address things a demo course does not have.
