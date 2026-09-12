@@ -533,7 +533,7 @@ export default async function TpDetailPage({
                             </colgroup>
                             <thead>
                               <tr>
-                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage</th>
+                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
                                 <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
                                 <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
                                 <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
