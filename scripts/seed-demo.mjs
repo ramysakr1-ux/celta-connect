@@ -3065,13 +3065,6 @@ async function main() {
   } else {
     console.log(`Stage 3 not seeded -- the course does not reach day 15 (${stage3Date}) until later.`);
   }
-  // Real lesson plans. Every seeded plan was aims-only -- empty procedure
-  // table, "0 of 45 min" -- and its main aim disagreed with the brief in the
-  // page heading. Ramy, 12 Sep 2026, opening Amara's TP7.
-  {
-    const r = await applyLessonPlans(supabase, course.id);
-    console.log(`lesson plans: ${r.updated} filled from each candidate's own brief`);
-  }
   if (STAGE === "finished") {
     // A finished course has had its final day: grades, both signatures on the
     // CELTA 5's last page, reports released the morning after (14.4).
@@ -3792,6 +3785,17 @@ async function main() {
     );
   }
   console.log("tp queue:", owedTrio.length, "lessons left owed with capture notes, one draft, one self-eval pending");
+
+  // Real lesson plans, LAST of all. Every seeded plan was aims-only -- empty
+  // procedure table, "0 of 45 min" -- and its main aim disagreed with the
+  // brief in the page heading (Ramy, 12 Sep 2026, opening Amara's TP7). It
+  // runs here, after everything, because plans and their briefs are written
+  // in several places along the way: run mid-file it filled TP1-6 and left
+  // the assessor-visit TP7 plans empty, which is exactly the screen he opened.
+  {
+    const r = await applyLessonPlans(supabase, course.id);
+    console.log(`lesson plans: ${r.updated} filled from each candidate's own brief`);
+  }
 
   console.log("DEMO SEED COMPLETE");
   console.log("center_id=" + center.id);
