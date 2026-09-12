@@ -300,8 +300,37 @@ export default async function TpDetailPage({
       ? "Submitted -- read-only. Your plan is locked while your tutor assesses this lesson. Feedback appears here once it is released."
       : "Submitted -- read-only. Your tutor has released feedback for this teaching practice.";
 
+  // Ramy, 12 Sep 2026: "because of the criteria evidenced part on the right,
+  // it's only half a page. When they're writing their lesson plan they're
+  // squashed in a corner, and it should be the entire page." So the plan
+  // has the whole width, and the criteria the tutor tagged sit under the
+  // feedback they were tagged in -- once there is feedback. Before that the
+  // panel was a 300px column saying "shows once your tutor releases
+  // feedback" beside a plan being written.
+  const criteriaEvidenced =
+    plan && feedback?.submitted_at ? (
+      <div className="sheet p-6">
+        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+          Criteria evidenced{criteriaCodes.length > 0 ? ` · ${criteriaCodes.length}` : ""}
+        </p>
+        <p className="mt-1 text-xs text-muted">The CELTA 5 criteria your tutor tagged in this lesson&apos;s feedback.</p>
+        {criteriaCodes.length > 0 ? (
+          <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+            {criteriaCodes.map((code) => (
+              <li key={code}>
+                <p className="text-xs font-semibold tracking-wide text-ink uppercase">{code}</p>
+                <p className="text-xs text-muted">{CRITERIA_LABELS[code]}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-muted">No criteria tagged in this lesson&apos;s feedback.</p>
+        )}
+      </div>
+    ) : null;
+
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
+    <div className="grid grid-cols-1 gap-6">
       <div className="flex min-w-0 flex-col gap-4">
         <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
 
@@ -621,6 +650,7 @@ export default async function TpDetailPage({
                 <p className="mt-2 text-sm text-muted">Not yet submitted.</p>
               </div>
             ) : null}
+            {criteriaEvidenced}
           </>
         ) : (
           <>
@@ -684,27 +714,6 @@ export default async function TpDetailPage({
             ) : null}
           </div>
         ) : null}
-      </div>
-
-      <div className="sheet h-fit p-6 lg:sticky lg:top-6">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
-          Criteria evidenced{criteriaCodes.length > 0 ? ` · ${criteriaCodes.length}` : ""}
-        </p>
-        <p className="mt-1 text-xs text-muted">Fills as your tutor tags criteria in this lesson&apos;s feedback.</p>
-        {criteriaCodes.length > 0 ? (
-          <ul className="mt-3 flex flex-col gap-3">
-            {criteriaCodes.map((code) => (
-              <li key={code}>
-                <p className="text-xs font-semibold tracking-wide text-ink uppercase">{code}</p>
-                <p className="text-xs text-muted">{CRITERIA_LABELS[code]}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm text-muted">
-            {feedback?.submitted_at ? "No criteria tagged in this lesson's feedback." : "Shows once your tutor releases feedback."}
-          </p>
-        )}
       </div>
     </div>
   );
