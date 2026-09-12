@@ -600,6 +600,10 @@ async function main() {
   // building the stage harness, which is the point of the harness.
   await import("node:child_process").then(({ execFileSync }) => {
     try {
+      execFileSync("node", ["scripts/seed-demo-precourse.mjs"], {
+        stdio: "inherit",
+        env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: url, SUPABASE_SERVICE_ROLE_KEY: key },
+      });
       execFileSync("node", ["scripts/seed-demo-pipeline.mjs"], {
         stdio: "inherit",
         env: {
@@ -2451,46 +2455,13 @@ async function main() {
     console.log("trainer-in-training: Elena Vasquez seeded (internal scheme, portfolio in progress, assessor day booked)");
   }
 
-  // --- Pre-course task: seeded per-centre (centre admins normally author
-  // these themselves), then marked handed in for all three trainees so the
-  // shared course reads as properly mid-stream, not day one. ---
-  const { data: pctSections } = await supabase
-    .from("pre_course_task_sections")
-    .insert([
-      {
-        center_id: center.id,
-        source: "cambridge",
-        sequence_index: 1,
-        title: "Your language learning experience",
-        prompt: "Describe a language you have learned (other than your first) and what helped or hindered you.",
-      },
-      {
-        center_id: center.id,
-        source: "cambridge",
-        sequence_index: 2,
-        title: "Observing a lesson",
-        prompt: "What do you expect to be the biggest challenge in managing a class of adult learners?",
-      },
-      {
-        center_id: center.id,
-        source: "centre_supplement",
-        sequence_index: 3,
-        title: "Getting to know you",
-        prompt: "Tell us a little about your background and what brought you to CELTA.",
-      },
-    ])
-    .select("id");
-  for (const traineeId of Object.values(trainees)) {
-    for (const section of pctSections ?? []) {
-      await supabase.from("pre_course_task_responses").insert({
-        course_id: course.id,
-        trainee_id: traineeId,
-        section_id: section.id,
-        response: "Completed before the course start date.",
-        submitted_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-      });
-    }
-  }
+  // --- Pre-course task: the real Cambridge content, plus the two centre
+  // supplements, applied by scripts/seed-demo-precourse.mjs once BOTH demo
+  // branches exist (it seeds every demo centre). It used to be done here, as
+  // three placeholder sections with no tasks and response rows in a shape
+  // the table stopped having at migration 0237 -- every rebuild since had
+  // shipped an empty task under a heading promising Cambridge's. See the
+  // child's own comment. Invoked further down, next to the pipeline seed. ---
 
   // ---------------------------------------------------------------------
   // The real four-week timetable, ported from Ramy's own design file

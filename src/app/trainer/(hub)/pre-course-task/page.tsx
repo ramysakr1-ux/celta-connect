@@ -39,7 +39,10 @@ export default async function TrainerPreCourseTaskPage() {
   // actually depend on each other. Trainees and sections both need nothing
   // but the course; the two lookups after them need an id list each.
   const [{ data: trainees }, { data: sections }] = await Promise.all([
-    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
+    // The active cohort: a candidate who has withdrawn is not doing the task,
+    // and listing them as "0 of 50" reads as a problem to chase. Same rule
+    // as every other Handbook count on the hub (12 Sep 2026).
+    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").neq("course_status", "withdrawn").order("full_name"),
     supabase.from("pre_course_task_sections").select("id, source, sequence_index, title").eq("center_id", course.center_id).order("sequence_index"),
   ]);
 
