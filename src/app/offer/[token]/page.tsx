@@ -2,10 +2,10 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { OfferAcceptForm } from "@/app/offer/[token]/offer-accept-form";
+import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
-function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-}
+const longDate = (iso: string) => formatCalendarDate(iso, { month: "long", year: "numeric" });
 
 // "Accepting is what creates the account" -- but only once the centre has
 // actually released the workspace (releaseWorkspace, admissions/actions.ts,
@@ -54,8 +54,15 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
 
   const [{ data: course }, { data: center }] = await Promise.all([
     admin.from("courses").select("name, start_date, end_date").eq("id", applicant.intake_course_id).maybeSingle(),
-    admin.from("centers").select("name, is_uk_centre").eq("id", applicant.center_id).maybeSingle(),
+    admin.from("centers").select("name, is_uk_centre, time_zone").eq("id", applicant.center_id).maybeSingle(),
   ]);
+  // The place-offer deadline is an INSTANT, and it used to be printed in UTC
+  // with "UTC" after it -- a 48-hour window that an applicant then had to
+  // convert themselves, on the one page where getting it wrong costs them the
+  // place. It is the centre's clock that runs out, so it is the centre's
+  // clock that is shown, with the city named.
+  const timeZone = center?.time_zone || DEFAULT_TIMEZONE;
+  const centreCity = timeZone.split("/").pop()?.replace(/_/g, " ") ?? "";
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
@@ -66,26 +73,24 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
         </Link>
         <p className="mt-1 text-sm text-ink">
           {applicant.full_name}, you&apos;re offered a place on <strong>{course?.name}</strong>
-          {course ? ` (${formatDate(course.start_date)} – ${formatDate(course.end_date)})` : ""} at {center?.name}.
+          {course ? ` (${longDate(course.start_date)} – ${longDate(course.end_date)})` : ""} at {center?.name}.
         </p>
+        {/* The accept-by date used to live inside the fee line, so an offer
+            recorded without a fee showed no deadline at all -- on the page
+            whose whole purpose is the deadline. They are two facts now. */}
         {applicant.fee_amount ? (
           <p className="mt-2 text-sm text-muted">
             Fee: {applicant.fee_amount}
-            {applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}. Accept by {formatDate(applicant.offer_accept_by!)}.
+            {applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.
           </p>
+        ) : null}
+        {applicant.offer_accept_by ? (
+          <p className="mt-2 text-sm text-muted">Accept by {longDate(applicant.offer_accept_by)}.</p>
         ) : null}
         {applicant.place_offer_expires_at ? (
           <p className="mt-2 text-sm text-muted">
-            This place is available until{" "}
-            {new Date(applicant.place_offer_expires_at).toLocaleString("en-GB", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              hour: "numeric",
-              minute: "2-digit",
-              timeZone: "UTC",
-            })}{" "}
-            UTC. After that, it goes to the next person on the waiting list.
+            This place is available until {formatDateTime(applicant.place_offer_expires_at, timeZone)}
+            {centreCity ? ` in ${centreCity}` : ""}. After that, it goes to the next person on the waiting list.
           </p>
         ) : null}
         {applicant.workspace_released_at ? (

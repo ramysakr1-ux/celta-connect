@@ -309,6 +309,10 @@ function profileFor(i, stage, daysAgo) {
     row.task_feedback_edited_at = row.marked_at;
   }
   if (stage === "offer_sent" || stage === "accepted") {
+    // An offer that was sent has a link in the email it went out in, so it has
+    // a token. Without one, /offer/[token] is unreachable for every demo
+    // applicant and the acceptance page can only be seen through the journey.
+    row.offer_token = crypto.randomUUID();
     row.offer_sent_at = ago(Math.max(daysAgo - 6, 1));
     row.offer_accept_by = agoDate(Math.max(daysAgo - 6, 1) - 14);
     row.fee_amount = 1800;
