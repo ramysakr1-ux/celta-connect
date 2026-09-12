@@ -207,8 +207,12 @@ export default async function TrainerTpCardPage({
       <FeedbackForm
         planId={plan.id}
         traineeId={id}
+        traineeName={trainee.full_name}
         tpNumber={tpNumber}
         feedback={feedback ?? null}
+        plan={plan}
+        languageAnalysis={languageAnalysis ?? null}
+        selfEvaluation={selfEvaluation ?? null}
         autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
         toneAssistEnabled={feedbackAssist?.enabled ?? false}
         captureNotes={captureNotes ?? []}
