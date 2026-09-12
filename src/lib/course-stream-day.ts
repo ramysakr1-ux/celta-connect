@@ -69,7 +69,9 @@ export interface StreamDay {
 
 /** A deadline is not a session -- it has no duration and nothing happens at a
  *  time. Those belong in Catch up, so they never reach the track. */
-const TRACK_TYPES = new Set<TimetableEvent["type"]>(["tp", "input_session", "milestone", "supervised_session"]);
+// unassessed_tp is teaching, so it belongs in the day exactly as TP does
+// (migration 0296). It is only the assessment that differs.
+const TRACK_TYPES = new Set<TimetableEvent["type"]>(["tp", "unassessed_tp", "input_session", "milestone", "supervised_session"]);
 
 function hhmm(minutes: number): string {
   const h = Math.floor(minutes / 60);

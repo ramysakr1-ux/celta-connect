@@ -33,16 +33,29 @@ export async function findGtkySession(
   courseId: string,
   timeZone: string = DEFAULT_TIMEZONE
 ): Promise<GtkySessionEvent | null> {
-  const { data } = await supabase
+  // What the slot IS, first: an unassessed teaching slot (migration 0296).
+  // Ramy, 12 Sep 2026: "are they just following whatever is written on the
+  // timetable?" They should follow the timetable's own structure, not its
+  // prose. The title match stays as a fallback for a centre whose timetable
+  // predates the type, or who names the session without typing it -- his
+  // earlier rule, still honoured, but no longer the only way in.
+  const { data: typed } = await supabase
     .from("course_timetable_events")
     .select("id, title, event_date, event_time")
     .eq("course_id", courseId)
-    .neq("type", "tp")
-    // "Getting to know you" or the staffroom's "GTKY" -- the ported demo
-    // timetable uses the latter and matched nothing (12 Sep 2026).
-    .or("title.ilike.%getting to know%,title.ilike.%gtky%")
+    .eq("type", "unassessed_tp")
     .order("event_date");
-  const events = (data ?? []) as GtkySessionEvent[];
+  let events = (typed ?? []) as GtkySessionEvent[];
+  if (events.length === 0) {
+    const { data } = await supabase
+      .from("course_timetable_events")
+      .select("id, title, event_date, event_time")
+      .eq("course_id", courseId)
+      .neq("type", "tp")
+      .or("title.ilike.%getting to know%,title.ilike.%gtky%")
+      .order("event_date");
+    events = (data ?? []) as GtkySessionEvent[];
+  }
   if (events.length === 0) return null;
   const today = toLocalIso(new Date(), timeZone);
   return events.find((e) => e.event_date >= today) ?? events[events.length - 1];

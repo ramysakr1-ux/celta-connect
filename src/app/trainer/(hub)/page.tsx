@@ -621,9 +621,14 @@ export default async function TodayPage() {
   // person's; TP rows follow the group scope. Events carry no tutor of their
   // own, so input and supervised sessions are shown to every tutor.
   const serverNowMs = Date.now();
-  const SLOT_MINUTES: Record<string, number> = { tp: 3 * 60, input_session: 60, supervised_session: 60 };
+  const SLOT_MINUTES: Record<string, number> = { tp: 3 * 60, unassessed_tp: 60, input_session: 60, supervised_session: 60 };
   const rawSlots: DaySlot[] = (todayEvents ?? [])
-    .filter((e) => e.event_time && (e.type === "tp" || e.type === "input_session" || e.type === "supervised_session") && e.tag !== "lunch")
+    .filter(
+      (e) =>
+        e.event_time &&
+        (e.type === "tp" || e.type === "unassessed_tp" || e.type === "input_session" || e.type === "supervised_session") &&
+        e.tag !== "lunch"
+    )
     .filter((e) => !(e.type === "tp" && scopedGroupIds && e.tp_group_scope_id && !scopedGroupIds.has(e.tp_group_scope_id)))
     .map((e) => {
       const start = zonedTimeToUtc(e.event_date, e.event_time!, timeZone).getTime();
@@ -783,7 +788,8 @@ export default async function TodayPage() {
     for (const e of events) {
       if (e.tag === "lunch") continue;
       if (e.type === "tp") contactMinutes += 180;
-      else if (e.type === "input_session" || e.type === "supervised_session") contactMinutes += bandMinutes(e.event_time);
+      else if (e.type === "input_session" || e.type === "supervised_session" || e.type === "unassessed_tp")
+        contactMinutes += bandMinutes(e.event_time);
     }
     problems.push(...contactHoursProblems({ locked: Boolean(course?.timetable_locked_at), contactHours: contactMinutes / 60 }));
 

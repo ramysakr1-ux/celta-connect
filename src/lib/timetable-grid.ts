@@ -112,7 +112,9 @@ export function categorize(event: TimetableEvent): CellCategory {
   // ordinary tagged events; this just gives them the syllabus's own word.
   if (event.tag === "consultation") return "cs";
   if (event.tag) return "rm";
-  return event.type === "tp" ? "rm" : "iw";
+  // An unassessed teaching slot happens in the group room, like the assessed
+  // ones -- migration 0296.
+  return event.type === "tp" || event.type === "unassessed_tp" ? "rm" : "iw";
 }
 
 function toMinutes(time: string): number {

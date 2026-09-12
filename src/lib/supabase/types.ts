@@ -2581,7 +2581,7 @@ export interface Database {
         Row: {
           id: string;
           course_id: string;
-          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
+          type: "input_session" | "tp" | "unassessed_tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
           title: string;
           event_date: string;
           event_time: string | null;
@@ -2609,7 +2609,7 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]> & {
           course_id: string;
-          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
+          type: "input_session" | "tp" | "unassessed_tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
           title: string;
           event_date: string;
         };
