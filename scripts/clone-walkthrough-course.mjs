@@ -214,6 +214,15 @@ async function main() {
   const courseRow = remapRow(demoCourse);
   courseRow.name = COURSE_NAME;
   courseRow.center_id = elmswood.id;
+  // Every login on this course is demo- swapped for walk-, and the assessor's
+  // has to move with them. courses.assessor_email is free text, not a foreign
+  // key, so the generic row copier carried the DEMO address across -- which
+  // meant "Email the assessor" on the walkthrough addressed a demo mailbox
+  // that does not exist and bounces. Found walking the assessor side,
+  // 12 Sep 2026.
+  if (typeof courseRow.assessor_email === "string") {
+    courseRow.assessor_email = courseRow.assessor_email.replace(/^demo-/, "walk-");
+  }
   const { data: newCourse, error: cErr } = await supabase.from("courses").insert(courseRow).select("id").single();
   if (cErr) throw new Error(`courses: ${cErr.message}`);
   maps.course.set(DEMO_COURSE_ID, newCourse.id);

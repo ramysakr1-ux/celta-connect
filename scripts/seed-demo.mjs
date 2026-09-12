@@ -3820,7 +3820,7 @@ async function main() {
   // the assessor-visit TP7 plans empty, which is exactly the screen he opened.
   {
     const r = await applyLessonPlans(supabase, course.id);
-    console.log(`lesson plans: ${r.updated} filled from each candidate's own brief`);
+    console.log(`lesson plans: ${r.updated} filled from each candidate's own brief, ${r.partial} given a procedure from their own stated aim (no brief), ${r.skipped} left alone`);
   }
 
   console.log("DEMO SEED COMPLETE");

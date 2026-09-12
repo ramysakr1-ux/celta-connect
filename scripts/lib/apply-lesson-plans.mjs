@@ -10,7 +10,7 @@ import { buildPlan } from "./lesson-plans-demo.mjs";
 
 export async function applyLessonPlans(supabase, courseId) {
   const [{ data: plans }, { data: planAssignments }, { data: feedback }] = await Promise.all([
-    supabase.from("tp_plans").select("id, trainee_id, tp_number, main_aims, procedure").eq("course_id", courseId),
+    supabase.from("tp_plans").select("id, trainee_id, tp_number, main_aims, procedure, anticipated_problems").eq("course_id", courseId),
     supabase.from("plan_assignments").select("trainee_id, tp_number, main_lesson_aim, tp_point_id").eq("course_id", courseId),
     supabase.from("tp_feedback").select("trainee_id, tp_number, action_points_teaching").eq("course_id", courseId),
   ]);
@@ -41,24 +41,49 @@ export async function applyLessonPlans(supabase, courseId) {
   }
 
   let updated = 0;
+  let partial = 0;
   let skipped = 0;
   for (const plan of plans) {
     const key = `${plan.trainee_id}:${plan.tp_number}`;
     const brief = briefFor.get(key);
-    if (!brief) {
+
+    // A plan with no tutor brief still states its own main aim, and that is
+    // enough to build a procedure from. Without this fallback, five of the six
+    // TP7 plans in the assessor's "lesson plans for the day" had NO PROCEDURE
+    // AT ALL -- aims and materials and nothing else -- because the assessor
+    // visit seeds those plans directly and only one carried a
+    // plan_assignments row. The pack's own line is "all 6 lesson plans are in,
+    // since the choice can change on the day". Found walking the assessor
+    // side, 12 Sep 2026.
+    //
+    // The difference from a full build: the authored prose on those plans is
+    // specific and better than anything generated, so only the parts that are
+    // actually missing get filled.
+    const source = brief ?? plan.main_aims;
+    if (!source) {
       skipped += 1;
       continue;
     }
     const built = buildPlan({
-      brief,
+      brief: source,
       tpNumber: plan.tp_number,
       level: levelFor.get(key) ?? "B1+",
       learnerCount: 12,
       previousActionPoints: actionPointsFor.get(`${plan.trainee_id}:${plan.tp_number - 1}`) ?? [],
     });
-    const { error } = await supabase.from("tp_plans").update(built).eq("id", plan.id);
+    const patch = brief
+      ? built
+      : {
+          procedure: built.procedure,
+          framework_used: built.framework_used,
+          ...((plan.anticipated_problems ?? []).some((x) => x?.problem || x?.solution)
+            ? {}
+            : { anticipated_problems: built.anticipated_problems }),
+        };
+    const { error } = await supabase.from("tp_plans").update(patch).eq("id", plan.id);
     if (error) throw new Error(`tp_plans ${plan.id}: ${error.message}`);
-    updated += 1;
+    if (brief) updated += 1;
+    else partial += 1;
   }
-  return { updated, skipped };
+  return { updated, partial, skipped };
 }
