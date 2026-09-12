@@ -45,6 +45,10 @@ export interface EventMeta {
   mine: boolean;
   ownTpSlot: boolean;
   teachingLetters: string | null;
+  /** The TP group this lesson belongs to ("Group B"). Two groups teach in
+   *  parallel and each is its own A-F, so "TP7 · A" exists twice on a TP
+   *  day; the group name is what tells them apart. */
+  groupName?: string | null;
   // Ramy, 25 Aug 2026: "the trainers should show how many volunteers are...
   // attending" -- aggregate count only, no names (names are a centre-admin
   // concern, not a trainer/trainee one). Undefined/null where the course has
@@ -76,7 +80,7 @@ export interface ReadOnlyBoardProps {
   timeZone: string;
 }
 
-const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null };
+const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
 
 export function ReadOnlyTimetableBoard({
   events,
@@ -239,7 +243,7 @@ export function ReadOnlyTimetableBoard({
                 <div
                   className="flex flex-col gap-0.5 py-3 pr-2.5"
                   style={{
-                    height: ROW_HEIGHT,
+                    minHeight: ROW_HEIGHT,
                     boxSizing: "border-box",
                     paddingLeft: isToday ? 9 : 12,
                     borderLeft: `3px solid ${isToday ? "oklch(38% 0.072 195)" : "transparent"}`,
@@ -253,11 +257,11 @@ export function ReadOnlyTimetableBoard({
                     <p className="text-[8.5px] font-bold tracking-[0.1em] text-primary uppercase">Today</p>
                   ) : null}
                 </div>
-                <div style={{ height: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
+                <div style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
                   <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                 </div>
                 {row.bands.map((bandEvents, i) => (
-                  <div key={i} style={{ height: ROW_HEIGHT, boxSizing: "border-box", padding: 5, overflowY: "auto" }}>
+                  <div key={i} style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
                     <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                   </div>
                 ))}
@@ -323,8 +327,10 @@ export function ReadOnlyTimetableBoard({
                       {event.detail ? (
                         <span className="text-[10.5px] text-muted">{event.detail}</span>
                       ) : null}
-                      {meta.teachingLetters ? (
-                        <span className="text-[10.5px] text-muted">{meta.teachingLetters}</span>
+                      {meta.groupName || meta.teachingLetters ? (
+                        <span className="text-[10.5px] text-muted">
+                          {[meta.groupName, meta.teachingLetters].filter(Boolean).join(" · ")}
+                        </span>
                       ) : null}
                       {mineOnly && meta.ownTpSlot ? (
                         <span
@@ -469,9 +475,19 @@ function Cell({
     );
   }
 
+  // Ramy, 12 Sep 2026: "the tiles are still squashed... they're supposed to
+  // be fixed dimensions" -- two groups teach in parallel, so a TP band holds
+  // two lessons, and side by side they shared one 115px cell at 55px each.
+  // Stacked, every card keeps the cell's full width and the row grows (the
+  // cells are min-height, not height) -- "stack them", his call over
+  // widening the column and scrolling the week sideways.
+  // Group A above Group B in every cell, whichever row was inserted first.
+  const ordered = [...events].sort((a, b) =>
+    ((eventMeta[a.id] ?? EMPTY_META).groupName ?? "").localeCompare((eventMeta[b.id] ?? EMPTY_META).groupName ?? "")
+  );
   return (
-    <div className="flex items-start gap-1.5">
-      {events.map((event) => {
+    <div className="flex flex-col gap-1.5">
+      {ordered.map((event) => {
         const displayCat = toDisplayCategory(categorize(event));
         const style = CATEGORY_STYLE[displayCat];
         const mine = (eventMeta[event.id] ?? EMPTY_META).mine;
@@ -479,7 +495,7 @@ function Cell({
         return (
           <div
             key={event.id}
-            className="min-w-0 flex-1 rounded-[10px] p-2 transition-opacity duration-150"
+            className="min-w-0 rounded-[10px] p-2 transition-opacity duration-150"
             style={{
               opacity: faded ? 0.25 : 1,
               backdropFilter: "blur(10px)",
@@ -525,7 +541,7 @@ function SessionTile({
   titleWeight: number;
   displayCat: DisplayCategory;
 }) {
-  const { mine, ownTpSlot, teachingLetters: letters } = meta;
+  const { mine, ownTpSlot, teachingLetters: letters, groupName } = meta;
   const youTeach = mineOnly && ownTpSlot;
   const showCamera = displayCat !== "lu" && displayCat !== "admin";
   const live = isEventLive(event, now, timeZone);
@@ -536,10 +552,9 @@ function SessionTile({
         {event.title}
       </span>
       {event.detail ? <span className="text-[10px] text-muted">{event.detail}</span> : null}
-      {letters || event.event_time ? (
+      {letters || groupName || event.event_time ? (
         <span className="text-[10px] text-muted">
-          {event.event_time?.slice(0, 5)}
-          {letters ? ` · ${letters}` : ""}
+          {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
       {youTeach ? <span className="pill pill-neutral text-[9px]">You teach</span> : null}
@@ -606,6 +621,7 @@ function DetailPanel({
   const letters = meta.teachingLetters;
 
   if (event.type === "tp") {
+    if (meta.groupName) rows.push({ label: "Group", value: meta.groupName });
     if (letters) rows.push({ label: "Teaching today", value: letters });
     if (event.linked_tp_number) rows.push({ label: "TP number", value: `TP${event.linked_tp_number}` });
     if (meta.volunteerAttendance) rows.push({ label: "Volunteers", value: `${meta.volunteerAttendance.expected} of ${meta.volunteerAttendance.total} coming` });

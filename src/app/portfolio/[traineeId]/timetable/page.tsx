@@ -47,7 +47,7 @@ export default async function TraineeTimetablePage({
     await markScavengerHuntFound(supabase, trainee.course_id, viewer.id, "group");
   }
 
-  const [{ data: course }, { data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }] = await Promise.all([
+  const [{ data: course }, { data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }, { data: tpGroups }] = await Promise.all([
     supabase.from("courses").select("time_bands").eq("id", trainee.course_id).maybeSingle(),
     supabase
       .from("course_timetable_events")
@@ -61,7 +61,11 @@ export default async function TraineeTimetablePage({
       .from("supervised_session_completions")
       .select("timetable_event_id, time_spent_seconds, response, submitted_at, checked_at, quiz_topic, score, question_count")
       .eq("trainee_id", traineeId),
+    // Admin client: course_tp_groups has no trainee read policy, so through RLS
+    // this came back empty and no card could name its group. Names only.
+    createAdminClient().from("course_tp_groups").select("id, name").eq("course_id", trainee.course_id),
   ]);
+  const tpGroupNameById = new Map((tpGroups ?? []).map((g) => [g.id, g.name]));
 
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
   const allEvents: TimetableEvent[] = events ?? [];
@@ -94,6 +98,7 @@ export default async function TraineeTimetablePage({
   let viewerHalfOrder: 1 | 2 | null = null;
   let viewerSubgroupId: string | null = null;
   let viewerGroupLabel: string | null = null;
+  let viewerTpGroupId: string | null = null;
   const halvesByCode = new Map<string, string>(); // computed "ABC"/"DEF" -> subgroupId
   const halfOrderBySubgroupId = new Map<string, 1 | 2>();
 
@@ -116,6 +121,7 @@ export default async function TraineeTimetablePage({
     }
 
     if (subgroup?.tp_group_id) {
+      viewerTpGroupId = subgroup.tp_group_id;
       const { data: tpGroup } = await supabase.from("course_tp_groups").select("name").eq("id", subgroup.tp_group_id).maybeSingle();
       const { data: siblingSubgroups } = await supabase
         .from("course_subgroups")
@@ -165,8 +171,16 @@ export default async function TraineeTimetablePage({
   // null and the card/detail-panel showed no group code at all. The letter
   // code is display info for every TP slot ("who's teaching today"), not
   // gated to "mine" -- that gating is isMineEvent's job, separately.
+  //
+  // Ramy, 12 Sep 2026: the parallel group's lesson "is wearing the first
+  // group's label". halvesByCode is the VIEWER's group's halves, so Group B's
+  // "TP7 · A" card carried Group A's "ABC" -- a Group B lesson knows nothing
+  // of those letters (each group is its own A-F; there is no G-L). Letters
+  // are only said for the viewer's own group; every TP card names its group
+  // (groupNameFor below), which is what tells two "TP7 · A" cards apart.
   const teachingLettersFor = (event: TimetableEvent): string | null => {
     if (event.type !== "tp") return null;
+    if (event.tp_group_scope_id && viewerTpGroupId && event.tp_group_scope_id !== viewerTpGroupId) return null;
     const owningHalfOrder = halfOwningDate(tpEvents, event.event_date);
     if (owningHalfOrder === null) return null;
     for (const [code, subgroupId] of halvesByCode) {
@@ -190,11 +204,19 @@ export default async function TraineeTimetablePage({
   ]);
   const eventMeta: Record<
     string,
-    { mine: boolean; ownTpSlot: boolean; teachingLetters: string | null; volunteerAttendance: { expected: number; total: number } | null; sheetHref: string | null }
+    {
+      mine: boolean;
+      ownTpSlot: boolean;
+      teachingLetters: string | null;
+      groupName: string | null;
+      volunteerAttendance: { expected: number; total: number } | null;
+      sheetHref: string | null;
+    }
   > = {};
   for (const event of allEvents) {
     eventMeta[event.id] = {
       sheetHref: sheetHrefByEventId.get(event.id) ?? null,
+      groupName: event.type === "tp" && event.tp_group_scope_id ? (tpGroupNameById.get(event.tp_group_scope_id) ?? null) : null,
       mine: isMineEvent(event),
       ownTpSlot: isOwnTpSlot(event),
       teachingLetters: teachingLettersFor(event),
