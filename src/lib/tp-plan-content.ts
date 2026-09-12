@@ -69,12 +69,27 @@ export interface LessonFramework {
   stages: LessonFrameworkStage[];
 }
 
-// Choosing a framework fills the procedure table's stage names + aims;
-// everything stays editable afterward. Ported verbatim from the prototype.
+// Choosing a framework fills the procedure table's STAGE NAMES. It does not
+// fill the stage aims -- each stage's `aim` below is shown as placeholder text
+// in the empty aim box, so the candidate can see what an aim for that stage
+// has to do and then writes their own, for their own lesson.
+//
+// Ramy, 12 Sep 2026: "choosing the framework is kind of cheating a bit,
+// because it tells them the stage aims... they should at least write that
+// part." Stage aims are assessed (CELTA 5 criterion 4c, staging and aims), so
+// a framework that types them for the candidate is evidence of nothing.
+//
+// `name` is what the picker shows and what `tp_plans.framework_used` stores.
+// The names were one long explanatory line each ("Receptive Skills (reading or
+// listening)", "Present – Practice – Produce (PPP)"); CELTA candidates are
+// taught these terms in input sessions, so the picker names them rather than
+// explaining them. FRAMEWORK_NAME_ALIASES below keeps plans written under the
+// old names pointing at the right framework. Stage content is unchanged and
+// still ported verbatim from the prototype.
 export const LESSON_FRAMEWORKS: LessonFramework[] = [
   {
     key: "ppp",
-    name: "Present – Practice – Produce (PPP)",
+    name: "PPP",
     stages: [
       { name: "Lead-in", aim: "To set the topic, personalise it and generate interest in the lesson" },
       {
@@ -118,7 +133,7 @@ export const LESSON_FRAMEWORKS: LessonFramework[] = [
   },
   {
     key: "textbased",
-    name: "Text-Based Presentation of Language",
+    name: "Text-based",
     stages: [
       { name: "Lead-in / building context", aim: "To generate interest in the topic, theme or context of the text" },
       {
@@ -133,7 +148,7 @@ export const LESSON_FRAMEWORKS: LessonFramework[] = [
   },
   {
     key: "langpractice",
-    name: "Language Practice (follows a previous lesson)",
+    name: "Language practice",
     stages: [
       { name: "Lead-in (optional)", aim: "Keep the same context as the previous lesson if possible" },
       { name: "Set up", aim: "To set up the practice activity; to highlight the target language to be used" },
@@ -144,7 +159,7 @@ export const LESSON_FRAMEWORKS: LessonFramework[] = [
   },
   {
     key: "receptive",
-    name: "Receptive Skills (reading or listening)",
+    name: "Receptive skills",
     stages: [
       { name: "Lead-in", aim: "To activate learners' existing knowledge of the topic; to develop oral fluency" },
       { name: "Prediction task", aim: "To encourage learners to predict the content of the text" },
@@ -160,7 +175,7 @@ export const LESSON_FRAMEWORKS: LessonFramework[] = [
   },
   {
     key: "productive",
-    name: "Productive Skills (speaking or writing)",
+    name: "Productive skills",
     stages: [
       { name: "Lead-in", aim: "To activate existing knowledge of the topic; to generate interest" },
       { name: "Preparing to write / speak", aim: "To generate ideas; to brainstorm, prepare notes, or work from a model" },
@@ -170,6 +185,27 @@ export const LESSON_FRAMEWORKS: LessonFramework[] = [
     ],
   },
 ];
+
+// Plans written before 12 Sep 2026 store the old long names. Read every
+// stored value through this so the picker still shows the right framework.
+const FRAMEWORK_NAME_ALIASES: Record<string, string> = {
+  "Present – Practice – Produce (PPP)": "PPP",
+  "Present-Practice-Produce (PPP)": "PPP",
+  "Test-Teach-Test Presentation of Language": "Test – Teach – Test",
+  "Text-Based Presentation of Language": "Text-based",
+  "Text-based Presentation of Language": "Text-based",
+  "Language Practice (follows a previous lesson)": "Language practice",
+  "Language Practice": "Language practice",
+  "Receptive Skills (reading or listening)": "Receptive skills",
+  "Receptive Skills": "Receptive skills",
+  "Productive Skills (speaking or writing)": "Productive skills",
+  "Productive Skills": "Productive skills",
+};
+
+export function normalizeFrameworkName(stored: string | null | undefined): string {
+  if (!stored) return "";
+  return FRAMEWORK_NAME_ALIASES[stored] ?? stored;
+}
 
 // ---------------- language analysis sheet ----------------
 

@@ -8,7 +8,6 @@ import {
   type LanguageAnalysisType,
   type VocabRow,
 } from "@/lib/tp-plan-content";
-import { VoiceTextarea } from "@/components/voice-textarea";
 import { bulletListProps } from "@/lib/bullet-list";
 import { PhonemicPopup } from "@/components/phonemic-popup";
 import { CustomSelect } from "@/components/custom-select";
@@ -261,11 +260,16 @@ export function LanguageAnalysisEditor({
                             className={inputClass}
                           />
                         ) : (
-                          <VoiceTextarea
+                          // No mic of its own: the lesson plan has one
+                          // Dictate button, in the submit bar, and it writes
+                          // into whichever box has the cursor -- this one
+                          // included (Ramy, 12 Sep 2026).
+                          <textarea
                             rows={3}
                             value={value}
                             disabled={locked}
                             onChange={(e) => updateBlock(i, { [key]: e.target.value } as Partial<AnalysisBlock>)}
+                            data-dictate-label={field.label}
                             className={inputClass}
                             {...bulletListProps}
                           />

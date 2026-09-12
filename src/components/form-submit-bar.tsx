@@ -13,6 +13,7 @@ export function FormSubmitBar({
   error,
   hideDraftButton = false,
   raiseForMobileNav = false,
+  leading,
 }: {
   warning: string;
   draftPending: boolean;
@@ -35,6 +36,11 @@ export function FormSubmitBar({
   // self-evaluation, written assignment) opt in; the trainer feedback form
   // has neither to clear.
   raiseForMobileNav?: boolean;
+  // A control that belongs to the whole form rather than to one box, parked at
+  // the left of the bar. The lesson plan's single Dictate button lives here:
+  // it follows the cursor, and the bar is the one thing on screen wherever you
+  // have scrolled to (Ramy, 12 Sep 2026).
+  leading?: React.ReactNode;
 }) {
   return (
     <div
@@ -42,9 +48,12 @@ export function FormSubmitBar({
         raiseForMobileNav ? "bottom-40 md:bottom-4" : "bottom-4"
       }`}
     >
-      <div className="flex items-center gap-2">
-        <span className="size-1.5 shrink-0 rounded-full bg-status-warning-text" />
-        <p className="text-xs text-muted">{warning}</p>
+      <div className="flex items-center gap-3">
+        {leading}
+        <div className="flex items-center gap-2">
+          <span className="size-1.5 shrink-0 rounded-full bg-status-warning-text" />
+          <p className="text-xs text-muted">{warning}</p>
+        </div>
       </div>
       <div className="flex items-center gap-3">
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

@@ -112,3 +112,13 @@ export function showsAbbreviationsGlossary(tier: DensityTier): boolean {
 export function showsTips(tier: DensityTier): boolean {
   return tier !== "minimal";
 }
+
+// The lesson-shape picker on the candidate's own plan is scaffolding like any
+// other: it hands over the usual stages of a framework so a candidate who has
+// never staged a lesson has somewhere to start. Ramy, 12 Sep 2026: "maybe this
+// should stop after TP4 -- it should only be for the first half of the
+// course." By TP5 the candidate stages their own lesson, which is what the
+// syllabus expects of them by then. Still openable by hand at any TP.
+export function offersLessonShapes(tier: DensityTier): boolean {
+  return tier === "scripted" || tier === "framework";
+}

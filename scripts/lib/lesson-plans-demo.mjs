@@ -23,7 +23,7 @@ const LESSON_MINUTES = 45;
 /** Framework stage lists, mirroring src/lib/tp-plan-content.ts. */
 const FRAMEWORKS = {
   ppp: {
-    name: "Present – Practice – Produce (PPP)",
+    name: "PPP",
     stages: ["Lead-in", "Present: clarify and focus on TL", "Practice", "Production", "Error correction"],
     times: [5, 12, 10, 13, 5],
   },
@@ -33,17 +33,17 @@ const FRAMEWORKS = {
     times: [4, 7, 12, 8, 9, 5],
   },
   textbased: {
-    name: "Text-Based Presentation of Language",
+    name: "Text-based",
     stages: ["Lead-in / building context", "Reading or listening task", "Highlighting target language", "Clarifying target language", "Language practice", "Feedback"],
     times: [5, 8, 5, 12, 10, 5],
   },
   receptive: {
-    name: "Receptive Skills (reading or listening)",
+    name: "Receptive skills",
     stages: ["Lead-in", "Pre-teach vocabulary", "Reading / listening for gist", "Reading / listening for detail", "Post-reading / listening task"],
     times: [5, 8, 7, 13, 12],
   },
   productive: {
-    name: "Productive Skills (speaking or writing)",
+    name: "Productive skills",
     stages: ["Lead-in", "Preparing to write / speak", "Useful language", "Speaking / writing task", "Feedback and error correction"],
     times: [5, 9, 8, 15, 8],
   },
