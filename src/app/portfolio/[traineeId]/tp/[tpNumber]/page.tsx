@@ -31,6 +31,10 @@ import { PeerNoteForm } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/peer-not
 import { GroupFeedbackForm } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/group-feedback-form";
 import type { Database } from "@/lib/supabase/types";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
+import { tpLessonDate } from "@/lib/tp-lesson-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 
@@ -208,6 +212,18 @@ export default async function TpDetailPage({
     admin.from("centers").select("auto_tag_criteria_enabled").eq("id", trainee.center_id).maybeSingle(),
   ]);
   const hasGoogleConnection = Boolean(googleConnection);
+
+  // Ramy, 12 Sep 2026: "the self-evaluation should unlock when the lesson date
+  // passes." Waiting for taught_at meant waiting for the tutor, and on the
+  // feedback path that is the feedback itself -- so a candidate could only
+  // reflect after reading their tutor's view. The CELTA order is teach,
+  // reflect, then be fed back to, which is also what makes the feedback
+  // form's own "comment on their self-evaluation" box usable.
+  //
+  // taught_at still counts, for a lesson taught early or logged by hand.
+  const lessonDate = trainee.course_id ? await tpLessonDate(supabase, trainee.course_id, traineeId, tpNumber) : null;
+  const centreToday = toLocalIso(new Date(), (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  const lessonTaught = Boolean(assignment?.taught_at) || Boolean(lessonDate && lessonDate <= centreToday);
 
   if (!assignment) {
     return (
@@ -683,7 +699,8 @@ export default async function TpDetailPage({
               <SelfEvaluationSection
                 tpNumber={tpNumber}
                 plan={plan ?? null}
-                taught={Boolean(assignment.taught_at)}
+                taught={lessonTaught}
+                lessonDate={lessonDate ? formatCalendarDate(lessonDate, { weekday: "long", month: "long" }) : null}
                 selfEvaluation={selfEvaluation ?? null}
                 previousActionPoints={previousActionPoints}
                 feedback={feedback ?? null}

@@ -12,6 +12,7 @@ export function SelfEvaluationSection({
   tpNumber,
   plan,
   taught,
+  lessonDate = null,
   selfEvaluation,
   previousActionPoints,
   feedback,
@@ -19,6 +20,8 @@ export function SelfEvaluationSection({
   tpNumber: number;
   plan: TpPlan | null;
   taught: boolean;
+  /** The day this lesson is taught, already formatted -- named in the locked message. */
+  lessonDate?: string | null;
   selfEvaluation: TpSelfEvaluation | null;
   previousActionPoints: string[];
   feedback: TpFeedback | null;
@@ -31,8 +34,17 @@ export function SelfEvaluationSection({
     return (
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
         <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
+        {/* Ramy, 12 Sep 2026: "the self-evaluation should unlock when the
+            lesson date passes." It used to wait for the tutor to log the
+            lesson as taught, which on the feedback path meant waiting for the
+            feedback itself -- so the candidate could only reflect after
+            reading their tutor's view, and the tutor's own "comment on their
+            self-evaluation" box could never be filled on a first pass. The
+            CELTA order is: teach, reflect, then be fed back to. */}
         <p className="mt-2 text-sm text-muted">
-          Unlocks once your trainer has logged this lesson as taught.
+          {lessonDate
+            ? `Opens after you teach this lesson, on ${lessonDate}.`
+            : "Opens once you have taught this lesson."}
         </p>
       </div>
     );
