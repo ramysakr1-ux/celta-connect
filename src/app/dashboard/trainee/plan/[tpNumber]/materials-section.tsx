@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { createMaterialRecord, deleteMaterial } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-actions";
 import { DriveAttachButtons } from "@/app/dashboard/trainee/plan/[tpNumber]/drive-attach-buttons";
+import { shareMaterialWithStudents, unshareMaterialWithStudents } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/share-actions";
 import type { Database, TpMaterialFileType } from "@/lib/supabase/types";
 
 type TpMaterial = Database["public"]["Tables"]["tp_materials"]["Row"];
@@ -15,6 +16,8 @@ export function MaterialsSection({
   materials,
   locked,
   hasGoogleConnection,
+  sharedMaterialIds = [],
+  tpNumber,
 }: {
   tpPlanId: string;
   centerId: string;
@@ -22,6 +25,9 @@ export function MaterialsSection({
   materials: TpMaterial[];
   locked: boolean;
   hasGoogleConnection: boolean;
+  /** Which of these the students can already see. */
+  sharedMaterialIds?: string[];
+  tpNumber?: number;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -118,14 +124,37 @@ export function MaterialsSection({
                 {opening === m.id ? "Opening…" : (m.file_name ?? m.slides_url)}
                 {m.file_type ? <span className="ml-2 text-xs text-muted">({m.file_type})</span> : null}
               </button>
-              {!locked ? (
-                <form action={deleteMaterial}>
-                  <input type="hidden" name="material_id" value={m.id} />
-                  <button type="submit" className="text-destructive hover:underline">
-                    Remove
+              <span className="flex shrink-0 items-center gap-3">
+                {/* The candidate shares their own handout with the students
+                    they are about to teach. It is their lesson and their
+                    handout, and online the students need it beforehand --
+                    Ramy, 12 Sep 2026. Stays available after the plan locks:
+                    the plan is fixed at submission, the students still have
+                    to receive the handout. */}
+                <form action={sharedMaterialIds.includes(m.id) ? unshareMaterialWithStudents : shareMaterialWithStudents}>
+                  <input type="hidden" name="tp_material_id" value={m.id} />
+                  <input type="hidden" name="trainee_id" value={traineeId} />
+                  <input type="hidden" name="tp_number" value={tpNumber ?? ""} />
+                  <button
+                    type="submit"
+                    className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                      sharedMaterialIds.includes(m.id)
+                        ? "border-border bg-status-neutral-bg text-ink"
+                        : "border-border text-muted trainee-hover-fill hover:text-primary"
+                    }`}
+                  >
+                    {sharedMaterialIds.includes(m.id) ? "Shared with students ✓" : "Share with students"}
                   </button>
                 </form>
-              ) : null}
+                {!locked ? (
+                  <form action={deleteMaterial}>
+                    <input type="hidden" name="material_id" value={m.id} />
+                    <button type="submit" className="text-destructive hover:underline">
+                      Remove
+                    </button>
+                  </form>
+                ) : null}
+              </span>
             </li>
           ))}
         </ul>

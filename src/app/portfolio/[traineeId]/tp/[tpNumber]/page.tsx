@@ -686,6 +686,8 @@ export default async function TpDetailPage({
                   materials={materials ?? []}
                   locked={Boolean(plan.submitted_at)}
                   hasGoogleConnection={hasGoogleConnection}
+                  sharedMaterialIds={[...sharedMaterialIds]}
+                  tpNumber={tpNumber}
                 />
               ) : (
                 <div className="sheet rounded-[9px] border-t-[var(--trainee-plum)] p-6">
