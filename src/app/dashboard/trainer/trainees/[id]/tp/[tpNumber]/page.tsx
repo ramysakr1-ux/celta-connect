@@ -130,7 +130,17 @@ export default async function TrainerTpCardPage({
                 <tbody>
                   {plan.procedure.map((row, i) => (
                     <tr key={i}>
-                      <td className="border-b border-border-faint p-2 align-top text-ink">{row.stage}</td>
+                      {/* The stage AIM was dropped here, in the portfolio view
+                          and in the PDF -- it only ever appeared on the
+                          candidate's own copy. The tutor reading this table is
+                          the person assessing staging and aims (4b, 4c, 4e),
+                          so the aim has to be in front of them. Found walking
+                          TP8, 12 Sep 2026, the same shape of gap as the
+                          anticipated problems earlier that day. */}
+                      <td className="border-b border-border-faint p-2 align-top text-ink">
+                        {row.stage}
+                        {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
+                      </td>
                       <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">{row.procedure}</td>
                       <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
                       <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>

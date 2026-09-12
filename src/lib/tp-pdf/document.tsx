@@ -111,14 +111,17 @@ export async function renderTpPdfBuffer(input: {
           <View>
             <Text style={styles.h2}>Procedure</Text>
             <View style={styles.headerRow}>
-              <Text style={[styles.cell, { flex: 1.2 }]}>Stage</Text>
+              <Text style={[styles.cell, { flex: 1.2 }]}>Stage / Aim</Text>
               <Text style={[styles.cell, { flex: 0.8 }]}>Interaction</Text>
               <Text style={[styles.cell, { flex: 0.8 }]}>Time</Text>
               <Text style={[styles.cell, { flex: 3.4 }]}>Procedure</Text>
             </View>
             {plan.procedure.map((row, i) => (
               <View key={i} style={styles.row}>
-                <Text style={[styles.cell, { flex: 1.2 }]}>{row.stage}</Text>
+                <Text style={[styles.cell, { flex: 1.2 }]}>
+                  {row.stage}
+                  {row.aim ? `\n${row.aim}` : ""}
+                </Text>
                 <Text style={[styles.cell, { flex: 0.8 }]}>{row.interaction}</Text>
                 <Text style={[styles.cell, { flex: 0.8 }]}>{row.time}</Text>
                 <Text style={[styles.cell, { flex: 3.4 }]}>{row.procedure}</Text>

@@ -542,7 +542,10 @@ export default async function TpDetailPage({
                             <tbody>
                               {plan.procedure.map((row, i) => (
                                 <tr key={i}>
-                                  <td className="border-b border-border-faint p-2 align-top text-ink">{row.stage}</td>
+                                  <td className="border-b border-border-faint p-2 align-top text-ink">
+                                    {row.stage}
+                                    {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
+                                  </td>
                                   <td className="border-b border-border-faint p-2 align-top whitespace-pre-line text-ink">
                                     {row.procedure}
                                   </td>
