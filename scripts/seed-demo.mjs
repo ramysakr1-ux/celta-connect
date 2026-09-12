@@ -176,6 +176,32 @@ async function main() {
   const { data: existingCentres } = await supabase.from("centers").select("id").eq("is_demo", true);
   for (const existing of existingCentres ?? []) {
     const { data: oldProfiles } = await supabase.from("profiles").select("id").eq("center_id", existing.id);
+    const oldIds = (oldProfiles ?? []).map((p) => p.id);
+
+    // Audit columns have to let go of a person before the person can be
+    // deleted. These are the ones on tables that OUTLIVE a course delete --
+    // centre-level records, and profiles' own self-reference -- so nothing
+    // else clears them. Without this the auth delete fails with a bare 500
+    // (the FK violation happens inside Auth's own cascade, so the message
+    // never reaches us) and the run dies on the next centre_hard_delete
+    // saying "Profiles still exist for this centre", which is true but says
+    // nothing about why. Found 12 Sep 2026 after a --stage day1 run wedged
+    // the demo half-deleted.
+    if (oldIds.length > 0) {
+      const holders = [
+        ["applicants", "marked_by"],
+        ["interview_records", "created_by"],
+        ["interview_slots", "created_by"],
+        ["tp_points", "created_by"],
+        ["plan_assignments", "assigned_by"],
+        ["profiles", "course_status_set_by"],
+      ];
+      for (const [table, column] of holders) {
+        const { error } = await supabase.from(table).update({ [column]: null }).in(column, oldIds);
+        if (error) console.warn(`  couldn't clear ${table}.${column}:`, error.message);
+      }
+    }
+
     for (const p of oldProfiles ?? []) {
       const { error: delUserErr } = await supabase.auth.admin.deleteUser(p.id);
       if (delUserErr) console.warn("  couldn't delete auth user", p.id, delUserErr.message);
@@ -2977,6 +3003,9 @@ async function main() {
   // bookings, Stage 1 invites in two states, Priya flagged for Stage 3, and
   // a consultation block per tutor with one booking (migration 0275).
   const tutorialAt = (n, band) => ({ event_date: courseDay(courseStart, n), event_time: BAND_TIMES[band - 1] });
+  // Used by the Stage 1 invites below. It lived in the old Stage 2 block that
+  // seedStage2Demo replaced, and went with it.
+  const stamp = new Date().toISOString();
   // Stage 2 at the halfway point for the whole cohort -- sheets on the
   // ported day-9 events, everyone booked and seen, records complete. Replaces
   // a day-12 sheet for Group A alone with two of six booked (12 Sep 2026).
@@ -3058,7 +3087,11 @@ async function main() {
       created_by: trainer2Id,
     });
   }
-  await supabase.from("celta5_records").update({ stage3_tutorial_required: true }).eq("trainee_id", trainees["Priya Sharma"]).eq("course_id", course.id);
+  // Priya's Stage 3 flag is a second-half judgement -- not something a course
+  // on day one can have made.
+  if (reached(stage3Date)) {
+    await supabase.from("celta5_records").update({ stage3_tutorial_required: true }).eq("trainee_id", trainees["Priya Sharma"]).eq("course_id", course.id);
+  }
   for (const [tutorId, tutorName, day, band, slotCount, bookedBy] of [
     [trainerId, "Jordan Blake", 13, 7, 4, ["Amara Okafor"]],
     [trainer2Id, "Marcus Webb", 14, 4, 3, []],
