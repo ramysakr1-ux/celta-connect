@@ -47,7 +47,9 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
     .select("id, title")
     .eq("course_id", assignment.course_id)
     .neq("type", "tp")
-    .ilike("title", "%getting to know%")
+    // "Getting to know you" or the staffroom's "GTKY" -- the ported demo
+    // timetable uses the latter and matched nothing (12 Sep 2026).
+    .or("title.ilike.%getting to know%,title.ilike.%gtky%")
     .order("event_date")
     .limit(1)
     .maybeSingle();

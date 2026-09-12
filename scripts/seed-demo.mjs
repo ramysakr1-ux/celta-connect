@@ -806,23 +806,62 @@ async function main() {
   // /demo/trainee-gtky returned a 404 for everyone -- found 2 Sep 2026 while
   // walking the demo journeys, with zero rows in the table centre-wide. The
   // activities themselves live in code (src/lib/gtky-activities.ts), so only
-  // the offer needs seeding. Different trios per trainee, because the real
-  // assigner avoids giving one TP group the same activity twice.
-  const GTKY_OFFERS = [
-    ["ball_game", "find_someone_who", "line_up_according_to"],
-    ["find_your_other_half", "draw_your_name", "ball_game"],
-    ["line_up_according_to", "find_your_other_half", "find_someone_who"],
-  ];
+  // the offer needs seeding.
+  //
+  // 12 Sep 2026, walking day one: the offers were three fixed trios drawn
+  // from the beginner and elementary pools, handed to candidates whose row
+  // says "inter" -- under a page heading promising activities "matched to
+  // the level you will teach". They now come from the band's own pool, the
+  // way resolveGtkyAssignments does it. And day one is over by any stage
+  // past precourse, so the choices are MADE: most candidates picked in
+  // Connect on the Friday, the tutor picked for the rest on the Monday --
+  // three weeks in, "0 of 12 have chosen" was a demo that had never had a
+  // day one. Likewise the scavenger hunt, which nobody had ever finished.
+  const GTKY_BANK_BY_BAND = {
+    inter: ["star_facts", "a_minute_of_questions", "hunt_the_teacher"],
+  };
+  const GTKY_BAND = "inter";
+  const gtkyPool = GTKY_BANK_BY_BAND[GTKY_BAND];
+  const dayOneIso = startDate;
+  const dayOne = new Date(`${dayOneIso}T14:00:00`);
+  const fridayBefore = new Date(dayOne); fridayBefore.setDate(fridayBefore.getDate() - 3); fridayBefore.setHours(17, 0, 0, 0);
+  const pastDayOne = STAGE !== "precourse";
+  const traineeList = Object.values(trainees);
   await supabase.from("gtky_assignments").insert(
-    Object.values(trainees).map((traineeId, i) => ({
-      center_id: center.id,
-      course_id: course.id,
-      trainee_id: traineeId,
-      level_band: "inter",
-      offered_slugs: GTKY_OFFERS[i % GTKY_OFFERS.length],
-    }))
+    traineeList.map((traineeId, i) => {
+      // Rotate the trio so the running order differs candidate to candidate.
+      const offered = [gtkyPool[i % 3], gtkyPool[(i + 1) % 3], gtkyPool[(i + 2) % 3]];
+      // Nine picked themselves before the Friday deadline; the tutor picked
+      // for the other three on the Monday morning (chosen_at on day one).
+      const selfPicked = pastDayOne && i % 4 !== 3;
+      const tutorPicked = pastDayOne && !selfPicked && STAGE !== "week1";
+      const chosen = selfPicked || tutorPicked ? offered[i % 3] : null;
+      return {
+        center_id: center.id,
+        course_id: course.id,
+        trainee_id: traineeId,
+        level_band: GTKY_BAND,
+        offered_slugs: offered,
+        chosen_slug: chosen,
+        chosen_at: chosen ? (selfPicked ? fridayBefore : dayOne).toISOString() : null,
+      };
+    })
   );
-  console.log("gtky assignments: offered to", Object.keys(trainees).length, "trainees");
+  console.log("gtky assignments: offered to", traineeList.length, "trainees", pastDayOne ? "(choices made)" : "(still open)");
+
+  // The "find your way around Connect" hunt from the welcome email -- six
+  // questions, done in the first days. Most found all six; a couple stopped
+  // at four. Nothing before day one.
+  if (pastDayOne) {
+    const HUNT_KEYS = ["lesson_plan", "group", "announcement", "observation_hour", "syllabus", "day_counter"];
+    const huntRows = [];
+    traineeList.forEach((traineeId, i) => {
+      const found = i % 5 === 2 ? 4 : 6;
+      HUNT_KEYS.slice(0, found).forEach((question_key) => huntRows.push({ course_id: course.id, trainee_id: traineeId, question_key }));
+    });
+    const { error: huntErr } = await supabase.from("scavenger_hunt_progress").insert(huntRows);
+    if (huntErr) console.log("scavenger hunt:", huntErr.message); else console.log("scavenger hunt:", huntRows.length, "answers found");
+  }
 
   // --- TP subgroup, which is what actually switches the chat on ---
   //

@@ -30,8 +30,12 @@ export default async function GtkyPage() {
   const nameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
   const activityBySlug = new Map(GTKY_BANK.map((a) => [a.slug, a]));
 
-  const assignedCount = assignments?.length ?? 0;
-  const chosenCount = (assignments ?? []).filter((a) => a.chosen_slug).length;
+  // Same cohort on both sides of the fraction. The assignments carried a
+  // withdrawn candidate's row while the trainee list did not, and the page
+  // read "12 of 11 candidates assigned" (12 Sep 2026).
+  const activeAssignments = (assignments ?? []).filter((a) => nameById.has(a.trainee_id));
+  const assignedCount = activeAssignments.length;
+  const chosenCount = activeAssignments.filter((a) => a.chosen_slug).length;
   const unassignedCount = (trainees?.length ?? 0) - assignedCount;
 
   return (
@@ -79,7 +83,7 @@ export default async function GtkyPage() {
               </tr>
             </thead>
             <tbody>
-              {(assignments ?? []).map((a) => (
+              {activeAssignments.map((a) => (
                 <tr key={a.id}>
                   <td className="text-ink">{nameById.get(a.trainee_id) ?? "Unknown"}</td>
                   <td className="text-muted">{BAND_LABELS[a.level_band] ?? a.level_band}</td>

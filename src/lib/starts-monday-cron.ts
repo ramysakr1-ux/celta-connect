@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
+import { resolveTimeBands, type TimeBand } from "@/lib/timetable-grid";
 import {
   sendApplicantEmail,
   startsMondayEmailHtml,
@@ -41,7 +42,7 @@ export async function runStartsMondayCron(): Promise<{ sent: number }> {
 
   const { data: courses } = await admin
     .from("courses")
-    .select("id, center_id, name, start_date, delivery_mode")
+    .select("id, center_id, name, start_date, delivery_mode, time_bands")
     .gte("start_date", today)
     .lte("start_date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
 
@@ -91,7 +92,13 @@ export async function runStartsMondayCron(): Promise<{ sent: number }> {
       const { data: center } = await admin.from("centers").select("name, admissions_email").eq("id", course.center_id).maybeSingle();
       if (!center) continue;
       const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
-      const startTime = "09:30"; // no per-course start-time field exists yet; matches the reference copy's own default
+      // The course's own first morning, not a constant. This read "09:30" --
+      // "no per-course start-time field exists yet" -- while every demo
+      // timetable began at 10:00: the one fact a candidate most needs on day
+      // one, and the email had it wrong. The earliest timetabled event on the
+      // start date is the truth; failing that, the first of the course's own
+      // time bands (10:00 by default).
+      const startTime = await resolveDayOneStart(admin, course.id, course.start_date, course.time_bands);
       const startDay = new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
       const mctName = await resolveMctName(admin, course.id);
@@ -176,6 +183,25 @@ export async function runStartsMondayCron(): Promise<{ sent: number }> {
   }
 
   return { sent };
+}
+
+async function resolveDayOneStart(
+  admin: ReturnType<typeof createAdminClient>,
+  courseId: string,
+  startDate: string,
+  timeBands: TimeBand[] | null
+): Promise<string> {
+  const { data: first } = await admin
+    .from("course_timetable_events")
+    .select("event_time")
+    .eq("course_id", courseId)
+    .eq("event_date", startDate)
+    .not("event_time", "is", null)
+    .order("event_time", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const hhmm = first?.event_time?.slice(0, 5);
+  return hhmm || resolveTimeBands(timeBands)[0].start;
 }
 
 function daysNotice(today: string, startDate: string): string {
