@@ -11,4 +11,9 @@ export interface TraineeNote {
   body: string;
   created_at: string;
   updated_at: string;
+  /** Migration 0294: a voice note keeps its recording; body is the transcript. */
+  audio_path?: string | null;
+  audio_duration_seconds?: number | null;
+  /** Signed for this page load -- never stored. */
+  audio_url?: string | null;
 }

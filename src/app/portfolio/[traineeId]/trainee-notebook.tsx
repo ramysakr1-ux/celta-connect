@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { PenLine, X, Trash2 } from "lucide-react";
-import { deleteTraineeNote, saveTraineeNote, setNotebookPaper } from "@/app/portfolio/[traineeId]/notebook-actions";
+import { PenLine, X, Trash2, Mic, Square } from "lucide-react";
+import { deleteTraineeNote, saveTraineeNote, saveVoiceNote, setNotebookPaper } from "@/app/portfolio/[traineeId]/notebook-actions";
 import type { NotebookPaper, TraineeNote } from "@/lib/trainee-notebook";
 import { formatDate } from "@/lib/format-date";
 
@@ -94,6 +94,16 @@ export function TraineeNotebook({
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftIdRef = useRef<string | null>(null);
+  // Voice notes (migration 0294): the same MediaRecorder capture the
+  // speaking task uses, no review step -- stop is save. The transcript
+  // comes back as the note's text; the recording stays playable under it.
+  const [rec, setRec] = useState<"idle" | "requesting" | "recording" | "saving" | "error">("idle");
+  const [recSeconds, setRecSeconds] = useState(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recSecondsRef = useRef(0);
   const anchor = useMemo(() => ({ path: pathname, label: labelFor(pathname, traineeId, assignmentTitles) }), [pathname, traineeId, assignmentTitles]);
 
   useEffect(() => {
@@ -178,6 +188,59 @@ export function TraineeNotebook({
     void setNotebookPaper(p);
   };
 
+  const startRecording = async () => {
+    setRec("requesting");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      recorderRef.current = recorder;
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (recTimer.current) clearInterval(recTimer.current);
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        const ext = blob.type.includes("mp4") ? "mp4" : blob.type.includes("ogg") ? "ogg" : "webm";
+        const fd = new FormData();
+        fd.set("audio", new File([blob], `note.${ext}`, { type: blob.type }));
+        fd.set("anchor_path", anchor.path);
+        fd.set("anchor_label", anchor.label);
+        fd.set("seconds", String(recSecondsRef.current));
+        setRec("saving");
+        const res = await saveVoiceNote(fd);
+        if (res.error || !res.note) {
+          setRec("error");
+          return;
+        }
+        setNotes((n) => [res.note!, ...n]);
+        setRec("idle");
+      };
+      recorder.start();
+      recSecondsRef.current = 0;
+      setRecSeconds(0);
+      recTimer.current = setInterval(() => {
+        recSecondsRef.current += 1;
+        setRecSeconds(recSecondsRef.current);
+      }, 1000);
+      setRec("recording");
+    } catch {
+      setRec("error");
+    }
+  };
+  const stopRecording = () => recorderRef.current?.stop();
+  useEffect(
+    () => () => {
+      if (recTimer.current) clearInterval(recTimer.current);
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    },
+    []
+  );
+  const mmss = (total: number) => `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+
   const p = PAPER[paper];
   const sameDay = (iso: string) => formatDate(iso, timeZone);
 
@@ -211,7 +274,7 @@ export function TraineeNotebook({
                   Your notebook
                 </p>
                 <p className="text-[11px]" style={{ color: MUTED }}>
-                  Yours only -- tutors and assessors never see it. Saved as you type.
+                  Yours only -- tutors and assessors never see it. Saved as you type; a voice note is kept and typed out for you.
                 </p>
               </div>
               <div className="flex items-center gap-1.5" title="Paper">
@@ -235,10 +298,37 @@ export function TraineeNotebook({
                   <span className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: MUTED }}>
                     {anchor.label} · {sameDay(new Date().toISOString())}
                   </span>
-                  <span className="text-[10.5px]" style={{ color: status === "error" ? "oklch(45% 0.15 27)" : MUTED }}>
+                  <span className="flex items-center gap-2 text-[10.5px]" style={{ color: status === "error" ? "oklch(45% 0.15 27)" : MUTED }}>
                     {status === "saving" ? "Saving…" : status === "saved" ? "Saved" : status === "error" ? "Couldn't save" : ""}
+                    {rec === "recording" ? (
+                      <button type="button" onClick={stopRecording} className="flex items-center gap-1.5 rounded-full px-2 py-0.5 font-bold" style={{ background: "oklch(45% 0.15 27)", color: "oklch(98.5% 0.006 90)" }}>
+                        <span className="block size-1.5 animate-pulse rounded-full bg-current" />
+                        {mmss(recSeconds)}
+                        <Square size={10} />
+                      </button>
+                    ) : rec === "saving" ? (
+                      <span>Transcribing…</span>
+                    ) : rec === "requesting" ? (
+                      <span>Microphone…</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={startRecording}
+                        aria-label="Record a voice note"
+                        title="Record a voice note"
+                        className="flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold transition-colors hover:brightness-95"
+                        style={{ background: "oklch(100% 0 0 / 0.7)", border: `1px solid ${p.edge}`, color: INK }}
+                      >
+                        <Mic size={11} /> Voice
+                      </button>
+                    )}
                   </span>
                 </div>
+                {rec === "error" ? (
+                  <p className="mt-1 text-[11px]" style={{ color: "oklch(45% 0.15 27)" }}>
+                    Couldn&apos;t record -- check the microphone permission for this site, then try again.
+                  </p>
+                ) : null}
                 <textarea
                   ref={draftRef}
                   value={draft}
@@ -276,8 +366,20 @@ export function TraineeNotebook({
                           <Trash2 size={13} />
                         </button>
                       </div>
+                      {n.audio_url ? (
+                        <div className="mt-1.5 flex items-center gap-2">
+                          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                          <audio src={n.audio_url} controls preload="none" className="h-8 w-full" />
+                          {n.audio_duration_seconds ? (
+                            <span className="shrink-0 text-[10.5px] tabular-nums" style={{ color: MUTED }}>
+                              {mmss(n.audio_duration_seconds)}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
                       <textarea
                         value={n.body}
+                        placeholder={n.audio_path ? "Transcript unavailable -- type what you said, or leave the recording as it is." : undefined}
                         onChange={(e) => editNote(n.id, e.target.value)}
                         rows={Math.min(12, Math.max(2, n.body.split("\n").length + 1))}
                         className="mt-1 w-full resize-none bg-transparent text-[13.5px] leading-relaxed outline-none"

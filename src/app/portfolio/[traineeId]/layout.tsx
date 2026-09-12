@@ -19,6 +19,7 @@ import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { TraineeNotebook } from "@/app/portfolio/[traineeId]/trainee-notebook";
 import { NOTEBOOK_PAPERS, type NotebookPaper, type TraineeNote } from "@/lib/trainee-notebook";
+import { signNotebookAudio } from "@/app/portfolio/[traineeId]/notebook-actions";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeWeekOf } from "@/lib/course-progress";
@@ -136,11 +137,11 @@ export default async function PortfolioLayout({
   if (ownNotebook) {
     const db = supabase as unknown as SupabaseClient;
     const [{ data: noteRows }, { data: setting }, { data: assignmentRows }] = await Promise.all([
-      db.from("trainee_notes").select("id, anchor_path, anchor_label, body, created_at, updated_at").eq("trainee_id", traineeId).order("created_at", { ascending: false }).limit(200),
+      db.from("trainee_notes").select("id, anchor_path, anchor_label, body, created_at, updated_at, audio_path, audio_duration_seconds").eq("trainee_id", traineeId).order("created_at", { ascending: false }).limit(200),
       db.from("trainee_notebook_settings").select("paper").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
     ]);
-    notebookNotes = (noteRows ?? []) as TraineeNote[];
+    notebookNotes = await signNotebookAudio((noteRows ?? []) as TraineeNote[]);
     if (setting?.paper && (NOTEBOOK_PAPERS as readonly string[]).includes(setting.paper)) notebookPaper = setting.paper as NotebookPaper;
     for (const a of assignmentRows ?? []) notebookAssignmentTitles[a.id] = ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type;
   }
