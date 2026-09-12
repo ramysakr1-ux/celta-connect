@@ -41,10 +41,14 @@ export async function shareMaterialWithStudents(formData: FormData): Promise<voi
   const ctx = await resolveSharer(tpMaterialId);
   if (!ctx) return;
 
-  await ctx.supabase.from("volunteer_shared_materials").upsert(
+  const { error } = await ctx.supabase.from("volunteer_shared_materials").upsert(
     { course_id: ctx.courseId, tp_material_id: tpMaterialId, shared_by: ctx.actorId },
     { onConflict: "course_id,tp_material_id", ignoreDuplicates: true }
   );
+  // Read the error back. This swallowed it, so when RLS refused a candidate's
+  // share the button did nothing at all and said nothing -- which is how the
+  // missing policy reached Ramy (12 Sep 2026) as "nothing happens".
+  if (error) console.error("[portfolio/tp/share-actions:shareMaterialWithStudents]", error);
 
   if (typeof traineeId === "string") {
     revalidatePath(`/portfolio/${traineeId}/tp/${tpNumber}`);
@@ -59,11 +63,12 @@ export async function unshareMaterialWithStudents(formData: FormData): Promise<v
   const ctx = await resolveSharer(tpMaterialId);
   if (!ctx) return;
 
-  await ctx.supabase
+  const { error } = await ctx.supabase
     .from("volunteer_shared_materials")
     .delete()
     .eq("tp_material_id", tpMaterialId)
     .eq("course_id", ctx.courseId);
+  if (error) console.error("[portfolio/tp/share-actions:unshareMaterialWithStudents]", error);
 
   if (typeof traineeId === "string") {
     revalidatePath(`/portfolio/${traineeId}/tp/${tpNumber}`);

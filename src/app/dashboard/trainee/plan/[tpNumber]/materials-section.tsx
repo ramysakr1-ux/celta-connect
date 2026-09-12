@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { createMaterialRecord, deleteMaterial } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-actions";
-import { DriveAttachButtons } from "@/app/dashboard/trainee/plan/[tpNumber]/drive-attach-buttons";
+import { AttachMenu } from "@/app/dashboard/trainee/plan/[tpNumber]/attach-menu";
 import { shareMaterialWithStudents, unshareMaterialWithStudents } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/share-actions";
 import type { Database, TpMaterialFileType } from "@/lib/supabase/types";
 
@@ -61,11 +61,7 @@ export function MaterialsSection({
     }
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
+  async function handleFile(file: File) {
     const isPdf = file.type === "application/pdf";
     const isImage = file.type.startsWith("image/");
     const isPptx = file.type === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || file.type === "application/vnd.ms-powerpoint";
@@ -107,8 +103,8 @@ export function MaterialsSection({
     <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
       <h2 className="font-serif text-lg text-ink">Materials</h2>
       <p className="mt-1 text-sm text-muted">
-        Handouts, worksheets, or slides. Upload a PDF, PowerPoint, Word doc, or image
-        {hasGoogleConnection ? ", or attach a file directly from your centre's Drive" : ""}.
+        Handouts, worksheets or slides -- anything you or the learners will need. Share one with the students and it
+        appears on their own page before the lesson.
       </p>
 
       {materials.length > 0 ? (
@@ -163,25 +159,15 @@ export function MaterialsSection({
       )}
 
       {!locked ? (
-        <div className="mt-4 flex flex-col gap-3 border-t border-border-faint pt-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Attach materials</label>
-            <input
-              type="file"
-              accept="application/pdf,image/*,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
-              disabled={uploading}
-              onChange={handleFileChange}
-              className="text-sm text-ink"
-            />
-            {uploading ? <p className="text-sm text-muted">Uploading…</p> : null}
-          </div>
-          {hasGoogleConnection ? (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm text-muted">Or attach a Google Doc, Slides, or Sheet</label>
-              <DriveAttachButtons tpPlanId={tpPlanId} onError={setError} />
-            </div>
-          ) : null}
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <div className="mt-4 border-t border-border-faint pt-4">
+          <AttachMenu
+            tpPlanId={tpPlanId}
+            hasGoogleConnection={hasGoogleConnection}
+            uploading={uploading}
+            onFile={handleFile}
+            onError={setError}
+          />
+          {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
         </div>
       ) : null}
     </div>
