@@ -332,6 +332,13 @@ async function main() {
   // would not have been.
   const endDate = courseDay(startDate, 20);
   const courseEnd = new Date(endDate);
+  // Nothing that only happens once a course is under way should be written
+  // into a course that has not begun. Teaching practice already respected
+  // this (it derives from dates that have passed); written assignments and
+  // observation hours did not, so --stage day1 and --stage precourse both
+  // produced a course starting on Monday with two assignments already marked
+  // Pass. Found 12 Sep 2026 on the first real day1 run.
+  const courseHasStarted = startDate <= isoOf(new Date());
 
   // ---- the course's own calendar, which the seeded RECORD now follows ----
   //
@@ -1848,13 +1855,15 @@ async function main() {
 
     // --- Who is where. Kofi's LRT is deliberately absent -- it is created by
     //     the malpractice flow further down, not as a plain state. ---
-    const DEFAULT_PLAN = {
-      "Focus on Learner": passedFirst(9),
-      LRT: passedFirst(6),
-      Skills: underReview(3),
-      LfC: notStarted(),
-    };
-    const PLAN = {
+    const DEFAULT_PLAN = courseHasStarted
+      ? {
+          "Focus on Learner": passedFirst(9),
+          LRT: passedFirst(6),
+          Skills: underReview(3),
+          LfC: notStarted(),
+        }
+      : { "Focus on Learner": notStarted(), LRT: notStarted(), Skills: notStarted(), LfC: notStarted() };
+    const PLAN = !courseHasStarted ? {} : {
       "Amara Okafor": {
         "Focus on Learner": passedFirst(9),
         LRT: passedFirst(6),
@@ -2409,9 +2418,13 @@ async function main() {
       });
       i += 1;
     }
-    const { error: obsErr } = await supabase.from("observations").insert(observationRows);
-    if (obsErr) throw obsErr;
-    console.log(`observation hours seeded: ${observationRows.length} rows for ${i} candidates`);
+    if (courseHasStarted) {
+      const { error: obsErr } = await supabase.from("observations").insert(observationRows);
+      if (obsErr) throw obsErr;
+      console.log(`observation hours seeded: ${observationRows.length} rows for ${i} candidates`);
+    } else {
+      console.log("observation hours not seeded -- the course has not started.");
+    }
   }
 
   // §14.2: candidates may ask to speak with the assessor privately, without
