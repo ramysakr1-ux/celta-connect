@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { ASSIGNMENT_INFO, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
+import { SecondMarkingPanel } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/second-marking-panel";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { isAssignmentWarningTriggered, buildAssignmentWarningDraft } from "@/lib/letters/assignment-warning";
@@ -56,6 +59,11 @@ export default async function TrainerAssignmentReviewPage({
 
   const round: "first" | "resubmission" = assignment.first_status === "resubmission_required" ? "resubmission" : "first";
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
+  const result = resolveAssignmentResult(assignment);
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const markerIds = [assignment.marker_id, assignment.second_marker_id].filter((x): x is string => Boolean(x));
+  const { data: markerRows } = markerIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", markerIds) : { data: [] };
+  const markerName = new Map((markerRows ?? []).map((m) => [m.id, m.full_name]));
 
   // connect-spec-corrections-for-claude-code.md item 8, soft flags 4-5:
   // advisory only, computed at marking time from the round actually being
@@ -75,7 +83,11 @@ export default async function TrainerAssignmentReviewPage({
           <h1 className="font-serif text-xl text-ink">
             {trainee.full_name} -- {ASSIGNMENT_INFO[assignment.assignment_type].title}
           </h1>
-          <p className="mt-1 text-sm text-muted">Status: {roundStatus.replace(/_/g, " ")}</p>
+          <p className="mt-1 text-sm text-muted">
+            {ASSIGNMENT_RESULT_LABEL[result]}
+            {round === "resubmission" && roundStatus === "submitted" ? " · resubmission in" : ""}
+            {assignment.first_submitted_late ? " · first submission late" : ""}
+          </p>
         </div>
         <Link href={`/dashboard/trainer/trainees/${id}`} className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary">
           Back to {trainee.full_name}
@@ -99,6 +111,20 @@ export default async function TrainerAssignmentReviewPage({
           </button>
         </form>
       </div>
+
+      <SecondMarkingPanel
+        assignmentId={assignmentId}
+        traineeId={id}
+        viewerId={trainer.id}
+        markerId={assignment.marker_id}
+        markerName={assignment.marker_id ? (markerName.get(assignment.marker_id) ?? null) : null}
+        secondMarkerId={assignment.second_marker_id}
+        secondMarkerName={assignment.second_marker_id ? (markerName.get(assignment.second_marker_id) ?? null) : null}
+        secondMarkerRecordedAt={assignment.second_marker_recorded_at}
+        decided={result === "pass_first" || result === "pass_resub" || result === "resubmission_required" || result === "fail"}
+        failed={result === "fail"}
+        timeZone={timeZone}
+      />
 
       {isAssignmentWarningTriggered(assignment) ? (
         <AssignmentWarningLetterSection

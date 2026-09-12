@@ -15,6 +15,7 @@ import {
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
@@ -80,6 +81,24 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
     .filter((a) => a.assignment_type !== "Plagiarism Reflection")
     .sort((a, b) => ASSIGNMENT_ORDER.indexOf(a.assignment_type) - ASSIGNMENT_ORDER.indexOf(b.assignment_type));
   const reflectionAssignments = (assignmentsRaw ?? []).filter((a) => a.assignment_type === "Plagiarism Reflection");
+  // The card's "Tutor feedback" line read assignments.tutor_feedback, which
+  // the marking action never writes (comments are per section, in
+  // assignment_section_responses) -- so every assignment a tutor had actually
+  // marked said "No feedback yet." Fall back to the latest round's first
+  // comment when the overall note is empty.
+  const assignmentIds = (assignmentsRaw ?? []).map((a) => a.id);
+  const { data: commentRows } =
+    assignmentIds.length > 0
+      ? await supabase
+          .from("assignment_section_responses")
+          .select("assignment_id, first_comments, resubmission_comments")
+          .in("assignment_id", assignmentIds)
+      : { data: [] };
+  const feedbackPreview = new Map<string, string>();
+  for (const r of commentRows ?? []) {
+    const text = (r.resubmission_comments ?? "").trim() || (r.first_comments ?? "").trim();
+    if (text && !feedbackPreview.has(r.assignment_id)) feedbackPreview.set(r.assignment_id, text);
+  }
   // A pass is a pass, not a closed round: a resubmission FAIL also carries
   // resubmission_status "approved", so counting that as passed inflated the
   // "X of 4 passed" heading (a failed candidate read as one closer to the
@@ -131,6 +150,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
               locked={!isStaffViewer && !isSet(a.assignment_type)}
               today={today}
               timeZone={timeZone}
+              feedbackPreview={feedbackPreview.get(a.id) ?? null}
             />
           ))
         ) : (
@@ -153,6 +173,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
                 accentClass="border-border"
                 today={today}
                 timeZone={timeZone}
+                feedbackPreview={feedbackPreview.get(a.id) ?? null}
               />
             ))}
           </div>
@@ -170,11 +191,13 @@ function AssignmentCard({
   locked,
   today,
   timeZone,
+  feedbackPreview,
 }: {
   traineeId: string;
   assignment: AssignmentRow;
   today: string;
   timeZone: string;
+  feedbackPreview: string | null;
   locked?: boolean;
   eyebrow: string;
   accentClass?: string;
@@ -219,11 +242,11 @@ function AssignmentCard({
         {[
           a.due_date ? (
             <span key="due" className={DEADLINE_URGENCY_CLASS[getDeadlineUrgency(a.due_date, a.first_submitted_at, today)]}>
-              Due {a.due_date}
+              Due {formatCalendarDate(a.due_date)}
             </span>
           ) : null,
           <span key="words">{ASSIGNMENT_WORD_COUNT}</span>,
-          a.first_submitted_at ? <span key="submitted">Submitted {toLocalIso(new Date(a.first_submitted_at), timeZone)}</span> : null,
+          a.first_submitted_at ? <span key="submitted">Submitted {formatDate(a.first_submitted_at, timeZone)}</span> : null,
         ]
           .filter(Boolean)
           .flatMap((node, idx) => (idx > 0 ? [" · ", node] : [node]))}
@@ -238,7 +261,7 @@ function AssignmentCard({
 
       <div className="mt-3 border-t border-border-faint pt-3">
         <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
-        <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || "No feedback yet."}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
       </div>
     </Link>
   );

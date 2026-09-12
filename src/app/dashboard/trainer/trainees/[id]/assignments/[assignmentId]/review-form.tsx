@@ -208,10 +208,11 @@ export function AssignmentReviewForm({
           ) : null}
 
           {outcome === "pass" ? (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm text-muted">Final grade note</label>
-              <input type="text" name="final_grade" placeholder="e.g. Pass" className={inputClass} />
-            </div>
+            <p className="text-xs text-muted">
+              Recorded on the record of written work as{" "}
+              <span className="font-semibold text-ink">{isResubmission ? "Pass (on resubmission)" : "Pass"}</span> -- Cambridge&apos;s
+              wording (Handbook 9.2.3), not a note.
+            </p>
           ) : null}
 
           <div className="flex flex-col gap-2 border-t border-border-faint pt-3">

@@ -1752,7 +1752,9 @@ async function main() {
       resubmission_outcome: "pass",
       second_marker_id: secondMarkerId,
       second_marker_recorded_at: daysAgoIso(2),
-      final_grade: "Pass",
+      // Handbook 9.2.3's own wording for a resubmission pass, as the
+      // marking action writes it.
+      final_grade: "Pass (on resubmission)",
     });
     const failedFinal = (feedback) => ({
       ...returnedForResub(feedback, 12),
@@ -1863,6 +1865,11 @@ async function main() {
             assignment_type,
             due_date: cDay(DUE_DAY[assignment_type]),
             ...state,
+            // What submit_assignment_round would have written: handed in after
+            // the deadline is late. The submitted-days-ago states above are
+            // relative to today and the deadlines are course days, so the two
+            // can cross -- the flag has to follow the dates, not be assumed.
+            first_submitted_late: Boolean(state.first_submitted_at) && state.first_submitted_at.slice(0, 10) > cDay(DUE_DAY[assignment_type]),
           })
           .select("id")
           .single();
@@ -1877,7 +1884,12 @@ async function main() {
         const submittedTwice = Boolean(state.resubmission_submitted_at);
         if (sections && submittedOnce) {
           const first = name.split(" ")[0];
-          const rows = sections.map((sec) => ({
+          // The tutor's comments live per section (assignment_section_responses),
+          // which is what the trainee's card and the cover sheet read -- a
+          // marked assignment with none looked unmarked ("No feedback yet.").
+          const firstMarked = state.first_status === "approved" || state.first_status === "resubmission_required";
+          const resubMarked = state.resubmission_status === "approved";
+          const rows = sections.map((sec, idx) => ({
             assignment_id: row.id,
             section_key: sec.key,
             section_title: sec.title,
@@ -1885,6 +1897,22 @@ async function main() {
             resubmission_response: submittedTwice
               ? `Revised after feedback: ${first} reworks this section, addressing the tutor's comment directly.`
               : null,
+            first_comments: !firstMarked
+              ? null
+              : state.first_status === "approved"
+                ? `Clear and well supported -- this section meets the criteria.${idx === 0 ? " Good use of examples from your own lessons." : ""}`
+                : idx === 0
+                  ? "Not yet at the standard: the analysis stays general. Tie each point to a specific learner and to the assessment criteria before resubmitting."
+                  : "Fine as it stands -- no change needed here on resubmission.",
+            resubmission_comments: !resubMarked
+              ? null
+              : state.resubmission_outcome === "fail"
+                ? idx === 0
+                  ? "Still short of the criteria after resubmission: the specific learner evidence asked for is not there."
+                  : "Unchanged, and fine."
+                : idx === 0
+                  ? "Addressed -- the learner evidence is specific now and this meets the criteria."
+                  : "Fine.",
           }));
           const { error: rErr } = await supabase.from("assignment_section_responses").insert(rows);
           if (rErr) throw rErr;
@@ -2666,8 +2694,12 @@ async function main() {
     { d: 17, b: 4, type: "milestone", title: "Lesson planning", tag: "individual", detail: "Bookable \u00b7 ABC", linked: null, tp: null },
     { d: 17, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 17, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 17, b: 7, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: null, tp: null },
-    { d: 17, b: 8, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: null, tp: null },
+    // Linked to LfC (12 Sep 2026): the trainee's Assignments tab opens a
+    // brief on the earliest event tagged with its type, so with no link
+    // Lessons from the Classroom read "Not yet open" while the rail said
+    // "due 17 Sept". These two are the sessions that set it.
+    { d: 17, b: 7, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: "LfC", tp: null },
+    { d: 17, b: 8, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: "LfC", tp: null },
     { d: 17, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 18, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 ABC", tag: null, detail: null, linked: "LRT", tp: null },
     { d: 18, b: 1, type: "tp", title: "TP8 \u00b7 A", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
@@ -2679,7 +2711,7 @@ async function main() {
     { d: 18, b: 7, type: "input_session", title: "Teaching literacy", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 18, b: 8, type: "supervised_session", title: "Portfolio check \u00b7 ABC", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     { d: 18, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
-    { d: 19, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) due", tag: null, detail: "09:00", linked: null, tp: null },
+    { d: 19, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) due", tag: null, detail: "09:00", linked: "LfC", tp: null },
     { d: 19, b: 1, type: "tp", title: "TP8 \u00b7 D", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 2, type: "tp", title: "TP8 \u00b7 E", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 3, type: "tp", title: "TP8 \u00b7 F", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },

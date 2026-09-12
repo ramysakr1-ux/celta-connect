@@ -119,6 +119,22 @@ export default async function AssessorPage({
   const applicationFilesRejected = (applicationFileRows ?? []).length - applicationFilesAccepted - applicationFilesWaiting;
   const hasApplicationFiles = (applicationFileRows ?? []).length > 0;
 
+  // "Double-marking record / Blind second marks, all assignments" -- §9.2.3
+  // says the centre keeps a record the assessor may ask to see. Connect keeps
+  // it on the assignments themselves (second_marker_id + recorded_at), so
+  // the row opens /assessor/double-marking whenever any exists; an uploaded
+  // record still takes precedence.
+  const { data: doubleMarkRows } = await admin
+    .from("assignments")
+    .select("assignment_type, second_marker_recorded_at")
+    .eq("course_id", courseId)
+    .neq("assignment_type", "Plagiarism Reflection");
+  const doubleMarkedByType = new Map<string, number>();
+  for (const r of doubleMarkRows ?? []) {
+    if (r.second_marker_recorded_at) doubleMarkedByType.set(r.assignment_type, (doubleMarkedByType.get(r.assignment_type) ?? 0) + 1);
+  }
+  const hasDoubleMarking = doubleMarkedByType.size > 0;
+
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
@@ -1127,6 +1143,7 @@ export default async function AssessorPage({
                 // And the application files: built from the admissions
                 // pipeline when selection went through Connect.
                 const isApplicationFiles = doc.name === "Application files";
+                const isDoubleMarking = doc.name === "Double-marking record";
                 const uploaded = isMarkingGuidance
                   ? null
                   : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
@@ -1138,7 +1155,9 @@ export default async function AssessorPage({
                       ? Boolean(uploaded?.file_url) || hasVolunteerRegister
                       : isApplicationFiles
                         ? Boolean(uploaded?.file_url) || hasApplicationFiles
-                        : Boolean(uploaded?.file_url);
+                        : isDoubleMarking
+                          ? Boolean(uploaded?.file_url) || hasDoubleMarking
+                          : Boolean(uploaded?.file_url);
                 const href = isMarkingGuidance
                   ? "/assessor/marking-guidance"
                   : isCandidateAgreement
@@ -1147,11 +1166,13 @@ export default async function AssessorPage({
                       ? uploaded?.file_url ?? "/trainer/volunteers"
                       : isApplicationFiles
                         ? uploaded?.file_url ?? "/assessor/application-files"
-                        : uploaded?.file_url;
+                        : isDoubleMarking
+                          ? uploaded?.file_url ?? "/assessor/double-marking"
+                          : uploaded?.file_url;
                 // App routes open in place; an uploaded file opens in a new tab.
                 const opensInApp =
                   isMarkingGuidance ||
-                  ((isCandidateAgreement || isVolunteerRegister || isApplicationFiles) && !uploaded?.file_url);
+                  ((isCandidateAgreement || isVolunteerRegister || isApplicationFiles || isDoubleMarking) && !uploaded?.file_url);
                 // The authorisation certificate's own datum is the centre's
                 // Cambridge number, and that IS on file even before the
                 // certificate is attached -- so name it rather than the
@@ -1162,7 +1183,11 @@ export default async function AssessorPage({
                     ? `Centre number ${center.center_number} on file`
                     : isApplicationFiles && hasApplicationFiles && !uploaded?.file_url
                       ? `${applicationFilesAccepted} accepted · ${applicationFilesRejected} rejected${applicationFilesWaiting > 0 ? ` · ${applicationFilesWaiting} waiting` : ""}`
-                      : doc.meta;
+                      : isDoubleMarking && hasDoubleMarking && !uploaded?.file_url
+                        ? `${["Focus on Learner", "LRT", "Skills", "LfC"]
+                            .map((t) => `${t === "Focus on Learner" ? "FoL" : t} ${doubleMarkedByType.get(t) ?? 0}`)
+                            .join(" · ")}${doubleMarkPerAssignment ? ` · ${doubleMarkPerAssignment} of each needed` : ""}`
+                        : doc.meta;
                 const rowStyle = {
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                   padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",

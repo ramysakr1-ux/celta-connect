@@ -80,6 +80,16 @@ export type AssignmentResultState =
   | "pass_resub"
   | "fail";
 
+/** The one wording for each result, for status lines staff read. */
+export const ASSIGNMENT_RESULT_LABEL: Record<AssignmentResultState, string> = {
+  not_submitted: "Not submitted",
+  under_review: "Under review",
+  resubmission_required: "Resubmission required",
+  pass_first: "Pass",
+  pass_resub: "Pass (on resubmission)",
+  fail: "Fail",
+};
+
 export function resolveAssignmentResult(a: {
   first_status: SubmissionStatus;
   resubmission_status: SubmissionStatus;

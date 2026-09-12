@@ -78,7 +78,6 @@ async function returnAssignment(
   const marker = await requireRole("trainer");
   const assignmentId = formData.get("assignment_id");
   const round = formData.get("round");
-  const finalGrade = formData.get("final_grade");
   const secondMarkerId = formData.get("second_marker_id");
   if (typeof assignmentId !== "string" || typeof round !== "string") {
     return { error: "Invalid request." };
@@ -113,7 +112,12 @@ async function returnAssignment(
 
   const criteriaMarks = parseCriteriaMarks(formData);
   const status = decision === "resubmission_required" ? "resubmission_required" : "approved";
-  const grade = decision === "pass" && typeof finalGrade === "string" && finalGrade ? finalGrade : undefined;
+  // Handbook 9.2.3: the grade recorded on the record of written work is
+  // "Pass", or on resubmission "Pass (on resubmission)" or "Fail". This was a
+  // free-text "final grade note" until 12 Sep 2026 -- a box that could hold
+  // "Pass B" on a component that has no B. The wording is Cambridge's, so
+  // it is written, not typed.
+  const grade = decision === "pass" ? (isResubmission ? "Pass (on resubmission)" : "Pass") : undefined;
 
   // A Plagiarism Reflection's fail is final on the first round -- the
   // schema only has a distinct pass/fail outcome field on the
@@ -212,4 +216,44 @@ export async function updateAssignmentDueDate(formData: FormData): Promise<void>
     .eq("id", assignmentId);
 
   revalidatePath(`/dashboard/trainer/trainees`);
+}
+
+// Handbook 9.2.3 -- the second tutor's initial on a double-marked assignment.
+// Recorded by the second marker THEMSELVES (not named by the first marker),
+// on any round that has a decision: that is the footprint the assessor's
+// record needs. The resubmission dropdown in returnAssignment stays -- a
+// resubmission decision is not returned without a second marker at all.
+export async function recordSecondMarking(formData: FormData): Promise<void> {
+  const viewer = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  const traineeId = formData.get("trainee_id");
+  if (typeof assignmentId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: a } = await supabase
+    .from("assignments")
+    .select("marker_id, first_status, resubmission_status, second_marker_id")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  if (!a) return;
+  // "A minimum of two tutors should be involved" -- the first marker cannot
+  // be their own second marker, and a recorded second marking is not
+  // overwritten by a third person clicking.
+  if (a.marker_id === viewer.id) return;
+  if (a.second_marker_id) return;
+  const decided =
+    a.first_status === "approved" ||
+    a.first_status === "resubmission_required" ||
+    a.resubmission_status === "approved";
+  if (!decided) return;
+
+  await supabase
+    .from("assignments")
+    .update({ second_marker_id: viewer.id, second_marker_recorded_at: new Date().toISOString() })
+    .eq("id", assignmentId);
+
+  revalidatePath(`/dashboard/trainer/trainees`);
+  if (typeof traineeId === "string") revalidatePath(`/portfolio/${traineeId}/assignments/${assignmentId}`);
+  revalidatePath(`/trainer`);
+  revalidatePath(`/assessor`);
 }

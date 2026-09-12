@@ -6,7 +6,9 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { ASSIGNMENT_INFO, resolveAssignmentResult } from "@/lib/assignment-info";
+import { ASSIGNMENT_INFO, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
+import { SecondMarkingPanel } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/second-marking-panel";
+import { formatCalendarDate } from "@/lib/format-date";
 import { AssignmentAuthoringForm } from "@/app/dashboard/trainee/assignments/[assignmentId]/assignment-form";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
@@ -68,6 +70,13 @@ export default async function AssignmentDetailPage({
     .from("assignment_section_responses")
     .select("*")
     .eq("assignment_id", assignmentId);
+
+  // Who marked and who second-marked, for the double-marking panel.
+  const markerIds = [assignment.marker_id, assignment.second_marker_id].filter((x): x is string => Boolean(x));
+  const { data: markerRows } =
+    isEditableStaff && markerIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", markerIds) : { data: [] };
+  const markerName = new Map((markerRows ?? []).map((m) => [m.id, m.full_name]));
+  const result = resolveAssignmentResult(assignment);
 
   const { data: secondMarkerRows } = isEditableStaff && trainee.course_id
     ? await supabase
@@ -217,9 +226,9 @@ export default async function AssignmentDetailPage({
           <h1 className="font-serif text-2xl text-ink">{ASSIGNMENT_INFO[assignment.assignment_type].title}</h1>
           <p className="mt-1 text-sm text-muted">
             {isStaff
-              ? `Status: ${roundStatus.replace(/_/g, " ")}${assignment.first_submitted_late ? " · submitted late" : ""}`
+              ? `${ASSIGNMENT_RESULT_LABEL[result]}${round === "resubmission" && roundStatus === "submitted" ? " · resubmission in" : ""}${assignment.first_submitted_late ? " · first submission late" : ""}`
               : assignment.due_date
-                ? `Due ${assignment.due_date}`
+                ? `Due ${formatCalendarDate(assignment.due_date, { year: "numeric" })}`
                 : "No deadline set"}
           </p>
         </div>
@@ -259,7 +268,24 @@ export default async function AssignmentDetailPage({
           </form>
         </div>
       ) : assessorCourseId && assignment.due_date ? (
-        <p className="text-sm text-muted">Due {assignment.due_date}</p>
+        <p className="text-sm text-muted">Due {formatCalendarDate(assignment.due_date, { year: "numeric" })}</p>
+      ) : null}
+
+      {isEditableStaff ? (
+        <SecondMarkingPanel
+          assignmentId={assignmentId}
+          traineeId={traineeId}
+          viewerId={viewer!.id}
+          markerId={assignment.marker_id}
+          markerName={assignment.marker_id ? (markerName.get(assignment.marker_id) ?? null) : null}
+          secondMarkerId={assignment.second_marker_id}
+          secondMarkerName={assignment.second_marker_id ? (markerName.get(assignment.second_marker_id) ?? null) : null}
+          secondMarkerRecordedAt={assignment.second_marker_recorded_at}
+          decided={result === "pass_first" || result === "pass_resub" || result === "resubmission_required" || result === "fail"}
+          failed={result === "fail"}
+          timeZone={timeZone}
+          garnet
+        />
       ) : null}
 
       {!template ? (
