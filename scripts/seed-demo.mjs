@@ -138,6 +138,22 @@ const STAGE_WEEKS = {
   finished: -4,   // ended last Friday
 };
 
+// Mirrors getDensityTier() in src/lib/tp-density.ts, which is the source of
+// truth and cannot be imported here (this is .mjs, that is .ts). The
+// scaffolding a candidate gets STEPS DOWN across the course: scripted for the
+// first two rounds, a stage framework for the next two, coaching prose at TP5
+// where the coursebook level changes, and minimal from TP6 -- no tips, no
+// abbreviations glossary. Three places in this file hardcoded their own
+// answer and two of them were wrong, so TP7 and TP8 came out richer than TP5
+// and a candidate's last lesson arrived with more help than their sixth
+// (Ramy, 12 Sep 2026, seeing planning tips on TP8).
+function densityTierFor(tpNumber) {
+  if (tpNumber === 5) return "coaching_prose";
+  if (tpNumber <= 2) return "scripted";
+  if (tpNumber <= 4) return "framework";
+  return "minimal";
+}
+
 function cliArg(name) {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? process.argv[i + 1] : null;
@@ -1091,7 +1107,7 @@ async function main() {
           center_id: center.id,
           tp_number: tp,
           sequence_index: seq,
-          density_tier: tp <= 2 ? "scripted" : tp <= 4 ? "framework" : "minimal",
+          density_tier: densityTierFor(tp),
           main_lesson_aim: aim,
           aim_type: aimTypeOf(aim),
           sub_aim: "You choose -- and say in your plan why it follows from the main aim.",
@@ -1416,7 +1432,7 @@ async function main() {
           tp_number: tpNumber,
           main_lesson_aim: selfAim,
           aim_type: aimTypeOf(selfAim),
-          density_tier: "coaching_prose",
+          density_tier: densityTierFor(tpNumber),
           class_grouping: "whole_class",
           assigned_by: trainerId,
         })
@@ -3453,7 +3469,7 @@ async function main() {
         short_title: tp.short_title,
         main_lesson_aim: tp.main_lesson_aim,
         aim_type: aimTypeOf(tp.short_title || tp.main_lesson_aim),
-        density_tier: "coaching_prose",
+        density_tier: densityTierFor(tp.tp_number),
         class_grouping: "whole_class",
         assigned_by: trainerId,
         taught_at: null,

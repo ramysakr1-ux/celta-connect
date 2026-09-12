@@ -30,6 +30,20 @@ export function SelfEvaluationSection({
     return null;
   }
 
+  // Ramy, 12 Sep 2026, walking it: "self-eval is open. I can write my self-eval
+  // now, and I haven't submitted my lesson plan yet." The gate only checked
+  // that a plan ROW existed -- which it does from the first autosave -- not
+  // that it had been handed in. A lesson you have not submitted a plan for is
+  // not a lesson you can reflect on having taught.
+  if (!plan.submitted_at) {
+    return (
+      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+        <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
+        <p className="mt-2 text-sm text-muted">Opens once you have submitted your lesson plan.</p>
+      </div>
+    );
+  }
+
   if (!taught) {
     return (
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
