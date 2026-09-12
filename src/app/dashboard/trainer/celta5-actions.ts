@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { computeStage3Status } from "@/lib/stage3-status";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 
 const VALID_LISTS = new Set(["planningStrengths", "planningActionPoints", "teachingStrengths", "teachingActionPoints"]);
@@ -277,6 +278,9 @@ export async function updateStage2Overall(
       stage2_tutor_other_notes: optionalString(formData.get("stage2_tutor_other_notes")),
       stage2_completed_at: completed ? new Date().toISOString() : null,
       stage2_tutor_signature_name: completed ? trainer.signature_name : null,
+      // Handbook 10.2, the first Stage 3 trigger: not to standard at Stage 2.
+      // Set here, the moment it is known, never cleared here.
+      ...(completed && overall === "not_to_standard" ? { stage3_tutorial_required: true } : {}),
     })
     .eq("trainee_id", traineeId);
 
@@ -338,13 +342,26 @@ export async function updateStage3Overall(
   }
 
   const supabase = await createClient();
+  // The four Handbook triggers are a floor (Ramy, 29 Aug 2026): a tutor may
+  // add a candidate to Stage 3, never take a triggered one out.
+  const status = await computeStage3Status(supabase, traineeId);
+  const required = formData.get("stage3_tutorial_required") === "on" || Boolean(status?.mandatory);
+  const tutorialGiven = formData.get("stage3_tutorial_given") === "on";
+  const overall = optionalRating(formData.get("stage3_tutor_overall"), STANDARD_RATINGS);
+  // "A tutorial must be given and the whole record completed" -- 10.2 / CELTA 5 p.20.
+  if (finalized && required && !tutorialGiven) {
+    return { error: "Stage 3 is a tutorial and a record (Handbook 10.2) -- tick \"Tutorial given\" before finalizing, or save without finalizing." };
+  }
+  if (finalized && !overall) {
+    return { error: "Say which standard the candidate is at before finalizing -- the fail letter and the final grade read it." };
+  }
   const { error } = await supabase
     .from("celta5_records")
     .update({
-      stage3_tutorial_required: formData.get("stage3_tutorial_required") === "on",
-      stage3_tutorial_given: formData.get("stage3_tutorial_given") === "on",
+      stage3_tutorial_required: required,
+      stage3_tutorial_given: tutorialGiven,
       stage3_hours_taught: optionalNumber(formData.get("stage3_hours_taught")),
-      stage3_tutor_overall: optionalRating(formData.get("stage3_tutor_overall"), STANDARD_RATINGS),
+      stage3_tutor_overall: overall,
       stage3_tutor_notes: optionalString(formData.get("stage3_tutor_notes")),
       stage3_tutor_written_assignments_notes: optionalString(
         formData.get("stage3_tutor_written_assignments_notes")

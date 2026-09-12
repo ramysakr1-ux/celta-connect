@@ -20,6 +20,7 @@
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import { seedStage2Demo } from "./lib/stage2-demo.mjs";
+import { seedStage3Demo } from "./lib/stage3-demo.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -2940,6 +2941,19 @@ async function main() {
     matrixOverridesByName: matrixByCandidate,
   });
   console.log("Stage 2: halfway sheets, bookings and CELTA 5 records for the active cohort");
+  // Stage 3 and the fail letters on day 15, for the three the triggers name.
+  await seedStage3Demo(supabase, {
+    courseId: course.id,
+    stage3Date: courseDay(courseStart, 15),
+    traineeIdByName: trainees,
+    groupByName: Object.fromEntries(traineeDefs.map((d) => [d.name, d.group])),
+    tutorIdByGroup: { A: trainer2Id, B: trainerId },
+    tutorSignatureByGroup: { A: "M. Webb", B: "J. Blake" },
+    tutorNameByGroup: { A: "Marcus Webb", B: "Jordan Blake" },
+    course: { name: course.name, start_date: startDate, end_date: endDate },
+    center: { name: center.name, center_number: "DEMO-IST" },
+  });
+  console.log("Stage 3: three invites, three records, two fail letters on day 15");
   for (const [name, day, confirmed] of [
     // Inside the ABC block on day 6 (band 7), not on top of DEF's.
     ["Amara Okafor", 6, true],

@@ -53,7 +53,8 @@ import { WrittenAssignmentsRecord } from "@/app/portfolio/[traineeId]/celta5/boo
 import { CriteriaGrid, StageLocked, type CriterionRow, type Mark } from "@/app/portfolio/[traineeId]/celta5/booklet/criteria-grid";
 import { Appendix1, Appendix2 } from "@/app/portfolio/[traineeId]/celta5/booklet/appendices";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
-import { computeStage3Triggers, stage3Expected, isStage3Mandatory, assignmentFailRequiresStage3, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
+import { stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
+import { computeStage3Status } from "@/lib/stage3-status";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 // CELTA 5's own wording for the overall-progress options (p.19, p.24).
@@ -457,26 +458,10 @@ export default async function PortfolioCelta5Page({
     // "Not making the expected progress" is read from TPs taught after the
     // Stage 2 tutorial; assessedTpOutcomes below is ordered by teaching
     // date, so anything after the tutorial date is the second half.
-    const stage2TutorialDate = record.stage2_completed_at ?? null;
-    const postStage2TpOutcomes = (plans ?? [])
-      .filter((p) => p.taught_at && (!stage2TutorialDate || p.taught_at > stage2TutorialDate))
-      .map(() => null as null);
-    // A terminally failed assignment pulls the candidate into Stage Three --
-    // Ramy's rule of 31 Aug 2026 -- unless three assignments are already
-    // passed, which assignmentFailRequiresStage3() decides.
-    const assignmentFailed = assignmentFailRequiresStage3(
-      (assignments ?? []).map((a) => ({
-        terminallyFailed: a.resubmission_status === "approved" && a.resubmission_outcome === "fail",
-        passed: a.first_status === "approved" || a.resubmission_outcome === "pass",
-      }))
-    );
-    const stage3Triggers = computeStage3Triggers({
-      stage2TutorOverall: record.stage2_tutor_overall ?? null,
-      postStage2TpOutcomes,
-      higherGradeIndicated: false,
-      assignmentFailed,
-      centreGivesStage3ToAll: center?.stage3_for_all_candidates ?? false,
-    });
+    // One reader for the triggers (stage3-status.ts) -- this page used to
+    // hand the "not making expected progress" rules a list of nulls, so
+    // only "not to standard at Stage 2" and a failed assignment ever fired.
+    const stage3Triggers = (await computeStage3Status(supabase, traineeId))?.triggers ?? [];
     const stage3IsExpected = stage3Expected(stage3Triggers) || record.stage3_tutorial_required;
     const stage3TriggerReason = isStage3Mandatory(stage3Triggers)
       ? STAGE3_TRIGGER_LABELS[stage3Triggers.find((t) => t !== "centre_gives_to_all")!]
@@ -1160,6 +1145,7 @@ export default async function PortfolioCelta5Page({
     tagsByCriteria.set(tag.criteria_code, list);
   }
   addTpFeedbackCriteriaTags(tagsByCriteria, tpFeedbackRows ?? []);
+  const staffStage3Status = await computeStage3Status(supabase, traineeId);
 
   const suggestions: Record<string, "S+" | "S" | "N"> = {};
   const attentionFlags: Record<string, ReturnType<typeof computeAttentionFlags>> = {};
@@ -1783,7 +1769,15 @@ export default async function PortfolioCelta5Page({
         </div>
       </div>
 
-      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
+      <Stage3OverallForm
+        key={`stage3-${record.updated_at}`}
+        record={record}
+        trainerFullName={viewer?.full_name ?? ""}
+        trainerSignatureName={viewer?.signature_name ?? null}
+        timeZone={center?.time_zone ?? DEFAULT_TIMEZONE}
+        mandatoryReason={staffStage3Status?.mandatory ? staffStage3Status.reason : null}
+        assessedHoursSoFar={((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60}
+      />
 
       {record.stage3_tutorial_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />

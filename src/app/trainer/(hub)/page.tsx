@@ -24,7 +24,7 @@ import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
-import { sixHoursProblems, stage2Problems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -701,6 +701,30 @@ export default async function TodayPage() {
           .map((r) => ({ id: r.id, name: r.name, tpStagesTaught: r.tpStagesTaught, stage2Filed: r.stage2Filed })),
       })
     );
+    // Stage 3 and the fail letter, Handbook 10.2 -- both read the roster's
+    // stored flag and the letters actually issued.
+    {
+      const activeRows = rows.filter((r) => r.courseStatus === "active");
+      problems.push(
+        ...stage3Problems({
+          candidates: activeRows.map((r) => ({ id: r.id, name: r.name, tpStagesTaught: r.tpStagesTaught, stage3Required: r.stage3Required, stage3Done: r.stage3Done })),
+        })
+      );
+      const { data: failLetters } = await admin.from("formal_letters").select("trainee_id").eq("course_id", courseId).eq("letter_type", "fail_risk");
+      const lettered = new Set((failLetters ?? []).map((l) => l.trainee_id));
+      const futureTps = [...new Set(events.filter((e) => e.type === "tp" && e.event_date > today && e.linked_tp_number !== null).map((e) => e.linked_tp_number as number))];
+      problems.push(
+        ...failLetterProblems({
+          candidates: activeRows.map((r) => ({
+            id: r.id,
+            name: r.name,
+            potentialFail: Boolean(r.provisionalLabel?.startsWith("Fail")),
+            failLetterIssued: lettered.has(r.id),
+            lessonsLeft: futureTps.filter((n) => n > r.tpStagesTaught).length,
+          })),
+        })
+      );
+    }
     const byType = new Map<string, number>();
     const types = new Set<string>();
     for (const a of courseAssignments ?? []) {

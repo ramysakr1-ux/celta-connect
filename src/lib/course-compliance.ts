@@ -91,6 +91,54 @@ export function stage2Problems(input: {
 }
 
 /**
+ * Stage 3 outstanding in the final third.
+ *
+ * Handbook §10.2: for every triggered candidate "a tutorial must be given and
+ * the whole tutorial record completed" in the final third of the course.
+ * Six of eight assessed lessons taught is the final third; a flagged
+ * candidate past it with no finalized record is what this names.
+ */
+export function stage3Problems(input: {
+  candidates: { id: string; name: string; tpStagesTaught: number; stage3Required: boolean; stage3Done: boolean }[];
+}): ComplianceProblem[] {
+  const overdue = input.candidates.filter((c) => c.stage3Required && !c.stage3Done && c.tpStagesTaught >= 6);
+  if (overdue.length === 0) return [];
+  return [
+    {
+      tag: "Stage 3",
+      message: `${overdue.length} candidate${overdue.length === 1 ? "" : "s"} in the final third with a Stage 3 tutorial owed and no record`,
+      detail: overdue.map((c) => `${c.name} · TP${c.tpStagesTaught}`).join(" · "),
+      href: "/trainer/roster",
+      cite: "10.2",
+    },
+  ];
+}
+
+/**
+ * A potential Fail with no fail letter and the window closing.
+ *
+ * Handbook §10.2: "Potential Fail candidates should also be issued with a
+ * Fail letter... sufficiently in advance of the end of the course, ideally
+ * with at least two lessons left to teach." Two lessons left is the last
+ * moment the ideal can still be met; one left is past it.
+ */
+export function failLetterProblems(input: {
+  candidates: { id: string; name: string; potentialFail: boolean; failLetterIssued: boolean; lessonsLeft: number }[];
+}): ComplianceProblem[] {
+  const due = input.candidates.filter((c) => c.potentialFail && !c.failLetterIssued && c.lessonsLeft <= 2);
+  if (due.length === 0) return [];
+  return [
+    {
+      tag: "Fail letter",
+      message: `${due.length} potential Fail candidate${due.length === 1 ? " has" : "s have"} no fail letter with two or fewer lessons left`,
+      detail: due.map((c) => `${c.name} · ${c.lessonsLeft} left`).join(" · "),
+      href: "/trainer/roster",
+      cite: "10.2",
+    },
+  ];
+}
+
+/**
  * Double-marking quota unmet, once the course is in its final week.
  *
  * Handbook §9.2.3: three of each assignment for up to nine candidates, four

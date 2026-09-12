@@ -8,10 +8,13 @@ export function FailRiskLetterSection({
   traineeId,
   draft,
   existingLetters,
+  lessonsLeft,
 }: {
   traineeId: string;
   draft: FormalLetterInput | null;
   existingLetters: { id: string; issued_at: string; acknowledged_at: string | null }[];
+  /** Assessed lessons not yet taught -- 10.2 wants the letter out with at least two. */
+  lessonsLeft: number;
 }) {
   const [showForm, setShowForm] = useState(existingLetters.length === 0);
 
@@ -23,6 +26,15 @@ export function FailRiskLetterSection({
         Admin Handbook 10.2 requires this with at least two assessed lessons still to teach. It&apos;s a formal
         notice, not a decision.
       </p>
+      {existingLetters.length === 0 ? (
+        <p className={`mt-1 text-sm font-semibold ${lessonsLeft >= 2 ? "text-ink" : "text-destructive"}`}>
+          {lessonsLeft >= 2
+            ? `${lessonsLeft} assessed lessons still to teach -- issue it now, before the next one.`
+            : lessonsLeft === 1
+              ? "Only one assessed lesson left -- the Handbook's window has all but closed. Issue it today."
+              : "No assessed lessons left -- the window 10.2 asks for has closed."}
+        </p>
+      ) : null}
 
       {existingLetters.length > 0 ? (
         <div className="mt-3 flex flex-col gap-2">

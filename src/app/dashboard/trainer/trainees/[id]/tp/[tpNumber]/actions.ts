@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import type { FeedbackPoint } from "@/lib/tp-plan-content";
 import type { StandardRating } from "@/lib/supabase/types";
 import { recordAssessedLesson } from "@/lib/assessed-lesson-record";
+import { ensureStage3Flag } from "@/lib/stage3-status";
 
 export interface FormState {
   error: string | null;
@@ -89,7 +90,12 @@ async function saveFeedback(formData: FormData, lock: boolean): Promise<FormStat
       grade,
       overallComment: fields.overall_comment,
     });
+    // A released grade after Stage 2 can be the Handbook's "not making the
+    // expected progress" -- the flag the roster reads is set here, not left
+    // to a tutor remembering a checkbox.
+    await ensureStage3Flag(supabase, traineeId);
     revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+    revalidatePath(`/trainer/roster`);
   }
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/tp/${tpNumber}`);
   return { error: null };

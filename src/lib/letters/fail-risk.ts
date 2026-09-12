@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { distinctTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Letters.dc.html 1a: "A provisional grade of Fail, or Fail/Pass, at any
 // point after the Stage 3 tutorial." Slashed pairs (migration 0036) are the
@@ -33,7 +34,9 @@ export async function buildFailRiskDraft(
   supabase: SupabaseClient<Database>,
   courseId: string,
   traineeId: string,
-  issuedByName: string
+  issuedByName: string,
+  /** The centre's zone -- the letter is dated where it is issued, not in UTC. */
+  timeZone: string = DEFAULT_TIMEZONE
 ): Promise<FailRiskDraft | null> {
   const [{ data: trainee }, { data: course }, { data: record }, { data: planAssignments }, { data: allEvents }] = await Promise.all([
     supabase.from("profiles").select("full_name").eq("id", traineeId).maybeSingle(),
@@ -57,7 +60,7 @@ export async function buildFailRiskDraft(
     .maybeSingle();
 
   const remaining = (planAssignments ?? []).filter((p) => !p.taught_at).map((p) => `TP${p.tp_number}`);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIso(new Date(), timeZone);
   const distinctDates = distinctTpDates((allEvents ?? []) as TpTimetableEvent[]);
   const dayIndex = distinctDates.indexOf(today);
   const dayLine = dayIndex >= 0 ? `Day ${dayIndex + 1} of ${distinctDates.length}` : null;

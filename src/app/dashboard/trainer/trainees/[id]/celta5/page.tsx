@@ -29,6 +29,7 @@ import { ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId
 import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/admin-grant-form";
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
 import { isFailRiskTriggered, buildFailRiskDraft } from "@/lib/letters/fail-risk";
+import { computeStage3Status } from "@/lib/stage3-status";
 import { FailRiskLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/fail-risk-letter-section";
 import { isReferenceLetterEligible, buildReferenceLetterDraft } from "@/lib/letters/reference";
 import { ReferenceLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/reference-letter-section";
@@ -110,6 +111,8 @@ export default async function Celta5RecordPage({
   // The booklet's "Hours taught" at Stage 2: assessed lessons actually taught
   // x the lesson length, the same arithmetic the roster's hours column uses.
   const assessedHoursSoFar = ((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60;
+  const lessonsLeft = (planAssignments ?? []).filter((p) => !p.taught_at).length;
+  const stage3Status = await computeStage3Status(supabase, id);
   const { data: subgroupForMode } = subgroupMember?.subgroup_id
     ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
     : { data: null };
@@ -342,6 +345,8 @@ export default async function Celta5RecordPage({
               timeZone={timeZone}
               trainerFullName={trainer.full_name}
               trainerSignatureName={trainer.signature_name}
+              mandatoryReason={stage3Status?.mandatory ? stage3Status.reason : null}
+              assessedHoursSoFar={assessedHoursSoFar}
             />
           </div>
           {stage3MixedModeLock ? (
@@ -404,7 +409,8 @@ export default async function Celta5RecordPage({
       {isFailRiskTriggered(record) ? (
         <FailRiskLetterSection
           traineeId={id}
-          draft={(await buildFailRiskDraft(supabase, trainer.course_id ?? "", id, trainer.full_name))?.input ?? null}
+          draft={(await buildFailRiskDraft(supabase, trainer.course_id ?? "", id, trainer.full_name, timeZone))?.input ?? null}
+          lessonsLeft={lessonsLeft}
           existingLetters={
             (
               await supabase

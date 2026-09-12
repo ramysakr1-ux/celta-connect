@@ -17,12 +17,18 @@ export function Stage3OverallForm({
   trainerFullName,
   trainerSignatureName,
   timeZone,
+  mandatoryReason,
+  assessedHoursSoFar,
 }: {
   record: Celta5Record;
   trainerFullName: string;
   trainerSignatureName: string | null;
   /** The centre's zone: a signature's date is an instant, read where it was signed. */
   timeZone: string;
+  /** Set when a Handbook 10.2 trigger has fired -- the wording of the first one. */
+  mandatoryReason: string | null;
+  /** Assessed hours actually taught, for the booklet's "Hours taught" box. */
+  assessedHoursSoFar: number | null;
 }) {
   const [state, action, pending] = useActionState(updateStage3Overall, initialState);
 
@@ -46,12 +52,21 @@ export function Stage3OverallForm({
         don&rsquo;t set that here.
       </p>
 
+      {mandatoryReason ? (
+        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-sm text-status-warning-text">
+          <span className="font-semibold">Stage 3 is required for this candidate:</span> {mandatoryReason.toLowerCase()} (Handbook 10.2).
+          The tutorial and the whole record must be completed in the final third; a centre may add candidates to Stage 3 but
+          may not take a triggered one out.
+        </p>
+      ) : null}
       <label className="flex items-center gap-2 text-sm text-ink">
         <input
           type="checkbox"
           name="stage3_tutorial_required"
-          defaultChecked={record.stage3_tutorial_required}
+          defaultChecked={record.stage3_tutorial_required || Boolean(mandatoryReason)}
+          disabled={Boolean(mandatoryReason)}
         />
+        {mandatoryReason ? <input type="hidden" name="stage3_tutorial_required" value="on" /> : null}
         This candidate needs a Stage 3 tutorial
       </label>
 
@@ -70,7 +85,7 @@ export function Stage3OverallForm({
           name="stage3_hours_taught"
           type="number"
           step="0.1"
-          defaultValue={record.stage3_hours_taught ?? ""}
+          defaultValue={record.stage3_hours_taught ?? (assessedHoursSoFar !== null ? assessedHoursSoFar.toFixed(1) : "")}
           className="w-32 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
