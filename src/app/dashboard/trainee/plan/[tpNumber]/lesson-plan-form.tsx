@@ -131,7 +131,12 @@ export function LessonPlanForm({
   // filling the aims in. His ruling is the newer decision, so it stands.
   const [aimHints, setAimHints] = useState<string[]>([]);
   const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
-  const [showShapes, setShowShapes] = useState(offersLessonShapes(tpNumber));
+  // Hidden from TP7, but never hidden when a shape is ALREADY chosen: the
+  // stage hues in the timeline come from it, and a colour with no visible
+  // cause is worse than the picker being there.
+  const [showShapes, setShowShapes] = useState(
+    offersLessonShapes(tpNumber) || Boolean(normalizeFrameworkName(plan?.framework_used))
+  );
   const personalAimsRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [problems, setProblems] = useState<ProblemSolutionPair[]>(() => {
