@@ -2,6 +2,29 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CourseStatus, Database } from "@/lib/supabase/types";
 import { computeAssessedTpStats } from "@/lib/course-progress";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+
+// Handbook 12.1.3: "The candidate portfolios should be up-to-date on the day
+// of the assessment." Up to date, not finished -- the visit is mid-course
+// and an assignment whose deadline falls after it is not a gap in anyone's
+// portfolio. Until 12 Sep 2026 the readiness bar counted every unmarked
+// assignment, so a course whose Lessons from the Classroom was due three
+// days after the visit read "0 of 11 complete" and "LfC unresolved (11
+// candidates)" -- Ramy: "why are we doing the assessor visit again?"
+//
+// The cutoff is the visit date where one is set, otherwise today in the
+// centre's zone; an assignment with no deadline at all still counts.
+async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: string): Promise<string> {
+  const { data: course } = await supabase.from("courses").select("assessor_visit_date, center_id").eq("id", courseId).maybeSingle();
+  if (course?.assessor_visit_date) return course.assessor_visit_date;
+  const timeZone = course?.center_id ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+  return toLocalIso(new Date(), timeZone);
+}
+
+function dueByCutoff(a: { due_date: string | null }, cutoff: string): boolean {
+  return !a.due_date || a.due_date <= cutoff;
+}
 
 export interface ReadinessIssue {
   traineeId: string;
@@ -47,10 +70,11 @@ export async function computeAssessorReadiness(
     return { ready: true, issues: [], totalCandidates: 0, portfoliosCompleteCount: 0, hoursAssessedTotal: 0, gradesEnteredCount: 0, gradesApprovedCount: 0 };
   }
 
-  const [{ data: records }, { data: assignments }, { data: planAssignments }] = await Promise.all([
+  const [{ data: records }, { data: assignments }, { data: planAssignments }, cutoff] = await Promise.all([
     supabase.from("celta5_records").select("*").eq("course_id", courseId),
     supabase.from("assignments").select("*").in("trainee_id", traineeIds),
     supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
+    assignmentCutoff(supabase, courseId),
   ]);
 
   // Perf, 6 Sep 2026: these two were `select(...)` with NO filter at all --
@@ -98,6 +122,7 @@ export async function computeAssessorReadiness(
     }
 
     const unresolved = traineeAssignments.find((a) => {
+      if (!dueByCutoff(a, cutoff)) return false; // not yet due on the visit day -- not a gap (12.1.3)
       const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
       const status = isResubmissionRound ? a.resubmission_status : a.first_status;
       return status !== "approved";
@@ -178,6 +203,7 @@ export async function buildCandidateCards(
   const traineeIds = (trainees ?? []).map((t) => t.id);
   if (traineeIds.length === 0) return [];
 
+  const cutoff = await assignmentCutoff(supabase, courseId);
   const [{ data: records }, { data: assignments }, , { data: planAssignments }, { data: subgroups }, { data: tpGroups }] = await Promise.all([
     supabase.from("celta5_records").select("*").eq("course_id", courseId),
     supabase.from("assignments").select("*").in("trainee_id", traineeIds),
@@ -239,6 +265,7 @@ export async function buildCandidateCards(
               : "Stages One and Two complete and signed";
     const tpsComplete = assessedTp.tpsTaught >= 8;
     const assignmentsComplete = traineeAssignments.every((a) => {
+      if (!dueByCutoff(a, cutoff)) return true; // not yet due on the visit day (12.1.3)
       const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
       const status = isResubmissionRound ? a.resubmission_status : a.first_status;
       return status === "approved";
@@ -248,6 +275,7 @@ export async function buildCandidateCards(
     if (stage3Open) flaggedIssue = "Stage Three record still open";
     else if (!assignmentsComplete) {
       const unresolved = traineeAssignments.find((a) => {
+        if (!dueByCutoff(a, cutoff)) return false;
         const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
         const status = isResubmissionRound ? a.resubmission_status : a.first_status;
         return status !== "approved";
