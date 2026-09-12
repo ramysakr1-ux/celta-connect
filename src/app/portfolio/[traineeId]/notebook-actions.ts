@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { transcribeAudio } from "@/lib/openai/transcribe";
-import { NOTEBOOK_AUDIO_BUCKET, type TraineeNote } from "@/lib/trainee-notebook";
+import { NOTEBOOK_AUDIO_BUCKET, PAGE_PALETTES, type PagePalette, type TraineeNote } from "@/lib/trainee-notebook";
 
 // Migration 0293. The generated types lag until Ramy regenerates them, so
 // the two notebook tables are read through an untyped handle on the same
@@ -125,4 +125,12 @@ export async function signNotebookAudio(notes: TraineeNote[]): Promise<TraineeNo
       return { ...n, audio_url: data?.signedUrl ?? null };
     })
   );
+}
+
+/** The trainee's page palette (migration 0295), one row per trainee. */
+export async function setPagePalette(palette: PagePalette): Promise<void> {
+  const trainee = await requireRole("trainee");
+  if (!PAGE_PALETTES.includes(palette)) return;
+  const db = await notebookDb();
+  await db.from("trainee_notebook_settings").upsert({ trainee_id: trainee.id, page_palette: palette, updated_at: new Date().toISOString() });
 }

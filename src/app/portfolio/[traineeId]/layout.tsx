@@ -18,7 +18,7 @@ import { HeaderCredit } from "@/components/designer-credit";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { TraineeNotebook } from "@/app/portfolio/[traineeId]/trainee-notebook";
-import { NOTEBOOK_PAPERS, type NotebookPaper, type TraineeNote } from "@/lib/trainee-notebook";
+import { NOTEBOOK_PAPERS, PAGE_PALETTES, pagePaletteVars, type NotebookPaper, type PagePalette, type TraineeNote } from "@/lib/trainee-notebook";
 import { signNotebookAudio } from "@/app/portfolio/[traineeId]/notebook-actions";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -133,16 +133,20 @@ export default async function PortfolioLayout({
   const ownNotebook = viewer?.role === "trainee" && viewer.id === traineeId;
   let notebookNotes: TraineeNote[] = [];
   let notebookPaper: NotebookPaper = "blue";
+  let pagePalette: PagePalette = "linen";
   const notebookAssignmentTitles: Record<string, string> = {};
   if (ownNotebook) {
     const db = supabase as unknown as SupabaseClient;
     const [{ data: noteRows }, { data: setting }, { data: assignmentRows }] = await Promise.all([
       db.from("trainee_notes").select("id, anchor_path, anchor_label, body, created_at, updated_at, audio_path, audio_duration_seconds").eq("trainee_id", traineeId).order("created_at", { ascending: false }).limit(200),
-      db.from("trainee_notebook_settings").select("paper").eq("trainee_id", traineeId).maybeSingle(),
+      // select("*"): page_palette arrives with migration 0295, and a named
+      // column that is not there yet would fail the whole read, paper included.
+      db.from("trainee_notebook_settings").select("*").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
     ]);
     notebookNotes = await signNotebookAudio((noteRows ?? []) as TraineeNote[]);
     if (setting?.paper && (NOTEBOOK_PAPERS as readonly string[]).includes(setting.paper)) notebookPaper = setting.paper as NotebookPaper;
+    if (setting?.page_palette && (PAGE_PALETTES as readonly string[]).includes(setting.page_palette)) pagePalette = setting.page_palette as PagePalette;
     for (const a of assignmentRows ?? []) notebookAssignmentTitles[a.id] = ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type;
   }
 
@@ -325,7 +329,9 @@ export default async function PortfolioLayout({
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    // The trainee's paper (migration 0295): the neutral ladder re-hued on
+    // this surface only. Semantic colours are untouched -- see pagePaletteVars.
+    <div id="trainee-surface" className="flex min-h-screen flex-col bg-background" style={ownNotebook ? (pagePaletteVars(pagePalette) as React.CSSProperties) : undefined}>
       {/* Checkpoint 2 (App Redesign.dc.html 1d -- not in the archive, see the
           note in trainer/(hub)/page.tsx) -- collapses the old 2-block
           header (14px wordmark bar + a separate .sheet identity block with
@@ -388,6 +394,7 @@ export default async function PortfolioLayout({
                     traineeId={trainee.id}
                     traineeName={trainee.full_name}
                     courseDayProgress={courseDayProgress}
+                    pagePalette={ownNotebook ? pagePalette : null}
                   />
                 </div>
               </div>

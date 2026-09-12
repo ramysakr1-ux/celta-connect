@@ -2,6 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/avatar";
+import { PagePalettePicker } from "@/app/portfolio/[traineeId]/page-palette-picker";
+import type { PagePalette } from "@/lib/trainee-notebook";
 
 // Ramy, 2026-08-24: only the bare landing route gets the credit pill (same
 // self-gating pattern as TraineeNameBanner, which the credit sits directly
@@ -16,10 +18,13 @@ export function TraineeHeaderCorner({
   traineeId,
   traineeName,
   courseDayProgress,
+  pagePalette = null,
 }: {
   traineeId: string;
   traineeName: string;
   courseDayProgress: { currentDay: number; totalDays: number; finished: boolean } | null;
+  /** The trainee's own paper, on their own portfolio only; null hides the picker. */
+  pagePalette?: PagePalette | null;
 }) {
   const pathname = usePathname();
   const isLanding = pathname === `/portfolio/${traineeId}`;
@@ -47,6 +52,7 @@ export function TraineeHeaderCorner({
           one of four separate initials implementations in the app. All of
           them are this component now, and the colour comes from the name
           rather than being the same teal for everyone. */}
+      {pagePalette ? <PagePalettePicker current={pagePalette} /> : null}
       <Avatar name={traineeName} size="xs" />
     </div>
   );
