@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { matchCriteriaCodes } from "@/lib/criteria-glossary";
 import { emptyFeedbackPoint, type FeedbackPoint } from "@/lib/tp-plan-content";
@@ -109,24 +109,63 @@ function PointRow({
 
   // project_grading_feedback_trainer_awareness.md §2 -- "as the trainer
   // types a bullet, the matching criterion code silently appends... no
-  // popup/click/confirm, behaves like autocorrect". Debounced so it fires
-  // on a pause rather than every keystroke; self-limiting (only adds codes
-  // not already present), so re-running on every keystroke after that is
-  // harmless -- it just finds nothing new to add.
+  // popup/click/confirm, behaves like autocorrect". The point of autocorrect
+  // is that you can undo it, and this could not be undone. Walking TP8 as
+  // Jordan Blake, 12 Sep 2026, unchecking a code put it straight back 600ms
+  // later -- the effect re-ran on its own output. Three faults, all fixed
+  // here; criteria codes are assessment evidence the assessor and Cambridge
+  // read, so a tutor has to be able to say no. (Ramy's standing rule:
+  // manual override by default.)
+  //
+  //  1. UN-REMOVABLE. Unchecking a code re-matched it a moment later.
+  //     `rejected` remembers what the tutor took off and the tagger never
+  //     puts those back.
+  //  2. OUT OF SCOPE. matchCriteriaCodes searches the whole glossary, so a
+  //     PLANNING point could be auto-tagged 3a -- a teaching code the
+  //     planning panel has no checkbox for, so it could not be reached at
+  //     all, by hand or otherwise. Matches are now filtered to the codes
+  //     this point's own panel offers.
+  //  3. STALE. Rewriting a point never dropped the codes matched from the
+  //     old wording. Codes this editor added itself now come off when the
+  //     text stops matching; anything the tutor ticked by hand stays.
+  const allowedCodes = useMemo(() => new Set<string>(sections.flatMap((s) => s.codes)), [sections]);
+  const autoAdded = useRef<Set<string>>(new Set());
+  const rejected = useRef<Set<string>>(new Set());
+  // Read the live point inside the debounce without making it a dependency:
+  // criteria_codes as a dependency is what made the effect answer itself.
+  const pointRef = useRef(point);
+  pointRef.current = point;
+
   useEffect(() => {
     if (!autoTagEnabled) return;
     const timeout = setTimeout(() => {
-      const matched = matchCriteriaCodes(point.text);
-      const newCodes = matched.filter((c) => !point.criteria_codes.includes(c));
-      if (newCodes.length > 0) {
-        onChange({ criteria_codes: [...point.criteria_codes, ...newCodes] });
+      const current = pointRef.current;
+      const matched = matchCriteriaCodes(current.text).filter((c) => allowedCodes.has(c));
+      const kept = current.criteria_codes.filter((c) => !autoAdded.current.has(c) || matched.includes(c));
+      for (const code of current.criteria_codes) {
+        if (autoAdded.current.has(code) && !matched.includes(code)) autoAdded.current.delete(code);
+      }
+      const added = matched.filter((c) => !kept.includes(c) && !rejected.current.has(c));
+      for (const code of added) autoAdded.current.add(code);
+      const next = [...kept, ...added];
+      if (next.length !== current.criteria_codes.length || next.some((c, i) => c !== current.criteria_codes[i])) {
+        onChange({ criteria_codes: next });
       }
     }, 600);
     return () => clearTimeout(timeout);
-  }, [point.text, point.criteria_codes, autoTagEnabled, onChange]);
+  }, [point.text, autoTagEnabled, allowedCodes, onChange]);
 
   function toggleCriteria(code: string) {
     const has = point.criteria_codes.includes(code);
+    if (has) {
+      // Taking a code off is a decision, not a slip: remember it so the
+      // tagger stops offering it for this point.
+      rejected.current.add(code);
+      autoAdded.current.delete(code);
+    } else {
+      rejected.current.delete(code);
+      autoAdded.current.delete(code);
+    }
     onChange({
       criteria_codes: has ? point.criteria_codes.filter((c) => c !== code) : [...point.criteria_codes, code],
     });
