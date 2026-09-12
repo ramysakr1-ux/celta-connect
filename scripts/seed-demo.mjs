@@ -1415,7 +1415,14 @@ async function main() {
       action_points_planning: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: PLANNING_CODES[s] ?? [] })),
       strengths_teaching: strengths.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
       action_points_teaching: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
-      overall_comment: "A confident, well-paced lesson overall -- keep building on this.",
+      // Handbook 10.2: "an unambiguous comment on the overall standard of the
+      // lesson" -- so the comment says the standard the grade says.
+      overall_comment:
+        grade === "not_to_standard"
+          ? "Below the standard expected at this stage: the aims were not achieved for most learners. See the action points -- they need to be addressed before the next lesson."
+          : grade === "above_standard"
+            ? "Above the standard expected at this stage -- a well-staged lesson in which the learners did the work. Keep building on this."
+            : "A confident, well-paced lesson that met the standard for this stage -- keep building on this.",
       submitted_at: at(),
     });
 
@@ -1530,9 +1537,16 @@ async function main() {
     // stops at the point they left, whichever comes first.
     const taught = Math.min(def.withdrawn ? 3 : 8, tpRoundsLogged(def.half));
     for (let n = 1; n <= taught; n += 1) {
+      // Ines is the borderline Fail/Pass: one written assignment failed after
+      // resubmission AND teaching that dipped below standard at TP4 and again
+      // at TP6 -- which is what a Fail/Pass provisional, a not-to-standard
+      // Stage 2 and a Stage 3 with a fail letter rest on (Handbook 11.6: one
+      // failed assignment alone still allows a Pass). Until 12 Sep 2026 her
+      // lessons were all to or above standard and the story did not hold.
+      const INES_GRADES = { 4: "not_to_standard", 6: "not_to_standard" };
       await seedTaughtTp(trainees[def.name], n, {
         aim: FILLER_AIMS[(n - 1) % FILLER_AIMS.length],
-        grade: n % 3 === 0 ? "above_standard" : "to_standard",
+        grade: def.name === "Ines Marchetti" ? (INES_GRADES[n] ?? "to_standard") : n % 3 === 0 ? "above_standard" : "to_standard",
         strengths: ["Clear instructions", "Good rapport with learners"],
         // A DIFFERENT action point each round, except for the two candidates
         // who are meant to look at risk.
@@ -1546,7 +1560,9 @@ async function main() {
         // the couple of genuine concerns an MCT would actually be chasing.
         actionPoints: [AT_RISK_CANDIDATES.has(def.name)
           ? "Vary interaction patterns a little more"
-          : ROTATING_ACTION_POINTS[(n - 1) % ROTATING_ACTION_POINTS.length]],
+          : def.name === "Ines Marchetti" && (n === 4 || n === 6)
+            ? "Instructions need to be more concise and checked"
+            : ROTATING_ACTION_POINTS[(n - 1) % ROTATING_ACTION_POINTS.length]],
         half: def.half,
       });
     }

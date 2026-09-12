@@ -33,15 +33,15 @@ const CANDIDATES = [
   {
     name: "Ines Marchetti",
     time: "15:15",
-    overall: "to_standard",
+    overall: "not_to_standard",
     letter: true,
     acknowledges: false,
     candidateSigns: true,
     notes:
-      "Teaching is to standard and TP6 was above it. The risk is the written component: Focus on the Learner failed after resubmission, so no further assignment can be failed. Action points: Language Skills Related Tasks due next week -- book a consultation before submitting; keep the lesson planning at TP6's level for TP7 and TP8. A Fail letter follows this tutorial because a second failed assignment would mean a Fail (Handbook 10.2, 11.5).",
-    assignments: "Focus on the Learner: Fail on resubmission (warning letter issued). Language Related Tasks: passed. Skills: due next week.",
+      "Not to standard entering the final third: TP4 and TP6 were below the standard, both on unclear, unchecked instructions and aims not reached for most learners; TP5 met it. Written work adds to the risk: Focus on the Learner failed after resubmission, so no further assignment can be failed. Action points: script and check every instruction (ICQs, not 'ok?'); stage the lesson to the aim and stop when the aim is reached; Language Skills Related Tasks due Monday -- book a consultation before submitting. A Fail letter follows this tutorial (Handbook 10.2).",
+    assignments: "Focus on the Learner: Fail on resubmission (warning letter issued). Language Related Tasks: passed. Skills: due Monday 14 September.",
     other: null,
-    matrix: {},
+    matrix: { "5f": "N", "4h": "N", "5d": "N" },
   },
   {
     name: "Priya Sharma",
