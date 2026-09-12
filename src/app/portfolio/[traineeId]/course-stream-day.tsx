@@ -65,6 +65,7 @@ export function StreamDayTrack({
   serverNowMs,
   timeZone,
   meta,
+  heading = "Your day",
 }: {
   day: StreamDay;
   serverNowMs: number;
@@ -74,6 +75,8 @@ export function StreamDayTrack({
   timeZone: string;
   /** The right-hand line: "You teach 10:00", or "Not teaching today · next TP5 Friday". */
   meta: { lead: string; countdownFor: string | null };
+  /** "Your day" by default; "Your next day · Monday 14 September" when today has nothing on. */
+  heading?: string;
 }) {
   const [mounted, setMounted] = useState(false);
   const now = useServerNow(serverNowMs);
@@ -127,7 +130,7 @@ export function StreamDayTrack({
   return (
     <section className="flex flex-col">
       <div className="mb-2.5 flex items-baseline justify-between gap-4">
-        <span className="text-[10.5px] font-bold tracking-[0.14em] text-muted uppercase">Your day</span>
+        <span className="text-[10.5px] font-bold tracking-[0.14em] text-muted uppercase">{heading}</span>
         <span className="text-[12.5px] text-muted">
           {meta.lead}
           {countdown ? ` · ${countdown}` : null}

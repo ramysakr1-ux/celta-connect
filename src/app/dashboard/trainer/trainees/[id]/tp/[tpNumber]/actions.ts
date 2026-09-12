@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import type { FeedbackPoint } from "@/lib/tp-plan-content";
 import type { StandardRating } from "@/lib/supabase/types";
+import { recordAssessedLesson } from "@/lib/assessed-lesson-record";
 
 export interface FormState {
   error: string | null;
@@ -42,6 +43,13 @@ async function saveFeedback(formData: FormData, lock: boolean): Promise<FormStat
     .maybeSingle();
 
   const grade = optionalString(formData.get("grade")) as StandardRating | null;
+  // Handbook 10.2: the summary of a feedback sheet "should include an
+  // unambiguous comment on the overall standard of the lesson". The grade is
+  // that comment, in the CELTA 5's own three words -- a sheet can be drafted
+  // without one, but not released.
+  if (lock && !grade) {
+    return { error: "Say which standard the lesson reached before releasing -- Cambridge asks for an unambiguous comment on the overall standard of every lesson (Handbook 10.2)." };
+  }
   const fields = {
     trainer_id: trainer.id,
     grade,
@@ -69,6 +77,20 @@ async function saveFeedback(formData: FormData, lock: boolean): Promise<FormStat
     return { error: "Could not save the feedback. Try again." };
 }
 
+  // Released feedback fills the candidate's CELTA 5 record of assessed
+  // teaching practice -- see assessed-lesson-record.ts.
+  if (lock && trainer.course_id) {
+    await recordAssessedLesson(supabase, {
+      courseId: trainer.course_id,
+      traineeId,
+      tpNumber,
+      planId,
+      trainerId: trainer.id,
+      grade,
+      overallComment: fields.overall_comment,
+    });
+    revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  }
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/tp/${tpNumber}`);
   return { error: null };
 }

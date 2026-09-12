@@ -1,3 +1,4 @@
+import { formatCalendarDate } from "@/lib/format-date";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { GTKY_BANK } from "@/lib/gtky-activities";
@@ -23,9 +24,21 @@ export default async function GtkyPage() {
   const supabase = await createClient();
   const courseId = trainer.course_id;
 
-  const [{ data: assignments }, { data: trainees }] = await Promise.all([
+  const [{ data: assignments }, { data: trainees }, { data: gtkyEvent }] = await Promise.all([
     supabase.from("gtky_assignments").select("*").eq("course_id", courseId),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").eq("course_status", "active"),
+    // The session as the timetable has it -- Ramy, 12 Sep 2026: "go with
+    // whatever is written on the timetable; this will change depending on
+    // the timetable and depending on the centre."
+    supabase
+      .from("course_timetable_events")
+      .select("event_date, event_time, title")
+      .eq("course_id", courseId)
+      .neq("type", "tp")
+      .or("title.ilike.%getting to know%,title.ilike.%gtky%")
+      .order("event_date")
+      .limit(1)
+      .maybeSingle(),
   ]);
   const nameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
   const activityBySlug = new Map(GTKY_BANK.map((a) => [a.slug, a]));
@@ -42,10 +55,14 @@ export default async function GtkyPage() {
     <div className="flex flex-col gap-6">
       <div>
         <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Getting to know you -- day one</h1>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Getting to know you</h1>
         <p className="mt-1 text-sm text-muted">
+          {gtkyEvent?.event_date
+            ? `Timetabled ${formatCalendarDate(gtkyEvent.event_date, { weekday: "long", month: "long" })}${gtkyEvent.event_time ? ` at ${gtkyEvent.event_time.slice(0, 5)}` : ""} ("${gtkyEvent.title}"). `
+            : "Not on the timetable yet -- add a session titled \"Getting to know you\" or \"GTKY\" and this page, and the candidates' materials, follow it. "}
           Twenty minutes each, unassessed, the tutor not in the room. Three activities offered per candidate, matched
-          to the level they will teach; they pick one in Connect. Anyone who hasn&apos;t by Monday, pick for them below.
+          to the level they will teach; they pick one in Connect. Anyone who hasn&apos;t picked before the session, pick
+          for them below.
         </p>
       </div>
 

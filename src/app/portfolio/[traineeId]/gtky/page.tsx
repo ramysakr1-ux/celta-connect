@@ -5,6 +5,7 @@ import { GTKY_BANK } from "@/lib/gtky-activities";
 import { GtkyPickForm } from "@/app/portfolio/[traineeId]/gtky/pick-form";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // design_handoff_open_items_batch, GTKY Activity Bank.dc.html §1c -- the
 // candidate's own handout, one page, three options. Access is
@@ -44,7 +45,7 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
   // just means nothing to share against, not an error.
   const { data: gtkyEvent } = await supabase
     .from("course_timetable_events")
-    .select("id, title")
+    .select("id, title, event_date, event_time")
     .eq("course_id", assignment.course_id)
     .neq("type", "tp")
     // "Getting to know you" or the staffroom's "GTKY" -- the ported demo
@@ -62,7 +63,15 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
     <div className="flex flex-col gap-6">
       <div>
         <p className="text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
-          Your day-one activity · unassessed · nobody is watching
+          {/* Ramy, 12 Sep 2026: "go with whatever is written on the timetable"
+              -- when this happens is the centre's timetable's business, not
+              a fixed "day one". The session is named here the moment a
+              trainer puts it on the board. */}
+          Your getting-to-know-you activity ·{" "}
+          {gtkyEvent?.event_date
+            ? `${formatCalendarDate(gtkyEvent.event_date, { weekday: "long", month: "long" })}${gtkyEvent.event_time ? `, ${gtkyEvent.event_time.slice(0, 5)}` : ""}`
+            : "not on the timetable yet"}{" "}
+          · unassessed · nobody is watching
         </p>
         <h1 className="mt-1 font-serif text-2xl text-ink">Getting to know your class</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
