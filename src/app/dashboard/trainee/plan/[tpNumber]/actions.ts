@@ -109,7 +109,22 @@ async function savePlan(formData: FormData, lock: boolean): Promise<FormState> {
     }
   }
 
-  const anticipatedProblems = parseJsonField<ProblemSolutionPair[]>(formData, "anticipated_problems", []);
+  // The form renders three problem/solution pairs as plain fields --
+  // problem_1/solution_1 and so on (lesson-plan-form.tsx). This read them as
+  // one JSON field called "anticipated_problems", which the form has never
+  // sent, so parseJsonField always fell through to its default and every
+  // anticipated problem a candidate typed was discarded on save. Silently:
+  // the save succeeded, the boxes simply came back empty.
+  //
+  // Anticipating difficulties with tasks, materials and learners is criterion
+  // 4j, assessed from the plan and moderated from the portfolio, so this was
+  // losing assessed evidence. Found 12 Sep 2026 writing a plan as a candidate.
+  const anticipatedProblems: ProblemSolutionPair[] = [1, 2, 3]
+    .map((n) => ({
+      problem: (formData.get(`problem_${n}`) as string | null)?.trim() ?? "",
+      solution: (formData.get(`solution_${n}`) as string | null)?.trim() ?? "",
+    }))
+    .filter((p) => p.problem || p.solution);
   const procedure = parseJsonField<PlanProcedureRow[]>(formData, "procedure", []);
 
   const { error: planError } = await supabase
