@@ -405,12 +405,24 @@ export default async function TpDetailPage({
             {(() => {
               const exportReady = Boolean(plan?.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at);
               return exportReady ? (
-                <a
-                  href={`/api/tp-plans/${plan!.id}/pdf`}
-                  className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
-                >
-                  Export TP PDF
-                </a>
+                <>
+                  {/* The designed document (design_handoff_tp_feedback_cycle
+                      §3), printed by the browser. The PDF endpoint beside it
+                      stays because it is the only one that merges the
+                      candidate's own uploaded handouts into the file. */}
+                  <a
+                    href={`/portfolio/${traineeId}/tp/${tpNumber}/document`}
+                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
+                  >
+                    The assembled document
+                  </a>
+                  <a
+                    href={`/api/tp-plans/${plan!.id}/pdf`}
+                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
+                  >
+                    PDF with materials
+                  </a>
+                </>
               ) : (
                 <span
                   className="cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted"
