@@ -360,10 +360,48 @@ export interface FeedbackPoint {
   text: string;
   criteria_codes: string[];
   starred: boolean;
+  // design_handoff_tp_feedback_cycle §1.0 -- the ONE data change in that
+  // handoff. A planning point written in step 1 (Plan Review) remembers which
+  // part of the plan the tutor was looking at, so the assembled document can
+  // print it twice: once on the feedback cover under Planning, and again
+  // beside that part of the plan itself.
+  //
+  // Values: "aims" | "stage-{n}" (1-based procedure index) | "problems" |
+  // "room" | "la" | "vocab-{n}" | "block-{n}". Absent means unanchored -- a
+  // point typed straight into step 2, or pulled in from a captured note.
+  // Teaching points never carry one.
+  //
+  // Lives in the same strengths_planning / action_points_planning JSON
+  // columns, so there is no migration beyond the shape.
+  anchor?: string;
 }
 
 export function emptyFeedbackPoint(): FeedbackPoint {
   return { text: "", criteria_codes: [], starred: false };
+}
+
+/** The parts of a plan a feedback point can be anchored to, in print order. */
+export type PlanAnchor = string;
+
+/** Which half of the assembled document an anchored point belongs beside. */
+export function anchorBelongsToAnalysis(anchor: string | undefined): boolean {
+  if (!anchor) return false;
+  return anchor === "la" || anchor.startsWith("vocab-") || anchor.startsWith("block-");
+}
+
+export function anchorBelongsToPlan(anchor: string | undefined): boolean {
+  if (!anchor) return false;
+  return anchor === "aims" || anchor === "problems" || anchor === "room" || anchor.startsWith("stage-");
+}
+
+/** Criteria the tutor is most likely to reach for, by the part they clicked. */
+export function suggestedCodesForAnchor(anchor: string): string[] {
+  if (anchor === "aims") return ["4a", "4l"];
+  if (anchor.startsWith("stage-")) return ["4b", "4e", "4f", "4h"];
+  if (anchor === "problems") return ["4j", "4k"];
+  if (anchor === "room") return ["4c"];
+  if (anchor === "la" || anchor.startsWith("vocab-") || anchor.startsWith("block-")) return ["4i"];
+  return [];
 }
 
 // ---------------- TP card lifecycle status (for the overview cards) ----------------

@@ -5,6 +5,11 @@ import { useState } from "react";
 export interface WizardStep {
   key: string;
   content: React.ReactNode;
+  /** Extra classes on the step's own wrapper -- the grid item, when the wizard
+   *  sits inside a grid. The self-evaluation uses it to span sections 5 and 6
+   *  across both columns while questions 1-4 sit 2x2
+   *  (design_handoff_tp_feedback_cycle §2b). */
+  className?: string;
 }
 
 // specs/build-spec.md §7: "Trainee -- everything, one question per screen,
@@ -25,12 +30,12 @@ export function MobileFormWizard({ steps }: { steps: WizardStep[] }) {
   return (
     <>
       {steps.map((step, i) => (
-        <div key={step.key} className={i === clamped ? "block" : "hidden md:block"}>
+        <div key={step.key} className={`${i === clamped ? "block" : "hidden md:block"} ${step.className ?? ""}`}>
           {step.content}
         </div>
       ))}
       {steps.length > 1 ? (
-        <div className="flex items-center justify-between gap-3 md:hidden">
+        <div className="col-span-full flex items-center justify-between gap-3 p-4 md:hidden">
           <button
             type="button"
             onClick={() => setCurrent((c) => Math.max(0, c - 1))}

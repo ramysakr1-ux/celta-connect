@@ -95,18 +95,33 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
 
 const TEAL = "oklch(37.5% 0.058 195)";
 const DESTRUCTIVE = "oklch(52% 0.19 32)";
-const INK_WARM = "oklch(30% 0.042 58)";
-const HEADER_GOLD = "oklch(86% 0.09 82)";
 const SHEET = "oklch(98.5% 0.006 90)";
 
 /**
- * `header` sits on the dark identity band (gold fill); `bar` sits in the fixed
- * bottom bar (teal outline). Both drive the same recogniser.
+ * `band` sits on a document's dark identity band and takes THAT band's own
+ * idle colours -- teal's tints on the garnet band read green-grey, so they are
+ * never shared (design_handoff_tp_feedback_cycle, colour map). `bar` sits in
+ * the sticky bottom bar and outlines in the screen's role hue. Both drive the
+ * same recogniser.
  */
-export function DictateButton({ variant }: { variant: "header" | "bar" }) {
+export function DictateButton({
+  variant,
+  fill,
+  text,
+  hue = TEAL,
+}: {
+  variant: "band" | "header" | "bar";
+  /** Band variant: the idle fill, from BAND[role].dictateFill. */
+  fill?: string;
+  /** Band variant: the idle text colour, from BAND[role].dictateText. */
+  text?: string;
+  /** Bar variant: the screen's role hue. */
+  hue?: string;
+}) {
   const ctx = useContext(DictationContext);
   if (!ctx) return null;
   const { supported, listening, fieldLabel, toggle } = ctx;
+  const onBand = variant !== "bar";
 
   const label = !supported
     ? "Not supported here"
@@ -118,9 +133,9 @@ export function DictateButton({ variant }: { variant: "header" | "bar" }) {
 
   const style: React.CSSProperties = listening
     ? { background: DESTRUCTIVE, borderColor: DESTRUCTIVE, color: SHEET }
-    : variant === "header"
-      ? { background: HEADER_GOLD, borderColor: HEADER_GOLD, color: INK_WARM }
-      : { background: `color-mix(in oklab, ${TEAL} 10%, transparent)`, borderColor: TEAL, color: TEAL };
+    : onBand
+      ? { background: fill ?? "oklch(86% 0.09 82)", borderColor: fill ?? "oklch(86% 0.09 82)", color: text ?? "oklch(30% 0.042 58)" }
+      : { background: `color-mix(in oklab, ${hue} 10%, transparent)`, borderColor: hue, color: hue };
 
   return (
     <button
@@ -132,9 +147,9 @@ export function DictateButton({ variant }: { variant: "header" | "bar" }) {
       className="inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-full border-2 font-bold disabled:opacity-60"
       style={{
         ...style,
-        padding: variant === "header" ? "8px 18px" : "7px 16px",
-        fontSize: variant === "header" ? 13.5 : 13,
-        boxShadow: variant === "header" ? "0 2px 10px oklch(23.5% 0.017 65 / 0.25)" : undefined,
+        padding: onBand ? "8px 18px" : "7px 16px",
+        fontSize: onBand ? 13.5 : 13,
+        boxShadow: onBand ? "0 2px 10px oklch(23.5% 0.017 65 / 0.25)" : undefined,
       }}
     >
       <span aria-hidden>{listening ? "●" : "🎙"}</span>

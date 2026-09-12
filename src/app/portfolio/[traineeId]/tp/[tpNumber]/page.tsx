@@ -750,6 +750,8 @@ export default async function TpDetailPage({
                 plan={plan ?? null}
                 taught={lessonTaught}
                 lessonDate={lessonDate ? formatCalendarDate(lessonDate, { weekday: "long", month: "long" }) : null}
+                lessonTitle={assignment.main_lesson_aim}
+                lessonWhen={lessonWhen}
                 selfEvaluation={selfEvaluation ?? null}
                 previousActionPoints={previousActionPoints}
                 feedback={feedback ?? null}

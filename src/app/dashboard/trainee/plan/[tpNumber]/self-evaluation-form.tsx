@@ -6,31 +6,108 @@ import {
   submitSelfEvaluation,
   type FormState,
 } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-actions";
-import { FormSubmitBar } from "@/components/form-submit-bar";
 import { MobileFormWizard, type WizardStep } from "@/components/mobile-form-wizard";
-import { DictateAnywhere } from "@/components/dictate-anywhere";
+import { DictationScope } from "@/components/dictate-anywhere";
+import {
+  BORDER,
+  BottomBar,
+  CARD,
+  Eyebrow,
+  FAINT,
+  GARNET,
+  GOLD,
+  GOLD_INK,
+  GOLD_WASH,
+  IdentityBand,
+  INK,
+  INK_WARM,
+  MUTED,
+  NumberedDot,
+  SaveDraftButton,
+  SaveStatusPill,
+  Strip,
+  SubmitButton,
+  TEAL,
+  TpSheet,
+  plainField,
+  ruledField,
+} from "@/components/tp-sheet";
+import { bulletListProps } from "@/lib/bullet-list";
+import { autosizeOnInput, useAutosize } from "@/lib/autosize";
 import type { SelfEvalActionPoint } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
 
 type TpSelfEvaluation = Database["public"]["Tables"]["tp_self_evaluations"]["Row"];
 
 const initialState: FormState = { error: null };
-const inputClass =
-  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+
+// design_handoff_tp_feedback_cycle §2, 13 Sep 2026.
+//
+// The self-evaluation is the trainee's OWN voice in the cycle, so it carries
+// the garnet identity band -- the same hue that marks the Teaching column in
+// the tutor's feedback and the tutor's comment on this sheet at the foot of
+// the assembled document. Its eyebrow, sub-line, save status and Dictate fill
+// are garnet's own tints; none of them are borrowed from the teal band.
+//
+// Each question keeps its own hue, and the progress strip fills a segment in
+// that hue as the question is answered: what went to plan (teal, structure),
+// what didn't (garnet, the room), evidence of learning (ink-warm), what you'd
+// do differently (gold-ink, carry-forward), the carried action points
+// (gold-ink), next TP focus (teal).
+
+const QUESTIONS = [
+  {
+    name: "what_went_well" as const,
+    label: "What went to plan?",
+    hint: "Be specific — a stage, a moment, something a learner said or did.",
+    hue: TEAL,
+  },
+  {
+    name: "what_not_as_planned" as const,
+    label: "What didn't go as planned, and why?",
+    hint: "Which stage, and what caused it.",
+    hue: GARNET,
+  },
+  {
+    name: "evidence_of_learning" as const,
+    label: "What evidence did you see that the learners had learnt?",
+    hint: "",
+    hue: INK_WARM,
+  },
+  {
+    name: "what_differently" as const,
+    label: "What would you do differently if you taught it again?",
+    hint: "",
+    hue: GOLD_INK,
+  },
+];
 
 export function SelfEvaluationForm({
   planId,
   tpNumber,
   selfEvaluation,
   previousActionPoints,
+  lessonTitle = null,
+  lessonWhen = null,
 }: {
   planId: string;
   tpNumber: number;
   selfEvaluation: TpSelfEvaluation | null;
   previousActionPoints: string[];
+  lessonTitle?: string | null;
+  lessonWhen?: string | null;
 }) {
   const [draftState, draftAction, draftPending] = useActionState(saveSelfEvaluationDraft, initialState);
   const [submitState, submitActionFn, submitPending] = useActionState(submitSelfEvaluation, initialState);
+  const autosize = useAutosize();
+
+  const [answers, setAnswers] = useState<Record<string, string>>(() => ({
+    what_went_well: selfEvaluation?.what_went_well ?? "",
+    what_not_as_planned: selfEvaluation?.what_not_as_planned ?? "",
+    evidence_of_learning: selfEvaluation?.evidence_of_learning ?? "",
+    what_differently: selfEvaluation?.what_differently ?? "",
+    next_tp_focus: selfEvaluation?.next_tp_focus ?? "",
+  }));
 
   const [actionPoints, setActionPoints] = useState<SelfEvalActionPoint[]>(() => {
     if (selfEvaluation && selfEvaluation.action_points.length > 0) return selfEvaluation.action_points;
@@ -42,194 +119,287 @@ export function SelfEvaluationForm({
 
   const state = submitPending ? submitState : draftState;
 
-  // specs/build-spec.md §7: "Trainee -- everything, one question per
-  // screen." Same 6 fields as before, just sequenced for MobileFormWizard
-  // instead of a 2-column grid -- desktop still sees every field at once
-  // (md:block override), just stacked full-width now rather than in a
-  // grid; a minor, deliberate layout simplification, not a functional one.
+  // §2a -- six segments, filled in the question's own hue once answered.
+  const answered = [
+    ...QUESTIONS.map((q) => Boolean(answers[q.name].trim())),
+    actionPoints.some((p) => p.what_i_did.trim()),
+    Boolean(answers.next_tp_focus.trim()),
+  ];
+  const answeredCount = answered.filter(Boolean).length;
+  const segmentHues = [...QUESTIONS.map((q) => q.hue), GOLD_INK, TEAL];
+
+  const eyebrow = [`Teaching Practice ${tpNumber}`, lessonWhen, lessonTitle].filter(Boolean).join(" · ");
+
   const steps: WizardStep[] = [
-    {
-      key: "what_went_well",
+    ...QUESTIONS.map((q, i) => ({
+      key: q.name,
       content: (
-        <Field label="What went to plan?" hint="Be specific -- a stage, a moment, something a learner said or did.">
-          <textarea
-            name="what_went_well"
-            rows={4}
-            defaultValue={selfEvaluation?.what_went_well ?? ""}
-            data-dictate-label="What went to plan?"
-            className={inputClass}
-          />
-        </Field>
+        <Question
+          n={i + 1}
+          label={q.label}
+          hint={q.hint}
+          hue={q.hue}
+          name={q.name}
+          value={answers[q.name]}
+          onChange={(v) => setAnswers({ ...answers, [q.name]: v })}
+          autosize={autosize}
+          bordered={i % 2 === 1}
+        />
       ),
-    },
-    {
-      key: "what_not_as_planned",
-      content: (
-        <Field label="What didn't go as planned, and why?" hint="Which stage, and what caused it.">
-          <textarea
-            name="what_not_as_planned"
-            rows={4}
-            defaultValue={selfEvaluation?.what_not_as_planned ?? ""}
-            data-dictate-label="What didn't go as planned"
-            className={inputClass}
-          />
-        </Field>
-      ),
-    },
-    {
-      key: "evidence_of_learning",
-      content: (
-        <Field label="What evidence did you see that the learners had learnt?">
-          <textarea
-            name="evidence_of_learning"
-            rows={4}
-            defaultValue={selfEvaluation?.evidence_of_learning ?? ""}
-            data-dictate-label="Evidence of learning"
-            className={inputClass}
-          />
-        </Field>
-      ),
-    },
-    {
-      key: "what_differently",
-      content: (
-        <Field label="What would you do differently if you taught it again?">
-          <textarea
-            name="what_differently"
-            rows={4}
-            defaultValue={selfEvaluation?.what_differently ?? ""}
-            data-dictate-label="What you would do differently"
-            className={inputClass}
-          />
-        </Field>
-      ),
-    },
+    })),
     {
       key: "action_points_table",
+      className: "md:col-span-2",
       content: (
-        <div>
-          <label className="text-sm text-muted">Action points from the last TP</label>
-          <p className="text-xs italic text-muted">
-            Brought in automatically from your tutor&apos;s starred points -- say what you actually did about each one.
-          </p>
-          <div className="mt-2 overflow-x-auto rounded-[6px] border border-border-faint">
-            <table className="w-full min-w-[520px] border-collapse text-sm">
-              <thead>
-                <tr>
-                  <th className="border-b border-border-faint bg-background p-2 text-left text-xs text-muted">
-                    Action point set last time
-                  </th>
-                  <th className="border-b border-border-faint bg-background p-2 text-left text-xs text-muted">
-                    What I did about it
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {actionPoints.map((point, i) => (
-                  <tr key={i} className="even:bg-background/50">
-                    <td className="border-b border-border-faint p-2 align-top">
-                      {point.carried ? (
-                        <p className="flex items-start gap-1.5 text-sm text-ink">
-                          <span className="mt-0.5 shrink-0 text-xs text-status-warning-text">★</span>
-                          {point.previous_point}
-                        </p>
-                      ) : (
-                        <input
-                          type="text"
-                          value={point.previous_point}
-                          onChange={(e) =>
-                            setActionPoints(
-                              actionPoints.map((p, x) => (x === i ? { ...p, previous_point: e.target.value } : p))
-                            )
-                          }
-                          placeholder="Your own point"
-                          data-dictate-label="your own action point"
-                          className={inputClass}
-                        />
-                      )}
-                    </td>
-                    <td className="border-b border-border-faint p-2 align-top">
-                      <textarea
-                        rows={2}
-                        value={point.what_i_did}
-                        onChange={(e) =>
-                          setActionPoints(actionPoints.map((p, x) => (x === i ? { ...p, what_i_did: e.target.value } : p)))
-                        }
-                        placeholder="What I did about it"
-                        data-dictate-label={`what you did about "${point.previous_point.slice(0, 40)}"`}
-                        className={inputClass}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div style={{ padding: "20px 26px 22px", borderBottom: `1px solid ${FAINT}` }}>
+          <div className="flex items-start gap-3">
+            <NumberedDot n={5} hue={GOLD_INK} done={answered[4]} />
+            <div className="min-w-0">
+              <h3 className="font-serif" style={{ fontSize: 17, fontWeight: 600, color: GOLD_INK }}>
+                Action points from the last TP
+              </h3>
+              <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+                Brought in automatically from your tutor&apos;s starred points — say what you actually did about each
+                one.
+              </p>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setActionPoints([...actionPoints, { previous_point: "", what_i_did: "" }])}
-            className="mt-2 text-sm text-primary hover:underline"
-          >
-            + Add another
-          </button>
+
+          <div style={{ marginLeft: 36, marginTop: 12 }}>
+            <div
+              className="grid gap-[18px]"
+              style={{ gridTemplateColumns: "1fr 1.2fr", borderBottom: `1px solid ${BORDER}`, paddingBottom: 6 }}
+            >
+              <Eyebrow>Action point set last time</Eyebrow>
+              <Eyebrow>What I did about it</Eyebrow>
+            </div>
+            {actionPoints.map((point, i) => (
+              <div
+                key={i}
+                className="grid gap-[18px]"
+                style={{
+                  gridTemplateColumns: "1fr 1.2fr",
+                  padding: "12px 0",
+                  borderBottom: `1px dashed ${FAINT}`,
+                }}
+              >
+                {point.carried ? (
+                  <div
+                    style={{
+                      borderRadius: 7,
+                      borderLeft: `3px solid ${GOLD}`,
+                      background: GOLD_WASH,
+                      padding: "9px 11px",
+                    }}
+                  >
+                    <span style={{ fontSize: 11, color: GOLD_INK }}>★ </span>
+                    <span style={{ fontSize: 13, lineHeight: 1.5, color: INK }}>{point.previous_point}</span>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={point.previous_point}
+                    onChange={(e) =>
+                      setActionPoints(actionPoints.map((p, x) => (x === i ? { ...p, previous_point: e.target.value } : p)))
+                    }
+                    placeholder="Your own point"
+                    data-dictate-label="your own action point"
+                    style={{ ...plainField(13), borderBottom: `1px solid ${BORDER}`, minHeight: undefined }}
+                  />
+                )}
+                <textarea
+                  ref={autosize}
+                  rows={1}
+                  value={point.what_i_did}
+                  onInput={autosizeOnInput}
+                  onChange={(e) =>
+                    setActionPoints(actionPoints.map((p, x) => (x === i ? { ...p, what_i_did: e.target.value } : p)))
+                  }
+                  placeholder="What I did about it"
+                  data-dictate-label={
+                    point.previous_point ? `what you did about "${point.previous_point.slice(0, 40)}"` : "what I did about it"
+                  }
+                  {...bulletListProps}
+                  style={{ ...ruledField(13.5, BORDER, 1.55), minHeight: 44 }}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setActionPoints([...actionPoints, { previous_point: "", what_i_did: "" }])}
+              className="mt-2"
+              style={{ fontSize: 12.5, color: TEAL }}
+            >
+              + Add another
+            </button>
+          </div>
         </div>
       ),
     },
     {
       key: "next_tp_focus",
+      className: "md:col-span-2",
       content: (
-        <Field label="What do you want to work on in the next TP?" hint="Your own priorities, before you read your tutor's.">
+        <div className="rounded-b-[14px]" style={{ background: CARD, padding: "20px 26px 24px" }}>
+          <div className="flex items-start gap-3">
+            <NumberedDot n={6} hue={TEAL} done={answered[5]} />
+            <div className="min-w-0">
+              <h3 className="font-serif" style={{ fontSize: 17, fontWeight: 600, color: TEAL }}>
+                What do you want to work on in the next TP?
+              </h3>
+              <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+                Your own priorities, before you read your tutor&apos;s.
+              </p>
+            </div>
+          </div>
           <textarea
+            ref={autosize}
             name="next_tp_focus"
-            rows={3}
-            defaultValue={selfEvaluation?.next_tp_focus ?? ""}
+            rows={1}
+            value={answers.next_tp_focus}
+            onInput={autosizeOnInput}
+            onChange={(e) => setAnswers({ ...answers, next_tp_focus: e.target.value })}
+            placeholder="• One priority per line"
             data-dictate-label="What to work on next TP"
-            className={inputClass}
+            {...bulletListProps}
+            style={{
+              ...ruledField(14, answers.next_tp_focus.trim() ? TEAL : BORDER),
+              marginLeft: 36,
+              width: "calc(100% - 36px)",
+              minHeight: 60,
+            }}
           />
-        </Field>
+        </div>
       ),
     },
   ];
 
   return (
-    <form id="self-evaluation" action={draftAction} className="card rounded-[9px] border-t-[var(--trainee-plum)] flex flex-col gap-4 p-6">
-      <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
-      <p className="text-sm text-muted">
-        Write this before you read your tutor&apos;s feedback -- that&apos;s the point of it.
-      </p>
-      <input type="hidden" name="plan_id" value={planId} />
-      <input type="hidden" name="tp_number" value={tpNumber} />
-      <input type="hidden" name="action_points" value={JSON.stringify(actionPoints)} />
+    <DictationScope scopeId="self-evaluation">
+      <form id="self-evaluation" action={draftAction} className="scroll-mt-20">
+        <input type="hidden" name="plan_id" value={planId} />
+        <input type="hidden" name="tp_number" value={tpNumber} />
+        <input type="hidden" name="action_points" value={JSON.stringify(actionPoints)} />
+        {QUESTIONS.map((q) => (
+          <input key={q.name} type="hidden" name={q.name} value={answers[q.name]} />
+        ))}
 
-      <div className="flex flex-col gap-4">
-        <MobileFormWizard steps={steps} />
-      </div>
+        <TpSheet maxWidth={1040}>
+          <IdentityBand
+            role="garnet"
+            eyebrow={eyebrow || `Teaching Practice ${tpNumber}`}
+            title="Self-evaluation"
+            subLine="Write this before you read your tutor's feedback — that's the point of it."
+            status={
+              <SaveStatusPill
+                role="garnet"
+                label={draftPending || submitPending ? "Saving…" : selfEvaluation ? "Draft" : "Not started"}
+              />
+            }
+          />
 
-      {/* One microphone for the whole form, following the cursor -- the same
-          change made on the lesson plan the same day. This form had five, one
-          under each box, and none at all on the two fields in the action
-          points table, which is the box a candidate most needs to talk
-          through. (Ramy, 12 Sep 2026.) */}
-      <FormSubmitBar
-        raiseForMobileNav
-        leading={<DictateAnywhere scopeId="self-evaluation" />}
-        warning="Submitting locks your self-evaluation -- you won't be able to edit it afterwards."
-        draftPending={draftPending}
-        submitPending={submitPending}
-        onSubmitAction={submitActionFn}
-        submitLabel="Submit self-evaluation"
-        error={state.error}
-      />
-    </form>
+          {/* §2a progress strip */}
+          <Strip>
+            <Eyebrow>Progress</Eyebrow>
+            <div className="flex flex-1 items-center gap-4" style={{ minWidth: 260 }}>
+              <div className="flex flex-1 gap-[3px]" style={{ height: 8 }}>
+                {answered.map((done, i) => (
+                  <span
+                    key={i}
+                    style={{ flex: 1, borderRadius: 2, background: done ? segmentHues[i] : FAINT }}
+                  />
+                ))}
+              </div>
+              <p className="flex-none whitespace-nowrap" style={{ fontSize: 12, color: MUTED }}>
+                <span className="font-serif" style={{ fontSize: 17, color: INK }}>
+                  {answeredCount}
+                </span>{" "}
+                of 6 answered
+              </p>
+            </div>
+          </Strip>
+
+          {/* §2b questions 1-4 as a 2x2 grid on desktop, one per screen on mobile */}
+          <div className="md:grid md:grid-cols-2">
+            <MobileFormWizard steps={steps} />
+          </div>
+        </TpSheet>
+
+        <BottomBar role="garnet" warning="Submitting locks your self-evaluation — you won't be able to edit it afterwards.">
+          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          <SaveDraftButton pending={draftPending} disabled={draftPending || submitPending} />
+          <SubmitButton
+            role="garnet"
+            label="Submit self-evaluation"
+            pending={submitPending}
+            disabled={draftPending || submitPending}
+            formAction={submitActionFn}
+          />
+        </BottomBar>
+      </form>
+    </DictationScope>
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Question({
+  n,
+  label,
+  hint,
+  hue,
+  name,
+  value,
+  onChange,
+  autosize,
+  bordered,
+}: {
+  n: number;
+  label: string;
+  hint: string;
+  hue: string;
+  name?: string;
+  value: string;
+  onChange: (v: string) => void;
+  autosize: (el: HTMLTextAreaElement | null) => void;
+  bordered: boolean;
+}) {
+  const answered = Boolean(value.trim());
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm text-muted">{label}</label>
-      {hint ? <p className="text-xs italic text-muted">{hint}</p> : null}
-      {children}
+    <div
+      style={{
+        padding: "20px 26px 22px",
+        borderBottom: `1px solid ${FAINT}`,
+        borderRight: bordered ? undefined : `1px solid ${FAINT}`,
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <NumberedDot n={n} hue={hue} done={answered} />
+        <div className="min-w-0">
+          <h3 className="font-serif" style={{ fontSize: 17, fontWeight: 600, color: hue }}>
+            {label}
+          </h3>
+          {hint ? (
+            <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+              {hint}
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <textarea
+        ref={autosize}
+        rows={1}
+        value={value}
+        onInput={autosizeOnInput}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="• One point per line"
+        data-dictate-label={label}
+        {...bulletListProps}
+        style={{
+          ...ruledField(14, answered ? hue : BORDER),
+          marginLeft: 36,
+          width: "calc(100% - 36px)",
+          minHeight: 72,
+        }}
+      />
     </div>
   );
 }

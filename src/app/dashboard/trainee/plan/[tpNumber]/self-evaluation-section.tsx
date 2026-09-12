@@ -16,6 +16,8 @@ export function SelfEvaluationSection({
   selfEvaluation,
   previousActionPoints,
   feedback,
+  lessonTitle = null,
+  lessonWhen = null,
 }: {
   tpNumber: number;
   plan: TpPlan | null;
@@ -25,6 +27,9 @@ export function SelfEvaluationSection({
   selfEvaluation: TpSelfEvaluation | null;
   previousActionPoints: string[];
   feedback: TpFeedback | null;
+  /** For the garnet identity band on the form. */
+  lessonTitle?: string | null;
+  lessonWhen?: string | null;
 }) {
   if (!plan) {
     return null;
@@ -71,6 +76,8 @@ export function SelfEvaluationSection({
         tpNumber={tpNumber}
         selfEvaluation={selfEvaluation}
         previousActionPoints={previousActionPoints}
+        lessonTitle={lessonTitle}
+        lessonWhen={lessonWhen}
       />
     );
   }
