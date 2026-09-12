@@ -2636,7 +2636,12 @@ async function main() {
     { d: 1, b: 1, type: "input_session", title: "Course introduction", tag: "whole_group", detail: "Timetable, CELTA 5, portfolio", linked: null, tp: null, shares: true },
     { d: 1, b: 2, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null, shares: true },
     { d: 1, b: 3, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null, shares: true },
-    { d: 1, b: 4, type: "supervised_session", title: "Unassessed teach", tag: "group_room", detail: "All six meet the learners", linked: null, tp: null, shares: true },
+    // Ramy's own rule, restated 12 Sep 2026: name the session and the app
+    // finds it -- "if we call it unassessed, getting to know you, there
+    // shouldn't be a problem". Day one IS a getting-to-know-you (all six meet
+    // the learners for the first time); it just did not say so, so the GTKY
+    // page skipped past it to the level-change one on day 10.
+    { d: 1, b: 4, type: "supervised_session", title: "Unassessed teach / GTKY", tag: "group_room", detail: "All six meet the learners", linked: null, tp: null, shares: true },
     { d: 1, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null },

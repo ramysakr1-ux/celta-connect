@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { GTKY_BANK } from "@/lib/gtky-activities";
 import { assignGtkyActivities, pickGtkyActivityForTrainee } from "@/app/trainer/(hub)/gtky/actions";
+import { findGtkySession } from "@/lib/gtky-session";
 
 const BAND_LABELS: Record<string, string> = {
   a1: "Beginner",
@@ -30,15 +31,7 @@ export default async function GtkyPage() {
     // The session as the timetable has it -- Ramy, 12 Sep 2026: "go with
     // whatever is written on the timetable; this will change depending on
     // the timetable and depending on the centre."
-    supabase
-      .from("course_timetable_events")
-      .select("event_date, event_time, title")
-      .eq("course_id", courseId)
-      .neq("type", "tp")
-      .or("title.ilike.%getting to know%,title.ilike.%gtky%")
-      .order("event_date")
-      .limit(1)
-      .maybeSingle(),
+    findGtkySession(supabase, courseId).then((e) => ({ data: e })),
   ]);
   const nameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
   const activityBySlug = new Map(GTKY_BANK.map((a) => [a.slug, a]));

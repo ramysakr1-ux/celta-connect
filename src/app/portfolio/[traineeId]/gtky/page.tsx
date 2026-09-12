@@ -6,6 +6,8 @@ import { GtkyPickForm } from "@/app/portfolio/[traineeId]/gtky/pick-form";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatCalendarDate } from "@/lib/format-date";
+import { findGtkySession } from "@/lib/gtky-session";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // design_handoff_open_items_batch, GTKY Activity Bank.dc.html §1c -- the
 // candidate's own handout, one page, three options. Access is
@@ -43,17 +45,11 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
   // via the ordinary timetable editor), matched by title since GTKY has no
   // formal link to the calendar today. Best-effort: no matching event yet
   // just means nothing to share against, not an error.
-  const { data: gtkyEvent } = await supabase
-    .from("course_timetable_events")
-    .select("id, title, event_date, event_time")
-    .eq("course_id", assignment.course_id)
-    .neq("type", "tp")
-    // "Getting to know you" or the staffroom's "GTKY" -- the ported demo
-    // timetable uses the latter and matched nothing (12 Sep 2026).
-    .or("title.ilike.%getting to know%,title.ilike.%gtky%")
-    .order("event_date")
-    .limit(1)
-    .maybeSingle();
+  const gtkyEvent = await findGtkySession(
+    supabase,
+    assignment.course_id,
+    traineeRow ? ((await getCachedCenter(traineeRow.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE
+  );
 
   const { data: materials } = gtkyEvent
     ? await supabase.from("session_materials").select("id, file_name, file_type, storage_path, slides_url, uploaded_by").eq("timetable_event_id", gtkyEvent.id).order("created_at")
