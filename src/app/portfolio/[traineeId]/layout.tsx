@@ -12,7 +12,7 @@ import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
 import { buildRailStatus, type RailStatus } from "@/lib/trainee-rail-status";
-import { getTraineeStreamDay, type TraineeDay } from "@/lib/trainee-day";
+import { getTraineeStreamDayOrNext, type TraineeDayView } from "@/lib/trainee-day";
 import { HeaderDayBar } from "@/app/portfolio/[traineeId]/header-day-bar";
 import { HeaderCredit } from "@/components/designer-credit";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
@@ -132,7 +132,7 @@ export default async function PortfolioLayout({
   let bannerWeekNumber: number | null = null;
   let weekTotal: number | null = null;
   let railStatus: RailStatus | null = null;
-  let traineeDay: TraineeDay | null = null;
+  let traineeDay: TraineeDayView | null = null;
   if (showTraineeNav && trainee.course_id) {
     const { data: courseDates } = await supabase.from("courses").select("start_date, end_date").eq("id", trainee.course_id).maybeSingle();
     const todayIso = toLocalIso(new Date(), timeZone);
@@ -140,7 +140,7 @@ export default async function PortfolioLayout({
     const parts = weekOf?.match(/week (\d+) of (\d+)/);
     bannerWeekNumber = parts ? Number(parts[1]) : null;
     weekTotal = parts ? Number(parts[2]) : null;
-    traineeDay = await getTraineeStreamDay(supabase, trainee.id, trainee.course_id, todayIso, timeZone);
+    traineeDay = await getTraineeStreamDayOrNext(supabase, trainee.id, trainee.course_id, todayIso, timeZone);
     railStatus = await buildRailStatus({
       supabase,
       traineeId: trainee.id,
@@ -366,12 +366,25 @@ export default async function PortfolioLayout({
                   />
                 </div>
               </div>
-              {/* A day with nothing timetabled draws no bar, so on a phone it
-                  gets no second line either -- an empty strip under the
-                  wordmark would be a header that grew to say nothing. */}
-              {traineeDay && traineeDay.slots.length > 0 ? (
+              {/* On a day with nothing timetabled the bar draws the NEXT day,
+                  named ("Mon · 10:00"), marker parked at its start -- Ramy,
+                  12 Sep 2026: "the bar should still be there ... it should not
+                  disappear." Only a course with no day left at all draws no
+                  bar, and then no second line on a phone either -- an empty
+                  strip under the wordmark would be a header that grew to say
+                  nothing. */}
+              {traineeDay && traineeDay.day.slots.length > 0 ? (
                 <div className="flex min-w-0 flex-1 md:order-2">
-                  <HeaderDayBar day={traineeDay} serverNowMs={Date.now()} timeZone={timeZone} />
+                  <HeaderDayBar
+                    day={traineeDay.day}
+                    serverNowMs={Date.now()}
+                    timeZone={timeZone}
+                    dayLabel={
+                      traineeDay.isToday
+                        ? undefined
+                        : new Date(`${traineeDay.dateIso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short" })
+                    }
+                  />
                 </div>
               ) : (
                 <div className="hidden min-w-0 flex-1 md:order-2 md:block" />

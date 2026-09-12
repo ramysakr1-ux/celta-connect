@@ -11,7 +11,7 @@ import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
-import { getTraineeStreamDay } from "@/lib/trainee-day";
+import { getTraineeStreamDayOrNext } from "@/lib/trainee-day";
 import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
 
 const TP_LESSON_LENGTH_MINUTES = 45;
@@ -761,32 +761,17 @@ export async function TodayTab({
   // The same object the header's day bar renders from -- getTraineeStreamDay is
   // cache()d per request, so this is one set of queries and one answer, which
   // is what §1b means by "never a second source".
-  const todayStream = await getTraineeStreamDay(supabase, traineeId, courseId, today, timeZone);
   // Ramy, 12 Sep 2026, logged in as a candidate on a Saturday: "it says
   // nothing timetabled for you today. How is that possible? There's always
   // something to do." A day with nothing on is a weekend or a gap, not the
   // end of the course -- so the section shows the next timetabled day
-  // instead, named as such, with the same boxes it will show on the morning.
-  // The header's day bar stays off: its live marker is for today only.
-  let streamDay = todayStream;
-  let streamHeading = "Your day";
-  if (todayStream.slots.length === 0) {
-    const { data: nextEvent } = await supabase
-      .from("course_timetable_events")
-      .select("event_date")
-      .eq("course_id", courseId)
-      .gt("event_date", today)
-      .order("event_date")
-      .limit(1)
-      .maybeSingle();
-    if (nextEvent?.event_date) {
-      const nextStream = await getTraineeStreamDay(supabase, traineeId, courseId, nextEvent.event_date, timeZone);
-      if (nextStream.slots.length > 0) {
-        streamDay = nextStream;
-        streamHeading = `Your next day · ${new Date(`${nextEvent.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}`;
-      }
-    }
-  }
+  // instead, named as such, with the same boxes it will show on the morning,
+  // and the marker parked at its start. Same answer as the header's bar.
+  const streamView = await getTraineeStreamDayOrNext(supabase, traineeId, courseId, today, timeZone);
+  const streamDay = streamView.day;
+  const streamHeading = streamView.isToday
+    ? "Your day"
+    : `Your next day · ${new Date(`${streamView.dateIso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}`;
 
   // Unread notices (migration 0283). The read rows are RLS-scoped to the
   // reader, so a peer viewing a groupmate's portfolio under layout.tsx's
@@ -914,7 +899,7 @@ export async function TodayTab({
         timeZone={timeZone}
         heading={streamHeading}
         meta={{
-          lead: streamDay === todayStream ? metaLead : `Nothing on ${dateLabel.split(" ")[0]}`,
+          lead: streamView.isToday ? metaLead : `Nothing on ${dateLabel.split(" ")[0]}`,
           countdownFor: teachingToday ? "mine" : null,
         }}
       />

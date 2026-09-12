@@ -9,10 +9,13 @@ export function HeaderDayBar({
   day,
   serverNowMs,
   timeZone,
+  dayLabel,
 }: {
   day: TraineeDay;
   serverNowMs: number;
   timeZone: string;
+  /** "Mon" when the day drawn is the next timetabled one, not today. */
+  dayLabel?: string;
 }) {
   const anchor = day.slots[0];
   return (
@@ -33,6 +36,7 @@ export function HeaderDayBar({
       tone="dark"
       serverNowMs={serverNowMs}
       timeZone={timeZone}
+      dayLabel={dayLabel}
     />
   );
 }

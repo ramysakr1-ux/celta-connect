@@ -82,3 +82,43 @@ export const getTraineeStreamDay = cache(
     return { ...day, mineEventId };
   }
 );
+
+export interface TraineeDayView {
+  day: TraineeDay;
+  /** The date the boxes and the bar describe -- today, or the next timetabled day. */
+  dateIso: string;
+  isToday: boolean;
+}
+
+// Today if anything is on; otherwise the next timetabled day. Ramy, 12 Sep
+// 2026, logged in as a candidate on a Saturday: "there's always something to
+// do" -- and, on the header's bar going missing with it: "even if there's
+// nothing on Saturday, the bar should still be there ... parked either at the
+// end of the day or at the beginning of the next day." The header's bar and
+// the track below it read from this ONE answer, so they can never disagree
+// about which day they are drawing.
+export const getTraineeStreamDayOrNext = cache(
+  async (
+    supabase: SupabaseClient<Database>,
+    traineeId: string,
+    courseId: string,
+    todayIso: string,
+    timeZone: string
+  ): Promise<TraineeDayView> => {
+    const today = await getTraineeStreamDay(supabase, traineeId, courseId, todayIso, timeZone);
+    if (today.slots.length > 0) return { day: today, dateIso: todayIso, isToday: true };
+    const { data: nextEvent } = await supabase
+      .from("course_timetable_events")
+      .select("event_date")
+      .eq("course_id", courseId)
+      .gt("event_date", todayIso)
+      .order("event_date")
+      .limit(1)
+      .maybeSingle();
+    if (nextEvent?.event_date) {
+      const next = await getTraineeStreamDay(supabase, traineeId, courseId, nextEvent.event_date, timeZone);
+      if (next.slots.length > 0) return { day: next, dateIso: nextEvent.event_date, isToday: false };
+    }
+    return { day: today, dateIso: todayIso, isToday: true };
+  }
+);

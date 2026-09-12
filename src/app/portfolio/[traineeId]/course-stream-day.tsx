@@ -82,10 +82,12 @@ export function StreamDayTrack({
   const now = useServerNow(serverNowMs);
   useEffect(() => setMounted(true), []);
 
-  // windowStart/windowEnd are not read here any more: placing blocks by
-  // percentage went out with the equal boxes, and the axis labels arrive
-  // already formatted. The header's bar is what still draws to the minute.
-  const { slots, axis } = day;
+  // windowStart/windowEnd/axis are not read here any more: placing blocks by
+  // percentage went out with the equal boxes, and the axis numbers went with
+  // the fixed-width boxes below (a "10:00 ... 18:00" spread under boxes that
+  // are not a timeline was a lie in both directions). The header's bar is
+  // what still draws to the minute.
+  const { slots } = day;
 
   const mine = slots.find((s) => s.mine) ?? null;
   const countdown = (() => {
@@ -105,27 +107,32 @@ export function StreamDayTrack({
   // 2026: "the garnet bar moving across, sort of stopping where the time of day
   // is." It rides the real clock -- gliding across whichever box is live in
   // proportion to how far through that session we are, and resting on the seam
-  // between boxes during the gaps (lunch, breaks). Equal boxes mean a pixel is
-  // no longer a fixed number of minutes, so the sweep is anchored box by box
-  // rather than to the day's raw minute span: the marker is always where the
-  // live session is, never adrift in the whitespace a collapsed gap left behind.
-  const markerFrac = (() => {
+  // before the next box during the gaps (lunch, breaks). The boxes are a fixed
+  // width and wrap, so the marker is anchored to a BOX (which one, and how far
+  // across it), never to the row: it is always where the live session is,
+  // whichever row that box landed on.
+  //
+  // It never leaves. Ramy, 12 Sep 2026: "even if there's nothing on Saturday,
+  // the bar should still be there ... parked either at the end of the day or at
+  // the beginning of the next day. It should not disappear." Before the first
+  // session it waits on the first box's left edge; after the last it rests on
+  // the last box's right edge. The clock under it is still now.
+  const marker = (() => {
     if (!mounted || slots.length === 0) return null;
-    const first = slots[0];
-    const last = slots[slots.length - 1];
-    if (now < first.startsAtMs || now >= last.endsAtMs) return null;
+    if (now < slots[0].startsAtMs) return { index: 0, frac: 0 };
     for (let i = 0; i < slots.length; i += 1) {
       const s = slots[i];
-      if (now < s.startsAtMs) return i / slots.length; // in the gap before box i
-      if (now < s.endsAtMs) {
-        const through = (now - s.startsAtMs) / (s.endsAtMs - s.startsAtMs);
-        return (i + through) / slots.length; // sweeping across the live box
-      }
+      if (now < s.startsAtMs) return { index: i, frac: 0 }; // in the gap before box i
+      if (now < s.endsAtMs) return { index: i, frac: (now - s.startsAtMs) / (s.endsAtMs - s.startsAtMs) };
     }
-    return null;
+    return { index: slots.length - 1, frac: 1 };
   })();
-  const markerPct = markerFrac === null ? 0 : markerFrac * 100;
-  const showMarker = markerFrac !== null;
+  const clockLabel = new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(now));
 
   return (
     <section className="flex flex-col">
@@ -147,10 +154,16 @@ export function StreamDayTrack({
               maybe with a nice curve. And same size, a little bigger, same
               size. So they don't change size."
 
-              So the track stops being a timeline and becomes a sequence: equal
-              boxes, evenly spaced, 104px tall, properly rounded. A 30-minute
-              session no longer renders half the width of an hour-long one and
-              gets squeezed out of legibility.
+              So the track stops being a timeline and becomes a sequence: boxes
+              of ONE fixed size, 128 x 104, properly rounded. A 30-minute
+              session no longer renders half the width of an hour-long one --
+              and, since 12 Sep 2026, a nine-session Monday no longer renders
+              every box two-thirds the width of a six-session Friday either
+              ("why are they squashed? We agreed they would be the same size").
+              Equal-within-a-day was still a size that changed with the day;
+              a fixed width holds, and a day with more boxes than fit the row
+              wraps onto a second row. The rows are spaced for the marker's
+              clock label to hang under a box on the first row.
 
               Nothing is lost by it -- the header's day bar is the proportional
               timeline now, drawn to the minute from the same rows, so between
@@ -170,21 +183,22 @@ export function StreamDayTrack({
               off the content column, so 768-1023 is the WORST width for the
               row -- 68px a box, "TP8 - D" over three lines. Stacked is right
               for the whole of that band too. */}
-          <div className="relative flex flex-col gap-1.5 lg:h-[104px] lg:flex-row">
-            {slots.map((s) => {
+          <div className="flex flex-col gap-1.5 lg:flex-row lg:flex-wrap lg:gap-x-1.5 lg:gap-y-7 lg:pb-[22px]">
+            {slots.map((s, i) => {
               const cat = CATEGORY_STYLE[s.category];
+              const marked = marker !== null && marker.index === i;
               // Ramy, 10 Sep 2026: "can we make it on the actual bar itself? So
               // TP8 B, if they click on it, and then they join Zoom." The whole
               // box is the door while the session is joinable.
               const joinable = joinableNow(s, now);
               const Box = joinable ? "a" : "div";
               return (
+                <div key={s.id} className="relative lg:w-[128px] lg:flex-none">
                 <Box
-                  key={s.id}
                   {...(joinable
                     ? { href: s.zoomUrl!, target: "_blank", rel: "noreferrer", title: `Join ${s.title}` }
                     : {})}
-                  className={`flex min-w-0 items-center gap-3 overflow-hidden rounded-[10px] px-3 py-2.5 lg:flex-1 lg:flex-col lg:items-stretch lg:gap-[3px] ${
+                  className={`flex min-w-0 items-center gap-3 overflow-hidden rounded-[10px] px-3 py-2.5 lg:h-[104px] lg:flex-col lg:items-stretch lg:gap-[3px] ${
                     joinable ? "cursor-pointer transition-shadow hover:brightness-[1.04]" : ""
                   }`}
                   style={{
@@ -240,49 +254,37 @@ export function StreamDayTrack({
                   ) : null}
                   </span>
                 </Box>
+
+                {marked ? (
+                  <span
+                    aria-hidden
+                    // The seam marker is a horizontal idea -- it sits between
+                    // the boxes that are finished and the ones that are not.
+                    // Stacked there is no seam to sit on, and the day already
+                    // reads top-to-bottom, so it stays off below lg.
+                    className="pointer-events-none absolute -top-1.5 -bottom-1.5 hidden w-0.5 lg:block"
+                    style={{ left: `${marker!.frac * 100}%`, background: "var(--color-garnet)" }}
+                  >
+                    <span
+                      className="absolute -top-1 -left-1 size-2.5 rounded-full"
+                      style={{ background: "var(--color-garnet)" }}
+                    />
+                    <span
+                      className="absolute -bottom-[18px] text-[10.5px] font-bold tabular-nums whitespace-nowrap"
+                      style={{
+                        color: "var(--color-garnet)",
+                        // Slides from left-aligned to right-aligned across the
+                        // box, so at either edge it never hangs outside it.
+                        transform: `translateX(${-marker!.frac * 100}%)`,
+                      }}
+                    >
+                      {clockLabel}
+                    </span>
+                  </span>
+                ) : null}
+                </div>
               );
             })}
-
-            {showMarker ? (
-              <span
-                aria-hidden
-                // The seam marker is a horizontal idea -- it sits between the
-                // boxes that are finished and the ones that are not. Stacked
-                // there is no seam to sit on, and the day already reads
-                // top-to-bottom with the done rows dimmed and the ring on the
-                // one you are in, so it stays off below lg.
-                className="pointer-events-none absolute -top-1.5 -bottom-1.5 hidden w-0.5 lg:block"
-                style={{ left: `${markerPct}%`, background: "var(--color-garnet)" }}
-              >
-                <span
-                  className="absolute -top-1 -left-1 size-2.5 rounded-full"
-                  style={{ background: "var(--color-garnet)" }}
-                />
-                <span
-                  className="absolute -bottom-[18px] text-[10.5px] font-bold tabular-nums whitespace-nowrap"
-                  style={{
-                    color: "var(--color-garnet)",
-                    // Clamped at both ends so the label never hangs outside the track.
-                    transform: `translateX(${-22 - ((markerPct - 50) / 50) * 22}px)`,
-                  }}
-                >
-                  {new Intl.DateTimeFormat("en-GB", {
-                    timeZone,
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  }).format(new Date(now))}
-                </span>
-              </span>
-            ) : null}
-          </div>
-
-          {/* The 25px is headroom for the marker's clock label, which hangs
-              below the track. No marker below lg, so no headroom needed. */}
-          <div className="mt-3 flex justify-between border-t border-border pt-1.5 text-[11px] tabular-nums text-muted lg:mt-[25px]">
-            {axis.map((a) => (
-              <span key={a}>{a}</span>
-            ))}
           </div>
         </>
       )}

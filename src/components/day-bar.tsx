@@ -48,6 +48,7 @@ export function DayBar({
   tone,
   serverNowMs,
   timeZone,
+  dayLabel,
 }: {
   items: DayBarItem[];
   windowStart: number;
@@ -57,6 +58,11 @@ export function DayBar({
   accent: string;
   tone: "dark" | "light";
   serverNowMs: number;
+  /** Set when the bar is drawing a day other than today ("Mon") -- a next
+   *  day's bar with the marker parked at its start, the clock still reading
+   *  now. Without a name on it, a Monday bar on a Saturday afternoon is a
+   *  clock that looks stuck. */
+  dayLabel?: string;
   /** The CENTRE's zone. This clock is the centre's wall clock, never the
    *  reader's device -- a course has one timetable and one 10:00, and a tutor
    *  working from another country who saw their own time next to it would show
@@ -132,6 +138,7 @@ export function DayBar({
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
       <span className="flex-none text-[10.5px] font-bold tracking-[0.12em] tabular-nums uppercase" style={{ color: label }}>
+        {dayLabel ? `${dayLabel} · ` : ""}
         {hhmm(windowStart)}
       </span>
 
