@@ -14,7 +14,9 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 // candidates)" -- Ramy: "why are we doing the assessor visit again?"
 //
 // The cutoff is the visit date where one is set, otherwise today in the
-// centre's zone; an assignment with no deadline at all still counts.
+// centre's zone. Work due ON the visit day is handed in that morning and
+// cannot be marked for the assessor to moderate, so only work due BEFORE
+// the day is expected marked; an assignment with no deadline still counts.
 async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: string): Promise<string> {
   const { data: course } = await supabase.from("courses").select("assessor_visit_date, center_id").eq("id", courseId).maybeSingle();
   if (course?.assessor_visit_date) return course.assessor_visit_date;
@@ -23,7 +25,7 @@ async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: st
 }
 
 function dueByCutoff(a: { due_date: string | null }, cutoff: string): boolean {
-  return !a.due_date || a.due_date <= cutoff;
+  return !a.due_date || a.due_date < cutoff;
 }
 
 export interface ReadinessIssue {
