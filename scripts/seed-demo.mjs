@@ -130,6 +130,7 @@ function makeTextPdf(title, lines) {
 // week3 is the default and reproduces exactly what the seed did before.
 const STAGE_WEEKS = {
   precourse: 1,   // starts next Monday -- nothing taught, GTKY still open
+  day1: 0,        // TODAY is the first morning (see courseStart below)
   week1: 0,       // opened this Monday
   week2: -1,
   week3: -2,      // the historical default
@@ -279,11 +280,32 @@ async function main() {
   // TPs graded and three assignments marked, so the demo shows the states
   // a locked, early-course record never can, while the course is still
   // running rather than finished.
-  const courseStart = mondayNearest(STAGE_WEEKS[STAGE] * 7);
-  const courseEnd = new Date(courseStart);
-  courseEnd.setDate(courseStart.getDate() + 25); // Mon + 25 = Friday of week 4
+  // --stage day1 plants the course so that TODAY is its first morning, which
+  // no week offset can express: week1 anchors to this week's Monday, so by
+  // Friday it means day five. Ramy asked for the first day itself, the one
+  // most worth demoing. A course cannot open at a weekend, so on Saturday or
+  // Sunday this starts it on the coming Monday and says so -- the app then
+  // correctly shows the pre-course state until that morning arrives.
+  let courseStart;
+  if (STAGE === "day1") {
+    const today = new Date();
+    const dow = today.getDay(); // 0 Sun .. 6 Sat
+    if (dow === 0 || dow === 6) {
+      const ahead = dow === 6 ? 2 : 1;
+      today.setDate(today.getDate() + ahead);
+      console.log(`--stage day1: today is a weekend, so the course opens Monday ${isoOf(today)} -- until then the app shows pre-course, which is the truth.`);
+    }
+    courseStart = today;
+  } else {
+    courseStart = mondayNearest(STAGE_WEEKS[STAGE] * 7);
+  }
   const startDate = isoOf(courseStart);
-  const endDate = isoOf(courseEnd);
+  // Twenty teaching days, counted the way the timetable counts them. From a
+  // Monday that is start + 25 (Friday of week 4), exactly as before; from any
+  // other weekday it is still twenty teaching days, which a hardcoded +25
+  // would not have been.
+  const endDate = courseDay(startDate, 20);
+  const courseEnd = new Date(endDate);
 
   // ---- the course's own calendar, which the seeded RECORD now follows ----
   //
@@ -2958,6 +2980,14 @@ async function main() {
   // Stage 2 at the halfway point for the whole cohort -- sheets on the
   // ported day-9 events, everyone booked and seen, records complete. Replaces
   // a day-12 sheet for Group A alone with two of six booked (12 Sep 2026).
+  // Stage 2 happens on day 9 and Stage 3 on day 15 -- so on a course that has
+  // not reached those days, seeding them would be writing a future into the
+  // record. Gated on the real calendar rather than on the stage name, which is
+  // what a course with a moved start date actually needs.
+  const stage2Date = courseDay(courseStart, 9);
+  const stage3Date = courseDay(courseStart, 15);
+  const reached = (iso) => iso <= isoOf(new Date());
+  if (reached(stage2Date)) {
   await seedStage2Demo(supabase, {
     courseId: course.id,
     halfwayDate: courseDay(courseStart, 9),
@@ -2968,10 +2998,14 @@ async function main() {
     matrixOverridesByName: matrixByCandidate,
   });
   console.log("Stage 2: halfway sheets, bookings and CELTA 5 records for the active cohort");
+  } else {
+    console.log(`Stage 2 not seeded -- the course does not reach day 9 (${stage2Date}) until later.`);
+  }
   // Stage 3 and the fail letters on day 15, for the three the triggers name.
+  if (reached(stage3Date)) {
   await seedStage3Demo(supabase, {
     courseId: course.id,
-    stage3Date: courseDay(courseStart, 15),
+    stage3Date,
     traineeIdByName: trainees,
     groupByName: Object.fromEntries(traineeDefs.map((d) => [d.name, d.group])),
     tutorIdByGroup: { A: trainer2Id, B: trainerId },
@@ -2981,6 +3015,9 @@ async function main() {
     center: { name: center.name, center_number: "DEMO-IST" },
   });
   console.log("Stage 3: three invites, three records, two fail letters on day 15");
+  } else {
+    console.log(`Stage 3 not seeded -- the course does not reach day 15 (${stage3Date}) until later.`);
+  }
   // Real lesson plans. Every seeded plan was aims-only -- empty procedure
   // table, "0 of 45 min" -- and its main aim disagreed with the brief in the
   // page heading. Ramy, 12 Sep 2026, opening Amara's TP7.
