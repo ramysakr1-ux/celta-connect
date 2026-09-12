@@ -18,10 +18,15 @@ export function Stage2OverallForm({
   trainerFullName,
   trainerSignatureName,
   timeZone,
+  assessedHoursSoFar,
 }: {
   record: Celta5Record;
   trainerFullName: string;
   trainerSignatureName: string | null;
+  /** Assessed TP hours the candidate has actually taught -- what the booklet's
+   *  "Hours taught" box means. Prefilled when the record has none yet; the
+   *  tutor can still correct it (a lesson cut short, a different length). */
+  assessedHoursSoFar: number | null;
   /** The centre's zone: a signature's date is an instant, read where it was signed. */
   timeZone: string;
 }) {
@@ -73,9 +78,15 @@ export function Stage2OverallForm({
           name="stage2_hours_taught"
           type="number"
           step="0.1"
-          defaultValue={record.stage2_hours_taught ?? ""}
+          defaultValue={record.stage2_hours_taught ?? (assessedHoursSoFar !== null ? assessedHoursSoFar.toFixed(1) : "")}
           className="w-32 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
+        {record.stage2_hours_taught === null && assessedHoursSoFar !== null ? (
+          <p className="text-xs text-muted">
+            Read from the assessed lessons taught so far ({assessedHoursSoFar.toFixed(1)} h). Stage 2 ordinarily follows three hours&apos; TP
+            (Handbook 10.2) -- correct it if a lesson ran to a different length.
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-1.5">

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { BookSlotButton } from "@/app/portfolio/[traineeId]/stage2-tutorial/[blockId]/book-slot-button";
 import { releaseStage2Slot } from "@/app/trainer/(hub)/timetable/stage2-actions";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Trainee-facing side of the Stage 2 tutorial booking sheet (§3a). Access
 // is enforced by RLS, not by traineeId in the URL -- a candidate only ever
@@ -45,7 +46,7 @@ export default async function TraineeStage2TutorialPage({
       <div className="sheet">
         <p className="text-xs text-muted">Stage 2 tutorials</p>
         <h1 className="font-serif text-xl text-ink">
-          {event?.event_date} {event?.event_time?.slice(0, 5)}
+          {event ? `${formatCalendarDate(event.event_date, { weekday: "long" })} · ${event.event_time?.slice(0, 5) ?? ""}` : "Stage 2 tutorials"}
         </h1>
         <p className="mt-2 text-sm text-muted">
           Around 15–20 min each, starting from {event?.event_time?.slice(0, 5)}. Running a few minutes over is

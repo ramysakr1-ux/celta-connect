@@ -183,7 +183,7 @@ export default async function TrainerTimetablePage({
     supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     supabase.from("stage2_tutorial_blocks").select("id, tp_group_id, subgroup_id, timetable_event_id").eq("course_id", courseId),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").eq("course_status", "active").order("full_name"),
-    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required, stage1_completed_at, stage3_finalized_at").eq("course_id", courseId),
+    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required, stage1_completed_at, stage2_completed_at, stage3_finalized_at").eq("course_id", courseId),
     supabase.from("individual_tutorial_invites").select("id, trainee_id, stage, timetable_event_id, confirmed_at").eq("course_id", courseId),
     // Consultation blocks (migration 0275) -- the tutorials section below.
     supabase.from("consultation_blocks").select("id, tutor_profile_id, timetable_event_id, slot_length_minutes").eq("course_id", courseId),
@@ -405,7 +405,10 @@ export default async function TrainerTimetablePage({
     const mine = slots.find((x) => x.trainee_id === t.id);
     const openLeft = slots.filter((x) => !x.trainee_id).length;
     const blockEvent = block ? blockEventById.get(block.timetable_event_id) : null;
-    const stage2: GridCell = !group
+    // Filed on the CELTA 5 beats the sheet, same as Stage 1.
+    const stage2: GridCell = record?.stage2_completed_at
+      ? { kind: "done", main: "Filed", sub: shortDate(record.stage2_completed_at.slice(0, 10)) }
+      : !group
       ? { kind: "none", main: "—", sub: "no TP group yet" }
       : !block
         ? { kind: "move", main: "No sheet yet", sub: `${group.name} sheet not placed`, action: { type: "place-sheet", scope: group.scope, label: group.name }, viewOnly: !own }

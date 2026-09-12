@@ -249,14 +249,27 @@ export async function updateStage2Overall(
   if (completed && !trainer.signature_name) {
     return { error: "Set your signature first (below) before marking this complete." };
   }
+  // Handbook 10.2: "At Stage 2, the tutor will conduct a one-to-one
+  // tutorial" -- unlike Stage 1, the tutorial is not optional, so a Stage 2
+  // record cannot be complete without it. And the overall standard is what
+  // Stage 3 is decided from (stage3-triggers.ts reads it), so a record
+  // completed without one silently exempts the candidate from Stage 3.
+  const tutorialGiven = formData.get("stage2_tutorial_given") === "on";
+  const overall = optionalRating(formData.get("stage2_tutor_overall"), STANDARD_RATINGS);
+  if (completed && !tutorialGiven) {
+    return { error: "Stage 2 is the one-to-one tutorial (Handbook 10.2) -- tick \"Tutorial given\" before completing the record, or save without completing." };
+  }
+  if (completed && !overall) {
+    return { error: "Say which standard the candidate is at before completing -- Stage 3 is decided from it (Handbook 10.2)." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("celta5_records")
     .update({
-      stage2_tutorial_given: formData.get("stage2_tutorial_given") === "on",
+      stage2_tutorial_given: tutorialGiven,
       stage2_hours_taught: optionalNumber(formData.get("stage2_hours_taught")),
-      stage2_tutor_overall: optionalRating(formData.get("stage2_tutor_overall"), STANDARD_RATINGS),
+      stage2_tutor_overall: overall,
       stage2_tutor_notes: optionalString(formData.get("stage2_tutor_notes")),
       stage2_tutor_written_assignments_notes: optionalString(
         formData.get("stage2_tutor_written_assignments_notes")

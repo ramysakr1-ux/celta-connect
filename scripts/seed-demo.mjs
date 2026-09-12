@@ -19,6 +19,7 @@
 // Run with: node scripts/seed-demo.mjs
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
+import { seedStage2Demo } from "./lib/stage2-demo.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -390,6 +391,9 @@ async function main() {
     tutor_role: "main_course_tutor",
     center_id: center.id,
     course_id: course.id,
+    // Nothing on the CELTA 5 can be signed without one -- the Stage 2
+    // records below carry it.
+    signature_name: "J. Blake",
   });
   if (trainerProfileErr) throw trainerProfileErr;
   await supabase.from("course_tutors").insert({
@@ -419,6 +423,7 @@ async function main() {
     tutor_role: "assistant_course_tutor",
     center_id: center.id,
     course_id: course.id,
+    signature_name: "M. Webb",
   });
   await supabase.from("course_tutors").insert({
     course_id: course.id,
@@ -2620,9 +2625,11 @@ async function main() {
     { d: 9, b: 3, type: "tp", title: "TP4 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 4 },
     { d: 9, b: 4, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 9, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 9, b: 6, type: "supervised_session", title: "Stage 2 tutorials \u00b7 ABC", tag: "group_room", detail: "DEF writing reports", linked: null, tp: null },
+    // Stage 2 is the halfway tutorial (Handbook 10.2) -- a milestone with a
+    // booking sheet behind it (stage2-demo.mjs), not a supervised session.
+    { d: 9, b: 6, type: "milestone", title: "Stage 2 tutorials \u00b7 ABC", tag: "stage2_tutorial", detail: "DEF writing reports", linked: null, tp: null },
     { d: 9, b: 7, type: "input_session", title: "Filmed observation 3", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 9, b: 8, type: "supervised_session", title: "Stage 2 tutorials \u00b7 DEF", tag: "group_room", detail: "One-to-one, own tutor", linked: null, tp: null },
+    { d: 9, b: 8, type: "milestone", title: "Stage 2 tutorials \u00b7 DEF", tag: "stage2_tutorial", detail: "One-to-one, own tutor", linked: null, tp: null },
     { d: 9, b: 9, type: "supervised_session", title: "GTKY / unassessed prep", tag: "group_room", detail: "Trainee planning session", linked: null, tp: null },
     { d: 10, b: 1, type: "input_session", title: "Demo lesson", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 10, b: 2, type: "input_session", title: "Demo lesson", tag: "whole_group", detail: null, linked: null, tp: null },
@@ -2917,20 +2924,19 @@ async function main() {
   // bookings, Stage 1 invites in two states, Priya flagged for Stage 3, and
   // a consultation block per tutor with one booking (migration 0275).
   const tutorialAt = (n, band) => ({ event_date: courseDay(courseStart, n), event_time: BAND_TIMES[band - 1] });
-  const stamp = new Date().toISOString();
-  const { data: s2Event } = await supabase
-    .from("course_timetable_events")
-    .insert({ course_id: course.id, type: "milestone", tag: "stage2_tutorial", title: "Stage 2 tutorials — Group A", ...tutorialAt(12, 6), created_by: trainer2Id })
-    .select("id")
-    .single();
-  const { data: s2Block } = await supabase
-    .from("stage2_tutorial_blocks")
-    .insert({ course_id: course.id, timetable_event_id: s2Event.id, tp_group_id: tpGroup.id, created_by: trainer2Id })
-    .select("id")
-    .single();
-  await supabase.rpc("set_stage2_slot_count", { p_block_id: s2Block.id, p_slot_count: 6 });
-  await supabase.from("stage2_tutorial_slots").update({ trainee_id: trainees["Amara Okafor"], booked_at: stamp }).eq("block_id", s2Block.id).eq("position", 1);
-  await supabase.from("stage2_tutorial_slots").update({ trainee_id: trainees["Priya Sharma"], booked_at: stamp }).eq("block_id", s2Block.id).eq("position", 2);
+  // Stage 2 at the halfway point for the whole cohort -- sheets on the
+  // ported day-9 events, everyone booked and seen, records complete. Replaces
+  // a day-12 sheet for Group A alone with two of six booked (12 Sep 2026).
+  await seedStage2Demo(supabase, {
+    courseId: course.id,
+    halfwayDate: courseDay(courseStart, 9),
+    defs: traineeDefs,
+    traineeIdByName: trainees,
+    subgroupIdByKey: subgroupIds,
+    tutorSignatureByGroup: { A: "M. Webb", B: "J. Blake" },
+    matrixOverridesByName: matrixByCandidate,
+  });
+  console.log("Stage 2: halfway sheets, bookings and CELTA 5 records for the active cohort");
   for (const [name, day, confirmed] of [
     ["Amara Okafor", 6, true],
     ["Daniel Kim", 7, false],

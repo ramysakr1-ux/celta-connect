@@ -616,13 +616,17 @@ export default async function PortfolioCelta5Page({
                   <div>
                     <p className="text-[11px] font-semibold text-ink">Stage 2 tutorial</p>
                     <p className="mt-0.5 text-[10px] text-muted">
-                      {myStage2Slot
-                        ? `You booked ${myStage2Slot.position === 1 ? "1st" : myStage2Slot.position === 2 ? "2nd" : myStage2Slot.position === 3 ? "3rd" : `${myStage2Slot.position}th`}`
-                        : "Book your slot from the timetable"}
+                      {record.stage2_completed_at
+                        ? `Given · record filed ${formatCalendarDate(record.stage2_completed_at.slice(0, 10))}${record.trainee_signoff_stage2_at ? ", signed by you" : " -- sign it below"}`
+                        : myStage2Slot
+                          ? `You booked ${myStage2Slot.position === 1 ? "1st" : myStage2Slot.position === 2 ? "2nd" : myStage2Slot.position === 3 ? "3rd" : `${myStage2Slot.position}th`}`
+                          : stage2BlockIds.length > 0
+                            ? "Book your slot from the timetable"
+                            : "Your tutor hasn't placed the booking sheet yet"}
                     </p>
                   </div>
-                  <span className={`pill ${myStage2Slot ? "pill-success" : "pill-warning"}`}>
-                    {myStage2Slot ? "Booked" : "Not booked"}
+                  <span className={`pill ${record.stage2_completed_at || myStage2Slot ? "pill-success" : "pill-warning"}`}>
+                    {record.stage2_completed_at ? "Filed" : myStage2Slot ? "Booked" : "Not booked"}
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-3 py-2">
@@ -1756,7 +1760,14 @@ export default async function PortfolioCelta5Page({
         </div>
       </div>
 
-      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
+      <Stage2OverallForm
+        key={`stage2-${record.updated_at}`}
+        record={record}
+        trainerFullName={viewer?.full_name ?? ""}
+        trainerSignatureName={viewer?.signature_name ?? null}
+        timeZone={center?.time_zone ?? DEFAULT_TIMEZONE}
+        assessedHoursSoFar={((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60}
+      />
 
       <div>
         <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>

@@ -65,6 +65,8 @@ export interface RosterRow {
   observationHoursShort: boolean;
   // Item 5
   stage1Filed: boolean;
+  /** The Stage 2 record is complete (tutorial given, standard said, tutor signed). */
+  stage2Filed: boolean;
   // Item 6: Stage 2 booking is a real slot with a position. Stage 1/3 are
   // individualized invites (migration 0129) -- null means not invited yet,
   // otherwise whether the candidate has confirmed the time the tutor set.
@@ -449,6 +451,7 @@ export async function fetchRosterRows(
     const observationHoursShort = observationHoursCounted < OBSERVATION_HOURS_REQUIRED;
 
     const stage1Filed = Boolean(celta5Record?.stage1_completed_at);
+    const stage2Filed = Boolean(celta5Record?.stage2_completed_at);
 
     const traineeStage2Slot = (stage2Slots ?? []).find((s) => s.trainee_id === trainee.id && s.booked_at);
     const stage2BookedPosition = traineeStage2Slot?.position ?? null;
@@ -502,6 +505,7 @@ export async function fetchRosterRows(
       observationHoursCounted,
       observationHoursShort,
       stage1Filed,
+      stage2Filed,
       stage2BookedPosition,
       stage1TutorialConfirmed,
       stage2CanMoveEarlier,

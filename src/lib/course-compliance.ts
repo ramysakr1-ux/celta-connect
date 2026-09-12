@@ -65,6 +65,32 @@ export function sixHoursProblems(input: {
 }
 
 /**
+ * Stage 2 not given by the time the halfway point has clearly passed.
+ *
+ * Handbook §10.2: Stage 2 is carried out on ALL candidates, with a one-to-one
+ * tutorial, "ordinarily at the halfway point (i.e., after 3 hours' TP and
+ * when candidates are swapping tutors/TP groups)". Four assessed lessons is
+ * three hours; a candidate on their fifth with no record has passed the
+ * point the plan put the tutorial at, and the plan can no longer put it
+ * there. Withdrawn candidates are not counted.
+ */
+export function stage2Problems(input: {
+  candidates: { id: string; name: string; tpStagesTaught: number; stage2Filed: boolean }[];
+}): ComplianceProblem[] {
+  const overdue = input.candidates.filter((c) => !c.stage2Filed && c.tpStagesTaught >= 5);
+  if (overdue.length === 0) return [];
+  return [
+    {
+      tag: "Stage 2",
+      message: `${overdue.length} candidate${overdue.length === 1 ? " is" : "s are"} past the halfway point with no Stage 2 record`,
+      detail: overdue.map((c) => `${c.name} · TP${c.tpStagesTaught}`).join(" · "),
+      href: "/trainer/roster",
+      cite: "10.2",
+    },
+  ];
+}
+
+/**
  * Double-marking quota unmet, once the course is in its final week.
  *
  * Handbook §9.2.3: three of each assignment for up to nine candidates, four

@@ -122,16 +122,19 @@ function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
         : row.stage3TutorialConfirmed
           ? { short: "conf.", long: "Stage 3 tutorial confirmed" }
           : { short: "invited", long: "Stage 3 tutorial invited" };
-  const s2 = row.stage2BookedPosition
-    ? { short: ordinal(row.stage2BookedPosition), long: `Stage 2 tutorial booked, ${ordinal(row.stage2BookedPosition)} slot` }
-    : { short: "--", long: "Stage 2 tutorial not booked" };
+  // Filed beats booked: once the record is complete the slot is history.
+  const s2 = row.stage2Filed
+    ? { short: "filed", long: "Stage 2 record filed -- tutorial given" }
+    : row.stage2BookedPosition
+      ? { short: ordinal(row.stage2BookedPosition), long: `Stage 2 tutorial booked, ${ordinal(row.stage2BookedPosition)} slot` }
+      : { short: "--", long: "Stage 2 tutorial not booked" };
   const moved = [
     row.stage2MovedEarlierReason ? `Stage 2 moved earlier: ${row.stage2MovedEarlierReason}` : null,
     row.stage3MovedEarlierReason ? `Stage 3 moved earlier: ${row.stage3MovedEarlierReason}` : null,
   ]
     .filter(Boolean)
     .join(" · ");
-  const stageWarn = !row.stage2BookedPosition || (row.stage3Required && !row.stage3Done);
+  const stageWarn = !(row.stage2Filed || row.stage2BookedPosition) || (row.stage3Required && !row.stage3Done);
 
   return (
     <div className="mr-5 mb-3 ml-[68px] grid grid-cols-[repeat(11,minmax(0,1fr))] items-start rounded-[8px] bg-black/[0.035] px-1 py-2">
@@ -333,6 +336,9 @@ export function RosterRowView({
   if (row.atRiskReasons.length > 0) flags.push({ label: "At risk", title: row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · "), tone: TONE.red });
   if (row.resubmissionPending) flags.push({ label: "Resubmission", title: "An assignment is waiting on a resubmission", tone: TONE.gold });
   if (!row.stage1Filed) flags.push({ label: "Stage 1 unfiled", title: "Stage 1 record not filed yet", tone: TONE.blue });
+  // Handbook 10.2: Stage 2 is for every candidate, ordinarily after three
+  // hours' TP. Four assessed lessons taught and no record is the flag.
+  if (!row.stage2Filed && row.tpStagesTaught >= 4) flags.push({ label: "Stage 2 unfiled", title: "Past the halfway point with no Stage 2 record -- tutorial for all candidates (Handbook 10.2)", tone: TONE.gold });
 
   return (
     <div

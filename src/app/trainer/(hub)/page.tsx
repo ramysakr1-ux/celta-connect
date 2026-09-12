@@ -24,7 +24,7 @@ import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
-import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, stage2Problems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -694,6 +694,13 @@ export default async function TodayPage() {
     );
   }
   if (isMct) {
+    problems.push(
+      ...stage2Problems({
+        candidates: rows
+          .filter((r) => r.courseStatus === "active")
+          .map((r) => ({ id: r.id, name: r.name, tpStagesTaught: r.tpStagesTaught, stage2Filed: r.stage2Filed })),
+      })
+    );
     const byType = new Map<string, number>();
     const types = new Set<string>();
     for (const a of courseAssignments ?? []) {

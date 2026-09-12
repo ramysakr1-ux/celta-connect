@@ -18,6 +18,7 @@ import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-
 import { Stage1ReleaseForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-release-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
 import { Stage2OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage2-overall-form";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { Stage3OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage3-overall-form";
 import { GradeReviewCommentsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/grade-review-comments-form";
 import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
@@ -104,8 +105,11 @@ export default async function Celta5RecordPage({
   // event.mode bridge computeAssessedHoursByMode already uses elsewhere.
   const [{ data: subgroupMember }, { data: planAssignments }] = await Promise.all([
     supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", id).maybeSingle(),
-    supabase.from("plan_assignments").select("tp_number").eq("trainee_id", id),
+    supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", id),
   ]);
+  // The booklet's "Hours taught" at Stage 2: assessed lessons actually taught
+  // x the lesson length, the same arithmetic the roster's hours column uses.
+  const assessedHoursSoFar = ((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60;
   const { data: subgroupForMode } = subgroupMember?.subgroup_id
     ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
     : { data: null };
@@ -311,6 +315,7 @@ export default async function Celta5RecordPage({
               timeZone={timeZone}
               trainerFullName={trainer.full_name}
               trainerSignatureName={trainer.signature_name}
+              assessedHoursSoFar={assessedHoursSoFar}
             />
           </div>
         </BookletSection>
