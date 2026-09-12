@@ -7,6 +7,7 @@ import type { FeedbackPoint } from "@/lib/tp-plan-content";
 import type { StandardRating } from "@/lib/supabase/types";
 import { recordAssessedLesson } from "@/lib/assessed-lesson-record";
 import { ensureStage3Flag } from "@/lib/stage3-status";
+import { checkTaughtMilestones } from "@/lib/cohort-milestones";
 
 export interface FormState {
   error: string | null;
@@ -90,12 +91,38 @@ async function saveFeedback(formData: FormData, lock: boolean): Promise<FormStat
       grade,
       overallComment: fields.overall_comment,
     });
+    // Releasing the feedback IS logging the outcome, so it is what marks the
+    // lesson taught. createTpLesson (the separate CELTA 5 record form) has
+    // always done this, with the right reason in its own comment -- "one
+    // action for the trainer, not a separate Mark taught click" -- but the
+    // feedback path never did, and that is the path a tutor actually uses.
+    //
+    // Walked as a tutor on 12 Sep 2026: the feedback went out, the CELTA 5
+    // record was written, and plan_assignments.taught_at stayed null. So the
+    // lesson counted as untaught everywhere it matters -- the candidate's
+    // self-evaluation stayed locked behind "unlocks once your trainer has
+    // logged this lesson as taught", the assessed hours did not move, and the
+    // roster still showed the round outstanding.
+    //
+    // Idempotent, like the other two call sites: a lesson already marked
+    // taught is left alone.
+    const { data: newlyTaught } = await supabase
+      .from("plan_assignments")
+      .update({ taught_at: new Date().toISOString() })
+      .eq("trainee_id", traineeId)
+      .eq("tp_number", tpNumber)
+      .is("taught_at", null)
+      .select("id");
+    if ((newlyTaught ?? []).length > 0) {
+      await checkTaughtMilestones(supabase, trainer.course_id, trainer.id, tpNumber);
+    }
     // A released grade after Stage 2 can be the Handbook's "not making the
     // expected progress" -- the flag the roster reads is set here, not left
     // to a tutor remembering a checkbox.
     await ensureStage3Flag(supabase, traineeId);
     revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
     revalidatePath(`/trainer/roster`);
+    revalidatePath(`/portfolio/${traineeId}/tp/${tpNumber}`);
   }
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/tp/${tpNumber}`);
   return { error: null };
