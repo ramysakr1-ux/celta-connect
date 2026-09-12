@@ -1717,11 +1717,10 @@ async function main() {
     // for this course (Ramy, 12 Sep 2026: "the timetable due event wins"):
     // LRT and LfC from the ported timetable's own due events (LRT · DEF day
     // 17, LRT · ABC day 18, LfC day 19); Focus on the Learner from the rule
-    // (cohort day 12); Skills the TP date after the half's own TP3 (half 1
-    // teaches TP3 on day 6, so day 7; half 2 on day 7, so day 8). A half is
+    // (cohort day 12); Skills from its own due event on day 16. A half is
     // def.half; the seed's DUE_DAY is a function of it for that reason.
     const DUE_DAY = (assignment_type, half) =>
-      ({ "Focus on Learner": 12, LRT: half === 2 ? 17 : 18, Skills: half === 2 ? 8 : 7, LfC: 19 })[assignment_type];
+      ({ "Focus on Learner": 12, LRT: half === 2 ? 17 : 18, Skills: 16, LfC: 19 })[assignment_type];
 
     // --- State builders. Each returns the mark-state columns for one row;
     //     the loop adds course_id/trainee_id/assignment_type/due_date. ---
@@ -2705,6 +2704,10 @@ async function main() {
     { d: 16, b: 7, type: "supervised_session", title: "Assessor meeting", tag: "group_room", detail: "Ahead of the visit", linked: null, tp: null },
     { d: 16, b: 8, type: "input_session", title: "Filmed observation 4", tag: "whole_group", detail: "With task", linked: null, tp: null },
     { d: 16, b: 9, type: "input_session", title: "Filmed observation 5", tag: "whole_group", detail: "With task", linked: null, tp: null },
+    // Ramy, 12 Sep 2026: "seed a Skills due event on day 16" -- the timetable
+    // had none, so the roster rule put Skills in week 2 and every submission
+    // read late. The due event wins; this is it.
+    { d: 16, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) due", tag: null, detail: "09:00", linked: "Skills", tp: null },
     { d: 17, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 DEF", tag: null, detail: null, linked: "LRT", tp: null },
     { d: 17, b: 1, type: "tp", title: "TP7 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 7 },
     { d: 17, b: 2, type: "tp", title: "TP7 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 7 },
