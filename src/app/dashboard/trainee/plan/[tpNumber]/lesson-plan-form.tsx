@@ -941,14 +941,22 @@ function StageRow({
           className="font-serif"
           style={{ ...fieldStyle(16, row.stage ? INK : MUTED), fontWeight: 600, lineHeight: 1.25 }}
         />
+        {/* Ramy, 13 Sep 2026: "for the stage aim there should be a bullet
+            point, so they understand that they're supposed to write there as
+            well." The stage NAME is a name and stays plain; the aim is
+            something they write, so it behaves like every other list field on
+            the plan -- clicking into it seeds a bullet, and Enter starts the
+            next one. On TP7 and TP8 there is no shape to prefill either box,
+            so this is the only thing telling them the row has two jobs. */}
         <textarea
           ref={autosize}
           rows={1}
           value={row.aim}
-          placeholder={aimHint || "Stage aim"}
+          placeholder={aimHint || "• What this stage is for"}
           data-dictate-label={`Stage ${index + 1} aim`}
           onInput={autosizeOnInput}
           onChange={(e) => onChange({ aim: e.target.value })}
+          {...bulletListProps}
           style={{ ...fieldStyle(12.5, MUTED), fontStyle: "italic" }}
         />
 
