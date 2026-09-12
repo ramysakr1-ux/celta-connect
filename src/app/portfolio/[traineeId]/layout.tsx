@@ -17,6 +17,10 @@ import { HeaderDayBar } from "@/app/portfolio/[traineeId]/header-day-bar";
 import { HeaderCredit } from "@/components/designer-credit";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
+import { TraineeNotebook } from "@/app/portfolio/[traineeId]/trainee-notebook";
+import { NOTEBOOK_PAPERS, type NotebookPaper, type TraineeNote } from "@/lib/trainee-notebook";
+import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeWeekOf } from "@/lib/course-progress";
 import { InstallPrompt } from "@/components/install-prompt";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
@@ -120,6 +124,26 @@ export default async function PortfolioLayout({
   // existing PortfolioTabs sidebar, a deliberately different tool for
   // browsing one candidate's whole record rather than a daily briefing.
   const showTraineeNav = !isStaffView;
+
+  // The notebook (migration 0293): the candidate's own, on their own
+  // portfolio only -- not a peer's under the observation carve-out, not a
+  // staff preview. Read through the RLS client; the tables are newer than
+  // the generated types.
+  const ownNotebook = viewer?.role === "trainee" && viewer.id === traineeId;
+  let notebookNotes: TraineeNote[] = [];
+  let notebookPaper: NotebookPaper = "blue";
+  const notebookAssignmentTitles: Record<string, string> = {};
+  if (ownNotebook) {
+    const db = supabase as unknown as SupabaseClient;
+    const [{ data: noteRows }, { data: setting }, { data: assignmentRows }] = await Promise.all([
+      db.from("trainee_notes").select("id, anchor_path, anchor_label, body, created_at, updated_at").eq("trainee_id", traineeId).order("created_at", { ascending: false }).limit(200),
+      db.from("trainee_notebook_settings").select("paper").eq("trainee_id", traineeId).maybeSingle(),
+      supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
+    ]);
+    notebookNotes = (noteRows ?? []) as TraineeNote[];
+    if (setting?.paper && (NOTEBOOK_PAPERS as readonly string[]).includes(setting.paper)) notebookPaper = setting.paper as NotebookPaper;
+    for (const a of assignmentRows ?? []) notebookAssignmentTitles[a.id] = ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type;
+  }
 
   // The rail's foot ("Week 3 of 5" over the tick strip) and, with it, every
   // door's status line. Ramy, 9 Sep 2026: "plugged into the layout" -- so this
@@ -551,6 +575,15 @@ export default async function PortfolioLayout({
       </footer>
 
       {showTraineeNav ? <TraineeMobileNav traineeId={trainee.id} /> : null}
+      {ownNotebook ? (
+        <TraineeNotebook
+          traineeId={trainee.id}
+          initialNotes={notebookNotes}
+          initialPaper={notebookPaper}
+          assignmentTitles={notebookAssignmentTitles}
+          timeZone={timeZone}
+        />
+      ) : null}
 
       <ChatDrawerSwitcher
         staffProfileId={viewer?.id ?? null}
