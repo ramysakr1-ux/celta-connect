@@ -107,6 +107,15 @@ const OVERALL_NOTES = [
   "Strong on motivation, articulate about her own learning. Language awareness in conversation matched the task. Accept.",
 ];
 const IDENTITY_DOCS = ["passport", "passport", "national_id", "passport", "driving_licence", "passport", "other"];
+// A home zone for a few applicants, so the picker and the confirmation show
+// two clocks ("02:00 GMT-5 your time · 10:00 GMT+3 in Istanbul") on the
+// demo. Ramy, 12 Sep 2026. Everyone else applied from the centre's own zone.
+const HOME_ZONES = {
+  "lucas.meyer": "Europe/London",
+  "nadia.petrova": "America/Lima",
+  "mateo.alvarez": "America/Mexico_City",
+  "priya.raman": "Asia/Kolkata",
+};
 
 // Answers to the fixed questions, generic enough to read well against any of
 // the seven and specific enough not to read as filler.
@@ -338,6 +347,7 @@ for (const [centre, course, names, stages] of [
     const stage = exists?.stage ?? stages[i % stages.length];
     const daysAgo = stages === NEXT_STAGES ? 2 + i * 3 : 4 + i * 5;   // arrivals spread over ~7 weeks; the next intake over two
     const { row, interviewed, marked } = profileFor(i, stage, daysAgo);
+    row.time_zone = HOME_ZONES[slug] ?? null;
     if (tutor && marked) { row.marked_by = tutor.id; row.task_feedback_edited_by = tutor.id; }
     row.writing_task_prompt_id = promptId(i);
 
