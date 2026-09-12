@@ -489,31 +489,6 @@ export function LessonPlanForm({
                   />
                 </div>
 
-                <div className="mt-auto flex items-center justify-between gap-3" style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: INK }}>Language analysis</p>
-                    <p style={{ fontSize: 11, color: MUTED }}>
-                      {laOpen
-                        ? `${laType === "grammar" ? "Grammar" : laType === "vocab" ? "Vocabulary" : "Functional language"} sheet open`
-                        : "Not started · optional here"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setLaOpen(!laOpen)}
-                    style={{
-                      borderRadius: 8,
-                      border: `1px solid ${BORDER}`,
-                      background: SHEET,
-                      padding: "7px 15px",
-                      fontWeight: 600,
-                      fontSize: 12.5,
-                      color: INK,
-                    }}
-                  >
-                    {laOpen ? "Hide" : "Open"}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -525,28 +500,33 @@ export function LessonPlanForm({
             <input type="hidden" name="la_vocab_rows" value={JSON.stringify(laVocabRows)} />
             <input type="hidden" name="la_vocab_reference" value={laVocabReference} />
             <input type="hidden" name="la_has_content" value={laHasContent ? "1" : "0"} />
-            {laOpen ? (
-              <div id="analysis" className="scroll-mt-20">
-                <LanguageAnalysisEditor
-                  open
-                  onToggle={() => setLaOpen(false)}
-                  type={laType}
-                  onTypeChange={setLaType}
-                  isMainAim={laMainAim}
-                  onMainAimChange={setLaMainAim}
-                  context={laContext}
-                  onContextChange={setLaContext}
-                  blocks={laBlocks}
-                  onBlocksChange={setLaBlocks}
-                  vocabRows={laVocabRows}
-                  onVocabRowsChange={setLaVocabRows}
-                  vocabReference={laVocabReference}
-                  onVocabReferenceChange={setLaVocabReference}
-                  locked={false}
-                />
-              </div>
-            ) : null}
           </div>
+        </div>
+
+        {/* Ramy, 13 Sep 2026: "I also like our LA sheet. I wonder if we should
+            keep our old LA sheet. Just change the rest." So it is untouched --
+            its own card, its own "Optional -- click to add" header, below the
+            plan rather than as a band inside it. The v3 handoff had it
+            unfolding as the sheet's last band with the door in the foot band;
+            that door is gone rather than doubled (one room, one door). */}
+        <div id="analysis" className="mt-4 scroll-mt-20">
+          <LanguageAnalysisEditor
+            open={laOpen}
+            onToggle={() => setLaOpen(!laOpen)}
+            type={laType}
+            onTypeChange={setLaType}
+            isMainAim={laMainAim}
+            onMainAimChange={setLaMainAim}
+            context={laContext}
+            onContextChange={setLaContext}
+            blocks={laBlocks}
+            onBlocksChange={setLaBlocks}
+            vocabRows={laVocabRows}
+            onVocabRowsChange={setLaVocabRows}
+            vocabReference={laVocabReference}
+            onVocabReferenceChange={setLaVocabReference}
+            locked={false}
+          />
         </div>
 
         {/* ---------- 7. Bottom bar ----------
