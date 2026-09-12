@@ -126,13 +126,19 @@ export function LessonPlanForm({
     ) {
       return;
     }
-    setProcedure(
-      framework.stages.map((stage, i) => ({
+    // Any stage past the end of the framework is KEPT. This used to map over
+    // the framework's stages alone, so filling a 5-stage shape into a plan
+    // that had grown to 7 rows deleted the last two outright, procedure and
+    // all -- while the confirm box promised the procedure stays.
+    const extra = procedure.slice(framework.stages.length);
+    setProcedure([
+      ...framework.stages.map((stage, i) => ({
         ...(procedure[i] ?? emptyProcedureRow()),
         stage: stage.name,
-      }))
-    );
-    setAimHints(framework.stages.map((stage) => stage.aim));
+      })),
+      ...extra,
+    ]);
+    setAimHints([...framework.stages.map((stage) => stage.aim), ...extra.map(() => "")]);
   }
 
   function updateProcedureRow(index: number, patch: Partial<PlanProcedureRow>) {
