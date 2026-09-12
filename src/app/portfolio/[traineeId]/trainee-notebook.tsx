@@ -190,7 +190,7 @@ export function TraineeNotebook({
         title="Your notebook (Ctrl/Cmd + Shift + N)"
         // Above the mobile nav and the chat pill below md, same offsets the
         // form submit bar uses so nothing in the corner overlaps.
-        className="fixed right-4 bottom-40 z-40 flex size-12 items-center justify-center rounded-full shadow-[0_8px_24px_oklch(23.5%_0.017_65_/_0.22)] transition-transform hover:scale-105 md:right-6 md:bottom-6"
+        className="fixed right-4 bottom-40 z-40 flex size-12 items-center justify-center rounded-full shadow-[0_8px_24px_oklch(23.5%_0.017_65_/_0.22)] transition-transform hover:scale-105 md:right-5 md:bottom-2"
         style={{ background: open ? INK : p.bg, color: open ? "oklch(98.5% 0.006 90)" : INK, border: `1.5px solid ${open ? INK : p.edge}` }}
       >
         {open ? <X size={18} /> : <PenLine size={19} />}

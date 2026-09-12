@@ -241,7 +241,10 @@ export function StaffChatDrawer({
   return (
     <div
       className={`pointer-events-none fixed left-0 right-0 z-30 flex justify-center px-3 ${
-        raiseForMobileNav ? "bottom-20 py-3 md:bottom-6" : "bottom-6"
+        // Ramy, 12 Sep 2026, on the trainee's pages: "the pill needs to go
+        // down a bit, closer to the bottom of the screen." Below md it still
+        // has to clear the mobile nav.
+        raiseForMobileNav ? "bottom-20 py-3 md:bottom-2" : "bottom-6"
       }`}
       // Ramy, 2026-08-24: "the frame, the border where the pill sits" gets
       // Connect's own off-white -- the pill itself keeps its normal bg-card
