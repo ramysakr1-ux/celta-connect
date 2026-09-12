@@ -171,8 +171,14 @@ export function PlanReview({
           <span className="font-serif" style={{ fontSize: 17, color: INK }}>
             {strengthCount + actionCount}
           </span>{" "}
-          notes · <span style={{ fontWeight: 600, color: TEAL }}>{strengthCount} strengths</span> ·{" "}
-          <span style={{ fontWeight: 600, color: GOLD_INK }}>{actionCount} action points</span>
+          {strengthCount + actionCount === 1 ? "note" : "notes"} ·{" "}
+          <span style={{ fontWeight: 600, color: TEAL }}>
+            {strengthCount} {strengthCount === 1 ? "strength" : "strengths"}
+          </span>{" "}
+          ·{" "}
+          <span style={{ fontWeight: 600, color: GOLD_INK }}>
+            {actionCount} {actionCount === 1 ? "action point" : "action points"}
+          </span>
         </p>
       </div>
 
