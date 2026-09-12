@@ -3,24 +3,38 @@
 import { useActionState } from "react";
 import { claimInterviewSlot, type ClaimSlotState } from "@/app/interview/[token]/actions";
 import type { PickerTimeOption } from "@/lib/interview-slot-picker";
+import { interviewWhenCompact } from "@/lib/interview-time";
 
 const initialState: ClaimSlotState = { error: null };
 
-function formatWhen(option: PickerTimeOption): string {
-  const when = new Date(`${option.slotDate}T${option.slotTime}`).toLocaleString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${when} (${option.mode === "online" ? "online" : "in person"})`;
-}
-
 // "Taken and past slots stay visible, greyed out and marked 'Booked'
 // rather than disappearing -- the applicant sees the full picture."
-export function SlotPicker({ token, options }: { token: string; options: PickerTimeOption[] }) {
+//
+// Each time is said the way the confirmation page and the emails say it:
+// in the applicant's own zone first, then the centre's, when they differ.
+// Until 12 Sep 2026 this built a Date from the centre's wall-clock string
+// in the applicant's browser and named no zone at all, so someone in Lima
+// read "10:00" for a 10:00 Istanbul interview and only found out which
+// 10:00 it was after booking.
+export function SlotPicker({
+  token,
+  options,
+  centreTimeZone,
+  applicantTimeZone,
+  centreCity,
+}: {
+  token: string;
+  options: PickerTimeOption[];
+  centreTimeZone: string | null;
+  applicantTimeZone: string | null;
+  /** "Istanbul" -- the city, since the zone name is what the reader needs, not the centre's full name. */
+  centreCity?: string;
+}) {
   const [state, action, pending] = useActionState(claimInterviewSlot, initialState);
+  const formatWhen = (option: PickerTimeOption) =>
+    `${interviewWhenCompact({ slot: { slotDate: option.slotDate, slotTime: option.slotTime }, centreTimeZone, applicantTimeZone, centreCity })} (${
+      option.mode === "online" ? "online" : "face to face"
+    })`;
 
   return (
     <div className="mt-4 flex flex-col gap-2">

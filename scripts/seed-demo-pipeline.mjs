@@ -6,6 +6,7 @@
 // He was right: New York had three applicants and Los Angeles had none at all,
 // so every money figure read zero and switching branches went from three rows
 // to an empty page. Demo centres only -- never Elmswood.
+import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -413,3 +414,92 @@ for (const [centre, course, names, stages] of [
   }
 }
 console.log(`applicants added: ${added}   enriched: ${enriched}   interview records: ${records}   payment plans: ${plans}   collected recently: ${collected}`);
+
+// --- Interview availability at the primary centre ---------------------------
+//
+// Ramy, 12 Sep 2026, walking the interview flow: the demo centre had no
+// availability pattern and not one interview slot. "This week's interviews"
+// was five columns of "No slots", Lucas Meyer was "interview booked" with
+// nothing to be booked into, and an applicant opening their picker link read
+// "we're still finding you a time". A centre that is recruiting has a rule
+// for when it interviews; this is the main course tutor's.
+//
+// Mirrors src/lib/interview-availability.ts exactly -- the same weekday
+// convention (0 = Sunday), the same 45 + 10 minute step, the same 24-hour
+// cutoff in the centre's own zone, one slot per open intake -- so pressing
+// "Generate slots from pattern" on the demo reproduces these rather than
+// replacing them with something different.
+{
+  const tutor = await tutorFor(ny.id);
+  const { data: centreRow } = await supabase
+    .from("centers").select("time_zone, interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours").eq("id", ny.id).single();
+  const { data: openIntakes } = await supabase.from("courses").select("id").eq("center_id", ny.id).eq("accepting_applications", true);
+  const PATTERNS = [
+    { weekday: 1, start_time: "10:00", end_time: "13:00", mode: "online" },
+    { weekday: 3, start_time: "10:00", end_time: "13:00", mode: "online" },
+    { weekday: 4, start_time: "14:00", end_time: "16:00", mode: "face_to_face" },
+  ];
+  const { data: existingPatterns } = await supabase.from("interview_availability_patterns").select("id").eq("interviewer_id", tutor.id);
+  if (!existingPatterns || existingPatterns.length === 0) {
+    const { error } = await supabase
+      .from("interview_availability_patterns")
+      .insert(PATTERNS.map((p) => ({ center_id: ny.id, interviewer_id: tutor.id, ...p, active: true })));
+    if (error) console.warn("  patterns:", error.message);
+  }
+
+  const { count: slotCount } = await supabase.from("interview_slots").select("id", { count: "exact", head: true }).eq("center_id", ny.id);
+  if ((slotCount ?? 0) === 0 && openIntakes && openIntakes.length > 0) {
+    const tz = centreRow.time_zone;
+    const step = centreRow.interview_slot_minutes + centreRow.interview_gap_minutes;
+    const cutoff = Date.now() + centreRow.interview_cutoff_hours * 3600000;
+    // Wall clock in the centre's zone -> the instant, the way zonedTimeToUtc does it.
+    const instantOf = (dateIso, hhmm) => {
+      const guess = new Date(`${dateIso}T${hhmm}:00Z`);
+      const local = new Date(guess.toLocaleString("en-US", { timeZone: tz }));
+      return new Date(guess.getTime() - (local.getTime() - guess.getTime()));
+    };
+    const todayIso = new Date().toLocaleDateString("en-CA", { timeZone: tz });
+    const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+    const toHHMM = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+    const rows = [];
+    for (let d = 0; d <= centreRow.interview_weeks_ahead * 7; d++) {
+      const day = new Date(`${todayIso}T00:00:00Z`);
+      day.setUTCDate(day.getUTCDate() + d);
+      const dateIso = day.toISOString().slice(0, 10);
+      for (const p of PATTERNS) {
+        if (day.getUTCDay() !== p.weekday) continue;
+        for (let m = toMin(p.start_time); m + centreRow.interview_slot_minutes <= toMin(p.end_time); m += step) {
+          const hhmm = toHHMM(m);
+          if (instantOf(dateIso, hhmm).getTime() < cutoff) continue;
+          for (const intake of openIntakes) {
+            rows.push({
+              center_id: ny.id, intake_course_id: intake.id, interviewer_id: tutor.id,
+              slot_date: dateIso, slot_time: hhmm, duration_minutes: centreRow.interview_slot_minutes, mode: p.mode, created_by: tutor.id,
+            });
+          }
+        }
+      }
+    }
+    const { error } = await supabase.from("interview_slots").insert(rows);
+    if (error) console.warn("  slots:", error.message); else console.log(`interview slots: ${rows.length} from ${PATTERNS.length} patterns`);
+  }
+
+  // Lucas Meyer is "interview booked": book him into the first open online
+  // slot on his intake, and give him the picker link his invite carried.
+  const { data: lucas } = await supabase
+    .from("applicants").select("id, intake_course_id, interview_invite_token").eq("center_id", ny.id).eq("email", "lucas.meyer@example.com").maybeSingle();
+  if (lucas) {
+    const { data: already } = await supabase.from("interview_slots").select("id").eq("booked_applicant_id", lucas.id).maybeSingle();
+    if (!already) {
+      const { data: slot } = await supabase
+        .from("interview_slots").select("id").eq("intake_course_id", lucas.intake_course_id).eq("mode", "online").is("booked_applicant_id", null)
+        .order("slot_date").order("slot_time").limit(1).maybeSingle();
+      if (slot) await supabase.from("interview_slots").update({ booked_applicant_id: lucas.id }).eq("id", slot.id);
+    }
+    await supabase.from("applicants").update({
+      interview_invite_token: lucas.interview_invite_token ?? crypto.randomUUID(),
+      interview_invite_sent_at: ago(6),
+    }).eq("id", lucas.id);
+  }
+}
+

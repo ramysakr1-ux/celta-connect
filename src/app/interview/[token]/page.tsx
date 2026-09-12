@@ -69,7 +69,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
               applicantTimeZone: applicant.time_zone,
               centreName: center?.name ?? undefined,
             })}{" "}
-            ({bookedSlot.mode === "online" ? "online" : "in person"}).
+            ({bookedSlot.mode === "online" ? "online" : "face to face"}).
           </p>
         ) : null}
         {/* Offered only while there is a change left to make and the cutoff
@@ -99,10 +99,21 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
         {applicant.full_name}, thank you for the written tasks — we have read them and we would like to meet you
         {course ? ` about ${course.name}` : ""}.
       </p>
-      <p className="mt-2 text-sm text-muted">The interview takes about 45 minutes. There is nothing to prepare.</p>
+      {/* The centre's own slot length, not a number typed in here: a centre
+          that interviews for thirty minutes should not promise forty-five. */}
+      <p className="mt-2 text-sm text-muted">
+        The interview takes about {(options.find((o) => o.bookable) ?? options[0])?.durationMinutes ?? 45} minutes. There is
+        nothing to prepare.
+      </p>
 
       {bookable ? (
-        <SlotPicker token={token} options={options} />
+        <SlotPicker
+          token={token}
+          options={options}
+          centreTimeZone={center?.time_zone ?? null}
+          applicantTimeZone={applicant.time_zone}
+          centreCity={center?.time_zone ? center.time_zone.split("/").pop()?.replace(/_/g, " ") : undefined}
+        />
       ) : (
         <p className="mt-4 rounded-[6px] border border-dashed border-border p-4 text-sm text-muted">
           We&apos;re still finding you a time — check back shortly, or reply to the invitation email and we&apos;ll

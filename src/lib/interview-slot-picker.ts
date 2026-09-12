@@ -1,4 +1,5 @@
 import "server-only";
+import { interviewInstant } from "@/lib/interview-time";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 
@@ -34,9 +35,15 @@ export async function getPickerTimeOptions(
     .order("slot_date", { ascending: true })
     .order("slot_time", { ascending: true });
 
-  const nowIso = new Date().toISOString();
-  const today = nowIso.slice(0, 10);
-  const nowTime = nowIso.slice(11, 16);
+  // Until 12 Sep 2026 "past" was judged by comparing the slot's wall-clock
+  // strings with the server's UTC clock, so at a centre east of Greenwich a
+  // slot stayed bookable for hours after it had started; and the centre's
+  // own cutoff (interview_cutoff_hours, the same one the generator
+  // honours) was never applied here at all, so an applicant could book a
+  // slot twenty minutes away. Both now come from the same instant the
+  // reminder cron and the reschedule action use.
+  const { data: centre } = await admin.from("centers").select("time_zone, interview_cutoff_hours").eq("id", input.centerId).maybeSingle();
+  const earliestBookable = Date.now() + (centre?.interview_cutoff_hours ?? 0) * 60 * 60 * 1000;
 
   const byKey = new Map<
     string,
@@ -55,7 +62,7 @@ export async function getPickerTimeOptions(
 
   return [...byKey.entries()]
     .map(([timeKey, v]) => {
-      const isPast = v.slotDate < today || (v.slotDate === today && v.slotTime < nowTime);
+      const isPast = interviewInstant({ slotDate: v.slotDate, slotTime: v.slotTime }, centre?.time_zone ?? null).getTime() < earliestBookable;
       return {
         timeKey,
         slotDate: v.slotDate,

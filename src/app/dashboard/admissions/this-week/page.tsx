@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveBranchScope } from "@/lib/branch-scope";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI"] as const;
 
@@ -44,7 +45,11 @@ export default async function ThisWeeksInterviewsPage({
   const supabase = createAdminClient();
 
   const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const weekStart = mondayOfIso(toLocalIso(new Date(), timeZone));
+  const todayIso = toLocalIso(new Date(), timeZone);
+  // On a Saturday or Sunday "this week" is over: show the one coming, which
+  // is the one anybody opening this page at the weekend is preparing for.
+  const thisMonday = mondayOfIso(todayIso);
+  const weekStart = todayIso > addDaysIso(thisMonday, 4) ? addDaysIso(thisMonday, 7) : thisMonday;
   const weekEnd = addDaysIso(weekStart, 4);
 
   const [{ data: slots }, { data: flagRows }] = await Promise.all([
@@ -98,7 +103,7 @@ export default async function ThisWeeksInterviewsPage({
         <BackLink href="/dashboard/admissions" label="Admissions" />
         <h1 className="mt-2 font-serif text-xl text-ink">This week&apos;s interviews</h1>
         <p className="mt-1 text-sm text-muted">
-          {weekStart} &ndash; {weekEnd}
+          {formatCalendarDate(weekStart)} &ndash; {formatCalendarDate(weekEnd, { year: "numeric" })}
         </p>
       </div>
 
@@ -106,7 +111,7 @@ export default async function ThisWeeksInterviewsPage({
         {days.map((d) => (
           <div key={d.date} className="flex flex-col gap-2">
             <div className="text-center text-xs font-bold text-muted">
-              {d.label} <span className="font-normal">{d.date.slice(5)}</span>
+              {d.label} <span className="font-normal">{formatCalendarDate(d.date)}</span>
             </div>
             {d.slots.length === 0 ? (
               <div className="rounded-[8px] border border-dashed border-border p-3 text-center text-xs text-muted">No slots</div>
@@ -121,7 +126,7 @@ export default async function ThisWeeksInterviewsPage({
                     }`}
                   >
                     <div className={`text-xs font-bold ${filled ? "text-primary" : "text-muted"}`}>
-                      {s.slot_time.slice(0, 5)} · {s.mode === "online" ? "Online" : "In person"}
+                      {s.slot_time.slice(0, 5)} · {s.mode === "online" ? "Online" : "Face to face"}
                     </div>
                     {filled ? (
                       <>

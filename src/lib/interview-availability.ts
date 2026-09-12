@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE, zonedTimeToUtc } from "@/lib/timetable-grid";
 
 export interface AvailabilityPattern {
   interviewer_id: string;
@@ -88,7 +88,10 @@ export function computeGeneratedSlots(
     if (weekdayOf(dateIso) !== pattern.weekday) continue;
     for (let mins = startMin; mins + settings.slotMinutes <= endMin; mins += step) {
       const timeStr = minutesToTime(mins);
-      const slotStart = new Date(`${dateIso}T${timeStr}`);
+      // In the centre's zone. `new Date("YYYY-MM-DDTHH:MM")` is the server's
+      // own zone -- UTC on Vercel -- which put the 24-hour cutoff three hours
+      // early for Istanbul and let a slot inside it be generated.
+      const slotStart = zonedTimeToUtc(dateIso, timeStr, timeZone);
       if (slotStart < cutoff) continue;
       if (isBlocked(pattern.interviewer_id, dateIso, timeStr, blocks)) continue;
       slots.push({ slot_date: dateIso, slot_time: timeStr });

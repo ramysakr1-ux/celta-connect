@@ -90,3 +90,32 @@ export function isSupportedTimeZone(value: string): boolean {
     return false;
   }
 }
+
+/**
+ * The picker's shorter form of the same line: one date, two clocks.
+ *
+ * A list of eight options each reading "Monday 14 September, 02:00 GMT-5
+ * your time — Monday 14 September, 10:00 GMT+3 Connect CELTA Istanbul time"
+ * says every date twice; here it is "Monday 14 September · 02:00 GMT-5 your
+ * time · 10:00 GMT+3 in Istanbul". Falls back to the full line when the two
+ * zones put the interview on different days, which is the one case where
+ * repeating the date is the point.
+ */
+export function interviewWhenCompact(input: {
+  slot: InterviewSlotTime;
+  centreTimeZone: string | null;
+  applicantTimeZone: string | null;
+  centreCity?: string;
+}): string {
+  const centre = input.centreTimeZone || DEFAULT_TIMEZONE;
+  const applicant = input.applicantTimeZone;
+  const instant = interviewInstant(input.slot, centre);
+  const day = (zone: string) =>
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone, weekday: "long", day: "numeric", month: "long" }).format(instant);
+  const clock = (zone: string) =>
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone, hour: "2-digit", minute: "2-digit", hour12: false, timeZoneName: "shortOffset" }).format(instant);
+  if (!applicant || applicant === centre) return `${day(centre)} · ${clock(centre)}`;
+  if (day(applicant) !== day(centre)) return interviewWhen({ ...input, centreName: input.centreCity });
+  const where = input.centreCity ? ` in ${input.centreCity}` : " centre time";
+  return `${day(applicant)} · ${clock(applicant)} your time · ${clock(centre)}${where}`;
+}

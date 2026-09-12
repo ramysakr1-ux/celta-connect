@@ -76,7 +76,7 @@ export default async function AdmissionsPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("courses")
-      .select("id, name")
+      .select("id, name, delivery_mode")
       .in("center_id", scope)
       .eq("accepting_applications", true)
       .order("start_date"),
@@ -186,6 +186,17 @@ export default async function AdmissionsPage({
     (a) => !["accepted", "rejected_before_interview", "rejected_after_interview", "not_this_time", "withdrawn_application"].includes(a.stage)
   );
 
+  // Intakes with an online element (online or blended delivery) that have a
+  // face-to-face slot open -- the §7.2 note above the slot list.
+  const onlineIntakeNames = new Map((intakes ?? []).filter((i) => i.delivery_mode && i.delivery_mode !== "f2f").map((i) => [i.id, i.name]));
+  const faceToFaceOnOnlineIntakes = [
+    ...new Set(
+      (openSlots ?? [])
+        .filter((s) => s.mode === "face_to_face" && onlineIntakeNames.has(s.intake_course_id))
+        .map((s) => onlineIntakeNames.get(s.intake_course_id)!)
+    ),
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
@@ -274,6 +285,21 @@ export default async function AdmissionsPage({
 
       <div className="card card-garnet flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Open interview slots</h2>
+        {/* Handbook §7.2: "Online interviews, using the centre's teaching
+            platform, should be arranged for candidates who are enrolling in
+            a course with an online TP element, as this will assist in
+            determining whether the candidate will cope in the online
+            environment." A note, not a block -- a centre may have its
+            reasons -- shown only when a face-to-face slot is open on such
+            an intake. */}
+        {faceToFaceOnOnlineIntakes.length > 0 ? (
+          <p className="rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg/40 px-3 py-2 text-xs leading-relaxed text-status-warning-text">
+            {faceToFaceOnOnlineIntakes.join(" and ")}{" "}
+            {faceToFaceOnOnlineIntakes.length === 1 ? "has" : "have"} an online element, and{" "}
+            {faceToFaceOnOnlineIntakes.length === 1 ? "its" : "their"} open slots include face-to-face times. Handbook §7.2 asks
+            for those interviews to be online, on the centre&apos;s own platform, so you can see how the applicant copes there.
+          </p>
+        ) : null}
         {(openSlots ?? []).length > 0 ? (
           <ul className="flex flex-col gap-1.5">
             {(openSlots ?? []).map((s) => (
