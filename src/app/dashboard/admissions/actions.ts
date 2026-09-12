@@ -1184,13 +1184,21 @@ export async function addToWaitingList(formData: FormData): Promise<void> {
     .maybeSingle();
   if (!applicant) return;
 
-  const { count } = await supabase
+  // The next number after the highest ever given on this intake, not a count
+  // of who is waiting right now. Counting collides: offer the person at #1 a
+  // place and their stage leaves waiting_list, so the count drops and the
+  // next person added is handed a number somebody else already holds --
+  // after which "first on the list" is whatever order the database felt like.
+  const { data: highest } = await supabase
     .from("applicants")
-    .select("id", { count: "exact", head: true })
+    .select("waiting_list_position")
     .eq("intake_course_id", applicant.intake_course_id)
-    .eq("stage", "waiting_list");
+    .not("waiting_list_position", "is", null)
+    .order("waiting_list_position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const position = (count ?? 0) + 1;
+  const position = (highest?.waiting_list_position ?? 0) + 1;
   const { error } = await supabase
     .from("applicants")
     .update({ stage: "waiting_list", waiting_list_position: position, waiting_list_hear_by: hearBy })

@@ -2,11 +2,15 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendApplicantEmail, placeFreedEmailHtml } from "@/lib/admissions-email";
 import type { Database } from "@/lib/supabase/types";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
-function formatDeadline(d: Date): string {
-  // "A named day and hour, not a number of days." No per-centre timezone
-  // exists in the schema, so this is UTC -- said explicitly rather than
-  // implying a local time that isn't actually known.
+// "A named day and hour, not a number of days." Said in the CENTRE'S clock,
+// with the city named. It used to be UTC, on the premise that "no per-centre
+// timezone exists in the schema" -- true when this was written, untrue since
+// centers.time_zone became real NOT NULL data (26 Aug 2026). A 48-hour window
+// is the one deadline nobody should have to convert.
+function formatDeadline(d: Date, timeZone: string): string {
+  const city = timeZone.split("/").pop()?.replace(/_/g, " ") ?? "";
   return (
     d.toLocaleString("en-GB", {
       weekday: "long",
@@ -14,8 +18,8 @@ function formatDeadline(d: Date): string {
       month: "long",
       hour: "numeric",
       minute: "2-digit",
-      timeZone: "UTC",
-    }) + " UTC"
+      timeZone: timeZone || DEFAULT_TIMEZONE,
+    }) + (city ? ` in ${city}` : "")
   );
 }
 
@@ -45,8 +49,12 @@ export async function offerNextWaitingListPlace(
 
   if (!next) return { offeredApplicantId: null, reason: "No one is on the waiting list for this intake." };
 
+  const { data: centreRow } = await supabase.from("centers").select("time_zone").eq("id", input.centerId).maybeSingle();
+  const timeZone = centreRow?.time_zone || DEFAULT_TIMEZONE;
+
   const offerToken = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+  const deadlineLabel = formatDeadline(expiresAt, timeZone);
 
   // Re-checking stage='waiting_list' here (not just filtering by id) closes
   // a TOCTOU gap between the select above and this write: if the applicant
@@ -58,7 +66,10 @@ export async function offerNextWaitingListPlace(
     .update({
       stage: "offer_sent",
       offer_sent_at: new Date().toISOString(),
-      offer_accept_by: expiresAt.toISOString().slice(0, 10),
+      // The calendar date the window runs out ON, in the centre's own zone --
+      // a UTC slice puts it a day early for anywhere east of Greenwich, and
+      // the offer page prints both this and the instant above it.
+      offer_accept_by: toLocalIso(expiresAt, timeZone),
       offer_token: offerToken,
       place_offered_at: new Date().toISOString(),
       place_offer_expires_at: expiresAt.toISOString(),
@@ -104,7 +115,7 @@ export async function offerNextWaitingListPlace(
             })()
           : "",
         feeLine: "The fee is as set for this course;",
-        respondBy: formatDeadline(expiresAt),
+        respondBy: deadlineLabel,
         offerUrl: `${siteUrl}/offer/${offerToken}`,
         hoursLeftLabel: "Accept your place",
         nextCourseName: null,
@@ -116,7 +127,7 @@ export async function offerNextWaitingListPlace(
     center_id: input.centerId,
     applicant_id: next.id,
     type: "place_offered",
-    message: `A place has been offered to ${next.full_name} -- expires ${formatDeadline(expiresAt)}.`,
+    message: `A place has been offered to ${next.full_name} -- expires ${deadlineLabel}.`,
   });
   {
     const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
@@ -128,10 +139,10 @@ export async function offerNextWaitingListPlace(
       applicantId: next.id,
       emailType: "place_offered",
       subject: `Place offered -- ${next.full_name}`,
-      pushBody: `A place has been offered to ${next.full_name} -- expires ${formatDeadline(expiresAt)}.`,
+      pushBody: `A place has been offered to ${next.full_name} -- expires ${deadlineLabel}.`,
       pushUrl: reviewUrl,
       buildEmailHtml: (recipientName) =>
-        placeOfferedStaffEmailHtml({ recipientName, applicantName: next.full_name, expiresLabel: formatDeadline(expiresAt), reviewUrl }),
+        placeOfferedStaffEmailHtml({ recipientName, applicantName: next.full_name, expiresLabel: deadlineLabel, reviewUrl }),
     }).catch(() => null);
   }
 
