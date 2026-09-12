@@ -852,6 +852,35 @@ export function notThisTimeEmailHtml(input: {
   });
 }
 
+// A merit offer that ran past its accept-by date unanswered. The offer email
+// promised "we will hold your place until X, after which it goes to the
+// waiting list" -- this is that promise being kept, said plainly, with the
+// door left open: a reply still reaches a person. Logged as not_this_time,
+// which is the outcome; the wording is what differs from the waiting-list
+// version of that outcome ("the course simply filled" would be untrue here).
+export function offerLapsedEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  heldUntil: string;
+  nextApplicantOffered: boolean;
+}): string {
+  return emailShell({
+    heading: "Your offer has lapsed",
+    tone: "plain",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `We offered you a place on ${input.courseName} and said we would hold it until ${input.heldUntil}. That date has passed without a reply, so, as we said we would, the place has ${
+          input.nextApplicantOffered ? "gone to the next person on the waiting list" : "been released"
+        }.`
+      ) +
+      p(
+        "If you still want to train with us, reply to this email. A place may open again before the course starts, and we run further intakes -- your written task and interview stay on file, so you would not repeat either."
+      ),
+    footnote: "Sent automatically on the date we promised to hold your place until.",
+  });
+}
+
 export function placeFreedEmailHtml(input: {
   applicantName: string;
   courseName: string;

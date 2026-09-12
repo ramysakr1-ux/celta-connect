@@ -314,7 +314,12 @@ function profileFor(i, stage, daysAgo) {
     // applicant and the acceptance page can only be seen through the journey.
     row.offer_token = crypto.randomUUID();
     row.offer_sent_at = ago(Math.max(daysAgo - 6, 1));
-    row.offer_accept_by = agoDate(Math.max(daysAgo - 6, 1) - 14);
+    // An offer still at offer_sent is an OPEN offer, so its accept-by date is
+    // ahead of today; the nightly cron now lapses anything past it (as the
+    // offer email promises), and a seeded-in-the-past deadline would have
+    // every demo offer lapse the first night. Accepted ones keep the date
+    // they were accepted against.
+    row.offer_accept_by = stage === 'accepted' ? agoDate(Math.max(daysAgo - 6, 1) - 14) : agoDate(-(7 + (i % 5)));
     row.fee_amount = 1800;
   }
   if (stage === "accepted") row.accepted_at = ago(Math.max(daysAgo - 8, 1));
