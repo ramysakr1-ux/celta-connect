@@ -3,7 +3,6 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { formatCalendarDate } from "@/lib/format-date";
 import { computeCourseDayProgress } from "@/lib/course-day";
 import { getCourseReleaseClock } from "@/lib/assignment-release";
 import { getAllAssignmentCriteria } from "@/lib/assignment-criteria";
@@ -15,20 +14,11 @@ import {
   type BoardCell,
   type BoardCellState,
 } from "@/lib/assignment-board";
-import {
-  BAND,
-  BORDER,
-  CARD,
-  FAINT,
-  GARNET,
-  GOLD_INK,
-  INK,
-  MUTED,
-  SHEET,
-  TEAL,
-  TpSheet,
-  ZEBRA,
-} from "@/components/tp-sheet";
+import { TpSheet } from "@/components/tp-sheet";
+// Tokens come from the plain module, never from tp-sheet: that file is
+// "use client", and a client module's exports reach a server component as
+// references rather than values.
+import { BAND, BORDER, CARD, FAINT, GARNET, GOLD_INK, INK, MUTED, SHEET, TEAL, ZEBRA } from "@/lib/sheet-tokens";
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
@@ -518,6 +508,3 @@ function Marker({ colour, label }: { colour: string; label: string }) {
     </span>
   );
 }
-
-/** Date formatting kept to hand for the strip's foot; a course day is the label. */
-export const formatDay = formatCalendarDate;
