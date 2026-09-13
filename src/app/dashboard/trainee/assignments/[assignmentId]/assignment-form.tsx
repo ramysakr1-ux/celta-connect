@@ -31,6 +31,7 @@ import {
   plainField,
 } from "@/components/tp-sheet";
 import { autosizeOnInput, useAutosize } from "@/lib/autosize";
+import { formatCalendarDate } from "@/lib/format-date";
 import { bulletListProps } from "@/lib/bullet-list";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
 
@@ -58,6 +59,10 @@ import type { TemplateSection } from "@/lib/assignment-templates/content";
 const initialState: FormState = { error: null };
 
 const SECTION_HUES = [TEAL, GOLD_INK, INK_WARM, INK_WARM, GARNET, MUTED, TEAL];
+
+// §7's own grey, for an assignment that has not opened for writing yet.
+const CLOSED_INK = "oklch(64% 0.015 70)";
+const CLOSED_BORDER = "oklch(83% 0.028 78)";
 
 function wordCount(text: string): number {
   // Bullets are punctuation, not words (handoff §2b).
@@ -101,6 +106,11 @@ export function AssignmentAuthoringForm({
   format = "prose",
   sanction = false,
   savedAt = null,
+  notYetOpen = false,
+  opensOnDay = null,
+  opensOnDate = null,
+  dueOnDay = null,
+  dueOnDate = null,
 }: {
   assignmentId: string;
   /** The assignment's own title, for the band. */
@@ -122,9 +132,27 @@ export function AssignmentAuthoringForm({
   /** True for the plagiarism reflection: garnet throughout, not one of the four. */
   sanction?: boolean;
   savedAt?: string | null;
+  /**
+   * §7 -- readable, not writable: the course timetable has not reached the
+   * day this assignment is set. The brief and the criteria show in full;
+   * everything that writes is closed, and nothing counts as written even if
+   * a draft is stored.
+   */
+  notYetOpen?: boolean;
+  opensOnDay?: number | null;
+  opensOnDate?: string | null;
+  dueOnDay?: number | null;
+  dueOnDate?: string | null;
 }) {
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
   const isResubmission = round === "resubmission";
+  // Everything that writes is closed in both states; only the wording, the
+  // pill and the strip differ. `readOnly` is the one the inputs read.
+  const readOnly = locked || notYetOpen;
+  const opensLabel = opensOnDay ? `Day ${opensOnDay}` : "its set day";
+  const opensDate = opensOnDate ? formatCalendarDate(opensOnDate, { weekday: "short" }) : null;
+  const dueLabel = dueOnDay ? `Day ${dueOnDay}` : null;
+  const dueDate = dueOnDate ? formatCalendarDate(dueOnDate, { weekday: "short" }) : null;
   const autosize = useAutosize();
 
   const [texts, setTexts] = useState<Record<string, string>>(() => {
@@ -152,7 +180,7 @@ export function AssignmentAuthoringForm({
   const skipNextAutosave = useRef(true);
 
   useEffect(() => {
-    if (locked) return;
+    if (readOnly) return;
     if (skipNextAutosave.current) {
       skipNextAutosave.current = false;
       return;
@@ -230,12 +258,42 @@ export function AssignmentAuthoringForm({
             role={bandRole}
             eyebrow={eyebrow}
             title={title ?? "Your assignment"}
-            status={<SaveStatusPill role={bandRole} label={locked ? "Submitted" : savedLabel} />}
-            showDictate={!locked}
+            status={
+              <SaveStatusPill
+                role={bandRole}
+                dot={notYetOpen ? CLOSED_INK : undefined}
+                label={
+                  notYetOpen
+                    ? `Opens ${opensLabel}${opensDate ? ` · ${opensDate}` : ""}`
+                    : locked
+                      ? "Submitted"
+                      : savedLabel
+                }
+              />
+            }
+            showDictate={!readOnly}
           />
 
           {/* ---------- §2 word-count budget ---------- */}
           <Strip>
+            {/* §7: before the assignment opens the budget is replaced -- a
+                word count is a measure of writing, and there is no writing
+                yet. Stored drafts (a centre that moved the day, a candidate
+                who wrote before it slipped) are not counted either. */}
+            {notYetOpen ? (
+              <div
+                className="flex flex-1 flex-col gap-1"
+                style={{ minWidth: 300, border: `1px dashed ${CLOSED_BORDER}`, borderRadius: 8, padding: "8px 14px" }}
+              >
+                <Eyebrow colour={GOLD_INK}>Not yet open</Eyebrow>
+                <p style={{ fontSize: 12, lineHeight: 1.5, color: MUTED }}>
+                  Writing opens on {opensLabel}
+                  {opensDate ? ` · ${opensDate}` : ""}
+                  {dueLabel ? `; due ${dueLabel}${dueDate ? ` · ${dueDate}` : ""}` : ""}. You can read the brief and
+                  criteria now.
+                </p>
+              </div>
+            ) : (
             <div className="flex flex-1 flex-col gap-1.5" style={{ minWidth: 300 }}>
               <div className="flex items-baseline justify-between gap-3">
                 <Eyebrow>Word count</Eyebrow>
@@ -261,6 +319,7 @@ export function AssignmentAuthoringForm({
                 {under > 0 ? <span style={{ flex: under, borderRadius: 3, background: FAINT }} /> : null}
               </div>
             </div>
+            )}
           </Strip>
 
           {/* ---------- §3 Before you start | Marked against ---------- */}
@@ -334,7 +393,9 @@ export function AssignmentAuthoringForm({
             <div className="mt-2">
               {sections.map((s, i) => {
                 const value = texts[s.key] ?? "";
-                const words = wordCount(value);
+                // §7: "Nothing counts as written -- dots hollow, spine faint,
+                // chips 0 words muted -- regardless of any stored draft."
+                const words = notYetOpen ? 0 : wordCount(value);
                 const written = words > 0;
                 const hue = hueFor(i);
                 const comment = isResubmission ? responseByKey.get(s.key)?.first_comments : null;
@@ -420,7 +481,11 @@ export function AssignmentAuthoringForm({
                         </div>
                       ) : null}
 
-                      {locked ? (
+                      {notYetOpen ? (
+                        <p className="italic" style={{ fontSize: 13, lineHeight: 1.55, color: CLOSED_INK }}>
+                          Opens with the assignment.
+                        </p>
+                      ) : locked ? (
                         <p style={{ fontSize: 14, lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
                           {value || <span className="italic" style={{ color: MUTED }}>Nothing written.</span>}
                         </p>
@@ -449,6 +514,17 @@ export function AssignmentAuthoringForm({
           </div>
 
           {/* ---------- §5 declaration | references ---------- */}
+          {notYetOpen ? (
+            <div
+              className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-b-[14px]"
+              style={{ borderTop: `1px solid ${FAINT}`, background: CARD, padding: "16px 26px" }}
+            >
+              <Eyebrow>Declaration · References · Appendices</Eyebrow>
+              <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+                Available once the assignment opens. The declaration is taken fresh on every submission.
+              </p>
+            </div>
+          ) : (
           <div
             className="grid grid-cols-1 rounded-b-[14px] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]"
             style={{ borderTop: `1px solid ${FAINT}`, background: CARD }}
@@ -529,6 +605,7 @@ export function AssignmentAuthoringForm({
               </div>
             </div>
           </div>
+          )}
         </TpSheet>
 
         {/* ---------- §6 bottom bar ---------- */}
@@ -543,9 +620,11 @@ export function AssignmentAuthoringForm({
           }}
         >
           <div className="flex items-center gap-2">
-            <span className="size-[5px] shrink-0 rounded-full" style={{ background: GOLD_INK }} />
-            <p style={{ fontSize: 11.5, color: GOLD_INK }}>
-              {locked
+            <span className="size-[5px] shrink-0 rounded-full" style={{ background: notYetOpen ? CLOSED_INK : GOLD_INK }} />
+            <p style={{ fontSize: 11.5, color: notYetOpen ? MUTED : GOLD_INK }}>
+              {notYetOpen
+                ? `This assignment opens on ${opensLabel}${opensDate ? ` · ${opensDate}` : ""}. Read the brief now; writing starts then.`
+                : locked
                 ? "With your tutor. You'll be told here when it's marked."
                 : sanction
                   ? "Submitting locks this reflection — one chance, pass or fail, alongside the resubmission it accompanies."
@@ -554,7 +633,24 @@ export function AssignmentAuthoringForm({
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-            {locked ? (
+            {notYetOpen ? (
+              <button
+                type="button"
+                disabled
+                title={`Opens ${opensLabel}`}
+                style={{
+                  borderRadius: 8,
+                  background: "oklch(88% 0.016 82)",
+                  padding: "8px 17px",
+                  fontWeight: 600,
+                  fontSize: 13.5,
+                  color: MUTED,
+                  cursor: "not-allowed",
+                }}
+              >
+                {sanction ? "Submit reflection" : "Submit assignment"}
+              </button>
+            ) : locked ? (
               canWithdraw ? (
                 <WithdrawButton assignmentId={assignmentId} />
               ) : null
@@ -584,7 +680,7 @@ export function AssignmentAuthoringForm({
             )}
           </div>
         </div>
-        {deadlinePassed && !locked ? (
+        {deadlinePassed && !readOnly ? (
           <p className="mt-2 text-xs text-destructive">The deadline for this assignment has passed.</p>
         ) : null}
       </form>

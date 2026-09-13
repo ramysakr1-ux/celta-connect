@@ -6,6 +6,9 @@ import { requireRole } from "@/lib/auth/require-role";
 import type { Database } from "@/lib/supabase/types";
 import { runPlagiarismScan } from "@/lib/plagiarism/scan";
 import { runLanguagePrecheck } from "@/lib/language-precheck";
+import { getCourseReleaseClock } from "@/lib/assignment-release";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 type SectionResponseInsert = Database["public"]["Tables"]["assignment_section_responses"]["Insert"];
 
@@ -52,6 +55,36 @@ async function saveResponses(
   return null;
 }
 
+// design_handoff_assignments §7: an assignment is readable from day one but
+// WRITABLE only from the day the course timetable sets it. The screen renders
+// that state, but a gate the screen alone enforces is not a gate -- both
+// writing paths check it here. Null means go ahead.
+async function releaseBlock(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  assignmentId: string
+): Promise<string | null> {
+  const { data: assignment } = await supabase
+    .from("assignments")
+    .select("assignment_type, course_id, trainee_id")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  if (!assignment?.course_id) return null;
+
+  const { data: trainee } = await supabase
+    .from("profiles")
+    .select("center_id")
+    .eq("id", assignment.trainee_id)
+    .maybeSingle();
+  const timeZone = trainee?.center_id ? ((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+  const clock = await getCourseReleaseClock(supabase, assignment.course_id, toLocalIso(new Date(), timeZone));
+  if (clock.isOpen(assignment.assignment_type)) return null;
+
+  const release = clock.releaseByType.get(assignment.assignment_type);
+  return release?.day
+    ? `This assignment opens on Day ${release.day}. You can read the brief and the criteria until then.`
+    : "This assignment has not opened for writing yet.";
+}
+
 export async function saveAssignmentDraft(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainee = await requireRole("trainee");
   const assignmentId = formData.get("assignment_id");
@@ -61,6 +94,8 @@ export async function saveAssignmentDraft(_prevState: FormState, formData: FormD
   }
 
   const supabase = await createClient();
+  const blocked = await releaseBlock(supabase, assignmentId);
+  if (blocked) return { error: blocked };
   const error = await saveResponses(supabase, assignmentId, round, parseSections(formData));
   if (error) return { error };
 
@@ -87,6 +122,8 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
   const ownWorkConfirmed = formData.get("own_work_confirmed") === "true";
 
   const supabase = await createClient();
+  const blocked = await releaseBlock(supabase, assignmentId);
+  if (blocked) return { error: blocked };
   const saveError = await saveResponses(supabase, assignmentId, round, sections);
   if (saveError) return { error: saveError };
 

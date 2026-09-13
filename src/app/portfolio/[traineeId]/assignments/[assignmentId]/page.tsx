@@ -16,6 +16,7 @@ import { RaiseConcernForm } from "@/app/trainer/(hub)/malpractice/raise-concern-
 import { FolPanel } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-panel";
 import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-cross-check";
 import { isCourseDayReached } from "@/lib/course-day";
+import { getCourseReleaseClock } from "@/lib/assignment-release";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -187,6 +188,14 @@ export default async function AssignmentDetailPage({
   const deadlinePassed = Boolean(
     assignment.due_date && round === "first" && !locked && assignment.due_date < today
   );
+
+  // §7 release gating. The assignment is readable from day one; writing opens
+  // on the day the course timetable sets it. Staff and the assessor are never
+  // gated -- the same carve-out the list makes.
+  const clock = trainee.course_id ? await getCourseReleaseClock(supabase, trainee.course_id, today) : null;
+  const release = clock?.releaseByType.get(assignment.assignment_type) ?? null;
+  const notYetOpen = !isStaff && Boolean(clock) && !clock!.isOpen(assignment.assignment_type);
+  const dueDay = clock?.dayOf(assignment.due_date) ?? null;
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
   const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";
 
@@ -405,6 +414,11 @@ export default async function AssignmentDetailPage({
             intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
             format={template.format}
+            notYetOpen={notYetOpen}
+            opensOnDay={release?.day ?? null}
+            opensOnDate={release?.date ?? null}
+            dueOnDay={dueDay}
+            dueOnDate={assignment.due_date}
             // for-claude-code-trainee-interface.md: "can withdraw only
             // while it's unopened" -- round==="first" && locked===true
             // here specifically means "submitted, not yet approved" (see

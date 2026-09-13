@@ -66,3 +66,29 @@ export async function computeCourseDayProgress(
     finished: today > distinctDates[distinctDates.length - 1],
   };
 }
+
+/**
+ * The course's distinct timetabled dates, in order -- the same clock
+ * isCourseDayReached and computeCourseDayProgress count on. Day N is
+ * `days[N - 1]`.
+ */
+export async function getCourseDays(supabase: SupabaseClient<Database>, courseId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("course_timetable_events")
+    .select("event_date")
+    .eq("course_id", courseId)
+    .order("event_date", { ascending: true });
+  return Array.from(new Set((data ?? []).map((row) => row.event_date))).sort();
+}
+
+/**
+ * Which course day a date falls on: the number of timetabled days up to and
+ * including it. Exact for a timetabled date; a deadline that lands on a
+ * weekend reads as the day of the last taught date before it, which is the
+ * day a candidate would count from. Null before the course's first day.
+ */
+export function courseDayOf(days: string[], date: string | null): number | null {
+  if (!date) return null;
+  const n = days.filter((d) => d <= date).length;
+  return n === 0 ? null : n;
+}

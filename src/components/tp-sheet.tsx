@@ -162,10 +162,20 @@ export function IdentityBand({
   );
 }
 
-export function SaveStatusPill({ role, label }: { role: BandRole; label: string }) {
+export function SaveStatusPill({
+  role,
+  label,
+  dot = "oklch(80% 0.1 80)",
+}: {
+  role: BandRole;
+  label: string;
+  /** Overridden for a state that is not "working": grey while an assignment
+   *  has not opened for writing yet (assignments handoff §7). */
+  dot?: string;
+}) {
   return (
     <span className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: BAND[role].status }}>
-      <span className="size-[5px] rounded-full" style={{ background: "oklch(80% 0.1 80)" }} />
+      <span className="size-[5px] rounded-full" style={{ background: dot }} />
       {label}
     </span>
   );

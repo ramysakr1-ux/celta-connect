@@ -14,6 +14,7 @@ import {
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { getCourseReleaseClock, type AssignmentRelease } from "@/lib/assignment-release";
 import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import type { Database } from "@/lib/supabase/types";
 
@@ -36,38 +37,28 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
     if (!trainee || trainee.course_id !== assessorCourseId) notFound();
   }
 
-  // Ramy, 27 Aug 2026: "Assignments can stay hidden or gated until their
-  // outdate" -- all four rows are created for every trainee at course-join
-  // time (join/actions.ts, offer/actions.ts), which is a seed-data
-  // convenience, not evidence the brief has actually been set yet. Gate on
-  // the timetable's own record of when each assignment was set (the
-  // earliest course_timetable_events row tagged with that
-  // linked_assignment_type, reaching today) -- same "the timetable is the
-  // spine" principle as everything else, not a second source of truth.
+  // When each assignment opens, off the course's own timetable -- the
+  // earliest event tagged with that linked_assignment_type, which is the
+  // input session that sets it.
+  //
+  // This used to HIDE an unopened assignment behind a stub card that could
+  // not be opened. design_handoff_assignments §7 changed the rule, and it is
+  // the better one: an assignment is "readable from day 1 but writable only
+  // from its Released day". A candidate can read the brief and the criteria
+  // for all four from the start and see when each one opens; what waits is
+  // the writing. Ramy, 27 Aug 2026, had left the choice open -- "assignments
+  // can stay hidden or gated until their outdate" -- and this is the gated
+  // reading of it.
   const { data: trainee } = await supabase.from("profiles").select("course_id, center_id").eq("id", traineeId).maybeSingle();
   const timeZone = trainee?.center_id ? ((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
-  const { data: settingEvents } = trainee?.course_id
-    ? await supabase
-        .from("course_timetable_events")
-        .select("linked_assignment_type, event_date")
-        .eq("course_id", trainee.course_id)
-        .not("linked_assignment_type", "is", null)
-    : { data: [] };
-  const setDateByAssignmentType = new Map<string, string>();
-  for (const e of settingEvents ?? []) {
-    if (!e.linked_assignment_type) continue;
-    const existing = setDateByAssignmentType.get(e.linked_assignment_type);
-    if (!existing || e.event_date < existing) setDateByAssignmentType.set(e.linked_assignment_type, e.event_date);
-  }
-  const isSet = (assignmentType: string) => {
-    const setDate = setDateByAssignmentType.get(assignmentType);
-    return Boolean(setDate && setDate <= today);
-  };
+  const clock = trainee?.course_id ? await getCourseReleaseClock(supabase, trainee.course_id, today) : null;
   // Staff/assessor previewing always see the full set -- gating is a
   // candidate-facing pacing device, not a real access restriction (same
   // reasoning as every other staff-sees-everything carve-out in this app).
   const isStaffViewer = Boolean(assessorCourseId) || (session?.profile != null && session.profile.role !== "trainee");
+  const releaseFor = (assignmentType: string) =>
+    isStaffViewer || !clock || clock.isOpen(assignmentType) ? null : (clock.releaseByType.get(assignmentType) ?? null);
 
   const { data: assignmentsRaw } = await supabase.from("assignments").select("*").eq("trainee_id", traineeId);
   // build-spec.md "Assignment 5": "not numbered as a Cambridge assignment
@@ -146,7 +137,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
               assignment={a}
               eyebrow={`Assignment ${i + 1}`}
               accentClass={(Math.floor(i / 2) + (i % 2)) % 2 === 0 ? "border-t-[oklch(38%_0.085_155)]" : "border-t-[oklch(42%_0.13_27)]"}
-              locked={!isStaffViewer && !isSet(a.assignment_type)}
+              opensOn={releaseFor(a.assignment_type)}
               today={today}
               timeZone={timeZone}
               feedbackPreview={feedbackPreview.get(a.id) ?? null}
@@ -187,7 +178,7 @@ function AssignmentCard({
   assignment: a,
   eyebrow,
   accentClass,
-  locked,
+  opensOn,
   today,
   timeZone,
   feedbackPreview,
@@ -197,38 +188,30 @@ function AssignmentCard({
   today: string;
   timeZone: string;
   feedbackPreview: string | null;
-  locked?: boolean;
+  /** Set while the assignment is readable but not yet open for writing. */
+  opensOn?: AssignmentRelease | null;
   eyebrow: string;
   accentClass?: string;
 }) {
   const info = ASSIGNMENT_INFO[a.assignment_type];
   const result = resolveAssignmentResult(a);
-  if (locked) {
-    // "Not yet open" is one of the spec's own named outcome states
-    // (for-claude-code-trainee-interface.md §4) -- gated, not hidden, so a
-    // candidate sees all four exist without being able to open one before
-    // its input session has actually taught it.
-    return (
-      <div className={`sheet flex h-full flex-col rounded-[9px] border-t-[3px] border-dashed p-5 opacity-60 ${accentClass ?? "border-t-[var(--trainee-plum)]"}`}>
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
-          <h3 className="font-serif text-lg text-ink">{info.title}</h3>
-        </div>
-        <p className="mt-2 text-sm text-muted">Not yet open -- this appears once the input session that sets it has run.</p>
-      </div>
-    );
-  }
+  // §7: an unopened assignment is still a door -- the brief and the criteria
+  // are readable behind it. The dashed edge says it is not open for writing;
+  // the "opens D9" on the meta line says when it will be.
+  const notYetOpen = Boolean(opensOn);
   return (
     <Link
       href={`/portfolio/${traineeId}/assignments/${a.id}`}
-      className={`sheet trainee-hover group flex h-full flex-col rounded-[9px] border-t-[3px] p-5 ${accentClass ?? "border-t-[var(--trainee-plum)]"}`}
+      className={`sheet trainee-hover group flex h-full flex-col rounded-[9px] border-t-[3px] p-5 ${notYetOpen ? "border-dashed" : ""} ${accentClass ?? "border-t-[var(--trainee-plum)]"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
           <h3 className="font-serif text-lg text-ink">{info.title}</h3>
         </div>
-        {result === "fail" ? (
+        {notYetOpen ? (
+          <span className="pill pill-neutral">Not yet open</span>
+        ) : result === "fail" ? (
           <span className="pill pill-danger">Fail</span>
         ) : (
           <span className={`pill ${STATUS_PILL_CLASS[a.first_status]}`}>{STATUS_LABEL[a.first_status]}</span>
@@ -239,8 +222,14 @@ function AssignmentCard({
 
       <p className="mt-3 text-xs text-muted">
         {[
+          opensOn ? (
+            <span key="opens" className="font-medium text-ink">
+              Opens {opensOn.day ? `D${opensOn.day} · ` : ""}
+              {formatCalendarDate(opensOn.date)}
+            </span>
+          ) : null,
           a.due_date ? (
-            <span key="due" className={DEADLINE_URGENCY_CLASS[getDeadlineUrgency(a.due_date, a.first_submitted_at, today)]}>
+            <span key="due" className={notYetOpen ? undefined : DEADLINE_URGENCY_CLASS[getDeadlineUrgency(a.due_date, a.first_submitted_at, today)]}>
               Due {formatCalendarDate(a.due_date)}
             </span>
           ) : null,
@@ -259,8 +248,14 @@ function AssignmentCard({
       ) : null}
 
       <div className="mt-3 border-t border-border-faint pt-3">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
-        <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
+        {notYetOpen ? (
+          <p className="text-sm text-muted">Read the brief and the criteria now; writing starts on the day above.</p>
+        ) : (
+          <>
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
+            <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
+          </>
+        )}
       </div>
     </Link>
   );
