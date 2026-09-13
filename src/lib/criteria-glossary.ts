@@ -102,13 +102,47 @@ function normalize(text: string): string {
 // Whole-phrase substring match, padded with spaces so e.g. "pace" doesn't
 // fire inside "pacemaker" -- not that CELTA feedback tends to mention
 // pacemakers, but the padding costs nothing and keeps short terms honest.
-export function matchCriteriaCodes(text: string): string[] {
+//
+// `glossary` lets a centre bring its own. The built-in table above is the
+// starting point every centre gets; the Criteria glossary screen (Centre
+// management, and the MCT's hub) merges the centre's own terms over it and
+// passes the result down to the feedback form. Ramy, 13 Sep 2026 -- and this
+// file's own opening comment always said the table was "meant to grow from
+// real trainer phrasing over time".
+export function matchCriteriaCodes(text: string, glossary: Record<string, string[]> = CRITERIA_GLOSSARY): string[] {
   const normalized = normalize(text);
   const codes = new Set<string>();
-  for (const [term, termCodes] of Object.entries(CRITERIA_GLOSSARY)) {
+  for (const [term, termCodes] of Object.entries(glossary)) {
     if (normalized.includes(` ${term} `)) {
       for (const code of termCodes) codes.add(code);
     }
   }
   return [...codes];
+}
+
+/** A centre's own row: adds a term, or shadows a built-in when disabled. */
+export interface CentreGlossaryTerm {
+  term: string;
+  criteria_codes: string[];
+  enabled: boolean;
+}
+
+/**
+ * The glossary as one centre actually sees it: the built-in table, plus the
+ * centre's own terms, minus anything the centre has switched off.
+ */
+export function mergeGlossary(centreTerms: CentreGlossaryTerm[]): Record<string, string[]> {
+  const merged: Record<string, string[]> = { ...CRITERIA_GLOSSARY };
+  for (const row of centreTerms) {
+    const term = row.term.trim().toLowerCase();
+    if (!term) continue;
+    if (!row.enabled) delete merged[term];
+    else merged[term] = row.criteria_codes;
+  }
+  return merged;
+}
+
+/** True when a term is one of the built-ins rather than the centre's own. */
+export function isBuiltInTerm(term: string): boolean {
+  return Object.prototype.hasOwnProperty.call(CRITERIA_GLOSSARY, term.trim().toLowerCase());
 }

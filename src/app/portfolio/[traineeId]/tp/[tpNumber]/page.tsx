@@ -3,6 +3,7 @@ import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCentreGlossary } from "@/lib/centre-glossary";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import {
   DENSITY_TIER_LABELS,
@@ -338,6 +339,8 @@ export default async function TpDetailPage({
         .filter(Boolean)
         .join(" ")
     : null;
+
+  const glossary = await getCentreGlossary(trainee.center_id);
 
   const tier = assignment.density_tier;
   const densityLabel = DENSITY_TIER_LABELS[tier];
@@ -718,6 +721,7 @@ export default async function TpDetailPage({
                 languageAnalysis={languageAnalysis ?? null}
                 selfEvaluation={selfEvaluation ?? null}
                 autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
+                glossary={glossary}
                 lessonTitle={assignment.main_lesson_aim}
                 lessonWhen={lessonWhen}
                 level={coursebook?.level ?? null}

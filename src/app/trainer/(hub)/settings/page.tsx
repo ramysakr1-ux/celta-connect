@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
@@ -52,6 +53,24 @@ export default async function TrainerSettingsPage() {
         </p>
       )}
 
+      {/* Ramy, 13 Sep 2026 -- the glossary is editable by any tutor here, MCT
+          or ACT, and by the Centre manager from Centre management. One screen,
+          one door from each side. Unlike feedback wording above, this one is
+          shared: what you change, every tutor at the centre gets. */}
+      <div className="rounded-[14px] border border-border bg-card px-[22px] py-5">
+        <h2 className="font-serif text-lg text-ink-warm">Criteria glossary</h2>
+        <p className="mt-1 max-w-[62ch] text-sm text-muted">
+          The words that attach a CELTA 5 code to a feedback point as you type &mdash; &ldquo;rapport&rdquo; tags 1d,
+          &ldquo;gist&rdquo; tags 3a. Add your own shorthand or switch one off. Shared with every tutor at the centre,
+          so each change is recorded with your name.
+        </p>
+        <Link
+          href="/centre/criteria-glossary"
+          className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+        >
+          Open the glossary
+        </Link>
+      </div>
     </div>
   );
 }

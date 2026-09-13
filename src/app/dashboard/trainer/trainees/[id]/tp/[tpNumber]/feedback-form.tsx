@@ -85,6 +85,7 @@ export function FeedbackForm({
   lessonTitle = null,
   lessonWhen = null,
   level = null,
+  glossary,
 }: {
   planId: string;
   traineeId: string;
@@ -100,6 +101,8 @@ export function FeedbackForm({
   lessonTitle?: string | null;
   lessonWhen?: string | null;
   level?: string | null;
+  /** The centre's criteria glossary, edited from /centre/criteria-glossary. */
+  glossary?: Record<string, string[]>;
 }) {
   const locked = Boolean(feedback?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveFeedbackDraft, initialState);
@@ -186,6 +189,7 @@ export function FeedbackForm({
               onStrengthsChange={setStrengthsPlanning}
               onActionPointsChange={setActionPointsPlanning}
               autoTagEnabled={autoTagEnabled}
+              glossary={glossary}
             />
           ) : null}
 
@@ -250,6 +254,7 @@ export function FeedbackForm({
                     tpNumber={tpNumber}
                     autoTagEnabled={autoTagEnabled}
                     toneAssistEnabled={toneAssistEnabled}
+                    glossary={glossary}
                   />
                   <FeedbackPointEditor
                     label="Action points in planning"
@@ -262,6 +267,7 @@ export function FeedbackForm({
                     tpNumber={tpNumber}
                     autoTagEnabled={autoTagEnabled}
                     toneAssistEnabled={toneAssistEnabled}
+                    glossary={glossary}
                   />
                 </div>
                 <div>
@@ -277,6 +283,7 @@ export function FeedbackForm({
                     tpNumber={tpNumber}
                     autoTagEnabled={autoTagEnabled}
                     toneAssistEnabled={toneAssistEnabled}
+                    glossary={glossary}
                   />
                   <FeedbackPointEditor
                     label="Action points in teaching"
@@ -289,6 +296,7 @@ export function FeedbackForm({
                     tpNumber={tpNumber}
                     autoTagEnabled={autoTagEnabled}
                     toneAssistEnabled={toneAssistEnabled}
+                    glossary={glossary}
                   />
                 </div>
               </div>

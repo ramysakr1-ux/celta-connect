@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
+import { getCentreGlossary } from "@/lib/centre-glossary";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 
@@ -73,6 +74,8 @@ export default async function TrainerTpCardPage({
         .eq("tp_number", tpNumber)
         .order("captured_at"),
     ]);
+
+  const glossary = await getCentreGlossary(trainee.center_id);
 
   return (
     <div className="flex flex-col gap-6">
@@ -214,6 +217,7 @@ export default async function TrainerTpCardPage({
         languageAnalysis={languageAnalysis ?? null}
         selfEvaluation={selfEvaluation ?? null}
         autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
+        glossary={glossary}
         toneAssistEnabled={feedbackAssist?.enabled ?? false}
         captureNotes={captureNotes ?? []}
       />

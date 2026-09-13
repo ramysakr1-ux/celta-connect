@@ -54,6 +54,7 @@ export function PlanReview({
   onStrengthsChange,
   onActionPointsChange,
   autoTagEnabled,
+  glossary,
 }: {
   tpNumber: number;
   plan: TpPlan | null;
@@ -63,6 +64,8 @@ export function PlanReview({
   onStrengthsChange: (points: FeedbackPoint[]) => void;
   onActionPointsChange: (points: FeedbackPoint[]) => void;
   autoTagEnabled: boolean;
+  /** The centre's own glossary, built-ins merged in. */
+  glossary?: Record<string, string[]>;
 }) {
   const autosize = useAutosize();
   const [focusAnchor, setFocusAnchor] = useState<string | null>(null);
@@ -392,6 +395,7 @@ export function PlanReview({
                   autosize={autosize}
                   autoFocus={focusAnchor === note.point.anchor && !note.point.text}
                   autoTagEnabled={autoTagEnabled}
+                  glossary={glossary}
                   onChange={(patch) => updateNote(note, patch)}
                   onKind={(kind) => setKind(note, kind)}
                   onRemove={() => removeNote(note)}
@@ -480,6 +484,7 @@ function NoteCard({
   autosize,
   autoFocus,
   autoTagEnabled,
+  glossary,
   onChange,
   onKind,
   onRemove,
@@ -492,6 +497,7 @@ function NoteCard({
   autosize: (el: HTMLTextAreaElement | null) => void;
   autoFocus: boolean;
   autoTagEnabled: boolean;
+  glossary?: Record<string, string[]>;
   onChange: (patch: Partial<FeedbackPoint>) => void;
   onKind: (kind: Kind) => void;
   onRemove: () => void;
@@ -514,7 +520,7 @@ function NoteCard({
   useEffect(() => {
     if (!autoTagEnabled || !touched) return;
     const t = setTimeout(() => {
-      const matched = matchCriteriaCodes(note.point.text).filter((c) => c.startsWith("4"));
+      const matched = matchCriteriaCodes(note.point.text, glossary).filter((c) => c.startsWith("4"));
       const added = matched.filter((c) => !note.point.criteria_codes.includes(c));
       if (added.length > 0) onChange({ criteria_codes: [...note.point.criteria_codes, ...added] });
     }, 600);

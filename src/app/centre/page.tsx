@@ -437,6 +437,24 @@ export default async function CentreOverviewPage({
             </Link>
           ) : null}
 
+          {/* The criteria glossary. Shared with every tutor at the centre --
+              they reach the same screen from their own hub settings. Ramy,
+              13 Sep 2026. */}
+          {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? (
+            <Link
+              href="/centre/criteria-glossary"
+              className="admin-hover-fill card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
+            >
+              <div className="flex flex-col gap-0.5">
+                <h2 className="font-serif text-base text-ink">Criteria glossary</h2>
+                <span className="text-xs text-muted">
+                  The words that tag a CELTA 5 criterion as a tutor writes feedback
+                </span>
+              </div>
+              <span className="text-xs font-semibold text-primary">Open</span>
+            </Link>
+          ) : null}
+
           {canView(ctx.roles, "courseAdmin.view", ctx.overrides) && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"

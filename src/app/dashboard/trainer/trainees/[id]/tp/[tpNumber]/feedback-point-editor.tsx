@@ -45,6 +45,7 @@ export function FeedbackPointEditor({
   toneAssistEnabled = false,
   sectionHue,
   tpNumber,
+  glossary,
 }: {
   label: string;
   guide: string;
@@ -57,6 +58,9 @@ export function FeedbackPointEditor({
   /** Teal for strengths, gold-ink for action points. */
   sectionHue: string;
   tpNumber: number;
+  /** The centre's own glossary, built-ins merged in. Edited from the
+   *  Criteria glossary screen by any tutor or the Centre manager. */
+  glossary?: Record<string, string[]>;
 }) {
   const sections = CELTA_CRITERIA_SECTIONS.filter((s) =>
     (scope === "planning" ? PLANNING_SECTIONS : TEACHING_SECTIONS).includes(s.section)
@@ -84,6 +88,7 @@ export function FeedbackPointEditor({
             autoTagEnabled={autoTagEnabled}
             toneAssistEnabled={toneAssistEnabled}
             tpNumber={tpNumber}
+            glossary={glossary}
             onChange={(patch) => onChange(points.map((p, x) => (x === i ? { ...p, ...patch } : p)))}
             onRemove={() => onChange(points.filter((_, x) => x !== i))}
           />
@@ -109,6 +114,7 @@ function PointRow({
   autoTagEnabled,
   toneAssistEnabled,
   tpNumber,
+  glossary,
   onChange,
   onRemove,
 }: {
@@ -119,6 +125,7 @@ function PointRow({
   autoTagEnabled: boolean;
   toneAssistEnabled: boolean;
   tpNumber: number;
+  glossary?: Record<string, string[]>;
   onChange: (patch: Partial<FeedbackPoint>) => void;
   onRemove: () => void;
 }) {
@@ -152,7 +159,7 @@ function PointRow({
     if (!autoTagEnabled) return;
     const timeout = setTimeout(() => {
       const current = pointRef.current;
-      const matched = matchCriteriaCodes(current.text).filter((c) => allowedCodes.has(c));
+      const matched = matchCriteriaCodes(current.text, glossary).filter((c) => allowedCodes.has(c));
       const kept = current.criteria_codes.filter((c) => !autoAdded.current.has(c) || matched.includes(c));
       for (const code of current.criteria_codes) {
         if (autoAdded.current.has(code) && !matched.includes(code)) autoAdded.current.delete(code);
@@ -166,7 +173,7 @@ function PointRow({
       }
     }, 600);
     return () => clearTimeout(timeout);
-  }, [point.text, autoTagEnabled, allowedCodes, onChange]);
+  }, [point.text, autoTagEnabled, allowedCodes, glossary, onChange]);
 
   function toggleCriteria(code: string) {
     const has = point.criteria_codes.includes(code);

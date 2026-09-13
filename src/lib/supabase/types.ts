@@ -184,6 +184,49 @@ export interface TimeBand {
 export interface Database {
   public: {
     Tables: {
+      // migration 0298 -- the criteria auto-tagger's glossary, per centre.
+      // A row either adds a term of the centre's own or shadows a built-in
+      // from src/lib/criteria-glossary.ts (same term, enabled = false).
+      center_criteria_terms: {
+        Row: {
+          id: string;
+          center_id: string;
+          term: string;
+          criteria_codes: string[];
+          enabled: boolean;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["center_criteria_terms"]["Row"]> & {
+          center_id: string;
+          term: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["center_criteria_terms"]["Row"]>;
+        Relationships: [];
+      };
+      // The footprint. Two roles can edit the glossary (any tutor, and a
+      // Centre manager), so every change records actor, before, after, when.
+      center_criteria_term_changes: {
+        Row: {
+          id: string;
+          center_id: string;
+          term: string;
+          action: "added" | "edited" | "removed" | "disabled" | "enabled";
+          codes_before: string[] | null;
+          codes_after: string[] | null;
+          changed_by: string | null;
+          changed_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["center_criteria_term_changes"]["Row"]> & {
+          center_id: string;
+          term: string;
+          action: "added" | "edited" | "removed" | "disabled" | "enabled";
+        };
+        Update: Partial<Database["public"]["Tables"]["center_criteria_term_changes"]["Row"]>;
+        Relationships: [];
+      };
       centers: {
         Row: {
           id: string;
