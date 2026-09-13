@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { loadInputSessionComponent } from "@/app/input-sessions/registry";
+import { InputSessionAudienceProvider } from "@/components/input-sessions/audience";
 
 export default async function InputSessionPage({
   params,
@@ -21,6 +22,12 @@ export default async function InputSessionPage({
   // `back` only ever comes from a link we generate ourselves (e.g. the
   // Resource Hub's input-sessions card) -- validated as a same-origin path
   // so it can never be used to redirect a candidate off-site.
+  // The trainer notes at the foot of every session are the answer key and
+  // the script. Staff only -- a candidate opening the same page from their
+  // Resource Hub does not see the pill at all.
+  const staff =
+    session.profile.role === "trainer" || session.profile.role === "admin" || session.profile.role === "platform_owner";
+
   const backHref = back && back.startsWith("/") && !back.startsWith("//") ? back : "/input-sessions";
   const backLabel = backHref === "/input-sessions" ? "Input sessions" : "Resource hub";
 
@@ -32,7 +39,9 @@ export default async function InputSessionPage({
           this page had never picked up. */}
       <BackLink href={backHref} label={backLabel} />
       <div className="mt-5">
-        <Session />
+        <InputSessionAudienceProvider staff={staff}>
+          <Session />
+        </InputSessionAudienceProvider>
       </div>
     </div>
   );

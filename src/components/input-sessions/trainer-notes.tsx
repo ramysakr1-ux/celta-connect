@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useIsStaffReader } from "@/components/input-sessions/audience";
 
 export interface TrainerNote {
   label: string;
@@ -12,6 +13,9 @@ export interface TrainerNote {
 // content if someone screen-shares mid-reveal.
 export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; runningNote?: string }) {
   const [open, setOpen] = useState(false);
+  // Not for candidates -- these are the answers. See audience.tsx.
+  const staff = useIsStaffReader();
+  if (!staff) return null;
 
   if (!open) {
     return (
