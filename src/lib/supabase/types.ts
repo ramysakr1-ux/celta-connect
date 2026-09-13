@@ -1325,6 +1325,10 @@ export interface Database {
           // Plagiarism Reflection for. See migration 0063.
           open_case_id: string | null;
           reflection_for_case_id: string | null;
+          // Migration 0300 -- which published version of the brief this
+          // submission answered. Stamped at submit; null on a draft, which
+          // follows whatever the brief says now.
+          template_version_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1339,6 +1343,30 @@ export interface Database {
       // Migration 0299 -- a submission sent back without being marked: a
       // wrong file, a missing appendix, a declaration problem. Spends no
       // resubmission, and leaves a footprint.
+      // Migration 0300 -- every published version of a brief, kept. A
+      // submitted assignment points at the one it answered, so editing a
+      // brief can never change what a candidate was asked.
+      assignment_template_versions: {
+        Row: {
+          id: string;
+          template_id: string;
+          center_id: string;
+          assignment_type: AssignmentTypeValue;
+          version: number;
+          sections: TemplateSection[];
+          format: "prose" | "structured";
+          published_at: string;
+          published_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assignment_template_versions"]["Row"]> & {
+          template_id: string;
+          center_id: string;
+          assignment_type: AssignmentTypeValue;
+          version: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["assignment_template_versions"]["Row"]>;
+        Relationships: [];
+      };
       assignment_returns: {
         Row: {
           id: string;

@@ -9,6 +9,7 @@ import {
   updateAssignmentTemplateSections,
 } from "@/app/dashboard/admin/assignment-briefs/actions";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { countSubmissionsAgainstBrief } from "@/lib/assignment-brief";
 import { holdsCentre } from "@/lib/branch-scope";
 
 export default async function AdminAssignmentBriefDetailPage({
@@ -45,11 +46,28 @@ export default async function AdminAssignmentBriefDetailPage({
       ? `The Handbook needs at least two of the four briefs in continuous prose -- this centre currently has ${proseCount}.`
       : null;
 
+  // What an editor is about to leave behind. A brief edit is versioned now
+  // (migration 0300), so this is information rather than a warning -- but a
+  // tutor changing the question mid-course should see who has already
+  // answered the old one.
+  const pinnedSubmissions = await countSubmissionsAgainstBrief(supabase, admin.center_id, template.assignment_type);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">{ASSIGNMENT_INFO[template.assignment_type].title}</h1>
         <p className="mt-2 text-muted">Status: {template.generation_status}</p>
+        {pinnedSubmissions > 0 ? (
+          <p
+            className="mt-2 rounded-[6px] px-3 py-2 text-sm"
+            style={{ background: "color-mix(in oklab, oklch(44% 0.095 68) 10%, transparent)", color: "oklch(44% 0.095 68)" }}
+          >
+            {pinnedSubmissions === 1 ? "One candidate has" : `${pinnedSubmissions} candidates have`} already submitted
+            against this brief. Editing the sections publishes a NEW version: what they handed in keeps the brief they
+            answered, and anyone still writing moves to the new one with their own words carried across.
+          </p>
+        ) : null}
+
         {publish_error === "format_count" ? (
           <p className="mt-2 rounded-[6px] border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">
             Can&apos;t publish -- the centre&apos;s four briefs need at least two in continuous prose. Adjust a

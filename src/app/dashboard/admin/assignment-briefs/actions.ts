@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/auth/require-capability";
 import { createClient } from "@/lib/supabase/server";
 import { upsertAssignmentTemplateRecord } from "@/lib/assignment-templates/upload";
+import { publishBriefVersion } from "@/lib/assignment-brief";
 import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
 
 export interface FormState {
@@ -35,7 +36,7 @@ export async function updateAssignmentTemplateSections(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireCapability("courseAdmin.settings");
+  const admin = await requireCapability("courseAdmin.settings");
 
   const templateId = formData.get("template_id");
   const sectionsRaw = formData.get("sections");
@@ -56,7 +57,28 @@ export async function updateAssignmentTemplateSections(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("assignment_templates").update({ sections, format }).eq("id", templateId);
+  // A brief is VERSIONED, not overwritten. Editing sections changes their
+  // keys, and assignment_section_responses is keyed by section_key -- so
+  // before migration 0300 an edit silently orphaned every answer and every
+  // tutor comment already written against the old keys. Submitted work now
+  // keeps the version it answered; drafts are carried across so nothing the
+  // candidate typed is lost. See src/lib/assignment-brief.ts.
+  const { data: template } = await supabase
+    .from("assignment_templates")
+    .select("center_id, assignment_type")
+    .eq("id", templateId)
+    .maybeSingle();
+  if (!template) return { error: "That brief no longer exists." };
+
+  const published = await publishBriefVersion(supabase, {
+    templateId,
+    centerId: template.center_id,
+    assignmentType: template.assignment_type,
+    sections,
+    format,
+    publishedBy: admin.id,
+  });
+  const error = published.error ? { message: published.error } : null;
 
   if (error) {
     // The message below is what the person reads; this is what we read.

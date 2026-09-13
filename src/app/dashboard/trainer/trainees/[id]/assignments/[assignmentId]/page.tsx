@@ -10,6 +10,7 @@ import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assi
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { isAssignmentWarningTriggered, buildAssignmentWarningDraft } from "@/lib/letters/assignment-warning";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
+import { resolveBrief } from "@/lib/assignment-brief";
 import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
 import { AssignmentWarningLetterSection } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/assignment-warning-letter-section";
 
@@ -34,13 +35,7 @@ export default async function TrainerAssignmentReviewPage({
 
   const criteria = await getAssignmentCriteria(supabase, trainer.center_id, assignment.assignment_type);
 
-  const { data: template } = await supabase
-    .from("assignment_templates")
-    .select("*")
-    .eq("center_id", trainer.center_id)
-    .eq("assignment_type", assignment.assignment_type)
-    .not("published_at", "is", null)
-    .maybeSingle();
+  const template = await resolveBrief(supabase, assignment, trainer.center_id);
 
   const { data: responses } = await supabase
     .from("assignment_section_responses")

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
+import { resolveBrief } from "@/lib/assignment-brief";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
@@ -56,13 +57,10 @@ export async function GET(
   const [{ data: course }, { data: center }, { data: template }, { data: responses }, { data: markers }] = await Promise.all([
     supabase.from("courses").select("name, start_date, end_date").eq("id", trainee.course_id).maybeSingle(),
     supabase.from("centers").select("name, logo_url").eq("id", trainee.center_id).maybeSingle(),
-    supabase
-      .from("assignment_templates")
-      .select("sections")
-      .eq("center_id", trainee.center_id)
-      .eq("assignment_type", assignment.assignment_type)
-      .not("published_at", "is", null)
-      .maybeSingle(),
+    // The version the candidate answered (migration 0300). This is the
+    // document that goes in the portfolio, so it has to carry the brief they
+    // were actually set, not whatever the centre's brief says today.
+    resolveBrief(supabase, assignment, trainee.center_id).then((b) => ({ data: b })),
     supabase.from("assignment_section_responses").select("*").eq("assignment_id", assignmentId),
     admin
       .from("profiles")

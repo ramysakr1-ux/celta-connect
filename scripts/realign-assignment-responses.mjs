@@ -1,5 +1,10 @@
 // Re-keys a submission's answers onto its brief's CURRENT sections.
 //
+// SUPERSEDED by migration 0300, which versions a brief and pins a submission
+// to the version it answered -- so an edit can no longer orphan anything.
+// Kept for the data it already repaired (31 rows, 13 Sep 2026) and as the
+// recovery path if a row is ever found unpinned and misaligned.
+//
 // Changing a published brief's sections changes their KEYS, and
 // assignment_section_responses is keyed by section_key -- so every answer and
 // every tutor comment already written against the old keys is orphaned. The

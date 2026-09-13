@@ -136,6 +136,38 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
   });
   if (error) return { error: error.message };
 
+  // Stamp which published version of the brief this answered (migration
+  // 0300). Done here rather than inside submit_assignment_round because the
+  // RPC has no idea which centre's template applies -- and because a failure
+  // to stamp must never undo a submission that has already succeeded.
+  try {
+    const { data: a } = await supabase
+      .from("assignments")
+      .select("assignment_type, template_version_id")
+      .eq("id", assignmentId)
+      .maybeSingle();
+    if (a && !a.template_version_id) {
+      const { data: tmpl } = await supabase
+        .from("assignment_templates")
+        .select("id")
+        .eq("center_id", trainee.center_id)
+        .eq("assignment_type", a.assignment_type)
+        .maybeSingle();
+      if (tmpl) {
+        const { data: version } = await supabase
+          .from("assignment_template_versions")
+          .select("id")
+          .eq("template_id", tmpl.id)
+          .order("version", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (version) await supabase.from("assignments").update({ template_version_id: version.id }).eq("id", assignmentId);
+      }
+    }
+  } catch (stampError) {
+    console.error("Could not stamp the brief version for assignment", assignmentId, stampError);
+  }
+
   // build-spec.md: the scanner "runs automatically on submission, visible
   // to tutors only". A scan failure must never block the trainee's
   // submission, which already succeeded above -- log and move on.

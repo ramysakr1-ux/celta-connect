@@ -18,6 +18,7 @@ import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignme
 import { isCourseDayReached } from "@/lib/course-day";
 import { getCourseReleaseClock } from "@/lib/assignment-release";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
+import { resolveBrief } from "@/lib/assignment-brief";
 import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -58,13 +59,10 @@ export default async function AssignmentDetailPage({
 
   const criteria = await getAssignmentCriteria(supabase, trainee.center_id, assignment.assignment_type);
 
-  const { data: template } = await supabase
-    .from("assignment_templates")
-    .select("*")
-    .eq("center_id", trainee.center_id)
-    .eq("assignment_type", assignment.assignment_type)
-    .not("published_at", "is", null)
-    .maybeSingle();
+  // The brief this assignment is read against: the version the candidate
+  // answered once it is submitted, the current one while it is still a draft
+  // (migration 0300 / src/lib/assignment-brief.ts).
+  const template = await resolveBrief(supabase, assignment, trainee.center_id);
 
   const { data: responses } = await supabase
     .from("assignment_section_responses")
