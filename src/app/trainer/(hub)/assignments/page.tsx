@@ -208,7 +208,13 @@ export default async function TrainerAssignmentsBoardPage() {
           const closed = ofType.filter((d) => ["pass", "pass_resub", "fail_resub"].includes(d.cell.state)).length;
           const withTutors = ofType.filter((d) => ["awaiting", "draft", "second_pending", "settle", "resub_in"].includes(d.cell.state)).length;
           const writing = Math.max(0, ofType.length - closed - withTutors);
-          const dueDay = clock.dayOf(ofType[0]?.assignment.due_date ?? null);
+          // Deadlines can differ within one assignment (the demo's LRT is due
+          // a day later for one TP group), so the strip names the first.
+          const firstDue = ofType
+            .map((d) => d.assignment.due_date)
+            .filter((x): x is string => Boolean(x))
+            .sort()[0];
+          const dueDay = clock.dayOf(firstDue ?? null);
           return (
             <div
               key={type}

@@ -228,16 +228,22 @@ export function buildSample(
   cohortSize: number
 ): SampleRow[] {
   const required = doubleMarkingPerAssignment(cohortSize);
+  // What counts as double-marked has to match what the assessor's own record
+  // at /assessor/double-marking counts, or the same course reads four on one
+  // screen and zero on the other. Both readings of 9.2.3 are valid and both
+  // are in the data: a COUNTERSIGN (a second tutor opens the marked work,
+  // checks the grading and comments, and signs) is complete the moment it is
+  // signed; a BLIND second mark -- an independent set of marks -- is complete
+  // only once the two tutors have settled and both initialled.
+  const isSettled = (a: AssignmentRow) => {
+    if (!a.second_marker_recorded_at) return false;
+    if (a.second_marks_recorded_at) return Boolean(a.first_initialled_at && a.second_initialled_at);
+    return true;
+  };
   return types.map(({ type, title }) => {
     const ofType = rows.filter((r) => r.assignment.assignment_type === type);
-    const settled = ofType.filter(
-      (r) => r.assignment.second_marker_recorded_at && r.assignment.first_initialled_at && r.assignment.second_initialled_at
-    ).length;
-    const inProgress = ofType.filter(
-      (r) =>
-        r.cell.inSample &&
-        !(r.assignment.second_marker_recorded_at && r.assignment.first_initialled_at && r.assignment.second_initialled_at)
-    ).length;
+    const settled = ofType.filter((r) => isSettled(r.assignment)).length;
+    const inProgress = ofType.filter((r) => r.cell.inSample && !isSettled(r.assignment)).length;
     const fails = ofType.filter((r) => r.cell.state === "fail_resub" || r.cell.state === "resub_needed");
     const failsOutsideSample = fails.filter((r) => !r.assignment.second_marker_recorded_at).length;
     return { assignmentType: type, title, settled, inProgress, required, failsOutsideSample, anyFails: fails.length > 0 };
