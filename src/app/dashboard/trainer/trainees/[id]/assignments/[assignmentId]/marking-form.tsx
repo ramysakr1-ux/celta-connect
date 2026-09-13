@@ -158,7 +158,6 @@ export function AssignmentMarkingForm({
   inSample,
   secondMarkerOptions,
   submittedLabel,
-  candidateHref,
   appendices = [],
 }: {
   assignmentId: string;
@@ -189,7 +188,6 @@ export function AssignmentMarkingForm({
   inSample: boolean;
   secondMarkerOptions: { id: string; full_name: string }[];
   submittedLabel: string;
-  candidateHref: string;
   /** Migration 0302 -- what the candidate attached for this round. */
   appendices?: MarkingAppendix[];
 }) {
@@ -349,19 +347,7 @@ export function AssignmentMarkingForm({
               {title} <i style={{ opacity: 0.75 }}>for</i> {candidateName}
             </>
           }
-          status={
-            <span className="flex items-center gap-2.5">
-              <a
-                href={candidateHref}
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontSize: 11.5, color: "oklch(86% 0.04 195)", textDecoration: "underline" }}
-              >
-                Candidate&apos;s view
-              </a>
-              <span style={{ fontSize: 11.5, color: "oklch(86% 0.04 195)" }}>{stagePill}</span>
-            </span>
-          }
+          status={<span style={{ fontSize: 11.5, color: "oklch(86% 0.04 195)" }}>{stagePill}</span>}
           showDictate={!closed}
         />
 

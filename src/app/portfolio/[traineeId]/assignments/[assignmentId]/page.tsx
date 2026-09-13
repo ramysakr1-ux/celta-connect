@@ -1,44 +1,36 @@
-import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { BackLink } from "@/components/back-link";
 import { AssignmentResultSignature } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/result-signature";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { ASSIGNMENT_INFO, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
-import { SecondMarkingPanel } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/second-marking-panel";
 import { formatCalendarDate } from "@/lib/format-date";
 import { AssignmentAuthoringForm } from "@/app/dashboard/trainee/assignments/[assignmentId]/assignment-form";
-import { AssignmentMarkingForm, type MarkingStage } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/marking-form";
-import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
-import { FindingsBand } from "@/app/trainer/(hub)/malpractice/findings-band";
-import { RaiseConcernForm } from "@/app/trainer/(hub)/malpractice/raise-concern-form";
 import { FolPanel } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-panel";
-import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-cross-check";
 import { isCourseDayReached } from "@/lib/course-day";
 import { getCourseReleaseClock } from "@/lib/assignment-release";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { resolveBrief } from "@/lib/assignment-brief";
-import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
-// §8 detail -- trainee viewers get the real editable pipeline
-// (AssignmentAuthoringForm, exactly as built for
-// /dashboard/trainee/assignments/[assignmentId] -- same tables, same
-// Server Actions). Staff viewers get the due-date editor plus the real
-// AssignmentReviewForm for grading, mirroring
-// /dashboard/trainer/trainees/[id]/assignments/[assignmentId].
+// The candidate's document, and the assessor's read-only record of it.
+//
+// It used to be the tutor's marking room as well, which meant a tutor opened
+// an assignment to mark and landed inside the candidate's portfolio shell --
+// her sidebar, her tabs, her notebook -- with a "?preview=trainee" toggle
+// bolted on to get back out. Ramy, 14 Sep 2026: "I only need to see the
+// assignment that I am marking. I don't need to see Amara's view."
+// Marking is /trainer/assignments/[assignmentId] now; a tutor who reaches
+// this URL is sent there.
 export default async function AssignmentDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ traineeId: string; assignmentId: string }>;
-  searchParams: Promise<{ preview?: string }>;
 }) {
   const { traineeId, assignmentId } = await params;
-  const { preview } = await searchParams;
   const session = await getPortfolioViewer();
   const viewer = session?.profile ?? null;
   // Raw role check for the access gate -- see the TP detail page's
@@ -47,8 +39,10 @@ export default async function AssignmentDetailPage({
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
   if (viewer && !isRealStaff && viewer.id !== traineeId) notFound();
-  const isEditableStaff = isRealStaff && preview !== "trainee";
-  const isStaff = isEditableStaff || Boolean(assessorCourseId);
+  if (isRealStaff) redirect(`/trainer/assignments/${assignmentId}`);
+  // Past the redirect there are exactly two readers left: the candidate
+  // themselves, and an assessor on a token. Neither marks anything.
+  const isStaff = Boolean(assessorCourseId);
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase.from("profiles").select("id, full_name, center_id, course_id").eq("id", traineeId).maybeSingle();
@@ -70,23 +64,6 @@ export default async function AssignmentDetailPage({
     .select("*")
     .eq("assignment_id", assignmentId);
 
-  // Who marked and who second-marked, for the double-marking panel.
-  const markerIds = [assignment.marker_id, assignment.second_marker_id].filter((x): x is string => Boolean(x));
-  const { data: markerRows } =
-    isEditableStaff && markerIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", markerIds) : { data: [] };
-  const markerName = new Map((markerRows ?? []).map((m) => [m.id, m.full_name]));
-  const result = resolveAssignmentResult(assignment);
-
-  const { data: secondMarkerRows } = isEditableStaff && trainee.course_id
-    ? await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("course_id", trainee.course_id)
-        .eq("role", "trainer")
-        .neq("id", viewer!.id)
-        .order("full_name")
-    : { data: [] };
-
   let round: "first" | "resubmission";
   let locked: boolean;
   if (assignment.first_status === "not_submitted") {
@@ -100,23 +77,6 @@ export default async function AssignmentDetailPage({
     locked = true;
   }
 
-  const { data: findingRows } = isEditableStaff
-    ? await supabase
-        .from("plagiarism_scanner_findings")
-        .select("id, section_key, matched_text, match_length, source_type, source_course_label, reviewed_at")
-        .eq("assignment_id", assignmentId)
-        .eq("round", round)
-    : { data: [] };
-  const findings = (findingRows ?? []).map((f) => ({
-    id: f.id,
-    sectionKey: f.section_key,
-    matchedText: f.matched_text,
-    matchLength: f.match_length,
-    sourceType: f.source_type,
-    sourceCourseLabel: f.source_course_label,
-    reviewedAt: f.reviewed_at,
-  }));
-
   const isFol = assignment.assignment_type === "Focus on Learner";
   let folData: {
     learners: { id: string; name: string }[];
@@ -124,7 +84,6 @@ export default async function AssignmentDetailPage({
     myClaims: { id: string; problem_type: "grammar" | "pronunciation"; problem_description: string; source: "pooled_log" | "signup_recording"; claimed_at: string }[];
     day10Reached: boolean;
     defaultTpClass: string;
-    allClaimsForCrossCheck: { id: string; candidate_id: string; problem_type: string; problem_description: string; source: string }[];
   } | null = null;
 
   if (isFol && trainee.course_id) {
@@ -150,14 +109,6 @@ export default async function AssignmentDetailPage({
     ]);
 
     const learnerNameById = new Map((learnerRows ?? []).map((l) => [l.id, l.name]));
-    const { data: allClaims } = isEditableStaff
-      ? await supabase
-          .from("fol_claims")
-          .select("id, candidate_id, problem_type, problem_description, source")
-          .eq("course_id", trainee.course_id)
-          .eq("candidate_id", traineeId)
-      : { data: [] };
-
     folData = {
       learners: learnerRows ?? [],
       poolEntries: (logRows ?? []).map((r) => ({
@@ -172,7 +123,6 @@ export default async function AssignmentDetailPage({
       myClaims: myClaimRows ?? [],
       day10Reached,
       defaultTpClass: (subgroupRow?.course_subgroups as unknown as { name: string } | null)?.name ?? "",
-      allClaimsForCrossCheck: allClaims ?? [],
     };
   }
 
@@ -212,32 +162,9 @@ export default async function AssignmentDetailPage({
   const dueDay = clock?.dayOf(assignment.due_date) ?? null;
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
 
-  // Which stage of the marking cycle this is (tutor assignments handoff 2a).
-  // A blind second marker sees the blind stage until they have recorded their
-  // own marks -- that is what makes it blind.
-  const markingStage: MarkingStage =
-    assignment.first_status === "approved" || assignment.resubmission_status === "approved" || assignment.final_grade === "Fail"
-      ? "closed"
-      : assignment.second_marks_recorded_at && assignment.second_mark_round === round
-        ? "agree"
-        : assignment.second_marker_id === viewer?.id && assignment.marker_id !== viewer?.id
-          ? "second"
-          : round === "resubmission"
-            ? "round2"
-            : "round1";
-
-  // markerName is already resolved above, for the double-marking panel.
-  const markerNames = markerName;
+  const result = resolveAssignmentResult(assignment);
   const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";
 
-  // connect-spec-corrections-for-claude-code.md item 8, soft flags 4-5.
-  const aiDeclared = round === "resubmission" ? assignment.resubmission_ai_declared : assignment.first_ai_declared;
-  const aiConversationUrl = round === "resubmission" ? assignment.resubmission_ai_conversation_url : assignment.first_ai_conversation_url;
-  const fullSubmittedText = (responses ?? [])
-    .map((r) => (round === "resubmission" ? r.resubmission_response : r.first_response) ?? "")
-    .join("\n\n");
-  const aiCitationMismatch = checkAiCitationShape(fullSubmittedText, aiDeclared);
-  const registerNote = round === "resubmission" ? assignment.resubmission_register_note : assignment.first_register_note;
 
   return (
     <div className="flex flex-col gap-4">
@@ -288,145 +215,18 @@ export default async function AssignmentDetailPage({
         )}
       </div>
 
-      {isEditableStaff ? (
-        <div className="sheet">
-          <form action={updateAssignmentDueDate} className="flex items-end gap-3">
-            <input type="hidden" name="assignment_id" value={assignmentId} />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm text-muted">Deadline</label>
-              <input
-                type="date"
-                name="due_date"
-                defaultValue={assignment.due_date ?? ""}
-                className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
-              />
-            </div>
-            <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover-fill">
-              Save deadline
-            </button>
-          </form>
-        </div>
-      ) : assessorCourseId && assignment.due_date ? (
+      {assessorCourseId && assignment.due_date ? (
         <p className="text-sm text-muted">Due {formatCalendarDate(assignment.due_date, { year: "numeric" })}</p>
       ) : null}
 
-      {isEditableStaff ? (
-        <SecondMarkingPanel
-          assignmentId={assignmentId}
-          traineeId={traineeId}
-          viewerId={viewer!.id}
-          markerId={assignment.marker_id}
-          markerName={assignment.marker_id ? (markerName.get(assignment.marker_id) ?? null) : null}
-          secondMarkerId={assignment.second_marker_id}
-          secondMarkerName={assignment.second_marker_id ? (markerName.get(assignment.second_marker_id) ?? null) : null}
-          secondMarkerRecordedAt={assignment.second_marker_recorded_at}
-          decided={result === "pass_first" || result === "pass_resub" || result === "resubmission_required" || result === "fail"}
-          failed={result === "fail"}
-          timeZone={timeZone}
-          garnet
-        />
-      ) : null}
-
       {!template ? (
-        // Decorative teal/garnet alternation against the deadline-editor
-        // sheet above -- only actually two stacked plain sheets when
-        // isEditableStaff (that sheet only renders then); a trainee/assessor
-        // view has just this one card, so it stays plain teal.
-        <div className={`sheet p-6 ${isEditableStaff ? "sheet-garnet" : ""}`}>
+        <div className="sheet p-6">
           <p className="text-muted">
             {isStaff
               ? "This assignment's brief hasn't been published yet."
               : "This assignment's brief hasn't been published yet -- check back soon."}
           </p>
         </div>
-      ) : isEditableStaff && assignment.open_case_id ? (
-        <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
-          <p className="pill pill-warning w-fit">Marking paused</p>
-          <p className="text-muted">
-            A malpractice case is open on this submission. No outcome can be recorded until it&apos;s decided.
-          </p>
-          <Link
-            href={`/trainer/malpractice/${assignment.open_case_id}`}
-            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
-          >
-            Open the case →
-          </Link>
-        </div>
-      ) : isEditableStaff ? (
-        // "Nothing to review" only when there is genuinely nothing: the
-        // candidate has not handed this round in. A CLOSED assignment --
-        // passed, or failed on resubmission -- has been submitted and marked,
-        // and a tutor opening it should see the finished document with the
-        // marks and comments on it, read-only. It was showing them an empty
-        // panel saying the work had not been submitted, which made the closed
-        // stage of the marking screen unreachable (found 13 Sep 2026,
-        // screenshotting the end state).
-        roundStatus === "not_submitted" || roundStatus === "resubmission_required" ? (
-          <div className="sheet sheet-garnet p-6">
-            <p className="text-muted">Not yet submitted for this round -- nothing to review until the trainee submits.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <div className="sheet sheet-garnet flex flex-col gap-1">
-              <p className="text-sm text-ink">
-                AI declaration: {aiDeclared ? "used" : "not used"}
-                {aiDeclared && aiConversationUrl ? (
-                  <>
-                    {" -- "}
-                    <a href={aiConversationUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                      conversation link
-                    </a>
-                  </>
-                ) : null}
-              </p>
-              {aiCitationMismatch ? <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
-              {registerNote ? <p className="text-sm text-status-warning-text">Language pre-check: {registerNote}</p> : null}
-            </div>
-            {isFol && folData ? <FolCrossCheck claims={folData.allClaimsForCrossCheck} poolEntries={folData.poolEntries} /> : null}
-            <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />
-            <AssignmentMarkingForm
-              assignmentId={assignmentId}
-              candidateName={trainee.full_name}
-              title={ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type}
-              sections={template.sections}
-              responses={responses ?? []}
-              criteria={criteria.map((c) => ({ key: c.key, text: c.text }))}
-              round={round}
-              stage={markingStage}
-              sanction={assignment.assignment_type === "Plagiarism Reflection"}
-              format={template.format}
-              intro={ASSIGNMENT_INFO[assignment.assignment_type]?.description ?? null}
-              marks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
-              secondMarks={assignment.second_criteria_marks ?? {}}
-              overallComment={round === "resubmission" ? assignment.resubmission_overall_comment : assignment.first_overall_comment}
-              secondOverallComment={assignment.second_overall_comment}
-              priorOverallComment={round === "resubmission" ? assignment.first_overall_comment : null}
-              firstMarkerName={markerNames.get(assignment.marker_id ?? "") ?? null}
-              secondMarkerName={markerNames.get(assignment.second_marker_id ?? "") ?? null}
-              viewerIsFirstMarker={assignment.marker_id === viewer?.id}
-              viewerIsSecondMarker={assignment.second_marker_id === viewer?.id}
-              firstInitialledAt={assignment.first_initialled_at}
-              secondInitialledAt={assignment.second_initialled_at}
-              inSample={assignment.in_double_marking_sample}
-              appendices={appendicesForRound(round)}
-              secondMarkerOptions={secondMarkerRows ?? []}
-              submittedLabel={
-                assignment.first_submitted_at
-                  ? `Submitted ${formatCalendarDate((round === "resubmission" ? assignment.resubmission_submitted_at : assignment.first_submitted_at)?.slice(0, 10) ?? null)}`
-                  : "Submitted"
-              }
-              candidateHref={`/portfolio/${traineeId}/assignments/${assignmentId}?preview=trainee`}
-            />
-            {assignment.assignment_type !== "Plagiarism Reflection" ? (
-              <RaiseConcernForm
-                assignmentId={assignmentId}
-                round={round}
-                ownSubmissionLabel={`${trainee.full_name} — ${ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type} (${round === "first" ? "1st submission" : "resubmission"})`}
-                aiDeclared={aiDeclared}
-              />
-            ) : null}
-          </div>
-        )
       ) : assessorCourseId ? (
         assignment.first_status === "not_submitted" ? (
           <div className="sheet p-6">

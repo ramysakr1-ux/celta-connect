@@ -330,6 +330,7 @@ export async function recordSecondMarking(formData: FormData): Promise<void> {
 
   revalidatePath(`/dashboard/trainer/trainees`);
   if (typeof traineeId === "string") revalidatePath(`/portfolio/${traineeId}/assignments/${assignmentId}`);
+  revalidatePath(`/trainer/assignments/${assignmentId}`);
   revalidatePath(`/trainer`);
   revalidatePath(`/assessor`);
 }
@@ -379,6 +380,7 @@ export async function saveMarkingDraft(_prevState: FormState, formData: FormData
   }
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
+  revalidatePath("/trainer/assignments/[assignmentId]", "page");
   return { error: null };
 }
 
@@ -406,6 +408,7 @@ export async function sendToSecondMarker(_prevState: FormState, formData: FormDa
     return { error: "Could not send it on. Try again." };
   }
   revalidatePath("/trainer/assignments");
+  revalidatePath("/trainer/assignments/[assignmentId]", "page");
   return { error: null };
 }
 
@@ -444,6 +447,7 @@ export async function recordBlindSecondMark(_prevState: FormState, formData: For
   }
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
+  revalidatePath("/trainer/assignments/[assignmentId]", "page");
   return { error: null };
 }
 
@@ -487,6 +491,7 @@ export async function settleAndInitial(_prevState: FormState, formData: FormData
   }
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
+  revalidatePath("/trainer/assignments/[assignmentId]", "page");
   return { error: null };
 }
 
@@ -545,5 +550,6 @@ export async function returnUnmarked(_prevState: FormState, formData: FormData):
 
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
+  revalidatePath("/trainer/assignments/[assignmentId]", "page");
   return { error: null };
 }

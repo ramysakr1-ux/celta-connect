@@ -99,7 +99,7 @@ export function AssignmentsSummary({
               return (
                 <tr key={a.id}>
                   <td className="text-ink">
-                    <Link href={`/portfolio/${traineeId}/assignments/${a.id}`} className="hover:text-primary">
+                    <Link href={`/trainer/assignments/${a.id}`} className="hover:text-primary">
                       {ASSIGNMENT_INFO[a.assignment_type].title}
                     </Link>
                   </td>

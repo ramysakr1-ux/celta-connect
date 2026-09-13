@@ -34,7 +34,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-ink">{assignment.assignment_type}</h3>
         <Link
-          href={`/dashboard/trainer/trainees/${assignment.trainee_id}/assignments/${assignment.id}`}
+          href={`/trainer/assignments/${assignment.id}`}
           className="text-sm text-primary hover:underline"
         >
           Review responses
