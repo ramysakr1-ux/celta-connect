@@ -2671,7 +2671,6 @@ async function main() {
     { d: 2, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 2, b: 9, type: "assignment_due", title: "Assignment 3 (Skills) Q&A", tag: null, detail: "Released the evening before", linked: "Skills", tp: null },
     { d: 3, b: 1, type: "tp", title: "TP1 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 2, type: "tp", title: "TP1 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 3, type: "tp", title: "TP1 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 1 },
@@ -2680,7 +2679,20 @@ async function main() {
     { d: 3, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 3, b: 7, type: "input_session", title: "Eliciting and concept checking", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 3, b: 8, type: "input_session", title: "Teaching vocabulary", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 3, b: 9, type: "assignment_due", title: "Assignment 2 (LRT) Q&A", tag: null, detail: "Released the evening before", linked: "LRT", tp: null },
+    // Which day each assignment is SET is what opens it for writing
+    // (src/lib/assignment-release.ts reads the earliest timetabled event
+    // carrying that linked_assignment_type). The schedule is Day 1 / 4 / 9 /
+    // 14 -- for-claude-code-assignment-schedule-rule.md, and Handbook 9.1.4's
+    // "centres should schedule written assignments ... in such a way that
+    // they do not create an extra workload for candidates during intensive TP
+    // blocks."
+    //
+    // The demo used to set three of the four in the first three days, off
+    // "Q&A" rows captioned "Released the evening before" -- a Q&A about an
+    // assignment nobody had been given. Corrected 13 Sep 2026 on Ramy's
+    // instruction. Untimed admin rows (b: 0), the same column the "due" rows
+    // sit in, so no booked band is displaced.
+    { d: 4, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) set", tag: null, detail: "The assignment session", linked: "Skills", tp: null },
     { d: 4, b: 1, type: "tp", title: "TP2 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 4, b: 2, type: "tp", title: "TP2 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 4, b: 3, type: "tp", title: "TP2 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 2 },
@@ -2729,6 +2741,7 @@ async function main() {
     { d: 8, b: 7, type: "input_session", title: "Giving feedback on tasks", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 8, b: 8, type: "input_session", title: "Error correction", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 8, b: 9, type: "milestone", title: "Writing Stage 2 report \u00b7 ABC", tag: "individual", detail: "Own time", linked: null, tp: null },
+    { d: 9, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) set", tag: null, detail: "The assignment session", linked: "LRT", tp: null },
     { d: 9, b: 1, type: "tp", title: "TP4 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 4 },
     { d: 9, b: 2, type: "tp", title: "TP4 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 4 },
     { d: 9, b: 3, type: "tp", title: "TP4 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 4 },
@@ -2776,6 +2789,7 @@ async function main() {
     { d: 13, b: 7, type: "input_session", title: "Lesson framework", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 13, b: 8, type: "input_session", title: "Teaching listening", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 13, b: 9, type: "input_session", title: "Syllabus planning \u00b7 ABC", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 14, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) set", tag: null, detail: "The assignment session", linked: "LfC", tp: null },
     { d: 14, b: 1, type: "tp", title: "TP6 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 14, b: 2, type: "tp", title: "TP6 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 14, b: 3, type: "tp", title: "TP6 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 6 },
