@@ -34,6 +34,7 @@ import { autosizeOnInput, useAutosize } from "@/lib/autosize";
 import { formatCalendarDate } from "@/lib/format-date";
 import { bulletListProps } from "@/lib/bullet-list";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
+import { AppendicesBlock, type AppendixRow } from "@/app/dashboard/trainee/assignments/[assignmentId]/appendices-block";
 
 // design_handoff_assignments (v1), 13 Sep 2026 — the candidate's assignment
 // writer, rebuilt as a document in the same visual system as the v3 lesson
@@ -101,6 +102,9 @@ export function AssignmentAuthoringForm({
   intro = null,
   scopeNote = null,
   appendixHint = null,
+  appendices = [],
+  centerId = null,
+  traineeId = null,
   wordMin = 750,
   wordMax = 1000,
   format = "prose",
@@ -126,6 +130,11 @@ export function AssignmentAuthoringForm({
   /** The reflection's "what this does and does not affect" paragraph. */
   scopeNote?: string | null;
   appendixHint?: string | null;
+  /** Migration 0302 -- what the candidate has attached for this round. */
+  appendices?: AppendixRow[];
+  /** Both are needed to build the storage path the bucket policies read. */
+  centerId?: string | null;
+  traineeId?: string | null;
   wordMin?: number;
   wordMax?: number;
   format?: "structured" | "prose";
@@ -614,9 +623,21 @@ export function AssignmentAuthoringForm({
               </div>
               <div className="flex flex-col gap-1.5">
                 <MarkerLabel colour={TEAL} label="Appendices" />
-                <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
-                  {appendixHint ?? "Anything you attach sits here. Not counted in the word count."}
-                </p>
+                {centerId && traineeId ? (
+                  <AppendicesBlock
+                    assignmentId={assignmentId}
+                    round={round}
+                    centerId={centerId}
+                    traineeId={traineeId}
+                    appendices={appendices}
+                    readOnly={readOnly}
+                    hint={appendixHint ?? "Anything the brief asks you to attach sits here. Not counted in the word count."}
+                  />
+                ) : (
+                  <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+                    {appendixHint ?? "Anything you attach sits here. Not counted in the word count."}
+                  </p>
+                )}
               </div>
             </div>
           </div>

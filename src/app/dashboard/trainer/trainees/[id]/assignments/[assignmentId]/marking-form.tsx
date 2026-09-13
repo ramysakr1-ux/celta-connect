@@ -27,6 +27,7 @@ import {
   TEAL,
 } from "@/lib/sheet-tokens";
 import { IdentityBand, MarkerLabel, NumberedDot, Strip, TpSheet, Eyebrow, plainField } from "@/components/tp-sheet";
+import { appendixDownloadUrl } from "@/app/dashboard/trainee/assignments/[assignmentId]/appendix-actions";
 import { autosizeOnInput, useAutosize } from "@/lib/autosize";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
 
@@ -51,6 +52,69 @@ const SECTION_HUES = [TEAL, GOLD_INK, INK_WARM, INK_WARM, GARNET, MUTED, TEAL];
 function wordCount(text: string): number {
   const cleaned = text.replace(/•/g, " ").trim();
   return cleaned.length === 0 ? 0 : cleaned.split(/\s+/).length;
+}
+
+export interface MarkingAppendix {
+  id: string;
+  label: string | null;
+  file_name: string;
+  storage_path: string | null;
+  link_url: string | null;
+}
+
+/**
+ * Syllabus 2.3 asks the marker to judge "task design in relation to the
+ * text", and 2.1(d) to judge the material they selected. Neither is possible
+ * with the attachment out of reach, so it opens from inside the document --
+ * a signed link, because the bucket is private.
+ */
+function AppendixBand({ appendices }: { appendices: MarkingAppendix[] }) {
+  const [error, setError] = useState<string | null>(null);
+  async function open(a: MarkingAppendix) {
+    if (a.link_url) {
+      window.open(a.link_url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (!a.storage_path) return;
+    const { url, error: e } = await appendixDownloadUrl(a.storage_path);
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+    else setError(e);
+  }
+  return (
+    <div className="flex flex-col gap-2" style={{ borderTop: `1px solid ${FAINT}`, padding: "14px 26px 16px" }}>
+      <MarkerLabel colour={TEAL} label="What they attached" />
+      {appendices.length === 0 ? (
+        <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+          Nothing attached. If the brief asked for an appendix, that is a return, not a fail.
+        </p>
+      ) : (
+        <ul className="flex flex-wrap gap-2" style={{ marginLeft: 12 }}>
+          {appendices.map((a) => (
+            <li key={a.id}>
+              <button
+                type="button"
+                onClick={() => void open(a)}
+                style={{
+                  borderRadius: 7,
+                  border: `1px solid ${BORDER}`,
+                  background: SHEET,
+                  padding: "7px 11px",
+                  fontSize: 12,
+                  color: INK,
+                  textAlign: "left",
+                }}
+              >
+                <span style={{ fontWeight: 700, color: TEAL }}>{a.label ?? "Appendix"}</span>
+                <span style={{ color: MUTED }}>{" · "}</span>
+                {a.file_name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error ? <p style={{ fontSize: 11.5, color: GOLD_INK, marginLeft: 12 }}>{error}</p> : null}
+    </div>
+  );
 }
 
 export interface MarkingCriterion {
@@ -95,6 +159,7 @@ export function AssignmentMarkingForm({
   secondMarkerOptions,
   submittedLabel,
   candidateHref,
+  appendices = [],
 }: {
   assignmentId: string;
   candidateName: string;
@@ -125,6 +190,8 @@ export function AssignmentMarkingForm({
   secondMarkerOptions: { id: string; full_name: string }[];
   submittedLabel: string;
   candidateHref: string;
+  /** Migration 0302 -- what the candidate attached for this round. */
+  appendices?: MarkingAppendix[];
 }) {
   const autosize = useAutosize();
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
@@ -478,6 +545,8 @@ export function AssignmentMarkingForm({
             </div>
           </div>
         </div>
+
+        <AppendixBand appendices={appendices} />
 
         {/* ---------- §2e the sections ---------- */}
         <div style={{ padding: "20px 26px 22px" }}>
