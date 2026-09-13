@@ -20,7 +20,7 @@ import { CRITERIA_LABELS, SHORT_CRITERIA_LABELS } from "../src/lib/celta-criteri
 
 const TAGS: Record<string, string[]> = {
   "Classroom management": ["5b", "5f", "5i", "5j"],
-  "Classroom management / Zoom": ["5b", "5e", "5f", "5j"],
+  "Classroom arrangements and material use": ["4c", "5a", "5e"],
   "Lesson planning input": ["4a", "4b", "4e", "4h"],
   "Receptive skills": ["3a", "4l"],
   Sounds: ["2e", "4i"],

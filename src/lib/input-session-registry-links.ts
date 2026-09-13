@@ -76,7 +76,11 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   // simulation's own trainer note makes that comparison the point). Both
   // titles map to it. ---
   "Classroom management": "classroom-management",
-  "Classroom management / Zoom": "classroom-management",
+  // Renamed on the timetable 13 Sep 2026 -- the second day-one slot is the
+  // arrangements session, which is where criterion 5a is taught. The old
+  // title stays mapped for any course still carrying it.
+  "Classroom management / Zoom": "classroom-arrangements",
+  "Classroom arrangements and material use": "classroom-arrangements",
   "Teaching speaking": "teaching-speaking",
   "Productive skills -- writing": "teaching-writing",
   "Productive skills — writing": "teaching-writing",
