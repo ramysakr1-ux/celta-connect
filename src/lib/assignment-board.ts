@@ -250,7 +250,11 @@ export function buildSample(
     // sample has to include it either way, and a tutor holding an unreleased
     // fail needs to see that it is already in.
     const fails = ofType.filter((r) => r.cell.failType);
-    const failsOutsideSample = fails.filter((r) => !r.assignment.second_marker_recorded_at).length;
+    // "Outside the sample" means nobody is on it -- not merely that the second
+    // marker has not finished. One already sent for a blind second mark is IN.
+    const failsOutsideSample = fails.filter(
+      (r) => !r.assignment.second_marker_id && !r.assignment.second_marker_recorded_at
+    ).length;
     return { assignmentType: type, title, settled, inProgress, required, failsOutsideSample, anyFails: fails.length > 0 };
   });
 }

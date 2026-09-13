@@ -187,6 +187,8 @@ export function AssignmentMarkingForm({
   const failType = allMarked && !allMet;
   const needsSecond = failType || inSample;
   const secondRecorded = stage === "agree" || stage === "closed";
+  // Already handed over: the first marker waits, and has nothing to press.
+  const awaitingSecond = !blind && !secondRecorded && needsSecond && Boolean(secondMarkerName);
   const bothInitialled = Boolean(firstInitialledAt && secondInitialledAt);
 
   // Handbook 9.2.2 -- a candidate told to rewrite has to be told where. With
@@ -202,7 +204,8 @@ export function AssignmentMarkingForm({
   if (!allMarked) blockers.push("Mark every criterion");
   if (!overall.trim()) blockers.push("Write the overall comment");
   if (failType && !anySectionComment) blockers.push("Comment on the section they rewrite from");
-  if (needsSecond && !secondRecorded && !blind && !secondMarkerId) blockers.push("Choose the second marker");
+  if (needsSecond && !secondRecorded && !blind && !secondMarkerId && !awaitingSecond) blockers.push("Choose the second marker");
+  if (awaitingSecond) blockers.push(`With ${secondMarkerName} for a blind second mark`);
   if (needsSecond && secondRecorded && !bothInitialled && !blind) blockers.push("Both markers initial it");
 
   const submission = (key: string) => {
@@ -612,7 +615,7 @@ export function AssignmentMarkingForm({
                 </button>
               </form>
             ) : null}
-            {needsSecond && !secondRecorded && !closed && !blind ? (
+            {needsSecond && !secondRecorded && !closed && !blind && !awaitingSecond ? (
               <div className="flex flex-col gap-1.5" style={{ marginLeft: 12 }}>
                 <label style={{ fontSize: 12, color: MUTED }}>Send for a blind second mark</label>
                 <select
@@ -689,11 +692,13 @@ export function AssignmentMarkingForm({
           <p style={{ fontSize: 11.5, color: blockers.length ? GOLD_INK : TEAL }}>
             {closed
               ? "Closed. Both rounds and both sets of comments are on the record."
-              : blockers.length
-                ? blockers[0]
-                : needsSecond && !secondRecorded
-                  ? "Nothing reaches the candidate yet — this goes for a blind second mark first."
-                  : "This releases your marks and comments to the candidate."}
+              : awaitingSecond
+                ? `Nothing reaches the candidate yet. ${secondMarkerName} marks it blind, then you both initial and it is released.`
+                : blockers.length
+                  ? blockers[0]
+                  : needsSecond && !secondRecorded
+                    ? "Nothing reaches the candidate yet — this goes for a blind second mark first."
+                    : "This releases your marks and comments to the candidate."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
