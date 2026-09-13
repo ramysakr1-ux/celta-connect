@@ -7,7 +7,7 @@ import {
   type FormState,
 } from "@/app/dashboard/trainee/plan/[tpNumber]/actions";
 import { LanguageAnalysisEditor } from "@/app/dashboard/trainee/plan/[tpNumber]/language-analysis-editor";
-import { DictateButton, DictationScope } from "@/components/dictate-anywhere";
+import { DictateButton, DictationScope, WakeWordToggle } from "@/components/dictate-anywhere";
 import { bulletListProps } from "@/lib/bullet-list";
 import { autosizeOnInput, useAutosize } from "@/lib/autosize";
 import { offersLessonSequences } from "@/lib/tp-density";
@@ -582,8 +582,14 @@ export function LessonPlanForm({
           </div>
           <div className="flex items-center gap-2">
             {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-            <span className="mr-2">
+            <span className="mr-2 flex flex-wrap items-center gap-2">
               <DictateButton variant="bar" />
+              {/* Candidates get it too, Ramy 13 Sep 2026. The limits that
+                  bounded it tutor-side were about recording other people's
+                  learners mid-lesson; a candidate writing their plan is
+                  recording nobody. Same rules all the same: off by default,
+                  armed from this screen, visibly red while open. */}
+              <WakeWordToggle />
             </span>
             <button
               type="submit"

@@ -7,7 +7,7 @@ import {
   type FormState,
 } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-actions";
 import { MobileFormWizard, type WizardStep } from "@/components/mobile-form-wizard";
-import { DictationScope } from "@/components/dictate-anywhere";
+import { DictationScope, WakeWordToggle } from "@/components/dictate-anywhere";
 import {
   BORDER,
   BottomBar,
@@ -327,6 +327,7 @@ export function SelfEvaluationForm({
 
         <BottomBar role="garnet" warning="Submitting locks your self-evaluation — you won't be able to edit it afterwards.">
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          <WakeWordToggle />
           <SaveDraftButton pending={draftPending} disabled={draftPending || submitPending} />
           <SubmitButton
             role="garnet"
