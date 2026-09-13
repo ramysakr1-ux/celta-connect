@@ -107,8 +107,21 @@ export function startDictation({
   stopActiveRecognition?.();
 
   let userStopped = false;
-  let baseValue = field.value;
-  let finalTranscript = "";
+  // `committed` is everything that is settled: whatever was in the field when
+  // we started, plus every finalised chunk since. `lastWritten` is what we
+  // actually put in the field last time, which is `committed` plus whatever
+  // interim guess the recogniser was showing.
+  //
+  // Keeping both is what lets the field be edited MID-DICTATION. Ramy,
+  // 13 Sep 2026: "I dictate, I press Enter, it opens the next bullet, I keep
+  // dictating and it jumps back to the first line." It did: every result
+  // rebuilt the field from the value captured when the session started, so the
+  // bullet the Enter key had just inserted was wiped and the new words landed
+  // back on line one. Now anything that appears in the field between results
+  // is adopted before the next words are added, so dictation follows the
+  // cursor instead of fighting it.
+  let committed = field.value;
+  let lastWritten = field.value;
   let lastField: DictationField = field;
 
   const recognition = new SpeechRecognitionCtor();
@@ -125,12 +138,20 @@ export function startDictation({
   recognition.onresult = (event: SpeechRecognitionEvent) => {
     const target = resolveField?.() ?? lastField;
     if (!target) return;
+
     // Clicking into another box mid-session moves the dictation with the
     // cursor rather than pasting the new speech into the old box.
     if (target !== lastField) {
       lastField = target;
-      baseValue = target.value;
-      finalTranscript = "";
+      committed = target.value;
+      lastWritten = target.value;
+    } else if (target.value !== lastWritten) {
+      // The field changed under us: a bullet from Enter, a backspace, a paste.
+      // If it simply grew at the end, keep what was added and drop the interim
+      // guess we had been showing; otherwise adopt the field wholesale.
+      committed = target.value.startsWith(lastWritten)
+        ? committed + target.value.slice(lastWritten.length)
+        : target.value;
     }
 
     let finalChunk = "";
@@ -142,10 +163,11 @@ export function startDictation({
       else interimChunk += transcript;
     }
     if (finalChunk) {
-      finalTranscript = applyPunctuationCommands(joinText(finalTranscript, finalChunk));
+      committed = joinText(committed, applyPunctuationCommands(finalChunk));
     }
-    const committed = joinText(baseValue, finalTranscript);
-    setFieldValue(target, joinText(committed, interimChunk));
+    const next = joinText(committed, interimChunk);
+    setFieldValue(target, next);
+    lastWritten = next;
   };
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
