@@ -364,11 +364,16 @@ export default async function AssignmentDetailPage({
         ) : (
           <AssignmentAuthoringForm
             assignmentId={assignment.id}
+            title={ASSIGNMENT_INFO[assignment.assignment_type].title}
             sections={template.sections}
             responses={responses ?? []}
             round={round}
             locked
             deadlinePassed={false}
+            criteria={criteria.map((c) => ({ key: c.key, text: c.text }))}
+            intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
+            sanction={assignment.assignment_type === "Plagiarism Reflection"}
+            format={assignment.assignment_type === "LRT" || assignment.assignment_type === "Skills" ? "structured" : "prose"}
           />
         )
       ) : (
@@ -384,11 +389,22 @@ export default async function AssignmentDetailPage({
           ) : null}
           <AssignmentAuthoringForm
             assignmentId={assignment.id}
+            title={ASSIGNMENT_INFO[assignment.assignment_type].title}
             sections={template.sections}
             responses={responses ?? []}
             round={round}
             locked={locked}
             deadlinePassed={deadlinePassed}
+            criteria={criteria.map((c) => ({
+              key: c.key,
+              text: c.text,
+              mark: (round === "resubmission"
+                ? (assignment.first_criteria_marks ?? {})[c.key]
+                : null) as "met" | "not_met" | null | undefined,
+            }))}
+            intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
+            sanction={assignment.assignment_type === "Plagiarism Reflection"}
+            format={assignment.assignment_type === "LRT" || assignment.assignment_type === "Skills" ? "structured" : "prose"}
             // for-claude-code-trainee-interface.md: "can withdraw only
             // while it's unopened" -- round==="first" && locked===true
             // here specifically means "submitted, not yet approved" (see
