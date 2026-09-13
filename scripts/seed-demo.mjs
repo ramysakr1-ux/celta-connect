@@ -23,6 +23,7 @@ import { seedStage2Demo } from "./lib/stage2-demo.mjs";
 import { seedStage3Demo } from "./lib/stage3-demo.mjs";
 import { seedFinalDayDemo } from "./lib/final-day-demo.mjs";
 import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
+import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -3821,6 +3822,13 @@ async function main() {
   {
     const r = await applyLessonPlans(supabase, course.id);
     console.log(`lesson plans: ${r.updated} filled from each candidate's own brief, ${r.partial} given a procedure from their own stated aim (no brief), ${r.skipped} left alone`);
+
+    // Every language lesson gets a real analysis sheet. Ramy, 13 Sep 2026 --
+    // before this the whole demo had two, so a tutor opening the analysis tab
+    // always found it empty on a qualification where analysing language is
+    // criterion 4i. Skills lessons get none, which is correct.
+    const la = await applyLanguageAnalyses(supabase, course.id);
+    console.log(`language analyses: ${la.written} written, ${la.kept} already written and left alone, ${la.skipped} skills lessons with none`);
   }
 
   console.log("DEMO SEED COMPLETE");
