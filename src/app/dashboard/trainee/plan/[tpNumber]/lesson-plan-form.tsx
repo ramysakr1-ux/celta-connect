@@ -162,9 +162,18 @@ export function LessonPlanForm({
   const totalMinutes = sumProcedureMinutes(procedure);
   const overBy = totalMinutes - TP_LESSON_LENGTH_MINUTES;
 
-  // §4a: with no shape chosen every stage is drawn in plain border colour --
-  // the timeline is there, but it is not saying anything yet.
-  const hueFor = (i: number) => (frameworkName ? STAGE_HUES[i % STAGE_HUES.length] : BORDER);
+  // A stage takes its hue once it has a NAME -- whether the name came from a
+  // shape or the candidate typed it. Grey only while the stage is unnamed.
+  //
+  // The handoff greys everything until a shape is chosen, which was right when
+  // the shape picker was always there. It is not right now: Ramy set the
+  // picker to TP1-6, so on TP7 and TP8 -- where the candidate names their own
+  // stages, which is the whole point of the fade -- the timeline could never
+  // take a colour at all. "It feels like the page completely lost all the
+  // colours in it... it's all washed" (13 Sep 2026). Naming a stage IS
+  // choosing a shape; the candidate just wrote it themselves.
+  const hueFor = (i: number) =>
+    frameworkName || procedure[i]?.stage.trim() ? STAGE_HUES[i % STAGE_HUES.length] : BORDER;
 
   function applyFramework(name: string) {
     setFrameworkName(name);

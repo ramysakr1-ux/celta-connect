@@ -127,7 +127,8 @@ export default async function AssembledDocumentPage({
 
   const total = sumProcedureMinutes(procedure);
   const overBy = total - TP_LESSON_LENGTH_MINUTES;
-  const hueFor = (i: number) => (plan.framework_used ? STAGE_HUES[i % STAGE_HUES.length] : BORDER);
+  const hueFor = (i: number) =>
+    plan.framework_used || (procedure[i]?.stage ?? "").trim() ? STAGE_HUES[i % STAGE_HUES.length] : BORDER;
 
   const footerLeft = [trainee.full_name, course?.name, centre?.name].filter(Boolean).join(" · ");
   const lessonTitle = assignment?.main_lesson_aim ?? plan.main_aims ?? "";

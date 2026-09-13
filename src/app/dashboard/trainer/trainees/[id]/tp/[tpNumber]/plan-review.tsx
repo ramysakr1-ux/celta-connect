@@ -92,7 +92,11 @@ export function PlanReview({
   const problems = (plan.anticipated_problems ?? []).filter((p) => p.problem || p.solution);
   const vocabRows = languageAnalysis?.vocab_rows ?? [];
   const laBlocks = languageAnalysis?.blocks ?? [];
-  const hueFor = (i: number) => (plan.framework_used ? STAGE_HUES[i % STAGE_HUES.length] : BORDER);
+  // A named stage takes its hue, whether the name came from a shape or the
+  // candidate typed it -- TP7 and TP8 have no shape picker, and their stages
+  // are no less staged for that.
+  const hueFor = (i: number) =>
+    plan.framework_used || (procedure[i]?.stage ?? "").trim() ? STAGE_HUES[i % STAGE_HUES.length] : BORDER;
   const totalMinutes = sumProcedureMinutes(procedure);
   const overBy = totalMinutes - TP_LESSON_LENGTH_MINUTES;
 

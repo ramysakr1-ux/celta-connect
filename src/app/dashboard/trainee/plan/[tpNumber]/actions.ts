@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import type {
   AnalysisBlock,
   LanguageAnalysisType,
@@ -73,6 +74,23 @@ async function savePlan(formData: FormData, lock: boolean): Promise<FormState> {
   const trainee = await requireRole("trainee");
   const tpNumber = parseTpNumber(formData);
   if (!tpNumber) return { error: "Invalid TP number." };
+
+  // The demo centre refuses every write from a signed-in account
+  // (block_demo_center_writes, migrations 0079/0162/0207/0285). That is
+  // deliberate -- the demo has to survive strangers -- but the plan form used
+  // to report it as "Could not open this lesson plan. Refresh and try again.",
+  // which sends the reader off to refresh for ever. Ramy hit exactly that on
+  // 13 Sep 2026, on demo-amara's TP8, where no plan row exists yet so the save
+  // tried to create one and the trigger stopped it.
+  //
+  // Checked up front so the message can say the true thing.
+  const centre = trainee.center_id ? await getCachedCenter(trainee.center_id) : null;
+  if (centre?.is_demo) {
+    return {
+      error:
+        "This is the demo course, which is read-only — nothing typed here is saved. The walkthrough course is the writable one.",
+    };
+  }
 
   const supabase = await createClient();
   let planId: string;
