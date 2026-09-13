@@ -1831,7 +1831,12 @@ async function main() {
       resubmission_own_work_confirmed: true,
       resubmission_outcome: "pass",
       second_marker_id: secondMarkerId,
+      // Migration 0299 split "double-marked" into two initials. A seeded
+      // countersign carries both, dated the moment it was signed -- the old
+      // single timestamp always meant "both initials are on the record".
       second_marker_recorded_at: daysAgoIso(2),
+      first_initialled_at: daysAgoIso(2),
+      second_initialled_at: daysAgoIso(2),
       // Handbook 9.2.3's own wording for a resubmission pass, as the
       // marking action writes it.
       final_grade: "Pass (on resubmission)",
@@ -1846,6 +1851,8 @@ async function main() {
       resubmission_outcome: "fail",
       second_marker_id: secondMarkerId,
       second_marker_recorded_at: daysAgoIso(3),
+      first_initialled_at: daysAgoIso(3),
+      second_initialled_at: daysAgoIso(3),
       final_grade: "Fail",
     });
 
@@ -2251,7 +2258,13 @@ async function main() {
       if (!id) continue;
       await supabase
         .from("assignments")
-        .update({ second_marker_id: trainer2Id, second_marker_recorded_at: doubleMarkAt })
+        .update({
+          second_marker_id: trainer2Id,
+          second_marker_recorded_at: doubleMarkAt,
+          // Both initials, dated the countersign -- see migration 0299.
+          first_initialled_at: doubleMarkAt,
+          second_initialled_at: doubleMarkAt,
+        })
         .eq("id", id);
     }
     console.log(`double-marking: FoL and LRT topped up to the §11 quota (4 each) with the ACT as blind second marker`);
