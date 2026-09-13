@@ -45,6 +45,9 @@ export const INPUT_SESSIONS: InputSessionMeta[] = [
   // design_handoff_input_sessions_2 §2 -- the two genuinely new sessions.
   { slug: "phonology-sounds", title: "Phonology: sounds", minutes: "60 min", kind: "Phonology, spoken aloud · 2 of the sounds pair" },
   { slug: "teaching-exam-classes", title: "Teaching exam classes", minutes: "50 min", kind: "The wider profession · last week" },
+  // Written rather than ported -- the criteria map found 1d and 2a taught by
+  // nothing on the course, and there was no design for either.
+  { slug: "rapport-and-teacher-talk", title: "Rapport, and how much you talk", minutes: "45 min", kind: "Classroom skills · after TP1" },
 ];
 
 export async function loadInputSessionComponent(slug: string): Promise<ComponentType | null> {
@@ -107,6 +110,8 @@ export async function loadInputSessionComponent(slug: string): Promise<Component
       return (await import("@/app/input-sessions/sessions/phonology-sounds")).default;
     case "teaching-exam-classes":
       return (await import("@/app/input-sessions/sessions/teaching-exam-classes")).default;
+    case "rapport-and-teacher-talk":
+      return (await import("@/app/input-sessions/sessions/rapport-and-teacher-talk")).default;
     default:
       return null;
   }

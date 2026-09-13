@@ -2708,7 +2708,10 @@ async function main() {
     { d: 4, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 4, b: 7, type: "input_session", title: "PPP", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2g", "4b", "5c"] },
     { d: 4, b: 8, type: "input_session", title: "Text-based teaching", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2c", "3a", "4c"] },
-    { d: 4, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    // 1d and 2a are assessed from TP1, and nothing on the course taught
+    // either (criteria map, 13 Sep 2026). After TP1 rather than before it:
+    // the teacher-talk count lands when you have just heard yourself teach.
+    { d: 4, b: 9, type: "input_session", title: "Rapport and teacher talk", tag: "whole_group", detail: null, linked: null, tp: null, slug: "rapport-and-teacher-talk", criteria: ["1d", "2a"] },
     { d: 5, b: 1, type: "tp", title: "TP2 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 5, b: 2, type: "tp", title: "TP2 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 5, b: 3, type: "tp", title: "TP2 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 2 },
@@ -2878,6 +2881,8 @@ async function main() {
     { d: 19, b: 4, type: "supervised_session", title: "Written feedback only", tag: "group_room", detail: "Final TP, no live session", linked: null, tp: null },
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 19, b: 6, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    // The consultation day 4 gave up, in day 19's empty band.
+    { d: 19, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
