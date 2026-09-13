@@ -194,12 +194,16 @@ export function AssignmentMarkingForm({
   // honestly enforce is: a fail-type outcome needs at least one section
   // comment, so there is somewhere to rewrite from.
   const anySectionComment = sections.some((s) => (comments[s.key] ?? "").trim().length > 0);
+  // What stops the button. Needing a second mark is NOT one of these: it
+  // changes what the button DOES (sends it on rather than releasing it), and
+  // listing it here is what made "Send it for a blind second mark" a disabled
+  // button that could never send.
   const blockers: string[] = [];
   if (!allMarked) blockers.push("Mark every criterion");
   if (!overall.trim()) blockers.push("Write the overall comment");
   if (failType && !anySectionComment) blockers.push("Comment on the section they rewrite from");
-  if (needsSecond && !secondRecorded) blockers.push("Send it for a blind second mark");
-  if (needsSecond && secondRecorded && !bothInitialled) blockers.push("Both markers initial it");
+  if (needsSecond && !secondRecorded && !blind && !secondMarkerId) blockers.push("Choose the second marker");
+  if (needsSecond && secondRecorded && !bothInitialled && !blind) blockers.push("Both markers initial it");
 
   const submission = (key: string) => {
     const r = responseByKey.get(key);
@@ -716,7 +720,7 @@ export function AssignmentMarkingForm({
                 {hidden}
                 <button
                   type="submit"
-                  disabled={pending || blockers.length > 0 || (needsSecond && !secondRecorded && !blind && !secondMarkerId)}
+                  disabled={pending || blockers.length > 0}
                   title={blockers[0] ?? undefined}
                   style={{
                     borderRadius: 8,
