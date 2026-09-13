@@ -59,6 +59,28 @@ const TAGS: Record<string, string[]> = {
   "Evaluating your plan": ["4n", "5m"],
 };
 
+// Four criteria are taught by the SHAPE of the course rather than by a
+// session, and the map used to report them as "not taught by any input
+// session" as though that were a fault. Ramy, 13 Sep 2026, ruling on each:
+//
+//   4m  working with colleagues in planning TP -- "starts pretty much TP6,
+//       because then they have to get together and plan for TP7 and TP8 on
+//       their own."
+//   5l  maintaining the portfolio -- "an ongoing thing... from TP3, after
+//       stage one, so you can start checking it."
+//   1b  cultural backgrounds -- comes from the learner interviews, so from
+//       TP3 onwards.
+//   4d  materials with a professional appearance and copyright -- a planning
+//       point inside Lesson planning, not a session of its own.
+//
+// Listed so the map says where each one IS covered instead of crying wolf.
+const COVERED_BY_COURSE: Record<string, string> = {
+  "1b": "the learner interviews, from TP3 on",
+  "4d": "inside Lesson planning (D2)",
+  "4m": "planning TP7 and TP8 together, from TP6 on",
+  "5l": "the portfolio itself, checked from TP3 / after Stage 1",
+};
+
 const env = fs.readFileSync(".env.local", "utf8");
 const db = createClient(
   env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)![1].trim(),
@@ -108,7 +130,12 @@ for (const code of Object.keys(CRITERIA_LABELS)) {
   const hits = (taughtOn.get(code) ?? []).sort((a, b) => a.day - b.day);
   const first = hits.length ? `D${hits[0].day}` : "—";
   const label = `${code} ${SHORT_CRITERIA_LABELS[code] ?? ""}`.padEnd(20);
-  console.log(`${label} ${first.padEnd(7)} ${hits.map((h) => `${h.title} (D${h.day})`).join(", ") || "NOT TAUGHT BY ANY INPUT SESSION"}`);
+  const where = hits.length
+    ? hits.map((h) => `${h.title} (D${h.day})`).join(", ")
+    : COVERED_BY_COURSE[code]
+      ? `by the course, not a session — ${COVERED_BY_COURSE[code]}`
+      : "NOT TAUGHT BY ANY INPUT SESSION";
+  console.log(`${label} ${(hits.length ? first : COVERED_BY_COURSE[code] ? "course" : "—").padEnd(7)} ${where}`);
 }
 
 // --- assignments against what feeds them ---
