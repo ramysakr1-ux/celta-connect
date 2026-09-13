@@ -2660,8 +2660,8 @@ async function main() {
     { d: 1, b: 4, type: "unassessed_tp", title: "Unassessed teach / GTKY", tag: "group_room", detail: "All six meet the learners", linked: null, tp: null, shares: true },
     { d: 1, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
-    { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 1, b: 8, type: "input_session", title: "Classroom management / Zoom", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5b", "5f", "5i", "5j"] },
+    { d: 1, b: 8, type: "input_session", title: "Classroom management / Zoom", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5b", "5e", "5f", "5j"] },
     { d: 1, b: 9, type: "input_session", title: "Focus on the Learner", tag: "whole_group", detail: "The assignment session", linked: "Focus on Learner", tp: null },
     { d: 2, b: 1, type: "tp", title: "TP1 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 2, b: 2, type: "tp", title: "TP1 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 1 },
@@ -2669,23 +2669,23 @@ async function main() {
     { d: 2, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 2, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 2, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 2, b: 9, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4a", "4b", "4e", "4h"] },
+    { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3a", "4l"] },
+    { d: 2, b: 9, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2e", "4i"] },
     { d: 3, b: 1, type: "tp", title: "TP1 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 2, type: "tp", title: "TP1 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 3, type: "tp", title: "TP1 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 3, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 3, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 3, b: 7, type: "input_session", title: "Eliciting and concept checking", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 3, b: 8, type: "input_session", title: "Teaching vocabulary", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 3, b: 7, type: "input_session", title: "Eliciting and concept checking", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5g", "2e"] },
+    { d: 3, b: 8, type: "input_session", title: "Teaching vocabulary", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2c", "2e", "4i"] },
     // The one built interactive session that had no slot on the timetable
     // (audit, 13 Sep 2026). Day 3 at 17:15 puts it straight after lexis and
     // two days before Language analysis, which is the session that needs the
     // grammar already in hand -- and after Eliciting and concept checking,
     // which is how you check a tense once you can name it.
-    { d: 3, b: 9, type: "input_session", title: "Tense and aspect", tag: "whole_group", detail: null, linked: null, tp: null, slug: "tense-and-aspect" },
+    { d: 3, b: 9, type: "input_session", title: "Tense and aspect", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2e", "4i"], slug: "tense-and-aspect" },
     // Which day each assignment is SET is what opens it for writing
     // (src/lib/assignment-release.ts reads the earliest timetabled event
     // carrying that linked_assignment_type). The schedule is Day 1 / 4 / 9 /
@@ -2706,8 +2706,8 @@ async function main() {
     { d: 4, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 4, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 4, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 4, b: 7, type: "input_session", title: "PPP", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 4, b: 8, type: "input_session", title: "Text-based teaching", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 4, b: 7, type: "input_session", title: "PPP", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2g", "4b", "5c"] },
+    { d: 4, b: 8, type: "input_session", title: "Text-based teaching", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2c", "3a", "4c"] },
     { d: 4, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 5, b: 1, type: "tp", title: "TP2 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 5, b: 2, type: "tp", title: "TP2 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 2 },
@@ -2720,8 +2720,8 @@ async function main() {
     // band; Phonology: sounds (the chart and phonemic script) takes the slot
     // it leaves on day 5, immediately before Language analysis -- which is
     // the session that needs the chart already in hand.
-    { d: 5, b: 7, type: "input_session", title: "Phonology: sounds", tag: "whole_group", detail: null, linked: null, tp: null, slug: "phonology-sounds" },
-    { d: 5, b: 8, type: "input_session", title: "Language analysis", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 5, b: 7, type: "input_session", title: "Phonology: sounds", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"], slug: "phonology-sounds" },
+    { d: 5, b: 8, type: "input_session", title: "Language analysis", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4i", "4j", "4k"] },
     { d: 5, b: 9, type: "input_session", title: "Filmed observation 1", tag: "whole_group", detail: "With task", linked: null, tp: null },
     { d: 6, b: 1, type: "tp", title: "TP3 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 3 },
     { d: 6, b: 2, type: "tp", title: "TP3 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 3 },
@@ -2738,15 +2738,15 @@ async function main() {
     // 2's Friday had two, so the phonology pair moved to the 17:15 bands on
     // Monday and Wednesday, and what was in those bands moved to the Friday
     // slots they vacated. Nothing was deleted; two things swapped days.
-    { d: 6, b: 9, type: "input_session", title: "Connected speech", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 6, b: 9, type: "input_session", title: "Connected speech", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"] },
     { d: 7, b: 1, type: "tp", title: "TP3 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 3 },
     { d: 7, b: 2, type: "tp", title: "TP3 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 3 },
     { d: 7, b: 3, type: "tp", title: "TP3 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 3 },
     { d: 7, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 ABC", linked: null, tp: null },
     { d: 7, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 7, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 7, b: 7, type: "input_session", title: "Guided discovery", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 7, b: 8, type: "input_session", title: "MFP", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 7, b: 7, type: "input_session", title: "Guided discovery", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2e", "5c", "5g"] },
+    { d: 7, b: 8, type: "input_session", title: "MFP", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2e", "4i"] },
     { d: 7, b: 9, type: "input_session", title: "Filmed observation 2", tag: "whole_group", detail: "With task", linked: null, tp: null },
     { d: 8, b: 1, type: "tp", title: "TP4 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 4 },
     { d: 8, b: 2, type: "tp", title: "TP4 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 4 },
@@ -2754,9 +2754,9 @@ async function main() {
     { d: 8, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
     { d: 8, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 8, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 8, b: 7, type: "input_session", title: "Giving feedback on tasks", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 8, b: 8, type: "input_session", title: "Error correction", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 8, b: 9, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 8, b: 7, type: "input_session", title: "Giving feedback on tasks", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5h", "5j"] },
+    { d: 8, b: 8, type: "input_session", title: "Error correction", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2b", "5h"] },
+    { d: 8, b: 9, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"] },
     { d: 9, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) set", tag: null, detail: "The assignment session", linked: "LRT", tp: null },
     { d: 9, b: 1, type: "tp", title: "TP4 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 4 },
     { d: 9, b: 2, type: "tp", title: "TP4 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 4 },
@@ -2786,8 +2786,8 @@ async function main() {
     { d: 11, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
     { d: 11, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 11, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 11, b: 7, type: "input_session", title: "Functional language", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 11, b: 8, type: "input_session", title: "Test-Teach-Test", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 11, b: 7, type: "input_session", title: "Functional language", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2c", "2f", "4i"] },
+    { d: 11, b: 8, type: "input_session", title: "Test-Teach-Test", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4b", "5c", "5g"] },
     { d: 11, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 12, b: 1, type: "tp", title: "TP5 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 5 },
     { d: 12, b: 2, type: "tp", title: "TP5 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 5 },
@@ -2795,8 +2795,8 @@ async function main() {
     { d: 12, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 ABC", linked: null, tp: null },
     { d: 12, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 12, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 12, b: 7, type: "input_session", title: "Productive skills \u2014 writing", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 12, b: 8, type: "input_session", title: "Teaching speaking", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 12, b: 7, type: "input_session", title: "Productive skills \u2014 writing", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3b", "4g"] },
+    { d: 12, b: 8, type: "input_session", title: "Teaching speaking", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3b", "5h", "5j"] },
     { d: 12, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 13, b: 1, type: "tp", title: "TP6 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 13, b: 2, type: "tp", title: "TP6 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 6 },
@@ -2804,8 +2804,8 @@ async function main() {
     { d: 13, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
     { d: 13, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 13, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 13, b: 7, type: "input_session", title: "Lesson framework", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 13, b: 8, type: "input_session", title: "Teaching listening", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 13, b: 7, type: "input_session", title: "Lesson framework", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4a", "4b", "4h"] },
+    { d: 13, b: 8, type: "input_session", title: "Teaching listening", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3a", "4c", "4l"] },
     { d: 13, b: 9, type: "input_session", title: "Syllabus planning \u00b7 ABC", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 14, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) set", tag: null, detail: "The assignment session", linked: "LfC", tp: null },
     { d: 14, b: 1, type: "tp", title: "TP6 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 6 },
@@ -2814,8 +2814,8 @@ async function main() {
     { d: 14, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 ABC", linked: null, tp: null },
     { d: 14, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 14, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 14, b: 7, type: "input_session", title: "Language practice", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 14, b: 8, type: "input_session", title: "Drilling technique", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 14, b: 7, type: "input_session", title: "Language practice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2g", "4g", "5b"] },
+    { d: 14, b: 8, type: "input_session", title: "Drilling technique", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2g", "5c"] },
     { d: 14, b: 9, type: "input_session", title: "Syllabus planning \u00b7 DEF", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 15, b: 1, type: "milestone", title: "Late start \u00b7 10:00\u201310:45", tag: "individual", detail: null, linked: null, tp: null },
     { d: 15, b: 2, type: "input_session", title: "Supervised review \u2014 presenting language", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
@@ -2860,7 +2860,7 @@ async function main() {
     { d: 18, b: 4, type: "milestone", title: "Lesson planning", tag: "individual", detail: "Bookable \u00b7 DEF", linked: null, tp: null },
     { d: 18, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 18, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Written feedback only", linked: null, tp: null },
-    { d: 18, b: 7, type: "input_session", title: "Teaching literacy", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 18, b: 7, type: "input_session", title: "Teaching literacy", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "1c", "3a"] },
     { d: 18, b: 8, type: "supervised_session", title: "Portfolio check \u00b7 ABC", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     { d: 18, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 19, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) due", tag: null, detail: "09:00", linked: "LfC", tp: null },
@@ -2869,11 +2869,11 @@ async function main() {
     { d: 19, b: 3, type: "tp", title: "TP8 \u00b7 F", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 4, type: "supervised_session", title: "Written feedback only", tag: "group_room", detail: "Final TP, no live session", linked: null, tp: null },
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5m", "5n"] },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
-    { d: 19, b: 8, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, slug: "teaching-exam-classes" },
+    { d: 19, b: 8, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "5c"], slug: "teaching-exam-classes" },
     { d: 20, b: 1, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 20, b: 2, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 20, b: 3, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
@@ -2972,6 +2972,10 @@ async function main() {
     // Which interactive session the slot opens, set explicitly rather than
     // left to a title match (migration 0301).
     slug: x.slug ?? null,
+    // The criteria this session teaches -- what seeds the week's peer
+    // observation task. Every one of the 44 slots carried an empty array
+    // until 13 Sep 2026.
+    criteria: x.criteria ?? [],
     tpNumber: x.tp,
     scope: x.scope ?? null,
     shares: x.shares ?? false,
@@ -3010,6 +3014,7 @@ async function main() {
         // the demo lesson, the unassessed teach and the introduction, so the
         // Share materials page has something to show (5 Sep 2026).
         registry_slug: e.slug ?? null,
+        input_session_criteria: e.criteria ?? [],
         shares_materials: e.type !== "tp" && Boolean(e.shares),
         created_by: trainerId,
       }))
