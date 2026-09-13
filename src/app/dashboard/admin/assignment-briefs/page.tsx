@@ -18,9 +18,11 @@ export default async function AdminAssignmentBriefsPage() {
 
   const templateByType = new Map((templates ?? []).map((t) => [t.assignment_type, t]));
   const proseCount = (templates ?? []).filter((t) => t.format === "prose").length;
+  // Handbook June 2025 9.2.1 -- at least two, not exactly two. See the
+  // detail page for why the syllabus's wording does not govern here.
   const formatWarning =
-    (templates ?? []).length === 4 && proseCount !== 2
-      ? `The syllabus needs exactly two of the four briefs in academic prose -- currently ${proseCount}.`
+    (templates ?? []).length === 4 && proseCount < 2
+      ? `The Handbook needs at least two of the four briefs in continuous prose -- currently ${proseCount}.`
       : null;
 
   return (

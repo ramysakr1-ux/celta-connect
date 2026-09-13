@@ -24,6 +24,8 @@ import { seedStage3Demo } from "./lib/stage3-demo.mjs";
 import { seedFinalDayDemo } from "./lib/final-day-demo.mjs";
 import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
 import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
+import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
+import { criteriaMarks } from "./lib/assignment-criteria-keys.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -1157,60 +1159,19 @@ async function main() {
   }
   console.log("assign_tp_round: plans created for TP1-6 across every subgroup");
 
-  // The four Cambridge assignments, as briefs with real section prompts. The
-  // sections are what the brief page actually renders -- storage_path is only
-  // the uploaded original, and "system:" is the established marker for a brief
-  // that has no file behind it (malpractice/actions.ts writes the same for the
-  // plagiarism reflection).
-  const BRIEFS = [
-    {
-      type: "Focus on Learner",
-      sections: [
-        { key: "learner_profile", title: "Learner profile", instruction: "Describe your chosen learner or small group: age, nationality, first language, reason for studying English, and how they prefer to learn." },
-        { key: "needs_analysis", title: "Needs analysis", instruction: "What evidence did you gather, and how? Refer to the pooled observation log, not only your impressions." },
-        { key: "language_problem", title: "The language problem", instruction: "Claim one specific grammar or pronunciation problem. Analyse meaning, form and phonology, and say why it matters for this learner." },
-        { key: "remedial", title: "Remedial activities", instruction: "Two activities, with a rationale for each and a reference to the source you took or adapted them from." },
-      ],
-    },
-    {
-      type: "LRT",
-      sections: [
-        { key: "meaning", title: "Meaning", instruction: "For each item: concept, a concept-checking question, and the answer you would expect." },
-        { key: "form", title: "Form", instruction: "Write the form out. Include contractions, negatives and questions where they apply." },
-        { key: "phonology", title: "Phonology", instruction: "Sentence stress, weak forms and connected speech features, with a model marked up." },
-        { key: "problems", title: "Anticipated problems and solutions", instruction: "One problem per item, with the clarification approach you would use." },
-      ],
-    },
-    {
-      type: "Skills",
-      sections: [
-        { key: "text", title: "The text", instruction: "Attach your authentic text and say where it came from. Do not simplify it." },
-        { key: "suitability", title: "Suitability", instruction: "Why this text for this level and this group? Comment on length, topic, and lexical load." },
-        { key: "receptive", title: "Receptive tasks", instruction: "A gist task and a detail task, with the rationale for each." },
-        { key: "productive", title: "Productive task", instruction: "One task that follows from the text, with a rationale linking it to the receptive work." },
-      ],
-    },
-    {
-      type: "LfC",
-      sections: [
-        { key: "strengths", title: "Strengths", instruction: "Two strengths, each evidenced from a specific lesson and from tutor or peer feedback." },
-        { key: "development", title: "Areas for development", instruction: "Two areas, evidenced the same way. Be specific: 'instructions' is not an area, 'staging instructions for a jigsaw reading' is." },
-        { key: "action_plan", title: "Action plan", instruction: "What you will do next, how you will know it worked, and by when." },
-      ],
-    },
-  ];
-  for (const brief of BRIEFS) {
-    const { error: brErr } = await supabase.from("assignment_templates").insert({
-      center_id: center.id,
-      assignment_type: brief.type,
-      storage_path: `system:${brief.type.toLowerCase().replace(/\s+/g, "-")}`,
-      sections: brief.sections,
-      generation_status: "completed",
-      published_at: new Date().toISOString(),
-    });
-    if (brErr) throw brErr;
-  }
-  console.log("assignment briefs:", BRIEFS.length);
+  // The four Cambridge assignments. The wording lives in
+  // scripts/lib/default-briefs.mjs -- the same module scripts/publish-briefs.mjs
+  // writes into a real centre -- so the demo and a live centre cannot drift
+  // into two different versions of the same brief, which is exactly what had
+  // happened (the seed's own hand-written prompts here, Elmswood's uploaded
+  // PDF, and the wording spec all said different things).
+  //
+  // It also fixes a quiet compliance breach: this insert never set `format`,
+  // so all four took the column default 'structured' and the demo centre had
+  // ZERO continuous-prose assignments -- Handbook June 2025 9.2.1, "At least
+  // two of the assignments should be written in continuous prose."
+  const { written: briefsWritten } = await publishMissingBriefs(supabase, center.id);
+  console.log("assignment briefs:", briefsWritten.length);
 
   // --- Marking guidance: the centre's own standardisation evidence
   // (marking_guidance_entries, migration 0177), which the assessor pack's
@@ -1829,6 +1790,13 @@ async function main() {
       first_submitted_at: daysAgoIso(submittedDaysAgo),
       first_own_work_confirmed: true,
     });
+    // Which criteria a round was marked against. Handbook 9.2.3 -- a pass
+    // means EVERY criterion met, and a resubmission has to name the ones it
+    // does not. These were never seeded, so every passed assignment's cover
+    // sheet printed all criteria "Not met" beside the word Pass, and every
+    // returned assignment told the candidate to rewrite without saying
+    // against which criterion (9.2.2). `notMet` is chosen per candidate to
+    // match the tutor feedback that goes with it.
     const passedFirst = (submittedDaysAgo = 8) => ({
       first_status: "approved",
       first_submitted_at: daysAgoIso(submittedDaysAgo),
@@ -1838,8 +1806,9 @@ async function main() {
       marker_id: trainerId,
       final_grade: "Pass",
     });
-    const returnedForResub = (feedback, submittedDaysAgo = 6) => ({
+    const returnedForResub = (feedback, submittedDaysAgo = 6, notMet = []) => ({
       first_status: "resubmission_required",
+      notMet,
       first_submitted_at: daysAgoIso(submittedDaysAgo),
       first_content_grade: "fail",
       first_english_grade: "pass",
@@ -1847,14 +1816,14 @@ async function main() {
       marker_id: trainerId,
       tutor_feedback: feedback,
     });
-    const resubHandedBack = (feedback) => ({
-      ...returnedForResub(feedback, 9),
+    const resubHandedBack = (feedback, notMet = []) => ({
+      ...returnedForResub(feedback, 9, notMet),
       resubmission_status: "submitted",
       resubmission_submitted_at: daysAgoIso(1),
       resubmission_own_work_confirmed: true,
     });
-    const passedOnResub = (feedback) => ({
-      ...returnedForResub(feedback, 11),
+    const passedOnResub = (feedback, notMet = []) => ({
+      ...returnedForResub(feedback, 11, notMet),
       resubmission_status: "approved",
       resubmission_submitted_at: daysAgoIso(4),
       resubmission_content_grade: "pass",
@@ -1867,8 +1836,8 @@ async function main() {
       // marking action writes it.
       final_grade: "Pass (on resubmission)",
     });
-    const failedFinal = (feedback) => ({
-      ...returnedForResub(feedback, 12),
+    const failedFinal = (feedback, notMet = []) => ({
+      ...returnedForResub(feedback, 12, notMet),
       resubmission_status: "approved",
       resubmission_submitted_at: daysAgoIso(5),
       resubmission_content_grade: "fail",
@@ -1901,7 +1870,8 @@ async function main() {
         // FoL bounced back with feedback; LRT never came in and is now overdue.
         "Focus on Learner": returnedForResub(
           "A solid needs analysis, but the language problem is described, not analysed -- I could not see meaning, form and phonology treated separately, and the two remedial activities have no source. Rework section 3 and resubmit.",
-          6
+          6,
+          ["terminology", "referencing"]
         ),
         LRT: notStarted(),
         Skills: underReview(3),
@@ -1910,7 +1880,8 @@ async function main() {
       "Priya Sharma": {
         "Focus on Learner": passedFirst(10),
         LRT: passedOnResub(
-          "First version had the form right but the concept-checking questions gave the answer away. Reworked CCQs on the resubmission do the job -- passed."
+          "First version had the form right but the concept-checking questions gave the answer away. Reworked CCQs on the resubmission do the job -- passed.",
+          ["analysis"]
         ),
         Skills: underReview(2),
         LfC: notStarted(),
@@ -1919,7 +1890,8 @@ async function main() {
         "Focus on Learner": passedFirst(9),
         // Resubmission is back in and waiting on the second marker.
         LRT: resubHandedBack(
-          "Meaning and form are fine; phonology was thin -- no sentence stress or weak forms marked. Add a marked-up model and resubmit."
+          "Meaning and form are fine; phonology was thin -- no sentence stress or weak forms marked. Add a marked-up model and resubmit.",
+          ["analysis"]
         ),
         Skills: underReview(3),
         LfC: notStarted(),
@@ -1927,7 +1899,8 @@ async function main() {
       "Ines Marchetti": {
         // A terminal Fail after resubmission -- carries the warning letter.
         "Focus on Learner": failedFinal(
-          "The resubmission still does not analyse the language problem: meaning, form and phonology are asserted rather than worked through, and the remedial activities remain unreferenced. As the one resubmission is used, this is recorded as a Fail."
+          "The resubmission still does not analyse the language problem: meaning, form and phonology are asserted rather than worked through, and the remedial activities remain unreferenced. As the one resubmission is used, this is recorded as a Fail.",
+          ["terminology", "referencing"]
         ),
         LRT: passedFirst(7),
         Skills: underReview(4),
@@ -1941,7 +1914,7 @@ async function main() {
     };
 
     // Brief sections by type, for the submitted-text responses.
-    const sectionsByType = new Map(BRIEFS.map((b) => [b.type, b.sections]));
+    const sectionsByType = new Map(DEFAULT_BRIEFS.map((b) => [b.type, b.sections]));
 
     // Display titles for the per-candidate feedback announcements below --
     // the same strings ASSIGNMENT_INFO carries, so a seeded broadcast reads
@@ -1970,6 +1943,8 @@ async function main() {
       if (name === "Kofi Mensah") delete base.LRT; // seeded by malpractice below
       assignmentIds[name] = {};
       for (const [assignment_type, state] of Object.entries(base)) {
+        // `notMet` drives the criteria marks below; it is not a column.
+        const { notMet: _notMet, ...stateColumns } = state;
         const { data: row, error } = await supabase
           .from("assignments")
           .insert({
@@ -1977,7 +1952,21 @@ async function main() {
             trainee_id: trainees[name],
             assignment_type,
             due_date: cDay(DUE_DAY(assignment_type, def.half)),
-            ...state,
+            ...stateColumns,
+            // A marked round carries its criteria. A first round that passed
+            // meets all of them; one returned for resubmission fails the ones
+            // the tutor's own feedback talks about. A resubmission that
+            // passed meets all of them; one that failed still does not.
+            first_criteria_marks:
+              state.first_status === "approved"
+                ? criteriaMarks(assignment_type)
+                : state.first_status === "resubmission_required"
+                  ? criteriaMarks(assignment_type, state.notMet)
+                  : undefined,
+            resubmission_criteria_marks:
+              state.resubmission_status === "approved"
+                ? criteriaMarks(assignment_type, state.resubmission_outcome === "fail" ? state.notMet : [])
+                : undefined,
             // What submit_assignment_round would have written: handed in after
             // the deadline is late. The submitted-days-ago states above are
             // relative to today and the deadlines are course days, so the two

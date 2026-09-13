@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import type { Database } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -107,10 +108,45 @@ async function returnAssignment(
     return { error: "Pick a second marker before returning a resubmission decision." };
   }
 
+  const criteriaMarks = parseCriteriaMarks(formData);
+
+  // Handbook June 2025 9.2.3: "To reach Pass standard, a candidate's work
+  // must meet ALL the assessment criteria specified for the written
+  // assignments." And 9.2.2: "When the candidate has to resubmit an
+  // assignment, there should be clear feedback as to which areas need to be
+  // addressed LINKED TO the Cambridge assessment criteria."
+  //
+  // The marking screen said both of those in a caption and enforced neither:
+  // an unmarked criterion renders as "Not met", so the default state of the
+  // panel was every criterion not met -- and "Return with a pass" would
+  // still go through, printing a pass on a cover sheet whose criteria all
+  // read Not met. Equally, a resubmission could be issued with nothing
+  // marked not met, which is a rewrite request the candidate cannot link to
+  // any criterion. Checked here rather than in the form because this is the
+  // rule, not a convenience (13 Sep 2026).
+  if (assignmentRow?.assignment_type) {
+    const criteria = await getAssignmentCriteria(supabase, marker.center_id, assignmentRow.assignment_type);
+    if (criteria.length > 0) {
+      const unmet = criteria.filter((c) => criteriaMarks[c.key] !== true);
+      if (decision === "pass" && unmet.length > 0) {
+        return {
+          error:
+            unmet.length === criteria.length
+              ? "Mark the assessment criteria before returning a pass -- a pass needs every criterion met (Handbook 9.2.3)."
+              : `A pass needs every criterion met (Handbook 9.2.3). Still not met: ${unmet.map((c) => c.text).join("; ")}`,
+        };
+      }
+      if (decision !== "pass" && unmet.length === 0) {
+        return {
+          error:
+            "Mark at least one criterion Not met -- the candidate has to be told which criteria the work does not meet (Handbook 9.2.2).",
+        };
+      }
+    }
+  }
+
   const commentError = await saveComments(supabase, assignmentId, round, parseComments(formData));
   if (commentError) return { error: commentError };
-
-  const criteriaMarks = parseCriteriaMarks(formData);
   const status = decision === "resubmission_required" ? "resubmission_required" : "approved";
   // Handbook 9.2.3: the grade recorded on the record of written work is
   // "Pass", or on resubmission "Pass (on resubmission)" or "Fail". This was a

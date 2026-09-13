@@ -68,12 +68,35 @@ export async function updateAssignmentTemplateSections(
   return { error: null };
 }
 
+// Administration Handbook June 2025 9.2.1: "At least two of the assignments
+// should be written in continuous prose." Course Admin's copy of this action
+// has refused a non-compliant set since the rule was built; the trainer hub's
+// copy -- the door tutors actually use -- had no check at all, so the same
+// centre could publish four structured briefs through one screen and not the
+// other. Two doors onto one area enforce one rule (13 Sep 2026).
 export async function publishAssignmentTemplate(formData: FormData): Promise<void> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
   const templateId = formData.get("template_id");
   if (typeof templateId !== "string") return;
 
   const supabase = await createClient();
+  const { data: allTemplates } = await supabase
+    .from("assignment_templates")
+    .select("id, format, published_at")
+    .eq("center_id", trainer.center_id)
+    .neq("assignment_type", "Plagiarism Reflection");
+
+  const afterPublish = (allTemplates ?? []).map((t) =>
+    t.id === templateId ? { ...t, published_at: new Date().toISOString() } : t
+  );
+  // Only judged once the full set of four is published -- a half-built centre
+  // is not in breach of anything yet.
+  if (afterPublish.length === 4 && afterPublish.every((t) => t.published_at)) {
+    if (afterPublish.filter((t) => t.format === "prose").length < 2) {
+      redirect(`/trainer/assignment-briefs/${templateId}?publish_error=format_count`);
+    }
+  }
+
   await supabase
     .from("assignment_templates")
     .update({ published_at: new Date().toISOString() })

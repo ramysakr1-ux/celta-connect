@@ -12,11 +12,14 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 
 export default async function TrainerAssignmentBriefDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ publish_error?: string }>;
 }) {
   const trainer = await requireRole("trainer");
   const { id } = await params;
+  const { publish_error } = await searchParams;
   const supabase = await createClient();
 
   const { data: template } = await supabase.from("assignment_templates").select("*").eq("id", id).maybeSingle();
@@ -31,6 +34,12 @@ export default async function TrainerAssignmentBriefDetailPage({
         <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Resource hub</p>
         <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{ASSIGNMENT_INFO[template.assignment_type].title}</h1>
         <p className="mt-2 text-muted">Status: {template.generation_status}</p>
+        {publish_error === "format_count" ? (
+          <p className="mt-2 rounded-[6px] border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            Can&apos;t publish -- the centre&apos;s four briefs need at least two in continuous prose. Adjust a
+            brief&apos;s format before publishing this one.
+          </p>
+        ) : null}
         {template.generation_error ? <p className="mt-2 text-sm text-destructive">{template.generation_error}</p> : null}
         {template.generation_status === "pending" || template.generation_status === "failed" ? (
           <div className="mt-4">

@@ -68,8 +68,8 @@ export async function updateAssignmentTemplateSections(
   return { error: null };
 }
 
-// remaining-compliance.md item 1: exactly two of the centre's four briefs
-// must be academic prose (Syllabus, assessment requirements). Warned
+// Administration Handbook June 2025 9.2.1: "At least two of the assignments
+// should be written in continuous prose." Warned
 // non-blockingly on the edit page at any point, but refused here -- only
 // at the moment publishing this one would complete a full set of 4
 // published briefs with the wrong prose count. Can't judge "wrong count"
@@ -92,7 +92,7 @@ export async function publishAssignmentTemplate(formData: FormData): Promise<voi
   const completingFullPublishedSet = afterPublish.length === 4 && afterPublish.every((t) => t.published_at);
   if (completingFullPublishedSet) {
     const proseCount = afterPublish.filter((t) => t.format === "prose").length;
-    if (proseCount !== 2) {
+    if (proseCount < 2) {
       redirect(`/dashboard/admin/assignment-briefs/${templateId}?publish_error=format_count`);
     }
   }

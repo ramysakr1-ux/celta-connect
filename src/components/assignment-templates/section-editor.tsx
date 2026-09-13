@@ -61,7 +61,7 @@ export function SectionEditor({
             <option value="structured">Structured (sections/tables)</option>
           </select>
           <p className="text-xs text-muted">
-            The syllabus requires exactly two of the four assignments to be continuous prose.
+            The Handbook requires at least two of the four assignments to be continuous prose.
           </p>
           {formatWarning ? <p className="text-xs text-status-warning-text">{formatWarning}</p> : null}
         </div>

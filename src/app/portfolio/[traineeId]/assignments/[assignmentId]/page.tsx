@@ -373,7 +373,7 @@ export default async function AssignmentDetailPage({
             criteria={criteria.map((c) => ({ key: c.key, text: c.text }))}
             intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
-            format={assignment.assignment_type === "LRT" || assignment.assignment_type === "Skills" ? "structured" : "prose"}
+            format={template.format}
           />
         )
       ) : (
@@ -404,7 +404,7 @@ export default async function AssignmentDetailPage({
             }))}
             intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
-            format={assignment.assignment_type === "LRT" || assignment.assignment_type === "Skills" ? "structured" : "prose"}
+            format={template.format}
             // for-claude-code-trainee-interface.md: "can withdraw only
             // while it's unopened" -- round==="first" && locked===true
             // here specifically means "submitted, not yet approved" (see

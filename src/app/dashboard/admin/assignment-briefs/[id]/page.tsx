@@ -35,9 +35,14 @@ export default async function AdminAssignmentBriefDetailPage({
     // single-centre: per-centre brief wording; a branch owns its own
     .eq("center_id", admin.center_id);
   const proseCount = (allTemplates ?? []).filter((t) => t.format === "prose").length;
+  // Handbook June 2025 9.2.1: "At least two of the assignments should be
+  // written in continuous prose." This read `!== 2` until 13 Sep 2026, which
+  // also refused a centre that had made THREE prose -- allowed by the
+  // Handbook, and the newer, more specific document wins over the syllabus's
+  // looser "two of the assignments must be written in academic prose."
   const formatWarning =
-    (allTemplates ?? []).length === 4 && proseCount !== 2
-      ? `The syllabus needs exactly two of the four briefs in academic prose -- this centre currently has ${proseCount}.`
+    (allTemplates ?? []).length === 4 && proseCount < 2
+      ? `The Handbook needs at least two of the four briefs in continuous prose -- this centre currently has ${proseCount}.`
       : null;
 
   return (
@@ -47,7 +52,7 @@ export default async function AdminAssignmentBriefDetailPage({
         <p className="mt-2 text-muted">Status: {template.generation_status}</p>
         {publish_error === "format_count" ? (
           <p className="mt-2 rounded-[6px] border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            Can&apos;t publish -- the centre&apos;s four briefs need exactly two in academic prose. Adjust a
+            Can&apos;t publish -- the centre&apos;s four briefs need at least two in continuous prose. Adjust a
             brief&apos;s format before publishing this one.
           </p>
         ) : null}
