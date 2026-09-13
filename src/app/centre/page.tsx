@@ -442,7 +442,7 @@ export default async function CentreOverviewPage({
               13 Sep 2026. */}
           {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? (
             <Link
-              href="/centre/criteria-glossary"
+              href="/criteria-glossary"
               className="admin-hover-fill card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">

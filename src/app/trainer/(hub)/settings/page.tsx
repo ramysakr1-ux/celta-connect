@@ -65,7 +65,7 @@ export default async function TrainerSettingsPage() {
           so each change is recorded with your name.
         </p>
         <Link
-          href="/centre/criteria-glossary"
+          href="/criteria-glossary"
           className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
         >
           Open the glossary

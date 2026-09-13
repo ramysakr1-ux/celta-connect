@@ -5,7 +5,7 @@ import {
   removeGlossaryTerm,
   saveGlossaryTerm,
   setGlossaryTermEnabled,
-} from "@/app/centre/criteria-glossary/actions";
+} from "@/app/criteria-glossary/actions";
 
 export interface GlossaryTermView {
   term: string;

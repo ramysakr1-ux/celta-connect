@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { BackLink } from "@/components/back-link";
 import { glossaryEditorFor, getCentreGlossaryRows, getGlossaryChanges } from "@/lib/centre-glossary";
-import { CRITERIA_GLOSSARY, CRITERIA_LABELS_SAFE } from "@/app/centre/criteria-glossary/glossary-data";
-import { GlossaryEditorPanel } from "@/app/centre/criteria-glossary/glossary-editor";
+import { CRITERIA_GLOSSARY, CRITERIA_LABELS_SAFE } from "@/app/criteria-glossary/glossary-data";
+import { GlossaryEditorPanel } from "@/app/criteria-glossary/glossary-editor";
 import { formatDateTime } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -19,6 +19,11 @@ export const dynamic = "force-dynamic";
 // phrasing. This is where it grows, and the people who may change it are the
 // people who speak the shorthand — any tutor at the centre — plus the Centre
 // manager.
+//
+// NOT under /centre: that route group's layout redirects anyone without a
+// centre role, which is every tutor. The Centre management overview still
+// links here, so the door is where Ramy asked for it even though the address
+// is neutral.
 
 export default async function CriteriaGlossaryPage() {
   const session = await getCurrentProfile();

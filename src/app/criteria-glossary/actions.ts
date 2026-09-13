@@ -85,7 +85,7 @@ export async function saveGlossaryTerm(_prev: Result, formData: FormData): Promi
     changed_by: ctx.profile.id,
   });
 
-  revalidatePath("/centre/criteria-glossary");
+  revalidatePath("/criteria-glossary");
   return { error: null };
 }
 
@@ -135,7 +135,7 @@ export async function setGlossaryTermEnabled(formData: FormData): Promise<void> 
     changed_by: ctx.profile.id,
   });
 
-  revalidatePath("/centre/criteria-glossary");
+  revalidatePath("/criteria-glossary");
 }
 
 /** Removes one of the centre's OWN terms. A built-in is switched off, not removed. */
@@ -166,5 +166,5 @@ export async function removeGlossaryTerm(formData: FormData): Promise<void> {
     changed_by: ctx.profile.id,
   });
 
-  revalidatePath("/centre/criteria-glossary");
+  revalidatePath("/criteria-glossary");
 }
