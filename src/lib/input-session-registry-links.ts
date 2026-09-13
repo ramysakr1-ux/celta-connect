@@ -69,6 +69,17 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   // never been built. Titles read off the seeded timetable. ---
   "Error correction": "error-correction",
   "Giving feedback on tasks": "giving-feedback-on-tasks",
+
+  // --- The last three, ported 13 Sep 2026. Classroom management has TWO
+  // day-one slots: the core 60 minutes and the online extension, which is the
+  // same session read with the Zoom contrast in front of you (the monitoring
+  // simulation's own trainer note makes that comparison the point). Both
+  // titles map to it. ---
+  "Classroom management": "classroom-management",
+  "Classroom management / Zoom": "classroom-management",
+  "Teaching speaking": "teaching-speaking",
+  "Productive skills -- writing": "teaching-writing",
+  "Productive skills — writing": "teaching-writing",
 };
 
 /**

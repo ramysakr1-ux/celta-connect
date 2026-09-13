@@ -38,6 +38,9 @@ export const INPUT_SESSIONS: InputSessionMeta[] = [
   // nothing behind them and read as broken.
   { slug: "error-correction", title: "Error correction", minutes: "45 min", kind: "Classroom skills" },
   { slug: "giving-feedback-on-tasks", title: "Giving feedback on tasks", minutes: "45 min", kind: "Classroom skills" },
+  { slug: "classroom-management", title: "Classroom management", minutes: "60 min + 30", kind: "Classroom skills · day one" },
+  { slug: "teaching-speaking", title: "Teaching speaking", minutes: "45 min", kind: "Loop input · 1 of 2 productive skills" },
+  { slug: "teaching-writing", title: "Teaching writing", minutes: "45 min", kind: "Loop input · 2 of 2 productive skills" },
 ];
 
 export async function loadInputSessionComponent(slug: string): Promise<ComponentType | null> {
@@ -88,6 +91,12 @@ export async function loadInputSessionComponent(slug: string): Promise<Component
       return (await import("@/app/input-sessions/sessions/error-correction")).default;
     case "giving-feedback-on-tasks":
       return (await import("@/app/input-sessions/sessions/giving-feedback-on-tasks")).default;
+    case "classroom-management":
+      return (await import("@/app/input-sessions/sessions/classroom-management")).default;
+    case "teaching-speaking":
+      return (await import("@/app/input-sessions/sessions/teaching-speaking")).default;
+    case "teaching-writing":
+      return (await import("@/app/input-sessions/sessions/teaching-writing")).default;
     default:
       return null;
   }
