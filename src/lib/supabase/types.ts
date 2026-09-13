@@ -2713,6 +2713,11 @@ export interface Database {
           is_asynchronous: boolean;
           linked_live_session_event_id: string | null;
           input_session_criteria: string[];
+          // Migration 0301 -- which Connect Native input session this slot
+          // opens (src/app/input-sessions/registry.ts), chosen by a tutor.
+          // Null falls back to the title map in
+          // src/lib/input-session-registry-links.ts.
+          registry_slug: string | null;
           tp_group_scope_id: string | null;
           register_submitted_at: string | null;
           mode: "f2f" | "online" | null;

@@ -406,13 +406,14 @@ export default async function ResourceHubPage({
   // put them inside an input session card with my HTML input session and
   // move on." The real timetable's own sessions, every one of them for the
   // whole course (not just this week), never renamed -- linked to the real
-  // interactive Connect Native page only where TIMETABLE_TITLE_TO_INPUT_
-  // SESSION_SLUG confirms it's genuinely the same session, never guessed.
+  // interactive Connect Native page only where a tutor has picked one on the
+  // timetable, or where the title map confirms it's genuinely the same
+  // session. Never guessed.
   let courseInputSessions: { id: string; title: string; event_date: string; event_time: string | null; criteria: string[]; registrySlug: string | null; materials: (typeof resources)[number][] }[] = [];
   if (trainee.course_id) {
     const { data: allInputEvents } = await supabase
       .from("course_timetable_events")
-      .select("id, title, event_date, event_time, input_session_criteria")
+      .select("id, title, event_date, event_time, input_session_criteria, registry_slug")
       .eq("course_id", trainee.course_id)
       .eq("type", "input_session")
       .order("event_date")
@@ -424,7 +425,9 @@ export default async function ResourceHubPage({
       event_date: e.event_date,
       event_time: e.event_time,
       criteria: e.input_session_criteria ?? [],
-      registrySlug: inputSessionSlugForTitle(e.title),
+      // The tutor's own choice wins; the title map is the fallback for
+      // every slot nobody has picked for (migration 0301).
+      registrySlug: e.registry_slug ?? inputSessionSlugForTitle(e.title),
       materials: inputSessionResources.filter((r) => r.title.trim().toLowerCase() === e.title.trim().toLowerCase()),
     }));
   }

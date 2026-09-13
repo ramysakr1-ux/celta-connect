@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "@/lib/timetable-skeleton";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
@@ -153,6 +154,46 @@ export async function setInputSessionCriteria(formData: FormData): Promise<void>
   await supabase.from("course_timetable_events").update({ input_session_criteria: codes }).eq("id", eventId);
 
   revalidatePath("/trainer/timetable");
+}
+
+// Which interactive session this slot opens, chosen rather than guessed.
+//
+// The link between a timetable session and one of the Connect Native input
+// sessions was an exact match on the TITLE, hand-curated in
+// src/lib/input-session-registry-links.ts. That map is deliberately not fuzzy
+// -- guessing would silently point a candidate at the wrong content -- but it
+// means a centre that names a session anything the map has never seen gets a
+// card that will not open, and nothing anywhere says why. Ramy hit that three
+// times (29 Aug, 1 Sep, 13 Sep), and each "fix" was adding another title to a
+// list in the code, which is not a fix a centre can make.
+//
+// So a tutor picks it (migration 0301). A person's choice always wins over a
+// string match; the title map stays as the fallback for every slot nobody has
+// picked for.
+export async function setEventRegistrySlug(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const eventId = formData.get("event_id");
+  if (typeof eventId !== "string") return;
+
+  const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, course_id")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event || event.course_id !== trainer.course_id) return;
+
+  // Only a slug the registry actually has. A stale or mistyped value would
+  // give the candidate a dead link, which is the thing this closes.
+  const raw = (formData.get("registry_slug") as string | null)?.trim() ?? "";
+  const slug = INPUT_SESSIONS.some((s) => s.slug === raw) ? raw : null;
+  await supabase.from("course_timetable_events").update({ registry_slug: slug }).eq("id", eventId);
+
+  revalidatePath("/trainer/timetable");
+  revalidatePath("/portfolio/[traineeId]/resources", "page");
 }
 
 // Timetable View (standalone).html's per-card subtitle -- display-only free
