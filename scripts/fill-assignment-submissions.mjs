@@ -59,6 +59,10 @@ for (const a of assignments ?? []) {
   const existing = byAssignment.get(a.id) ?? [];
   const words = Object.values(text).reduce((n, t) => n + countWords(t), 0);
 
+  // The note goes on ONE section -- the one the tutor asked to be reworked --
+  // not on every one, which pushed a resubmission a hundred words over the
+  // maximum it is marked against.
+  const firstWritten = sections.find((sec) => text[sec.key])?.key;
   for (const sec of sections) {
     const body = text[sec.key];
     if (!body) continue;
@@ -71,7 +75,9 @@ for (const a of assignments ?? []) {
       // A resubmission is the same work with the criticised part reworked, so
       // it reads as the same essay -- not a different one.
       resubmission_response: submittedResub
-        ? body + `\n\nRevised after feedback: this section has been reworked to address the point raised on the first submission.`
+        ? sec.key === firstWritten
+          ? `${body}\n\nRevised after feedback to address the point raised on the first submission.`
+          : body
         : row?.resubmission_response ?? null,
     };
     if (apply) {

@@ -2014,7 +2014,9 @@ async function main() {
               `${sec.instruction} ${first} answers this from the course so far, with specific examples from their own lessons and the pooled observation log.`,
             resubmission_response: submittedTwice
               ? (written?.[sec.key]
-                  ? `${written[sec.key]}\n\nRevised after feedback: this section has been reworked to address the point raised on the first submission.`
+                  ? (idx === 0
+                      ? `${written[sec.key]}\n\nRevised after feedback to address the point raised on the first submission.`
+                      : written[sec.key])
                   : `Revised after feedback: ${first} reworks this section, addressing the tutor's comment directly.`)
               : null,
             first_comments: !firstMarked
