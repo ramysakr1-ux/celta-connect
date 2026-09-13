@@ -27,6 +27,8 @@ import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
 import { criteriaMarks } from "./lib/assignment-criteria-keys.mjs";
 import { submissionFor } from "./lib/assignment-submissions.mjs";
+import { appendicesFor } from "./lib/assignment-appendix-materials.mjs";
+import { renderAppendixPdf } from "./lib/appendix-pdf.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -2038,6 +2040,35 @@ async function main() {
           }));
           const { error: rErr } = await supabase.from("assignment_section_responses").insert(rows);
           if (rErr) throw rErr;
+
+          // Migration 0302. Focus on the Learner's brief tells the candidate
+          // to "Attach one task in Appendix 1" and "Appendix 2"; the Skills
+          // assignment is analysis OF a text (syllabus 2.3 marks "task design
+          // in relation to the text"). Seeding the essay without the material
+          // leaves both unmarkable, so the worksheets go in with it -- and
+          // they match the VARIANT the essay above describes.
+          const appendixSet = appendicesFor(assignment_type, activeDefs.indexOf(def));
+          for (const round of submittedTwice ? ["first", "resubmission"] : ["first"]) {
+            for (const spec of appendixSet) {
+              const buf = await renderAppendixPdf(spec);
+              const storagePath = `${center.id}/${trainees[name]}/${row.id}/${crypto.randomUUID()}.pdf`;
+              const up = await supabase.storage
+                .from("assignment-appendices")
+                .upload(storagePath, buf, { contentType: "application/pdf" });
+              if (up.error) throw up.error;
+              const { error: aErr } = await supabase.from("assignment_appendices").insert({
+                assignment_id: row.id,
+                round,
+                label: spec.label,
+                storage_path: storagePath,
+                file_name: spec.fileName,
+                mime_type: "application/pdf",
+                size_bytes: buf.length,
+                uploaded_by: trainees[name],
+              });
+              if (aErr) throw aErr;
+            }
+          }
         }
 
         // The announcement that closes the loop, matching returnAssignment's
