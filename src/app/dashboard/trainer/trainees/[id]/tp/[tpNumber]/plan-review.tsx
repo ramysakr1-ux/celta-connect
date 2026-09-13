@@ -104,10 +104,16 @@ export function PlanReview({
     ];
   }
 
+  // Ramy, 13 Sep 2026: "the criteria is already there. It doesn't jump out or
+  // appear as I type. It feels like it has already landed." It had: the part
+  // you clicked put its codes straight onto the note before you had written a
+  // word, which is the screen deciding on your behalf. The codes are OFFERED
+  // now -- outlined chips under the note, tap one to take it -- and a note is
+  // created carrying none.
   function addNote(anchor: string) {
     const point: FeedbackPoint = {
       text: "",
-      criteria_codes: suggestedCodesForAnchor(anchor),
+      criteria_codes: [],
       starred: false,
       anchor,
     };
@@ -507,8 +513,15 @@ function NoteCard({
 }) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   const [touched, setTouched] = useState(Boolean(note.point.text));
+  const [dismissed, setDismissed] = useState(false);
   const kindHue = note.kind === "strength" ? TEAL : GOLD_INK;
   const empty = !note.point.text.trim();
+
+  // What this part usually evidences, minus anything already on the note.
+  // Suggestions only -- they are not data until the tutor taps one.
+  const offered = dismissed
+    ? []
+    : suggestedCodesForAnchor(note.point.anchor ?? "").filter((c) => !note.point.criteria_codes.includes(c));
 
   useEffect(() => {
     if (autoFocus) ref.current?.focus();
@@ -614,10 +627,40 @@ function NoteCard({
               {code}
             </button>
           ))}
-          {!touched && note.point.criteria_codes.length > 0 ? (
-            <span className="italic" style={{ fontSize: 10.5, color: MUTED }}>
-              suggested for this part — edit in step 2
-            </span>
+
+          {/* Offered, not attached. Outlined and quiet until you take one. */}
+          {offered.length > 0 ? (
+            <>
+              {offered.map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => onChange({ criteria_codes: [...note.point.criteria_codes, code] })}
+                  title={`${CRITERIA_LABELS[code] ?? code} — click to add`}
+                  style={{
+                    borderRadius: 4,
+                    border: `1px dashed ${BORDER}`,
+                    padding: "0 6px",
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    color: MUTED,
+                  }}
+                >
+                  + {code}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setDismissed(true)}
+                title="Hide these suggestions for this note"
+                style={{ fontSize: 10.5, color: MUTED, padding: "0 2px" }}
+              >
+                ✕
+              </button>
+              <span className="italic" style={{ fontSize: 10.5, color: MUTED }}>
+                usual for this part — tap to add
+              </span>
+            </>
           ) : null}
         </div>
         {note.kind === "action" ? (
