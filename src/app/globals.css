@@ -1369,3 +1369,18 @@ h6 {
 .scroll-row::-webkit-scrollbar {
   display: none;
 }
+
+/* The "Hey Connect" indicator, while the microphone is open and waiting.
+   It has to be visible the whole time it is armed -- that is the basis on
+   which a tutor may leave it on during someone else's lesson (Ramy,
+   13 Sep 2026). Respects prefers-reduced-motion: the dot stays solid red
+   rather than pulsing, so it is never less visible, only less busy. */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+  }
+}

@@ -77,6 +77,19 @@ const PUNCTUATION_COMMANDS: [RegExp, string][] = [
 // dictate and stop, because then it'll just keep writing whatever you say."
 const STOP_COMMAND = /\b(?:stop dictation|stop dictating|stop listening|end dictation)\b[.,!?]?\s*/i;
 
+// The wake phrase, for the armed mode a tutor turns on for one lesson.
+// Deliberately two words with a distinctive vowel run: a CELTA classroom is
+// full of "listen", "repeat", "practice" and "now", and any of those as a wake
+// word would fire all lesson. Ramy chose it, 13 Sep 2026.
+export const WAKE_PHRASE = /\bhey,?\s*connect\b[.,!?]?\s*/i;
+
+/** Splits a finalised chunk at the wake phrase. `heard` false = keep waiting. */
+export function findWakePhrase(text: string): { heard: boolean; after: string } {
+  const m = WAKE_PHRASE.exec(text);
+  if (!m) return { heard: false, after: "" };
+  return { heard: true, after: text.slice(m.index + m[0].length).trim() };
+}
+
 export function findStopCommand(text: string): { stripped: string; stop: boolean } {
   if (!STOP_COMMAND.test(text)) return { stripped: text, stop: false };
   return { stripped: text.replace(STOP_COMMAND, "").trim(), stop: true };
@@ -109,11 +122,25 @@ export function startDictation({
   resolveField,
   onError,
   onEnd,
+  waitForWake = false,
+  onWake,
+  onSleep,
 }: {
   field: DictationField;
   resolveField?: () => DictationField | null;
   onError: (message: string) => void;
   onEnd: () => void;
+  /**
+   * Armed mode: the microphone is open but NOTHING is written until the wake
+   * phrase is heard. Everything spoken before it is discarded, never stored
+   * and never shown -- which is the whole basis on which a tutor may leave
+   * this on during someone else's lesson.
+   */
+  waitForWake?: boolean;
+  /** Told when the wake phrase lands and writing begins. */
+  onWake?: () => void;
+  /** Told when a spoken stop returns it to waiting, rather than ending it. */
+  onSleep?: () => void;
 }): DictationSession | null {
   const SpeechRecognitionCtor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
   if (!SpeechRecognitionCtor) return null;
@@ -121,6 +148,7 @@ export function startDictation({
   stopActiveRecognition?.();
 
   let userStopped = false;
+  let waiting = waitForWake;
   // `committed` is everything that is settled: whatever was in the field when
   // we started, plus every finalised chunk since. `lastWritten` is what we
   // actually put in the field last time, which is `committed` plus whatever
@@ -176,6 +204,25 @@ export function startDictation({
       if (result.isFinal) finalChunk += transcript;
       else interimChunk += transcript;
     }
+    // Armed and still waiting: throw away everything, look only for the wake
+    // phrase. Interim results are not even examined -- a half-heard syllable
+    // must never open the field.
+    if (waiting) {
+      if (!finalChunk) return;
+      const { heard, after } = findWakePhrase(finalChunk);
+      if (!heard) return;
+      waiting = false;
+      committed = target.value;
+      lastWritten = target.value;
+      onWake?.();
+      if (after) {
+        committed = joinText(committed, applyPunctuationCommands(after));
+        setFieldValue(target, committed);
+        lastWritten = committed;
+      }
+      return;
+    }
+
     let stopRequested = false;
     if (finalChunk) {
       const { stripped, stop: asked } = findStopCommand(finalChunk);
@@ -187,7 +234,16 @@ export function startDictation({
     const next = stopRequested ? committed : joinText(committed, interimChunk);
     setFieldValue(target, next);
     lastWritten = next;
-    if (stopRequested) stop();
+    if (stopRequested) {
+      // Armed, a spoken stop puts it back to waiting rather than closing the
+      // microphone -- that is what being armed for the lesson means.
+      if (waitForWake) {
+        waiting = true;
+        onSleep?.();
+      } else {
+        stop();
+      }
+    }
   };
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {

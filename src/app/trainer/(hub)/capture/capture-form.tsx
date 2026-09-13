@@ -2,7 +2,8 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { captureTeachingPoint, type CaptureFormState } from "@/app/trainer/(hub)/capture/actions";
-import { VoiceTextarea } from "@/components/voice-textarea";
+import { DictationScope, DictateButton, WakeWordToggle } from "@/components/dictate-anywhere";
+import { autosizeOnInput } from "@/lib/autosize";
 
 const initialState: CaptureFormState = { error: null, savedAt: null };
 
@@ -31,7 +32,8 @@ export function CaptureForm({
   }, [state.savedAt]);
 
   return (
-    <form ref={formRef} action={formAction} className="sheet flex flex-col gap-4">
+    <DictationScope scopeId="capture-point">
+    <form id="capture-point" ref={formRef} action={formAction} className="sheet flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted">Who</span>
@@ -65,12 +67,21 @@ export function CaptureForm({
         </label>
       </div>
 
-      <VoiceTextarea
+      <textarea
         name="text"
         rows={4}
-        placeholder="Type or tap Dictate -- a strength, an action point, anything to remember for the feedback form later."
+        data-dictate-label="the point you are capturing"
+        placeholder="Type, dictate, or say “Hey Connect” -- a strength, an action point, anything to remember for the feedback form later."
+        onInput={autosizeOnInput}
         className="w-full rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
       />
+
+      {/* This screen is the one being used mid-lesson, hands on nothing, which
+          is where "Hey Connect" earns itself. Armed for this lesson only. */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <DictateButton variant="bar" />
+        <WakeWordToggle />
+      </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       {justSaved ? <p className="text-sm text-primary">Captured.</p> : null}
@@ -83,5 +94,6 @@ export function CaptureForm({
         {pending ? "Capturing…" : "Capture point"}
       </button>
     </form>
+    </DictationScope>
   );
 }

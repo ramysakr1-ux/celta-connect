@@ -6,7 +6,7 @@ import { FeedbackPointEditor } from "@/app/dashboard/trainer/trainees/[id]/tp/[t
 import { PlanReview } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/plan-review";
 import { deleteCaptureNote } from "@/app/trainer/(hub)/capture/actions";
 import { TutorToneTextarea } from "@/components/tutor-tone-textarea";
-import { DictationScope } from "@/components/dictate-anywhere";
+import { DictationScope, WakeWordToggle } from "@/components/dictate-anywhere";
 import {
   BAND,
   BAR_BORDER,
@@ -449,6 +449,8 @@ export function FeedbackForm({
           }
         >
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {/* Tutor-side only, and never on a candidate's own plan. */}
+          <WakeWordToggle />
           <SaveDraftButton pending={draftPending} disabled={draftPending || submitPending} />
           {step < 3 ? (
             <button

@@ -20,9 +20,12 @@ import { dictationSupported, isDictationField, startDictation, type DictationFie
 type DictationState = {
   supported: boolean;
   listening: boolean;
+  /** Armed: the microphone is open, waiting for "Hey Connect". */
+  armed: boolean;
   error: string | null;
   fieldLabel: string | null;
   toggle: () => void;
+  toggleArmed: () => void;
 };
 
 const DictationContext = createContext<DictationState | null>(null);
@@ -30,6 +33,7 @@ const DictationContext = createContext<DictationState | null>(null);
 export function DictationScope({ scopeId, children }: { scopeId: string; children: React.ReactNode }) {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
+  const [armed, setArmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldLabel, setFieldLabel] = useState<string | null>(null);
   const fieldRef = useRef<DictationField | null>(null);
@@ -108,6 +112,7 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
     field.focus();
     const session = startDictation({
       field,
+      waitForWake: false,
       // Re-read on every result so the cursor, not the click that started the
       // session, decides where the words land.
       resolveField: () => {
@@ -126,11 +131,51 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
     setListening(true);
   }, [scopeId]);
 
+  // "Hey Connect" — armed for one lesson, never remembered, never on by
+  // default. While armed the microphone is open but nothing is written until
+  // the phrase is heard, and everything before it is discarded unheard.
+  // Ramy authorised it 13 Sep 2026, on those terms.
+  const toggleArmed = useCallback(() => {
+    if (sessionRef.current) {
+      sessionRef.current.stop();
+      sessionRef.current = null;
+      setListening(false);
+      setArmed(false);
+      return;
+    }
+    const field = fieldRef.current;
+    if (!field || !field.isConnected) {
+      setError("Click into a field first, so it knows where to write.");
+      return;
+    }
+    setError(null);
+    const session = startDictation({
+      field,
+      waitForWake: true,
+      resolveField: () => {
+        const active = document.activeElement;
+        if (isDictationField(active) && document.getElementById(scopeId)?.contains(active)) return active;
+        return fieldRef.current;
+      },
+      onWake: () => setListening(true),
+      onSleep: () => setListening(false),
+      onError: (message) => setError(message),
+      onEnd: () => {
+        sessionRef.current = null;
+        setListening(false);
+        setArmed(false);
+      },
+    });
+    if (!session) return;
+    sessionRef.current = session;
+    setArmed(true);
+  }, [scopeId]);
+
   startRef.current = toggle;
 
   const value = useMemo(
-    () => ({ supported, listening, error, fieldLabel, toggle }),
-    [supported, listening, error, fieldLabel, toggle]
+    () => ({ supported, listening, armed, error, fieldLabel, toggle, toggleArmed }),
+    [supported, listening, armed, error, fieldLabel, toggle, toggleArmed]
   );
   return <DictationContext.Provider value={value}>{children}</DictationContext.Provider>;
 }
@@ -199,6 +244,55 @@ export function DictateButton({
       {label}
       {hint ? <span style={{ opacity: 0.6, fontWeight: 600 }}>{hint}</span> : null}
     </button>
+  );
+}
+
+/**
+ * The "Hey Connect" control. Deliberately a separate, opt-in pill beside
+ * Dictate rather than a setting: it is armed for ONE lesson, from this screen,
+ * and it is visibly on the whole time it is armed. Only the tutor-side screens
+ * render it -- never a candidate's own plan.
+ */
+export function WakeWordToggle() {
+  const ctx = useContext(DictationContext);
+  if (!ctx?.supported) return null;
+  const { armed, listening, toggleArmed } = ctx;
+
+  return (
+    <span className="inline-flex items-center gap-2">
+      <button
+        type="button"
+        onClick={toggleArmed}
+        aria-pressed={armed}
+        title={
+          armed
+            ? "The microphone is open, waiting for “Hey Connect”. Nothing is written until it hears it."
+            : "Open the microphone for this lesson and wait for “Hey Connect”. Nothing is recorded or written until you say it."
+        }
+        className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold"
+        style={
+          armed
+            ? { borderColor: DESTRUCTIVE, background: `color-mix(in oklab, ${DESTRUCTIVE} 10%, transparent)`, color: DESTRUCTIVE }
+            : { borderColor: "var(--color-border)", color: "var(--color-muted)" }
+        }
+      >
+        {armed ? (
+          <span
+            aria-hidden
+            className="inline-block size-2 rounded-full"
+            style={{ background: DESTRUCTIVE, animation: "pulse 1.6s ease-in-out infinite" }}
+          />
+        ) : (
+          <span aria-hidden>🎙</span>
+        )}
+        {armed ? (listening ? "Hey Connect — writing" : "Hey Connect — waiting") : "Hey Connect"}
+      </button>
+      {armed ? (
+        <span className="text-[11px] leading-tight" style={{ color: "var(--color-muted)", maxWidth: 190 }}>
+          Microphone open for this lesson. Nothing is written until you say it.
+        </span>
+      ) : null}
+    </span>
   );
 }
 
