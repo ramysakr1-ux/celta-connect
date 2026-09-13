@@ -134,29 +134,6 @@ export default async function TpDetailPage({
   // this TP number maps to. Admin client throughout: volunteer_declines'
   // RLS has no trainee policy (0143_volunteer_declines.sql), and this page
   // already uses `admin` for peer-observation reads above.
-  let volunteerAttendance: { expected: number; total: number } | null = null;
-  if (trainee.course_id) {
-    const { data: tpCalendarEvent } = await admin
-      .from("course_timetable_events")
-      .select("id")
-      .eq("course_id", trainee.course_id)
-      .eq("type", "tp")
-      .eq("linked_tp_number", tpNumber)
-      .maybeSingle();
-    if (tpCalendarEvent) {
-      const { data: courseVolunteers } = await admin.from("volunteer_students").select("id").eq("course_id", trainee.course_id).is("removed_at", null);
-      const courseVolunteerIds = (courseVolunteers ?? []).map((v) => v.id);
-      if (courseVolunteerIds.length > 0) {
-        const { data: declines } = await admin
-          .from("volunteer_declines")
-          .select("volunteer_student_id")
-          .eq("timetable_event_id", tpCalendarEvent.id)
-          .in("volunteer_student_id", courseVolunteerIds);
-        volunteerAttendance = { total: courseVolunteerIds.length, expected: courseVolunteerIds.length - (declines?.length ?? 0) };
-      }
-    }
-  }
-
   // specs/build-spec.md "Peer observation" -- a peer only ever sees this
   // one panel for someone else's lesson, never their plan, self-eval, or
   // tutor feedback. Returns early, before any of those get fetched.
@@ -225,6 +202,60 @@ export default async function TpDetailPage({
   const lessonDate = trainee.course_id ? await tpLessonDate(supabase, trainee.course_id, traineeId, tpNumber) : null;
   const centreToday = toLocalIso(new Date(), (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
   const lessonTaught = Boolean(assignment?.taught_at) || Boolean(lessonDate && lessonDate <= centreToday);
+
+  let volunteerAttendance: { expected: number; total: number } | null = null;
+  // How many learners are expected at THIS candidate's lesson.
+  //
+  // This used to look up "the" timetable event for the TP number with
+  // maybeSingle(). Two groups teach in parallel, six lessons a day across two
+  // days, so TP8 has TWELVE events on this course -- maybeSingle() errored and
+  // the count came back null for every TP on every course, which is why it had
+  // never appeared. Found 13 Sep 2026 when Ramy asked for it on the plan.
+  //
+  // The candidate's own lesson date and TP group narrow it to their slot, the
+  // same derivation tpLessonDate uses.
+  if (trainee.course_id && lessonDate) {
+    const { data: membership } = await admin
+      .from("course_subgroup_members")
+      .select("subgroup_id")
+      .eq("trainee_id", traineeId)
+      .maybeSingle();
+    const { data: subgroup } = membership?.subgroup_id
+      ? await admin.from("course_subgroups").select("tp_group_id").eq("id", membership.subgroup_id).maybeSingle()
+      : { data: null };
+
+    const { data: dayEvents } = await admin
+      .from("course_timetable_events")
+      .select("id, tp_group_scope_id")
+      .eq("course_id", trainee.course_id)
+      .eq("type", "tp")
+      .eq("linked_tp_number", tpNumber)
+      .eq("event_date", lessonDate);
+    const eventIds = (dayEvents ?? [])
+      .filter((e) => !subgroup?.tp_group_id || !e.tp_group_scope_id || e.tp_group_scope_id === subgroup.tp_group_id)
+      .map((e) => e.id);
+
+    if (eventIds.length > 0) {
+      const { data: courseVolunteers } = await admin
+        .from("volunteer_students")
+        .select("id")
+        .eq("course_id", trainee.course_id)
+        .is("removed_at", null);
+      const courseVolunteerIds = (courseVolunteers ?? []).map((v) => v.id);
+      if (courseVolunteerIds.length > 0) {
+        const { data: declines } = await admin
+          .from("volunteer_declines")
+          .select("volunteer_student_id")
+          .in("timetable_event_id", eventIds)
+          .in("volunteer_student_id", courseVolunteerIds);
+        // A volunteer who declined any of their group's slots that day is not
+        // coming to this one either; counted once however many they declined.
+        const declined = new Set((declines ?? []).map((d) => d.volunteer_student_id));
+        volunteerAttendance = { total: courseVolunteerIds.length, expected: courseVolunteerIds.length - declined.size };
+      }
+    }
+  }
+
 
   if (!assignment) {
     return (
