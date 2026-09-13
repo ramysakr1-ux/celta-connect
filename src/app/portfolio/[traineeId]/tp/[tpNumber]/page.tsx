@@ -735,6 +735,7 @@ export default async function TpDetailPage({
               lessonTitle={assignment.main_lesson_aim}
               lessonWhen={lessonWhen}
               level={coursebook?.level ?? null}
+              learners={volunteerAttendance}
             />
 
             <div id="materials" className="scroll-mt-20">

@@ -99,6 +99,7 @@ export function LessonPlanForm({
   lessonTitle = null,
   lessonWhen = null,
   level = null,
+  learners = null,
 }: {
   tpNumber: number;
   plan: TpPlan | null;
@@ -111,6 +112,13 @@ export function LessonPlanForm({
   lessonWhen?: string | null;
   /** The class level, e.g. "B1+". */
   level?: string | null;
+  /**
+   * How many learners are expected, and how many are on the register.
+   * Ramy, 13 Sep 2026 -- it was on the page header only, and the moment it
+   * matters is while you are writing the class profile and deciding how many
+   * handouts to print.
+   */
+  learners?: { expected: number; total: number } | null;
 }) {
   const locked = Boolean(plan?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveLessonPlanDraft, initialState);
@@ -230,7 +238,18 @@ export function LessonPlanForm({
     );
   }
 
-  const eyebrow = [`Teaching Practice ${tpNumber}`, lessonWhen, level, `${TP_LESSON_LENGTH_MINUTES} minutes`]
+  const learnerLine = learners
+    ? learners.expected === learners.total
+      ? `${learners.total} ${learners.total === 1 ? "learner" : "learners"}`
+      : `${learners.expected} of ${learners.total} learners coming`
+    : null;
+  const eyebrow = [
+    `Teaching Practice ${tpNumber}`,
+    lessonWhen,
+    level,
+    learnerLine,
+    `${TP_LESSON_LENGTH_MINUTES} minutes`,
+  ]
     .filter(Boolean)
     .join(" · ");
 
