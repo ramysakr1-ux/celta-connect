@@ -73,6 +73,13 @@ const TAGS: Record<string, string[]> = {
 //   4d  materials with a professional appearance and copyright -- a planning
 //       point inside Lesson planning, not a session of its own.
 //
+// And the wider point Ramy made straight after: "not everything has to be
+// connected directly to an input session... the planning part, the feedback,
+// also has a role to play, not just input sessions." A criterion with no
+// session beside it is not a hole in the course. This map only ever claimed
+// to show what the INPUT SESSIONS cover; supervised planning, TP feedback,
+// tutorials and the portfolio carry the rest.
+//
 // Listed so the map says where each one IS covered instead of crying wolf.
 const COVERED_BY_COURSE: Record<string, string> = {
   "1b": "the learner interviews, from TP3 on",
@@ -124,6 +131,9 @@ for (const e of events ?? []) {
   }
 }
 
+console.log("What the INPUT SESSIONS cover. Supervised planning, TP feedback,");
+console.log("tutorials and the portfolio carry criteria too -- this is not the");
+console.log("whole course, and a blank line here is not a hole in it.\n");
 console.log("CRITERION            FIRST   TAUGHT IN");
 console.log("-".repeat(78));
 for (const code of Object.keys(CRITERIA_LABELS)) {
