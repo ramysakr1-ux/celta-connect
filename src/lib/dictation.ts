@@ -68,6 +68,20 @@ const PUNCTUATION_COMMANDS: [RegExp, string][] = [
   [/\bapostrophe\b/gi, "'"],
 ];
 
+// Said out loud, these end the session. Matched on finalised speech only, and
+// the words themselves never reach the field.
+//
+// Ramy, 13 Sep 2026, on dictating while observing a lesson: "I have to go back
+// to the pill and stop it from there... there's a lot of stress when you're
+// observing. You don't want to have to keep going back and forth between
+// dictate and stop, because then it'll just keep writing whatever you say."
+const STOP_COMMAND = /\b(?:stop dictation|stop dictating|stop listening|end dictation)\b[.,!?]?\s*/i;
+
+export function findStopCommand(text: string): { stripped: string; stop: boolean } {
+  if (!STOP_COMMAND.test(text)) return { stripped: text, stop: false };
+  return { stripped: text.replace(STOP_COMMAND, "").trim(), stop: true };
+}
+
 export function applyPunctuationCommands(text: string): string {
   let result = text;
   for (const [pattern, replacement] of PUNCTUATION_COMMANDS) {
@@ -162,12 +176,18 @@ export function startDictation({
       if (result.isFinal) finalChunk += transcript;
       else interimChunk += transcript;
     }
+    let stopRequested = false;
     if (finalChunk) {
-      committed = joinText(committed, applyPunctuationCommands(finalChunk));
+      const { stripped, stop: asked } = findStopCommand(finalChunk);
+      stopRequested = asked;
+      if (stripped) committed = joinText(committed, applyPunctuationCommands(stripped));
     }
-    const next = joinText(committed, interimChunk);
+    // A spoken stop ends the session, and the interim guess for the words that
+    // ended it is dropped rather than left hanging in the field.
+    const next = stopRequested ? committed : joinText(committed, interimChunk);
     setFieldValue(target, next);
     lastWritten = next;
+    if (stopRequested) stop();
   };
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {

@@ -52,6 +52,23 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
     };
   }, [scopeId]);
 
+  // Escape ends it, from wherever the cursor is. A tutor dictating during an
+  // observation should never have to find the pill again to stop -- Ramy,
+  // 13 Sep 2026. Capture phase so it fires before a menu swallows the key, and
+  // only while listening, so Escape still closes menus the rest of the time.
+  useEffect(() => {
+    if (!listening) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      sessionRef.current?.stop();
+      sessionRef.current = null;
+      setListening(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [listening]);
+
   const toggle = useCallback(() => {
     if (sessionRef.current) {
       sessionRef.current.stop();
@@ -126,7 +143,7 @@ export function DictateButton({
   const label = !supported
     ? "Not supported here"
     : listening
-      ? "Listening — speak into the field"
+      ? "Listening — Esc or say \u201cstop dictation\u201d"
       : fieldLabel
         ? "Dictate"
         : "Click into a field first";
@@ -208,7 +225,7 @@ function InlineDictate() {
         {error ? (
           <span className="text-destructive">{error}</span>
         ) : listening ? (
-          `Listening — speak into ${fieldLabel ?? "the box"}`
+          `Listening — Esc, or say “stop dictation”`
         ) : fieldLabel ? (
           `Into ${fieldLabel}`
         ) : (
