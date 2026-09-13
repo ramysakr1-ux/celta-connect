@@ -46,9 +46,16 @@ type CaptureNote = { id: string; text: string; criteria_codes: string[]; capture
 
 const initialState: FormState = { error: null };
 
+// The WHOLE self-evaluation, not three lines of it. Ramy, 13 Sep 2026: "I want
+// to see the self-eval." A tutor writing a comment on it was being shown three
+// quoted fields out of six, with the evidence of learning, what they would do
+// differently and what they did about the last TP's action points all missing
+// -- which are the parts a tutor most wants to answer.
 const SELF_EVAL_QUOTE_FIELDS: { key: keyof SelfEvaluation; label: string }[] = [
   { key: "what_went_well", label: "What went to plan?" },
-  { key: "what_not_as_planned", label: "What didn't go as planned" },
+  { key: "what_not_as_planned", label: "What didn't go as planned, and why?" },
+  { key: "evidence_of_learning", label: "Evidence the learners had learnt" },
+  { key: "what_differently", label: "What they'd do differently" },
   { key: "next_tp_focus", label: "Focus for next TP" },
 ];
 
@@ -383,8 +390,39 @@ export function FeedbackForm({
                           </div>
                         );
                       })}
+                      {(selfEvaluation.action_points ?? []).some((a) => a.previous_point || a.what_i_did) ? (
+                        <div style={{ borderTop: `1px solid ${FAINT}`, paddingTop: 8 }}>
+                          <p
+                            className="uppercase"
+                            style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: MUTED }}
+                          >
+                            What they did about your last action points
+                          </p>
+                          {(selfEvaluation.action_points ?? []).map((a, i) =>
+                            a.previous_point || a.what_i_did ? (
+                              <p key={i} style={{ fontSize: 12.5, lineHeight: 1.5, color: INK_WARM, marginTop: 3 }}>
+                                {a.carried ? <span style={{ color: GOLD_INK }}>★ </span> : null}
+                                {a.previous_point}
+                                {a.what_i_did ? (
+                                  <>
+                                    {" "}
+                                    <span style={{ color: TEAL }}>→</span>{" "}
+                                    <span className="font-serif italic" style={{ color: INK }}>
+                                      {a.what_i_did}
+                                    </span>
+                                  </>
+                                ) : null}
+                              </p>
+                            ) : null
+                          )}
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
+                  ) : (
+                    <p className="italic" style={{ fontSize: 12, color: MUTED, marginLeft: 12 }}>
+                      They haven&apos;t written their self-evaluation yet.
+                    </p>
+                  )}
                   <TutorToneTextarea
                     enabled={toneAssistEnabled}
                     name="self_eval_comment"

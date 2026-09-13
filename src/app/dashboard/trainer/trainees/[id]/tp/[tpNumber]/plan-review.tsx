@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { matchCriteriaCodes } from "@/lib/criteria-glossary";
-import { suggestedCodesForAnchor, type FeedbackPoint } from "@/lib/tp-plan-content";
+import {
+  ANALYSIS_SHEETS,
+  TP_LESSON_LENGTH_MINUTES,
+  suggestedCodesForAnchor,
+  sumProcedureMinutes,
+  type FeedbackPoint,
+} from "@/lib/tp-plan-content";
 import { autosizeOnInput, useAutosize } from "@/lib/autosize";
 import {
   BORDER,
@@ -87,6 +93,8 @@ export function PlanReview({
   const vocabRows = languageAnalysis?.vocab_rows ?? [];
   const laBlocks = languageAnalysis?.blocks ?? [];
   const hueFor = (i: number) => (plan.framework_used ? STAGE_HUES[i % STAGE_HUES.length] : BORDER);
+  const totalMinutes = sumProcedureMinutes(procedure);
+  const overBy = totalMinutes - TP_LESSON_LENGTH_MINUTES;
 
   // The rail, in the order the parts appear in the plan.
   const rail: RailNote[] = [
@@ -194,6 +202,30 @@ export function PlanReview({
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* ---------------- the plan, as parts ---------------- */}
         <div style={{ borderRight: `1px solid ${FAINT}` }}>
+          {/* The shape and the time budget are part of the plan the candidate
+              handed in, so the tutor reads them here too. Ramy, 13 Sep 2026:
+              "I want to see the entire lesson plan." */}
+          <div
+            className="flex flex-wrap items-center justify-between gap-3"
+            style={{ borderBottom: `1px solid ${FAINT}`, padding: "10px 26px" }}
+          >
+            <span style={{ fontSize: 12.5, color: MUTED }}>
+              Shape:{" "}
+              <span style={{ fontWeight: 600, color: plan.framework_used ? TEAL : MUTED }}>
+                {plan.framework_used || "none chosen"}
+              </span>
+            </span>
+            <span style={{ fontSize: 12.5, color: MUTED }}>
+              <span className="font-serif" style={{ fontSize: 16, color: INK }}>
+                {totalMinutes}
+              </span>{" "}
+              of {TP_LESSON_LENGTH_MINUTES} min ·{" "}
+              <span style={{ fontWeight: 600, color: overBy > 0 ? GOLD_INK : TEAL }}>
+                {overBy > 0 ? `over by ${overBy} min` : overBy === 0 ? "fits exactly" : `${-overBy} min spare`}
+              </span>
+            </span>
+          </div>
+
           <div {...partProps("aims")}>
             <PartHead
               label="Aims"
@@ -354,19 +386,53 @@ export function PlanReview({
 
               {laBlocks.map((block, i) => {
                 const anchor = `block-${i + 1}`;
+                const sheet = languageAnalysis.type !== "vocab" ? ANALYSIS_SHEETS[languageAnalysis.type] : null;
                 return (
                   <div key={anchor} {...partProps(anchor)}>
                     <PartHead
-                      label={block.item ? `Structure ${i + 1} · ${block.item}` : `Structure ${i + 1}`}
+                      label={
+                        block.item
+                          ? `${sheet?.blockName ?? "Structure"} ${i + 1} · ${block.item}`
+                          : `${sheet?.blockName ?? "Structure"} ${i + 1}`
+                      }
                       colour={GOLD_INK}
                       notes={notesOn(anchor)}
                       onComment={() => addNote(anchor)}
                     />
-                    {block.meaning ? (
-                      <p style={{ marginLeft: 12, marginTop: 6, fontSize: 13, lineHeight: 1.55, color: INK_WARM, whiteSpace: "pre-line" }}>
-                        {block.meaning}
-                      </p>
-                    ) : null}
+                    {/* Every field the candidate filled in. This used to show
+                        the meaning analysis alone, so a tutor asked to comment
+                        on the sheet could not see the marker sentences, the
+                        form, the phonology or a single problem/solution pair
+                        -- most of what criterion 4i is actually about. */}
+                    <div className="mt-1.5 flex flex-col gap-1.5" style={{ marginLeft: 12 }}>
+                      {(sheet?.fields ?? []).map((field) => {
+                        const value = block[field.key];
+                        if (field.type === "pairs") {
+                          const pairs = (value as { problem: string; solution: string }[] | undefined) ?? [];
+                          const real = pairs.filter((x) => x?.problem || x?.solution);
+                          if (real.length === 0) return null;
+                          return (
+                            <div key={String(field.key)}>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED }}>{field.label}</p>
+                              {real.map((pair, pi) => (
+                                <p key={pi} style={{ fontSize: 12.5, lineHeight: 1.5, color: INK }}>
+                                  {pair.problem} <span style={{ color: TEAL }}>→</span>{" "}
+                                  <span style={{ color: INK_WARM }}>{pair.solution}</span>
+                                </p>
+                              ))}
+                            </div>
+                          );
+                        }
+                        const text = ((value as string | undefined) ?? "").trim();
+                        if (!text || field.key === "item") return null;
+                        return (
+                          <div key={String(field.key)}>
+                            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED }}>{field.label}</p>
+                            <p style={{ fontSize: 12.5, lineHeight: 1.5, color: INK, whiteSpace: "pre-line" }}>{text}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}
