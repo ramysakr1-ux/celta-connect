@@ -108,8 +108,14 @@ export function dictationSupported(): boolean {
 }
 
 export interface DictationSession {
-  /** Ends the session. Safe to call more than once. */
+  /** Ends the session and closes the microphone. Safe to call more than once. */
   stop: () => void;
+  /**
+   * Armed sessions only: stop writing, keep the microphone open and go back to
+   * waiting for the wake phrase. What Escape and a spoken stop both do while
+   * armed, so there is exactly one way to close the microphone -- the pill.
+   */
+  sleep: () => void;
 }
 
 /**
@@ -263,6 +269,14 @@ export function startDictation({
     onEnd();
   };
 
+  const sleep = () => {
+    if (!waitForWake) {
+      stop();
+      return;
+    }
+    waiting = true;
+  };
+
   recognition.start();
-  return { stop };
+  return { stop, sleep };
 }

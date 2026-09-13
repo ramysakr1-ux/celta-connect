@@ -37,7 +37,7 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
   const [error, setError] = useState<string | null>(null);
   const [fieldLabel, setFieldLabel] = useState<string | null>(null);
   const fieldRef = useRef<DictationField | null>(null);
-  const sessionRef = useRef<{ stop: () => void } | null>(null);
+  const sessionRef = useRef<{ stop: () => void; sleep: () => void } | null>(null);
   const startRef = useRef<(() => void) | null>(null);
 
   useEffect(() => setSupported(dictationSupported()), []);
@@ -88,13 +88,22 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.stopPropagation();
+      // Armed, Escape does what saying "stop dictation" does: stop writing,
+      // keep the microphone open, wait for the phrase again. Only the pill
+      // closes the microphone, so there is one off switch and it is the one
+      // showing red.
+      if (armed) {
+        sessionRef.current?.sleep();
+        setListening(false);
+        return;
+      }
       sessionRef.current?.stop();
       sessionRef.current = null;
       setListening(false);
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [listening]);
+  }, [listening, armed]);
 
   const toggle = useCallback(() => {
     if (sessionRef.current) {
