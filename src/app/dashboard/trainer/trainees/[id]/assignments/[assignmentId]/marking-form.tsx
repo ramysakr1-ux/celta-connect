@@ -27,6 +27,7 @@ import {
   TEAL,
 } from "@/lib/sheet-tokens";
 import { IdentityBand, MarkerLabel, NumberedDot, Strip, TpSheet, Eyebrow, plainField } from "@/components/tp-sheet";
+import { formatDate } from "@/lib/format-date";
 import { appendixDownloadUrl } from "@/app/dashboard/trainee/assignments/[assignmentId]/appendix-actions";
 import { autosizeOnInput, useAutosize } from "@/lib/autosize";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
@@ -159,6 +160,7 @@ export function AssignmentMarkingForm({
   secondMarkerOptions,
   submittedLabel,
   appendices = [],
+  timeZone,
 }: {
   assignmentId: string;
   candidateName: string;
@@ -190,6 +192,15 @@ export function AssignmentMarkingForm({
   submittedLabel: string;
   /** Migration 0302 -- what the candidate attached for this round. */
   appendices?: MarkingAppendix[];
+  /**
+   * The CENTRE's zone. An initial is an act at the centre, so it is dated
+   * there -- and without it the server (UTC on Vercel) and the reader's
+   * browser disagreed about which day a 22:36 timestamp fell on, which React
+   * reports as a hydration mismatch and repaints. Found 14 Sep 2026 walking
+   * all five assignments through the new marking room: every CLOSED one
+   * threw React #418, because only a closed one renders the initials.
+   */
+  timeZone: string;
 }) {
   const autosize = useAutosize();
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
@@ -666,8 +677,8 @@ export function AssignmentMarkingForm({
               Handbook 9.2.3 — both tutors initial what they have checked, and the centre keeps the record.
             </p>
             <div className="flex flex-col gap-1.5" style={{ marginLeft: 12 }}>
-              <InitialRow name={firstMarkerName} role="first marker" at={firstInitialledAt} />
-              <InitialRow name={secondMarkerName} role="second marker" at={secondInitialledAt} />
+              <InitialRow name={firstMarkerName} role="first marker" at={firstInitialledAt} timeZone={timeZone} />
+              <InitialRow name={secondMarkerName} role="second marker" at={secondInitialledAt} timeZone={timeZone} />
             </div>
             {settling && !closed ? (
               <form action={settleAction} style={{ marginLeft: 12 }}>
@@ -908,7 +919,7 @@ function Chip({ on, small, children }: { on: boolean; small?: boolean; children:
   );
 }
 
-function InitialRow({ name, role, at }: { name: string | null; role: string; at: string | null }) {
+function InitialRow({ name, role, at, timeZone }: { name: string | null; role: string; at: string | null; timeZone: string }) {
   const initials = (name ?? "")
     .split(/\s+/)
     .filter(Boolean)
@@ -924,7 +935,7 @@ function InitialRow({ name, role, at }: { name: string | null; role: string; at:
         {at ? "✓" : ""}
       </span>
       {initials || "—"} · {name ?? "not assigned"}, {role}
-      {at ? ` · ${new Date(at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
+      {at ? ` · ${formatDate(at, timeZone, { day: "numeric", month: "short" })}` : ""}
     </p>
   );
 }

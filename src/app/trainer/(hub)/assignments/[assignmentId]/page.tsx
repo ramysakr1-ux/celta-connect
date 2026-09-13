@@ -307,6 +307,7 @@ export default async function TrainerMarkAssignmentPage({
             secondInitialledAt={assignment.second_initialled_at}
             inSample={assignment.in_double_marking_sample}
             appendices={appendices}
+            timeZone={timeZone}
             secondMarkerOptions={secondMarkerRows ?? []}
             submittedLabel={
               assignment.first_submitted_at
