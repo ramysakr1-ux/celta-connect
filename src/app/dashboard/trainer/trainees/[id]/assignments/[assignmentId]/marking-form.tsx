@@ -140,6 +140,15 @@ export function AssignmentMarkingForm({
   const [comments, setComments] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const s of sections) {
+      // Blind means blind: the first marker's section comments never load
+      // into the second marker's page, not even as the starting value of a
+      // box. They were leaking in exactly that way when this was first
+      // walked (13 Sep 2026), which would have given the second marker the
+      // first marker's reading before they had formed their own.
+      if (blind) {
+        initial[s.key] = "";
+        continue;
+      }
       const r = responseByKey.get(s.key);
       initial[s.key] = (isResub ? r?.resubmission_comments : r?.first_comments) ?? "";
     }
@@ -203,7 +212,7 @@ export function AssignmentMarkingForm({
   const blockers: string[] = [];
   if (!allMarked) blockers.push("Mark every criterion");
   if (!overall.trim()) blockers.push("Write the overall comment");
-  if (failType && !anySectionComment) blockers.push("Comment on the section they rewrite from");
+  if (failType && !anySectionComment && !blind) blockers.push("Comment on the section they rewrite from");
   if (needsSecond && !secondRecorded && !blind && !secondMarkerId && !awaitingSecond) blockers.push("Choose the second marker");
   if (awaitingSecond) blockers.push(`With ${secondMarkerName} for a blind second mark`);
   if (needsSecond && secondRecorded && !bothInitialled && !blind) blockers.push("Both markers initial it");
@@ -477,7 +486,9 @@ export function AssignmentMarkingForm({
               {format === "structured" ? "The tasks" : "The essay"}
             </h3>
             <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
-              {format === "structured"
+              {blind
+                ? "Read the script and mark it. Your reading goes in the overall comment above — the per-section comments are the first marker's."
+                : format === "structured"
                 ? "Comment beside the step the point belongs to."
                 : "The whole essay is judged together — the comment they rewrite from is the overall one."}
             </p>
@@ -550,7 +561,7 @@ export function AssignmentMarkingForm({
                       {text || <span className="italic" style={{ color: MUTED }}>Nothing written.</span>}
                     </p>
 
-                    {closed ? (
+                    {blind ? null : closed ? (
                       commentValue ? (
                         <div style={{ borderRadius: 7, borderLeft: `3px solid ${TEAL}`, background: `color-mix(in oklab, ${TEAL} 9%, transparent)`, padding: "8px 11px" }}>
                           <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{commentValue}</p>
