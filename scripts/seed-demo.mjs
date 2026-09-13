@@ -2679,6 +2679,12 @@ async function main() {
     { d: 3, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 3, b: 7, type: "input_session", title: "Eliciting and concept checking", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 3, b: 8, type: "input_session", title: "Teaching vocabulary", tag: "whole_group", detail: null, linked: null, tp: null },
+    // The one built interactive session that had no slot on the timetable
+    // (audit, 13 Sep 2026). Day 3 at 17:15 puts it straight after lexis and
+    // two days before Language analysis, which is the session that needs the
+    // grammar already in hand -- and after Eliciting and concept checking,
+    // which is how you check a tense once you can name it.
+    { d: 3, b: 9, type: "input_session", title: "Tense and aspect", tag: "whole_group", detail: null, linked: null, tp: null, slug: "tense-and-aspect" },
     // Which day each assignment is SET is what opens it for writing
     // (src/lib/assignment-release.ts reads the earliest timetabled event
     // carrying that linked_assignment_type). The schedule is Day 1 / 4 / 9 /
@@ -2948,6 +2954,9 @@ async function main() {
     tag: x.tag,
     detail: x.detail,
     linked: x.linked,
+    // Which interactive session the slot opens, set explicitly rather than
+    // left to a title match (migration 0301).
+    slug: x.slug ?? null,
     tpNumber: x.tp,
     scope: x.scope ?? null,
     shares: x.shares ?? false,
@@ -2985,6 +2994,7 @@ async function main() {
         // Which non-TP sessions volunteer students may see materials for --
         // the demo lesson, the unassessed teach and the introduction, so the
         // Share materials page has something to show (5 Sep 2026).
+        registry_slug: e.slug ?? null,
         shares_materials: e.type !== "tp" && Boolean(e.shares),
         created_by: trainerId,
       }))
