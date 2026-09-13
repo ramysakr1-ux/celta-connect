@@ -337,7 +337,15 @@ export default async function AssignmentDetailPage({
           </Link>
         </div>
       ) : isEditableStaff ? (
-        roundStatus !== "submitted" ? (
+        // "Nothing to review" only when there is genuinely nothing: the
+        // candidate has not handed this round in. A CLOSED assignment --
+        // passed, or failed on resubmission -- has been submitted and marked,
+        // and a tutor opening it should see the finished document with the
+        // marks and comments on it, read-only. It was showing them an empty
+        // panel saying the work had not been submitted, which made the closed
+        // stage of the marking screen unreachable (found 13 Sep 2026,
+        // screenshotting the end state).
+        roundStatus === "not_submitted" || roundStatus === "resubmission_required" ? (
           <div className="sheet sheet-garnet p-6">
             <p className="text-muted">Not yet submitted for this round -- nothing to review until the trainee submits.</p>
           </div>
