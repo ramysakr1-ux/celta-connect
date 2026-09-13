@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { getCentreGlossary } from "@/lib/centre-glossary";
+import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-only";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 
@@ -159,25 +160,9 @@ export default async function TrainerTpCardPage({
       {languageAnalysis ? (
         <div className="card p-6">
           <h2 className="font-serif text-lg text-ink">Language Analysis ({languageAnalysis.type})</h2>
-          {languageAnalysis.context ? <p className="mt-1 text-sm text-ink">{languageAnalysis.context}</p> : null}
-          {languageAnalysis.type === "vocab" ? (
-            <ul className="mt-3 flex flex-col gap-2 text-sm">
-              {languageAnalysis.vocab_rows.map((row, i) => (
-                <li key={i} className="text-ink">
-                  <b>{row.item}</b> -- {row.definition}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="mt-3 flex flex-col gap-3">
-              {languageAnalysis.blocks.map((block, i) => (
-                <div key={i} className="text-sm text-ink">
-                  <p className="font-medium">{block.item}</p>
-                  {block.meaning ? <p className="text-muted">{block.meaning}</p> : null}
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="mt-3">
+            <LanguageAnalysisReadOnly analysis={languageAnalysis} />
+          </div>
         </div>
       ) : null}
 
