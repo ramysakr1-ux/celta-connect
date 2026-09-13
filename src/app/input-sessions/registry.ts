@@ -41,6 +41,9 @@ export const INPUT_SESSIONS: InputSessionMeta[] = [
   { slug: "classroom-management", title: "Classroom management", minutes: "60 min + 30", kind: "Classroom skills · day one" },
   { slug: "teaching-speaking", title: "Teaching speaking", minutes: "45 min", kind: "Loop input · 1 of 2 productive skills" },
   { slug: "teaching-writing", title: "Teaching writing", minutes: "45 min", kind: "Loop input · 2 of 2 productive skills" },
+  // design_handoff_input_sessions_2 §2 -- the two genuinely new sessions.
+  { slug: "phonology-sounds", title: "Phonology: sounds", minutes: "60 min", kind: "Phonology, spoken aloud · 2 of the sounds pair" },
+  { slug: "teaching-exam-classes", title: "Teaching exam classes", minutes: "50 min", kind: "The wider profession · last week" },
 ];
 
 export async function loadInputSessionComponent(slug: string): Promise<ComponentType | null> {
@@ -97,6 +100,10 @@ export async function loadInputSessionComponent(slug: string): Promise<Component
       return (await import("@/app/input-sessions/sessions/teaching-speaking")).default;
     case "teaching-writing":
       return (await import("@/app/input-sessions/sessions/teaching-writing")).default;
+    case "phonology-sounds":
+      return (await import("@/app/input-sessions/sessions/phonology-sounds")).default;
+    case "teaching-exam-classes":
+      return (await import("@/app/input-sessions/sessions/teaching-exam-classes")).default;
     default:
       return null;
   }
