@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
+import { derivedOutcome, needsSecondMark } from "@/lib/assignment-board";
 import type { Database } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -145,6 +146,43 @@ async function returnAssignment(
     }
   }
 
+  // The overall comment is the one the candidate reads first, under "Before
+  // you start". Handbook 9.2.2 asks for "appropriate" feedback before and
+  // after submission and, on a resubmission, "clear feedback as to which
+  // areas need to be addressed" -- a decision released with nothing written
+  // is not that. Required on every release (tutor assignments handoff 2d).
+  const overall = (formData.get("overall_comment") as string | null)?.trim() ?? "";
+  if (!overall) {
+    return { error: "Write the overall comment before releasing this -- it is the first thing the candidate reads." };
+  }
+
+  // Handbook 9.2.3: the double-marked sample "should include any fail
+  // assignments", and blind double marking means "each tutor marking original
+  // scripts independently before discussing and agreeing results". So a
+  // fail-type outcome, and anything the centre picked into the sample, cannot
+  // reach the candidate on one tutor's word: the second mark has to be
+  // recorded and both tutors have to have initialled it.
+  const { data: full } = await supabase.from("assignments").select("*").eq("id", assignmentId).maybeSingle();
+  if (full && decision !== "pass") {
+    if (needsSecondMark(full, true)) {
+      if (!full.second_marks_recorded_at || full.second_mark_round !== round) {
+        return {
+          error:
+            "This outcome needs a second marker first (Handbook 9.2.3). Send it for a blind second mark, then settle and initial together.",
+        };
+      }
+      if (!full.first_initialled_at || !full.second_initialled_at) {
+        return { error: "Both tutors initial a double-marked assignment before it is released (Handbook 9.2.3)." };
+      }
+    }
+  } else if (full && decision === "pass" && full.in_double_marking_sample) {
+    if (!full.second_marks_recorded_at || !full.first_initialled_at || !full.second_initialled_at) {
+      return {
+        error: "This one is in the double-marked sample -- it needs the second mark and both initials before release.",
+      };
+    }
+  }
+
   const commentError = await saveComments(supabase, assignmentId, round, parseComments(formData));
   if (commentError) return { error: commentError };
   const status = decision === "resubmission_required" ? "resubmission_required" : "approved";
@@ -165,6 +203,8 @@ async function returnAssignment(
 
   const update: Database["public"]["Tables"]["assignments"]["Update"] = {
     marker_id: marker.id,
+    first_overall_comment: isResubmission ? undefined : overall,
+    resubmission_overall_comment: isResubmission ? overall : undefined,
     first_status: isResubmission ? undefined : status,
     first_criteria_marks: isResubmission ? undefined : criteriaMarks,
     resubmission_status: isResubmission ? status : undefined,
@@ -292,4 +332,218 @@ export async function recordSecondMarking(formData: FormData): Promise<void> {
   if (typeof traineeId === "string") revalidatePath(`/portfolio/${traineeId}/assignments/${assignmentId}`);
   revalidatePath(`/trainer`);
   revalidatePath(`/assessor`);
+}
+
+// ---------------------------------------------------------------------------
+// design_handoff_tutor_assignments §2h -- the marking cycle before release.
+//
+// Marking used to BE releasing: one button wrote the decision and the
+// candidate had it. The Handbook's double marking needs three steps in
+// between -- draft, a blind second mark, settle and initial -- and none of
+// them existed. Migration 0299 holds them; these write them.
+//
+// Nothing here touches first_status/resubmission_status. Release is still the
+// moment the status moves, and that is still returnAssignment above.
+
+/** Marks and comments written, nothing sent. */
+export async function saveMarkingDraft(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const marker = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  const round = formData.get("round");
+  if (typeof assignmentId !== "string" || (round !== "first" && round !== "resubmission")) {
+    return { error: "Invalid request." };
+  }
+  const supabase = await createClient();
+  const commentError = await saveComments(supabase, assignmentId, round, parseComments(formData));
+  if (commentError) return { error: commentError };
+
+  const overall = (formData.get("overall_comment") as string | null) ?? "";
+  const marks = parseCriteriaMarks(formData);
+  const now = new Date().toISOString();
+  const isResub = round === "resubmission";
+  const { error } = await supabase
+    .from("assignments")
+    .update({
+      marker_id: marker.id,
+      first_criteria_marks: isResub ? undefined : marks,
+      resubmission_criteria_marks: isResub ? marks : undefined,
+      first_overall_comment: isResub ? undefined : overall,
+      resubmission_overall_comment: isResub ? overall : undefined,
+      first_marks_saved_at: isResub ? undefined : now,
+      resubmission_marks_saved_at: isResub ? now : undefined,
+    })
+    .eq("id", assignmentId);
+  if (error) {
+    console.error("[assignments:saveMarkingDraft]", error);
+    return { error: "Could not save your marks. Try again." };
+  }
+  revalidatePath(`/portfolio/[traineeId]`, "layout");
+  revalidatePath("/trainer/assignments");
+  return { error: null };
+}
+
+/** Hands the script to another tutor for an independent read. */
+export async function sendToSecondMarker(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const marker = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  const secondMarkerId = formData.get("second_marker_id");
+  if (typeof assignmentId !== "string" || typeof secondMarkerId !== "string" || !secondMarkerId) {
+    return { error: "Pick the tutor who will second-mark it." };
+  }
+  if (secondMarkerId === marker.id) {
+    return { error: "A second mark has to be someone else's -- that is what makes it a second mark." };
+  }
+  const draft = await saveMarkingDraft(_prevState, formData);
+  if (draft.error) return draft;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("assignments")
+    .update({ second_marker_id: secondMarkerId, in_double_marking_sample: true })
+    .eq("id", assignmentId);
+  if (error) {
+    console.error("[assignments:sendToSecondMarker]", error);
+    return { error: "Could not send it on. Try again." };
+  }
+  revalidatePath("/trainer/assignments");
+  return { error: null };
+}
+
+/**
+ * The blind second mark: the second tutor's own reading, recorded before
+ * either of them can see the other's. Only the named second marker may.
+ */
+export async function recordBlindSecondMark(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const marker = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  const round = formData.get("round");
+  if (typeof assignmentId !== "string" || (round !== "first" && round !== "resubmission")) {
+    return { error: "Invalid request." };
+  }
+  const supabase = await createClient();
+  const { data: row } = await supabase.from("assignments").select("second_marker_id, marker_id").eq("id", assignmentId).maybeSingle();
+  if (!row) return { error: "Assignment not found." };
+  if (row.second_marker_id !== marker.id) {
+    return { error: "Only the tutor this was sent to can record the second mark." };
+  }
+  if (row.marker_id === marker.id) {
+    return { error: "You marked this first -- a second mark has to be another tutor's." };
+  }
+  const { error } = await supabase
+    .from("assignments")
+    .update({
+      second_criteria_marks: parseCriteriaMarks(formData),
+      second_overall_comment: (formData.get("overall_comment") as string | null) ?? "",
+      second_marks_recorded_at: new Date().toISOString(),
+      second_mark_round: round,
+    })
+    .eq("id", assignmentId);
+  if (error) {
+    console.error("[assignments:recordBlindSecondMark]", error);
+    return { error: "Could not record your second mark. Try again." };
+  }
+  revalidatePath(`/portfolio/[traineeId]`, "layout");
+  revalidatePath("/trainer/assignments");
+  return { error: null };
+}
+
+/**
+ * Settle and initial. The agreed marks are what the candidate receives; each
+ * tutor initials as themselves, and the record carries both names and dates
+ * -- "assignments that have been double-marked should be initialled by both
+ * tutors" (9.2.3).
+ */
+export async function settleAndInitial(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const marker = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  if (typeof assignmentId !== "string") return { error: "Invalid request." };
+
+  const supabase = await createClient();
+  const { data: row } = await supabase
+    .from("assignments")
+    .select("marker_id, second_marker_id, second_marks_recorded_at")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  if (!row) return { error: "Assignment not found." };
+  if (!row.second_marks_recorded_at) return { error: "There is no second mark to settle yet." };
+  const isFirst = row.marker_id === marker.id;
+  const isSecond = row.second_marker_id === marker.id;
+  if (!isFirst && !isSecond) return { error: "Only the two markers initial this." };
+
+  const now = new Date().toISOString();
+  const update: Database["public"]["Tables"]["assignments"]["Update"] = {
+    agreed_criteria_marks: parseCriteriaMarks(formData),
+  };
+  if (isFirst) update.first_initialled_at = now;
+  if (isSecond) update.second_initialled_at = now;
+  // One timestamp for the countersign record the rest of the app already
+  // reads, set the moment the second tutor puts their initials on it.
+  if (isSecond) update.second_marker_recorded_at = now;
+
+  const { error } = await supabase.from("assignments").update(update).eq("id", assignmentId);
+  if (error) {
+    console.error("[assignments:settleAndInitial]", error);
+    return { error: "Could not record your initials. Try again." };
+  }
+  revalidatePath(`/portfolio/[traineeId]`, "layout");
+  revalidatePath("/trainer/assignments");
+  return { error: null };
+}
+
+/**
+ * Back to the candidate without a decision -- a wrong file, a missing
+ * appendix, a declaration problem. Not for the quality of the work. Nothing
+ * marked is sent, and the one resubmission is not spent.
+ */
+export async function returnUnmarked(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const marker = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  const round = formData.get("round");
+  const reason = (formData.get("reason") as string | null)?.trim() ?? "";
+  if (typeof assignmentId !== "string" || (round !== "first" && round !== "resubmission")) {
+    return { error: "Invalid request." };
+  }
+  if (!reason) return { error: "Say why it is going back -- the candidate has to know what to fix." };
+
+  const supabase = await createClient();
+  const { error: logError } = await supabase
+    .from("assignment_returns")
+    .insert({ assignment_id: assignmentId, round, returned_by: marker.id, reason });
+  if (logError) {
+    console.error("[assignments:returnUnmarked]", logError);
+    return { error: "Could not send it back. Try again." };
+  }
+
+  // The round goes back to not_submitted so the candidate can edit and hand
+  // it in again. Nothing else is touched: no criteria marks, no decision, and
+  // on a first round the resubmission is untouched and unspent.
+  const isResub = round === "resubmission";
+  const { error } = await supabase
+    .from("assignments")
+    .update(
+      isResub
+        ? { resubmission_status: "not_submitted", resubmission_submitted_at: null, resubmission_own_work_confirmed: false }
+        : { first_status: "not_submitted", first_submitted_at: null, first_own_work_confirmed: false }
+    )
+    .eq("id", assignmentId);
+  if (error) {
+    console.error("[assignments:returnUnmarked]", error);
+    return { error: "Could not send it back. Try again." };
+  }
+
+  const { data: a } = await supabase.from("assignments").select("course_id, trainee_id, assignment_type").eq("id", assignmentId).maybeSingle();
+  if (a?.course_id && a.trainee_id) {
+    await supabase.from("course_broadcasts").insert({
+      course_id: a.course_id,
+      author_id: marker.id,
+      title: `${ASSIGNMENT_INFO[a.assignment_type]?.title ?? "An assignment"} came back unmarked`,
+      body: `${reason} — this does not use up your resubmission.`,
+      visible_to_trainee_id: a.trainee_id,
+      sent_at: new Date().toISOString(),
+    });
+  }
+
+  revalidatePath(`/portfolio/[traineeId]`, "layout");
+  revalidatePath("/trainer/assignments");
+  return { error: null };
 }

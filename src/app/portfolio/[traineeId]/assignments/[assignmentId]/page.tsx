@@ -9,7 +9,7 @@ import { ASSIGNMENT_INFO, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } fro
 import { SecondMarkingPanel } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/second-marking-panel";
 import { formatCalendarDate } from "@/lib/format-date";
 import { AssignmentAuthoringForm } from "@/app/dashboard/trainee/assignments/[assignmentId]/assignment-form";
-import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
+import { AssignmentMarkingForm, type MarkingStage } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/marking-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { FindingsBand } from "@/app/trainer/(hub)/malpractice/findings-band";
 import { RaiseConcernForm } from "@/app/trainer/(hub)/malpractice/raise-concern-form";
@@ -197,6 +197,23 @@ export default async function AssignmentDetailPage({
   const notYetOpen = !isStaff && Boolean(clock) && !clock!.isOpen(assignment.assignment_type);
   const dueDay = clock?.dayOf(assignment.due_date) ?? null;
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
+
+  // Which stage of the marking cycle this is (tutor assignments handoff 2a).
+  // A blind second marker sees the blind stage until they have recorded their
+  // own marks -- that is what makes it blind.
+  const markingStage: MarkingStage =
+    assignment.first_status === "approved" || assignment.resubmission_status === "approved" || assignment.final_grade === "Fail"
+      ? "closed"
+      : assignment.second_marks_recorded_at && assignment.second_mark_round === round
+        ? "agree"
+        : assignment.second_marker_id === viewer?.id && assignment.marker_id !== viewer?.id
+          ? "second"
+          : round === "resubmission"
+            ? "round2"
+            : "round1";
+
+  // markerName is already resolved above, for the double-marking panel.
+  const markerNames = markerName;
   const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";
 
   // connect-spec-corrections-for-claude-code.md item 8, soft flags 4-5.
@@ -345,15 +362,37 @@ export default async function AssignmentDetailPage({
             </div>
             {isFol && folData ? <FolCrossCheck claims={folData.allClaimsForCrossCheck} poolEntries={folData.poolEntries} /> : null}
             <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />
-            <AssignmentReviewForm
+            <AssignmentMarkingForm
               assignmentId={assignmentId}
-              assignmentType={assignment.assignment_type}
+              candidateName={trainee.full_name}
+              title={ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type}
               sections={template.sections}
               responses={responses ?? []}
+              criteria={criteria.map((c) => ({ key: c.key, text: c.text }))}
               round={round}
-              criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
-              criteria={criteria}
+              stage={markingStage}
+              sanction={assignment.assignment_type === "Plagiarism Reflection"}
+              format={template.format}
+              intro={ASSIGNMENT_INFO[assignment.assignment_type]?.description ?? null}
+              marks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
+              secondMarks={assignment.second_criteria_marks ?? {}}
+              overallComment={round === "resubmission" ? assignment.resubmission_overall_comment : assignment.first_overall_comment}
+              secondOverallComment={assignment.second_overall_comment}
+              priorOverallComment={round === "resubmission" ? assignment.first_overall_comment : null}
+              firstMarkerName={markerNames.get(assignment.marker_id ?? "") ?? null}
+              secondMarkerName={markerNames.get(assignment.second_marker_id ?? "") ?? null}
+              viewerIsFirstMarker={assignment.marker_id === viewer?.id}
+              viewerIsSecondMarker={assignment.second_marker_id === viewer?.id}
+              firstInitialledAt={assignment.first_initialled_at}
+              secondInitialledAt={assignment.second_initialled_at}
+              inSample={assignment.in_double_marking_sample}
               secondMarkerOptions={secondMarkerRows ?? []}
+              submittedLabel={
+                assignment.first_submitted_at
+                  ? `Submitted ${formatCalendarDate((round === "resubmission" ? assignment.resubmission_submitted_at : assignment.first_submitted_at)?.slice(0, 10) ?? null)}`
+                  : "Submitted"
+              }
+              candidateHref={`/portfolio/${traineeId}/assignments/${assignmentId}?preview=trainee`}
             />
             {assignment.assignment_type !== "Plagiarism Reflection" ? (
               <RaiseConcernForm
