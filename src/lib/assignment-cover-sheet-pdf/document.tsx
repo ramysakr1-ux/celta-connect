@@ -132,6 +132,13 @@ export interface AssignmentCoverSheetInput {
   sectionComments: { title: string; firstComment: string | null; resubmissionComment: string | null }[];
   hasResubmission: boolean;
   sections: { title: string; firstResponse: string | null; resubmissionResponse: string | null }[];
+  /**
+   * Migration 0302. The binary cannot go inside this PDF, but the portfolio
+   * has to record that it existed and what it was called -- an assessor
+   * reading the pack should not have to guess whether Appendix 1 was ever
+   * attached.
+   */
+  appendices?: { label: string | null; fileName: string; round: string }[];
 }
 
 function formatDate(iso: string | null): string {
@@ -183,6 +190,7 @@ export async function renderAssignmentCoverSheetBuffer(input: AssignmentCoverShe
     sectionComments,
     hasResubmission,
     sections,
+    appendices,
   } = input;
 
   return renderToBuffer(
@@ -290,6 +298,18 @@ export async function renderAssignmentCoverSheetBuffer(input: AssignmentCoverShe
             ))}
           </View>
         ) : null}
+
+        <Text style={styles.sectionLabel}>Appendices</Text>
+        {(appendices ?? []).length === 0 ? (
+          <Text style={styles.declarationText}>None attached.</Text>
+        ) : (
+          (appendices ?? []).map((a, i) => (
+            <Text key={`${a.label ?? "appendix"}-${i}`} style={styles.declarationText}>
+              {a.label ?? `Appendix ${i + 1}`} -- {a.fileName}
+              {a.round === "resubmission" ? " (attached at resubmission)" : ""}
+            </Text>
+          ))
+        )}
 
         <Text style={styles.sectionLabel}>Declaration</Text>
         {DECLARATION.map((d) => (

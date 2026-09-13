@@ -72,6 +72,14 @@ export async function GET(
     return NextResponse.json({ error: "Course not found." }, { status: 404 });
   }
 
+  // Migration 0302 -- listed on the cover sheet so the pack records what was
+  // attached. Untyped handle until the generated types catch up.
+  const { data: appendixRows } = await (admin as unknown as { from: (t: string) => any })
+    .from("assignment_appendices")
+    .select("label, file_name, round")
+    .eq("assignment_id", assignmentId)
+    .order("created_at", { ascending: true });
+
   const markerName = new Map((markers ?? []).map((m) => [m.id, m.full_name]));
   const hasResubmission = assignment.resubmission_status !== "not_submitted";
 
@@ -114,6 +122,11 @@ export async function GET(
       title: s.title,
       firstResponse: responseByKey.get(s.key)?.first_response ?? null,
       resubmissionResponse: responseByKey.get(s.key)?.resubmission_response ?? null,
+    })),
+    appendices: ((appendixRows ?? []) as { label: string | null; file_name: string; round: string }[]).map((a) => ({
+      label: a.label,
+      fileName: a.file_name,
+      round: a.round,
     })),
   });
 
