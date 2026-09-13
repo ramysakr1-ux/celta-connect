@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
 
@@ -106,7 +107,15 @@ export async function publishBriefVersion(
     publishedBy: string;
   }
 ): Promise<{ error: string | null; version?: number; draftsCarried?: number }> {
-  const { data: latest } = await supabase
+  // A published version is a record, not a setting: there is deliberately no
+  // insert/update/delete policy on the table, so the write goes through the
+  // service role AFTER the calling action has checked the capability. The
+  // same shape the centre settings screens already use -- and without it the
+  // insert is refused by RLS and the edit silently fails to save at all,
+  // which is what happened on the first live attempt (13 Sep 2026).
+  const writer = createAdminClient();
+
+  const { data: latest } = await writer
     .from("assignment_template_versions")
     .select("version, sections, format")
     .eq("template_id", templateId)
@@ -119,7 +128,7 @@ export async function publishBriefVersion(
   if (unchanged) return { error: null, version: latest.version, draftsCarried: 0 };
 
   const version = (latest?.version ?? 0) + 1;
-  const { error: versionError } = await supabase.from("assignment_template_versions").insert({
+  const { error: versionError } = await writer.from("assignment_template_versions").insert({
     template_id: templateId,
     center_id: centerId,
     assignment_type: assignmentType,
@@ -130,13 +139,15 @@ export async function publishBriefVersion(
   });
   if (versionError) return { error: versionError.message };
 
-  const { error: templateError } = await supabase
+  const { error: templateError } = await writer
     .from("assignment_templates")
     .update({ sections, format })
     .eq("id", templateId);
   if (templateError) return { error: templateError.message };
 
-  const draftsCarried = await carryDraftsToNewSections(supabase, centerId, assignmentType, sections);
+  // Drafts can sit on any course at the centre, not only the caller's own,
+  // so the carry-across uses the same writer.
+  const draftsCarried = await carryDraftsToNewSections(writer, centerId, assignmentType, sections);
   return { error: null, version, draftsCarried };
 }
 
