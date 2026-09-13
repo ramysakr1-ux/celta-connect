@@ -307,8 +307,14 @@ export default async function TpDetailPage({
   }
 
   const materialIds = (materials ?? []).map((m) => m.id);
+  // NOT gated on isStaff. A candidate shares their own handouts with the
+  // students they are about to teach (migration 0297), and this read is what
+  // turns their button into "Shared with students ✓". Gated on staff, the
+  // share succeeded in the database and the button never changed, so it read
+  // as doing nothing at all -- Ramy, 13 Sep 2026: "when I share with students,
+  // nothing happens. I don't get the acknowledgment."
   const { data: sharedRows } =
-    isStaff && materialIds.length > 0
+    materialIds.length > 0
       ? await supabase.from("volunteer_shared_materials").select("tp_material_id").in("tp_material_id", materialIds)
       : { data: [] };
   const sharedMaterialIds = new Set((sharedRows ?? []).map((r) => r.tp_material_id));
