@@ -2699,7 +2699,7 @@ async function main() {
     // assignment nobody had been given. Corrected 13 Sep 2026 on Ramy's
     // instruction. Untimed admin rows (b: 0), the same column the "due" rows
     // sit in, so no booked band is displaced.
-    { d: 4, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) set", tag: null, detail: "The assignment session", linked: "Skills", tp: null },
+
     { d: 4, b: 1, type: "tp", title: "TP2 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 4, b: 2, type: "tp", title: "TP2 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 4, b: 3, type: "tp", title: "TP2 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 2 },
@@ -2797,7 +2797,15 @@ async function main() {
     { d: 12, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 12, b: 7, type: "input_session", title: "Productive skills \u2014 writing", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3b", "4g"] },
     { d: 12, b: 8, type: "input_session", title: "Teaching speaking", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3b", "5h", "5j"] },
-    { d: 12, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    // The only two sessions that teach 5m and 5n, and Lessons from the
+    // Classroom -- the assignment built on both -- is set on day 14. It ran
+    // on day 19, five days after the assignment that needs it.
+    { d: 12, b: 9, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5m", "5n"] },
+    // Set AFTER the sessions that teach the skill it is about. It used to be
+    // day 4 -- nine days before Teaching listening and the productive-skills
+    // pair, so a candidate was asked to design skills tasks before the course
+    // had taught any (criteria map, 13 Sep 2026). Due day 16 still.
+    { d: 13, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) set", tag: null, detail: "The assignment session", linked: "Skills", tp: null },
     { d: 13, b: 1, type: "tp", title: "TP6 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 13, b: 2, type: "tp", title: "TP6 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 13, b: 3, type: "tp", title: "TP6 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 6 },
@@ -2869,7 +2877,7 @@ async function main() {
     { d: 19, b: 3, type: "tp", title: "TP8 \u00b7 F", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 4, type: "supervised_session", title: "Written feedback only", tag: "group_room", detail: "Final TP, no live session", linked: null, tp: null },
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5m", "5n"] },
+    { d: 19, b: 6, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
