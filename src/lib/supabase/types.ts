@@ -1268,6 +1268,29 @@ export interface Database {
           marker_id: string | null;
           second_marker_id: string | null;
           second_marker_recorded_at: string | null;
+          // Migration 0299 -- the tutor side of the five assignments.
+          // The overall comment, per round: the slot at the top of the
+          // candidate's document, required before a decision is released.
+          first_overall_comment: string | null;
+          resubmission_overall_comment: string | null;
+          // Marks written but NOT released. first_status stays 'submitted'
+          // while a marker drafts, hands to a second marker, and settles --
+          // release is still the moment the status moves.
+          first_marks_saved_at: string | null;
+          resubmission_marks_saved_at: string | null;
+          // The blind second mark (Handbook 9.2.3, "each tutor marking
+          // original scripts independently before discussing and agreeing
+          // results"), and what the two of them settled on.
+          second_criteria_marks: Record<string, boolean>;
+          second_overall_comment: string | null;
+          second_marks_recorded_at: string | null;
+          second_mark_round: "first" | "resubmission" | null;
+          agreed_criteria_marks: Record<string, boolean>;
+          first_initialled_at: string | null;
+          second_initialled_at: string | null;
+          /** Deliberately picked into the centre's double-marked sample. A
+           *  fail-type outcome is in the sample whether or not this is set. */
+          in_double_marking_sample: boolean;
           first_submitted_late: boolean;
           first_ai_declared: boolean;
           first_ai_conversation_url: string | null;
@@ -1311,6 +1334,26 @@ export interface Database {
           assignment_type: AssignmentTypeValue;
         };
         Update: Partial<Database["public"]["Tables"]["assignments"]["Row"]>;
+        Relationships: [];
+      };
+      // Migration 0299 -- a submission sent back without being marked: a
+      // wrong file, a missing appendix, a declaration problem. Spends no
+      // resubmission, and leaves a footprint.
+      assignment_returns: {
+        Row: {
+          id: string;
+          assignment_id: string;
+          round: "first" | "resubmission";
+          returned_by: string | null;
+          reason: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assignment_returns"]["Row"]> & {
+          assignment_id: string;
+          round: "first" | "resubmission";
+          reason: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assignment_returns"]["Row"]>;
         Relationships: [];
       };
       assignment_templates: {

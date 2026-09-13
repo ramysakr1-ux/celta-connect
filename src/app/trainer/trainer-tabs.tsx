@@ -18,6 +18,10 @@ const TABS = [
   // this tab link into them) -- matched here too so the tab still reads
   // as active once you've clicked through into either one.
   { href: "/tp", label: "Teaching Practice", alsoMatch: ["/rotation", "/coursebooks"] },
+  // The other component of assessment (Handbook 9.2), and until 13 Sep 2026
+  // it had no page at all -- a tutor reached an assignment one candidate at a
+  // time through the roster, and nothing showed the marking as a whole.
+  { href: "/assignments", label: "Assignments" },
   // build-spec.md: "Replace the Audio Library tab with a Resource hub tab."
   // /audio and /coursebooks keep working as direct routes (linked from the
   // hub's own cards) -- only the top-nav tab itself moved.
