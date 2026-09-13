@@ -19,8 +19,15 @@ import fs from "node:fs";
 import { CRITERIA_LABELS, SHORT_CRITERIA_LABELS } from "../src/lib/celta-criteria";
 
 const TAGS: Record<string, string[]> = {
-  "Classroom management": ["5b", "5f", "5i", "5j"],
-  "Classroom arrangements and material use": ["4c", "5a", "5e"],
+  // 5d and 5k were sitting in this session all along and were not tagged:
+  // the monitoring simulation IS managing the process so the aims are
+  // reached, and "stopping an activity" plus the internal clock are
+  // beginning and finishing on time. Ramy, 13 Sep 2026: "most of it is part
+  // of classroom management."
+  "Classroom management": ["5b", "5d", "5f", "5i", "5j", "5k"],
+  // "Plan the switch" -- one lesson, three stages, pick the arrangement for
+  // each -- is interaction-pattern selection, which is 4f.
+  "Classroom arrangements and material use": ["4c", "4f", "5a", "5e"],
   "Lesson planning input": ["4a", "4b", "4e", "4h"],
   "Receptive skills": ["3a", "4l"],
   Sounds: ["2e", "4i"],
