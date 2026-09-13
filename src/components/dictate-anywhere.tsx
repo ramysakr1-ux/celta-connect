@@ -34,6 +34,7 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
   const [fieldLabel, setFieldLabel] = useState<string | null>(null);
   const fieldRef = useRef<DictationField | null>(null);
   const sessionRef = useRef<{ stop: () => void } | null>(null);
+  const startRef = useRef<(() => void) | null>(null);
 
   useEffect(() => setSupported(dictationSupported()), []);
 
@@ -51,6 +52,28 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
       sessionRef.current?.stop();
     };
   }, [scopeId]);
+
+  // ...and a keyboard shortcut starts it, from wherever the cursor is, so the
+  // pill is never the only way in either.
+  //
+  // Ramy, 13 Sep 2026: "if I can say stop dictation and it stops, why can't I
+  // say start dictation and it starts?" Because hearing that phrase means the
+  // microphone is already open. A wake word needs the browser recording
+  // continuously -- in Chrome that audio goes to Google's servers -- and in a
+  // room full of learners being observed, that is a recording nobody consented
+  // to. Stopping is free because the microphone is already on by then. So the
+  // symmetric answer is a key rather than a word.
+  useEffect(() => {
+    if (listening) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "D" || e.key === "d"))) return;
+      if (!document.getElementById(scopeId)?.contains(document.activeElement)) return;
+      e.preventDefault();
+      startRef.current?.();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [listening, scopeId]);
 
   // Escape ends it, from wherever the cursor is. A tutor dictating during an
   // observation should never have to find the pill again to stop -- Ramy,
@@ -103,6 +126,8 @@ export function DictationScope({ scopeId, children }: { scopeId: string; childre
     setListening(true);
   }, [scopeId]);
 
+  startRef.current = toggle;
+
   const value = useMemo(
     () => ({ supported, listening, error, fieldLabel, toggle }),
     [supported, listening, error, fieldLabel, toggle]
@@ -147,6 +172,7 @@ export function DictateButton({
       : fieldLabel
         ? "Dictate"
         : "Click into a field first";
+  const hint = listening ? null : fieldLabel ? "⌘⇧D" : null;
 
   const style: React.CSSProperties = listening
     ? { background: DESTRUCTIVE, borderColor: DESTRUCTIVE, color: SHEET }
@@ -171,6 +197,7 @@ export function DictateButton({
     >
       <span aria-hidden>{listening ? "●" : "🎙"}</span>
       {label}
+      {hint ? <span style={{ opacity: 0.6, fontWeight: 600 }}>{hint}</span> : null}
     </button>
   );
 }
