@@ -1,13 +1,5 @@
 import { categorize, isEventLive, type TimetableEvent } from "@/lib/timetable-grid";
-import {
-  setAttendance,
-  setEventDetail,
-  setEventRegistrySlug,
-  setInputSessionCriteria,
-  setTpEventMode,
-} from "@/app/trainer/(hub)/timetable/actions";
-import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
-import { inputSessionSlugForTitle } from "@/lib/input-session-registry-links";
+import { setAttendance, setEventDetail, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
 
 export type Volunteer = { id: string; name: string };
@@ -145,48 +137,6 @@ function EventRow({
             </button>
           </form>
         </details>
-      ) : null}
-      {event.type === "input_session" && !locked ? (
-        (() => {
-          // What the candidate's Resources card will open. A tutor's own
-          // choice wins; otherwise the title map answers, and if neither
-          // does, the card is a plain one -- which is the state that kept
-          // reading as a bug.
-          const matched = inputSessionSlugForTitle(event.title);
-          const effective = event.registry_slug ?? matched;
-          const chosen = INPUT_SESSIONS.find((s) => s.slug === effective);
-          return (
-            <details className="mt-1">
-              <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
-                {chosen ? `Opens: ${chosen.title}` : "No interactive session"}
-              </summary>
-              <form action={setEventRegistrySlug} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
-                <input type="hidden" name="event_id" value={event.id} />
-                <select
-                  name="registry_slug"
-                  defaultValue={event.registry_slug ?? ""}
-                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
-                >
-                  <option value="">
-                    {matched ? `Match the title (${INPUT_SESSIONS.find((s) => s.slug === matched)?.title ?? matched})` : "None -- a plain card"}
-                  </option>
-                  {INPUT_SESSIONS.map((s) => (
-                    <option key={s.slug} value={s.slug}>
-                      {s.title}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[10px] text-muted">
-                  What this slot opens on a candidate&apos;s Resources tab. Leave it on the first option to keep
-                  matching by title.
-                </p>
-                <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover-fill">
-                  Save
-                </button>
-              </form>
-            </details>
-          );
-        })()
       ) : null}
       {event.type === "tp" && mixedMode ? (
         <details className="mt-1">

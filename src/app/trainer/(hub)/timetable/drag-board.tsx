@@ -2,10 +2,13 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
+import { inputSessionSlugForTitle } from "@/lib/input-session-registry-links";
 import { categorize, isEventLive, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
 import {
   moveTimetableEvent,
   setAttendance,
+  setEventRegistrySlug,
   setInputSessionCriteria,
   setTpEventMode,
   resolveZoomParticipant,
@@ -437,6 +440,55 @@ function DetailPanel({
             Criteria: {event.input_session_criteria.join(", ")}
           </p>
         ) : null
+      ) : null}
+
+      {/* Which interactive session this slot opens, chosen rather than
+          guessed off the title (migration 0301). Sits beside the criteria
+          because both are "what this session IS", not when it runs. */}
+      {event.type === "input_session" ? (
+        (() => {
+          const matched = inputSessionSlugForTitle(event.title);
+          const effective = event.registry_slug ?? matched;
+          const chosen = INPUT_SESSIONS.find((s) => s.slug === effective);
+          if (!canEdit) {
+            return chosen ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">Opens: {chosen.title}</p>
+            ) : null;
+          }
+          return (
+            <details className="mt-1">
+              <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+                {chosen ? `Opens: ${chosen.title}` : "No interactive session"}
+              </summary>
+              <form action={setEventRegistrySlug} className="mt-2 flex flex-col gap-1.5">
+                <input type="hidden" name="event_id" value={event.id} />
+                <select
+                  name="registry_slug"
+                  defaultValue={event.registry_slug ?? ""}
+                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                >
+                  <option value="">
+                    {matched
+                      ? `Match the title -- ${INPUT_SESSIONS.find((s) => s.slug === matched)?.title ?? matched}`
+                      : "None -- a plain card"}
+                  </option>
+                  {INPUT_SESSIONS.map((s) => (
+                    <option key={s.slug} value={s.slug}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] leading-snug text-muted">
+                  What this slot opens on a candidate&apos;s Resources tab. Leave it on the first option to keep
+                  matching by title.
+                </p>
+                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+                  Save
+                </button>
+              </form>
+            </details>
+          );
+        })()
       ) : null}
 
       {event.type === "tp" && mixedMode ? (
