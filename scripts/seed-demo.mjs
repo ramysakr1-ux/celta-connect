@@ -2671,6 +2671,7 @@ async function main() {
     { d: 2, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 2, b: 9, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 3, b: 1, type: "tp", title: "TP1 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 2, type: "tp", title: "TP1 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 3, type: "tp", title: "TP1 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 1 },
@@ -2714,7 +2715,12 @@ async function main() {
     { d: 5, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 5, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 5, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
-    { d: 5, b: 7, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null },
+    // Ramy, 13 Sep 2026: "move Sounds to day 2 and phonology after it."
+    // Sounds (minimal pairs, L1 trouble spots) takes day 2's free 17:15
+    // band; Phonology: sounds (the chart and phonemic script) takes the slot
+    // it leaves on day 5, immediately before Language analysis -- which is
+    // the session that needs the chart already in hand.
+    { d: 5, b: 7, type: "input_session", title: "Phonology: sounds", tag: "whole_group", detail: null, linked: null, tp: null, slug: "phonology-sounds" },
     { d: 5, b: 8, type: "input_session", title: "Language analysis", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 5, b: 9, type: "input_session", title: "Filmed observation 1", tag: "whole_group", detail: "With task", linked: null, tp: null },
     { d: 6, b: 1, type: "tp", title: "TP3 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 3 },
@@ -2859,6 +2865,9 @@ async function main() {
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
+    // The wider profession, after the last TP and beside Professional
+    // development -- where the handoff puts it.
+    { d: 19, b: 8, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, slug: "teaching-exam-classes" },
     { d: 20, b: 1, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 20, b: 2, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 20, b: 3, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
