@@ -63,6 +63,12 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   "Language analysis": "language-analysis",
   "Lesson framework": "lesson-framework",
   "Test-Teach-Test": "test-teach-test",
+
+  // --- Ported 13 Sep 2026 (design_handoff_input_sessions_2 §4). Both are on
+  // the live course on day 8, and both cards were dead because the design had
+  // never been built. Titles read off the seeded timetable. ---
+  "Error correction": "error-correction",
+  "Giving feedback on tasks": "giving-feedback-on-tasks",
 };
 
 /**

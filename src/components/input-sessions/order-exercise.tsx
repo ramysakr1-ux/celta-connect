@@ -6,17 +6,33 @@ import { useState } from "react";
 // correct next stage locks it in place (numbered, teal); clicking any
 // other stage is a silent no-op -- no penalty, just doesn't advance,
 // matching the source's own "no wrong answer" framing for this exercise.
-export function OrderExercise({ correctOrder, shuffled }: { correctOrder: string[]; shuffled: string[] }) {
+export function OrderExercise({
+  correctOrder,
+  shuffled,
+  title = "Debrief — put the stages back in order",
+  intro,
+}: {
+  correctOrder: string[];
+  shuffled: string[];
+  /** Overridden where the exercise is not a loop-input debrief. */
+  title?: string;
+  intro?: React.ReactNode;
+}) {
   const [picked, setPicked] = useState<string[]>([]);
   const done = picked.length === correctOrder.length;
 
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-1">
-        <p className="font-serif text-lg font-semibold text-ink">Debrief — put the stages back in order</p>
+        <p className="font-serif text-lg font-semibold text-ink">{title}</p>
         <p className="text-xs text-muted">
-          Click each stage in the order you just experienced it. This is a <strong className="text-ink">loop input</strong> — the
-          session modelled the framework instead of only describing it.
+          {intro ?? (
+            <>
+              Click each stage in the order you just experienced it. This is a{" "}
+              <strong className="text-ink">loop input</strong> — the session modelled the framework instead of only
+              describing it.
+            </>
+          )}
         </p>
       </div>
       <div className="flex flex-col gap-1.5">

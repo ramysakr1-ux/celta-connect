@@ -33,6 +33,11 @@ export const INPUT_SESSIONS: InputSessionMeta[] = [
   { slug: "lesson-framework", title: "Lesson framework — finding your shape", minutes: "45 min", kind: "Loop input" },
   { slug: "test-teach-test", title: "Test-Teach-Test", minutes: "45 min", kind: "Loop input" },
   { slug: "text-based-teaching", title: "Text-based teaching", minutes: "45 min", kind: "Loop input" },
+  // design_handoff_input_sessions_2 -- two finished designs that had never
+  // been ported, so their day-8 cards on a candidate's Resources tab had
+  // nothing behind them and read as broken.
+  { slug: "error-correction", title: "Error correction", minutes: "45 min", kind: "Classroom skills" },
+  { slug: "giving-feedback-on-tasks", title: "Giving feedback on tasks", minutes: "45 min", kind: "Classroom skills" },
 ];
 
 export async function loadInputSessionComponent(slug: string): Promise<ComponentType | null> {
@@ -79,6 +84,10 @@ export async function loadInputSessionComponent(slug: string): Promise<Component
       return (await import("@/app/input-sessions/sessions/test-teach-test")).default;
     case "text-based-teaching":
       return (await import("@/app/input-sessions/sessions/text-based-teaching")).default;
+    case "error-correction":
+      return (await import("@/app/input-sessions/sessions/error-correction")).default;
+    case "giving-feedback-on-tasks":
+      return (await import("@/app/input-sessions/sessions/giving-feedback-on-tasks")).default;
     default:
       return null;
   }
