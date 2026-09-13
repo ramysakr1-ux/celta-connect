@@ -4,7 +4,7 @@ import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
-import { TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG } from "@/lib/input-session-registry-links";
+import { inputSessionSlugForTitle } from "@/lib/input-session-registry-links";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -424,7 +424,7 @@ export default async function ResourceHubPage({
       event_date: e.event_date,
       event_time: e.event_time,
       criteria: e.input_session_criteria ?? [],
-      registrySlug: TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG[e.title] ?? null,
+      registrySlug: inputSessionSlugForTitle(e.title),
       materials: inputSessionResources.filter((r) => r.title.trim().toLowerCase() === e.title.trim().toLowerCase()),
     }));
   }

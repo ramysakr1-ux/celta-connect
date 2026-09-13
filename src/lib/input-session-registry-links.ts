@@ -64,3 +64,34 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   "Lesson framework": "lesson-framework",
   "Test-Teach-Test": "test-teach-test",
 };
+
+/**
+ * The lookup, tolerant of how a title is typed but never of what it says.
+ *
+ * The map above is exact-string on purpose -- a fuzzy match would silently
+ * point a candidate at the wrong session. But a centre that types "Teaching
+ * Listening" or "Teaching  listening" means the same session, and until
+ * 13 Sep 2026 those dropped off the list and the card rendered inert.
+ *
+ * So: case, surrounding space, repeated spaces and the difference between a
+ * hyphen, an en dash and a double hyphen are normalised on both sides. Every
+ * other difference still misses, which is the point -- this recovers typing,
+ * not meaning.
+ */
+export function inputSessionSlugForTitle(title: string | null | undefined): string | null {
+  if (!title) return null;
+  const direct = TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG[title];
+  if (direct) return direct;
+  const normalise = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[\u2010-\u2015]/g, "-")
+      .replace(/--+/g, "-")
+      .replace(/\s+/g, " ")
+      .trim();
+  const wanted = normalise(title);
+  for (const [key, slug] of Object.entries(TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG)) {
+    if (normalise(key) === wanted) return slug;
+  }
+  return null;
+}

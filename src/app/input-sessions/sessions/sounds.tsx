@@ -47,12 +47,21 @@ const OBSTRUCTION_SOUNDS = [
   { symbol: "k", word: "can", place: "tongue back, velum" },
 ];
 
+// The Vowels and Voiced consonants definitions were swapped, and both were
+// therefore wrong: vowels were being defined by voicing, and voiced
+// consonants by the shape of the mouth. The row below them gives it away --
+// "Unvoiced consonants ... do not require the activation of vocal cords", so
+// the voiced ones are the ones that do. Corrected 13 Sep 2026, in the design
+// source too.
 const MATCH_PAIRS = [
-  { term: "Vowels", def: "are formed by activating the vocal cords" },
+  {
+    term: "Vowels",
+    def: "are formed by modifying the airflow's passage through the mouth, principally with the tongue and lips",
+  },
   { term: "Diphthongs", def: "are a glide from one vowel to another" },
   { term: "Monophthongs", def: "are single vowels" },
   { term: "Consonants", def: "are formed when the airflow from the lungs is obstructed by the moveable parts of the mouth, including the tongue and the lips" },
-  { term: "Voiced consonants", def: "are formed by modifying its passage through the mouth, principally through the use of the tongue and lips" },
+  { term: "Voiced consonants", def: "are formed by activating the vocal cords" },
   { term: "Unvoiced consonants", def: "do not require the activation of vocal cords" },
 ];
 
