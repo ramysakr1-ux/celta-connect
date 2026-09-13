@@ -411,7 +411,7 @@ export default async function TpDetailPage({
                       stays because it is the only one that merges the
                       candidate's own uploaded handouts into the file. */}
                   <a
-                    href={`/portfolio/${traineeId}/tp/${tpNumber}/document`}
+                    href={`/tp-document/${traineeId}/${tpNumber}`}
                     className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
                   >
                     The assembled document

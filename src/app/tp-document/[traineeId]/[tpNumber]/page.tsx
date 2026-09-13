@@ -13,12 +13,21 @@ import {
   timeValue,
   type FeedbackPoint,
 } from "@/lib/tp-plan-content";
-import { PrintButton } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/document/print-button";
+import { PrintButton } from "@/app/tp-document/[traineeId]/[tpNumber]/print-button";
 
 export const dynamic = "force-dynamic";
 
 // design_handoff_tp_feedback_cycle §3 — the assembled document, the thing the
-// trainee finally receives: feedback cover → lesson plan → language analysis →
+// trainee finally receives.
+//
+// Deliberately OUTSIDE /portfolio: that route group's layout wraps every page
+// in the candidate's workspace rail and the staff roster chrome, and all of it
+// would have printed around the document. A layout cannot be removed by a
+// child, so the document lives at its own top-level route and carries its own
+// access check (the same one the portfolio uses: a real session, or a live
+// assessor token scoped to this course).
+//
+// The thing the trainee finally receives: feedback cover → lesson plan → language analysis →
 // self-evaluation, each opening with a full-bleed band in its role colour.
 //
 // Deliberately NOT a replacement for /api/tp-plans/[planId]/pdf yet. That
