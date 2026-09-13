@@ -113,20 +113,31 @@ export function showsTips(tier: DensityTier): boolean {
   return tier !== "minimal";
 }
 
-// The lesson-shape picker on the candidate's own plan is scaffolding: it hands
-// over the usual stages of a framework so a candidate who has never staged a
-// lesson has somewhere to start.
+// The lesson-sequence picker on the candidate's own plan is scaffolding: it
+// hands over the usual stages of a known sequence so a candidate who has never
+// staged a lesson has somewhere to start.
 //
 // Ramy, 13 Sep 2026: "I would like to have the lesson shape option up to TP6,
 // and then for TP7 and TP8 they should be able to decide on the lesson shape
 // and write it down themselves. So only one to six."
 //
+// Called a lesson SEQUENCE after checking all fourteen Cambridge documents.
+// Cambridge has no name for this thing, and both obvious candidates are
+// already taken: "framework" means the Regulated Qualifications Framework, the
+// assessment framework, and grammatical frameworks (Topic 2.2); "systems"
+// means the language systems of English -- grammar, lexis, phonology -- which
+// is the Language Related Tasks assignment. "Lesson type" is Cambridge's, but
+// means skills-based versus language-focus-based (CELTA 5 5c), a different
+// axis. What CELTA 5 4b actually says is "SEQUENCE the activities/stages of a
+// ... lesson in one of the ways you have learnt on the course", which is
+// precisely what this picker does, so the criterion's own verb names it.
+//
 // Deliberately a TP number and not a density tier: the tiers step down at
 // 3, 5 and 6 (scripted / framework / coaching prose / minimal) and the line he
-// drew is at 6, which no tier boundary matches. The shape picker is still
+// drew is at 6, which no tier boundary matches. The sequence picker is still
 // openable by hand at TP7 and TP8 -- nothing the system decides is final.
-export function offersLessonShapes(tpNumber: number): boolean {
-  return tpNumber <= LAST_TP_WITH_LESSON_SHAPES;
+export function offersLessonSequences(tpNumber: number): boolean {
+  return tpNumber <= LAST_TP_WITH_LESSON_SEQUENCES;
 }
 
-export const LAST_TP_WITH_LESSON_SHAPES = 6;
+export const LAST_TP_WITH_LESSON_SEQUENCES = 6;

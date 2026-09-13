@@ -92,8 +92,8 @@ export function PlanReview({
   const problems = (plan.anticipated_problems ?? []).filter((p) => p.problem || p.solution);
   const vocabRows = languageAnalysis?.vocab_rows ?? [];
   const laBlocks = languageAnalysis?.blocks ?? [];
-  // A named stage takes its hue, whether the name came from a shape or the
-  // candidate typed it -- TP7 and TP8 have no shape picker, and their stages
+  // A named stage takes its hue, whether the name came from a sequence or the
+  // candidate typed it -- TP7 and TP8 have no sequence picker, and their stages
   // are no less staged for that.
   const hueFor = (i: number) =>
     plan.framework_used || (procedure[i]?.stage ?? "").trim() ? STAGE_HUES[i % STAGE_HUES.length] : BORDER;
@@ -206,7 +206,7 @@ export function PlanReview({
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* ---------------- the plan, as parts ---------------- */}
         <div style={{ borderRight: `1px solid ${FAINT}` }}>
-          {/* The shape and the time budget are part of the plan the candidate
+          {/* The lesson sequence and the time budget are part of the plan the candidate
               handed in, so the tutor reads them here too. Ramy, 13 Sep 2026:
               "I want to see the entire lesson plan." */}
           <div
@@ -214,7 +214,7 @@ export function PlanReview({
             style={{ borderBottom: `1px solid ${FAINT}`, padding: "10px 26px" }}
           >
             <span style={{ fontSize: 12.5, color: MUTED }}>
-              Shape:{" "}
+              Lesson sequence:{" "}
               <span style={{ fontWeight: 600, color: plan.framework_used ? TEAL : MUTED }}>
                 {plan.framework_used || "none chosen"}
               </span>

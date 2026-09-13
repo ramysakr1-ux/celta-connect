@@ -10,7 +10,7 @@ import { LanguageAnalysisEditor } from "@/app/dashboard/trainee/plan/[tpNumber]/
 import { DictateButton, DictationScope } from "@/components/dictate-anywhere";
 import { bulletListProps } from "@/lib/bullet-list";
 import { autosizeOnInput, useAutosize } from "@/lib/autosize";
-import { offersLessonShapes } from "@/lib/tp-density";
+import { offersLessonSequences } from "@/lib/tp-density";
 import {
   INTERACTION_PATTERNS,
   LESSON_FRAMEWORKS,
@@ -33,7 +33,7 @@ type TpLanguageAnalysis = Database["public"]["Tables"]["tp_language_analyses"]["
 // design_handoff_trainee_lesson_plan (v3), 13 Sep 2026.
 //
 // The old form was a stack of cards in two columns. This reads as ONE CELTA
-// plan document: a dark identity band, a shape + time-budget strip, the three
+// plan document: a dark identity band, a sequence + time-budget strip, the three
 // aims across the top, the procedure as a numbered colour-coded timeline, the
 // problems and the room at the foot, the language analysis sheet unfolding
 // below.
@@ -123,19 +123,19 @@ export function LessonPlanForm({
       : [{ ...emptyProcedureRow(), stage: "Lead-in" }, ...Array.from({ length: 4 }, emptyProcedureRow)]
   );
   const [frameworkName, setFrameworkName] = useState(normalizeFrameworkName(plan?.framework_used));
-  // The chosen shape's aim for each stage, shown as PLACEHOLDER text in the
+  // The chosen sequence's aim for each stage, shown as PLACEHOLDER text in the
   // empty aim box -- never written into the plan. Ramy, 12 Sep 2026: "choosing
   // the framework is kind of cheating a bit, because it tells them the stage
   // aims... they should at least write that part." The v3 handoff was drawn
   // from the form as it stood before that ruling, and still has applyFramework
   // filling the aims in. His ruling is the newer decision, so it stands.
   const [aimHints, setAimHints] = useState<string[]>([]);
-  const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
-  // Hidden from TP7, but never hidden when a shape is ALREADY chosen: the
+  const [sequenceMenuOpen, setSequenceMenuOpen] = useState(false);
+  // Hidden from TP7, but never hidden when a sequence is ALREADY chosen: the
   // stage hues in the timeline come from it, and a colour with no visible
   // cause is worse than the picker being there.
-  const [showShapes, setShowShapes] = useState(
-    offersLessonShapes(tpNumber) || Boolean(normalizeFrameworkName(plan?.framework_used))
+  const [showSequences, setShowSequences] = useState(
+    offersLessonSequences(tpNumber) || Boolean(normalizeFrameworkName(plan?.framework_used))
   );
   const personalAimsRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -163,21 +163,21 @@ export function LessonPlanForm({
   const overBy = totalMinutes - TP_LESSON_LENGTH_MINUTES;
 
   // A stage takes its hue once it has a NAME -- whether the name came from a
-  // shape or the candidate typed it. Grey only while the stage is unnamed.
+  // sequence or the candidate typed it. Grey only while the stage is unnamed.
   //
-  // The handoff greys everything until a shape is chosen, which was right when
-  // the shape picker was always there. It is not right now: Ramy set the
+  // The handoff greys everything until a sequence is chosen, which was right
+  // when the picker was always there. It is not right now: Ramy set the
   // picker to TP1-6, so on TP7 and TP8 -- where the candidate names their own
   // stages, which is the whole point of the fade -- the timeline could never
   // take a colour at all. "It feels like the page completely lost all the
   // colours in it... it's all washed" (13 Sep 2026). Naming a stage IS
-  // choosing a shape; the candidate just wrote it themselves.
+  // choosing a sequence; the candidate just wrote it themselves.
   const hueFor = (i: number) =>
     frameworkName || procedure[i]?.stage.trim() ? STAGE_HUES[i % STAGE_HUES.length] : BORDER;
 
   function applyFramework(name: string) {
     setFrameworkName(name);
-    setShapeMenuOpen(false);
+    setSequenceMenuOpen(false);
     if (!name) {
       setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })));
       setAimHints([]);
@@ -185,7 +185,7 @@ export function LessonPlanForm({
     }
     const framework = LESSON_FRAMEWORKS.find((f) => f.name === name);
     if (!framework) return;
-    // Stages past the end of the shape are KEPT, with everything typed in them.
+    // Stages past the end of the sequence are KEPT, with everything typed in them.
     const extra = procedure.slice(framework.stages.length);
     setProcedure([
       ...framework.stages.map((stage, i) => ({ ...(procedure[i] ?? emptyProcedureRow()), stage: stage.name })),
@@ -285,24 +285,24 @@ export function LessonPlanForm({
               </div>
             </div>
 
-            {/* ---------- 2. Shape + time budget ---------- */}
+            {/* ---------- 2. Lesson sequence + time budget ---------- */}
             <div
               className="flex flex-wrap items-center gap-[26px]"
               style={{ background: CARD, borderBottom: `1px solid ${FAINT}`, padding: "14px 26px" }}
             >
-              {showShapes ? (
-                <ShapePicker value={frameworkName} open={shapeMenuOpen} onOpenChange={setShapeMenuOpen} onPick={applyFramework} />
+              {showSequences ? (
+                <LessonSequencePicker value={frameworkName} open={sequenceMenuOpen} onOpenChange={setSequenceMenuOpen} onPick={applyFramework} />
               ) : (
-                // TP7-8: the shape is theirs to decide and to name. Ramy,
+                // TP7-8: the sequence is theirs to decide and to name. Ramy,
                 // 13 Sep 2026 -- "only one to six". Still one click away,
                 // because nothing the system decides is final.
                 <div className="flex flex-col gap-1">
                   <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
-                    Shape
+                    Lesson sequence
                   </p>
-                  <button type="button" onClick={() => setShowShapes(true)} className="text-left" style={{ fontSize: 13, color: MUTED }}>
+                  <button type="button" onClick={() => setShowSequences(true)} className="text-left" style={{ fontSize: 13, color: MUTED }}>
                     Yours to decide and to name —{" "}
-                    <span style={{ color: TEAL, fontWeight: 600 }}>show the shapes anyway</span>
+                    <span style={{ color: TEAL, fontWeight: 600 }}>show the sequences anyway</span>
                   </button>
                 </div>
               )}
@@ -368,7 +368,7 @@ export function LessonPlanForm({
                 <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
                   {frameworkName
                     ? "One action per line. Tap a stage name to rename it."
-                    : "No shape chosen — the stages are yours to name."}
+                    : "No sequence chosen — the stages are yours to name."}
                 </p>
               </div>
 
@@ -661,7 +661,7 @@ function SaveStatus({ pending, savedAt }: { pending: boolean; savedAt: string | 
   );
 }
 
-function ShapePicker({
+function LessonSequencePicker({
   value,
   open,
   onOpenChange,
@@ -691,7 +691,7 @@ function ShapePicker({
   return (
     <div ref={wrap} className="relative flex flex-col gap-1">
       <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
-        Shape
+        Lesson sequence
       </p>
       <button
         type="button"
@@ -707,7 +707,7 @@ function ShapePicker({
           color: chosen ? TEAL : MUTED,
         }}
       >
-        {value || "Choose a lesson shape"}
+        {value || "Choose a lesson sequence"}
         <span style={{ fontSize: 9, opacity: 0.65 }}>▼</span>
       </button>
 
@@ -727,10 +727,10 @@ function ShapePicker({
             padding: 7,
           }}
         >
-          <ShapeItem label="No shape chosen" meta="clears the names" selected={!value} onClick={() => onPick("")} />
+          <SequenceItem label="No sequence chosen" meta="clears the names" selected={!value} onClick={() => onPick("")} />
           <div style={{ borderTop: `1px solid ${FAINT}`, margin: "3px 0" }} />
           {LESSON_FRAMEWORKS.map((f) => (
-            <ShapeItem
+            <SequenceItem
               key={f.key}
               label={f.name}
               meta={`${f.stages.length} stages`}
@@ -744,7 +744,7 @@ function ShapePicker({
   );
 }
 
-function ShapeItem({
+function SequenceItem({
   label,
   meta,
   selected,
@@ -955,7 +955,7 @@ function StageRow({
             well." The stage NAME is a name and stays plain; the aim is
             something they write, so it behaves like every other list field on
             the plan -- clicking into it seeds a bullet, and Enter starts the
-            next one. On TP7 and TP8 there is no shape to prefill either box,
+            next one. On TP7 and TP8 there is no sequence to prefill either box,
             so this is the only thing telling them the row has two jobs. */}
         <textarea
           ref={autosize}
