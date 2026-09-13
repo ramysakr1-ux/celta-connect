@@ -82,6 +82,7 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   "Classroom management / Zoom": "classroom-arrangements",
   "Classroom arrangements and material use": "classroom-arrangements",
   "Rapport and teacher talk": "rapport-and-teacher-talk",
+  "Evaluating your plan": "evaluating-your-plan",
   "Teaching speaking": "teaching-speaking",
   "Productive skills -- writing": "teaching-writing",
   "Productive skills — writing": "teaching-writing",

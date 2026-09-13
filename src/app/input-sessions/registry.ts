@@ -48,6 +48,7 @@ export const INPUT_SESSIONS: InputSessionMeta[] = [
   // Written rather than ported -- the criteria map found 1d and 2a taught by
   // nothing on the course, and there was no design for either.
   { slug: "rapport-and-teacher-talk", title: "Rapport, and how much you talk", minutes: "45 min", kind: "Classroom skills · after TP1" },
+  { slug: "evaluating-your-plan", title: "Evaluating your plan", minutes: "45 min", kind: "Planning · after TP2" },
 ];
 
 export async function loadInputSessionComponent(slug: string): Promise<ComponentType | null> {
@@ -112,6 +113,8 @@ export async function loadInputSessionComponent(slug: string): Promise<Component
       return (await import("@/app/input-sessions/sessions/teaching-exam-classes")).default;
     case "rapport-and-teacher-talk":
       return (await import("@/app/input-sessions/sessions/rapport-and-teacher-talk")).default;
+    case "evaluating-your-plan":
+      return (await import("@/app/input-sessions/sessions/evaluating-your-plan")).default;
     default:
       return null;
   }

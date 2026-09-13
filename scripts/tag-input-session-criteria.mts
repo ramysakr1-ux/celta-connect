@@ -49,6 +49,7 @@ const TAGS: Record<string, string[]> = {
   "Professional development and career advice": ["5m", "5n"],
   "Teaching exam classes": ["1a", "5c"],
   "Rapport and teacher talk": ["1d", "2a"],
+  "Evaluating your plan": ["4n", "5m"],
 };
 
 const env = fs.readFileSync(".env.local", "utf8");

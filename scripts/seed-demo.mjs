@@ -2791,7 +2791,14 @@ async function main() {
     { d: 11, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 11, b: 7, type: "input_session", title: "Functional language", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2c", "2f", "4i"] },
     { d: 11, b: 8, type: "input_session", title: "Test-Teach-Test", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4b", "5c", "5g"] },
-    { d: 11, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    // 4n is assessed on every self-evaluation a candidate writes -- eight
+    // times -- and nothing on the course taught what it asks for. Day 11,
+    // after TP3, so trainees have three of their own evaluations to work on.
+    //
+    // This took day 11's bookable consultation band. The course runs seven
+    // consultation slots instead of eight; there was no free band anywhere
+    // in weeks 1-3 and nothing cheaper to move.
+    { d: 11, b: 9, type: "input_session", title: "Evaluating your plan", tag: "whole_group", detail: null, linked: null, tp: null, slug: "evaluating-your-plan", criteria: ["4n", "5m"] },
     { d: 12, b: 1, type: "tp", title: "TP5 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 5 },
     { d: 12, b: 2, type: "tp", title: "TP5 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 5 },
     { d: 12, b: 3, type: "tp", title: "TP5 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 5 },
