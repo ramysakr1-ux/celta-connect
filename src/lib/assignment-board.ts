@@ -36,6 +36,8 @@ export interface BoardCell {
   round: "first" | "resubmission";
   /** In the double-marked sample: picked, or a fail that entered automatically. */
   inSample: boolean;
+  /** The marks say Not met -- whether or not the decision has been released. */
+  failType: boolean;
   /** Days since the candidate handed this round in, for "waiting 3 days". */
   waitingDays: number | null;
 }
@@ -115,7 +117,7 @@ export function boardCell(
   const inSample = a.in_double_marking_sample || failRecorded || Boolean(outcome?.failType);
   const submittedAt = round === "resubmission" ? a.resubmission_submitted_at : a.first_submitted_at;
   const waitingDays = daysSince(submittedAt, today);
-  const base = { round, inSample, waitingDays } as const;
+  const base = { round, inSample, waitingDays, failType: failRecorded || Boolean(outcome?.failType) } as const;
 
   // Closed states first -- a released decision outranks everything.
   if (a.resubmission_outcome === "fail" || a.final_grade === "Fail") return { ...base, state: "fail_resub" };
@@ -244,7 +246,10 @@ export function buildSample(
     const ofType = rows.filter((r) => r.assignment.assignment_type === type);
     const settled = ofType.filter((r) => isSettled(r.assignment)).length;
     const inProgress = ofType.filter((r) => r.cell.inSample && !isSettled(r.assignment)).length;
-    const fails = ofType.filter((r) => r.cell.state === "fail_resub" || r.cell.state === "resub_needed");
+    // A Not met counts from the moment it is MARKED, not from release -- the
+    // sample has to include it either way, and a tutor holding an unreleased
+    // fail needs to see that it is already in.
+    const fails = ofType.filter((r) => r.cell.failType);
     const failsOutsideSample = fails.filter((r) => !r.assignment.second_marker_recorded_at).length;
     return { assignmentType: type, title, settled, inProgress, required, failsOutsideSample, anyFails: fails.length > 0 };
   });
