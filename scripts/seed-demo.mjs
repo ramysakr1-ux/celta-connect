@@ -26,6 +26,7 @@ import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
 import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
 import { criteriaMarks } from "./lib/assignment-criteria-keys.mjs";
+import { submissionFor } from "./lib/assignment-submissions.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
@@ -1998,13 +1999,23 @@ async function main() {
           // marked assignment with none looked unmarked ("No feedback yet.").
           const firstMarked = state.first_status === "approved" || state.first_status === "resubmission_required";
           const resubMarked = state.resubmission_status === "approved";
+          // Real assignment text, 750-1,000 words, two variants rotated by
+          // candidate so eleven identical submissions do not (correctly)
+          // light up the plagiarism scanner. See lib/assignment-submissions.
+          // Falls back to the generated line for any section the module has
+          // no text for.
+          const written = submissionFor(assignment_type, sections.map((s) => s.key), activeDefs.indexOf(def));
           const rows = sections.map((sec, idx) => ({
             assignment_id: row.id,
             section_key: sec.key,
             section_title: sec.title,
-            first_response: `${sec.instruction} ${first} answers this from the course so far, with specific examples from their own lessons and the pooled observation log.`,
+            first_response:
+              written?.[sec.key] ??
+              `${sec.instruction} ${first} answers this from the course so far, with specific examples from their own lessons and the pooled observation log.`,
             resubmission_response: submittedTwice
-              ? `Revised after feedback: ${first} reworks this section, addressing the tutor's comment directly.`
+              ? (written?.[sec.key]
+                  ? `${written[sec.key]}\n\nRevised after feedback: this section has been reworked to address the point raised on the first submission.`
+                  : `Revised after feedback: ${first} reworks this section, addressing the tutor's comment directly.`)
               : null,
             first_comments: !firstMarked
               ? null
