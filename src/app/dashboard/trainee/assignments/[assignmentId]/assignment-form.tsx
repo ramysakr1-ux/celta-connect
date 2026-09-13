@@ -171,7 +171,10 @@ export function AssignmentAuthoringForm({
 
   const [draftState, draftAction, draftPending] = useActionState(saveAssignmentDraft, initialState);
   const [submitState, submitActionFn, submitPending] = useActionState(submitAssignment, initialState);
-  const state = submitPending ? submitState : draftState;
+  // A submit error outlives the pending flag -- reading `submitPending` here
+  // meant the state flipped back to the draft's the instant the action
+  // returned, so a refused submission said nothing at all.
+  const state = submitState.error ? submitState : draftState;
 
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(savedAt ? new Date(savedAt) : null);
   const [, forceTick] = useState(0);
@@ -225,6 +228,17 @@ export function AssignmentAuthoringForm({
   const fitColour = under > 0 || over > 0 ? GOLD_INK : TEAL;
 
   const declarationComplete = ownWorkConfirmed && referencedConfirmed && aiAnswered !== null;
+
+  // The submit button used to carry its reason in a `title` -- a tooltip on a
+  // dead grey button, which nobody hovers. Clicking it looked like the page
+  // was broken. Same shape as the tutor marking screen now: the blocker is
+  // the bar line AND the button's own label.
+  const blockers: { label: string; target: string }[] = [];
+  if (totalWords === 0) blockers.push({ label: "Write something first", target: "assignment-sections" });
+  if (!ownWorkConfirmed) blockers.push({ label: "Confirm this is your own work", target: "assignment-declaration" });
+  if (!referencedConfirmed) blockers.push({ label: "Confirm your sources are referenced", target: "assignment-declaration" });
+  if (aiAnswered === null) blockers.push({ label: "Answer the question about AI tools", target: "assignment-declaration" });
+  const blocker = blockers[0] ?? null;
 
   const wholeAssignmentCriteria = criteria.filter((c) => !c.sectionKey);
   const criteriaForSection = (key: string) => criteria.filter((c) => c.sectionKey === key);
@@ -378,7 +392,7 @@ export function AssignmentAuthoringForm({
           </div>
 
           {/* ---------- §4 the sections ---------- */}
-          <div style={{ padding: "20px 26px 22px" }}>
+          <div id="assignment-sections" className="scroll-mt-24" style={{ padding: "20px 26px 22px" }}>
             <div className="flex flex-wrap items-baseline gap-3">
               <h3 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: sanction ? GARNET : INK_WARM }}>
                 {format === "structured" ? "The tasks" : "The essay"}
@@ -526,7 +540,8 @@ export function AssignmentAuthoringForm({
             </div>
           ) : (
           <div
-            className="grid grid-cols-1 rounded-b-[14px] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]"
+            id="assignment-declaration"
+            className="grid scroll-mt-24 grid-cols-1 rounded-b-[14px] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]"
             style={{ borderTop: `1px solid ${FAINT}`, background: CARD }}
           >
             <div className="flex flex-col gap-3" style={{ padding: "18px 22px 22px 26px" }}>
@@ -619,17 +634,47 @@ export function AssignmentAuthoringForm({
             padding: "11px 24px",
           }}
         >
-          <div className="flex items-center gap-2">
-            <span className="size-[5px] shrink-0 rounded-full" style={{ background: notYetOpen ? CLOSED_INK : GOLD_INK }} />
-            <p style={{ fontSize: 11.5, color: notYetOpen ? MUTED : GOLD_INK }}>
-              {notYetOpen
-                ? `This assignment opens on ${opensLabel}${opensDate ? ` · ${opensDate}` : ""}. Read the brief now; writing starts then.`
-                : locked
-                ? "With your tutor. You'll be told here when it's marked."
-                : sanction
-                  ? "Submitting locks this reflection — one chance, pass or fail, alongside the resubmission it accompanies."
-                  : "Submitting locks this assignment — if a criterion isn't met you get one resubmission, targeted at that criterion."}
-            </p>
+          <div className="flex items-start gap-2">
+            <span
+              className="mt-[5px] size-[5px] shrink-0 rounded-full"
+              style={{ background: notYetOpen ? CLOSED_INK : GOLD_INK }}
+            />
+            <div className="flex flex-col gap-0.5">
+              {!notYetOpen && !locked && blocker ? (
+                // The reason lives here, in the open, and it is a door: it
+                // takes you to the thing that is missing.
+                <button
+                  type="button"
+                  className="text-left underline decoration-dotted underline-offset-2"
+                  style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_INK }}
+                  onClick={() =>
+                    document.getElementById(blocker.target)?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }
+                >
+                  {blocker.label} — take me there
+                </button>
+              ) : null}
+              <p style={{ fontSize: 11.5, color: notYetOpen ? MUTED : GOLD_INK }}>
+                {notYetOpen
+                  ? `This assignment opens on ${opensLabel}${opensDate ? ` · ${opensDate}` : ""}. Read the brief now; writing starts then.`
+                  : locked
+                  ? "With your tutor. You'll be told here when it's marked."
+                  : sanction
+                    ? "Submitting locks this reflection — one chance, pass or fail, alongside the resubmission it accompanies."
+                    : "Submitting locks this assignment — if a criterion isn't met you get one resubmission, targeted at that criterion."}
+              </p>
+              {/* The word count is one of the marked criteria, so being short
+                  is a warning and never a bar -- the tutor decides, not the
+                  form. It just must not be a silent one. */}
+              {!notYetOpen && !locked && totalWords > 0 && (under > 0 || over > 0) ? (
+                <p style={{ fontSize: 11.5, color: MUTED }}>
+                  {under > 0
+                    ? `${under} words short of the ${wordMin} minimum`
+                    : `${over} words over the ${wordMax.toLocaleString()} maximum`}
+                  {" — the word count is one of the criteria you're marked on."}
+                </p>
+              ) : null}
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
@@ -662,19 +707,25 @@ export function AssignmentAuthoringForm({
                 </span>
                 <button
                   type="submit"
-                  disabled={draftPending || submitPending || !declarationComplete}
-                  title={declarationComplete ? undefined : "Complete the declaration first"}
+                  disabled={draftPending || submitPending || Boolean(blocker)}
+                  title={blocker?.label}
                   style={{
                     borderRadius: 8,
-                    background: declarationComplete ? accent : BORDER,
+                    background: blocker ? "oklch(88% 0.016 82)" : accent,
                     padding: "8px 17px",
                     fontWeight: 600,
                     fontSize: 13.5,
-                    color: declarationComplete ? "oklch(98.5% 0.006 90)" : MUTED,
-                    cursor: declarationComplete ? undefined : "not-allowed",
+                    color: blocker ? MUTED : "oklch(98.5% 0.006 90)",
+                    cursor: blocker ? "not-allowed" : undefined,
                   }}
                 >
-                  {submitPending ? "Submitting…" : sanction ? "Submit reflection" : "Submit assignment"}
+                  {submitPending
+                    ? "Submitting…"
+                    : blocker
+                      ? blocker.label
+                      : sanction
+                        ? "Submit reflection"
+                        : "Submit assignment"}
                 </button>
               </>
             )}
