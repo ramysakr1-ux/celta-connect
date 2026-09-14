@@ -62,6 +62,25 @@ const mistyped = (unassessed ?? []).filter((e) => !/prep/i.test(e.title) && e.ty
 console.log(`  ${mistyped.length ? "!!" : "ok"} ${"unassessed teaching slot not typed unassessed_tp".padEnd(52)} ${mistyped.length} / ${(unassessed ?? []).length}`);
 if (mistyped.length) violations += 1;
 
+// A TP recorded as taught on a day that TP was not timetabled. Amara's TP8
+// on the walkthrough course was stamped taught on 12 September, before the
+// TP7 she had not taught and on a day with no TP8 anywhere on the board
+// (walked 14 Sep 2026) -- the clone had emptied her plan and feedback but
+// left the record claiming the lesson happened.
+const { data: taughtRows } = await db.from("plan_assignments").select("course_id, tp_number, taught_at").not("taught_at", "is", null);
+const { data: tpRows } = await db.from("course_timetable_events").select("course_id, event_date, linked_tp_number").eq("type", "tp").not("linked_tp_number", "is", null);
+const tpDates = new Map();
+for (const e of tpRows ?? []) {
+  const key = `${e.course_id}|${e.linked_tp_number}`;
+  tpDates.set(key, (tpDates.get(key) ?? new Set()).add(e.event_date));
+}
+const offTimetable = (taughtRows ?? []).filter((r) => {
+  const dates = tpDates.get(`${r.course_id}|${r.tp_number}`);
+  return dates && dates.size > 0 && !dates.has(r.taught_at.slice(0, 10));
+});
+console.log(`  ${offTimetable.length ? "!!" : "ok"} ${"TP taught on a day it was not timetabled".padEnd(52)} ${offTimetable.length} / ${(taughtRows ?? []).length}`);
+if (offTimetable.length) violations += 1;
+
 const noComment = marked.filter((x) => !x.first_overall_comment).length;
 const noMarks = marked.filter((x) => !x.first_criteria_marks || !Object.keys(x.first_criteria_marks).length).length;
 violations += (noComment ? 1 : 0) + (noMarks ? 1 : 0);
