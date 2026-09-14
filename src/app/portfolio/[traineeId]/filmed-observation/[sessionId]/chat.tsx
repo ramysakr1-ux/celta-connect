@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
+import { formatTime } from "@/lib/format-date";
 
 type Message = Database["public"]["Tables"]["filmed_observation_messages"]["Row"];
 
@@ -21,6 +23,7 @@ export function FilmedObservationChat({
   nameById: Map<string, string>;
   initialMessages: Message[];
 }) {
+  const timeZone = useCentreTimeZone();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -90,7 +93,7 @@ export function FilmedObservationChat({
                     <p className="flex items-baseline gap-1.5 text-[11px] font-semibold text-ink">
                       {mine ? "You" : (nameById.get(m.author_id) ?? "Unknown")}
                       <span className="text-[10px] font-normal text-muted">
-                        {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {formatTime(m.created_at, timeZone)}
                       </span>
                     </p>
                     <p className="text-[12.5px] leading-[1.45] text-ink/85 text-pretty">{m.body}</p>

@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { setProvisionalGradesDueDate, type FormState } from "@/app/dashboard/trainer/celta5-actions";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDate } from "@/lib/format-date";
 
 const initialState: FormState = { error: null };
@@ -36,7 +36,7 @@ export function ProvisionalDeadlineBanner({
 }) {
   const allConfirmed = totalCount > 0 && approvedCount >= totalCount;
   const overdueDays = daysOut !== null && daysOut < 0 ? -daysOut : 0;
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [state, action, pending] = useActionState(setProvisionalGradesDueDate, initialState);
   const [editing, setEditing] = useState(false);
 

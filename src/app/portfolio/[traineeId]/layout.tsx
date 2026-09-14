@@ -42,6 +42,7 @@ import { getPeerGroupMembers } from "@/lib/peer-observation";
 import { computeCourseDayProgress } from "@/lib/course-day";
 import { Avatar } from "@/components/avatar";
 import { formatCalendarDate } from "@/lib/format-date";
+import { CentreTimeZoneProvider } from "@/components/centre-time-zone";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -329,9 +330,15 @@ export default async function PortfolioLayout({
   };
 
   return (
-    // The trainee's paper (migration 0295): the neutral ladder re-hued on
-    // this surface only. Semantic colours are untouched -- see pagePaletteVars.
-    <div id="trainee-surface" className="flex min-h-screen flex-col bg-background" style={ownNotebook ? (pagePaletteVars(pagePalette) as React.CSSProperties) : undefined}>
+    // The centre's zone, in reach of every client component under this
+    // layout. A date on a candidate's portfolio belongs to the centre
+    // running the course, not to wherever the candidate is reading from --
+    // the same rule the hub has followed since 5 Sep 2026.
+    <CentreTimeZoneProvider timeZone={timeZone}>
+      {/* The trainee's paper (migration 0295): the neutral ladder re-hued on
+          this surface only. Semantic colours are untouched -- see
+          pagePaletteVars. */}
+      <div id="trainee-surface" className="flex min-h-screen flex-col bg-background" style={ownNotebook ? (pagePaletteVars(pagePalette) as React.CSSProperties) : undefined}>
       {/* Checkpoint 2 (App Redesign.dc.html 1d -- not in the archive, see the
           note in trainer/(hub)/page.tsx) -- collapses the old 2-block
           header (14px wordmark bar + a separate .sheet identity block with
@@ -603,5 +610,6 @@ export default async function PortfolioLayout({
         raiseForMobileNav={showTraineeNav}
       />
     </div>
+    </CentreTimeZoneProvider>
   );
 }

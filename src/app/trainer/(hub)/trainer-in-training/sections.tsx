@@ -32,7 +32,7 @@ import {
   type FormState,
 } from "@/app/trainer/(hub)/trainer-in-training/actions";
 import { SHADOW_DAYS_REQUIRED, TIT_MODE_LABEL } from "@/lib/trainer-in-training-constants";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDate } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
@@ -191,7 +191,7 @@ export function Task12Stage1Form({ titRecordId, events }: { titRecordId: string;
 }
 
 export function Task12Stage1List({ rows }: { rows: { id: string; eventTitle: string | null; handoutDescription: string; filedAt: string }[] }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   if (rows.length === 0) return <p className="text-sm text-muted">Nothing filed yet.</p>;
   return (
     <ul className="flex flex-col gap-1.5">
@@ -609,7 +609,7 @@ export function TaskRecordItemRow({
 }
 
 export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRecordId: string; essay: string | null; submittedAt: string | null }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [saveState, saveAction, savePending] = useActionState(updateReflectiveEssay, initial);
   const [submitState, submitAction, submitPending] = useActionState(submitReflectiveEssay, initial);
   const wordCount = (essay ?? "").trim().split(/\s+/).filter(Boolean).length;
@@ -660,7 +660,7 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
 }
 
 export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRecordId: string; bookedAt: string | null; completedAt: string | null }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-muted">
@@ -729,7 +729,7 @@ export function OutcomeForm({ titRecordId, outcome, note }: { titRecordId: strin
 }
 
 export function SubmitPortfolioButton({ titRecordId, submittedAt }: { titRecordId: string; submittedAt: string | null }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   if (submittedAt) {
     return <span className="pill pill-success">Submitted {formatDate(submittedAt, timeZone)}</span>;
   }

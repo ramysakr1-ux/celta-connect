@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { confirmCelta5Section, type AbsenceFormState } from "@/app/portfolio/[traineeId]/status-actions";
+import { formatDate } from "@/lib/format-date";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 
 const initial: AbsenceFormState = { error: null };
 
@@ -27,6 +29,7 @@ export function ConfirmBox({
   canSign: boolean;
   fullName: string | null;
 }) {
+  const timeZone = useCentreTimeZone();
   const [state, formAction, pending] = useActionState(confirmCelta5Section, initial);
 
   if (confirmedAt) {
@@ -41,7 +44,7 @@ export function ConfirmBox({
           <span className="flex items-center gap-2">
             <span className="text-muted">Signed:</span>
             <span className="font-semibold text-ink">
-              {new Date(confirmedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              {formatDate(confirmedAt, timeZone, { day: "numeric", month: "long", year: "numeric" })}
             </span>
           </span>
         </div>

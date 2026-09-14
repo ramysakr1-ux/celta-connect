@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import type { PrepItemState, PrepSummary } from "@/lib/assessor-prep-state";
 import { markPrepItem } from "@/app/trainer/(hub)/assessor/prep-actions";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDate } from "@/lib/format-date";
 
 // Handbook 14.1's list, with state.
@@ -19,7 +19,7 @@ const TEAL = "oklch(37.5% 0.058 195)";
 
 
 function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolean; onToggle: (key: string, done: boolean) => void }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const ready = item.status === "ready";
   const na = item.status === "not_applicable";
   const tone = ready ? TEAL : na ? "var(--color-muted)" : AMBER;

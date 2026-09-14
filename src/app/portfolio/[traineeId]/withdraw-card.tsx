@@ -11,7 +11,8 @@ import {
   type RestartFormState,
   type DeferralFormState,
 } from "@/app/portfolio/[traineeId]/status-actions";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 
 const initialWithdrawState: WithdrawFormState = { error: null };
 const initialExtensionState: ExtensionFormState = { error: null };
@@ -52,6 +53,7 @@ export function CandidateStatusCard({
   // status meaning of its own, so it defaults to plain teal.
   accent?: "teal" | "garnet";
 }) {
+  const timeZone = useCentreTimeZone();
   const [mode, setMode] = useState<Mode>("none");
   const requestNoteStarter = pendingRequest
     ? [pendingRequest.reason_tag, pendingRequest.note].filter(Boolean).join(": ")
@@ -81,7 +83,7 @@ export function CandidateStatusCard({
             <p className="text-xs text-muted">{pendingRequest.still_attending ? "Would like to keep attending as an observer." : "This would be their last day."}</p>
           ) : null}
           <p className="text-xs text-muted">
-            Signed {pendingRequest.signed_name} · {new Date(pendingRequest.signed_at).toLocaleString()} · {pendingRequest.confirmations.length}{" "}
+            Signed {pendingRequest.signed_name} · {formatDateTime(pendingRequest.signed_at, timeZone)} · {pendingRequest.confirmations.length}{" "}
             confirmation{pendingRequest.confirmations.length === 1 ? "" : "s"} ticked
           </p>
           {mode === "none" ? (

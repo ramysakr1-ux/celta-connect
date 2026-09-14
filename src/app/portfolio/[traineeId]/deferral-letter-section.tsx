@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { LetterIssueForm } from "@/app/dashboard/trainer/letter-issue-form";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { formatDate } from "@/lib/format-date";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 
 export function DeferralLetterSection({
   traineeId,
@@ -15,6 +17,7 @@ export function DeferralLetterSection({
   draft: FormalLetterInput | null;
   existingLetters: { id: string; issued_at: string; acknowledged_at: string | null }[];
 }) {
+  const timeZone = useCentreTimeZone();
   const [showForm, setShowForm] = useState(existingLetters.length === 0);
 
   return (
@@ -23,7 +26,7 @@ export function DeferralLetterSection({
       {existingLetters.map((l) => (
         <div key={l.id} className="flex items-center justify-between gap-3 text-xs">
           <span className="text-muted">
-            Issued {new Date(l.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} ·{" "}
+            Issued {formatDate(l.issued_at, timeZone, { day: "numeric", month: "short", year: "numeric" })} ·{" "}
             {l.acknowledged_at ? "acknowledged" : "awaiting acknowledgement"}
           </span>
           <a href={`/api/formal-letter/${l.id}`} className="font-semibold text-primary hover:underline">

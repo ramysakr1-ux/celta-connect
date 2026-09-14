@@ -20,7 +20,7 @@ import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues, computeAssessedTpStats, computeAssessedHoursByMode, computeCurrentTpRound } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { formatDate, formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDate, formatDateTime } from "@/lib/format-date";
 import { resolveAssignmentResult } from "@/lib/assignment-info";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
@@ -201,6 +201,9 @@ export default async function PortfolioCelta5Page({
       // Cambridge prints was simply missing from the candidate's own view.
       supabase.from("attendance_absences").select("*").eq("trainee_id", traineeId).order("session_date"),
     ]);
+
+    // Every signature and submission on CELTA 5 is dated where the centre is.
+    const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
     const record = recordRows?.[0];
     const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
 
@@ -713,7 +716,7 @@ export default async function PortfolioCelta5Page({
                         {task.instructions ? <p className="mt-1 text-[10px] text-muted">{task.instructions}</p> : null}
                         {submission?.submitted_at ? (
                           <p className="mt-2 text-[10px] text-muted">
-                            Submitted {new Date(submission.submitted_at).toLocaleDateString("en-GB")}.
+                            Submitted {formatDate(submission.submitted_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}.
                           </p>
                         ) : (
                           <div className="mt-2">
@@ -742,7 +745,7 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-assignments" title="Record of written assignments">
-            <WrittenAssignmentsRecord rows={writtenAssignmentRows} />
+            <WrittenAssignmentsRecord rows={writtenAssignmentRows} timeZone={timeZone} />
           </BookletSection>
 
           <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">
@@ -888,7 +891,7 @@ export default async function PortfolioCelta5Page({
                 {record.trainee_signoff_stage2_at ? (
                   <p className="text-[11px] text-muted">
                     Signed by {record.stage2_candidate_signature_name ?? "you"} on{" "}
-                    {new Date(record.trainee_signoff_stage2_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+                    {formatDate(record.trainee_signoff_stage2_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}.
                   </p>
                 ) : !viewer?.signature_name ? (
                   <SetSignatureForm fullName={viewer?.full_name ?? ""} />
@@ -938,7 +941,7 @@ export default async function PortfolioCelta5Page({
                     {record.stage3_candidate_signed_at ? (
                       <p className="text-[11px] text-muted">
                         Signed by {record.stage3_candidate_signature_name} on{" "}
-                        {new Date(record.stage3_candidate_signed_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+                        {formatDate(record.stage3_candidate_signed_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}.
                       </p>
                     ) : !viewer?.signature_name ? (
                       <SetSignatureForm fullName={viewer?.full_name ?? ""} />
@@ -983,7 +986,7 @@ export default async function PortfolioCelta5Page({
               {record.trainer_signoff_final_at ? (
                 <span className="text-muted">
                   {" \u00b7 "}
-                  {new Date(record.trainer_signoff_final_at).toLocaleDateString("en-GB", {
+                  {formatDate(record.trainer_signoff_final_at, timeZone, {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -1081,6 +1084,9 @@ export default async function PortfolioCelta5Page({
       .eq("type", "tp"),
     supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
   ]);
+
+  // Every signature and submission on CELTA 5 is dated where the centre is.
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
@@ -1244,7 +1250,7 @@ export default async function PortfolioCelta5Page({
                 </div>
                 {submission ? (
                   <>
-                    <p className="mt-1 text-xs text-muted">{new Date(submission.submitted_at).toLocaleString()}</p>
+                    <p className="mt-1 text-xs text-muted">{formatDateTime(submission.submitted_at, timeZone)}</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
                   </>
                 ) : null}
@@ -1415,7 +1421,7 @@ export default async function PortfolioCelta5Page({
       );
     const assessorOverall = (v: string | null | undefined) => overallLabel(v);
     const sigLine = (name: string | null, at: string | null) =>
-      name ? `${name}${at ? ` · ${new Date(at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}` : "Not signed";
+      name ? `${name}${at ? ` · ${formatDate(at, timeZone, { day: "numeric", month: "long", year: "numeric" })}` : ""}` : "Not signed";
 
     return (
       <div className="flex flex-col gap-4">
@@ -1481,7 +1487,7 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-assignments" title="Record of written assignments">
-            <WrittenAssignmentsRecord rows={assessorAssignmentRows} />
+            <WrittenAssignmentsRecord rows={assessorAssignmentRows} timeZone={timeZone} />
           </BookletSection>
 
           <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">

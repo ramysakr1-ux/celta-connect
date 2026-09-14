@@ -17,7 +17,7 @@ import {
 } from "@/app/trainer/(hub)/volunteers/actions";
 import { LEVEL_OPTIONS } from "@/lib/levels";
 import { Avatar } from "@/components/avatar";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatCalendarDate, formatDate, formatTime } from "@/lib/format-date";
 
 // design_handoff_volunteer_students_v2: the Today strip (RSVP replies +
@@ -290,7 +290,7 @@ export function VolunteersV2({
   courseEndDate: string | null;
   siteOrigin: string;
 }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [selectedId, setSelectedId] = useState<string | null>(rows[0]?.id ?? null);
   const [addOpen, setAddOpen] = useState(false);
   const selected = rows.find((r) => r.id === selectedId) ?? null;
@@ -517,7 +517,7 @@ export function VolunteersV2({
 // ---------- the student card ----------
 
 function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerRowData; rule: RuleInfo; courseEndDate: string | null; siteOrigin: string }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [reissueState, reissueAction, reissuing] = useActionState(reissueVolunteerLink, { error: null, done: false } as ReissueState);
   const [emailState, emailAction, emailing] = useActionState(sendVolunteerStartingEmailNow, { error: null, sent: false } as SendStartingEmailState);
   const total = row.hoursPrior + row.hoursHere;

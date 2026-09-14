@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { saveMarkingGuidanceEntry, type FormState } from "@/app/trainer/(hub)/marking-guidance/actions";
 import type { AssignmentCriterion } from "@/lib/assignment-criteria";
 import type { Database } from "@/lib/supabase/types";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDate } from "@/lib/format-date";
 
 type GuidanceRow = Database["public"]["Tables"]["marking_guidance_entries"]["Row"];
@@ -78,7 +78,7 @@ function CriterionCard({
   row: GuidanceRow | undefined;
   updatedByName: string | undefined;
 }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [state, action, pending] = useActionState(saveMarkingGuidanceEntry, initialState);
 
   return (

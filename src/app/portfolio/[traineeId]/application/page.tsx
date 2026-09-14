@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate } from "@/lib/format-date";
 
 // Handbook 12.2: "completed selection tasks and interview notes/record sheets
 // of both accepted and rejected candidates must be available to assessors."
@@ -45,8 +48,10 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const admin = createAdminClient();
 
-  const { data: trainee } = await supabase.from("profiles").select("full_name, course_id").eq("id", traineeId).maybeSingle();
+  const { data: trainee } = await supabase.from("profiles").select("full_name, course_id, center_id").eq("id", traineeId).maybeSingle();
   if (!trainee) notFound();
+  // An application was marked at the centre; that is where the date belongs.
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   // applicants.resulting_trainee_id is the link back from an enrolled
@@ -121,7 +126,7 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
         title="How the centre marked it"
         caption={
           applicant.marked_at
-            ? `Marked ${new Date(applicant.marked_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.`
+            ? `Marked ${formatDate(applicant.marked_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}.`
             : "Not marked in Connect."
         }
       >

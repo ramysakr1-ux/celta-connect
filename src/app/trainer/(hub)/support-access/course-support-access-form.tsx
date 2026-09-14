@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { grantCourseSupportAccess, revokeSupportGrant, type SupportGrantFormState } from "@/app/centre/settings/support-access-actions";
 import type { SupportGrantRow } from "@/app/centre/settings/support-access-tab";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDateTime } from "@/lib/format-date";
 
 const initial: SupportGrantFormState = { error: null };
@@ -20,7 +20,7 @@ const STATUS_LABEL: Record<SupportGrantRow["status"], string> = {
 };
 
 export function CourseSupportAccessForm({ courseName, grants }: { courseName: string; grants: SupportGrantRow[] }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [state, action, pending] = useActionState(grantCourseSupportAccess, initial);
 
   return (

@@ -7,6 +7,9 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
 import { ObservationTaskForm } from "@/app/portfolio/[traineeId]/celta5/observation-task-form";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDateTime } from "@/lib/format-date";
 
 // specs/for-claude-code-progress-tab-build.md -- a fresh, independent
 // implementation (deliberately NOT extracted from celta5/page.tsx, see that
@@ -42,6 +45,8 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
   }
 
   const supabase = await createClient();
+  // Past the guard above the viewer IS the candidate, so this is their centre.
+  const timeZone = (await getCachedCenter(viewer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
 
   const [
     { data: recordRows },
@@ -278,7 +283,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
                   <p className="mt-1 text-sm text-muted">{task.instructions}</p>
                   {submission ? (
                     <div className="mt-3 border-t border-border-faint pt-3">
-                      <p className="text-xs text-muted">Submitted {new Date(submission.submitted_at).toLocaleString()}</p>
+                      <p className="text-xs text-muted">Submitted {formatDateTime(submission.submitted_at, timeZone)}</p>
                       <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
                     </div>
                   ) : (

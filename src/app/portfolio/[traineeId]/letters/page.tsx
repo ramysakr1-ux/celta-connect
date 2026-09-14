@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
+import { formatDate } from "@/lib/format-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Handbook 12.1.1 Section A, "where appropriate": a fail warning letter and a
 // candidate letter of withdrawal belong in the portfolio. 14.2 also has the
@@ -25,8 +28,8 @@ const LETTER_TITLE: Record<string, string> = {
   deferral: "Deferral — centre record and candidate letter",
 };
 
-function longDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+function longDate(iso: string, timeZone: string): string {
+  return formatDate(iso, timeZone, { day: "numeric", month: "long", year: "numeric" });
 }
 
 export default async function CandidateLettersPage({ params }: { params: Promise<{ traineeId: string }> }) {
@@ -42,10 +45,13 @@ export default async function CandidateLettersPage({ params }: { params: Promise
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const admin = createAdminClient();
 
-  const { data: trainee } = await supabase.from("profiles").select("full_name, course_id").eq("id", traineeId).maybeSingle();
+  const { data: trainee } = await supabase.from("profiles").select("full_name, course_id, center_id").eq("id", traineeId).maybeSingle();
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
+  // The centre's zone. A letter is issued, and an application marked, where
+  // the centre is -- rendering in the runtime's showed the wrong day abroad.
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const [{ data: letters }, { data: cases }] = await Promise.all([
     admin
       .from("formal_letters")
@@ -90,8 +96,8 @@ export default async function CandidateLettersPage({ params }: { params: Promise
               {LETTER_TITLE[l.letter_type] ?? l.letter_type}
             </span>
             <span className="mt-0.5 block text-[12.5px] text-muted">
-              Issued {longDate(l.issued_at)}.{" "}
-              {l.acknowledged_at ? `Acknowledged by the candidate ${longDate(l.acknowledged_at)}.` : "Not yet acknowledged."}
+              Issued {longDate(l.issued_at, timeZone)}.{" "}
+              {l.acknowledged_at ? `Acknowledged by the candidate ${longDate(l.acknowledged_at, timeZone)}.` : "Not yet acknowledged."}
             </span>
           </span>
           <span className="shrink-0 pt-0.5 text-[11px] font-semibold text-primary">Open →</span>
@@ -102,7 +108,7 @@ export default async function CandidateLettersPage({ params }: { params: Promise
         <div key={c.id} className="card p-5">
           <p className="text-[13.5px] font-semibold text-ink">Malpractice case</p>
           <p className="mt-0.5 text-[12.5px] text-muted">
-            Opened {longDate(c.opened_at)} on the {c.assignment_round === "resubmission" ? "resubmission" : "first submission"}.{" "}
+            Opened {longDate(c.opened_at, timeZone)} on the {c.assignment_round === "resubmission" ? "resubmission" : "first submission"}.{" "}
             {c.candidate_account_recorded_at
               ? "The candidate's own account is on the record."
               : "The candidate's account has not been recorded yet."}

@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { signAssignmentOutcome, type AbsenceFormState } from "@/app/portfolio/[traineeId]/status-actions";
+import { formatDate } from "@/lib/format-date";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 
 const initial: AbsenceFormState = { error: null };
 
@@ -40,6 +42,7 @@ export function AssignmentResultSignature({
   viewerSignatureName: string | null;
   canSign: boolean;
 }) {
+  const timeZone = useCentreTimeZone();
   const [state, formAction, pending] = useActionState(signAssignmentOutcome, initial);
 
   // Nothing to acknowledge until there is a decision. "submitted" and
@@ -74,7 +77,7 @@ export function AssignmentResultSignature({
       {signedAt ? (
         <p className="mt-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-muted">
           Acknowledged by {signatureName} on{" "}
-          {new Date(signedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+          {formatDate(signedAt, timeZone, { day: "numeric", month: "long", year: "numeric" })}.
         </p>
       ) : !canSign ? (
         <p className="mt-1 text-xs text-muted">Not yet acknowledged by the candidate.</p>

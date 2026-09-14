@@ -1,4 +1,5 @@
 import { Pulled } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
+import { formatDate } from "@/lib/format-date";
 
 // Record of written assignments.
 //
@@ -18,7 +19,7 @@ export type AssignmentRow = {
   signedAt: string | null;
 };
 
-export function WrittenAssignmentsRecord({ rows }: { rows: AssignmentRow[] }) {
+export function WrittenAssignmentsRecord({ rows, timeZone }: { rows: AssignmentRow[]; timeZone: string }) {
   return (
     <>
       <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 8 }}>
@@ -69,7 +70,7 @@ export function WrittenAssignmentsRecord({ rows }: { rows: AssignmentRow[] }) {
                     {r.signedAt ? (
                       <span className="text-muted">
                         {" · "}
-                        {new Date(r.signedAt).toLocaleDateString("en-GB", {
+                        {formatDate(r.signedAt, timeZone, {
                           day: "numeric",
                           month: "short",
                           year: "numeric",

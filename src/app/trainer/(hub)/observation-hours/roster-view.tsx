@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
-import { useHubTimeZone } from "@/components/hub-time-zone";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDate } from "@/lib/format-date";
 
 export interface ObservationLogEntry {
@@ -44,7 +44,7 @@ const KIND_CLASS: Record<ObservationLogEntry["kind"], string> = {
 };
 
 export function ObservationHoursRoster({ rows, obsTasksTotal }: { rows: CandidateObservationRow[]; obsTasksTotal: number }) {
-  const timeZone = useHubTimeZone();
+  const timeZone = useCentreTimeZone();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("all");
 
   return (
