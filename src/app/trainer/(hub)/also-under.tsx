@@ -18,7 +18,23 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
   // ring like every other door. `tab` is kept for the accessible name.
   return (
     <div className="flex flex-wrap gap-2" aria-label={`Also under ${tab}`}>
-      {links.map((l) => (
+      {links.map((l) =>
+        // A file the browser downloads (the calendar feed) or a document that
+        // prints outside the hub is a plain link, not a client navigation.
+        l.href.startsWith("/api/") ? (
+          <a
+            key={l.href}
+            href={l.href}
+            className="trainer-hover inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-semibold"
+            style={{
+              background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))",
+              borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)",
+              color: "oklch(40% 0.09 68)",
+            }}
+          >
+            {l.label}
+          </a>
+        ) : (
         <Link
           key={l.href}
           href={l.href}
@@ -31,7 +47,8 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
         >
           {l.label}
         </Link>
-      ))}
+        )
+      )}
     </div>
   );
 }

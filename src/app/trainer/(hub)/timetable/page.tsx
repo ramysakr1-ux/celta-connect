@@ -697,7 +697,19 @@ export default async function TrainerTimetablePage({
               </Link>
             ) : null}
           </PageHead>
-          {trainer ? <AlsoUnder tab="Timetable" links={[{ href: "/trainer/session-materials", label: "Share session materials" }]} /> : null}
+          {/* Ramy, 14 Sep 2026: "give the tutor the calendar link and a print
+              view." The candidate has had the calendar link since the
+              Timetable tab was built; the tutor had neither. */}
+          {trainer ? (
+            <AlsoUnder
+              tab="Timetable"
+              links={[
+                { href: "/trainer/session-materials", label: "Share session materials" },
+                { href: `/timetable-document/${courseId}`, label: "Print timetable" },
+                { href: `/api/courses/${courseId}/timetable.ics`, label: "Add to my calendar" },
+              ]}
+            />
+          ) : null}
 
           {allEvents.length === 0 ? (
             <div className="sheet text-sm text-muted">No events yet.</div>
