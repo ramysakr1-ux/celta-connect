@@ -437,6 +437,11 @@ async function main() {
     await supabase.from("tp_plans").delete().eq("trainee_id", newAmara).eq("tp_number", 8);
     await supabase.from("tp_feedback").delete().eq("trainee_id", newAmara).eq("tp_number", 8);
     await supabase.from("tp_self_evaluations").delete().eq("trainee_id", newAmara).eq("tp_number", 8);
+    // The TP record itself stays -- it is the slot she is going to teach --
+    // but it must not claim she already taught it. Walked 14 Sep 2026: her
+    // TP8 carried a taught stamp dated before TP7, on a day the timetable
+    // has no TP8 on, so she read as having taught out of order.
+    await supabase.from("plan_assignments").update({ taught_at: null }).eq("trainee_id", newAmara).eq("tp_number", 8);
     console.log("  Amara's TP8 left empty, ready to write");
   }
 
