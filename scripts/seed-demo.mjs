@@ -1137,12 +1137,15 @@ async function main() {
   // The Handbook asks for at least two hours at each of two levels, one below
   // intermediate (9.1.2), and puts Stage 2 "after 3 hours' TP and when
   // candidates are swapping tutors/TP groups" (10.2) -- which is TP5. It used
-  // to swap at TP4 (three lessons at one level, five at the other) and stopped
-  // at TP6. This is the row assign_tp_round reads to know which book feeds a
-  // group's round.
+  // to swap at TP4 (three lessons at one level, five at the other). This is
+  // the row assign_tp_round reads to know which book feeds a
+  // group's round. TP7 and TP8 are not here on purpose: the candidate
+  // self-selects those (migration 0025, the Syllabus Planning Grid), and the
+  // table's check constraint stops at 6. Their level on the timetable card is
+  // still the group's second level -- levelForGroupTp below handles 7 and 8.
   const SCHEDULE = {
-    "Group A": { 1: "A2", 2: "A2", 3: "A2", 4: "A2", 5: "B1+", 6: "B1+", 7: "B1+", 8: "B1+" },
-    "Group B": { 1: "B1+", 2: "B1+", 3: "B1+", 4: "B1+", 5: "A2", 6: "A2", 7: "A2", 8: "A2" },
+    "Group A": { 1: "A2", 2: "A2", 3: "A2", 4: "A2", 5: "B1+", 6: "B1+" },
+    "Group B": { 1: "B1+", 2: "B1+", 3: "B1+", 4: "B1+", 5: "A2", 6: "A2" },
   };
   for (const [groupName, byTp] of Object.entries(SCHEDULE)) {
     for (const [tp, level] of Object.entries(byTp)) {
