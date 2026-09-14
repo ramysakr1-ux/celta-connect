@@ -15,7 +15,8 @@
     "check:course": "node scripts/course-readiness.mjs",
     "check:writes": "node scripts/write-paths.mjs",
     "check:browser": "node scripts/browser-check.mjs",
-    "check:journeys": "node scripts/journeys.mjs"
+    "check:journeys": "node scripts/journeys.mjs",
+    "gen:types": "bash scripts/gen-types.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
