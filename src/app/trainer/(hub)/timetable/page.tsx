@@ -548,8 +548,16 @@ export default async function TrainerTimetablePage({
       event.type === "tp" && volunteerIds.length > 0
         ? { total: volunteerIds.length, expected: volunteerIds.length - (declinedCountByEvent.get(event.id) ?? 0) }
         : null;
+    // A TP session's door is its register. setAttendance is ungated on
+    // purpose -- taking the register is a day-of teaching task, not a
+    // timetable edit -- but the only form for it lived inside Edit
+    // timetable, which is MCT-only, so the assistant tutor the hub nags
+    // about a missing register had no way to submit one (walked 14 Sep
+    // 2026). Assessors are read-only here and get no register door.
+    const registerHref = event.type === "tp" && !isAssessorViewer ? `/trainer/timetable/register/${event.id}` : null;
     eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
-      sheetHref: sheetHrefByEventId.get(event.id) ?? null,
+      sheetHref: sheetHrefByEventId.get(event.id) ?? registerHref,
+      sheetLabel: sheetHrefByEventId.has(event.id) ? undefined : registerHref ? "Take the register" : undefined,
     };
   }
 

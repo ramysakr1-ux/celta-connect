@@ -61,6 +61,11 @@ export interface EventMeta {
    * blocks -- migrations 0094 / 0275): the panel shows a door to it.
    */
   sheetHref?: string | null;
+  /**
+   * What that door says. Defaults to the booking sheet it was built for; the
+   * tutor's board also uses it to reach a TP session's register.
+   */
+  sheetLabel?: string;
 }
 
 export interface ReadOnlyBoardProps {
@@ -642,7 +647,7 @@ function DetailPanel({
     if (event.zoom_url) rows.push({ label: "Zoom link", value: event.zoom_url });
   } else if (event.tag === "consultation") {
     rows.push({ label: "Format", value: event.zoom_url ? "Online" : "In person" });
-    if (!meta.sheetHref) rows.push({ label: "Booking", value: "Arranged with your tutor" });
+    if (!meta.sheetHref && !meta.sheetLabel) rows.push({ label: "Booking", value: "Arranged with your tutor" });
   } else if (event.type === "input_session") {
     if (event.input_session_criteria.length > 0) {
       rows.push({ label: "Syllabus strands", value: event.input_session_criteria.join(", ") });
@@ -671,7 +676,7 @@ function DetailPanel({
       </div>
       {meta.sheetHref ? (
         <a href={meta.sheetHref} className="inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm font-medium text-ink trainee-hover-fill">
-          Open the booking sheet
+          {meta.sheetLabel ?? "Open the booking sheet"}
         </a>
       ) : null}
       {rows.length > 0 ? (
