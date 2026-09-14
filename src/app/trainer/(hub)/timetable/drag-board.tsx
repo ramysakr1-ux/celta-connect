@@ -4,11 +4,12 @@ import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
 import { inputSessionSlugForTitle } from "@/lib/input-session-registry-links";
-import { categorize, isEventLive, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
+import { categorize, isEventLive, toLocalIso, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
 import {
   moveTimetableEvent,
   setAttendance,
   setEventRegistrySlug,
+  setEventDetail,
   setInputSessionCriteria,
   setTpEventMode,
   resolveZoomParticipant,
@@ -142,6 +143,7 @@ export function DragBoard({
   mixedMode,
   canEdit,
   timeZone,
+  timeBands,
 }: {
   events: TimetableEvent[];
   locked: boolean;
@@ -156,6 +158,7 @@ export function DragBoard({
   // timetable edit, and actions.ts' setAttendance was deliberately left open.
   canEdit: boolean;
   timeZone: string;
+  timeBands: TimeBand[];
 }) {
   const weeks = buildWeeks(events);
   const today = toLocalIso(new Date(), timeZone);
@@ -244,7 +247,7 @@ export function DragBoard({
                       {day.events.map((event) => {
                         const cat = tileCategory(event);
                         const spine = TILE_COLOR[cat];
-                        const live = isEventLive(event, now, timeZone);
+                        const live = isEventLive(event, now, timeZone, timeBands);
                         return (
                           <div
                             key={event.id}
@@ -322,6 +325,7 @@ export function DragBoard({
           mixedMode={mixedMode}
           now={now}
           timeZone={timeZone}
+          timeBands={timeBands}
           canEdit={canEdit}
         />
       ) : null}
@@ -342,6 +346,7 @@ function DetailPanel({
   mixedMode,
   now,
   timeZone,
+  timeBands,
   canEdit,
 }: {
   event: TimetableEvent;
@@ -354,6 +359,7 @@ function DetailPanel({
   mixedMode: boolean;
   now: Date;
   timeZone: string;
+  timeBands: TimeBand[];
   canEdit: boolean;
 }) {
   const rows: { label: string; value: string }[] = [
@@ -364,7 +370,7 @@ function DetailPanel({
   if (event.tag) rows.push({ label: "Tag", value: event.tag });
   if (event.linked_tp_number) rows.push({ label: "TP number", value: `TP${event.linked_tp_number}` });
   if (event.linked_assignment_type) rows.push({ label: "Assignment", value: event.linked_assignment_type });
-  const live = isEventLive(event, now, timeZone);
+  const live = isEventLive(event, now, timeZone, timeBands);
 
   return (
     <div className="sheet flex flex-col gap-3">
@@ -414,6 +420,38 @@ function DetailPanel({
         <Link href={`/trainer/timetable/filmed-observation/${event.id}`} className="text-sm font-medium text-primary hover:underline">
           Set up this session
         </Link>
+      ) : null}
+
+      {/* The subtitle under a title on every board -- "Room 2 · B1+",
+          "Self-evaluations lead", "Written feedback only". It could be typed
+          when the event was created and never again: the only editor for it
+          lived in event-cell.tsx, which nothing has rendered since the
+          day-stack redesign, so setEventDetail had no way in. Walked
+          14 Sep 2026. */}
+      {canEdit && !locked ? (
+        <details className="mt-1" open={Boolean(event.detail)}>
+          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+            {event.detail ? `Subtitle: ${event.detail}` : "Set subtitle"}
+          </summary>
+          <form action={setEventDetail} className="mt-2 flex flex-col gap-1.5">
+            <input type="hidden" name="event_id" value={event.id} />
+            <input
+              name="detail"
+              type="text"
+              defaultValue={event.detail ?? ""}
+              placeholder="Room 2 · B1+, Supervised, Observation task…"
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+            />
+            <div className="flex items-center gap-2">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+                Save
+              </button>
+              <span className="text-[11px] text-muted">Leave it empty to remove the subtitle.</span>
+            </div>
+          </form>
+        </details>
+      ) : event.detail ? (
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">Subtitle: {event.detail}</p>
       ) : null}
 
       {event.type === "input_session" ? (

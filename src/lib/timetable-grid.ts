@@ -58,7 +58,7 @@ export type CellCategory = "admin" | "wg" | "rm" | "iw" | "lu" | "cs";
 // ones. `timeZone` is now required; callers pass the course's centre's
 // time_zone (falling back to DEFAULT_TIMEZONE the same way every other
 // timezone-aware call site in this file does).
-export function isEventLive(event: TimetableEvent, now: Date, timeZone: string): boolean {
+export function isEventLive(event: TimetableEvent, now: Date, timeZone: string, timeBands: TimeBand[] = DEFAULT_TIME_BANDS): boolean {
   // Ramy, 27 Aug 2026: the live-now bar should fire for an in-person
   // session too (its own design reference's worked example is a TP, not a
   // Zoom session) -- "live" is purely a time-window fact now. Callers that
@@ -68,7 +68,16 @@ export function isEventLive(event: TimetableEvent, now: Date, timeZone: string):
   if (!event.event_time) return false;
   const startsAt = zonedTimeToUtc(event.event_date, event.event_time, timeZone);
   const start = startsAt.getTime() - 10 * 60 * 1000;
-  const end = startsAt.getTime() + 3 * 60 * 60 * 1000;
+  // A session ends when its band ends. This used to be a flat three hours
+  // from the start, which lit a 45-minute session for two hours after it
+  // finished -- and the "Live now" bar printed the band's own end time
+  // ("16:15 - 17:00") while still glowing at 19:11, contradicting itself on
+  // its own line, with the quiet-hours notice below it saying the day was
+  // over. Walked 14 Sep 2026. Anything outside the day's bands (bandIndexFor
+  // clamps to the nearest one) falls back to an hour.
+  const band = timeBands[bandIndexFor(event.event_time, timeBands)];
+  const bandEndMs = band ? zonedTimeToUtc(event.event_date, band.end, timeZone).getTime() : 0;
+  const end = bandEndMs > startsAt.getTime() ? bandEndMs : startsAt.getTime() + 60 * 60 * 1000;
   const nowMs = now.getTime();
   return nowMs >= start && nowMs <= end;
 }

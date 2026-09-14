@@ -76,6 +76,12 @@ export interface ReadOnlyBoardProps {
    * trainer/(hub)/timetable/page.tsx.
    */
   mineMeaning?: string;
+  /**
+   * What to say about changing the schedule. A candidate is told to ask
+   * their tutor; a tutor reading their own course's board was being told
+   * the same thing, which is nobody's instruction (walked 14 Sep 2026).
+   */
+  changeHint?: string;
   today: string;
   nowIso: string;
   timeZone: string;
@@ -90,6 +96,7 @@ export function ReadOnlyTimetableBoard({
   viewerName,
   viewerGroupLabel,
   mineMeaning,
+  changeHint,
   today,
   nowIso,
   timeZone,
@@ -106,7 +113,7 @@ export function ReadOnlyTimetableBoard({
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
 
   const week = weeks[weekIndex] ?? weeks[0];
-  const liveEvent = events.find((e) => isEventLive(e, now, timeZone)) ?? null;
+  const liveEvent = events.find((e) => isEventLive(e, now, timeZone, timeBands)) ?? null;
   // for-claude-code-timetable-view.md: "time range + 'opened HH:MM'" -- opened
   // is the join-window's own start (isEventLive's -10min), the range's end is
   // the event's time band boundary, not a stored field on the event itself.
@@ -394,8 +401,8 @@ export function ReadOnlyTimetableBoard({
           </>
         ) : (
           <>
-            Read-only -- ask your tutor to change anything here. &quot;Mine&quot; fades sessions that don&apos;t involve
-            you, and hides them on a phone; it never removes anything from the real schedule.
+            Read-only -- {changeHint ?? "ask your tutor to change anything here"}. &quot;Mine&quot; fades sessions that
+            don&apos;t involve you, and hides them on a phone; it never removes anything from the real schedule.
           </>
         )}
       </p>

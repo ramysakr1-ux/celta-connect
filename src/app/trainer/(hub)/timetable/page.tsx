@@ -633,6 +633,7 @@ export default async function TrainerTimetablePage({
                 mixedMode={course?.delivery_mode === "mixed"}
                 canEdit={isMct}
                 timeZone={timeZone}
+                timeBands={timeBands}
               />
             </div>
           ) : (
@@ -712,6 +713,7 @@ export default async function TrainerTimetablePage({
                     : "No visit date has been set yet, so \u201cMine\u201d has nothing to narrow to."
                   : undefined
               }
+              changeHint={isAssessorViewer ? undefined : "use Edit timetable, above, to change anything"}
               viewerGroupLabel={viewerGroupLabel}
               today={today}
               nowIso={new Date().toISOString()}
