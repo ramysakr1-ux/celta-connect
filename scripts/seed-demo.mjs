@@ -1656,6 +1656,12 @@ async function main() {
       trainee_id: trainees[def.name],
       stage1_tutorial_given: stage1Filed,
       stage1_completed_at: stage1Filed ? stage1At : null,
+      // updateStage1 refuses to mark a stage complete without the tutor's
+      // signature, so a filed-but-unsigned Stage 1 is a state the real app
+      // cannot produce. Writing the record directly skipped that guard, and
+      // all 20 seeded records showed the candidate "Tutor's signature: —" on
+      // a Cambridge form that requires one (CELTA 5, printed p15).
+      stage1_tutor_signature_name: stage1Filed ? (def.group === "A" ? "M. Webb" : "J. Blake") : null,
       stage1_released_at: stage1Filed ? stage1At : null,
       stage1_strengths: stage1Filed ? "Confident classroom presence and a clear speaking model; good rapport with the learners from the first lesson." : null,
       stage1_action_plan: stage1Filed ? "Tighten task instructions and check them before starting; give clearer time limits so pace does not drift." : null,
