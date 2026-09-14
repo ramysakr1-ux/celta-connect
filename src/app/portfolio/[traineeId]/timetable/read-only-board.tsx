@@ -87,6 +87,8 @@ export interface ReadOnlyBoardProps {
    * the same thing, which is nobody's instruction (walked 14 Sep 2026).
    */
   changeHint?: string;
+  /** Which lens the board opens on. Defaults to the reader's own sessions. */
+  defaultLens?: "mine" | "everything";
   today: string;
   nowIso: string;
   timeZone: string;
@@ -102,6 +104,7 @@ export function ReadOnlyTimetableBoard({
   viewerGroupLabel,
   mineMeaning,
   changeHint,
+  defaultLens,
   today,
   nowIso,
   timeZone,
@@ -114,7 +117,13 @@ export function ReadOnlyTimetableBoard({
     weeks.findIndex((w) => w.rows.some((r) => r.isoDate >= today))
   );
   const [weekIndex, setWeekIndex] = useState(initialWeek === -1 ? 0 : initialWeek);
-  const [mineOnly, setMineOnly] = useState(false);
+  // Ramy, 14 Sep 2026, looking at a TP band holding two cards with the same
+  // title: "everything is doubled... it was crystal clear, it was alive."
+  // Both groups' lessons are real and both stay one click away -- but the
+  // board opens on the reader's own group, which is the week they actually
+  // live in. An assessor's "Mine" is their visit day alone, so their board
+  // still opens on everything (the page passes the lens in).
+  const [mineOnly, setMineOnly] = useState(defaultLens !== "everything");
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
 
   const week = weeks[weekIndex] ?? weeks[0];

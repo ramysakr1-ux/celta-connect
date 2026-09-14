@@ -55,6 +55,7 @@ export function isMine({
   eventTag,
   eventType,
   eventDate,
+  eventTpGroupId,
   viewer,
   tpEvents,
   viewerHalfOrder,
@@ -63,6 +64,8 @@ export function isMine({
   eventTag: string | null;
   eventType: string;
   eventDate: string;
+  /** The group a TP row belongs to, where it names one. */
+  eventTpGroupId?: string | null;
   viewer: ViewerInvolvement;
   tpEvents: TpTimetableEvent[];
   viewerHalfOrder: 1 | 2 | null;
@@ -71,6 +74,11 @@ export function isMine({
 }): boolean {
   if (eventType === "tp") {
     if (!viewer.subgroupId || viewerHalfOrder === null) return false;
+    // Two groups teach the same hour at two levels (11 Sep 2026), so the day
+    // owning the half is only half the question -- the other group's lesson
+    // is not this candidate's, however much it looks like it: same round,
+    // same letter, another room. Ramy, 14 Sep 2026: "everything is doubled."
+    if (eventTpGroupId && viewer.tpGroupId && eventTpGroupId !== viewer.tpGroupId) return false;
     return halfOwningDate(tpEvents, eventDate) === viewerHalfOrder;
   }
   if (eventTag && groupCodeByTag.has(eventTag)) {

@@ -744,6 +744,7 @@ export default async function TrainerTimetablePage({
                   : undefined
               }
               changeHint={isAssessorViewer ? undefined : "use Edit timetable, above, to change anything"}
+              defaultLens={isAssessorViewer ? "everything" : "mine"}
               viewerGroupLabel={viewerGroupLabel}
               today={today}
               nowIso={new Date().toISOString()}
