@@ -25,7 +25,7 @@ const ROW_HEIGHT = 108;
  * the floor. Lunch and the deadline column are deliberately their own
  * shapes -- lunch recedes by design, a deadline is not a session.
  */
-const TILE_HEIGHT = 104;
+const TILE_HEIGHT = 118;
 
 function CameraIcon() {
   return (
@@ -493,7 +493,8 @@ function Cell({
               key={displayCat}
               className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
               style={{
-                minHeight: displayCat === "lu" || displayCat === "admin" ? undefined : TILE_HEIGHT,
+                height: displayCat === "lu" || displayCat === "admin" ? undefined : TILE_HEIGHT,
+                overflow: "hidden",
                 opacity: faded ? 0.25 : 1,
                 backdropFilter: "blur(10px)",
                 border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -545,7 +546,8 @@ function Cell({
             key={event.id}
             className="min-w-0 rounded-[10px] p-2 transition-opacity duration-150"
             style={{
-              minHeight: TILE_HEIGHT,
+              height: TILE_HEIGHT,
+              overflow: "hidden",
               opacity: faded ? 0.25 : 1,
               backdropFilter: "blur(10px)",
               border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -607,10 +609,7 @@ function SessionTile({
         {event.title}
       </span>
       {event.detail ? (
-        <span
-          className="text-[10px] text-muted"
-          style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
-        >
+        <span className="w-full truncate text-[10px] text-muted" title={event.detail}>
           {event.detail}
         </span>
       ) : null}
