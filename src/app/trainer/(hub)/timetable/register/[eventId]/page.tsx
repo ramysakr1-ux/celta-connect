@@ -34,7 +34,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
   if (!event || event.course_id !== trainer.course_id || event.type !== "tp") notFound();
 
   const [{ data: volunteers }, { data: attendance }, { data: declines }] = await Promise.all([
-    supabase.from("volunteer_students").select("id, name, removed_at").eq("course_id", event.course_id).is("removed_at", null).order("name"),
+    supabase.from("volunteer_students").select("id, name, level, removed_at").eq("course_id", event.course_id).is("removed_at", null).order("name"),
     supabase.from("volunteer_attendance").select("volunteer_student_id, source").eq("timetable_event_id", eventId),
     supabase.from("volunteer_declines").select("volunteer_student_id").eq("timetable_event_id", eventId),
   ]);
@@ -74,7 +74,17 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
             {(volunteers ?? []).map((v) => (
               <label key={v.id} className="trainer-hover flex items-center gap-3 rounded-[8px] px-2 py-2.5 text-sm text-ink">
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attended.has(v.id)} className="size-4" />
-                <span className="flex-1">{v.name}</span>
+                <span className="flex-1">
+                  {v.name}
+                  {/* Two groups teach two levels in parallel, and the
+                      volunteers belong to a class, not to the course -- the
+                      level is how a tutor tells their own room's students
+                      from the other room's. Shown, not filtered on: the
+                      level is free text on the volunteer, and a register
+                      that silently hides someone who walked in is worse
+                      than one that lists a name too many. */}
+                  {v.level ? <span className="ml-2 text-[12px] text-muted">{v.level}</span> : null}
+                </span>
                 {viaZoom.has(v.id) ? <span className="pill pill-neutral text-[10px]">via Zoom</span> : null}
                 {declined.has(v.id) ? <span className="pill pill-neutral text-[10px]">said they could not come</span> : null}
               </label>
