@@ -585,7 +585,9 @@ export default async function PortfolioCelta5Page({
                     <p className="text-[11px] font-semibold text-ink">Stage 1 report</p>
                     <p className="mt-0.5 text-[10px] text-muted">
                       {record.stage1_released_at
-                        ? "Filed by your tutor · the tutorial itself is optional, not held up on this"
+                        ? `Filed by your tutor · the tutorial itself is optional, not held up on this${
+                            record.stage1_candidate_signed_at ? ", signed by you" : " -- sign it below"
+                          }`
                         : stage1Invite
                           ? `Tutorial ${stage1Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
                               tutorialEventById.get(stage1Invite.timetable_event_id)
@@ -622,7 +624,9 @@ export default async function PortfolioCelta5Page({
                     <p className="mt-0.5 text-[10px] text-muted">
                       {stage3IsExpected
                         ? record.stage3_finalized_at
-                          ? "Filed by your tutor"
+                          ? `Filed by your tutor${
+                              record.stage3_candidate_signed_at ? ", signed by you" : " -- sign it below"
+                            }`
                           : stage3Invite
                             ? `Tutorial ${stage3Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
                                 tutorialEventById.get(stage3Invite.timetable_event_id)

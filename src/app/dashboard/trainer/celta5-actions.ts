@@ -115,6 +115,76 @@ export async function addAbsence(
   return { error: null };
 }
 
+
+// Ramy, 14 Sep 2026: "there's usually an announcement that goes prior to --
+// post TP2, and also post TP6, but that's depending on the centre. The
+// announcement will inform them that they need to sign."
+//
+// So a candidate is told to sign by an announcement, not by noticing a line
+// on CELTA 5. Stage 1 and Stage 2 send it automatically when the tutor
+// releases the record -- the release IS the moment there is something to
+// sign. Stage 3 is prepared and HELD instead: whether a centre announces a
+// Stage 3 at all is the MCT's call on the course in front of them, and a
+// held broadcast already appears in their Announcements panel with Post now
+// and Resume beside it, so this needs no new screen.
+//
+// source_key makes re-saving a record a no-op rather than a second ping --
+// checked in app code, not upsert(onConflict), since Postgres will not take
+// a partial unique index as a conflict target through supabase-js.
+type StageKey = "stage1" | "stage2" | "stage3";
+
+const STAGE_ANNOUNCEMENT: Record<StageKey, { title: string; body: string; held: boolean }> = {
+  stage1: {
+    title: "Your Stage One record is ready — please sign it",
+    body: "Your tutor has filed your Stage One progress record. Open CELTA 5, read the summary and the action plan, and sign it. It is part of the record Cambridge sees.",
+    held: false,
+  },
+  stage2: {
+    title: "Your Stage Two record is ready — please sign it",
+    body: "Your tutor has filed your Stage Two progress record after your tutorial. Open CELTA 5, read it, and sign it. It is part of the record Cambridge sees.",
+    held: false,
+  },
+  stage3: {
+    title: "Your Stage Three record is ready — please sign it",
+    body: "Your tutor has filed your Stage Three progress record. Open CELTA 5, read the comments and the action points, and sign it. It is part of the record Cambridge sees.",
+    held: true,
+  },
+};
+
+async function announceStageReady(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  stage: StageKey,
+  traineeId: string,
+  authorId: string
+): Promise<void> {
+  const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+  if (!trainee?.course_id) return;
+
+  const sourceKey = `celta5_stage_sign:${traineeId}:${stage}`;
+  const { data: already } = await supabase
+    .from("course_broadcasts")
+    .select("id")
+    .eq("course_id", trainee.course_id)
+    .eq("source_key", sourceKey)
+    .maybeSingle();
+  if (already) return;
+
+  const now = new Date().toISOString();
+  const spec = STAGE_ANNOUNCEMENT[stage];
+  const { error } = await supabase.from("course_broadcasts").insert({
+    course_id: trainee.course_id,
+    author_id: authorId,
+    title: spec.title,
+    body: spec.body,
+    visible_to_trainee_id: traineeId,
+    sent_at: spec.held ? null : now,
+    held_at: spec.held ? now : null,
+    source_key: sourceKey,
+  });
+  // A failed announcement must not fail the record it is about.
+  if (error) console.error("[dashboard/trainer/celta5-actions.ts:announceStageReady]", stage, error);
+}
+
 export async function updateStage1(
   _prevState: FormState,
   formData: FormData
@@ -198,6 +268,8 @@ export async function setStage1Release(_prevState: FormState, formData: FormData
     console.error("[dashboard/trainer/celta5-actions.ts:setStage1Release]", error);
     return { error: "Could not save. Try again." };
   }
+
+  if (release) await announceStageReady(supabase, "stage1", traineeId, trainer.id);
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath(`/portfolio/${traineeId}/celta5`);
@@ -291,6 +363,8 @@ export async function updateStage2Overall(
     return { error: "Could not save. Try again." };
 }
 
+  if (completed) await announceStageReady(supabase, "stage2", traineeId, trainer.id);
+
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
 }
@@ -378,6 +452,8 @@ export async function updateStage3Overall(
     console.error("[dashboard/trainer/celta5-actions.ts:updateStage3Overall]", error);
     return { error: "Could not save. Try again." };
 }
+
+  if (finalized) await announceStageReady(supabase, "stage3", traineeId, trainer.id);
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
