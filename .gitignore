@@ -58,3 +58,4 @@ scripts/migration/rollback-values.json
 .walk/
 .tmpchk/
 .tz/
+.chk/
