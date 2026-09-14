@@ -355,7 +355,18 @@ export async function TodayTab({
     //
     // Sorted by time, because the query does not order and PostgREST gives no
     // guarantee -- the slot order IS the clock order.
-    const orderedTpEvents = [...tpEvents].sort((a, b) => (a.event_time ?? "").localeCompare(b.event_time ?? ""));
+    //
+    // Ramy's two-group model (11 Sep 2026) put six lessons on a TP day, two
+    // groups at two levels, so this list held each slot TWICE and position 2
+    // landed on the other group's copy of slot 1 -- the right lesson, the
+    // wrong hour again, for everyone but whoever taught first. Narrowed to
+    // the candidate's own group before ordering (walked 14 Sep 2026); a TP
+    // row that names no group is left in, for a course with one group.
+    const myGroupId = subgroup?.tp_group_id ?? null;
+    const ownGroupEvents = myGroupId
+      ? tpEvents.filter((e) => !e.tp_group_scope_id || e.tp_group_scope_id === myGroupId)
+      : tpEvents;
+    const orderedTpEvents = [...ownGroupEvents].sort((a, b) => (a.event_time ?? "").localeCompare(b.event_time ?? ""));
     const event = orderedTpEvents[order - 1] ?? orderedTpEvents[0];
     // Matches the timetable's own camera-icon/live-now-bar gate
     // (isEventLive: joinable from 10 min before start) -- this card's

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
+import { halfTpDates, rotationPosition, type TpTimetableEvent } from "@/lib/rotation";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { formatCalendarDate } from "@/lib/format-date";
@@ -89,7 +89,7 @@ export async function buildRailStatus({
 
   const [{ data: subgroupMember }, { data: assignments }, { data: plans }, { data: invites }, { data: todaysEvents }] =
     await Promise.all([
-      supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
+      supabase.from("course_subgroup_members").select("subgroup_id, base_slot").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("assignments").select("assignment_type, due_date, first_status").eq("trainee_id", traineeId),
       supabase.from("plan_assignments").select("tp_number, taught_at, short_title").eq("trainee_id", traineeId),
       supabase
@@ -99,7 +99,7 @@ export async function buildRailStatus({
         .is("confirmed_at", null),
       supabase
         .from("course_timetable_events")
-        .select("type, title, event_time")
+        .select("type, title, event_time, tp_group_scope_id")
         .eq("course_id", courseId)
         .eq("event_date", todayIso),
     ]);
@@ -108,7 +108,7 @@ export async function buildRailStatus({
   // bridge rotation.ts and the trainer-side queue already trust, rather than a
   // second interpretation of the same schedule.
   const subgroup = subgroupMember
-    ? (await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()).data
+    ? (await supabase.from("course_subgroups").select("half_order, tp_group_id").eq("id", subgroupMember.subgroup_id).maybeSingle()).data
     : null;
   const allTpEvents: TpTimetableEvent[] = subgroup?.half_order
     ? ((await supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp")).data ??
@@ -142,8 +142,29 @@ export async function buildRailStatus({
   const times = (todaysEvents ?? []).map((e) => e.event_time).filter((t): t is string => Boolean(t));
   const firstTime = times.length > 0 ? times.slice().sort()[0].slice(0, 5) : null;
   const feedback = (todaysEvents ?? []).find((e) => e.title === "Feedback" && e.event_time)?.event_time?.slice(0, 5) ?? null;
-  const myTpTime =
-    (todaysEvents ?? []).find((e) => e.type === "tp" && e.event_time)?.event_time?.slice(0, 5) ?? null;
+  // The candidate's OWN slot, not simply the day's first TP row. With two
+  // groups teaching six lessons a day, "the first TP event today" was
+  // whichever row the query happened to return, so the rail told a candidate
+  // an hour that belonged to someone else -- and disagreed with the hero on
+  // the same screen (walked 14 Sep 2026). Same rotation arithmetic the hero
+  // uses: their position in their subgroup for this TP round, against their
+  // own group's slots in clock order.
+  const myTpTime = await (async () => {
+    const ownTpRows = (todaysEvents ?? []).filter(
+      (e) => e.type === "tp" && e.event_time && (!e.tp_group_scope_id || e.tp_group_scope_id === subgroup?.tp_group_id)
+    );
+    if (ownTpRows.length === 0) return null;
+    const ordered = [...ownTpRows].sort((a, b) => (a.event_time ?? "").localeCompare(b.event_time ?? ""));
+    if (!teachesToday || !tpToday || !subgroupMember) return null;
+    const { data: members } = await supabase
+      .from("course_subgroup_members")
+      .select("trainee_id")
+      .eq("subgroup_id", subgroupMember.subgroup_id);
+    const size = (members ?? []).length;
+    if (size === 0) return null;
+    const order = rotationPosition(subgroupMember.base_slot, size, tpToday) + 1;
+    return (ordered[order - 1] ?? ordered[0]).event_time?.slice(0, 5) ?? null;
+  })();
 
   const byHref: Record<string, RailDoorStatus> = {};
 
