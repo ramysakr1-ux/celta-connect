@@ -15,7 +15,7 @@ import {
 } from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
 
 // zoom-auto-attendance.md §4 -- a Zoom participant the webhook couldn't
 // confidently match to a volunteer_student, shown in the Attendance panel
@@ -106,7 +106,7 @@ function buildWeeks(events: TimetableEvent[]): WeekRow[] {
   const dates = [...byDate.keys()].sort();
   const firstMonday = mondayOf(new Date(`${dates[0]}T00:00:00`));
   const lastDate = new Date(`${dates[dates.length - 1]}T00:00:00`);
-  const fmt = (dt: Date) => dt.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+  const fmt = (dt: Date) => formatCalendarDateObject(dt, { day: "numeric", month: "long" });
 
   const weeks: WeekRow[] = [];
   const cursor = new Date(firstMonday);

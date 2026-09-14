@@ -37,6 +37,8 @@ import { STANDARD_RATING_OPTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { StandardRatingPill } from "@/lib/status-pill";
 import type { AnalysisBlock, FeedbackPoint, PlanProcedureRow, ProblemSolutionPair, VocabRow } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
+import { formatTime } from "@/lib/format-date";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 type TpPlan = Database["public"]["Tables"]["tp_plans"]["Row"];
@@ -111,6 +113,7 @@ export function FeedbackForm({
   /** The centre's criteria glossary, edited from /centre/criteria-glossary. */
   glossary?: Record<string, string[]>;
 }) {
+  const timeZone = useCentreTimeZone();
   const locked = Boolean(feedback?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveFeedbackDraft, initialState);
   const [submitState, submitActionFn, submitPending] = useActionState(submitFeedback, initialState);
@@ -222,7 +225,7 @@ export function FeedbackForm({
                       >
                         <div className="flex flex-wrap items-center gap-1.5">
                           <span className="tabular-nums" style={{ fontSize: 11, color: MUTED }}>
-                            {new Date(note.captured_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                            {formatTime(note.captured_at, timeZone)}
                           </span>
                           {note.criteria_codes.map((code) => (
                             <span

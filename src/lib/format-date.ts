@@ -56,6 +56,23 @@ export function formatCalendarDate(iso: Nullable, opts?: Intl.DateTimeFormatOpti
   });
 }
 
+/**
+ * A Date that was built from a calendar date and is therefore anchored to
+ * LOCAL midnight -- `new Date(`${iso}T00:00:00`)`, or arithmetic on one.
+ * Formatting it in the local zone is correct and gives the same day
+ * everywhere; this exists so that is stated rather than inferred by a reader
+ * noticing the `T00:00:00`, and so the lint rule has one sanctioned door
+ * instead of an exception list.
+ *
+ * Never pass a Date built from a timestamp: use formatDate with a zone.
+ */
+export function formatCalendarDateObject(d: Date, opts?: Intl.DateTimeFormatOptions): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return formatCalendarDate(`${y}-${m}-${day}`, opts);
+}
+
 /** "14:30" -- 24-hour, the format the rest of the app uses. */
 export function formatTime(iso: Nullable, timeZone: string, opts?: Intl.DateTimeFormatOptions): string {
   if (!iso) return "--";
@@ -68,7 +85,7 @@ export function formatTime(iso: Nullable, timeZone: string, opts?: Intl.DateTime
 }
 
 /** "5 Sep 2026, 14:30". */
-export function formatDateTime(iso: Nullable, timeZone: string): string {
+export function formatDateTime(iso: Nullable, timeZone: string, opts?: Intl.DateTimeFormatOptions): string {
   if (!iso) return "--";
   return new Date(iso).toLocaleString("en-GB", {
     day: "numeric",
@@ -76,6 +93,7 @@ export function formatDateTime(iso: Nullable, timeZone: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    ...opts,
     timeZone: timeZone || DEFAULT_TIMEZONE,
   });
 }

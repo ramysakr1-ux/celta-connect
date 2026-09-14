@@ -18,7 +18,7 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { resolveTimeBands, toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
 
 // Four evenly-spaced markers scaled to whatever the centre has set --
 // quarters of the threshold, rounded to the nearest 10 hours, rather than
@@ -34,7 +34,7 @@ function formatEventDate(iso: string): string {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.round((date.getTime() - today.getTime()) / 86400000);
-  const dayLabel = date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const dayLabel = formatCalendarDateObject(date, { weekday: "long", day: "numeric", month: "long" });
   if (diffDays === 0) return `Today, ${dayLabel}`;
   if (diffDays === 1) return `Tomorrow, ${dayLabel}`;
   return dayLabel;
@@ -744,6 +744,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               </div>
               {nextClass ? (
                 <NextClassBanner
+                  courseTimeZone={courseTimeZone}
                   nextClass={nextClass}
                   whereLabel={whereLabel}
                   topicLabel={topicLabel}
@@ -791,6 +792,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop={false} />
               {nextClass ? (
                 <NextClassCard
+                  courseTimeZone={courseTimeZone}
                   nextClass={nextClass}
                   whereLabel={whereLabel}
                   topicLabel={topicLabel}
@@ -885,8 +887,10 @@ function NextClassCard({
   token,
   nextClassDecline,
   joinActivationIso,
+  courseTimeZone,
 }: {
   nextClass: NextClassLike;
+  courseTimeZone: string;
   whereLabel: string;
   topicLabel: string | null;
   teachersLabel: string | null;
@@ -921,6 +925,7 @@ function NextClassCard({
       <div className="flex flex-wrap items-center gap-3 pt-1">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
+            timeZone={courseTimeZone}
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
             className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
@@ -975,8 +980,10 @@ function NextClassBanner({
   attended,
   missed,
   toCome,
+  courseTimeZone,
 }: {
   nextClass: NextClassLike;
+  courseTimeZone: string;
   whereLabel: string;
   topicLabel: string | null;
   teachersLabel: string | null;
@@ -1059,6 +1066,7 @@ function NextClassBanner({
       <div className="flex flex-wrap items-center gap-3 pt-1">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
+            timeZone={courseTimeZone}
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
             className="trainee-hover-fill flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary px-6 text-[14.5px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"

@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDateTime } from "@/lib/format-date";
 
 // The list behind "Owner actions logged -- 3 this month".
 //
@@ -76,7 +77,7 @@ export default async function OwnerActionLogPage({
       .in("center_id", scope)
       .order("created_at", { ascending: false })
       .limit(200),
-    admin.from("centers").select("id, name").in("id", scope),
+    admin.from("centers").select("id, name, time_zone").in("id", scope),
   ]);
 
   const actorIds = [...new Set((entries ?? []).map((e) => e.actor_profile_id).filter(Boolean))];
@@ -85,6 +86,8 @@ export default async function OwnerActionLogPage({
     : { data: [] as { id: string; full_name: string }[] };
   const nameOf = new Map((actors ?? []).map((a) => [a.id, a.full_name]));
   const branchOf = new Map((centres ?? []).map((c) => [c.id, c.name]));
+  // Branch-scoped: each entry is dated where its own branch is.
+  const zoneByCentre = new Map((centres ?? []).map((c) => [c.id, c.time_zone ?? DEFAULT_TIMEZONE]));
 
   const timeZone = cachedCentre?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
@@ -132,7 +135,7 @@ export default async function OwnerActionLogPage({
                 </p>
               </div>
               <span className="shrink-0 text-xs text-muted tabular-nums">
-                {new Date(e.created_at).toLocaleString("en-GB")}
+                {formatDateTime(e.created_at, zoneByCentre.get(e.center_id) ?? DEFAULT_TIMEZONE)}
               </span>
             </div>
           ))}

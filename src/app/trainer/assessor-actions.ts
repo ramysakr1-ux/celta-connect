@@ -10,7 +10,7 @@ import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pa
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { buildAssessorInviteEmailHtml } from "@/lib/assessor-invite-email";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
 
 // for-claude-code-assessor-pack-decisions.md §1: "Centres need a way to
 // mark which candidates are 'selected for this visit'... a simple toggle."
@@ -143,9 +143,10 @@ export async function sendAssessorInviteEmail(
     ? formatCalendarDate(course.assessor_visit_date, { weekday: "long", day: "numeric", month: "long" })
     : null;
   // Same window the token is minted with, said the way a person says it.
-  const accessEndsLabel = `Two weeks after the course closes, ${new Date(
-    new Date(`${course.end_date}T00:00:00`).getTime() + ASSESSOR_REPORT_WINDOW_DAYS * 86400000
-  ).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+  const accessEndsLabel = `Two weeks after the course closes, ${formatCalendarDateObject(
+    new Date(new Date(`${course.end_date}T00:00:00`).getTime() + ASSESSOR_REPORT_WINDOW_DAYS * 86400000),
+    { day: "numeric", month: "short" }
+  )}`;
 
   // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
   // send() call, untracked. Routed through sendApplicantEmail as

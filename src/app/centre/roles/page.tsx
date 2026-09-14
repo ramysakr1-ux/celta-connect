@@ -11,7 +11,9 @@ import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { getAreaHolders } from "@/lib/auth/area-holders";
 import { DELIVERY_LABEL, DELIVERY_PILL_CLASS, type EmailDeliveryStatus } from "@/lib/email-delivery-status";
 import { Avatar } from "@/components/avatar";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's
@@ -25,6 +27,8 @@ export default async function CentreRolesPage() {
   if (ctx.roles.length === 0) redirect("/dashboard");
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  // The audit trail is dated where the centre being administered is.
+  const timeZone = (await getCachedCenter(centerId))?.time_zone ?? DEFAULT_TIMEZONE;
   const mayAppoint = can(ctx.roles, "roles.grant", ctx.overrides);
 
   // Read through the admin client so the list is complete: centre_roles' own
@@ -236,7 +240,7 @@ export default async function CentreRolesPage() {
                 <span className="text-ink">
                   {nameOf.get(entry.actor_profile_id) ?? "Unknown"} &middot; {entry.action}
                 </span>
-                <span className="text-muted">{new Date(entry.created_at).toLocaleString("en-GB")}</span>
+                <span className="text-muted">{formatDateTime(entry.created_at, timeZone)}</span>
               </div>
             ))}
           </div>

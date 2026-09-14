@@ -4,6 +4,8 @@ import { initials } from "@/lib/initials";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
+import { formatTime } from "@/lib/format-date";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
 
 export type Message = Database["public"]["Tables"]["staff_messages"]["Row"];
 
@@ -47,6 +49,9 @@ export const MessageThread = forwardRef<
   { channelId, myProfileId, nameById, isGroup, hideComposer = false, staticMessages, retentionDays = 1 },
   ref
 ) {
+  // A message is stamped at the centre's clock, not the reader's -- a tutor
+  // reading from another country must see the same 14:32 the sender saw.
+  const timeZone = useCentreTimeZone();
   const [messages, setMessages] = useState<Message[]>(staticMessages ?? []);
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(!staticMessages);
@@ -177,7 +182,7 @@ export const MessageThread = forwardRef<
                     <p className="flex items-baseline gap-1.5 text-xs font-semibold text-ink">
                       {!mine && isGroup ? (nameById.get(m.sender_id) ?? "Unknown") : mine ? "You" : null}
                       <span className="text-[10px] font-normal text-muted">
-                        {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {formatTime(m.created_at, timeZone)}
                       </span>
                     </p>
                     <p className="text-[13px] leading-[1.45] text-ink/85 text-pretty">{m.body}</p>

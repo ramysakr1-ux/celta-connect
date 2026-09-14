@@ -6,7 +6,8 @@ import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pa
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { renderAssessorPackBuffer } from "@/lib/assessor-pack-pdf/document";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // The "Download whole pack" button, and the centre's end-of-course PDF.
 //
@@ -48,7 +49,7 @@ export async function GET() {
 
   const [{ data: centre }, { data: uploadedDocs }, markingGuidancePresent, { count: applicantCount }, { count: rejectedCount }] =
     await Promise.all([
-      admin.from("centers").select("name, center_number").eq("id", course.center_id).maybeSingle(),
+      admin.from("centers").select("name, center_number, time_zone").eq("id", course.center_id).maybeSingle(),
       admin.from("resources").select("title").eq("center_id", course.center_id).eq("category", "centre_documents"),
       hasMarkingGuidance(admin, course.center_id),
       // "Application files -- including rejected applicants." Appeals.dc.html:
@@ -101,7 +102,7 @@ export async function GET() {
       }
       return { ...d, present: uploadedTitles.has(d.name.toLowerCase()) };
     }),
-    generatedAt: new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" }),
+    generatedAt: formatDateTime(new Date().toISOString(), centre?.time_zone ?? DEFAULT_TIMEZONE, { month: "long" }),
   });
 
   const slug = course.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase();

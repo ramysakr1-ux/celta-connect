@@ -1,4 +1,5 @@
 import type { Database, TimeBand } from "@/lib/supabase/types";
+import { formatCalendarDateObject } from "@/lib/format-date";
 
 export type TimetableEvent = Database["public"]["Tables"]["course_timetable_events"]["Row"];
 
@@ -300,7 +301,7 @@ export function buildDayRows(events: TimetableEvent[], timeBands: TimeBand[] = D
       currentWeekStart = weekKey;
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      const fmt = (dt: Date) => dt.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+      const fmt = (dt: Date) => formatCalendarDateObject(dt, { day: "numeric", month: "long" });
       weekLabel = `${fmt(monday)} – ${fmt(sunday)}`;
     }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatTime } from "@/lib/format-date";
 
 function VideoIcon() {
   return (
@@ -45,7 +46,7 @@ function formatCountdown(ms: number): string {
 // separate timer element plus a dead button; clicking it early still
 // shows the activation-time message he asked for, in case someone taps
 // through the countdown out of impatience.
-export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUrl: string; activationIso: string | null; className: string }) {
+export function JoinOnlineButton({ zoomUrl, activationIso, className, timeZone }: { zoomUrl: string; activationIso: string | null; className: string; timeZone: string }) {
   const activationMs = activationIso ? new Date(activationIso).getTime() : null;
   // `now` starts null so the server render and the client's first render
   // (hydration) show the exact same text either way -- Date.now() only
@@ -83,9 +84,9 @@ export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUr
     );
   }
 
-  const activationLabel = activationMs
-    ? new Date(activationMs).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-    : null;
+  // The centre's clock: a learner is told the time their class starts where
+  // the class is, not where their phone happens to be.
+  const activationLabel = activationIso ? formatTime(activationIso, timeZone) : null;
 
   return (
     <div className="relative">

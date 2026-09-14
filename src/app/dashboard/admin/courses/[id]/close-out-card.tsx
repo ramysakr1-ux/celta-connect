@@ -11,11 +11,13 @@ import {
 } from "@/app/dashboard/admin/courses/[id]/close-out-actions";
 import type { CloseOutVerificationReport, CourseCloseOutStatus } from "@/lib/supabase/types";
 import type { CloseOutBlockingReason } from "@/lib/course-close-out/blocking-rules";
+import { useCentreTimeZone } from "@/components/centre-time-zone";
+import { formatDateTime as fmtDateTime } from "@/lib/format-date";
 
 const initialState: FormState = { error: null };
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+function formatDateTime(iso: string, timeZone: string): string {
+  return fmtDateTime(iso, timeZone);
 }
 
 export function CloseOutCard({
@@ -38,6 +40,7 @@ export function CloseOutCard({
     wiped_at: string | null;
   } | null;
 }) {
+  const timeZone = useCentreTimeZone();
   const [verifyState, verifyAction, verifyPending] = useActionState(initiateCloseOut, initialState);
   const [exportState, exportAction, exportPending] = useActionState(exportCloseOut, initialState);
   const [receiptState, receiptAction, receiptPending] = useActionState(confirmCloseOutReceipt, initialState);
@@ -68,24 +71,24 @@ export function CloseOutCard({
             cambridgeGradesConfirmedAt ? "bg-primary text-card" : "admin-hover-fill border border-border text-ink"
           }`}
         >
-          {cambridgeGradesConfirmedAt ? `Confirmed ${formatDateTime(cambridgeGradesConfirmedAt)}` : "Mark confirmed"}
+          {cambridgeGradesConfirmedAt ? `Confirmed ${formatDateTime(cambridgeGradesConfirmedAt, timeZone)}` : "Mark confirmed"}
         </button>
       </form>
 
       {status === "wiped" ? (
         <p className="text-sm text-muted">
-          This course was closed out{closeOut?.wiped_at ? ` on ${formatDateTime(closeOut.wiped_at)}` : ""}. Its record now lives
+          This course was closed out{closeOut?.wiped_at ? ` on ${formatDateTime(closeOut.wiped_at, timeZone)}` : ""}. Its record now lives
           entirely on your centre&apos;s Drive.
         </p>
       ) : status === "grace_period" ? (
         <div className="rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg p-3">
           <p className="text-sm text-ink">
             Receipt signed by {closeOut?.receipt_signed_name} on{" "}
-            {closeOut?.receipt_signed_at ? formatDateTime(closeOut.receipt_signed_at) : ""}.
+            {closeOut?.receipt_signed_at ? formatDateTime(closeOut.receipt_signed_at, timeZone) : ""}.
           </p>
           <p className="mt-1 text-xs text-muted">
             The working copy clears automatically on{" "}
-            {closeOut?.grace_period_ends_at ? formatDateTime(closeOut.grace_period_ends_at) : "--"}.
+            {closeOut?.grace_period_ends_at ? formatDateTime(closeOut.grace_period_ends_at, timeZone) : "--"}.
           </p>
           <form action={extendAction} className="mt-3 flex flex-wrap items-end gap-3">
             <input type="hidden" name="course_id" value={courseId} />

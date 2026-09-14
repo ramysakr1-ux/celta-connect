@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AREA_VERB, type AreaVerdict } from "@/lib/auth/areas";
-import { formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
 
 /**
  * Renders an action according to whose job it is.
@@ -21,6 +21,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 export function AreaAction({
   verdict,
   children,
+  timeZone,
   adminRoomHref = "/centre",
 }: {
   verdict: AreaVerdict | { kind: "no_capability" };
@@ -28,6 +29,8 @@ export function AreaAction({
   children: React.ReactNode;
   /** Where the holder's name links -- the admin room, per §12. */
   adminRoomHref?: string;
+  /** The centre's zone -- a hold was taken where the centre is. */
+  timeZone: string;
 }) {
   if (verdict.kind === "no_capability") return null;
   if (verdict.kind === "act" || verdict.kind === "act_covering") {
@@ -72,19 +75,16 @@ export function ActionAttribution({
   actorName,
   at,
   coveringArea,
+  timeZone,
 }: {
+  timeZone: string;
   verb: string;
   actorName: string;
   at: string | null;
   coveringArea?: string | null;
 }) {
   if (!at) return null;
-  const when = new Date(at).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const when = formatDateTime(at, timeZone, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   return (
     <p className="text-[11px] text-muted">
       {verb} by {actorName}

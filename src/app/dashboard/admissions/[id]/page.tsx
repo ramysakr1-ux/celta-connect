@@ -574,7 +574,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               {paymentState.outstanding !== null ? ` \u00b7 ${paymentState.outstanding} outstanding` : ""}
             </p>
             <div className="mt-3">
-              <AreaAction verdict={paymentVerdict}>
+              <AreaAction verdict={paymentVerdict} timeZone={timeZone}>
               <DepositForm
                 applicantId={applicant.id}
                 depositAmount={applicant.deposit_amount}
@@ -592,7 +592,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           {/* The green light sits with the money, because that is what informs
               it -- but it is a separate decision, which is the whole point of
               the gate. */}
-          <AreaAction verdict={paymentVerdict}>
+          <AreaAction verdict={paymentVerdict} timeZone={timeZone}>
             <ReleaseWorkspaceForm
             timeZone={timeZone}
               applicantId={applicant.id}
@@ -618,7 +618,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {canDecide && !isSettled ? (
         <>
-          <AreaAction verdict={offerVerdict}>
+          <AreaAction verdict={offerVerdict} timeZone={timeZone}>
             <OfferForm
               applicantId={applicant.id}
               hasDeposit={Boolean(applicant.deposit_paid_at)}

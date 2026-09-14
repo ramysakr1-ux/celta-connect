@@ -6,6 +6,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AnnouncementComposer } from "@/app/trainer/(hub)/announcements/composer";
 import { ScheduledPanel, type ScheduledRowData } from "@/app/trainer/(hub)/announcements/scheduled-panel";
+import { formatCalendarDateObject } from "@/lib/format-date";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -234,7 +235,7 @@ export default async function AnnouncementsPage() {
                   <div key={b.id} className="trainer-hover grid grid-cols-[40px_1fr] items-center gap-3.5 rounded-[10px] px-3 py-[10px]">
                     <span className="flex size-10 flex-col items-center justify-center rounded-[10px] bg-ink-warm text-primary-foreground">
                       <span className="text-[13px] leading-none font-bold">{when.getDate()}</span>
-                      <span className="text-[9px] leading-none tracking-[0.06em] uppercase">{when.toLocaleDateString("en-GB", { month: "short" })}</span>
+                      <span className="text-[9px] leading-none tracking-[0.06em] uppercase">{formatCalendarDateObject(when, { month: "short" })}</span>
                     </span>
                     <span className="min-w-0">
                       <span className="flex items-center gap-2">

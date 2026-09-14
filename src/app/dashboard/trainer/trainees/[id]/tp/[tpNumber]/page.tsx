@@ -6,6 +6,9 @@ import { getCentreGlossary } from "@/lib/centre-glossary";
 import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-only";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDateTime } from "@/lib/format-date";
 
 export default async function TrainerTpCardPage({
   params,
@@ -25,6 +28,8 @@ export default async function TrainerTpCardPage({
   if (!trainee || trainee.course_id !== trainer.course_id || trainee.role !== "trainee") {
     notFound();
   }
+  // A plan is submitted at the centre's clock, not the reader's.
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
 
   const { data: center } = await supabase
     .from("centers")
@@ -86,7 +91,7 @@ export default async function TrainerTpCardPage({
             {trainee.full_name} -- TP{tpNumber}
           </h1>
           <p className="mt-1 text-sm text-muted">
-            {plan.submitted_at ? `Lesson plan submitted ${new Date(plan.submitted_at).toLocaleString()}` : "Draft in progress"}
+            {plan.submitted_at ? `Lesson plan submitted ${formatDateTime(plan.submitted_at, timeZone)}` : "Draft in progress"}
           </p>
         </div>
         <Link href={`/dashboard/trainer/trainees/${id}`} className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary">
