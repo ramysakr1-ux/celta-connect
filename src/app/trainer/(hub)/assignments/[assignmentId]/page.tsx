@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -149,14 +148,12 @@ export default async function TrainerMarkAssignmentPage({
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
 
   // Migration 0302 -- what the candidate attached for the round on show.
-  const { data: appendixRows } = await (supabase as unknown as SupabaseClient)
+  const { data: appendixRows } = await supabase
     .from("assignment_appendices")
     .select("id, label, file_name, storage_path, link_url, round")
     .eq("assignment_id", assignmentId)
     .order("created_at", { ascending: true });
-  const appendices = ((appendixRows ?? []) as { round: string }[])
-    .filter((a) => a.round === round)
-    .map((a) => a as unknown as { id: string; label: string | null; file_name: string; storage_path: string | null; link_url: string | null });
+  const appendices = (appendixRows ?? []).filter((a) => a.round === round);
 
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
 

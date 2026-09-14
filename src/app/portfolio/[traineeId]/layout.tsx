@@ -137,15 +137,15 @@ export default async function PortfolioLayout({
   let pagePalette: PagePalette = "linen";
   const notebookAssignmentTitles: Record<string, string> = {};
   if (ownNotebook) {
-    const db = supabase as unknown as SupabaseClient;
     const [{ data: noteRows }, { data: setting }, { data: assignmentRows }] = await Promise.all([
-      db.from("trainee_notes").select("id, anchor_path, anchor_label, body, created_at, updated_at, audio_path, audio_duration_seconds").eq("trainee_id", traineeId).order("created_at", { ascending: false }).limit(200),
-      // select("*"): page_palette arrives with migration 0295, and a named
-      // column that is not there yet would fail the whole read, paper included.
-      db.from("trainee_notebook_settings").select("*").eq("trainee_id", traineeId).maybeSingle(),
+      supabase.from("trainee_notes").select("id, anchor_path, anchor_label, body, created_at, updated_at, audio_path, audio_duration_seconds").eq("trainee_id", traineeId).order("created_at", { ascending: false }).limit(200),
+      // select("*"): page_palette arrived with migration 0295, and a named
+      // column that was not there yet would have failed the whole read,
+      // paper included. Both are typed now, but * is still correct here.
+      supabase.from("trainee_notebook_settings").select("*").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
     ]);
-    notebookNotes = await signNotebookAudio((noteRows ?? []) as TraineeNote[]);
+    notebookNotes = await signNotebookAudio(noteRows ?? []);
     if (setting?.paper && (NOTEBOOK_PAPERS as readonly string[]).includes(setting.paper)) notebookPaper = setting.paper as NotebookPaper;
     if (setting?.page_palette && (PAGE_PALETTES as readonly string[]).includes(setting.page_palette)) pagePalette = setting.page_palette as PagePalette;
     for (const a of assignmentRows ?? []) notebookAssignmentTitles[a.id] = ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type;

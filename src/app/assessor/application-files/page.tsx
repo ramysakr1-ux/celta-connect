@@ -61,9 +61,8 @@ type InterviewRecordRow = {
   interviewer_signed_at: string | null;
   applicant_signature_name: string | null;
   overall_notes: string | null;
-  // Migration 0291; the generated types lag.
-  identity_checked_at?: string | null;
-  identity_document_type?: string | null;
+  identity_checked_at: string | null;
+  identity_document_type: string | null;
 };
 
 export default async function AssessorApplicationFilesPage() {

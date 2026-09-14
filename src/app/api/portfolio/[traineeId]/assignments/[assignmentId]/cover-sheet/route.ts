@@ -75,8 +75,8 @@ export async function GET(
   }
 
   // Migration 0302 -- listed on the cover sheet so the pack records what was
-  // attached. Untyped handle until the generated types catch up.
-  const { data: appendixRows } = await (admin as unknown as { from: (t: string) => any })
+  // attached.
+  const { data: appendixRows } = await admin
     .from("assignment_appendices")
     .select("label, file_name, round")
     .eq("assignment_id", assignmentId)
@@ -126,7 +126,7 @@ export async function GET(
       firstResponse: responseByKey.get(s.key)?.first_response ?? null,
       resubmissionResponse: responseByKey.get(s.key)?.resubmission_response ?? null,
     })),
-    appendices: ((appendixRows ?? []) as { label: string | null; file_name: string; round: string }[]).map((a) => ({
+    appendices: (appendixRows ?? []).map((a) => ({
       label: a.label,
       fileName: a.file_name,
       round: a.round,

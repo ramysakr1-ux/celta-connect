@@ -655,11 +655,20 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
 /**
  * Handbook §7.2's identity authentication, as the record says it happened.
- * Read-only; the tick itself lives on the interview record form. Cast because
- * the columns are migration-added (0291) and the generated types lag.
+ * Read-only; the tick itself lives on the interview record form.
  */
-function IdentityCheckLine({ record, timeZone }: { record: { interviewer_signature_name: string | null }; timeZone: string }) {
-  const r = record as { identity_checked_at?: string | null; identity_document_type?: string | null; interviewer_signature_name: string | null };
+function IdentityCheckLine({
+  record,
+  timeZone,
+}: {
+  record: {
+    identity_checked_at: string | null;
+    identity_document_type: string | null;
+    interviewer_signature_name: string | null;
+  };
+  timeZone: string;
+}) {
+  const r = record;
   if (!r.identity_checked_at) return <p className="text-xs text-status-warning-text">Identity not yet recorded as checked (Handbook §7.2).</p>;
   const doc = IDENTITY_DOCUMENT_LABEL[r.identity_document_type ?? ""] ?? "a document";
   return (

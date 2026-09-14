@@ -1,4 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { BackLink } from "@/components/back-link";
 import { AssignmentResultSignature } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/result-signature";
 import { notFound, redirect } from "next/navigation";
@@ -134,9 +133,8 @@ export default async function AssignmentDetailPage({
   // instead, same pattern as today-tab.tsx/assignments/page.tsx.
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
 
-  // Migration 0302 -- what the candidate attached. Read through an untyped
-  // handle until the generated types catch up; RLS is what scopes it.
-  const { data: appendixRows } = await (supabase as unknown as SupabaseClient)
+  // Migration 0302 -- what the candidate attached. RLS is what scopes it.
+  const { data: appendixRows } = await supabase
     .from("assignment_appendices")
     .select("id, label, file_name, storage_path, link_url, size_bytes, round")
     .eq("assignment_id", assignmentId)
@@ -145,9 +143,7 @@ export default async function AssignmentDetailPage({
   // An appendix belongs to the round it was attached for, so a resubmission
   // shows what is attached now and a locked first round keeps what it had.
   const appendicesForRound = (r: "first" | "resubmission") =>
-    ((appendixRows ?? []) as { round: string }[])
-      .filter((a) => a.round === r)
-      .map((a) => a as unknown as import("@/app/dashboard/trainee/assignments/[assignmentId]/appendices-block").AppendixRow);
+    (appendixRows ?? []).filter((a) => a.round === r);
   const today = toLocalIso(new Date(), timeZone);
   const deadlinePassed = Boolean(
     assignment.due_date && round === "first" && !locked && assignment.due_date < today

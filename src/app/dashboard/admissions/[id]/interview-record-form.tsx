@@ -4,12 +4,7 @@ import { useActionState, useState } from "react";
 import { saveInterviewRecord, type FormState } from "@/app/dashboard/admissions/actions";
 import type { Database } from "@/lib/supabase/types";
 
-// identity_checked_at / identity_document_type are migration-added (0291);
-// the generated types lag, so the record is widened here.
-type InterviewRecord = Database["public"]["Tables"]["interview_records"]["Row"] & {
-  identity_checked_at?: string | null;
-  identity_document_type?: string | null;
-};
+type InterviewRecord = Database["public"]["Tables"]["interview_records"]["Row"];
 
 // Same set as migration 0291's check constraint and the action's own list.
 const IDENTITY_DOCUMENTS = [
