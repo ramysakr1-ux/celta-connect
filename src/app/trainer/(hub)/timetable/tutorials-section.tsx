@@ -115,14 +115,26 @@ function ConsultationBlockForm({ data, onDone }: { data: TutorialsSectionData; o
       )}
       <input type="hidden" name="tutor_name" value={tutorName} />
       <input name="event_date" type="date" required aria-label="Date" className={INPUT} />
-      <input name="event_time" type="time" required aria-label="Start time" className={INPUT} />
+      <input name="event_time" type="time" required defaultValue={data.dayEndsAt} aria-label="Start time" className={INPUT} />
       <input name="duration_minutes" type="number" min={15} step={15} defaultValue={60} required aria-label="Duration in minutes" className={`${INPUT} w-24`} />
       <button type="submit" disabled={pending} className={PRIMARY} style={{ background: "var(--hub-accent)", height: 36 }}>
         {pending ? "Adding…" : "Add block"}
       </button>
       <p className="text-[11.5px] text-muted sm:col-span-4">
-        Any candidate may book before an assignment&apos;s first submission; after it, only with their own tutor. Connect applies that at booking.
+        Consultation sits at the end of the teaching day, so the time opens on {data.dayEndsAt}. Any candidate may book before an
+        assignment&apos;s first submission; after it, only with their own tutor. Connect applies that at booking.
       </p>
+      {/* Only offered once the clash has been named: a consultation in a band
+          the whole group is already teaching in shares its tile with that
+          session, which is how the demo ended up with a consultation fused
+          to an input session (walked 14 Sep 2026). Refused, not blocked --
+          the tutor can still say go ahead. */}
+      {state.error?.includes("already has") ? (
+        <label className="flex items-center gap-1.5 text-[11.5px] text-ink sm:col-span-4">
+          <input type="checkbox" name="allow_clash" value="yes" />
+          Add it anyway
+        </label>
+      ) : null}
       <button type="button" onClick={onDone} className="justify-self-end text-[12px] text-muted hover:text-ink">
         Close
       </button>

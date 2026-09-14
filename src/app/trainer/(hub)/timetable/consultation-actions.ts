@@ -36,6 +36,28 @@ export async function createConsultationBlock(_prevState: FormState, formData: F
   }
 
   const supabase = await createClient();
+
+  // A consultation dropped into a band the whole group is already in shares
+  // that band's tile with the session, and reads as one fused thing -- which
+  // is exactly what the demo data had (walked 14 Sep 2026). Named, not
+  // forbidden: the tutor can tick "Add it anyway".
+  if (formData.get("allow_clash") !== "yes") {
+    const { data: sameBand } = await supabase
+      .from("course_timetable_events")
+      .select("title, type, tag")
+      .eq("course_id", courseId)
+      .eq("event_date", eventDate)
+      .eq("event_time", eventTime);
+    const clash = (sameBand ?? []).find(
+      (e) => e.type === "tp" || e.type === "input_session" || e.type === "supervised_session" || e.tag === "whole_group" || e.tag === "group_room"
+    );
+    if (clash) {
+      return {
+        error: `${eventTime} that day already has "${clash.title}". Consultation sits at the end of the teaching day.`,
+      };
+    }
+  }
+
   // The "consultation" tag is the syllabus's own band (remaining-
   // compliance.md item 2), so the block lands on the timetable as the
   // kind of session it is, and the tile's panel gets a booking door.

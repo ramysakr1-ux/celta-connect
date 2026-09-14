@@ -476,6 +476,7 @@ export default async function TrainerTimetablePage({
     rows: gridRows,
     tutors: (courseTutors ?? []).map((ct) => ({ id: ct.profile_id, name: (ct as unknown as { profiles: { full_name: string } }).profiles.full_name })),
     ruleExample,
+    dayEndsAt: (timeBands[timeBands.length - 1]?.start ?? "17:15").slice(0, 5),
   };
 
   // Glass-card view's "Mine" involvement, trainer-shaped: read-only-board.tsx

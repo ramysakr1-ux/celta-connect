@@ -2872,12 +2872,12 @@ async function main() {
     { d: 10, b: 3, type: "unassessed_tp", title: "Unassessed teach / GTKY", tag: "group_room", detail: "New level", linked: null, tp: null, shares: true },
     { d: 10, b: 4, type: "unassessed_tp", title: "Unassessed teach / GTKY", tag: "group_room", detail: "New level", linked: null, tp: null, shares: true },
     { d: 10, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 10, b: 6, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 10, b: 6, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Early finish, if done", linked: null, tp: null },
     { d: 10, b: 7, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Tutors marking", linked: null, tp: null },
     // After the Stage 2 tutorials on day 9 rather than before them, which is
     // also the order that makes sense.
     { d: 10, b: 8, type: "milestone", title: "Writing Stage 2 report \u00b7 ABC", tag: "individual", detail: "Own time", linked: null, tp: null },
-    { d: 10, b: 9, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Early finish, if done", linked: null, tp: null },
+    { d: 10, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 11, b: 1, type: "tp", title: "TP5 \u00b7 A", tag: "group_room", detail: "New level", linked: null, tp: 5 },
     { d: 11, b: 2, type: "tp", title: "TP5 \u00b7 B", tag: "group_room", detail: "New level", linked: null, tp: 5 },
     { d: 11, b: 3, type: "tp", title: "TP5 \u00b7 C", tag: "group_room", detail: "New level", linked: null, tp: 5 },
@@ -2965,7 +2965,7 @@ async function main() {
     // "due 17 Sept". These two are the sessions that set it.
     { d: 17, b: 7, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: "LfC", tp: null },
     { d: 17, b: 8, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: "LfC", tp: null },
-    { d: 17, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+
     { d: 18, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 ABC", tag: null, detail: null, linked: "LRT", tp: null },
     { d: 18, b: 1, type: "tp", title: "TP8 \u00b7 A", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 18, b: 2, type: "tp", title: "TP8 \u00b7 B", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
@@ -2975,20 +2975,20 @@ async function main() {
     { d: 18, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Written feedback only", linked: null, tp: null },
     { d: 18, b: 7, type: "input_session", title: "Teaching literacy", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "1c", "3a"] },
     { d: 18, b: 8, type: "supervised_session", title: "Portfolio check \u00b7 ABC", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
-    { d: 18, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+
     { d: 19, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) due", tag: null, detail: "09:00", linked: "LfC", tp: null },
     { d: 19, b: 1, type: "tp", title: "TP8 \u00b7 D", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 2, type: "tp", title: "TP8 \u00b7 E", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 3, type: "tp", title: "TP8 \u00b7 F", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 4, type: "supervised_session", title: "Written feedback only", tag: "group_room", detail: "Final TP, no live session", linked: null, tp: null },
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 19, b: 6, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 19, b: 6, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "5c"], slug: "teaching-exam-classes" },
     // The consultation day 4 gave up, in day 19's empty band.
     { d: 19, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
-    { d: 19, b: 8, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "5c"], slug: "teaching-exam-classes" },
+    { d: 19, b: 8, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     // The last day was "Course close" in six consecutive bands with a lunch
     // in the middle of it -- filler that read on the board as a broken
     // repeat (walked 14 Sep 2026). A real last morning, from the Handbook:
@@ -3260,14 +3260,17 @@ async function main() {
     });
     console.log("Final day: grades, signatures and released reports for the finished course");
   }
-  for (const [name, day, confirmed] of [
-    // Inside the ABC block on day 6 (band 7), not on top of DEF's.
-    ["Amara Okafor", 6, true],
-    ["Daniel Kim", 7, false],
+  for (const [name, day, band, confirmed] of [
+    // Inside day 6's own Stage 1 tutorial blocks -- ABC's is band 7, DEF's
+    // is band 8. Daniel's used to be on day 7, where there is no tutorial
+    // block at all, so it landed on top of the MFP input session and the two
+    // shared one tile.
+    ["Amara Okafor", 6, 7, true],
+    ["Daniel Kim", 6, 8, false],
   ]) {
     const { data: ev } = await supabase
       .from("course_timetable_events")
-      .insert({ course_id: course.id, type: "milestone", tag: "stage1_tutorial", title: `Stage 1 tutorial — ${name}`, ...tutorialAt(day, 7), created_by: trainer2Id })
+      .insert({ course_id: course.id, type: "milestone", tag: "stage1_tutorial", title: `Stage 1 tutorial — ${name}`, ...tutorialAt(day, band), created_by: trainer2Id })
       .select("id")
       .single();
     await supabase.from("individual_tutorial_invites").insert({
@@ -3284,9 +3287,15 @@ async function main() {
   if (reached(stage3Date)) {
     await supabase.from("celta5_records").update({ stage3_tutorial_required: true }).eq("trainee_id", trainees["Priya Sharma"]).eq("course_id", course.id);
   }
+  // Ramy, 14 Sep 2026: "all the consultations are at the end of the day.
+  // There's never a consultation in the [middle]." These two sat mid-
+  // afternoon on a full teaching day, so each one shared its band -- and its
+  // tile -- with a whole-group session nobody could be in at the same time.
+  // They are the last band of their day now, which is where the generic
+  // consultation slots on those days already were.
   for (const [tutorId, tutorName, day, band, slotCount, bookedBy] of [
-    [trainerId, "Jordan Blake", 13, 7, 4, ["Amara Okafor"]],
-    [trainer2Id, "Marcus Webb", 14, 4, 3, []],
+    [trainerId, "Jordan Blake", 17, 9, 4, ["Amara Okafor"]],
+    [trainer2Id, "Marcus Webb", 18, 9, 3, []],
   ]) {
     const { data: ev } = await supabase
       .from("course_timetable_events")

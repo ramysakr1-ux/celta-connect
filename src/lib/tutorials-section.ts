@@ -95,6 +95,12 @@ export interface TutorialsSectionData {
   tutors: { id: string; name: string }[];
   /** The booking rule's worked example, from real data when there is one. */
   ruleExample: string | null;
+  /**
+   * The start of the course's last time band. Ramy, 14 Sep 2026: "all the
+   * consultations are at the end of the day. There's never a consultation in
+   * the [middle]" -- so that is what the Add block form opens on.
+   */
+  dayEndsAt: string;
 }
 
 /** "15:30" for position N of a block starting at event_time. */
