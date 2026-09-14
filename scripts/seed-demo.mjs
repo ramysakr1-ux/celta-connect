@@ -2908,7 +2908,7 @@ async function main() {
     // The only two sessions that teach 5m and 5n, and Lessons from the
     // Classroom -- the assignment built on both -- is set on day 14. It ran
     // on day 19, five days after the assignment that needs it.
-    { d: 12, b: 9, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5m", "5n"] },
+    { d: 12, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     // Set AFTER the sessions that teach the skill it is about. It used to be
     // day 4 -- nine days before Teaching listening and the productive-skills
     // pair, so a candidate was asked to design skills tasks before the course
@@ -2985,7 +2985,7 @@ async function main() {
     { d: 19, b: 3, type: "tp", title: "TP8 \u00b7 F", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 19, b: 4, type: "supervised_session", title: "Written feedback only", tag: "group_room", detail: "Final TP, no live session", linked: null, tp: null },
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 19, b: 6, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5m", "5n"] },
     // The consultation day 4 gave up, in day 19's empty band.
     { d: 19, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
