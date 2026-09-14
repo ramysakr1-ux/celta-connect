@@ -36,9 +36,12 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
   // TP has its own tp_materials system and is excluded regardless.
   const { data: events } = await supabase
     .from("course_timetable_events")
-    .select("id, title, event_date, event_time, type, shares_materials")
+    .select("id, title, event_date, event_time, type, tag, shares_materials")
     .eq("course_id", courseId)
     .neq("type", "tp")
+    // Nobody shares materials for lunch, and a deadline is not a session.
+    .neq("tag", "lunch")
+    .not("type", "in", '("assignment_due","resubmission_due")')
     .order("event_date")
     .order("event_time");
 
