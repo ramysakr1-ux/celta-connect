@@ -252,6 +252,7 @@ export default async function AssignmentDetailPage({
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
             format={template.format}
             tutorOverall={roundMarked ? tutorOverall : null}
+            priorOverall={round === "resubmission" ? assignment.first_overall_comment : null}
             showComments={roundMarked}
             appendices={appendicesForRound(round)}
             centerId={trainee.center_id}
@@ -288,6 +289,7 @@ export default async function AssignmentDetailPage({
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
             format={template.format}
             tutorOverall={roundMarked ? tutorOverall : null}
+            priorOverall={round === "resubmission" ? assignment.first_overall_comment : null}
             showComments={roundMarked}
             appendices={appendicesForRound(round)}
             centerId={trainee.center_id}

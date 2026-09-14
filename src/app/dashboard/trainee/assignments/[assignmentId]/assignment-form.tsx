@@ -110,6 +110,7 @@ export function AssignmentAuthoringForm({
   format = "prose",
   sanction = false,
   tutorOverall = null,
+  priorOverall = null,
   showComments = false,
   savedAt = null,
   notYetOpen = false,
@@ -151,6 +152,14 @@ export function AssignmentAuthoringForm({
    * as appropriate" -- not only when they have to rewrite it.
    */
   tutorOverall?: string | null;
+  /**
+   * Round 1's overall comment, shown throughout a resubmission. Handbook
+   * 9.2.2: "When the candidate has to resubmit an assignment, there should be
+   * clear feedback as to" what to change -- so the one piece of writing that
+   * says what the whole piece needs cannot only appear once round 2 has been
+   * marked, which is far too late to act on.
+   */
+  priorOverall?: string | null;
   /** The round on show has been marked, so its comments are feedback now. */
   showComments?: boolean;
   savedAt?: string | null;
@@ -368,22 +377,28 @@ export function AssignmentAuthoringForm({
               {scopeNote ? (
                 <p style={{ fontSize: 12.5, lineHeight: 1.55, color: GARNET, textWrap: "pretty" }}>{scopeNote}</p>
               ) : null}
-              {tutorOverall ? (
-                <div
-                  className="mt-1"
-                  style={{
-                    borderRadius: 8,
-                    borderLeft: `3px solid ${TEAL}`,
-                    background: `color-mix(in oklab, ${TEAL} 9%, transparent)`,
-                    padding: "9px 12px",
-                  }}
-                >
-                  <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
-                    Your tutor, on the whole assignment
-                  </p>
-                  <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{tutorOverall}</p>
-                </div>
-              ) : null}
+              {[
+                { label: `Your tutor, on the whole assignment${isResubmission ? " · round 1" : ""}`, text: priorOverall },
+                { label: `Your tutor, on the whole assignment${isResubmission ? " · round 2" : ""}`, text: tutorOverall },
+              ]
+                .filter((c, i, all) => Boolean(c.text) && all.findIndex((o) => o.text === c.text) === i)
+                .map((c) => (
+                  <div
+                    key={c.label}
+                    className="mt-1"
+                    style={{
+                      borderRadius: 8,
+                      borderLeft: `3px solid ${TEAL}`,
+                      background: `color-mix(in oklab, ${TEAL} 9%, transparent)`,
+                      padding: "9px 12px",
+                    }}
+                  >
+                    <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                      {c.label}
+                    </p>
+                    <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{c.text}</p>
+                  </div>
+                ))}
             </div>
 
             <div className="flex flex-col gap-2" style={{ borderLeft: `1px solid ${FAINT}`, padding: "16px 26px 18px 22px" }}>

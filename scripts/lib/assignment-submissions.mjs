@@ -436,3 +436,58 @@ export function countWords(text) {
   const cleaned = String(text ?? "").replace(/[*_#]/g, " ").trim();
   return cleaned.length === 0 ? 0 : cleaned.split(/\s+/).length;
 }
+
+// --- The tutor's overall comment ------------------------------------------
+//
+// Walking an approved assignment from the candidate's side, 14 Sep 2026: the
+// page said "Passed on first submission" and showed nothing the tutor wrote,
+// because `first_overall_comment` was NULL on all 42 marked rounds. The
+// marking screen refuses to release a round without one ("Write the overall
+// comment" is a blocker), so no real assignment can be in that state -- only
+// seeded ones were, which made the walk misrepresent the product.
+//
+// It is the comment that goes under "Before you start" on the candidate's
+// page, so it is addressed to them, and it says something the per-section
+// comments do not: what the piece is like as a whole.
+
+const OVERALL_PASS = {
+  "Focus on Learner": `A strong piece. What lifts it is that the two problems you chose are ones you actually heard this learner make -- the examples are transcribed from your own monitoring rather than borrowed from a list, and that is exactly what the criteria are asking for. The rationale for each activity is tied to this learner specifically, not to learners in general.
+
+For the next one: you are slightly over-reliant on Harmer for the theory. One more source, used for a different claim, would strengthen it.`,
+  LRT: `Accurate throughout, and the anticipated problems are the best part -- they read like problems you have seen rather than problems a book predicts. The phonemic transcription is correct, including the weak forms, which is not usually the case at this stage.
+
+Watch the length of the meaning sections: you can say the same thing in half the words, and the word count is tight.`,
+  Skills: `A clear analysis. You have kept the distinction between the skill and the language, which is the thing most candidates lose, and the staging follows from the sub-skills rather than being described alongside them. The point about the true/false task being answerable by word-matching is a genuinely sharp observation about your own material.
+
+Next time, say more about what you would do if the gist task failed -- you name the risk but not the recovery.`,
+  LfC: `An honest piece of reflection, and honest in a useful way: you name the specific thing you do that produces the rapport, rather than just reporting that you have it. The action points are things you could start on Monday.
+
+The post-course section is the thinnest part. "Read more" is not a plan; the paragraph on the Delta is.`,
+  "Plagiarism Reflection": `Accepted. You have taken responsibility without excusing it, you have identified the mechanism that actually failed rather than the moral failing, and the note-taking rule you describe would have prevented this. That is what this task is for.`,
+};
+
+const OVERALL_RESUBMIT = {
+  "Focus on Learner": `Not yet. The analysis stays general: the problems you have named are the ones this level typically has, but the assignment asks for problems this learner has, evidenced. Go back to your monitoring notes and find two things you actually heard.
+
+The activities are fine and do not need rewriting. Rework the diagnosis section only, and resubmit within a week.`,
+  LRT: `Not yet. The form section is not accurate enough to teach from -- see the comment on that section for the specific point. Everything else meets the criteria and should be left as it is.
+
+One resubmission, targeted at that section. Come and find me before you rewrite it if the terminology is the problem.`,
+  Skills: `Not yet. The sub-skills are named but not distinguished: skimming and scanning are described in the same terms, which means the task design cannot follow from them. Rewrite that section with a clear account of what each task actually asks the learner to do with their eyes and their attention.
+
+The rest stands.`,
+  LfC: `Not yet. The strengths and the action points are both general enough to belong to anyone on the course -- "improve my instructions" is not an action point until it says what you will do differently in TP7. Tie each one to a specific moment in feedback you have had.`,
+};
+
+const OVERALL_RESUB_PASS = `Addressed. The evidence is specific now, and the section reads as an account of this learner rather than of the level. Pass on resubmission.`;
+const OVERALL_RESUB_FAIL = `Still short of the criteria. The rewrite is longer but not more specific, and the evidence the first round asked for is still not there. This is recorded as a fail on resubmission; it does not on its own prevent you passing the course -- come and talk to me about what it means.`;
+
+/** The tutor's overall comment for a marked round, or null if none applies. */
+export function overallCommentFor(assignmentType, round, outcome) {
+  if (round === "resubmission") {
+    return outcome === "fail" ? OVERALL_RESUB_FAIL : OVERALL_RESUB_PASS;
+  }
+  if (outcome === "resubmission_required") return OVERALL_RESUBMIT[assignmentType] ?? null;
+  if (outcome === "approved") return OVERALL_PASS[assignmentType] ?? null;
+  return null;
+}

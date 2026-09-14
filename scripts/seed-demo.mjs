@@ -26,7 +26,7 @@ import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
 import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
 import { criteriaMarks } from "./lib/assignment-criteria-keys.mjs";
-import { submissionFor } from "./lib/assignment-submissions.mjs";
+import { submissionFor, overallCommentFor } from "./lib/assignment-submissions.mjs";
 import { appendicesFor } from "./lib/assignment-appendix-materials.mjs";
 import { renderAppendixPdf } from "./lib/appendix-pdf.mjs";
 
@@ -1976,6 +1976,19 @@ async function main() {
             resubmission_criteria_marks:
               state.resubmission_status === "approved"
                 ? criteriaMarks(assignment_type, state.resubmission_outcome === "fail" ? state.notMet : [])
+                : undefined,
+            // The marking screen will not release a round without an overall
+            // comment ("Write the overall comment" is a blocker), so a seeded
+            // round that has been marked must carry one too -- otherwise the
+            // candidate's page says "Passed" and shows nothing the tutor
+            // wrote, which is a state no real assignment can reach.
+            first_overall_comment:
+              state.first_status === "approved" || state.first_status === "resubmission_required"
+                ? overallCommentFor(assignment_type, "first", state.first_status)
+                : undefined,
+            resubmission_overall_comment:
+              state.resubmission_status === "approved"
+                ? overallCommentFor(assignment_type, "resubmission", state.resubmission_outcome)
                 : undefined,
             // What submit_assignment_round would have written: handed in after
             // the deadline is late. The submitted-days-ago states above are
