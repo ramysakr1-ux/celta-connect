@@ -3016,7 +3016,7 @@ async function main() {
   // teaching on one day. You get six, for two different levels." The literal
   // above carried six letters -- A to F, one group split across two days --
   // so Group B was never timetabled and the two groups never taught in
-  // parallel. Now every TP day has six lessons: Group A in rooms 2-4, Group B
+  // parallel. Now every TP day has six lessons: Group A and Group B
   // in rooms 5-7, at the same three times, at two levels.
   //
   // Letters are PEOPLE, not slots: A-C and D-F are Group A's two halves, G-I
@@ -3553,27 +3553,24 @@ async function main() {
       .select("id, title, linked_tp_number, tp_group_scope_id")
       .eq("course_id", course.id)
       .eq("type", "tp");
-    // Room and level per group, read off the schedule the engine also uses.
-    // Group A teaches in rooms 2-4, Group B in 5-7; on any one day the six
-    // lessons are in six different rooms. Levels swap at TP4, matching the
-    // per-group course_tp_schedule above, so a card's level always agrees with
-    // the plan the engine assigned for it.
+    // Level per group, read off the schedule the engine also uses. Levels
+    // swap at TP4, matching the per-group course_tp_schedule above, so a
+    // card's level always agrees with the plan the engine assigned for it.
+    // Room numbers used to be written here too ("Room 4 · B1+"); they were
+    // invented -- the app has no rooms anywhere -- and Ramy, 15 Sep 2026:
+    // "get rid of the rooms."
     const groupNameById = { [tpGroupIds["Group A"]]: "Group A", [tpGroupIds["Group B"]]: "Group B" };
-    const ROOM_BY_GROUP = { "Group A": [2, 3, 4], "Group B": [5, 6, 7] };
-    const SLOT_OF_LETTER = { A: 0, B: 1, C: 2, D: 0, E: 1, F: 2 };
     const firstLevel = { "Group A": "A2", "Group B": "B1+" };
     const levelForGroupTp = (g, tp) => ((tp ?? 1) <= 3 ? firstLevel[g] : firstLevel[g] === "A2" ? "B1+" : "A2");
     for (const e of tpEvents ?? []) {
-      const letter = (e.title.match(/·\s*([A-F])/) || [])[1];
       const g = groupNameById[e.tp_group_scope_id];
-      if (!letter || !g) continue;
-      const room = ROOM_BY_GROUP[g][SLOT_OF_LETTER[letter]] ?? 2;
+      if (!g) continue;
       await supabase
         .from("course_timetable_events")
-        .update({ detail: `Room ${room} · ${levelForGroupTp(g, e.linked_tp_number)}` })
+        .update({ detail: levelForGroupTp(g, e.linked_tp_number) })
         .eq("id", e.id);
     }
-    console.log("rooms:", (tpEvents ?? []).length, "TP events");
+    console.log("levels:", (tpEvents ?? []).length, "TP events");
 
     // Registers. The trainer hub raises "Register not logged" for any TP in
     // the last seven days without a register_submitted_at, and nothing ever
