@@ -487,7 +487,7 @@ export async function TodayTab({
     waiting.push({
       label: `Confirm your ${stageLabel} tutorial`,
       kind: "scheduled",
-      detail: event ? `${event.event_date}${event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}` : "Time set by your tutor",
+      detail: event ? `${formatCalendarDate(event.event_date)}${event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}` : "Time set by your tutor",
       href: `/portfolio/${traineeId}/individual-tutorial/${invite.id}`,
     });
   }

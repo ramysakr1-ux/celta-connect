@@ -24,6 +24,7 @@ import { sendApplicantEmail } from "@/lib/admissions-email";
 import { esc } from "@/lib/email-layout";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -542,7 +543,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
           centerName: center?.name ?? "",
           centerLogoUrl: center?.logo_url ?? null,
           courseName: course.name,
-          courseDates: `${course.start_date} - ${course.end_date}`,
+          courseDates: `${formatCalendarDate(course.start_date)} - ${formatCalendarDate(course.end_date, { year: "numeric" })}`,
           assignmentTitle: ASSIGNMENT_INFO[assignment.assignment_type].title,
           firstSubmittedAt: assignment.first_submitted_at,
           resubmittedAt: assignment.resubmission_submitted_at,

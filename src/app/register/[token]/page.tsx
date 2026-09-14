@@ -5,6 +5,7 @@ import { AddVolunteerForm } from "@/app/register/[token]/add-volunteer-form";
 import { BulkImportForm } from "@/app/register/[token]/bulk-import-form";
 import { Wordmark } from "@/components/wordmark";
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // A separate no-login link for center business/admissions staff -- distinct
 // from the app's own `admin` UserRole. They have no account at all and
@@ -62,7 +63,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
         <div>
           <h1 className="font-serif text-2xl text-ink">Volunteer student register</h1>
           <p className="mt-1 text-sm text-muted">
-            {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null].filter(Boolean).join(" · ")}
+            {[course?.name, course ? `${formatCalendarDate(course.start_date)} – ${formatCalendarDate(course.end_date, { year: "numeric" })}` : null].filter(Boolean).join(" · ")}
           </p>
         </div>
 

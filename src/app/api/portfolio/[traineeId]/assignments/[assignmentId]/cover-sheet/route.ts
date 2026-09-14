@@ -8,6 +8,7 @@ import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { renderAssignmentCoverSheetBuffer } from "@/lib/assignment-cover-sheet-pdf/document";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Same three-way viewer resolution as every /portfolio/[traineeId]/* route
 // this session (trainee-self / real staff / assessor-via-cookie). Gated on
@@ -105,7 +106,7 @@ export async function GET(
     centerName: center?.name ?? "",
     centerLogoUrl: center?.logo_url ?? null,
     courseName: course.name,
-    courseDates: `${course.start_date} – ${course.end_date}`,
+    courseDates: `${formatCalendarDate(course.start_date)} – ${formatCalendarDate(course.end_date, { year: "numeric" })}`,
     assignmentTitle: ASSIGNMENT_INFO[assignment.assignment_type].title,
     firstSubmittedAt: assignment.first_submitted_at,
     resubmittedAt: assignment.resubmission_submitted_at,
