@@ -24,7 +24,7 @@ import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
-import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -784,13 +784,7 @@ export default async function TodayPage() {
       const [eh, em] = b.end.split(":").map(Number);
       return Math.max(0, eh * 60 + em - (sh * 60 + sm));
     };
-    let contactMinutes = 0;
-    for (const e of events) {
-      if (e.tag === "lunch") continue;
-      if (e.type === "tp") contactMinutes += 180;
-      else if (e.type === "input_session" || e.type === "supervised_session" || e.type === "unassessed_tp")
-        contactMinutes += bandMinutes(e.event_time);
-    }
+    const contactMinutes = contactMinutesFromTimetable(events, bandMinutes);
     problems.push(...contactHoursProblems({ locked: Boolean(course?.timetable_locked_at), contactHours: contactMinutes / 60 }));
 
     // Whole-class rule (§9.1.2): at most one of a candidate's assessed lessons

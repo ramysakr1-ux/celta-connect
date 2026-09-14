@@ -261,6 +261,51 @@ export function tpLevelProblems(input: { schedule: { tpNumber: number; level: st
  * supervised session is its band's length, each TP session is the three
  * lessons plus feedback the rest of the app already treats it as.
  */
+/**
+ * The course's contact hours, counted as ONE CANDIDATE experiences them.
+ *
+ * The syllabus (p3) says what the 120 hours are made of: input, supervised
+ * lesson planning, teaching practice, feedback on teaching, peer observation,
+ * observation of experienced teachers, consultation time -- and separately
+ * "a minimum of 80 hours" of the candidate's OWN reading, assignments and
+ * lesson preparation, which is not contact time.
+ *
+ * Two things this used to get wrong, both from counting timetable ROWS
+ * instead of a candidate's hours (walked 14 Sep 2026, when the walkthrough
+ * course read 348.8 hours against a 120-hour minimum -- an overcount big
+ * enough to silence the check completely):
+ *
+ *   - Every TP row counted a full three-hour block. Six lettered rows a day
+ *     across two parallel groups is one three-hour block for the candidate
+ *     who sits in it, not eighteen hours.
+ *   - Two groups running the same session at the same hour counted twice.
+ *     A candidate attends it once.
+ *
+ * And two it never counted at all: consultation time and observation of
+ * experienced teachers, both named in the syllabus, both carried on
+ * `milestone` rows here.
+ */
+export function contactMinutesFromTimetable(
+  events: { type: string; title: string; detail: string | null; event_date: string; event_time: string | null; tag: string | null }[],
+  bandMinutes: (time: string | null) => number
+): number {
+  const tpDates = new Set(events.filter((e) => e.type === "tp").map((e) => e.event_date));
+  let minutes = tpDates.size * 180;
+  const counted = new Set<string>();
+  for (const e of events) {
+    if (e.type === "tp" || e.tag === "lunch") continue;
+    // A deadline is not a session.
+    if (e.type === "assignment_due" || e.type === "resubmission_due") continue;
+    // "Own time" is the syllabus's other 80 hours, not contact time.
+    if (/own time/i.test(e.detail ?? "") || /own time/i.test(e.title)) continue;
+    const key = `${e.event_date}|${e.event_time}|${e.title}`;
+    if (counted.has(key)) continue;
+    counted.add(key);
+    minutes += bandMinutes(e.event_time);
+  }
+  return minutes;
+}
+
 export function contactHoursProblems(input: { locked: boolean; contactHours: number }): ComplianceProblem[] {
   if (!input.locked) return [];
   if (input.contactHours + 1e-9 >= 120) return [];
