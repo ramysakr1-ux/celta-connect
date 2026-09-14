@@ -3287,8 +3287,14 @@ async function main() {
     await supabase.from("celta5_records").update({ stage3_tutorial_required: true }).eq("trainee_id", trainees["Priya Sharma"]).eq("course_id", course.id);
   }
   for (const [tutorId, tutorName, day, band, slotCount, bookedBy] of [
-    [trainerId, "Jordan Blake", 13, 7, 4, ["Amara Okafor"]],
-    [trainer2Id, "Marcus Webb", 14, 4, 3, []],
+    // Ramy, 15 Sep 2026: "I have a consultation the same time there is a
+    // Lesson framework session." Consultation sits at the end of the day.
+    // Day 13's last band is Syllabus planning for ABC, so DEF are free to
+    // book Jordan; day 14's is Syllabus planning for DEF, so ABC can book
+    // Marcus -- the two half-group sessions leave the other half its
+    // consultation hour.
+    [trainerId, "Jordan Blake", 13, 9, 4, ["Amara Okafor"]],
+    [trainer2Id, "Marcus Webb", 14, 9, 3, []],
   ]) {
     const { data: ev } = await supabase
       .from("course_timetable_events")

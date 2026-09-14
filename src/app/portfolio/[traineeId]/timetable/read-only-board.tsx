@@ -14,7 +14,13 @@ import { formatCalendarDate } from "@/lib/format-date";
 
 
 // From the design file, verbatim.
-const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
+// Ramy, 15 Sep 2026: "why does the day now end at five?" It didn't -- the
+// 17:15 band was there, off the right edge. The grid was a fixed 1276px
+// minimum (64 + 150 + nine bands at 118px) inside a frame that scrolls
+// sideways, and on a laptop the last band sat past the edge with nothing to
+// say so. The bands now share whatever width the frame has, and the admin
+// column gives up a little, so every band of the day is on screen.
+const GRID_COLUMNS = "56px 128px repeat(9, minmax(0, 1fr))";
 const ROW_HEIGHT = 108;
 
 function CameraIcon() {
