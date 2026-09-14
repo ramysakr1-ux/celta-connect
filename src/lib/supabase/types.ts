@@ -318,6 +318,12 @@ export interface Database {
       courses: {
         Row: {
           id: string;
+          appian_notification_reference: string | null;
+          assessment_kind: string;
+          grade_approval_form_submitted_at: string | null;
+          grade_approval_form_submitted_by: string | null;
+          grade_form_submitted_at: string | null;
+          grade_form_submitted_by: string | null;
           center_id: string;
           name: string;
           start_date: string;
@@ -783,6 +789,8 @@ export interface Database {
       interview_records: {
         Row: {
           id: string;
+          identity_checked_at: string | null;
+          identity_document_type: string | null;
           applicant_id: string;
           slot_id: string | null;
           fixed_questions: { question_id: string; question_text: string; answer_text: string }[];
@@ -1876,6 +1884,9 @@ export interface Database {
       celta5_records: {
         Row: {
           id: string;
+          final_higher_grade_evidence: string | null;
+          final_update_notes: string | null;
+          grades_report_list_overrides: Record<string, unknown>;
           course_id: string;
           trainee_id: string;
           hours_attended: number | null;
@@ -2808,7 +2819,12 @@ export interface Database {
         Row: {
           id: string;
           center_id: string;
-          payment_instalment_id: string | null;
+          // The column is payment_id. It was declared here as
+          // payment_instalment_id, which does not exist on the table at all
+          // -- nothing referenced it, so nothing broke, but anything that had
+          // would have typechecked and then failed at runtime. Found by the
+          // drift check, 14 Sep 2026.
+          payment_id: string | null;
           applicant_id: string | null;
           amount: number;
           currency: string;
@@ -2830,6 +2846,65 @@ export interface Database {
           currency: string;
         };
         Update: Partial<Database["public"]["Tables"]["refunds"]["Row"]>;
+        Relationships: [];
+      };
+      // migration 0302 -- what a candidate attaches to a written assignment.
+      // The FoL brief asks for "Appendix 1" and "Appendix 2" by name, and the
+      // Skills assignment is analysis OF a text; both were unmarkable until
+      // there was somewhere for the material to live.
+      assignment_appendices: {
+        Row: {
+          id: string;
+          assignment_id: string;
+          round: string;
+          label: string | null;
+          storage_path: string | null;
+          link_url: string | null;
+          file_name: string;
+          mime_type: string | null;
+          size_bytes: number | null;
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assignment_appendices"]["Row"]> & {
+          assignment_id: string;
+          file_name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assignment_appendices"]["Row"]>;
+        Relationships: [];
+      };
+      // migration 0293 -- the candidate's own notebook.
+      trainee_notebook_settings: {
+        Row: {
+          trainee_id: string;
+          paper: string;
+          page_palette: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["trainee_notebook_settings"]["Row"]> & { trainee_id: string };
+        Update: Partial<Database["public"]["Tables"]["trainee_notebook_settings"]["Row"]>;
+        Relationships: [];
+      };
+      trainee_notes: {
+        Row: {
+          id: string;
+          trainee_id: string;
+          course_id: string | null;
+          anchor_path: string;
+          anchor_label: string;
+          body: string;
+          audio_path: string | null;
+          audio_duration_seconds: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["trainee_notes"]["Row"]> & {
+          trainee_id: string;
+          anchor_path: string;
+          anchor_label: string;
+          body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["trainee_notes"]["Row"]>;
         Relationships: [];
       };
       // migration 0119 -- Handbook 14.2's candidate-concerns meeting. The

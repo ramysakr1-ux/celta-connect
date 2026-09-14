@@ -2,17 +2,17 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { APPENDIX_BUCKET } from "@/lib/assignment-appendices";
 
-// Migration 0302. The generated types lag until Ramy regenerates them, so
-// assignment_appendices is reached through an untyped handle on the same
-// RLS-scoped client -- the policies, not the types, are what keep an
-// appendix the candidate's own and refuse it once the round has locked.
-async function appendixDb(): Promise<SupabaseClient> {
-  return (await createClient()) as unknown as SupabaseClient;
+// Migration 0302. Typed since the drift check caught the table missing from
+// src/lib/supabase/types.ts (14 Sep 2026) -- this used to go through an
+// untyped handle. RLS is still what keeps an appendix the candidate's own and
+// refuses it once the round has locked; the types just stop a typo reaching
+// production.
+async function appendixDb() {
+  return createClient();
 }
 
 // Mirrors the file itself: the browser uploads straight to Storage (the 1MB

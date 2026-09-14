@@ -1,20 +1,18 @@
 "use server";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { transcribeAudio } from "@/lib/openai/transcribe";
 import { NOTEBOOK_AUDIO_BUCKET, PAGE_PALETTES, type PagePalette, type TraineeNote } from "@/lib/trainee-notebook";
 
-// Migration 0293. The generated types lag until Ramy regenerates them, so
-// the two notebook tables are read through an untyped handle on the same
-// RLS-scoped client -- the policies, not the types, are what keep a note
-// the trainee's own.
+// Migration 0293. Typed since 14 Sep 2026, when the drift check found both
+// notebook tables missing from src/lib/supabase/types.ts. RLS is still what
+// keeps a note the trainee's own.
 import { NOTEBOOK_PAPERS, type NotebookPaper } from "@/lib/trainee-notebook";
 
-async function notebookDb(): Promise<SupabaseClient> {
-  return (await createClient()) as unknown as SupabaseClient;
+async function notebookDb() {
+  return createClient();
 }
 
 /** Create (id null) or update a note. Returns the row's id, or an error. */
