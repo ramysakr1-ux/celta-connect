@@ -47,7 +47,14 @@ const env = Object.fromEntries(
 );
 const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
-const DEMO_COURSE_ID = "6d7fbc3a-3362-4fe1-aa23-befd98e2c59b";
+// Resolved at run time, not pinned: the demo course is rebuilt by
+// seed-demo.mjs and comes back with a NEW id every time, so the id this
+// script used to carry stopped existing the first time the demo was
+// reseeded -- a re-run would have cloned nothing at all. Same rule the app's
+// own pickDemoCourse uses (src/lib/demo-course.ts): the course running at
+// the demo centre today, not the newest row, which since 12 Sep 2026 is a
+// next intake five weeks out with nobody on it. Walked 14 Sep 2026.
+let DEMO_COURSE_ID = null;
 const ELMSWOOD_ID = "c2086317-68ac-4bbf-9ac5-3e3b25a1b4b1"; // resolved below by name, this is a fallback
 const COURSE_NAME = "CELTA Walkthrough (Ramy)";
 const EMAIL_PREFIX = "walk-";
@@ -87,6 +94,15 @@ const REMAP = {
   assignment_id: "assignment",
   related_assignment_id: "assignment",
   block_id: "stage2_block",
+  session_id: "filmed_session",
+  set_by_profile_id: "profile",
+  superseded_by_profile_id: "profile",
+  raised_by: "profile",
+  opened_by: "profile",
+  closed_by: "profile",
+  acted_by: "profile",
+  actor_profile_id: "profile",
+  administrator_profile_id: "profile",
   tp_coursebook_id: "coursebook",
   tp_point_id: "tp_point",
   volunteer_student_id: "volunteer",
@@ -115,6 +131,8 @@ const maps = {
   coursebook: new Map(),
   tp_point: new Map(),
   volunteer: new Map(),
+  consultation_block: new Map(),
+  filmed_session: new Map(),
 };
 
 /**
@@ -143,6 +161,14 @@ const NULLABLE_FK = new Set([
   "stage3_moved_earlier_by",
   "admin_access_granted_by",
   "assignment_fail_override_by",
+  "set_by_profile_id",
+  "superseded_by_profile_id",
+  "raised_by",
+  "opened_by",
+  "closed_by",
+  "acted_by",
+  "actor_profile_id",
+  "administrator_profile_id",
   "anchor_event_id",
   "linked_live_session_event_id",
   "related_assignment_id",
@@ -194,7 +220,12 @@ async function main() {
   // --- Where it lands -------------------------------------------------
   const { data: elmswood } = await supabase.from("centers").select("id, name, time_zone").eq("name", "Elmswood English Centre").maybeSingle();
   if (!elmswood) throw new Error("Elmswood English Centre not found");
-  const { data: demoCourse } = await supabase.from("courses").select("*").eq("id", DEMO_COURSE_ID).single();
+  // seed-demo.mjs names the running demo course exactly this, and gives the
+  // spring/autumn intakes their own suffixed names -- so the name is the
+  // stable handle the id never was.
+  const { data: demoCourse } = await supabase.from("courses").select("*").eq("name", "CELTA Demo Course").maybeSingle();
+  if (!demoCourse) throw new Error('No course called "CELTA Demo Course" to clone -- run npm run seed:demo first');
+  DEMO_COURSE_ID = demoCourse.id;
   maps.center.set(demoCourse.center_id, elmswood.id);
   console.log(`Cloning "${demoCourse.name}" into ${elmswood.name}`);
 
@@ -336,6 +367,54 @@ async function main() {
   const blockIds = (blocks ?? []).map((b) => b.id);
   const { data: slots } = blockIds.length ? await supabase.from("stage2_tutorial_slots").select("*").in("block_id", blockIds) : { data: [] };
   await copyTable("stage2_tutorial_slots", slots);
+
+  // Consultation. Walked 14 Sep 2026: the blocks were never copied, so the
+  // two "Consultation -- <tutor>" tiles on the cloned timetable opened
+  // nothing at all -- a door on the board with no room behind it.
+  const { data: consultBlocks } = await pick("consultation_blocks", { course_id: DEMO_COURSE_ID });
+  await copyTable("consultation_blocks", consultBlocks, { mapKind: "consultation_block" });
+  const consultIds = (consultBlocks ?? []).map((b) => b.id);
+  const { data: consultSlots } = consultIds.length
+    ? await supabase.from("consultation_slots").select("*").in("block_id", consultIds)
+    : { data: [] };
+  // consultation_slots.block_id points at a consultation block, not a Stage 2
+  // one, so it is remapped here rather than through REMAP's shared block_id.
+  await copyTable(
+    "consultation_slots",
+    (consultSlots ?? []).map((r) => ({ ...r, block_id: maps.consultation_block.get(r.block_id) ?? r.block_id })),
+    { patch: (mapped) => mapped }
+  );
+
+  // The filmed observation sessions behind the "Filmed observation" tiles,
+  // and everything hanging off them.
+  const { data: filmed } = await pick("filmed_observation_sessions", { course_id: DEMO_COURSE_ID });
+  await copyTable("filmed_observation_sessions", filmed, { mapKind: "filmed_session" });
+  const filmedIds = (filmed ?? []).map((f) => f.id);
+  const bySession = async (t) => (filmedIds.length ? (await supabase.from(t).select("*").in("session_id", filmedIds)).data : []);
+  const filmedTasks = await bySession("filmed_observation_tasks");
+  await copyTable("filmed_observation_tasks", filmedTasks);
+  await copyTable("filmed_observation_breaks", await bySession("filmed_observation_breaks"));
+
+  // Who tutors each group from which TP -- the record behind the tutor swap.
+  await copyTable("course_tp_group_tutors", await pick("course_tp_group_tutors", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
+
+  // The rest of the course's own history. None of it was deliberately left
+  // out -- it simply was never added as each feature landed, so the clone
+  // drifted behind the demo (15 tables' worth by 14 Sep 2026).
+  for (const table of [
+    "gtky_assignments",
+    "tp_capture_notes",
+    "class_error_log",
+    "resources",
+    "trainee_notes",
+    "concerns",
+    "malpractice_cases",
+    "assessor_meeting_requests",
+    "volunteer_signup_profiles",
+    "payment_plans",
+  ]) {
+    await copyTable(table, await pick(table, { course_id: DEMO_COURSE_ID }).then((r) => r.data));
+  }
 
   await copyTable("individual_tutorial_invites", await pick("individual_tutorial_invites", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
   await copyTable("formal_letters", await pick("formal_letters", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
