@@ -4,6 +4,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveBranchScope } from "@/lib/branch-scope";
 import { ReferralRequestRow } from "@/app/dashboard/admissions/referral-requests/referral-request-row";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // build-spec.md §14: "Where nobody spans the two, it becomes a request the
 // receiving branch accepts." This is that acceptance screen -- the
@@ -47,6 +48,11 @@ export default async function ReferralRequestsPage({
     admin.from("courses").select("id, name").in("center_id", scope).order("start_date", { ascending: false }),
   ]);
 
+  // Branch-scoped: a person holding two branches sees both at once, so each
+  // request is dated where the branch it is addressed to actually is.
+  const { data: centreRows } = await admin.from("centers").select("id, time_zone").in("id", scope);
+  const zoneByCentre = new Map((centreRows ?? []).map((c) => [c.id, c.time_zone ?? DEFAULT_TIMEZONE]));
+
   const allRequests = [...(incoming ?? []), ...(sent ?? [])];
   const applicantIds = [...new Set(allRequests.map((r) => r.applicant_id))];
   const centerIds = [...new Set(allRequests.flatMap((r) => [r.from_center_id, r.to_center_id]))];
@@ -85,6 +91,7 @@ export default async function ReferralRequestsPage({
           pendingIncoming.map((r, i) => (
             <ReferralRequestRow
               key={r.id}
+              timeZone={zoneByCentre.get(r.to_center_id) ?? DEFAULT_TIMEZONE}
               request={{
                 id: r.id,
                 toCenterId: r.to_center_id,

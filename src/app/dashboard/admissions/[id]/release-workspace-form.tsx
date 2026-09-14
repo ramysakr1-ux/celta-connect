@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { releaseWorkspace } from "@/app/dashboard/admissions/actions";
 import type { FormState } from "@/app/dashboard/admissions/actions";
+import { formatDate } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
 
@@ -26,6 +27,7 @@ export function ReleaseWorkspaceForm({
   releasedByName,
   hasDeposit,
   specialRequirements,
+  timeZone,
 }: {
   applicantId: string;
   releasedAt: string | null;
@@ -33,6 +35,7 @@ export function ReleaseWorkspaceForm({
   releasedByName: string | null;
   hasDeposit: boolean;
   specialRequirements: string | null;
+  timeZone: string;
 }) {
   const [state, formAction, pending] = useActionState(releaseWorkspace, initial);
 
@@ -49,7 +52,7 @@ export function ReleaseWorkspaceForm({
       <div className="rounded-[8px] border border-border bg-card p-4">
         <h3 className="font-serif text-base text-ink">Workspace access</h3>
         <p className="mt-1 text-sm text-muted">
-          Released {new Date(releasedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
+          Released {formatDate(releasedAt, timeZone, { day: "numeric", month: "long" })}
           {releasedByName ? ` by ${releasedByName}` : ""}
           {releasedReason ? ` · ${REASON_LABEL[releasedReason] ?? releasedReason}` : ""}
         </p>

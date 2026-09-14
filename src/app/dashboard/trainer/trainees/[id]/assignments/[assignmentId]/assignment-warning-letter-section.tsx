@@ -3,17 +3,20 @@
 import { useState } from "react";
 import { LetterIssueForm } from "@/app/dashboard/trainer/letter-issue-form";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { formatDate } from "@/lib/format-date";
 
 export function AssignmentWarningLetterSection({
   traineeId,
   assignmentId,
   draft,
   existingLetters,
+  timeZone,
 }: {
   traineeId: string;
   assignmentId: string;
   draft: FormalLetterInput | null;
   existingLetters: { id: string; issued_at: string; acknowledged_at: string | null }[];
+  timeZone: string;
 }) {
   const [showForm, setShowForm] = useState(existingLetters.length === 0);
 
@@ -31,8 +34,8 @@ export function AssignmentWarningLetterSection({
           {existingLetters.map((l) => (
             <div key={l.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint p-2.5">
               <div>
-                <p className="text-sm text-ink">Issued {new Date(l.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
-                <p className="text-xs text-muted">{l.acknowledged_at ? `Acknowledged ${new Date(l.acknowledged_at).toLocaleDateString("en-GB")}` : "Awaiting acknowledgement"}</p>
+                <p className="text-sm text-ink">Issued {formatDate(l.issued_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}</p>
+                <p className="text-xs text-muted">{l.acknowledged_at ? `Acknowledged ${formatDate(l.acknowledged_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}` : "Awaiting acknowledgement"}</p>
               </div>
               <a href={`/api/formal-letter/${l.id}`} className="text-xs font-semibold text-primary hover:underline">
                 Download

@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/types";
+import { formatDate as fmtDateTime } from "@/lib/format-date";
 
 type EmailRow = Database["public"]["Tables"]["applicant_emails"]["Row"];
 
@@ -18,15 +19,15 @@ const STATUS_PILL_CLASS: Record<EmailRow["status"], string> = {
   failed: "status-pill-at-risk",
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+function formatDate(iso: string, timeZone: string): string {
+  return fmtDateTime(iso, timeZone, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 // All Emails.dc.html: every real send to this candidate, oldest to newest
 // reversed, real delivery state from applicant_emails (migration 0108/0113,
 // populated by the Resend webhook) -- not a guess at what "should" have
 // sent, the actual log.
-export function EmailHistoryPanel({ emails, garnet = false }: { emails: EmailRow[]; garnet?: boolean }) {
+export function EmailHistoryPanel({ emails, garnet = false, timeZone }: { emails: EmailRow[]; garnet?: boolean; timeZone: string }) {
   if (emails.length === 0) {
     return (
       <div className={`card flex flex-col gap-1 p-6 ${garnet ? "card-garnet" : ""}`}>
@@ -45,7 +46,7 @@ export function EmailHistoryPanel({ emails, garnet = false }: { emails: EmailRow
             <div className="min-w-0">
               <p className="truncate text-sm text-ink">{email.subject}</p>
               <p className="text-xs text-muted">
-                {formatDate(email.created_at)}
+                {formatDate(email.created_at, timeZone)}
                 {email.status === "bounced" && email.bounce_reason ? ` -- ${email.bounce_reason}` : ""}
                 {email.status === "failed" && email.error ? ` -- ${email.error}` : ""}
               </p>

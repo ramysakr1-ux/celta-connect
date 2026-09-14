@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { formatDateTime } from "@/lib/format-date";
 import {
   acceptReferralRequestAction,
   declineReferralRequestAction,
@@ -13,6 +14,7 @@ export function ReferralRequestRow({
   request,
   courses,
   garnet = false,
+  timeZone,
 }: {
   request: {
     id: string;
@@ -24,6 +26,7 @@ export function ReferralRequestRow({
   };
   courses: { id: string; name: string }[];
   garnet?: boolean;
+  timeZone: string;
 }) {
   const [acceptState, acceptAction, acceptPending] = useActionState(acceptReferralRequestAction, initialState);
   const [declineState, declineAction, declinePending] = useActionState(declineReferralRequestAction, initialState);
@@ -35,7 +38,7 @@ export function ReferralRequestRow({
         <p className="text-sm font-semibold text-ink">{request.applicantName}</p>
         <p className="text-xs text-muted">{request.applicantEmail}</p>
         <p className="mt-1 text-xs text-muted">
-          Requested by {request.fromCenterName} · {new Date(request.requestedAt).toLocaleString("en-GB")}
+          Requested by {request.fromCenterName} · {formatDateTime(request.requestedAt, timeZone)}
         </p>
       </div>
 

@@ -3,12 +3,13 @@
 import { useActionState } from "react";
 import { updateAdminGrant, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import type { Database } from "@/lib/supabase/types";
+import { formatDateTime } from "@/lib/format-date";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
 const initialState: FormState = { error: null };
 
-export function AdminGrantForm({ record }: { record: Celta5Record }) {
+export function AdminGrantForm({ record, timeZone }: { record: Celta5Record; timeZone: string }) {
   const [state, action, pending] = useActionState(updateAdminGrant, initialState);
   const granted = !!record.admin_access_granted_at;
 
@@ -40,7 +41,7 @@ export function AdminGrantForm({ record }: { record: Celta5Record }) {
 
       {granted && record.admin_access_granted_at ? (
         <p className="text-xs text-muted">
-          Granted {new Date(record.admin_access_granted_at).toLocaleString()}.
+          Granted {formatDateTime(record.admin_access_granted_at, timeZone)}.
         </p>
       ) : null}
 

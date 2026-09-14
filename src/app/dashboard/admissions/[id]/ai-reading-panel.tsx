@@ -1,5 +1,6 @@
 import { holdAutoSentInterview } from "@/app/dashboard/admissions/actions";
 import type { SelectionTaskReading, SelectionTaskRowKey } from "@/lib/openai/read-selection-task";
+import { formatTime } from "@/lib/format-date";
 
 const ROW_LABELS: Record<SelectionTaskRowKey, string> = {
   language_awareness: "Language awareness",
@@ -32,6 +33,7 @@ function isReading(value: unknown): value is SelectionTaskReading {
 export function AiReadingPanel({
   applicant,
   garnet = false,
+  timeZone,
 }: {
   applicant: {
     id: string;
@@ -43,6 +45,7 @@ export function AiReadingPanel({
     interview_auto_send_sent_at: string | null;
   };
   garnet?: boolean;
+  timeZone: string;
 }) {
   if (!applicant.ai_reading_generated_at || !isReading(applicant.ai_reading_summary)) return null;
   const reading = applicant.ai_reading_summary;
@@ -86,7 +89,7 @@ export function AiReadingPanel({
           <input type="hidden" name="applicant_id" value={applicant.id} />
           <p className="flex-1 text-xs text-muted">
             An interview will be booked automatically -- held until{" "}
-            {new Date(applicant.interview_auto_send_at!).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit" })}.
+            {formatTime(applicant.interview_auto_send_at!, timeZone)}.
           </p>
           <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary admin-hover-fill">
             Hold

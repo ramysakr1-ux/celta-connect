@@ -123,6 +123,7 @@ export default async function TrainerAssignmentReviewPage({
 
       {isAssignmentWarningTriggered(assignment) ? (
         <AssignmentWarningLetterSection
+          timeZone={timeZone}
           traineeId={id}
           assignmentId={assignmentId}
           draft={(await buildAssignmentWarningDraft(supabase, trainer.course_id ?? "", assignmentId, trainer.full_name))?.input ?? null}

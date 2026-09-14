@@ -1690,7 +1690,7 @@ export default async function PortfolioCelta5Page({
           )}
         </div>
 
-        <SignatureLedger rows={signatureLedger} traineeId={traineeId} />
+        <SignatureLedger rows={signatureLedger} traineeId={traineeId} timeZone={timeZone} />
       </div>
     );
   }
@@ -1734,7 +1734,7 @@ export default async function PortfolioCelta5Page({
         </div>
       ) : null}
 
-      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
+      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={timeZone} />
 
       <div>
         <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
@@ -1756,7 +1756,7 @@ export default async function PortfolioCelta5Page({
         record={record}
         trainerFullName={viewer?.full_name ?? ""}
         trainerSignatureName={viewer?.signature_name ?? null}
-        timeZone={center?.time_zone ?? DEFAULT_TIMEZONE}
+        timeZone={timeZone}
         assessedHoursSoFar={((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60}
       />
 
@@ -1779,7 +1779,7 @@ export default async function PortfolioCelta5Page({
         record={record}
         trainerFullName={viewer?.full_name ?? ""}
         trainerSignatureName={viewer?.signature_name ?? null}
-        timeZone={center?.time_zone ?? DEFAULT_TIMEZONE}
+        timeZone={timeZone}
         mandatoryReason={staffStage3Status?.mandatory ? staffStage3Status.reason : null}
         assessedHoursSoFar={((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60}
       />
@@ -1802,15 +1802,15 @@ export default async function PortfolioCelta5Page({
 
       <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
 
-      <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
+      <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={timeZone} />
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
+        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} timeZone={timeZone} />
       ) : null}
 
-      <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />
+      <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} timeZone={timeZone} />
 
-      <SignatureLedger rows={signatureLedger} traineeId={traineeId} />
+      <SignatureLedger rows={signatureLedger} traineeId={traineeId} timeZone={timeZone} />
     </div>
   );
 }

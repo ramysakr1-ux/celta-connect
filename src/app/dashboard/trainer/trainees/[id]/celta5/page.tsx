@@ -377,6 +377,7 @@ export default async function Celta5RecordPage({
           <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
           <div className="mt-4">
             <FinalizeRecordForm
+          timeZone={timeZone}
               key={`finalize-${record.updated_at}`}
               record={record}
               trainerFullName={trainer.full_name}
@@ -408,6 +409,7 @@ export default async function Celta5RecordPage({
           document, so they sit outside it rather than inside a section. */}
       {isFailRiskTriggered(record) ? (
         <FailRiskLetterSection
+          timeZone={timeZone}
           traineeId={id}
           draft={(await buildFailRiskDraft(supabase, trainer.course_id ?? "", id, trainer.full_name, timeZone))?.input ?? null}
           lessonsLeft={lessonsLeft}
@@ -426,6 +428,7 @@ export default async function Celta5RecordPage({
 
       {isReferenceLetterEligible(record) ? (
         <ReferenceLetterSection
+          timeZone={timeZone}
           traineeId={id}
           draft={(await buildReferenceLetterDraft(supabase, trainer.course_id ?? "", id, trainer.full_name))?.input ?? null}
           canGenerate={trainer.role === "admin" || trainer.tutor_role === "main_course_tutor"}
@@ -442,7 +445,7 @@ export default async function Celta5RecordPage({
         />
       ) : null}
 
-      <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />
+      <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} timeZone={timeZone} />
     </div>
   );
 }

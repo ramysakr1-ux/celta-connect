@@ -3,6 +3,9 @@ import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveBranchScope } from "@/lib/branch-scope";
+import { formatDate as fmtDateTime } from "@/lib/format-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const STATUS_LABEL: Record<string, string> = {
   sent: "Sent",
@@ -27,9 +30,9 @@ function humanizeType(type: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, " ");
 }
 
-function formatDate(iso: string | null): string {
+function formatDate(iso: string | null, timeZone: string): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return fmtDateTime(iso, timeZone, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 // Email Delivery.dc.html 1a, "Delivery, not just sent" -- one course's real
@@ -54,7 +57,7 @@ export default async function EmailDeliveryPage({
 
   const { data: courses } = await supabase
     .from("courses")
-    .select("id, course_code, name, start_date")
+    .select("id, course_code, name, start_date, center_id")
     .in("center_id", scope)
     .order("start_date", { ascending: false });
 
@@ -69,6 +72,8 @@ export default async function EmailDeliveryPage({
 
   const courseId = selectedCourseId && courses.some((c) => c.id === selectedCourseId) ? selectedCourseId : courses[0].id;
   const course = courses.find((c) => c.id === courseId)!;
+  // Delivery times belong to the centre running the course, not the reader.
+  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
 
   const { data: applicants } = await supabase.from("applicants").select("id").eq("intake_course_id", courseId);
   const applicantIds = (applicants ?? []).map((a) => a.id);
@@ -170,8 +175,8 @@ export default async function EmailDeliveryPage({
               >
                 <div className="text-[12.5px] font-semibold text-ink">{email.recipient_name ?? "—"}</div>
                 <div className="text-xs text-muted">{humanizeType(email.type)}</div>
-                <div className="text-[11.5px] text-muted">{formatDate(email.created_at)}</div>
-                <div className="text-[11.5px] text-muted">{formatDate(email.delivered_at)}</div>
+                <div className="text-[11.5px] text-muted">{formatDate(email.created_at, timeZone)}</div>
+                <div className="text-[11.5px] text-muted">{formatDate(email.delivered_at, timeZone)}</div>
                 <div className="flex items-center gap-1.5">
                   <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} />
                   <span className={`text-xs ${tone.weight} ${tone.ink}`}>

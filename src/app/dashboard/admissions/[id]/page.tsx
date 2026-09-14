@@ -27,7 +27,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { holdsCentre, heldCenterIds } from "@/lib/branch-scope";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { formatDate, formatCalendarDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDate, formatDateTime } from "@/lib/format-date";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const staff = await requireAdmissionsHandler();
@@ -284,7 +284,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <p className="mt-2 text-xs text-muted">
             Referred to {referredToCentre?.name ?? "another branch"}
             {referredByProfile ? ` by ${referredByProfile.full_name}` : ""}
-            {applicant.referred_at ? ` · ${new Date(applicant.referred_at).toLocaleString("en-GB")}` : ""}
+            {applicant.referred_at ? ` · ${formatDateTime(applicant.referred_at, timeZone)}` : ""}
           </p>
         ) : null}
       </div>
@@ -424,7 +424,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         {applicant.commitments_accepted_at ? (
           <>
             <p className="text-sm text-ink">
-              Accepted {new Date(applicant.commitments_accepted_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              Accepted {formatDate(applicant.commitments_accepted_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}
             </p>
             {applicant.commitments_snapshot ? (
               <details className="mt-1">
@@ -440,7 +440,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         )}
       </div>
 
-      <AiReadingPanel applicant={applicant} garnet={aiReadingGarnet} />
+      <AiReadingPanel applicant={applicant} garnet={aiReadingGarnet} timeZone={timeZone} />
 
       {canDecide ? (
         <MarkingForm applicant={applicant} garnet={markingGarnet} />
@@ -471,7 +471,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               <div>
                 <p className="text-sm text-ink">
                   {applicant.interview_invite_sent_at
-                    ? `Invite sent ${new Date(applicant.interview_invite_sent_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} -- no time picked yet`
+                    ? `Invite sent ${formatDate(applicant.interview_invite_sent_at, timeZone, { day: "numeric", month: "long" })} -- no time picked yet`
                     : "Send the applicant a link to pick their own time"}
                 </p>
                 <p className="text-xs text-muted">Same link every time -- reply to admissions if none of the times suit.</p>
@@ -588,12 +588,13 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             </div>
           </div>
           <PaymentsPanel applicant={applicant} payments={payments ?? []} garnet={paymentsGarnet} timeZone={timeZone} />
-          <EmailHistoryPanel emails={emailHistory ?? []} garnet={emailHistoryGarnet} />
+          <EmailHistoryPanel emails={emailHistory ?? []} garnet={emailHistoryGarnet} timeZone={timeZone} />
           {/* The green light sits with the money, because that is what informs
               it -- but it is a separate decision, which is the whole point of
               the gate. */}
           <AreaAction verdict={paymentVerdict}>
             <ReleaseWorkspaceForm
+            timeZone={timeZone}
               applicantId={applicant.id}
               releasedAt={applicant.workspace_released_at}
               releasedReason={applicant.workspace_released_reason}
@@ -639,7 +640,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                     : `${existingRequest.toCenterName} declined this request${existingRequest.declineReason ? `: ${existingRequest.declineReason}` : "."}`}
               </p>
               <p className="text-xs text-muted">
-                Sent {new Date(existingRequest.requestedAt).toLocaleString("en-GB")}
+                Sent {formatDateTime(existingRequest.requestedAt, timeZone)}
               </p>
             </div>
           ) : (

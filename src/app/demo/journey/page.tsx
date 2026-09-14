@@ -23,6 +23,7 @@ import { EmailPreview } from "@/app/demo/journey/email-preview";
 import { VolunteerJourneyMap } from "@/app/demo/journey/journey-map";
 import { BackToTop } from "@/app/demo/journey/back-to-top";
 import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Ramy, 2026-08-25: "one link... it will open all of them, and it will sort
 // of tell the process, the journey" -- the application/interview/offer
@@ -517,7 +518,7 @@ export default async function JourneyPage() {
                 marking scheme is also recorded right on this applicant&apos;s page -- never shown to them, never
                 auto-rejects anyone. Here&apos;s what that reading actually looks like:
               </p>
-              <AiReadingPanel applicant={sampleAiReading} />
+              <AiReadingPanel applicant={sampleAiReading} timeZone={DEFAULT_TIMEZONE} />
 
               <p className="mt-2 text-xs text-muted">
                 The recorded speaking task is transcribed automatically (fails silently if it can&apos;t -- a missing

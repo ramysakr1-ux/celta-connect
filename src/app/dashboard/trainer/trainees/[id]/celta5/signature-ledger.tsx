@@ -1,5 +1,6 @@
 import type { SignatureLedgerRow } from "@/lib/celta5-signatures";
 import { isBookletExportReady } from "@/lib/celta5-signatures";
+import { formatDateTime as fmtDateTime } from "@/lib/format-date";
 
 const STATE_LABEL: Record<SignatureLedgerRow["state"], string> = {
   signed: "Signed",
@@ -15,9 +16,9 @@ const STATE_CLASS: Record<SignatureLedgerRow["state"], string> = {
   locked: "status-pill-at-risk",
 };
 
-function formatDateTime(iso: string | null): string {
+function formatDateTime(iso: string | null, timeZone: string): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleString();
+  return fmtDateTime(iso, timeZone);
 }
 
 // Area 4 -- one place that lists every signature the booklet needs, reading
@@ -25,7 +26,7 @@ function formatDateTime(iso: string | null): string {
 // assignments rather than a new table (computeSignatureLedger owns the
 // mapping). The booklet export button lives here too since its gate is
 // exactly "every row below is Signed."
-export function SignatureLedger({ rows, traineeId }: { rows: SignatureLedgerRow[]; traineeId: string }) {
+export function SignatureLedger({ rows, traineeId, timeZone }: { rows: SignatureLedgerRow[]; traineeId: string; timeZone: string }) {
   const ready = isBookletExportReady(rows);
 
   return (
@@ -72,7 +73,7 @@ export function SignatureLedger({ rows, traineeId }: { rows: SignatureLedgerRow[
           <div key={row.key} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
             <span className="text-sm text-ink">{row.label}</span>
             <div className="flex items-center gap-2">
-              {row.at ? <span className="text-xs text-muted">{formatDateTime(row.at)}</span> : null}
+              {row.at ? <span className="text-xs text-muted">{formatDateTime(row.at, timeZone)}</span> : null}
               <span className={`status-pill ${STATE_CLASS[row.state]}`}>{STATE_LABEL[row.state]}</span>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { finalizeRecord, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import { SetSignatureForm } from "@/components/set-signature-form";
 import type { Database } from "@/lib/supabase/types";
+import { formatDateTime } from "@/lib/format-date";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
@@ -13,10 +14,12 @@ export function FinalizeRecordForm({
   record,
   trainerFullName,
   trainerSignatureName,
+  timeZone,
 }: {
   record: Celta5Record;
   trainerFullName: string;
   trainerSignatureName: string | null;
+  timeZone: string;
 }) {
   const [state, action, pending] = useActionState(finalizeRecord, initialState);
 
@@ -45,12 +48,12 @@ export function FinalizeRecordForm({
 
       {record.trainer_signoff_final_at ? (
         <p className="text-xs text-muted">
-          Finalized by {record.final_tutor_signature_name} on {new Date(record.trainer_signoff_final_at).toLocaleString()}.
+          Finalized by {record.final_tutor_signature_name} on {formatDateTime(record.trainer_signoff_final_at, timeZone)}.
         </p>
       ) : null}
       {record.trainee_signoff_final_at ? (
         <p className="text-xs text-muted">
-          Trainee signed off {new Date(record.trainee_signoff_final_at).toLocaleString()}.
+          Trainee signed off {formatDateTime(record.trainee_signoff_final_at, timeZone)}.
         </p>
       ) : null}
 
