@@ -2989,13 +2989,19 @@ async function main() {
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
     { d: 19, b: 8, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "5c"], slug: "teaching-exam-classes" },
-    { d: 20, b: 1, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 2, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 3, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 4, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 20, b: 6, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 7, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    // The last day was "Course close" in six consecutive bands with a lunch
+    // in the middle of it -- filler that read on the board as a broken
+    // repeat (walked 14 Sep 2026). A real last morning, from the Handbook:
+    // CELTA 5's final day section "must be signed by the course tutor and
+    // the candidate at the end of the course" (12.1.3); candidates get a
+    // planned slot to say what the course was like (16.1, "regular in-course
+    // evaluation sessions or written feedback forms"); and the close says
+    // what happens next, since grades are "subject to confirmation by
+    // Cambridge English" and reports are not issued until after the final
+    // day (14.4, 8.3). Then the course is over -- no afternoon, no lunch.
+    { d: 20, b: 1, type: "supervised_session", title: "CELTA 5 -- final day signatures", tag: "group_room", detail: "Tutor and candidate sign every record", linked: null, tp: null },
+    { d: 20, b: 2, type: "milestone", title: "Course evaluation", tag: "whole_group", detail: "Your written feedback on the course", linked: null, tp: null },
+    { d: 20, b: 3, type: "input_session", title: "Course close", tag: "whole_group", detail: "What happens next: results, certificates, references", linked: null, tp: null },
   ];
 
   // NO group-B TP rows. Ramy, 6 Sep 2026: "we have two groups of six, A, B, C

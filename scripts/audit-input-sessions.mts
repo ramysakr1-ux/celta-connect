@@ -20,6 +20,8 @@ import { inputSessionSlugForTitle } from "../src/lib/input-session-registry-link
 const INERT_BY_DESIGN = [
   /^Course introduction/i,
   /^Course close/i,
+  /^Course evaluation$/i,
+  /^CELTA 5 -- final day signatures$/i,
   /^Demo lesson/i,
   /^Filmed observation/i,
   /^Syllabus planning/i,
