@@ -233,12 +233,9 @@ export interface Database {
           name: string;
           center_number: string;
           logo_url: string | null;
-          primary_color: string | null;
-          accent_color: string | null;
           is_uk_centre: boolean;
           auto_tag_criteria_enabled: boolean;
           is_demo: boolean;
-          admissions_stale_threshold_days: number;
           application_low_availability_threshold: number;
           admissions_email: string | null;
           // migration 0248 -- CELTA Administration Handbook 10.2 lets a
@@ -655,7 +652,6 @@ export interface Database {
           workspace_released_note: string | null;
           task_feedback: string | null;
           task_feedback_ai_suggestion: string | null;
-          task_feedback_ai_accepted: boolean | null;
           task_feedback_edited_by: string | null;
           task_feedback_edited_at: string | null;
           stage:
@@ -692,7 +688,6 @@ export interface Database {
           place_offered_at: string | null;
           place_offer_expires_at: string | null;
           resulting_trainee_id: string | null;
-          notification_opt_outs: string[];
           // migration 0196 -- centre's own marketing signal, never part of
           // the academic record and deliberately excluded from the
           // close-out export (export.ts uses an explicit column list that
@@ -4019,24 +4014,6 @@ export interface Database {
           expires_at: string;
         };
         Update: Partial<Database["public"]["Tables"]["centre_zoom_connections"]["Row"]>;
-        Relationships: [];
-      };
-      finances: {
-        Row: {
-          id: string;
-          profile_id: string;
-          course_id: string;
-          total_fee: number;
-          amount_paid: number;
-          balance_due: number;
-          payment_notes: string | null;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["finances"]["Row"]> & {
-          profile_id: string;
-          course_id: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["finances"]["Row"]>;
         Relationships: [];
       };
       centre_subscriptions: {
