@@ -531,10 +531,19 @@ export default async function TrainerTimetablePage({
             (event.title === "Feedback" || (event.title ?? "").toLowerCase().includes("assessor")))))
       : event.type !== "tp"
         ? true
-        : ownedHalfOrders.size > 0 && (() => {
-            const owningHalf = halfOwningDate(tpEventsForRotation, event.event_date);
-            return owningHalf !== null && ownedHalfOrders.has(owningHalf);
-          })();
+        : // A TP row names the group it belongs to, and on a two-group course
+          // that is the whole answer: six lessons a day at two levels, three
+          // of them yours. Walked 14 Sep 2026 -- "Mine" faded nothing at all
+          // for either tutor, because it only asked which HALF of the course
+          // owns the day, and a tutor owns a whole group, whose two halves
+          // between them cover every teaching day. The half rule is still
+          // the fallback for a course whose TP rows carry no group.
+          event.tp_group_scope_id
+          ? ownedGroupIds.has(event.tp_group_scope_id)
+          : ownedHalfOrders.size > 0 && (() => {
+              const owningHalf = halfOwningDate(tpEventsForRotation, event.event_date);
+              return owningHalf !== null && ownedHalfOrders.has(owningHalf);
+            })();
     const volunteerAttendance =
       event.type === "tp" && volunteerIds.length > 0
         ? { total: volunteerIds.length, expected: volunteerIds.length - (declinedCountByEvent.get(event.id) ?? 0) }
