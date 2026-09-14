@@ -1,0 +1,25 @@
+import { chromium } from "playwright";
+import { createClient } from "@supabase/supabase-js";
+import fs from "fs";
+const env = fs.readFileSync(".env.local", "utf8");
+const db = createClient(env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim(), env.match(/SUPABASE_SERVICE_ROLE_KEY=(.+)/)[1].trim());
+const BASE = "https://celta-connect.vercel.app";
+const picks = JSON.parse(fs.readFileSync(".walk/picks.json","utf8"));
+const sk = picks.find(p=>p.assignment_type==="Skills");
+const b = await chromium.launch();
+const page = await (await b.newContext({ timezoneId:"Europe/Istanbul" })).newPage();
+const { data: l } = await db.auth.admin.generateLink({ type:"magiclink", email: sk.who.email });
+await page.goto(`${BASE}/auth/confirm?token_hash=${l.properties.hashed_token}&type=magiclink&next=%2Fportfolio%2F${sk.trainee_id}%2Fassignments%2F${sk.id}`, { waitUntil:"domcontentloaded" });
+await page.waitForTimeout(6000);
+console.log(await page.evaluate(() => {
+  const forms = [...document.querySelectorAll("form")];
+  const wd = [...document.querySelectorAll("button")].find(b=>b.textContent.trim()==="Withdraw");
+  return JSON.stringify({
+    formCount: forms.length,
+    formIds: forms.map(f=>f.id || "(none)"),
+    withdrawFound: !!wd,
+    withdrawOwnerFormId: wd ? (wd.form ? (wd.form.id || "(unnamed form)") : "NO FORM") : "-",
+    withdrawIsInsideAssignmentForm: wd ? !!wd.closest("#assignment") : null,
+  }, null, 1);
+}));
+await b.close();

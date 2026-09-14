@@ -1,0 +1,74 @@
+[
+ {
+  "id": "32743e6b-57ab-43c2-ac45-3f74ddf72164",
+  "assignment_type": "LfC",
+  "trainee_id": "e12f82e2-a1e1-4f80-bd9a-cecefbff1da1",
+  "first_status": "not_submitted",
+  "resubmission_status": "not_submitted",
+  "who": {
+   "id": "e12f82e2-a1e1-4f80-bd9a-cecefbff1da1",
+   "full_name": "Amara Okafor",
+   "email": "walk-amara@celtaconnect.com"
+  }
+ },
+ {
+  "id": "51042a58-0630-45fc-a1f0-db2c06cf2d11",
+  "assignment_type": "Skills",
+  "trainee_id": "48b25ec3-2981-418e-832e-6b3257a6cc2e",
+  "first_status": "submitted",
+  "resubmission_status": "not_submitted",
+  "who": {
+   "id": "48b25ec3-2981-418e-832e-6b3257a6cc2e",
+   "full_name": "Sam Whitfield",
+   "email": "walk-sam@celtaconnect.com"
+  }
+ },
+ {
+  "id": "3de98056-d36a-4c29-baaf-e3186a698bec",
+  "assignment_type": "Focus on Learner",
+  "trainee_id": "439ab27c-2e80-46d1-8e49-cf671bce530e",
+  "first_status": "approved",
+  "resubmission_status": "not_submitted",
+  "who": {
+   "id": "439ab27c-2e80-46d1-8e49-cf671bce530e",
+   "full_name": "Tomas Novak",
+   "email": "walk-tomas@celtaconnect.com"
+  }
+ },
+ {
+  "id": "4abee818-d7a4-4bfb-96d7-1051b6088e3d",
+  "assignment_type": "Focus on Learner",
+  "trainee_id": "43cf6a80-be2d-44a6-bf13-c0287d87aa9c",
+  "first_status": "resubmission_required",
+  "resubmission_status": "approved",
+  "who": {
+   "id": "43cf6a80-be2d-44a6-bf13-c0287d87aa9c",
+   "full_name": "Ines Marchetti",
+   "email": "walk-ines@celtaconnect.com"
+  }
+ },
+ {
+  "id": "35c03c12-3862-4f32-b15d-e83143ef1737",
+  "assignment_type": "LRT",
+  "trainee_id": "66635799-7d27-407c-bfbc-6e8b6ff295e4",
+  "first_status": "resubmission_required",
+  "resubmission_status": "submitted",
+  "who": {
+   "id": "66635799-7d27-407c-bfbc-6e8b6ff295e4",
+   "full_name": "Leila Haddad",
+   "email": "walk-leila@celtaconnect.com"
+  }
+ },
+ {
+  "id": "eba266d5-f748-44fc-8b59-590881d48200",
+  "assignment_type": "Plagiarism Reflection",
+  "trainee_id": "949d345e-9c12-4e75-9409-b637a9634cfa",
+  "first_status": "not_submitted",
+  "resubmission_status": "not_submitted",
+  "who": {
+   "id": "949d345e-9c12-4e75-9409-b637a9634cfa",
+   "full_name": "Kofi Mensah",
+   "email": "walk-kofi@celtaconnect.com"
+  }
+ }
+]

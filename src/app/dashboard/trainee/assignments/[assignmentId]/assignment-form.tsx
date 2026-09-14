@@ -718,7 +718,29 @@ export function AssignmentAuthoringForm({
               </button>
             ) : locked ? (
               canWithdraw ? (
-                <WithdrawButton assignmentId={assignmentId} />
+                // formAction, NOT a nested <form>: the HTML parser deletes a
+                // form inside a form, so the server's markup and the client's
+                // tree disagreed and React threw away the whole page and
+                // re-rendered it (#418, found 14 Sep 2026 walking a submitted
+                // Skills assignment). Worse, until hydration finished this
+                // button belonged to the ASSIGNMENT form -- clicking Withdraw
+                // early would have submitted, not withdrawn.
+                //
+                // The outer form already carries the assignment_id this needs.
+                <button
+                  type="submit"
+                  formAction={withdrawAssignmentSubmission}
+                  style={{
+                    borderRadius: 8,
+                    border: `1px solid ${BAR_BORDER}`,
+                    background: SHEET,
+                    padding: "8px 15px",
+                    fontSize: 13.5,
+                    color: INK,
+                  }}
+                >
+                  Withdraw
+                </button>
               ) : null
             ) : (
               <>
@@ -831,16 +853,3 @@ function RadioRow({
   );
 }
 
-function WithdrawButton({ assignmentId }: { assignmentId: string }) {
-  return (
-    <form action={withdrawAssignmentSubmission}>
-      <input type="hidden" name="assignment_id" value={assignmentId} />
-      <button
-        type="submit"
-        style={{ borderRadius: 8, border: `1px solid ${BAR_BORDER}`, background: SHEET, padding: "8px 15px", fontSize: 13.5, color: INK }}
-      >
-        Withdraw
-      </button>
-    </form>
-  );
-}
