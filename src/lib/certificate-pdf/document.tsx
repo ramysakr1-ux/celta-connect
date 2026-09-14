@@ -1,6 +1,7 @@
 import "server-only";
 import path from "node:path";
 import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { formatDate as fmtDate } from "@/lib/format-date";
 
 // Certificate of attendance for a volunteer TP student who's completed a
 // full level (all "sets" of a coursebook) -- a DESIGN-ONLY piece for now,
@@ -117,6 +118,8 @@ interface Signatory {
 }
 
 export interface CertificateInput {
+  /** The centre's zone -- every date on this document is dated there. */
+  timeZone: string;
   volunteerName: string;
   levelName: string;
   centerName: string;
@@ -125,12 +128,15 @@ export interface CertificateInput {
   signatories: Signatory[];
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+// The CENTRE's zone. Rendered in the runtime's -- UTC on Vercel -- a
+// signature given at 4pm in Los Angeles printed as the NEXT day on a
+// document that goes to Cambridge. See src/lib/format-date.ts.
+function formatDate(iso: string, timeZone: string): string {
+  return fmtDate(iso, timeZone, { day: "numeric", month: "long", year: "numeric" });
 }
 
 export async function renderCertificateBuffer(input: CertificateInput): Promise<Buffer> {
-  const { volunteerName, levelName, centerName, centerLogoUrl, completionDate, signatories } = input;
+  const { volunteerName, levelName, centerName, centerLogoUrl, completionDate, signatories, timeZone } = input;
 
   return renderToBuffer(
     <Document>
@@ -151,7 +157,7 @@ export async function renderCertificateBuffer(input: CertificateInput): Promise<
               on teaching practice
             </Text>
             <Text style={styles.centerLine}>at {centerName}</Text>
-            <Text style={styles.dateLine}>{formatDate(completionDate)}</Text>
+            <Text style={styles.dateLine}>{formatDate(completionDate, timeZone)}</Text>
 
             <View style={styles.signRow}>
               {signatories.map((s) => (

@@ -3,6 +3,7 @@ import path from "node:path";
 import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { GRADE_DESCRIPTORS } from "@/lib/celta-criteria";
 import type { FinalGrade } from "@/lib/supabase/types";
+import { formatDate as fmtDate } from "@/lib/format-date";
 
 // SS9.5 -- the end-of-course final report. Structure and copy are ported
 // from the center's real, already-in-use Word-doc reports (Ramy's own
@@ -149,6 +150,8 @@ interface Signatory {
 }
 
 export interface FinalReportInput {
+  /** The centre's zone -- every date on this document is dated there. */
+  timeZone: string;
   traineeName: string;
   courseName: string;
   centerName: string;
@@ -166,8 +169,11 @@ export interface FinalReportInput {
   signatories: Signatory[];
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+// The CENTRE's zone. Rendered in the runtime's -- UTC on Vercel -- a
+// signature given at 4pm in Los Angeles printed as the NEXT day on a
+// document that goes to Cambridge. See src/lib/format-date.ts.
+function formatDate(iso: string, timeZone: string): string {
+  return fmtDate(iso, timeZone, { day: "numeric", month: "long", year: "numeric" });
 }
 
 function CornerMarks() {
@@ -197,6 +203,7 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
     assignmentsGrade,
     overallComment,
     signatories,
+    timeZone,
   } = input;
 
   const gradeColor = GRADE_COLOR[finalGrade] ?? COLOR.ink;
@@ -232,7 +239,7 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
             </Text>
             <Text style={styles.body}>at {centerName}</Text>
             <Text style={styles.body}>
-              from {formatDate(courseStartDate)} to {formatDate(courseEndDate)}
+              from {formatDate(courseStartDate, timeZone)} to {formatDate(courseEndDate, timeZone)}
             </Text>
             <Text style={styles.body}>
               {deliveryMode === "online"

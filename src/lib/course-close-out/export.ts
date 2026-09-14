@@ -23,6 +23,7 @@ import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { esc } from "@/lib/email-layout";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -168,7 +169,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
     if (!course) throw new Error("Course not found.");
     if (!connection) throw new Error("This centre hasn't connected Google Drive yet -- connect it in Settings first.");
 
-    const { data: center } = await admin.from("centers").select("name, logo_url").eq("id", closeOut.center_id).single();
+    const { data: center } = await admin.from("centers").select("name, logo_url, time_zone").eq("id", closeOut.center_id).single();
     const accessToken = await getAccessTokenFromRefreshToken(connection.refresh_token);
 
     // "Folder shape (locked): top folder = course number + course dates."
@@ -425,6 +426,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
           });
 
           const buffer = await renderCelta5BookletBuffer({
+          timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,
             traineeName: trainee.full_name,
             courseName: course.name,
             centerName: center?.name ?? "",
@@ -459,6 +461,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
           !["Withdrawn", "Extension", "Deferred"].includes(record.final_recommended_grade)
         ) {
           const buffer = await renderFinalReportBuffer({
+          timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,
             traineeName: trainee.full_name,
             courseName: course.name,
             centerName: center?.name ?? "",
@@ -534,6 +537,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
         const resubMarks = assignment.resubmission_criteria_marks as Record<string, boolean>;
 
         const buffer = await renderAssignmentCoverSheetBuffer({
+          timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,
           candidateName: trainee.full_name,
           centerName: center?.name ?? "",
           centerLogoUrl: center?.logo_url ?? null,

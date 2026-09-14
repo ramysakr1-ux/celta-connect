@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { renderCertificateBuffer } from "@/lib/certificate-pdf/document";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // The certificate of attendance, rendered so it can actually be seen.
 //
@@ -24,7 +25,7 @@ export async function GET() {
   const admin = createAdminClient();
   const { data: centre } = await admin
     .from("centers")
-    .select("name, logo_url")
+    .select("name, logo_url, time_zone")
     .eq("is_demo", true)
     .maybeSingle();
 
@@ -34,6 +35,7 @@ export async function GET() {
     centerName: centre?.name ?? "CELTA Demo Centre",
     centerLogoUrl: (centre as { logo_url?: string | null } | null)?.logo_url ?? null,
     completionDate: new Date().toISOString(),
+    timeZone: (centre as { time_zone?: string | null } | null)?.time_zone ?? DEFAULT_TIMEZONE,
     signatories: [
       { name: "Elif Yilmaz", role: "Main Course Tutor" },
       { name: "Jordan Blake", role: "Centre Director" },

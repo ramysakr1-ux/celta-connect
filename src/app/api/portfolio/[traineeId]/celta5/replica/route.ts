@@ -3,14 +3,13 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { formatCalendarDate } from "@/lib/format-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signatures";
 import { renderCelta5ReplicaBuffer } from "@/lib/celta5-replica-pdf";
 import type { CriteriaMarks } from "@/lib/celta5-replica-pdf/pages/criteria-grid";
 import type { AssignmentTypeValue } from "@/lib/celta5-replica-pdf/pages/written-assignments";
-
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
 
 function initials(fullName: string): string {
   return fullName
@@ -101,13 +100,15 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
     tutorStage3Marks[m.criteria_code] = m.tutor_status_stage3;
   }
 
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const buffer = await renderCelta5ReplicaBuffer({
+    timeZone,
     cover: {
       traineeName: trainee.full_name,
       centerName: center?.name ?? "",
       centerNumber: center?.center_number ?? "",
       courseCode: course.course_code,
-      courseDates: `${fmtDate(course.start_date)} - ${fmtDate(course.end_date)}`,
+      courseDates: `${formatCalendarDate(course.start_date)} - ${formatCalendarDate(course.end_date)}`,
       tutorNames: (tutors ?? []).map((t) => t.full_name),
     },
     attendance: {
@@ -120,7 +121,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
         // its own; before that it was living in tutor_comment, which is why
         // the fallback reads both.
         .map((a) => ({
-          date: a.session_date ? fmtDate(a.session_date) : "",
+          date: a.session_date ? formatCalendarDate(a.session_date) : "",
           sessionMissed: a.session_missed,
           reason: a.reason,
           workMadeUp: a.work_made_up,
@@ -130,7 +131,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
       otherAbsences: (absences ?? [])
         .filter((a) => a.category === "other")
         .map((a) => ({
-          date: a.session_date ? fmtDate(a.session_date) : "",
+          date: a.session_date ? formatCalendarDate(a.session_date) : "",
           sessionMissed: a.session_missed,
           reason: a.reason,
           workMadeUp: a.work_made_up,
@@ -181,14 +182,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
       tutorSignedAt: record.stage1_completed_at,
     },
     observations: (observations ?? []).map((o) => ({
-      date: o.observation_date ? fmtDate(o.observation_date) : "",
+      date: o.observation_date ? formatCalendarDate(o.observation_date) : "",
       lengthMinutes: o.length_minutes,
       level: o.level,
       learnersPresent: o.learners_present,
       lessonFocus: o.lesson_focus,
     })),
     assessedTp: (tpLessons ?? []).map((l) => ({
-      date: l.lesson_date ? fmtDate(l.lesson_date) : "",
+      date: l.lesson_date ? formatCalendarDate(l.lesson_date) : "",
       lengthMinutes: l.length_minutes,
       level: l.level,
       learnerCount: l.learner_count,

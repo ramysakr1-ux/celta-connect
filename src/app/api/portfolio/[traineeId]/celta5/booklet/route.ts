@@ -9,6 +9,7 @@ import { computeAssessedTpStats } from "@/lib/course-progress";
 import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signatures";
 import { renderCelta5BookletBuffer } from "@/lib/celta5-booklet-pdf/document";
 import type { CriteriaRating } from "@/lib/supabase/types";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Same three-way viewer resolution as every other /portfolio/[traineeId]/*
 // export route this session. Staff/assessor only. Close-out (export +
@@ -49,7 +50,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   const [{ data: course }, { data: center }, { data: matrix }, { data: record }, { data: observations }, { data: assignments }, { data: tutors }, { data: planAssignments }] =
     await Promise.all([
       supabase.from("courses").select("name, start_date, end_date, total_hours").eq("id", trainee.course_id).maybeSingle(),
-      supabase.from("centers").select("name, logo_url").eq("id", trainee.center_id).maybeSingle(),
+      supabase.from("centers").select("name, logo_url, time_zone").eq("id", trainee.center_id).maybeSingle(),
       admin.from("celta5_matrix").select("*").eq("trainee_id", traineeId),
       admin.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
       admin.from("observations").select("length_minutes, filmed").eq("trainee_id", traineeId),
@@ -97,6 +98,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   }
 
   const buffer = await renderCelta5BookletBuffer({
+    timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,
     traineeName: trainee.full_name,
     courseName: course.name,
     centerName: center?.name ?? "",

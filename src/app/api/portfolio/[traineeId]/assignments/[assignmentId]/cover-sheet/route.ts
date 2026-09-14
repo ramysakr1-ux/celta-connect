@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { renderAssignmentCoverSheetBuffer } from "@/lib/assignment-cover-sheet-pdf/document";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Same three-way viewer resolution as every /portfolio/[traineeId]/* route
 // this session (trainee-self / real staff / assessor-via-cookie). Gated on
@@ -56,7 +57,7 @@ export async function GET(
 
   const [{ data: course }, { data: center }, { data: template }, { data: responses }, { data: markers }] = await Promise.all([
     supabase.from("courses").select("name, start_date, end_date").eq("id", trainee.course_id).maybeSingle(),
-    supabase.from("centers").select("name, logo_url").eq("id", trainee.center_id).maybeSingle(),
+    supabase.from("centers").select("name, logo_url, time_zone").eq("id", trainee.center_id).maybeSingle(),
     // The version the candidate answered (migration 0300). This is the
     // document that goes in the portfolio, so it has to carry the brief they
     // were actually set, not whatever the centre's brief says today.
@@ -99,6 +100,7 @@ export async function GET(
   const resubMarks = assignment.resubmission_criteria_marks as Record<string, boolean>;
 
   const buffer = await renderAssignmentCoverSheetBuffer({
+    timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,
     candidateName: trainee.full_name,
     centerName: center?.name ?? "",
     centerLogoUrl: center?.logo_url ?? null,

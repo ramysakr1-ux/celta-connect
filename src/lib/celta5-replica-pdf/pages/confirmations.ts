@@ -1,5 +1,6 @@
 import type { PDFPage } from "pdf-lib";
 import type { Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
+import { formatDate as formatDate_ } from "@/lib/format-date";
 
 export interface ConfirmationsPageData {
   candidateName: string;
@@ -31,14 +32,17 @@ export interface ConfirmationsPageData {
 const LEFT = 60;
 const TOP = 760;
 
-function fmt(iso: string | null): string {
+// A signature is dated where the centre is. Without the zone this rendered
+// in the runtime's -- UTC on Vercel -- so a candidate who signed at 4pm in
+// Los Angeles had it printed on the Cambridge document as the NEXT day.
+function fmt(iso: string | null, timeZone: string): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return formatDate_(d.toISOString(), timeZone, { day: "numeric", month: "long", year: "numeric" });
 }
 
-export function drawConfirmationsPage(page: PDFPage, fonts: Celta5Fonts, data: ConfirmationsPageData) {
+export function drawConfirmationsPage(page: PDFPage, fonts: Celta5Fonts, data: ConfirmationsPageData, timeZone: string) {
   let y = TOP;
 
   page.drawText("CENTRE RECORD -- CANDIDATE CONFIRMATIONS", {
@@ -70,7 +74,7 @@ export function drawConfirmationsPage(page: PDFPage, fonts: Celta5Fonts, data: C
     y -= 20;
     if (at) {
       page.drawText(`Signed: ${name ?? data.candidateName}`, { x: LEFT + 12, y, size: 9.5, font: fonts.regular });
-      page.drawText(`Date: ${fmt(at)}`, { x: LEFT + 300, y, size: 9.5, font: fonts.regular });
+      page.drawText(`Date: ${fmt(at, timeZone)}`, { x: LEFT + 300, y, size: 9.5, font: fonts.regular });
     } else {
       // An unsigned confirmation is stated as unsigned rather than left
       // blank: a blank line reads as an oversight, "not confirmed" reads

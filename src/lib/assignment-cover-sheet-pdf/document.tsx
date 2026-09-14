@@ -2,6 +2,7 @@ import "server-only";
 import path from "node:path";
 import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import type { AssignmentCriterion } from "@/lib/assignment-criteria";
+import { formatDate as fmtDate } from "@/lib/format-date";
 
 // Assignment Review.dc.html 1d (checkpoint 6) -- the cover sheet that goes
 // in the portfolio, assembled entirely from data already captured while
@@ -116,6 +117,8 @@ interface CriterionMarkRow {
 }
 
 export interface AssignmentCoverSheetInput {
+  /** The centre's zone -- every date on this document is dated there. */
+  timeZone: string;
   candidateName: string;
   centerName: string;
   centerLogoUrl: string | null;
@@ -141,9 +144,12 @@ export interface AssignmentCoverSheetInput {
   appendices?: { label: string | null; fileName: string; round: string }[];
 }
 
-function formatDate(iso: string | null): string {
+// The CENTRE's zone. Rendered in the runtime's -- UTC on Vercel -- a
+// signature given at 4pm in Los Angeles printed as the NEXT day on a
+// document that goes to Cambridge. See src/lib/format-date.ts.
+function formatDate(iso: string | null, timeZone: string): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return fmtDate(iso, timeZone, { day: "numeric", month: "short", year: "numeric" });
 }
 
 function markText(met: boolean | undefined): string {
@@ -191,6 +197,7 @@ export async function renderAssignmentCoverSheetBuffer(input: AssignmentCoverShe
     hasResubmission,
     sections,
     appendices,
+    timeZone,
   } = input;
 
   return renderToBuffer(
@@ -220,8 +227,8 @@ export async function renderAssignmentCoverSheetBuffer(input: AssignmentCoverShe
           <View style={styles.factRow}>
             <Text style={styles.factLabel}>Submitted</Text>
             <Text style={styles.factValue}>
-              {formatDate(firstSubmittedAt)}
-              {hasResubmission ? ` (1st) · ${formatDate(resubmittedAt)} (resubmission)` : ""}
+              {formatDate(firstSubmittedAt, timeZone)}
+              {hasResubmission ? ` (1st) · ${formatDate(resubmittedAt, timeZone)} (resubmission)` : ""}
             </Text>
           </View>
         </View>
@@ -248,8 +255,8 @@ export async function renderAssignmentCoverSheetBuffer(input: AssignmentCoverShe
           <View style={styles.signCell}>
             <Text style={styles.signLabel}>Date</Text>
             <Text style={styles.signValue}>
-              {formatDate(firstSubmittedAt)}
-              {hasResubmission ? ` · ${formatDate(secondMarkerDate)}` : ""}
+              {formatDate(firstSubmittedAt, timeZone)}
+              {hasResubmission ? ` · ${formatDate(secondMarkerDate, timeZone)}` : ""}
             </Text>
           </View>
           <View style={styles.signCell}>
@@ -321,11 +328,11 @@ export async function renderAssignmentCoverSheetBuffer(input: AssignmentCoverShe
 
         <View style={styles.signatureRow}>
           <View style={styles.signatureBlock}>
-            <Text style={styles.signatureLine}>Accepted online · {formatDate(firstSubmittedAt)}</Text>
+            <Text style={styles.signatureLine}>Accepted online · {formatDate(firstSubmittedAt, timeZone)}</Text>
             <Text style={styles.signatureCaption}>Candidate</Text>
           </View>
           <View style={styles.signatureBlock}>
-            <Text style={styles.signatureLine}>{firstMarkerName} · {formatDate(hasResubmission ? secondMarkerDate : firstSubmittedAt)}</Text>
+            <Text style={styles.signatureLine}>{firstMarkerName} · {formatDate(hasResubmission ? secondMarkerDate : firstSubmittedAt, timeZone)}</Text>
             <Text style={styles.signatureCaption}>Tutor</Text>
           </View>
         </View>

@@ -1,5 +1,6 @@
 import type { PDFPage } from "pdf-lib";
 import { drawAt, drawCheck, drawWrapped, drawSignature, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
+import { formatDate as formatDate_ } from "@/lib/format-date";
 
 export interface Stage1PageData {
   tutorialGiven: boolean;
@@ -30,11 +31,14 @@ const TUTOR_SIG_X = 156;
 const TUTOR_DATE_X = 434;
 const TUTOR_SIG_Y = 666.6;
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+// A signature is dated where the centre is. Without the zone this rendered
+// in the runtime's -- UTC on Vercel -- so a candidate who signed at 4pm in
+// Los Angeles had it printed on the Cambridge document as the NEXT day.
+function formatDate(iso: string, timeZone: string): string {
+  return formatDate_(iso, timeZone, { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function drawStage1Page(page: PDFPage, fonts: Celta5Fonts, data: Stage1PageData) {
+export function drawStage1Page(page: PDFPage, fonts: Celta5Fonts, data: Stage1PageData, timeZone: string) {
   drawCheck(page, fonts.bold, data.tutorialGiven ? TUTORIAL_GIVEN_BOX : TUTORIAL_NOT_GIVEN_BOX);
   if (data.hoursTaught !== null) {
     const xMid = (HOURS_TAUGHT_BOX[0] + HOURS_TAUGHT_BOX[2]) / 2;
@@ -47,10 +51,10 @@ export function drawStage1Page(page: PDFPage, fonts: Celta5Fonts, data: Stage1Pa
 
   if (data.tutorSignatureName && data.tutorSignedAt) {
     drawSignature(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y, TUTOR_DATE_X - TUTOR_SIG_X - 10);
-    drawAt(page, fonts.regular, formatDate(data.tutorSignedAt), TUTOR_DATE_X, TUTOR_SIG_Y);
+    drawAt(page, fonts.regular, formatDate(data.tutorSignedAt, timeZone), TUTOR_DATE_X, TUTOR_SIG_Y);
   }
   if (data.candidateSignatureName && data.candidateSignedAt) {
     drawSignature(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y, CANDIDATE_DATE_X - CANDIDATE_SIG_X - 10);
-    drawAt(page, fonts.regular, formatDate(data.candidateSignedAt), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);
+    drawAt(page, fonts.regular, formatDate(data.candidateSignedAt, timeZone), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);
   }
 }

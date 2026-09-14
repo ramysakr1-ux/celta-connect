@@ -4,6 +4,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { renderFinalReportBuffer } from "@/lib/final-report-pdf/document";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Same three-way viewer resolution as every /portfolio/[traineeId]/* page
 // this session (trainee-self / real staff / assessor-via-cookie), reused
@@ -55,7 +56,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
 
   const [{ data: course }, { data: center }, { data: record }, { data: trainers }] = await Promise.all([
     supabase.from("courses").select("name, start_date, end_date, total_hours, delivery_mode").eq("id", trainee.course_id).maybeSingle(),
-    supabase.from("centers").select("name, logo_url").eq("id", trainee.center_id).maybeSingle(),
+    supabase.from("centers").select("name, logo_url, time_zone").eq("id", trainee.center_id).maybeSingle(),
     admin.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
     // Admin client regardless of viewer: profiles RLS only lets a trainee
     // read their own row (plus subgroup-mates), so the session-scoped
@@ -85,6 +86,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   }
 
   const buffer = await renderFinalReportBuffer({
+    timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,
     traineeName: trainee.full_name,
     courseName: course.name,
     centerName: center?.name ?? "",

@@ -1,5 +1,6 @@
 import type { PDFPage } from "pdf-lib";
 import { drawAt, drawCheck, drawSignature, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
+import { formatDate as formatDate_ } from "@/lib/format-date";
 
 export interface FinalDeclarationPageData {
   checklistTp: boolean;
@@ -33,11 +34,14 @@ const TUTOR_SIG_X = 174;
 const TUTOR_DATE_X = 412;
 const TUTOR_SIG_Y = 435.8;
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+// A signature is dated where the centre is. Without the zone this rendered
+// in the runtime's -- UTC on Vercel -- so a candidate who signed at 4pm in
+// Los Angeles had it printed on the Cambridge document as the NEXT day.
+function formatDate(iso: string, timeZone: string): string {
+  return formatDate_(iso, timeZone, { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function drawFinalDeclarationPage(page: PDFPage, fonts: Celta5Fonts, data: FinalDeclarationPageData) {
+export function drawFinalDeclarationPage(page: PDFPage, fonts: Celta5Fonts, data: FinalDeclarationPageData, timeZone: string) {
   const checks = [data.checklistTp, data.checklistObservations, data.checklistAssignments, data.checklistOwnWork, data.checklistAllRecords];
   checks.forEach((checked, i) => {
     if (checked) drawCheck(page, fonts.bold, CHECKBOXES[i]);
@@ -45,12 +49,12 @@ export function drawFinalDeclarationPage(page: PDFPage, fonts: Celta5Fonts, data
 
   if (data.candidateSignatureName && data.candidateSignedAt) {
     drawSignature(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y, CANDIDATE_DATE_X - CANDIDATE_SIG_X - 10);
-    drawAt(page, fonts.regular, formatDate(data.candidateSignedAt), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);
+    drawAt(page, fonts.regular, formatDate(data.candidateSignedAt, timeZone), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);
   }
   // "Accepted by Tutor" -- the final grade-review acceptance, a distinct
   // signature from the Stage 1/2/3 ones (see migration 0221).
   if (data.tutorSignatureName && data.tutorSignedAt) {
     drawSignature(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y, TUTOR_DATE_X - TUTOR_SIG_X - 10);
-    drawAt(page, fonts.regular, formatDate(data.tutorSignedAt), TUTOR_DATE_X, TUTOR_SIG_Y);
+    drawAt(page, fonts.regular, formatDate(data.tutorSignedAt, timeZone), TUTOR_DATE_X, TUTOR_SIG_Y);
   }
 }

@@ -5,6 +5,7 @@ import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { MIN_LEVELS_REQUIRED } from "@/lib/course-progress";
 import type { SignatureLedgerRow } from "@/lib/celta5-signatures";
 import type { Database } from "@/lib/supabase/types";
+import { formatDate as fmtDate } from "@/lib/format-date";
 
 type MatrixRow = Database["public"]["Tables"]["celta5_matrix"]["Row"];
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
@@ -108,6 +109,8 @@ interface CriteriaMatrixInput {
 }
 
 export interface Celta5BookletInput {
+  /** The centre's zone -- every date on this document is dated there. */
+  timeZone: string;
   traineeName: string;
   courseName: string;
   centerName: string;
@@ -124,13 +127,16 @@ export interface Celta5BookletInput {
   ledger: SignatureLedgerRow[];
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+// The CENTRE's zone. Rendered in the runtime's -- UTC on Vercel -- a
+// signature given at 4pm in Los Angeles printed as the NEXT day on a
+// document that goes to Cambridge. See src/lib/format-date.ts.
+function formatDate(iso: string, timeZone: string): string {
+  return fmtDate(iso, timeZone, { day: "numeric", month: "long", year: "numeric" });
 }
 
-function formatDateTime(iso: string | null): string {
+function formatDateTime(iso: string | null, timeZone: string): string {
   if (!iso) return "--";
-  return new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleString("en-GB", { ...{ day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }, timeZone });
 }
 
 function PageHeader({ traineeName, courseName, logoUrl }: { traineeName: string; courseName: string; logoUrl: string | null }) {
@@ -161,6 +167,7 @@ export async function renderCelta5BookletBuffer(input: Celta5BookletInput): Prom
     assessedTp,
     assignments,
     ledger,
+    timeZone,
   } = input;
 
   return renderToBuffer(
@@ -186,7 +193,7 @@ export async function renderCelta5BookletBuffer(input: Celta5BookletInput): Prom
               <View style={styles.coverMetaBlock}>
                 <Text style={styles.coverMetaLabel}>Dates</Text>
                 <Text style={styles.coverMetaValue}>
-                  {formatDate(courseStartDate)} -- {formatDate(courseEndDate)}
+                  {formatDate(courseStartDate, timeZone)} -- {formatDate(courseEndDate, timeZone)}
                 </Text>
               </View>
               <View style={styles.coverMetaBlock}>
@@ -341,7 +348,7 @@ export async function renderCelta5BookletBuffer(input: Celta5BookletInput): Prom
             <View key={row.key} style={styles.ledgerRow}>
               <Text style={styles.ledgerLabel}>{row.label}</Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={{ fontSize: 7.5, color: COLOR.muted }}>{formatDateTime(row.at)}</Text>
+                <Text style={{ fontSize: 7.5, color: COLOR.muted }}>{formatDateTime(row.at, timeZone)}</Text>
                 <Text style={[styles.ledgerPill, { color: SIGNATURE_STATE_COLOR[row.state], borderWidth: 0.75, borderColor: SIGNATURE_STATE_COLOR[row.state] }]}>
                   {SIGNATURE_STATE_LABEL[row.state]}
                 </Text>

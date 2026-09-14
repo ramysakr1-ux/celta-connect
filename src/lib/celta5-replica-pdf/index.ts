@@ -16,6 +16,8 @@ import { drawWrittenAssignmentsPage, type WrittenAssignmentsPageData } from "@/l
 import { drawConfirmationsPage, type ConfirmationsPageData } from "@/lib/celta5-replica-pdf/pages/confirmations";
 
 export interface Celta5ReplicaInput {
+  /** The CENTRE's zone -- every signature on this document is dated there. */
+  timeZone: string;
   cover: CoverPageData;
   attendance: AttendancePageData;
   stage1: Stage1PageData;
@@ -85,7 +87,7 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
   drawCoverPage(out.getPage(startIndex.get(0)!), fonts, input.cover);
   drawAttendancePage(out.getPage(startIndex.get(PAGE_INDEX.attendance)!), fonts, input.attendance);
   drawWrittenAssignmentsPage(out.getPage(startIndex.get(PAGE_INDEX.writtenAssignments)!), fonts, input.writtenAssignments);
-  drawStage1Page(out.getPage(startIndex.get(PAGE_INDEX.stage1)!), fonts, input.stage1);
+  drawStage1Page(out.getPage(startIndex.get(PAGE_INDEX.stage1)!), fonts, input.stage1, input.timeZone);
 
   const observationsStart = startIndex.get(PAGE_INDEX.observations)!;
   for (let i = 0; i < observationsCopies; i++) {
@@ -105,16 +107,16 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
   }
 
   drawStage2NotesPage(out.getPage(startIndex.get(PAGE_INDEX.stage2Notes)!), fonts, input.stage2Notes);
-  drawStage2OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage2Overall)!), fonts, input.stage2Overall);
+  drawStage2OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage2Overall)!), fonts, input.stage2Overall, input.timeZone);
   drawStage3NotesPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Notes)!), fonts, input.stage3Notes);
-  drawStage3OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Overall)!), fonts, input.stage3Overall);
-  drawFinalDeclarationPage(out.getPage(startIndex.get(PAGE_INDEX.finalDeclaration)!), fonts, input.finalDeclaration);
+  drawStage3OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Overall)!), fonts, input.stage3Overall, input.timeZone);
+  drawFinalDeclarationPage(out.getPage(startIndex.get(PAGE_INDEX.finalDeclaration)!), fonts, input.finalDeclaration, input.timeZone);
 
   // Appended after Cambridge's own pages -- see pages/confirmations.ts for
   // why these travel with the export rather than living only on screen.
   // A4 portrait, matching the master's own portrait pages.
   const confirmationsPage = out.addPage([595.28, 841.89]);
-  drawConfirmationsPage(confirmationsPage, fonts, input.confirmations);
+  drawConfirmationsPage(confirmationsPage, fonts, input.confirmations, input.timeZone);
 
   const bytes = await out.save();
   return Buffer.from(bytes);
