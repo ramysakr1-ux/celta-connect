@@ -26,10 +26,14 @@ const EVENT_PILL_CLASS: Record<TransactionRow["eventType"], string> = {
  * real, valuable data (every succeeded/failed/refunded event, with amount
  * and currency) that nothing has ever read back. First reader.
  */
-export function TransactionsPanel({ transactions }: { transactions: TransactionRow[] }) {
+export function TransactionsPanel({ transactions, timeZone }: { transactions: TransactionRow[]; timeZone: string }) {
   if (transactions.length === 0) return null;
 
-  const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  // The centre's zone. formatDateTime would force a year in, which this
+  // list does not want, so the zone goes in explicitly instead -- the rule
+  // is that it is never left to the runtime, not that it is always a helper.
+  const when = (iso: string) =>
+    new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone });
 
   return (
     <div className="card">

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { reassignUnownedCourse, type ReassignState } from "@/app/centre/owner/actions";
+import { formatCalendarDate } from "@/lib/format-date";
 
 export interface UnownedCourse {
   id: string;
@@ -81,7 +82,11 @@ export function UnownedCoursesCard({
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">{c.name}</span>
                 <span className="text-[11.5px]" style={{ color: "var(--owner-muted)" }}>
-                  {[c.branchName, c.startDate ? `starts ${new Date(c.startDate).toLocaleDateString("en-GB")}` : null]
+                  {/* courses.start_date is a DATE column, and bare
+                      new Date("2026-09-01") reads it as UTC midnight, so
+                      anywhere west of UTC this printed the day before.
+                      formatCalendarDate parses it as local midnight. */}
+                  {[c.branchName, c.startDate ? `starts ${formatCalendarDate(c.startDate, { day: "numeric", month: "short", year: "numeric" })}` : null]
                     .filter(Boolean)
                     .join(" · ")}
                 </span>

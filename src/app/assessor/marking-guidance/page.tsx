@@ -7,6 +7,9 @@ import { getMarkingGuidance } from "@/lib/marking-guidance";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { getAllAssignmentCriteria } from "@/lib/assignment-criteria";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatDate } from "@/lib/format-date";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const TAB_ORDER: AssignmentTypeValue[] = [...ASSIGNMENT_ORDER, "Plagiarism Reflection"];
 
@@ -29,6 +32,10 @@ export default async function AssessorMarkingGuidancePage() {
   const { data: course } = await admin.from("courses").select("center_id").eq("id", courseId).maybeSingle();
   if (!course) redirect("/login?error=assessor_link_invalid");
 
+  // Guidance was last touched at a moment; the centre is where that moment
+  // is dated. Rendering it in the reader's own zone showed an assessor
+  // abroad the wrong day, and disagreed with the server's UTC render.
+  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const guidanceMap = await getMarkingGuidance(admin, course.center_id);
   const allCriteria = await getAllAssignmentCriteria(admin, course.center_id);
   const updatedByIds = [...new Set([...guidanceMap.values()].flatMap((byKey) => [...byKey.values()].map((r) => r.updated_by).filter((id): id is string => Boolean(id))))];
@@ -86,7 +93,7 @@ export default async function AssessorMarkingGuidancePage() {
                             {row?.updated_at ? (
                               <p style={{ fontSize: 10.5, color: "oklch(63% 0.012 82)", marginTop: 8 }}>
                                 {row.updated_by && updaterNameById.get(row.updated_by) ? `${updaterNameById.get(row.updated_by)} · ` : ""}
-                                {new Date(row.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                                {formatDate(row.updated_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}
                               </p>
                             ) : null}
                           </>

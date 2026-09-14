@@ -6,6 +6,8 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { resolveBranchScope } from "@/lib/branch-scope";
 import { CentreConcernReplyForm } from "@/app/centre/concerns/reply-form";
+import { formatDate } from "@/lib/format-date";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // The far end of the internal complaints route.
 //
@@ -35,8 +37,17 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
   // sees all of them unless they have filtered to one, so the complaints route
   // must not go quiet on a branch just because it is not the active centre.
   const { scope } = await resolveBranchScope(session.profile, branch);
-  const { data: courses } = await admin.from("courses").select("id, name").in("center_id", scope);
+  const { data: courses } = await admin.from("courses").select("id, name, center_id").in("center_id", scope);
   const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
+
+  // A concern was raised at the centre running that course, and this screen
+  // is branch-aware -- someone holding Istanbul and Los Angeles sees both at
+  // once, so there is no single page zone to date them in. Rendering them in
+  // the READER's zone showed the wrong day and, because the server renders in
+  // UTC, made React repaint on a text mismatch.
+  const { data: centres } = await admin.from("centers").select("id, time_zone").in("id", scope);
+  const zoneByCentre = new Map((centres ?? []).map((c) => [c.id, c.time_zone]));
+  const zoneByCourse = new Map((courses ?? []).map((c) => [c.id, zoneByCentre.get(c.center_id) ?? DEFAULT_TIMEZONE]));
 
   // RLS's admin policy is what permits this; the route filter is what makes
   // the page about one thing. Tutor- and MCT-routed concerns stay in the
@@ -83,7 +94,11 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
                 <span className="font-normal text-muted"> &middot; {courseNameById.get(c.course_id) ?? "Course"}</span>
               </span>
               <span className="text-[11.5px] text-muted">
-                {new Date(c.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                {formatDate(c.created_at, zoneByCourse.get(c.course_id) ?? DEFAULT_TIMEZONE, {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
               </span>
             </div>
             <p className="text-sm leading-[1.6] whitespace-pre-wrap text-ink">{c.body}</p>

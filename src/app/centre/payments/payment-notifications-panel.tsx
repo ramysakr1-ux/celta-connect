@@ -1,4 +1,5 @@
 import { markPaymentNotificationRead } from "@/lib/payments/actions";
+import { formatDate } from "@/lib/format-date";
 
 export interface PaymentNotificationRow {
   id: string;
@@ -13,10 +14,10 @@ export interface PaymentNotificationRow {
  * underlying payment record (and the refunds/plan views) are untouched,
  * this only stops the notification itself surfacing as outstanding.
  */
-export function PaymentNotificationsPanel({ notifications, canEdit }: { notifications: PaymentNotificationRow[]; canEdit: boolean }) {
+export function PaymentNotificationsPanel({ notifications, canEdit, timeZone }: { notifications: PaymentNotificationRow[]; canEdit: boolean; timeZone: string }) {
   if (notifications.length === 0) return null;
 
-  const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const day = (iso: string) => formatDate(iso, timeZone);
 
   return (
     <div className="rounded-[10px] border border-status-warning-text/40 border-t-[3px] border-t-status-warning-text bg-status-warning-bg">

@@ -9,6 +9,7 @@ import type { PaymentProviderKey } from "@/lib/payments/providers";
 import { RefundsPanel, type RefundRow } from "@/app/centre/payments/refunds-panel";
 import { PaymentNotificationsPanel } from "@/app/centre/payments/payment-notifications-panel";
 import { TransactionsPanel } from "@/app/centre/payments/transactions-panel";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Centre settings > payment providers (spec 2026-08-16, Payments.dc.html 1c).
 // Reached from the "payment providers" link in Centre Admin's settings bar.
@@ -29,7 +30,7 @@ export default async function PaymentProvidersPage() {
   // transactions are four independent queries -- none needs another's
   // result, all previously ran one after another.
   const [{ data: center }, { data: refunds }, { data: paymentNotifications }, { data: transactions }] = await Promise.all([
-    supabase.from("centers").select("name, payment_provider, payment_provider_connected_at").eq("id", centerId).maybeSingle(),
+    supabase.from("centers").select("name, payment_provider, payment_provider_connected_at, time_zone").eq("id", centerId).maybeSingle(),
     supabase
       .from("refunds")
       .select("id, amount, currency, reason, status, settlement, agreed_at, applicant_id")
@@ -58,6 +59,12 @@ export default async function PaymentProvidersPage() {
   // throws. Only the boolean crosses to the client -- never the key itself.
   const credentialsPresent =
     center?.payment_provider === "stripe" ? Boolean(process.env.STRIPE_SECRET_KEY) : false;
+
+  // A refund agreed, an instalment missed, a webhook received: all moments,
+  // and all of them the centre's. Rendered in the reader's own zone they
+  // showed the wrong day to anyone abroad and disagreed with the server's
+  // UTC render, which React reports as a hydration mismatch.
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
 
   // Names for the rows that have an applicant. A refund can also stand alone
   // (a deposit taken before anyone applied through Connect), so this is a
@@ -101,11 +108,13 @@ export default async function PaymentProvidersPage() {
       <PaymentNotificationsPanel
         notifications={(paymentNotifications ?? []).map((n) => ({ id: n.id, message: n.message, createdAt: n.created_at }))}
         canEdit={can(ctx.roles, "payments.edit", ctx.overrides)}
+        timeZone={timeZone}
       />
 
-      <RefundsPanel refunds={refundRows} canEdit={can(ctx.roles, "payments.edit", ctx.overrides)} />
+      <RefundsPanel refunds={refundRows} canEdit={can(ctx.roles, "payments.edit", ctx.overrides)} timeZone={timeZone} />
 
       <TransactionsPanel
+        timeZone={timeZone}
         transactions={(transactions ?? []).map((t) => ({
           id: t.id,
           provider: t.provider,

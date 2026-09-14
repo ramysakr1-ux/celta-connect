@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { agreeRefund, settleRefund } from "@/app/dashboard/admissions/actions";
 import type { FormState } from "@/app/dashboard/admissions/actions";
+import { formatDate } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
 
@@ -29,14 +30,16 @@ export interface RefundRow {
  * without doing arithmetic, which is why the list leads with the date rather
  * than the amount.
  */
-export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEdit: boolean }) {
+export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRow[]; canEdit: boolean; timeZone: string }) {
   const [agreeState, agreeAction, agreeing] = useActionState(agreeRefund, initial);
   const [settleState, settleAction, settling] = useActionState(settleRefund, initial);
 
   const pending = refunds.filter((r) => r.status === "pending");
   const settled = refunds.filter((r) => r.status !== "pending");
   const money = (r: RefundRow) => `${r.currency} ${r.amount.toLocaleString("en-GB")}`;
-  const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  // The centre's zone, not the reader's -- a refund was agreed where the
+  // centre is. See src/lib/format-date.ts.
+  const day = (iso: string) => formatDate(iso, timeZone);
 
   return (
     <div className="card card-gold">
