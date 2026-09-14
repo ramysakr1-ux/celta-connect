@@ -360,6 +360,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             </div>
           ) : null}
         </dl>
+
+        <AcknowledgementsGiven applicant={applicant} timeZone={timeZone} />
       </div>
 
       <div className={`card flex flex-col gap-3 p-6 ${writingTaskGarnet ? "card-garnet" : ""}`}>
@@ -649,6 +651,62 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           )}
         </>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * What the applicant ticked to be allowed to submit the form.
+ *
+ * apply/actions.ts refuses the application without all of them -- "You need
+ * to agree to all the acknowledgements to apply" -- stamps a time on each,
+ * and admissions-referral.ts carries them to another branch. Nothing showed
+ * them to anyone, so the one place they would matter was the one place they
+ * could not be reached: a candidate later saying nobody told them the course
+ * demands full attendance. Handbook §16.4 -- Cambridge cannot investigate
+ * what there is no record of. Found 14 Sep 2026 reading admissions.
+ *
+ * The statements are quoted as the applicant read them, not paraphrased.
+ */
+function AcknowledgementsGiven({
+  applicant,
+  timeZone,
+}: {
+  applicant: {
+    acknowledged_no_guarantee_at: string | null;
+    acknowledged_no_exemptions_at: string | null;
+    acknowledged_full_attendance_at: string | null;
+    acknowledged_mixed_mode_demand_at: string | null;
+  };
+  timeZone: string;
+}) {
+  const given = [
+    ["I confirm that completing the course does not guarantee success.", applicant.acknowledged_no_guarantee_at],
+    ["I confirm there are no exemptions or recognition of prior learning.", applicant.acknowledged_no_exemptions_at],
+    [
+      "I confirm I don't know of anything that would stop me attending or participating in significant parts of this course.",
+      applicant.acknowledged_full_attendance_at,
+    ],
+    [
+      "I confirm this course involves teaching practice in both face-to-face and online modes.",
+      applicant.acknowledged_mixed_mode_demand_at,
+    ],
+  ].filter(([, at]) => at) as [string, string][];
+
+  if (given.length === 0) return null;
+  return (
+    <div className="mt-1 border-t border-border-faint pt-3">
+      <p className="text-xs text-muted">
+        Acknowledged on the application form, {formatDate(given[0][1], timeZone, { year: "numeric" })}
+      </p>
+      <ul className="mt-1 flex flex-col gap-1">
+        {given.map(([statement]) => (
+          <li key={statement} className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink">
+            <span className="mt-[2px] shrink-0 text-primary">&#10003;</span>
+            <span>{statement}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
