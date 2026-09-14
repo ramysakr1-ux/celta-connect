@@ -610,16 +610,31 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
     // asked to teach twice that day.
     const { data: tpEvents } = await supabase
       .from("course_timetable_events")
-      .select("event_date, mode")
+      .select("event_date, mode, title, linked_tp_number, tp_group_scope_id")
       .eq("course_id", trainer.course_id)
       .eq("type", "tp");
-    const tpDateCounts = new Map<string, number>();
+    // Counting TP rows per DATE stopped meaning anything when two groups
+    // started teaching in parallel (11 Sep 2026): six lessons a day at two
+    // levels, so every single teaching date has more than one TP row and
+    // no two-group course could ever be locked at all. Walked 14 Sep 2026.
+    //
+    // The rule itself is unchanged -- a candidate cannot teach twice in one
+    // day -- it is just asked per GROUP, which is the thing a candidate
+    // belongs to: on one date, one group teaches one round, and each of its
+    // lettered slots appears once.
+    const tpByDateAndGroup = new Map<string, { rounds: Set<number>; titles: string[] }>();
     for (const e of tpEvents ?? []) {
-      tpDateCounts.set(e.event_date, (tpDateCounts.get(e.event_date) ?? 0) + 1);
+      const key = `${e.event_date}|${e.tp_group_scope_id ?? "ungrouped"}`;
+      const entry = tpByDateAndGroup.get(key) ?? { rounds: new Set<number>(), titles: [] };
+      if (e.linked_tp_number !== null) entry.rounds.add(e.linked_tp_number);
+      entry.titles.push(e.title);
+      tpByDateAndGroup.set(key, entry);
     }
-    const doubleBookedDate = [...tpDateCounts.entries()].find(([, count]) => count > 1)?.[0];
-    if (doubleBookedDate) {
-      redirect(`/trainer/timetable?lock_error=tp_double_booked&date=${doubleBookedDate}`);
+    const doubleBooked = [...tpByDateAndGroup.entries()].find(
+      ([, v]) => v.rounds.size > 1 || new Set(v.titles).size !== v.titles.length
+    );
+    if (doubleBooked) {
+      redirect(`/trainer/timetable?lock_error=tp_double_booked&date=${doubleBooked[0].split("|")[0]}`);
     }
 
     // course-modes.md §1 (Handbook 3.5), the last piece of delivery-
