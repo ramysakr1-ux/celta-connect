@@ -372,7 +372,7 @@ for (const [centre, course, names, stages] of [
       const { data: applicant, error } = await supabase.from("applicants").insert({
         center_id: centre.id, intake_course_id: course.id, full_name, email, stage, ...row,
         fee_paid: false, waiting_list_opt_out: false,
-        notification_opt_outs: [], created_at: ago(daysAgo), updated_at: ago(daysAgo),
+        created_at: ago(daysAgo), updated_at: ago(daysAgo),
       }).select("id").single();
       if (error) { console.warn("  applicant:", full_name, error.message); continue; }
       applicantId = applicant.id;
