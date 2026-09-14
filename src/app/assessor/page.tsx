@@ -9,7 +9,7 @@ import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { formatDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
@@ -440,7 +440,7 @@ export default async function AssessorPage({
 
   const courseDates =
     course.start_date && course.end_date
-      ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} \u2013 ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
+      ? `${formatCalendarDate(course.start_date, { day: "numeric", month: "short" })} \u2013 ${formatCalendarDate(course.end_date, { day: "numeric", month: "short", year: "numeric" })}`
       : "";
 
   // build-spec.md: "120 contact hours; 6 hours of assessed teaching per
@@ -452,9 +452,9 @@ export default async function AssessorPage({
   // 30 November", "Send by 28 Aug" -- never ISO. An assessor reading
   // "2026-11-30" has to translate it.
   const longDate = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    formatCalendarDate(iso, { day: "numeric", month: "long" });
   const shortDate = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    formatCalendarDate(iso, { day: "numeric", month: "short" });
   // Malpractice fields are timestamptz (an instant), not date-only, so this
   // resolves the day in the centre's zone before writing it the pack's way.
   const fmtCaseDate = (ts: string) =>

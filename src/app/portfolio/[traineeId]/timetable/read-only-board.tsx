@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { buildDayRows, bandIndexFor, categorize, isEventLive, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
 import { CATEGORY_STYLE, toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-timetable-view.md -- read-only 4-week glass-card board,
 // shared by trainee and staff-preview viewers of a trainee's portfolio
@@ -647,7 +648,7 @@ function DetailPanel({
         <div>
           <h2 className="font-serif text-lg text-ink">{event.title}</h2>
           <p className="text-xs text-muted">
-            {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" })}
+            {formatCalendarDate(event.event_date, { day: "numeric", month: "long", weekday: "long" })}
             {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
           </p>
         </div>

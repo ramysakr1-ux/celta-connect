@@ -7,6 +7,7 @@ import { can, canView } from "@/lib/auth/centre-permissions";
 import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
 import { AdmissionsChangeIndicator } from "@/app/centre/admissions-change-indicator";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Centre Admin's Overview.
 //
@@ -175,7 +176,7 @@ export default async function CentreOverviewPage({
   });
   const money = (n: number) => moneyFormatter.format(n);
   const dateRange = (a: string | null, b: string | null) => {
-    const fmt = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    const fmt = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
     return a && b ? `${fmt(a)} – ${fmt(b)}` : "Dates not set";
   };
   // Centre Admin.dc.html gives each state its own tint, and they aren't

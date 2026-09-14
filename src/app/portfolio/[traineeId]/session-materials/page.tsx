@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Ramy, 25 Aug 2026: "I thought it would recognize whatever is on the
 // timetable... if it says games, it will read games." The GTKY page's
@@ -55,7 +56,7 @@ export default async function TraineeSessionMaterialsPage({
         .order("created_at")
     : { data: [] };
 
-  const dateLabel = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const dateLabel = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
 
   return (
     <div className="flex flex-col gap-5">

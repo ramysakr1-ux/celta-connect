@@ -4,6 +4,7 @@ import type { Database } from "@/lib/supabase/types";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type Assignment = Database["public"]["Tables"]["assignments"]["Row"];
 
@@ -17,7 +18,7 @@ export function isAssignmentWarningTriggered(assignment: Assignment): boolean {
 }
 
 function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return formatCalendarDate(iso, { day: "numeric", month: "long", year: "numeric" });
 }
 
 export interface AssignmentWarningDraft {

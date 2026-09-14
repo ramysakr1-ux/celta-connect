@@ -1,3 +1,4 @@
+import { formatCalendarDate } from "@/lib/format-date";
 // The data shape behind the Tutorials and consultations section under the
 // Timetable board (design_handoff_tutorials_consultations, 5 Sep 2026).
 // Built on the server in trainer/(hub)/timetable/page.tsx, rendered by
@@ -107,7 +108,7 @@ export function positionTime(eventTime: string | null | undefined, position: num
 export function shortDate(iso: string): string {
   // Node's ICU spells September "Sept" in en-GB; the handoff (and every
   // other hub date) says "Sep".
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).replace("Sept", "Sep");
+  return formatCalendarDate(iso, { weekday: "short", day: "numeric", month: "short" }).replace("Sept", "Sep");
 }
 
 export function shortTime(t: string | null | undefined): string {

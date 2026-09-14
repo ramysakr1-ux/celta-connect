@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { OwedLesson, TodaySession, TomorrowLine } from "@/lib/tp-queue";
 import { AIM_TYPE_LABELS, AIM_TYPE_STYLE, type AimType } from "@/lib/aim-type";
-import { formatDate, formatTime } from "@/lib/format-date";
+import { formatCalendarDate, formatDate, formatTime } from "@/lib/format-date";
 
 // design_handoff_teaching_practice_v2: the owed lessons as cards, each
 // showing what is already on the tutor's desk to write from; today's
@@ -79,7 +79,7 @@ function DeskRow({
 
 export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: string }) {
   const edge = lesson.isLate ? RED : "var(--hub-accent)";
-  const dateLabel = new Date(`${lesson.taughtDate}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }).toUpperCase();
+  const dateLabel = formatCalendarDate(lesson.taughtDate, { weekday: "short", day: "numeric" }).toUpperCase();
   const meta = [lesson.point.level, lesson.slotIndex ? `slot ${lesson.slotIndex}` : null, lesson.slotTime].filter(Boolean).join(" · ");
 
   return (
@@ -183,7 +183,7 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
                 Today
               </span>
               <span className="text-[13px] font-semibold text-ink">
-                {new Date(`${today.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" })} · TP{today.tpNumber} · {today.groupName}
+                {formatCalendarDate(today.date, { weekday: "short", day: "numeric" })} · TP{today.tpNumber} · {today.groupName}
                 {today.level ? ` · ${today.level}` : ""}
                 {today.room ? ` · ${today.room}` : ""}
               </span>
@@ -243,7 +243,7 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
         <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 ${today ? "border-t border-border-faint pt-3" : ""}`}>
           <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">Tomorrow</span>
           <span className="text-[12px] text-ink">
-            {new Date(`${tomorrow.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" })} · TP{tomorrow.tpNumber} · {tomorrow.groupName}
+            {formatCalendarDate(tomorrow.date, { weekday: "short", day: "numeric" })} · TP{tomorrow.tpNumber} · {tomorrow.groupName}
             {tomorrow.level ? ` · ${tomorrow.level}` : ""}
             {tomorrow.tutorName ? ` · ${tomorrow.tutorName}` : ""}
           </span>

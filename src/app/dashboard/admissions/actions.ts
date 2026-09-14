@@ -19,6 +19,7 @@ import type { Database } from "@/lib/supabase/types";
 import { interviewWhen } from "@/lib/interview-time";
 import { sendInterviewConfirmationToApplicant } from "@/lib/interview-confirmation";
 import { holdsCentre } from "@/lib/branch-scope";
+import { formatCalendarDate } from "@/lib/format-date";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
 const ORDINAL_WORD: Record<number, string> = {
@@ -1078,7 +1079,7 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
         .maybeSingle(),
     ]);
     const currency = (typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : course?.fee_currency) || "";
-    const fmtDate = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    const fmtDate = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "long" });
     const mctName = (mct?.profiles as { full_name?: string } | null)?.full_name ?? null;
 
     // Ramy, 2026-08-16: "the Connect account will only be set up after they
@@ -1410,7 +1411,7 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
     .filter((n): n is string => Boolean(n));
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : "";
+    iso ? formatCalendarDate(iso, { weekday: "long", day: "numeric", month: "long" }) : "";
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
 
   const { welcomeEmailHtml } = await import("@/lib/admissions-email");

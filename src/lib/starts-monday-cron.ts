@@ -9,6 +9,7 @@ import {
   accountNotSetUpEmailHtml,
 } from "@/lib/admissions-email";
 import { resolveGtkyAssignments } from "@/lib/gtky-assignment";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // specs/handoffs/Course Emails.dc.html: "Welcome goes out the Friday
 // before and carries the link to their day-one activity, because that is
@@ -99,7 +100,7 @@ export async function runStartsMondayCron(): Promise<{ sent: number }> {
       // start date is the truth; failing that, the first of the course's own
       // time bands (10:00 by default).
       const startTime = await resolveDayOneStart(admin, course.id, course.start_date, course.time_bands);
-      const startDay = new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+      const startDay = formatCalendarDate(course.start_date, { weekday: "long", day: "numeric", month: "long" });
 
       const mctName = await resolveMctName(admin, course.id);
 

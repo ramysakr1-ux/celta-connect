@@ -687,10 +687,10 @@ export async function TodayTab({
           ? {
               // Same "You teach {day}" pattern as today/tomorrow, just with
               // the actual weekday name once it's further out than tomorrow.
-              label: `You teach ${new Date(`${teachingNext.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long" })}`,
+              label: `You teach ${formatCalendarDate(teachingNext.date, { weekday: "long" })}`,
               big: `TP${teachingNext.tpNumber} — ${teachingNext.title}`,
               bigSub: [
-                new Date(`${teachingNext.date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" }),
+                formatCalendarDate(teachingNext.date, { day: "numeric", month: "long" }),
                 teachingNext.eventTime ? teachingNext.eventTime.slice(0, 5) : null,
                 teachingNext.level,
                 `${teachingNext.teachingOrder === 1 ? "1st" : teachingNext.teachingOrder === 2 ? "2nd" : `${teachingNext.teachingOrder}th`} of ${teachingNext.groupSize}`,
@@ -742,7 +742,7 @@ export async function TodayTab({
   // The trainee's name moved to TraineeNameBanner, above the Connect header
   // itself (Ramy, 2026-08-24: "I want this to go on top") -- not repeated
   // here too.
-  const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const todayHeading = formatCalendarDate(today, { weekday: "long", day: "numeric", month: "long" });
 
   // ---------------------------------------------------------------- 4b ----
   // design_handoff_trainee_landing, "Course Stream (Status rail, option 4b)".
@@ -771,7 +771,7 @@ export async function TodayTab({
   const streamDay = streamView.day;
   const streamHeading = streamView.isToday
     ? "Your day"
-    : `Your next day · ${new Date(`${streamView.dateIso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}`;
+    : `Your next day · ${formatCalendarDate(streamView.dateIso, { weekday: "long", day: "numeric", month: "long" })}`;
 
   // Unread notices (migration 0283). The read rows are RLS-scoped to the
   // reader, so a peer viewing a groupmate's portfolio under layout.tsx's
@@ -798,7 +798,7 @@ export async function TodayTab({
   }
 
   const serverNowMs = Date.now();
-  const dateLabel = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", {
+  const dateLabel = formatCalendarDate(today, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -950,7 +950,7 @@ export async function TodayTab({
         {showAssessorMeeting && assessorVisitIso ? (
           <AssessorMeetingCard
             traineeId={traineeId}
-            visitDate={new Date(`${assessorVisitIso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
+            visitDate={formatCalendarDate(assessorVisitIso, { day: "numeric", month: "long" })}
             alreadyRequested={Boolean(ownMeetingRequest)}
           />
         ) : null}

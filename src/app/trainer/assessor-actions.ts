@@ -10,6 +10,7 @@ import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pa
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { buildAssessorInviteEmailHtml } from "@/lib/assessor-invite-email";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-assessor-pack-decisions.md §1: "Centres need a way to
 // mark which candidates are 'selected for this visit'... a simple toggle."
@@ -139,7 +140,7 @@ export async function sendAssessorInviteEmail(
   const centerName = center?.name ?? "Your centre";
   const potentialFails = candidates.filter((c) => c.provisionalLabel?.includes("Fail")).length;
   const visitDateLabel = course.assessor_visit_date
-    ? new Date(`${course.assessor_visit_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
+    ? formatCalendarDate(course.assessor_visit_date, { weekday: "long", day: "numeric", month: "long" })
     : null;
   // Same window the token is minted with, said the way a person says it.
   const accessEndsLabel = `Two weeks after the course closes, ${new Date(

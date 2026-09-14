@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { FilmedObservationWatchScreen } from "@/app/portfolio/[traineeId]/filmed-observation/[sessionId]/watch-screen";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // design_handoff_filmed_observation_watch: the group-watch screen. Access is
 // RLS-scoped to the cohort (any profile whose course_id matches the
@@ -89,7 +90,7 @@ export default async function FilmedObservationWatchPage({
         <h1 className="mt-0.5 font-serif text-2xl text-ink">{fSession.lesson_title ?? "Filmed lesson — focus set by the trainer per session"}</h1>
         {event?.event_date ? (
           <p className="mt-1 text-sm text-muted">
-            Scheduled {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
+            Scheduled {formatCalendarDate(event.event_date, { day: "numeric", month: "long" })}
             {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""} — missed it? Watch the same recording here any time.
           </p>
         ) : null}

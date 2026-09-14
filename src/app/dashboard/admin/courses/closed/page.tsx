@@ -6,6 +6,7 @@ import { resolveBranchScope } from "@/lib/branch-scope";
 import { computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: "Closed --
 // past courses, collapsed to a simple list/link to history." The landing
@@ -33,7 +34,7 @@ export default async function ClosedCoursesPage({
     .order("end_date", { ascending: false });
 
   // Was "Ended 2026-05-09" -- the one raw ISO date on the page (audit, 6 Sep 2026).
-  const calendarDay = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const calendarDay = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" });
   const closedCourses = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "closed");
 
   return (

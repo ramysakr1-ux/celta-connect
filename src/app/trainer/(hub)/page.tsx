@@ -12,7 +12,7 @@ import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandIndexFor } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
-import { formatDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import type { CourseCloseOutStatus } from "@/lib/supabase/types";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
@@ -51,7 +51,7 @@ import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, d
 // around them read "Sat 5 Sep" (audit, 6 Sep 2026). Date-only strings, so
 // T00:00:00 parses and formats in the same zone and the day is preserved.
 function shortDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  return formatCalendarDate(iso, { weekday: "short", day: "numeric", month: "short" });
 }
 
 // What is left once the course is over. Ramy, 12 Sep 2026: the candidate's
@@ -872,7 +872,7 @@ export default async function TodayPage() {
   ]
     .filter(Boolean)
     .join(" · ");
-  const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", {
+  const todayHeading = formatCalendarDate(today, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -1098,12 +1098,12 @@ export default async function TodayPage() {
                 </span>
               </span>
               <span className="font-serif text-[18px] font-semibold">
-                {new Date(`${course.assessor_visit_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                {formatCalendarDate(course.assessor_visit_date, { weekday: "short", day: "numeric", month: "short" })}
                 {course.assessor_name ? ` · ${course.assessor_name}` : ""}
               </span>
               <span className="text-[12px] opacity-80">
                 {centrePreparation.length} preparation item{centrePreparation.length === 1 ? "" : "s"}
-                {preparationDeadline ? ` · ready by ${new Date(`${preparationDeadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
+                {preparationDeadline ? ` · ready by ${formatCalendarDate(preparationDeadline, { day: "numeric", month: "short" })}` : ""}
               </span>
               <span className="text-[12.5px] font-semibold text-gold">Open the Assessor tab</span>
             </Link>

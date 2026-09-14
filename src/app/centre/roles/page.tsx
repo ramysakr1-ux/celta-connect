@@ -11,6 +11,7 @@ import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { getAreaHolders } from "@/lib/auth/area-holders";
 import { DELIVERY_LABEL, DELIVERY_PILL_CLASS, type EmailDeliveryStatus } from "@/lib/email-delivery-status";
 import { Avatar } from "@/components/avatar";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's
@@ -128,7 +129,7 @@ export default async function CentreRolesPage() {
                       {h.endsAt ? (
                         <span className="text-muted">
                           {" "}
-                          until {new Date(`${h.endsAt}T00:00:00`).toLocaleDateString("en-GB")}
+                          until {formatCalendarDate(h.endsAt, { day: "numeric", month: "short", year: "numeric" })}
                         </span>
                       ) : null}
                     </>

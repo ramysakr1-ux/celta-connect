@@ -18,7 +18,7 @@ import {
 import { LEVEL_OPTIONS } from "@/lib/levels";
 import { Avatar } from "@/components/avatar";
 import { useHubTimeZone } from "@/components/hub-time-zone";
-import { formatDate, formatTime } from "@/lib/format-date";
+import { formatCalendarDate, formatDate, formatTime } from "@/lib/format-date";
 
 // design_handoff_volunteer_students_v2: the Today strip (RSVP replies +
 // Zoom presence, nothing to enter), the register grouped by class, and the
@@ -107,7 +107,7 @@ function milestonesFor(threshold: number): number[] {
 }
 
 function shortDay(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
+  return formatCalendarDate(iso, { weekday: "short", day: "numeric" });
 }
 
 // "Today" and the clock both have to be the CENTRE's, not the runtime's --

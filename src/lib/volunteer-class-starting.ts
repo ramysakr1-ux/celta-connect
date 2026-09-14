@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { sendApplicantEmail, volunteerClassStartingEmailHtml } from "@/lib/admissions-email";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Ramy, 2026-08-19: "how else will they receive the link to join?" --
 // volunteer_students gets a course_access_tokens row (role
@@ -42,7 +43,7 @@ export async function sendVolunteerClassStartingEmail(
   if (!center) return { sent: false, reason: "Centre not found." };
 
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
-  const startDay = new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const startDay = formatCalendarDate(course.start_date, { weekday: "long", day: "numeric", month: "long" });
   // No per-course start-time field exists yet -- same default starts-
   // monday-cron.ts already uses for the equivalent candidate email.
   const startTime = "09:30";

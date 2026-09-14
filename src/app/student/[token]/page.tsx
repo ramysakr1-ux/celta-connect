@@ -18,6 +18,7 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { resolveTimeBands, toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Four evenly-spaced markers scaled to whatever the centre has set --
 // quarters of the threshold, rounded to the nearest 10 hours, rather than
@@ -40,7 +41,7 @@ function formatEventDate(iso: string): string {
 }
 
 function formatShortDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return formatCalendarDate(iso, { day: "numeric", month: "short" });
 }
 
 // Ramy, 25 Aug 2026: "let's go for a red sort of garnet for missed and the
@@ -643,12 +644,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const nextMilestoneIndex = milestones.findIndex((m) => hoursCredited < m);
 
   const firstName = volunteer.name.split(" ")[0];
-  const endDateLabel = course?.end_date ? new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
+  const endDateLabel = course?.end_date ? formatCalendarDate(course.end_date, { day: "numeric", month: "short" }) : null;
   // Ramy, 30 Aug 2026: "maybe you can have the dates instead" -- a run of
   // dates tells a volunteer how much of the course is left in a way that
   // "until 4 Sept" alone does not.
   const startDateLabel = course?.start_date
-    ? new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+    ? formatCalendarDate(course.start_date, { day: "numeric", month: "short" })
     : null;
   const courseDatesLabel = startDateLabel && endDateLabel ? `${startDateLabel} – ${endDateLabel}` : endDateLabel;
   const headline = nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet";

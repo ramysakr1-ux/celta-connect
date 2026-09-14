@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendApplicantEmail, placeFreedEmailHtml } from "@/lib/admissions-email";
 import type { Database } from "@/lib/supabase/types";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // "A named day and hour, not a number of days." Said in the CENTRE'S clock,
 // with the city named. It used to be UTC, on the premise that "no per-centre
@@ -102,7 +103,7 @@ export async function offerNextWaitingListPlace(
         courseName: course?.name ?? "the course",
         courseDates:
           course?.start_date && course?.end_date
-            ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} to ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+            ? `${formatCalendarDate(course.start_date, { day: "numeric", month: "long" })} to ${formatCalendarDate(course.end_date, { day: "numeric", month: "long" })}`
             : "the dates confirmed with you",
         // "it starts in eleven days" -- the design says it plainly, because
         // short notice is the whole reason this email reads as it does.

@@ -469,7 +469,7 @@ export default async function PortfolioCelta5Page({
         : undefined;
 
     const fmtCoverDate = (iso: string | null | undefined) =>
-      iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null;
+      iso ? formatCalendarDate(iso, { day: "numeric", month: "long", year: "numeric" }) : null;
     const coverData = {
       candidateName: viewer?.full_name ?? null,
       centreName: center?.name ?? null,

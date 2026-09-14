@@ -26,6 +26,7 @@ import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/reso
 import { getCambridgeDocuments } from "@/lib/cambridge-documents";
 import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 
@@ -93,7 +94,7 @@ function InputSessionCard({
   // "Open session". Making all 22 look alike is what caused the complaint.
   const openable = Boolean(session.registrySlug);
   const Icon = openable ? MonitorPlay : CalendarClock;
-  const dateLabel = `${new Date(`${session.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}${
+  const dateLabel = `${formatCalendarDate(session.event_date, { day: "numeric", month: "short" })}${
     session.event_time ? ` · ${session.event_time.slice(0, 5)}` : ""
   }`;
 
@@ -626,7 +627,7 @@ export default async function ResourceHubPage({
                       : { label: "Not watched", sub: "Recording attached · not opened yet", tone: "idle" as const };
               const isActive = status.tone === "open";
               const dateLabel = s.eventDate
-                ? new Date(`${s.eventDate}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+                ? formatCalendarDate(s.eventDate, { day: "numeric", month: "short" })
                 : null;
               const row = (
                 <>

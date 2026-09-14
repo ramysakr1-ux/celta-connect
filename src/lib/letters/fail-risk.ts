@@ -4,6 +4,7 @@ import type { Database } from "@/lib/supabase/types";
 import { distinctTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Letters.dc.html 1a: "A provisional grade of Fail, or Fail/Pass, at any
 // point after the Stage 3 tutorial." Slashed pairs (migration 0036) are the
@@ -17,7 +18,7 @@ export function isFailRiskTriggered(record: {
 }
 
 function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return formatCalendarDate(iso, { day: "numeric", month: "long", year: "numeric" });
 }
 
 export interface FailRiskDraft {

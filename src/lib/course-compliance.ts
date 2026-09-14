@@ -3,6 +3,7 @@ import { doubleMarkingPerAssignment } from "@/lib/assessor-requirements";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // What the course cannot satisfy as planned.
 //
@@ -193,7 +194,7 @@ export function entryFormProblems(input: {
     {
       tag: "Entry form",
       message: "The entry form has not been sent to Cambridge and its deadline has passed",
-      detail: `Due ${new Date(`${deadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${daysLate} day${daysLate === 1 ? "" : "s"} late`,
+      detail: `Due ${formatCalendarDate(deadline, { day: "numeric", month: "short" })} · ${daysLate} day${daysLate === 1 ? "" : "s"} late`,
       href: "/dashboard/admin",
       cite: "4.1",
     },

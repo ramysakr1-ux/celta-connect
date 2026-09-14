@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { formatDate, formatDateTime } from "@/lib/format-date";
+import { formatCalendarDate, formatDate, formatDateTime } from "@/lib/format-date";
 import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
@@ -37,7 +37,7 @@ import { TintBlock } from "@/app/trainer/(hub)/assessor/tint-block";
 // email, candidate selection) moved here too -- one room, one door.
 
 function fmtDate(iso: string, opts: Intl.DateTimeFormatOptions) {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", opts);
+  return formatCalendarDate(iso, opts);
 }
 
 export default async function AssessorPage({ searchParams }: { searchParams: Promise<{ preview?: string }> }) {

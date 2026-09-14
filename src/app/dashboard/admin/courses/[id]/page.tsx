@@ -10,7 +10,7 @@ import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-
 import { markGradeFormSubmitted, markGradeApprovalFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { formatDate } from "@/lib/format-date";
+import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
@@ -90,7 +90,7 @@ export default async function CourseAdminDetailPage({
   const today = toLocalIso(new Date(), timeZone);
   // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
   // reached from says "17 Aug – 11 Sept" (audit, 6 Sep 2026).
-  const calendarDay = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const calendarDay = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" });
   const courseState = computeCourseState(course.start_date, course.end_date, today);
   const weekOf = courseState === "running" ? computeWeekOf(course.start_date, course.end_date, today) : null;
 

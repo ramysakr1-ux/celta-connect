@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AREA_VERB, type AreaVerdict } from "@/lib/auth/areas";
+import { formatCalendarDate } from "@/lib/format-date";
 
 /**
  * Renders an action according to whose job it is.
@@ -50,7 +51,7 @@ export function AreaAction({
       </Link>{" "}
       handles {AREA_VERB[area]}
       {verdict.holder.endsAt ? (
-        <span className="text-muted"> until {new Date(`${verdict.holder.endsAt}T00:00:00`).toLocaleDateString("en-GB")}</span>
+        <span className="text-muted"> until {formatCalendarDate(verdict.holder.endsAt, { day: "numeric", month: "short", year: "numeric" })}</span>
       ) : null}
       .
     </p>

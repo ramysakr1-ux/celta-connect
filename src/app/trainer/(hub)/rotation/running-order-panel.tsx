@@ -5,6 +5,7 @@ import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
 import { AimCoverageMatrix } from "@/app/trainer/(hub)/rotation/aim-coverage";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import type { CourseStatus } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 export interface RunningOrderMember {
   traineeId: string;
@@ -58,7 +59,7 @@ export function RunningOrderPanel({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-                {new Date(`${nextDate}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })} · half{" "}
+                {formatCalendarDate(nextDate, { weekday: "long", day: "numeric", month: "long" })} · half{" "}
                 {halfLabel}
               </p>
               <h4 className="font-serif text-lg text-ink">Running order</h4>

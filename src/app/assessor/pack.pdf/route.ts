@@ -6,6 +6,7 @@ import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pa
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { renderAssessorPackBuffer } from "@/lib/assessor-pack-pdf/document";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // The "Download whole pack" button, and the centre's end-of-course PDF.
 //
@@ -67,8 +68,8 @@ export async function GET() {
   const uploadedTitles = new Set((uploadedDocs ?? []).map((d) => d.title.trim().toLowerCase()));
 
   const fmtLong = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const fmtShort = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    formatCalendarDate(iso, { day: "numeric", month: "long", year: "numeric" });
+  const fmtShort = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
 
   // MCT-set, not computed from assessor_visit_date -- see migration 0127.
   const sendBy = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;

@@ -13,6 +13,7 @@ import { assignmentGradeCeiling, PROVISIONAL_SLOTS } from "@/lib/provisional-gra
 import { isMctOnCourse } from "@/lib/course-mct";
 import { checkStage1RecordsMilestone, checkFinalGradeMilestone } from "@/lib/cohort-milestones";
 import type { CriteriaRating, StandardRating } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 export interface FormState {
   error: string | null;
@@ -1035,7 +1036,7 @@ async function finalDayBlock(
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
   if (today < course.end_date) {
-    const finalDay = new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", {
+    const finalDay = formatCalendarDate(course.end_date, {
       day: "numeric",
       month: "long",
     });

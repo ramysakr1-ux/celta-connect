@@ -10,6 +10,7 @@ import { computeSessionTicks, creditedHours, blocksNeededForPresent, CERTIFICATE
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { isMctView } from "@/lib/act-preview";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // §14 + design_handoff_volunteer_students_v2 (Ramy, 5 Sep 2026). The
 // trainer-side register: Today strip (RSVP replies + Zoom presence),
@@ -237,7 +238,7 @@ export default async function VolunteersPage() {
         todayEvents.length > 0 && nextDate
           ? {
               isToday: stripIsToday,
-              dateLabel: new Date(`${nextDate}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }),
+              dateLabel: formatCalendarDate(nextDate, { weekday: "short", day: "numeric" }),
               classNumber: teachingDayNumber(tpDates, nextDate),
               totalClasses: tpDates.length,
               startTime: todayStart ? todayStart.slice(0, 5) : null,

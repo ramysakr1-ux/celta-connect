@@ -14,6 +14,7 @@ import { ASSIGNMENT_ORDER } from "@/lib/assignment-info";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -37,7 +38,7 @@ const GROUP_ORDER: LandingGroup[] = ["interviewing", "launching", "running"];
 // Management's own course list reads "10 Aug – 4 Sept". Same courses, two
 // screens, two formats. This matches the readable one.
 function courseDates(start: string | null, end: string | null): string {
-  const fmt = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const fmt = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
   return start && end ? `${fmt(start)} – ${fmt(end)}` : "Dates not set";
 }
 const GROUP_PILL_CLASS: Record<LandingGroup, string> = {

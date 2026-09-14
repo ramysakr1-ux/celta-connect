@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApplicantEmail, volunteerRsvpEmailHtml } from "@/lib/admissions-email";
 import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { extractLevelCode } from "@/lib/levels";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const WINDOW_START_MINUTES = 20 * 60 - 15; // 19h45m before
 const WINDOW_END_MINUTES = 20 * 60 + 15; // 20h15m before
@@ -120,7 +121,7 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
     // course name lives in the body line instead. The 20-hours-before
     // window above already keys off each session's own start time, which
     // is the spec's timing requirement.
-    const dateFact = `Tomorrow, ${new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}`;
+    const dateFact = `Tomorrow, ${formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "long" })}`;
     const timeFact = event.event_time ? event.event_time.slice(0, 5) : "";
     const whereFact = event.zoom_url ? "Zoom" : "In person at the centre";
 

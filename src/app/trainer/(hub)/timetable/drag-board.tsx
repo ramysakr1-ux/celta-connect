@@ -15,6 +15,7 @@ import {
 } from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // zoom-auto-attendance.md §4 -- a Zoom participant the webhook couldn't
 // confidently match to a volunteer_student, shown in the Attendance panel
@@ -357,7 +358,7 @@ function DetailPanel({
 }) {
   const rows: { label: string; value: string }[] = [
     { label: "Type", value: event.type.replace(/_/g, " ") },
-    { label: "Date", value: new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" }) },
+    { label: "Date", value: formatCalendarDate(event.event_date, { day: "numeric", month: "long", weekday: "long" }) },
   ];
   if (event.event_time) rows.push({ label: "Time", value: event.event_time.slice(0, 5) });
   if (event.tag) rows.push({ label: "Tag", value: event.tag });

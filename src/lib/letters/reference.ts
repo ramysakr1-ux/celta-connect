@@ -4,6 +4,7 @@ import type { Database } from "@/lib/supabase/types";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import type { FeedbackPoint } from "@/lib/tp-plan-content";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-reference-letter.md: "generated from their actual record
 // on the course... not a fill-in-the-blanks generic template." Available
@@ -26,7 +27,7 @@ export function isReferenceLetterEligible(record: {
 }
 
 function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return formatCalendarDate(iso, { day: "numeric", month: "long", year: "numeric" });
 }
 
 const codesOf = (points: FeedbackPoint[]): string[] => points.flatMap((p) => p.criteria_codes);

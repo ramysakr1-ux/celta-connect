@@ -2,9 +2,10 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { formatCalendarDate } from "@/lib/format-date";
 
 function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return formatCalendarDate(iso, { day: "numeric", month: "long", year: "numeric" });
 }
 
 export interface DeferralDraft {

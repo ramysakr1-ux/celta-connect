@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
 import { ShareToggle } from "@/app/trainer/(hub)/session-materials/share-toggle";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Ramy, 25 Aug 2026: "why can't the trainers upload their demo lesson...
 // it would read demo lesson, and then the next one would read getting to
@@ -46,7 +47,7 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
     ? await supabase.from("session_materials").select("id, file_name, file_type, storage_path, slides_url, uploaded_by").eq("timetable_event_id", selectedEvent.id).order("created_at")
     : { data: [] };
 
-  const dateLabel = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const dateLabel = (iso: string) => formatCalendarDate(iso, { weekday: "short", day: "numeric", month: "short" });
   const timeLabel = (t: string | null) => (t ? ` ${t.slice(0, 5)}` : "");
   const sharedCount = (events ?? []).filter((e) => e.shares_materials).length;
 

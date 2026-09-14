@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FilmedObservationSetupForm } from "@/app/trainer/(hub)/timetable/filmed-observation/setup-form";
 import { FilmedObservationBreaksForm } from "@/app/trainer/(hub)/timetable/filmed-observation/breaks-form";
 import { FilmedObservationTaskForm } from "@/app/trainer/(hub)/timetable/filmed-observation/task-form";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // design_handoff_filmed_observation_watch: setup for one "Filmed observation
 // N" timetable milestone -- recording link, expected length, discussion
@@ -53,7 +54,7 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
         <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Timetable</p>
         <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{event.title}</h1>
         <p className="mt-1 text-sm text-muted">
-          {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" })}
+          {formatCalendarDate(event.event_date, { day: "numeric", month: "long", weekday: "long" })}
           {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
         </p>
       </div>

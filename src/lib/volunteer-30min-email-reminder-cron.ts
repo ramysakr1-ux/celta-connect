@@ -4,6 +4,7 @@ import { sendApplicantEmail, volunteer30MinReminderEmailHtml } from "@/lib/admis
 import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { teachingDayNumber } from "@/lib/volunteer-attendance";
 import { extractLevelCode } from "@/lib/levels";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const WINDOW_START_MINUTES = 25;
 const WINDOW_END_MINUTES = 35;
@@ -102,7 +103,7 @@ export async function runVolunteer30MinEmailReminderCron(): Promise<{ eventsChec
     const tokenByVolunteerId = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t.token]));
 
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
-    const whenFact = `${new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${
+    const whenFact = `${formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "long" })}${
       event.event_time ? `, ${event.event_time.slice(0, 5)}` : ""
     }`;
     const dayFact = `Day ${teachingDayNumber(tpDatesByCourse.get(event.course_id) ?? [], event.event_date)}`;

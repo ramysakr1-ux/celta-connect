@@ -9,6 +9,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { computeCriteriaPct, CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
 import type { Database } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
 
@@ -170,7 +171,7 @@ export default async function TpHubPage({
     if (!prev || e.event_date < prev) scheduledByTpNumber.set(n, e.event_date);
   }
   const dayMonth = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    formatCalendarDate(iso, { day: "numeric", month: "short" });
   const tpPlanByTpNumber = new Map((tpPlans ?? []).map((p) => [p.tp_number, p]));
   const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
   const feedbackByTpNumber = new Map((feedbackRows ?? []).map((f) => [f.tp_number, f]));

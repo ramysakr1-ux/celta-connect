@@ -4,6 +4,7 @@ import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { SupervisedTaskForm } from "@/app/portfolio/[traineeId]/supervised/[eventId]/task-form";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-supervised-review.md: the trainee side of a "Supervised
 // review"/"[X] writing" timetable slot -- real submit-and-check structure,
@@ -40,7 +41,7 @@ export default async function SupervisedSessionPage({
       <BackLink href={`/portfolio/${traineeId}/timetable`} label={"Timetable"} />
       <div className="sheet">
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-          {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+          {formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "long" })}
           {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
         </p>
         <h1 className="mt-1 font-serif text-xl text-ink">{event.title}</h1>

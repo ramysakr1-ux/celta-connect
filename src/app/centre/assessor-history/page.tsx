@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { canView } from "@/lib/auth/centre-permissions";
 import { computeAssessorCentreHistory, type Severity } from "@/lib/assessor-course-history";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Dedicated screen reached from the "Assessor history" card on Centre
 // Admin overview (centre/page.tsx) -- same pattern as /centre/volunteers:
@@ -66,7 +67,7 @@ export default async function AssessorHistoryPage({
   );
 
   const dateRange = (a: string, b: string) => {
-    const fmt = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    const fmt = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" });
     return `${fmt(a)} – ${fmt(b)}`;
   };
 

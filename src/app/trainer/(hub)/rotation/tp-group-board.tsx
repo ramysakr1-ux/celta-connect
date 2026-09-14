@@ -1,5 +1,6 @@
 import { rotationPosition, distinctTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { lettersForGroup, dayLabel } from "@/lib/tp-letters";
+import { formatCalendarDate } from "@/lib/format-date";
 
 export interface BoardMember {
   traineeId: string;
@@ -79,7 +80,7 @@ export function TpGroupBoard({
                     }`}
                   >
                     <span className={`block text-[10px] font-semibold ${isNext ? "text-status-warning-text" : "text-ink"}`}>
-                      {new Date(`${date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      {formatCalendarDate(date, { day: "numeric", month: "short" })}
                     </span>
                     <span className="block text-[9px] font-semibold uppercase tracking-[0.06em] text-muted">
                       {dayLabel(owningHalf)}

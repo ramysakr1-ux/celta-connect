@@ -15,6 +15,7 @@ import { halfTpDates, distinctTpDates, checkIntensiveTpBreaks } from "@/lib/rota
 import { sendPushToOwners } from "@/lib/push/send";
 import { extractZoomMeetingId } from "@/lib/zoom/meeting-id";
 import type { TimeBand } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 export interface FormState {
   error: string | null;
@@ -453,7 +454,7 @@ export async function cancelTimetableEvent(formData: FormData): Promise<void> {
   const profileIds = (cohort ?? []).map((p) => p.id);
   if (profileIds.length > 0) {
     const label = CANCEL_EVENT_TYPE_LABEL[event.type as (typeof EVENT_TYPES)[number]] ?? "Session";
-    const dateLabel = new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" });
+    const dateLabel = formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "short" });
     await sendPushToOwners(
       { profileIds },
       {

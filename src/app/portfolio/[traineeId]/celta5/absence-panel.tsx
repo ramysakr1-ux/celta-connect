@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { reportOwnAbsence, type AbsenceFormState } from "@/app/portfolio/[traineeId]/status-actions";
 import type { Database } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type Absence = Database["public"]["Tables"]["attendance_absences"]["Row"];
 
@@ -67,7 +68,7 @@ export function AbsencePanel({
             <li key={a.id} className="flex flex-col gap-0.5 py-2.5 first:pt-0">
               <div className="flex items-baseline justify-between gap-3">
                 <p className="text-sm font-semibold text-ink">
-                  {a.session_date ? new Date(`${a.session_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" }) : "Date not given"}
+                  {a.session_date ? formatCalendarDate(a.session_date, { day: "numeric", month: "long" }) : "Date not given"}
                 </p>
                 <span className={`pill shrink-0 ${a.category === "unavoidable" ? "pill-neutral" : "pill-warning"}`}>
                   {a.category === "unavoidable" ? "Unavoidable" : "Other"}

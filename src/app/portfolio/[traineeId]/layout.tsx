@@ -41,6 +41,7 @@ import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status
 import { getPeerGroupMembers } from "@/lib/peer-observation";
 import { computeCourseDayProgress } from "@/lib/course-day";
 import { Avatar } from "@/components/avatar";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -413,7 +414,7 @@ export default async function PortfolioLayout({
                     dayLabel={
                       traineeDay.isToday
                         ? undefined
-                        : new Date(`${traineeDay.dateIso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short" })
+                        : formatCalendarDate(traineeDay.dateIso, { weekday: "short" })
                     }
                   />
                 </div>

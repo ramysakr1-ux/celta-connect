@@ -11,6 +11,7 @@ import {
   type RestartFormState,
   type DeferralFormState,
 } from "@/app/portfolio/[traineeId]/status-actions";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const initialWithdrawState: WithdrawFormState = { error: null };
 const initialExtensionState: ExtensionFormState = { error: null };
@@ -74,7 +75,7 @@ export function CandidateStatusCard({
           </p>
           {pendingRequest.note ? <p className="text-xs text-ink">&ldquo;{pendingRequest.note}&rdquo;</p> : null}
           {pendingRequest.effective_date ? (
-            <p className="text-xs text-muted">Last day: {new Date(`${pendingRequest.effective_date}T00:00:00`).toLocaleDateString("en-GB")}</p>
+            <p className="text-xs text-muted">Last day: {formatCalendarDate(pendingRequest.effective_date, { day: "numeric", month: "short", year: "numeric" })}</p>
           ) : null}
           {pendingRequest.kind === "withdraw" && pendingRequest.still_attending !== null ? (
             <p className="text-xs text-muted">{pendingRequest.still_attending ? "Would like to keep attending as an observer." : "This would be their last day."}</p>

@@ -23,6 +23,7 @@ import { shortDate, shortTime, stageForWeek, positionTime, type SheetSlot, type 
 import { computeWeekOf } from "@/lib/course-progress";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-timetable-edit-vs-view.md: DragBoard (editing) and the
 // glass-card view (for-claude-code-timetable-view.md) are two different
@@ -139,7 +140,7 @@ export default async function TrainerTimetablePage({
     if (allEvents.length === 0) return null;
     const dates = [...allEvents].map((e) => e.event_date).sort();
     const fmt = (iso: string) =>
-      new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+      formatCalendarDate(iso, { day: "numeric", month: "long" });
     const first = dates[0];
     const last = dates[dates.length - 1];
     return first === last ? fmt(first) : `${fmt(first)} – ${fmt(last)}`;
