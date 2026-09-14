@@ -160,6 +160,22 @@ async function announceStageReady(
   const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
   if (!trainee?.course_id) return;
 
+  // A tutor who un-ticks and re-ticks a stage after the candidate has
+  // already signed it would otherwise send them off to sign it again.
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("stage1_candidate_signed_at, trainee_signoff_stage2_at, stage3_candidate_signed_at")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  const signedAt = record
+    ? stage === "stage1"
+      ? record.stage1_candidate_signed_at
+      : stage === "stage2"
+        ? record.trainee_signoff_stage2_at
+        : record.stage3_candidate_signed_at
+    : null;
+  if (signedAt) return;
+
   const sourceKey = `celta5_stage_sign:${traineeId}:${stage}`;
   const { data: already } = await supabase
     .from("course_broadcasts")
