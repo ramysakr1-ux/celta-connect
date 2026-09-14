@@ -27,6 +27,7 @@ import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
 import { criteriaMarks } from "./lib/assignment-criteria-keys.mjs";
 import { submissionFor, overallCommentFor } from "./lib/assignment-submissions.mjs";
+import { selfEvaluationFor } from "./lib/tp-self-evaluations.mjs";
 import { appendicesFor } from "./lib/assignment-appendix-materials.mjs";
 import { renderAppendixPdf } from "./lib/appendix-pdf.mjs";
 
@@ -1426,12 +1427,15 @@ async function main() {
       })
       .select("id")
       .single();
+    // All six questions, and a different reflection per candidate per TP.
+    // One placeholder sentence answering two of six, on all 109 rows, made
+    // the candidate's own band of the assembled document read as a stub --
+    // and made every candidate sound like the same person.
     await supabase.from("tp_self_evaluations").insert({
       tp_plan_id: plan.id,
       trainee_id: traineeId,
       tp_number: tpNumber,
-      what_went_well: "The lead-in got strong engagement and the timing worked well.",
-      what_not_as_planned: "Ran short on freer practice time.",
+      ...selfEvaluationFor(traineeDefs.findIndex((d) => trainees[d.name] === traineeId), tpNumber),
       submitted_at: at(),
     });
     await supabase.from("tp_feedback").insert({
