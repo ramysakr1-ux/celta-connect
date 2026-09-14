@@ -2214,6 +2214,15 @@ async function main() {
         first_own_work_confirmed: true,
         marker_id: trainerId,
         due_date: cDay(DUE_DAY("LRT", 1)), // Kofi is half 1 -- LRT · ABC
+        // returnAssignment refuses to send a round back without naming at
+        // least one unmet criterion -- Handbook 9.2.2, so the candidate knows
+        // what to rewrite. This insert wrote the table directly and skipped
+        // that, leaving the one row in either course returned for
+        // resubmission with nothing marked. An upheld plagiarism case fails
+        // the analysis criteria (the work is not the candidate's to be
+        // credited with) and the referencing one it turned on; the language
+        // and word-count criteria are unaffected by it.
+        first_criteria_marks: criteriaMarks("LRT", ["analysis", "terminology", "reference_materials"]),
         tutor_feedback:
           "A plagiarism case on this submission was upheld. The assignment fails this round and must be resubmitted in your own words, with sources cited. See the decision on your record, and complete the Plagiarism Reflection that has been set.",
       })

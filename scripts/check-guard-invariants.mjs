@@ -1,0 +1,56 @@
+// Tests the data against the rules the server actions enforce.
+//
+// Three times on 14 Sep 2026 the code was correct and the DATA made it look
+// broken: an assignment released with no overall comment, a Stage 1 filed
+// with no tutor signature, an LRT sent back for resubmission with no
+// criterion marked. Every one came from a seed writing the table directly
+// and skipping the guard in the action, which produces a state the product
+// itself forbids -- so walking the demo shows something that could never
+// happen to a real candidate.
+//
+// Each entry below mirrors an `if (X && !Y) return { error: ... }` in a
+// server action. A violation means something wrote around it.
+//
+// Run: node scripts/check-guard-invariants.mjs    (exits 1 on any violation)
+import { createClient } from "@supabase/supabase-js";
+import fs from "fs";
+const env = fs.readFileSync(".env.local", "utf8");
+const db = createClient(env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim(), env.match(/SUPABASE_SERVICE_ROLE_KEY=(.+)/)[1].trim());
+
+// Each entry is an invariant a server action ENFORCES. If rows violate it,
+// something wrote the table directly and skipped the guard.
+let violations = 0;
+
+const CHECKS = [
+  ["tp_feedback",     "submitted_at",             "grade",                        "TP feedback released without a grade (Handbook 10.2)"],
+  ["celta5_records",  "stage1_completed_at",      "stage1_tutor_signature_name",  "Stage 1 complete, tutor unsigned"],
+  ["celta5_records",  "stage2_completed_at",      "stage2_tutor_signature_name",  "Stage 2 complete, tutor unsigned"],
+  ["celta5_records",  "stage2_completed_at",      "stage2_tutor_overall",         "Stage 2 complete without a standard"],
+  ["celta5_records",  "stage2_completed_at",      "stage2_tutorial_given",        "Stage 2 complete without the tutorial"],
+  ["celta5_records",  "stage3_finalized_at",      "stage3_tutor_signature_name",  "Stage 3 finalized, tutor unsigned"],
+  ["celta5_records",  "stage3_finalized_at",      "stage3_tutor_overall",         "Stage 3 finalized without a standard"],
+  ["celta5_records",  "trainer_signoff_final_at", "final_tutor_signature_name",   "Final signed off, tutor unsigned"],
+  ["assignments",     "first_overall_comment",    "marker_id",                    "assignment marked with no marker recorded"],
+];
+
+for (const [table, whenSet, mustAlsoBeSet, label] of CHECKS) {
+  const { data, error } = await db.from(table).select(`${whenSet},${mustAlsoBeSet}`);
+  if (error) { console.log(`  ?  ${label.padEnd(52)} ${error.message.slice(0,40)}`); continue; }
+  const scoped = data.filter(r => r[whenSet]);
+  const bad = scoped.filter(r => r[mustAlsoBeSet] === null || r[mustAlsoBeSet] === false);
+  if (bad.length) violations += 1;
+  const mark = bad.length ? "!!" : "ok";
+  console.log(`  ${mark} ${label.padEnd(52)} ${bad.length} / ${scoped.length}`);
+}
+
+// The assignment release guards, which live in returnAssignment.
+const { data: a } = await db.from("assignments").select("first_status,resubmission_status,first_criteria_marks,first_overall_comment,resubmission_overall_comment");
+const marked = a.filter(x => ["approved","resubmission_required"].includes(x.first_status));
+console.log(`  ${marked.filter(x=>!x.first_overall_comment).length?"!!":"ok"} ${"assignment round released without an overall comment".padEnd(52)} ${marked.filter(x=>!x.first_overall_comment).length} / ${marked.length}`);
+console.log(`  ${marked.filter(x=>!x.first_criteria_marks||!Object.keys(x.first_criteria_marks).length).length?"!!":"ok"} ${"assignment released with no criteria marked".padEnd(52)} ${marked.filter(x=>!x.first_criteria_marks||!Object.keys(x.first_criteria_marks).length).length} / ${marked.length}`);
+
+const noComment = marked.filter((x) => !x.first_overall_comment).length;
+const noMarks = marked.filter((x) => !x.first_criteria_marks || !Object.keys(x.first_criteria_marks).length).length;
+violations += (noComment ? 1 : 0) + (noMarks ? 1 : 0);
+console.log(violations === 0 ? "\nNo violations." : `\n${violations} invariant(s) violated.`);
+process.exit(violations === 0 ? 0 : 1);
