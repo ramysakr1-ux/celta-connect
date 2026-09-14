@@ -2757,7 +2757,10 @@ async function main() {
     { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5b", "5d", "5f", "5i", "5j", "5k"] },
     { d: 1, b: 8, type: "input_session", title: "Classroom arrangements and material use", tag: "whole_group", detail: null, linked: null, tp: null, slug: "classroom-arrangements", criteria: ["4c", "4f", "5a", "5e"] },
-    { d: 1, b: 9, type: "input_session", title: "Focus on the Learner", tag: "whole_group", detail: "The assignment session", linked: "Focus on Learner", tp: null },
+    // The criteria the app's own generated skeleton gives this session --
+    // 1b ("learning preferences and cultural factors") is carried by nothing
+    // else on the timetable, and this is the session about the learner.
+    { d: 1, b: 9, type: "input_session", title: "Focus on the Learner", tag: "whole_group", detail: "The assignment session", linked: "Focus on Learner", tp: null, criteria: ["1a", "1b", "1c"] },
     { d: 2, b: 1, type: "tp", title: "TP1 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 2, b: 2, type: "tp", title: "TP1 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 2, b: 3, type: "tp", title: "TP1 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 1 },
