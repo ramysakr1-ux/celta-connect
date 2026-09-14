@@ -16,6 +16,16 @@ import { formatCalendarDate } from "@/lib/format-date";
 // From the design file, verbatim.
 const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
 const ROW_HEIGHT = 108;
+/**
+ * Ramy, 12 Sep 2026: "the tiles ... they're supposed to be fixed
+ * dimensions", and again on 14 Sep: "make sure the size is consistent."
+ * A card's height was whatever its text came to, so a row ran 51px beside
+ * 103px beside 149px. Every session card is this tall now whatever it says;
+ * the title and the subtitle each get two lines, and the join chip sits on
+ * the floor. Lunch and the deadline column are deliberately their own
+ * shapes -- lunch recedes by design, a deadline is not a session.
+ */
+const TILE_HEIGHT = 104;
 
 function CameraIcon() {
   return (
@@ -483,6 +493,7 @@ function Cell({
               key={displayCat}
               className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
               style={{
+                minHeight: displayCat === "lu" || displayCat === "admin" ? undefined : TILE_HEIGHT,
                 opacity: faded ? 0.25 : 1,
                 backdropFilter: "blur(10px)",
                 border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -534,6 +545,7 @@ function Cell({
             key={event.id}
             className="min-w-0 rounded-[10px] p-2 transition-opacity duration-150"
             style={{
+              minHeight: TILE_HEIGHT,
               opacity: faded ? 0.25 : 1,
               backdropFilter: "blur(10px)",
               border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -587,18 +599,32 @@ function SessionTile({
   const live = isEventLive(event, now, timeZone, timeBands);
 
   return (
-    <button type="button" onClick={() => onSelect(event)} className="flex flex-col items-start gap-1 text-left">
-      <span className="text-[11.5px] leading-snug text-ink" style={{ fontWeight: titleWeight }}>
+    <button type="button" onClick={() => onSelect(event)} className="flex h-full min-h-0 w-full flex-col items-start gap-1 text-left">
+      <span
+        className="text-[11.5px] leading-snug text-ink"
+        style={{ fontWeight: titleWeight, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
+      >
         {event.title}
       </span>
-      {event.detail ? <span className="text-[10px] text-muted">{event.detail}</span> : null}
+      {event.detail ? (
+        <span
+          className="text-[10px] text-muted"
+          style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
+        >
+          {event.detail}
+        </span>
+      ) : null}
       {letters || groupName || event.event_time ? (
         <span className="text-[10px] text-muted">
           {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
       {youTeach ? <span className="pill pill-neutral text-[9px]">You teach</span> : null}
-      {showCamera ? <CameraChip event={event} live={live} mine={mine} /> : null}
+      {showCamera ? (
+        <span className="mt-auto">
+          <CameraChip event={event} live={live} mine={mine} />
+        </span>
+      ) : null}
     </button>
   );
 }
