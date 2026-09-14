@@ -24,6 +24,7 @@ export function ReleaseWorkspaceForm({
   applicantId,
   releasedAt,
   releasedReason,
+  releasedNote,
   releasedByName,
   hasDeposit,
   specialRequirements,
@@ -32,6 +33,14 @@ export function ReleaseWorkspaceForm({
   applicantId: string;
   releasedAt: string | null;
   releasedReason: string | null;
+  /**
+   * The free text the releaser typed beside the canned reason. It was saved
+   * and never shown again: the dropdown reason came back, the sentence
+   * explaining it did not. Releasing a workspace before the fee is paid is
+   * exactly the decision that needs a footprint, and the note is the part of
+   * it a person actually wrote. Found 14 Sep 2026 auditing write paths.
+   */
+  releasedNote: string | null;
   releasedByName: string | null;
   hasDeposit: boolean;
   specialRequirements: string | null;
@@ -56,6 +65,9 @@ export function ReleaseWorkspaceForm({
           {releasedByName ? ` by ${releasedByName}` : ""}
           {releasedReason ? ` · ${REASON_LABEL[releasedReason] ?? releasedReason}` : ""}
         </p>
+        {releasedNote ? (
+          <p className="mt-1 text-sm whitespace-pre-line text-ink">&ldquo;{releasedNote}&rdquo;</p>
+        ) : null}
         <p className="mt-2 text-xs text-muted">
           Their workspace email has been sent. It won&apos;t send twice.
         </p>

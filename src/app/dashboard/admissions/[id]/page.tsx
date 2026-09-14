@@ -598,6 +598,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               applicantId={applicant.id}
               releasedAt={applicant.workspace_released_at}
               releasedReason={applicant.workspace_released_reason}
+              releasedNote={applicant.workspace_released_note}
               releasedByName={releasedByName}
               hasDeposit={Boolean(applicant.deposit_paid_at)}
               specialRequirements={applicant.special_requirements}
