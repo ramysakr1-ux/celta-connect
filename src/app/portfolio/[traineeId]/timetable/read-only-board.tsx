@@ -57,6 +57,16 @@ export interface EventMeta {
   // showing "0 of 0".
   volunteerAttendance?: { expected: number; total: number } | null;
   /**
+   * A TP lesson belonging to the OTHER group: same round, same letter,
+   * another room at another level. "Mine" fades what isn't yours, because a
+   * faded tile still says something is happening there -- but a parallel
+   * group's lesson is not a session this reader could be in, and leaving it
+   * in the grid is what made every TP band two cards tall. Ramy, 14 Sep
+   * 2026: "everything is doubled." In "Mine" these leave the grid; the
+   * lens shows them again.
+   */
+  otherGroup?: boolean;
+  /**
    * A booking sheet behind this tile (Stage 2 tutorials, consultation
    * blocks -- migrations 0094 / 0275): the panel shows a door to it.
    */
@@ -94,7 +104,7 @@ export interface ReadOnlyBoardProps {
   timeZone: string;
 }
 
-const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
+const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null, otherGroup: false };
 
 export function ReadOnlyTimetableBoard({
   events,
@@ -309,7 +319,9 @@ export function ReadOnlyTimetableBoard({
               bandEvents.map((e) => ({ band: timeBands[i]?.label ?? "", event: e }))
             ),
           ];
-          const visible = rowItems.filter(({ event }) => !mineOnly || (eventMeta[event.id] ?? EMPTY_META).mine);
+          const visible = rowItems.filter(
+            ({ event }) => !mineOnly || ((eventMeta[event.id] ?? EMPTY_META).mine && !(eventMeta[event.id] ?? EMPTY_META).otherGroup)
+          );
           if (visible.length === 0) return null;
           return (
             <div
@@ -424,6 +436,12 @@ export function ReadOnlyTimetableBoard({
   );
 }
 
+/** What a cell shows under the current lens. */
+function visibleIn(events: TimetableEvent[], eventMeta: Record<string, EventMeta>, mineOnly: boolean): TimetableEvent[] {
+  if (!mineOnly) return events;
+  return events.filter((e) => !(eventMeta[e.id] ?? EMPTY_META).otherGroup);
+}
+
 function Cell({
   events,
   eventMeta,
@@ -441,6 +459,7 @@ function Cell({
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
 }) {
+  events = visibleIn(events, eventMeta, mineOnly);
   if (events.length === 0) return null;
 
   // Ramy, 28 Aug 2026: "the master timetable" -- simultaneous TP slots
