@@ -164,6 +164,7 @@ const PARAM_SOURCE = {
   // the page 404s on anything else, quite correctly. It was passing the
   // generic eventId and reporting "route missing" for a route that is there.
   "/trainer/timetable/filmed-observation/[eventId]": { eventId: "filmedEventId" },
+  "/trainer/timetable/register/[eventId]": { eventId: "tpEventId" },
   // Only a trainee who came through the admissions pipeline HAS an
   // application, so this page needs that trainee, not just any trainee.
   "/portfolio/[traineeId]/application": { traineeId: "enrolledApplicantTraineeId" },
@@ -200,6 +201,9 @@ async function fixtures() {
   const event = await one("course_timetable_events", "id", (q) => q.eq("course_id", course?.id));
   const filmed = await one("course_timetable_events", "id", (q) =>
     q.eq("course_id", course?.id).eq("type", "milestone").ilike("title", "Filmed observation%"));
+  // A register belongs to a TP session and the page 404s on anything else,
+  // quite correctly -- the generic event fixture is an input session.
+  const tpEvent = await one("course_timetable_events", "id", (q) => q.eq("course_id", course?.id).eq("type", "tp"));
 
   // Scoped to the demo centre. Unscoped, this picked up Elmswood's templates
   // and every brief page 404'd -- correctly, since a demo trainer cannot open
@@ -228,6 +232,7 @@ async function fixtures() {
     sessionId: session?.id ?? null,
     eventId: event?.id ?? null,
     filmedEventId: filmed?.id ?? null,
+    tpEventId: tpEvent?.id ?? null,
     tpNumber: "1",
     slug: "learner-profiles",
     // No sensible fixture: these address things a demo course does not have.
