@@ -449,6 +449,13 @@ export async function cancelTimetableEvent(formData: FormData): Promise<void> {
     .eq("id", eventId)
     .eq("course_id", trainer.course_id ?? "");
 
+  // Same as deleteTimetableEvent: a due event on the timetable IS the due
+  // date, so cancelling one hands the date back to the roster rule. Cancel
+  // deleted the row and left every candidate's assignment pointing at a
+  // deadline that no longer existed anywhere on the timetable (walked
+  // 14 Sep 2026).
+  if (event.type === "assignment_due" && trainer.course_id) await syncAssignmentDueDates(supabase, trainer.course_id);
+
   const { data: cohort } = await supabase
     .from("profiles")
     .select("id")
