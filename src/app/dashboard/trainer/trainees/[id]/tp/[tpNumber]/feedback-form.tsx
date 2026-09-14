@@ -168,6 +168,7 @@ export function FeedbackForm({
             <FeedbackPointList label="Strengths in teaching" points={feedback.strengths_teaching as FeedbackPoint[]} />
             <FeedbackPointList label="Action points in teaching" points={feedback.action_points_teaching as FeedbackPoint[]} />
             <ReadOnlyField label="Overall comment" value={feedback.overall_comment} />
+            <ReadOnlyField label="Your comment on their self-evaluation" value={feedback.self_eval_comment} />
             <p className="text-xs text-muted">
               ★ Starred action points carry into the Personal Aims of the TP{tpNumber + 1} plan.
             </p>

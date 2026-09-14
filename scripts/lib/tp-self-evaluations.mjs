@@ -60,3 +60,28 @@ const SETS = [
 export function selfEvaluationFor(candidateIndex, tpNumber) {
   return SETS[(candidateIndex + tpNumber) % SETS.length];
 }
+
+// --- The tutor's reply to it ----------------------------------------------
+//
+// `tp_feedback.self_eval_comment` is written in step 3 of the tutor's form,
+// saved by the action, and read on the candidate's page, in the assembled
+// document and in the PDF record -- a complete chain that had never once been
+// used, so it was invisible on every seeded lesson and looked unbuilt.
+//
+// Indexed to match SETS: a reply that does not answer what the candidate
+// actually wrote would be worse than none, because this is the one place the
+// tutor responds to the candidate's own account rather than to the lesson.
+
+const REPLIES = [
+  `Your reading of the clarification stage is the right one, and it is the more useful thing to have noticed -- the over-running was a symptom. Watch what you do when they have already got it: you added examples because the silence felt early, not because they needed them.`,
+  `Agreed about the pair check, and your fix is the right one. I would add that you already had the ingredients: you noticed while monitoring that two pairs disagreed about question 4, and that was the moment to send them to each other rather than to the answer key.`,
+  `The board is the fair criticism and I am glad you got there first. One thing you undersold: you let the mingle run without intervening, which most people cannot do at TP1 -- the instinct is to rescue, and you resisted it.`,
+  `You are right that you spoke too much, though I would put it slightly differently: the problem was not quantity, it was that you answered questions you had not yet asked. The correction slot was genuinely good and you should say so.`,
+  `A fair and specific evaluation. The point about the stronger half already knowing it is exactly right, and it is a needs-analysis observation rather than a teaching one -- bring that to the Focus on the Learner assignment, it is the sort of evidence that assignment wants.`,
+  `Honest, and the honesty about thin evidence is worth more than a confident claim would have been. Your fix -- writing the concept questions with their answers into the plan -- is the right one, and I want to see it in the TP{next} plan rather than in the lesson.`,
+];
+
+/** The tutor's reply to that candidate's self-evaluation, for that TP. */
+export function selfEvalReplyFor(candidateIndex, tpNumber) {
+  return REPLIES[(candidateIndex + tpNumber) % REPLIES.length].replace("TP{next}", `TP${tpNumber + 1}`);
+}

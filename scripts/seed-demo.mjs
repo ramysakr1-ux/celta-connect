@@ -27,7 +27,7 @@ import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
 import { criteriaMarks } from "./lib/assignment-criteria-keys.mjs";
 import { submissionFor, overallCommentFor } from "./lib/assignment-submissions.mjs";
-import { selfEvaluationFor } from "./lib/tp-self-evaluations.mjs";
+import { selfEvaluationFor, selfEvalReplyFor } from "./lib/tp-self-evaluations.mjs";
 import { appendicesFor } from "./lib/assignment-appendix-materials.mjs";
 import { renderAppendixPdf } from "./lib/appendix-pdf.mjs";
 
@@ -1474,6 +1474,12 @@ async function main() {
           : grade === "above_standard"
             ? "Above the standard expected at this stage -- a well-staged lesson in which the learners did the work. Keep building on this."
             : "A confident, well-paced lesson that met the standard for this stage -- keep building on this.",
+      // Step 3 of the tutor's form collects this, the action saves it, and
+      // the candidate's page, the assembled document and the PDF record all
+      // read it -- a complete chain that no seeded lesson had ever used, so
+      // the feature was invisible and looked unbuilt. It answers what THIS
+      // candidate actually wrote in THIS self-evaluation.
+      self_eval_comment: selfEvalReplyFor(traineeDefs.findIndex((d) => trainees[d.name] === traineeId), tpNumber),
       submitted_at: at(),
     });
 
