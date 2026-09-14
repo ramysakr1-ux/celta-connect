@@ -239,7 +239,7 @@ export async function duplicateCourse(
 
   const { data: source } = await supabase
     .from("courses")
-    .select("id, center_id, start_date, delivery_mode")
+    .select("id, center_id, start_date, delivery_mode, time_bands")
     .eq("id", sourceCourseId)
     .maybeSingle();
   if (!source || !(await holdsCentre(admin, source.center_id))) {
@@ -259,6 +259,10 @@ export async function duplicateCourse(
       end_date: endDate,
       duplicated_from_course_id: source.id,
       delivery_mode: source.delivery_mode,
+      // The day's shape is part of the course being duplicated. Without it
+      // a centre teaching to its own band times got the default grid back
+      // and every session landed in the wrong column.
+      time_bands: source.time_bands,
     })
     .select("id")
     .single();
@@ -274,7 +278,9 @@ export async function duplicateCourse(
   // wants to tweak it.
   const { data: events } = await supabase
     .from("course_timetable_events")
-    .select("id, type, title, event_date, event_time, tag, linked_assignment_type, linked_tp_number")
+    .select(
+      "id, type, title, detail, event_date, event_time, tag, linked_assignment_type, linked_tp_number, input_session_criteria, registry_slug, shares_materials, mode, is_asynchronous, linked_live_session_event_id"
+    )
     .eq("course_id", source.id);
 
   // Old event id -> new event id, by insert-row-order (a single multi-row
@@ -285,15 +291,32 @@ export async function duplicateCourse(
   // depends on.
   const newEventIdByOldId = new Map<string, string>();
   if (events && events.length > 0) {
+    // What a duplicate carries is everything about the SESSION, and nothing
+    // about the running of it. Walked 14 Sep 2026: it used to carry seven
+    // columns, so "the exact same course again" arrived with no subtitles,
+    // no criteria on any input session, no link from a slot to the
+    // interactive session it opens, no materials flags and no teaching
+    // modes -- a hollow shape of the timetable it came from.
+    //
+    // Deliberately NOT carried: Zoom links (a new course meets in new
+    // meetings), registers and attendance (they belong to sessions that
+    // happened), and tp_group_scope_id -- a duplicate has no groups yet, so
+    // there is nothing for it to point at.
     const rows = events.map((e) => ({
       course_id: newCourse.id,
       type: e.type,
       title: e.title,
+      detail: e.detail,
       event_date: addDays(startDate, daysBetween(source.start_date, e.event_date)),
       event_time: e.event_time,
       tag: e.tag,
       linked_assignment_type: e.linked_assignment_type,
       linked_tp_number: e.linked_tp_number,
+      input_session_criteria: e.input_session_criteria,
+      registry_slug: e.registry_slug,
+      shares_materials: e.shares_materials,
+      mode: e.mode,
+      is_asynchronous: e.is_asynchronous,
       created_by: admin.id,
     }));
     const { data: newEvents } = await supabase.from("course_timetable_events").insert(rows).select("id");
@@ -301,6 +324,23 @@ export async function duplicateCourse(
       events.forEach((e, i) => {
         if (newEvents[i]) newEventIdByOldId.set(e.id, newEvents[i].id);
       });
+      // An asynchronous input session must point at the live follow-up slot
+      // that goes with it (Handbook 3.4) -- which only exists as a new row
+      // once the insert above has run, so the link is written in a second
+      // pass onto the new course's own copy of that slot.
+      await Promise.all(
+        events
+          .filter((e) => e.linked_live_session_event_id && newEventIdByOldId.has(e.id))
+          .map((e) => {
+            const newFollowUp = newEventIdByOldId.get(e.linked_live_session_event_id!);
+            if (!newFollowUp) return Promise.resolve();
+            return supabase
+              .from("course_timetable_events")
+              .update({ linked_live_session_event_id: newFollowUp })
+              .eq("id", newEventIdByOldId.get(e.id)!)
+              .then(() => undefined);
+          })
+      );
     }
   }
 

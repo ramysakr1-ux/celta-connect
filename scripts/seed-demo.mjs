@@ -3134,6 +3134,11 @@ async function main() {
         linked_tp_number: e.tpNumber ?? null,
         tp_group_scope_id: e.scope ?? null,
         zoom_url: e.zoomUrl ?? null,
+        // The webhook matches a live Zoom session to its timetable row by
+        // this id (migration 0200), and only addTimetableEvent was filling
+        // it -- so every seeded session with a Zoom link could never
+        // auto-record attendance. Walked 14 Sep 2026.
+        zoom_meeting_id: (e.zoomUrl ?? "").match(/zoom\.us\/j\/(\d+)/i)?.[1] ?? null,
         // Which non-TP sessions volunteer students may see materials for --
         // the demo lesson, the unassessed teach and the introduction, so the
         // Share materials page has something to show (5 Sep 2026).
