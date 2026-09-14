@@ -16,16 +16,6 @@ import { formatCalendarDate } from "@/lib/format-date";
 // From the design file, verbatim.
 const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
 const ROW_HEIGHT = 108;
-/**
- * Ramy, 12 Sep 2026: "the tiles ... they're supposed to be fixed
- * dimensions", and again on 14 Sep: "make sure the size is consistent."
- * A card's height was whatever its text came to, so a row ran 51px beside
- * 103px beside 149px. Every session card is this tall now whatever it says;
- * the title and the subtitle each get two lines, and the join chip sits on
- * the floor. Lunch and the deadline column are deliberately their own
- * shapes -- lunch recedes by design, a deadline is not a session.
- */
-const TILE_HEIGHT = 118;
 
 function CameraIcon() {
   return (
@@ -96,11 +86,6 @@ export interface ReadOnlyBoardProps {
   nowIso: string;
   timeZone: string;
 }
-
-/** The order a band's cards read in, when one band holds more than one kind
- *  of thing: what the whole group does, then the group room, then what a
- *  candidate books for themselves, then admin, then lunch. */
-const CARD_ORDER: DisplayCategory[] = ["wg", "rm", "iw", "admin", "lu"];
 
 const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
 
@@ -466,60 +451,37 @@ function Cell({
     // In a mixed card, "Mine" now keeps only the events that are yours. A
     // card where nothing is yours still fades whole rather than emptying, so
     // the day keeps its shape.
-    //
-    // Ramy, 14 Sep 2026: "I can see things like consultation and another
-    // input session, somehow they are mirrored together." A whole-group
-    // input session and a bookable consultation were fusing into one card
-    // wearing the first one's colour -- two different audiences reading as
-    // one session. Things of the SAME kind still share a card (the plenary
-    // followed by an announcement this was built for); different kinds get
-    // their own card, in the order the day runs: teaching, then the room,
-    // then what you book, then admin, then lunch.
-    const byCategory = new Map<DisplayCategory, TimetableEvent[]>();
-    for (const event of events) {
-      const cat = toDisplayCategory(categorize(event));
-      byCategory.set(cat, [...(byCategory.get(cat) ?? []), event]);
-    }
-    const cards = [...byCategory.entries()].sort((a, b) => CARD_ORDER.indexOf(a[0]) - CARD_ORDER.indexOf(b[0]));
+    const mine = events.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
+    const shown = mineOnly && mine ? events.filter((e) => (eventMeta[e.id] ?? EMPTY_META).mine) : events;
+    const displayCat = toDisplayCategory(categorize(shown[0] ?? events[0]));
+    const style = CATEGORY_STYLE[displayCat];
+    const faded = mineOnly && !mine;
     return (
-      <div className="flex flex-col gap-1.5">
-        {cards.map(([displayCat, cardEvents]) => {
-          const style = CATEGORY_STYLE[displayCat];
-          const mine = cardEvents.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
-          const shown = mineOnly && mine ? cardEvents.filter((e) => (eventMeta[e.id] ?? EMPTY_META).mine) : cardEvents;
-          const faded = mineOnly && !mine;
-          return (
-            <div
-              key={displayCat}
-              className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
-              style={{
-                height: displayCat === "lu" || displayCat === "admin" ? undefined : TILE_HEIGHT,
-                overflow: "hidden",
-                opacity: faded ? 0.25 : 1,
-                backdropFilter: "blur(10px)",
-                border: "1px solid oklch(100% 0 0 / 0.75)",
-                borderTop: `2.5px solid ${style.accent}`,
-                boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
-                background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
-              }}
-            >
-              {shown.map((event) => (
-                <SessionTile
-                  key={event.id}
-                  event={event}
-                  meta={eventMeta[event.id] ?? EMPTY_META}
-                  now={now}
-                  timeZone={timeZone}
-                  timeBands={timeBands}
-                  mineOnly={mineOnly}
-                  onSelect={onSelect}
-                  titleWeight={style.titleWeight}
-                  displayCat={displayCat}
-                />
-              ))}
-            </div>
-          );
-        })}
+      <div
+        className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
+        style={{
+          opacity: faded ? 0.25 : 1,
+          backdropFilter: "blur(10px)",
+          border: "1px solid oklch(100% 0 0 / 0.75)",
+          borderTop: `2.5px solid ${style.accent}`,
+          boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
+          background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
+        }}
+      >
+        {shown.map((event) => (
+          <SessionTile
+            key={event.id}
+            event={event}
+            meta={eventMeta[event.id] ?? EMPTY_META}
+            now={now}
+            timeZone={timeZone}
+            timeBands={timeBands}
+            mineOnly={mineOnly}
+            onSelect={onSelect}
+            titleWeight={style.titleWeight}
+            displayCat={displayCat}
+          />
+        ))}
       </div>
     );
   }
@@ -546,8 +508,6 @@ function Cell({
             key={event.id}
             className="min-w-0 rounded-[10px] p-2 transition-opacity duration-150"
             style={{
-              height: TILE_HEIGHT,
-              overflow: "hidden",
               opacity: faded ? 0.25 : 1,
               backdropFilter: "blur(10px)",
               border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -601,29 +561,18 @@ function SessionTile({
   const live = isEventLive(event, now, timeZone, timeBands);
 
   return (
-    <button type="button" onClick={() => onSelect(event)} className="flex h-full min-h-0 w-full flex-col items-start gap-1 text-left">
-      <span
-        className="text-[11.5px] leading-snug text-ink"
-        style={{ fontWeight: titleWeight, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
-      >
+    <button type="button" onClick={() => onSelect(event)} className="flex flex-col items-start gap-1 text-left">
+      <span className="text-[11.5px] leading-snug text-ink" style={{ fontWeight: titleWeight }}>
         {event.title}
       </span>
-      {event.detail ? (
-        <span className="w-full truncate text-[10px] text-muted" title={event.detail}>
-          {event.detail}
-        </span>
-      ) : null}
+      {event.detail ? <span className="text-[10px] text-muted">{event.detail}</span> : null}
       {letters || groupName || event.event_time ? (
         <span className="text-[10px] text-muted">
           {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
       {youTeach ? <span className="pill pill-neutral text-[9px]">You teach</span> : null}
-      {showCamera ? (
-        <span className="mt-auto">
-          <CameraChip event={event} live={live} mine={mine} />
-        </span>
-      ) : null}
+      {showCamera ? <CameraChip event={event} live={live} mine={mine} /> : null}
     </button>
   );
 }
