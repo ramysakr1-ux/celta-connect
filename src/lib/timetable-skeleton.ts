@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/types";
+import { bandIndexFor, type TimeBand } from "@/lib/timetable-grid";
 
 type EventType = Database["public"]["Tables"]["course_timetable_events"]["Row"]["type"];
 type AssignmentType = Database["public"]["Tables"]["assignments"]["Row"]["assignment_type"];
@@ -138,7 +139,10 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     type: "input_session",
     title: "Classroom management",
     position: pos(0),
-    time: "10:00",
+    // Was 10:00, on top of the orientation that opens the course -- two
+    // whole-group sessions in one band, generated into every new timetable
+    // (walked 14 Sep 2026). The band after it, as on the real demo course.
+    time: "10:45",
     tag: "whole_group",
     inputSessionCriteria: ["5b", "5d", "5f", "5i", "5j", "5k", "4g", "1d"],
   },
@@ -220,7 +224,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["3a", "3b", "4c"],
   },
-  { type: "milestone", title: "Language Skills Related Tasks released", position: pos(3), time: "17:00", tag: "whole_group", linkedAssignmentType: "Skills" },
+  { type: "assignment_due", title: "Language Skills Related Tasks released", position: pos(3), time: "09:00", tag: "whole_group", linkedAssignmentType: "Skills" },
   { type: "tp", title: "TP2 -- Day B", position: pos(4), time: "10:00", tag: "individual", linkedTpNumber: 2 },
   {
     // "overlaps with Language analysis 1 on 4i" (Ramy) -- both rows below
@@ -301,7 +305,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP4 -- Day B", position: pos(8), time: "10:00", tag: "individual", linkedTpNumber: 4 },
   { type: "milestone", title: "Filmed observation 4", position: pos(8), time: "17:00", tag: "individual", detail: "With task" },
-  { type: "milestone", title: "Language Related Tasks released", position: pos(8), time: "17:00", tag: "whole_group", linkedAssignmentType: "LRT" },
+  { type: "assignment_due", title: "Language Related Tasks released", position: pos(8), time: "09:00", tag: "whole_group", linkedAssignmentType: "LRT" },
 
   // Day 9 (Fri) -- no TP: demo lesson 2 / new level, FOL's divergence
   // session (comparing pooled notes before claiming), LRT due for both
@@ -369,7 +373,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "Skills",
   },
   { type: "tp", title: "TP6 -- Day B", position: pos(13), time: "10:00", tag: "individual", linkedTpNumber: 6 },
-  { type: "milestone", title: "Lessons from the Classroom released", position: pos(13), time: "17:00", tag: "whole_group", linkedAssignmentType: "LfC" },
+  { type: "assignment_due", title: "Lessons from the Classroom released", position: pos(13), time: "09:00", tag: "whole_group", linkedAssignmentType: "LfC" },
 
   // Day 14 (Fri) -- no TP: syllabus planning, FOL resubmission due.
   { type: "input_session", title: "Syllabus planning", position: pos(14), time: "10:00", tag: "whole_group" },
@@ -506,7 +510,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   },
 
   { type: "tp", title: "TP1 -- Group ABC", position: partTimePos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
-  { type: "milestone", title: "Language Skills Related Tasks released", position: partTimePos(2), time: "17:00", tag: "whole_group", linkedAssignmentType: "Skills" },
+  { type: "assignment_due", title: "Language Skills Related Tasks released", position: partTimePos(2), time: "09:00", tag: "whole_group", linkedAssignmentType: "Skills" },
   {
     type: "input_session",
     title: "Lesson planning input",
@@ -596,7 +600,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP4 -- Group DEF", position: partTimePos(9), time: "10:00", tag: "individual", linkedTpNumber: 4 },
   { type: "milestone", title: "Filmed observation 2", position: partTimePos(9), time: "17:00", tag: "individual", detail: "With task" },
-  { type: "milestone", title: "Language Related Tasks released", position: partTimePos(9), time: "17:00", tag: "whole_group", linkedAssignmentType: "LRT" },
+  { type: "assignment_due", title: "Language Related Tasks released", position: partTimePos(9), time: "09:00", tag: "whole_group", linkedAssignmentType: "LRT" },
   {
     type: "input_session",
     title: "Language analysis 1",
@@ -672,7 +676,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "Skills",
   },
   { type: "tp", title: "TP7 -- Group DEF", position: partTimePos(17), time: "10:00", tag: "individual", linkedTpNumber: 7 },
-  { type: "milestone", title: "Lessons from the Classroom released", position: partTimePos(17), time: "17:00", tag: "whole_group", linkedAssignmentType: "LfC" },
+  { type: "assignment_due", title: "Lessons from the Classroom released", position: partTimePos(17), time: "09:00", tag: "whole_group", linkedAssignmentType: "LfC" },
 
   // TP8 -- the final assessed lesson for each group.
   { type: "tp", title: "TP8 -- Group ABC, final assessed", position: partTimePos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
@@ -833,3 +837,44 @@ export function buildSkeletonEvents(
  * drilling" is the seed's "Drilling technique"), and both spellings are
  * mapped in src/lib/input-session-registry-links.ts.
  */
+
+
+/**
+ * Puts a generated skeleton on the course's own time bands.
+ *
+ * The drafts above carry hand-authored times (14:30, 16:00, 17:00, 13:45)
+ * from a band set no course actually uses, so a freshly generated timetable
+ * printed a time on every card that disagreed with the column it sat in --
+ * bandIndexFor clamps it into the nearest band, and the cell then has to
+ * spell out the real time (overridesband). Snapped to the course's bands
+ * instead, which is what a starting point should be; the MCT moves anything
+ * they want afterwards.
+ *
+ * Due dates keep their own time: they live in the Admin column by type, not
+ * by band, and 09:00 is the deadline itself, not a session.
+ *
+ * Where snapping would land a session in a band that already has a different
+ * session that day, it takes the next free band -- generating a double
+ * booking is worse than moving something an hour.
+ */
+export function snapSkeletonToBands<T extends { event_date: string; event_time: string | null; type: string; title: string }>(
+  events: T[],
+  timeBands: TimeBand[]
+): T[] {
+  const isSession = (e: T) => e.type === "tp" || e.type === "input_session" || e.type === "supervised_session" || e.type === "milestone";
+  const takenByDate = new Map<string, Map<number, string>>();
+  const ordered = [...events].sort((a, b) =>
+    a.event_date === b.event_date ? (a.event_time ?? "").localeCompare(b.event_time ?? "") : a.event_date.localeCompare(b.event_date)
+  );
+  const snappedById = new Map<T, string>();
+  for (const event of ordered) {
+    if (!event.event_time || !isSession(event)) continue;
+    let index = bandIndexFor(event.event_time, timeBands);
+    const taken = takenByDate.get(event.event_date) ?? new Map<number, string>();
+    while (index < timeBands.length - 1 && taken.has(index) && taken.get(index) !== event.title) index += 1;
+    taken.set(index, event.title);
+    takenByDate.set(event.event_date, taken);
+    snappedById.set(event, timeBands[index].start);
+  }
+  return events.map((event) => (snappedById.has(event) ? { ...event, event_time: snappedById.get(event)! } : event));
+}

@@ -5,9 +5,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { resolveTimeBands } from "@/lib/timetable-grid";
 import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
 import { isMctOnCourse } from "@/lib/course-mct";
-import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "@/lib/timetable-skeleton";
+import { snapSkeletonToBands, buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "@/lib/timetable-skeleton";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
@@ -326,7 +327,11 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
     return { error: "The timetable already has events -- clear them first to regenerate the skeleton." };
   }
 
-  const events = buildSkeletonEvents(startDate, totalTeachingDays, meetingDays, skeletonDrafts).map((event) => ({
+  const { data: courseBands } = await supabase.from("courses").select("time_bands").eq("id", trainer.course_id).maybeSingle();
+  const events = snapSkeletonToBands(
+    buildSkeletonEvents(startDate, totalTeachingDays, meetingDays, skeletonDrafts),
+    resolveTimeBands(courseBands?.time_bands)
+  ).map((event) => ({
     ...event,
     course_id: trainer.course_id!,
     created_by: trainer.id,

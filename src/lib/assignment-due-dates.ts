@@ -61,11 +61,30 @@ interface TimetableDue {
   half: 1 | 2 | null;
 }
 
-/** "· ABC" names the first half (Day A), "· DEF" the second -- letters are per group. */
+/**
+ * "· ABC" names the first half (Day A), "· DEF" the second -- letters are per
+ * group. The generated skeleton says it the other way round, "(Day A)" /
+ * "(Day B)", which this did not recognise: both of its Skills deadlines then
+ * read as addressed to nobody in particular, so the earlier of the two
+ * became every candidate's deadline, whichever day they actually teach on
+ * (walked 14 Sep 2026).
+ */
 export function halfFromTitle(title: string): 1 | 2 | null {
-  if (/\bABC\b/i.test(title)) return 1;
-  if (/\bDEF\b/i.test(title)) return 2;
+  if (/\bABC\b/i.test(title) || /\bDay A\b/i.test(title)) return 1;
+  if (/\bDEF\b/i.test(title) || /\bDay B\b/i.test(title)) return 2;
   return null;
+}
+
+/**
+ * A timetable row that announces an assignment being SET is not a deadline,
+ * even though it is typed `assignment_due` so it sits in the Admin column
+ * beside the real one. Without this, "Assignment 3 (Skills) set" on day 9
+ * and "Assignment 3 (Skills) due" on day 16 both counted, the earlier date
+ * won the tie, and the next timetable edit would have made every Skills
+ * assignment due the day it was handed out.
+ */
+function announcesRatherThanCloses(title: string): boolean {
+  return /\b(set|released|briefed)\b/i.test(title) && !/\bdue\b/i.test(title);
 }
 
 /**
@@ -138,7 +157,7 @@ export async function resolveAssignmentDueDates(
 
   // The timetable's own word on due dates -- wins wherever it speaks.
   const timetableDue: TimetableDue[] = (allEvents ?? [])
-    .filter((e) => e.type === "assignment_due" && e.linked_assignment_type)
+    .filter((e) => e.type === "assignment_due" && e.linked_assignment_type && !announcesRatherThanCloses(e.title ?? ""))
     .map((e) => ({ type: e.linked_assignment_type as string, date: e.event_date, tpGroupId: e.tp_group_scope_id ?? null, half: halfFromTitle(e.title ?? "") }));
   const fromTimetable = (type: string, trainee: TraineeGroupInfo) => timetableDueFor(timetableDue, type, trainee);
 
