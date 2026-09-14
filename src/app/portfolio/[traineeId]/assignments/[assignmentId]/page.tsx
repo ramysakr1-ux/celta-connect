@@ -161,6 +161,12 @@ export default async function AssignmentDetailPage({
   const notYetOpen = !isStaff && Boolean(clock) && !clock!.isOpen(assignment.assignment_type);
   const dueDay = clock?.dayOf(assignment.due_date) ?? null;
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
+  // A marked round's comments ARE the feedback. Handbook 9.2.2 asks for
+  // written feedback "as appropriate", not only when a candidate has to
+  // rewrite -- and the marking screen already tells the tutor their overall
+  // comment appears on this page, which until now it never did.
+  const roundMarked = roundStatus === "approved" || roundStatus === "resubmission_required";
+  const tutorOverall = round === "resubmission" ? assignment.resubmission_overall_comment : assignment.first_overall_comment;
 
   const result = resolveAssignmentResult(assignment);
   const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";
@@ -245,6 +251,8 @@ export default async function AssignmentDetailPage({
             intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
             format={template.format}
+            tutorOverall={roundMarked ? tutorOverall : null}
+            showComments={roundMarked}
             appendices={appendicesForRound(round)}
             centerId={trainee.center_id}
             traineeId={traineeId}
@@ -279,6 +287,8 @@ export default async function AssignmentDetailPage({
             intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
             sanction={assignment.assignment_type === "Plagiarism Reflection"}
             format={template.format}
+            tutorOverall={roundMarked ? tutorOverall : null}
+            showComments={roundMarked}
             appendices={appendicesForRound(round)}
             centerId={trainee.center_id}
             traineeId={traineeId}

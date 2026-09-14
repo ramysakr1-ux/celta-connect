@@ -109,6 +109,8 @@ export function AssignmentAuthoringForm({
   wordMax = 1000,
   format = "prose",
   sanction = false,
+  tutorOverall = null,
+  showComments = false,
   savedAt = null,
   notYetOpen = false,
   opensOnDay = null,
@@ -140,6 +142,17 @@ export function AssignmentAuthoringForm({
   format?: "structured" | "prose";
   /** True for the plagiarism reflection: garnet throughout, not one of the four. */
   sanction?: boolean;
+  /**
+   * The tutor's overall comment on the round being shown. The marking screen
+   * tells the tutor it "appears under Before you start on the candidate's
+   * page" -- until 14 Sep 2026 the candidate's page never read the column at
+   * all, so the main piece of written feedback on every marked assignment
+   * went nowhere. Handbook 9.2.2: "Oral and written feedback should be given
+   * as appropriate" -- not only when they have to rewrite it.
+   */
+  tutorOverall?: string | null;
+  /** The round on show has been marked, so its comments are feedback now. */
+  showComments?: boolean;
   savedAt?: string | null;
   /**
    * §7 -- readable, not writable: the course timetable has not reached the
@@ -355,6 +368,22 @@ export function AssignmentAuthoringForm({
               {scopeNote ? (
                 <p style={{ fontSize: 12.5, lineHeight: 1.55, color: GARNET, textWrap: "pretty" }}>{scopeNote}</p>
               ) : null}
+              {tutorOverall ? (
+                <div
+                  className="mt-1"
+                  style={{
+                    borderRadius: 8,
+                    borderLeft: `3px solid ${TEAL}`,
+                    background: `color-mix(in oklab, ${TEAL} 9%, transparent)`,
+                    padding: "9px 12px",
+                  }}
+                >
+                  <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                    Your tutor, on the whole assignment
+                  </p>
+                  <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{tutorOverall}</p>
+                </div>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-2" style={{ borderLeft: `1px solid ${FAINT}`, padding: "16px 26px 18px 22px" }}>
@@ -421,7 +450,23 @@ export function AssignmentAuthoringForm({
                 const words = notYetOpen ? 0 : wordCount(value);
                 const written = words > 0;
                 const hue = hueFor(i);
-                const comment = isResubmission ? responseByKey.get(s.key)?.first_comments : null;
+                const resp = responseByKey.get(s.key);
+                // Two different jobs. On a resubmission, round 1's comment is what
+                // they rewrite FROM. On any marked round, that round's own comment
+                // is their feedback -- and a pass used to hide it, so a tutor's
+                // "good use of examples from your own lessons" was written and
+                // never read. Handbook 9.2.2.
+                const priorComment = isResubmission ? resp?.first_comments : null;
+                const comment = showComments
+                  ? (isResubmission ? resp?.resubmission_comments : resp?.first_comments)
+                  : null;
+                // On a marked resubmission both rounds have something to say,
+                // and they are different things; on a first round there is
+                // only ever one. Identical text is not shown twice.
+                const tutorNotes = [
+                  { label: "Your tutor, on this section · round 1", text: priorComment },
+                  { label: `Your tutor, on this section${isResubmission ? " · round 2" : ""}`, text: comment },
+                ].filter((c, i, all) => Boolean(c.text) && all.findIndex((o) => o.text === c.text) === i);
                 return (
                   <div
                     key={s.key}
@@ -488,21 +533,22 @@ export function AssignmentAuthoringForm({
                     </div>
 
                     <div className="flex flex-col gap-3" style={{ borderLeft: `1px solid ${FAINT}`, padding: "14px 0 18px 20px" }}>
-                      {comment ? (
-                        <div
-                          style={{
-                            borderRadius: 7,
-                            borderLeft: `3px solid ${TEAL}`,
-                            background: `color-mix(in oklab, ${TEAL} 9%, transparent)`,
-                            padding: "8px 11px",
-                          }}
-                        >
-                          <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
-                            Your tutor, on this section · round 1
-                          </p>
-                          <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{comment}</p>
-                        </div>
-                      ) : null}
+                      {tutorNotes.map((c) => (
+                          <div
+                            key={c.label}
+                            style={{
+                              borderRadius: 7,
+                              borderLeft: `3px solid ${TEAL}`,
+                              background: `color-mix(in oklab, ${TEAL} 9%, transparent)`,
+                              padding: "8px 11px",
+                            }}
+                          >
+                            <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                              {c.label}
+                            </p>
+                            <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{c.text}</p>
+                          </div>
+                        ))}
 
                       {notYetOpen ? (
                         <p className="italic" style={{ fontSize: 13, lineHeight: 1.55, color: CLOSED_INK }}>
