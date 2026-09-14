@@ -558,7 +558,12 @@ export default async function TrainerTimetablePage({
     const otherGroup = Boolean(
       !isAssessorViewer && event.type === "tp" && event.tp_group_scope_id && ownedGroupIds.size > 0 && !ownedGroupIds.has(event.tp_group_scope_id)
     );
-    eventMeta[event.id] = { mine, otherGroup, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
+    // Ramy, 15 Sep 2026: "show the group name on the TP card." Two groups
+    // teach the same three slots at the same times, so without it two cards
+    // in a band read as the same lesson twice. The candidate's board has
+    // carried it since 12 Sep; the tutor's never did.
+    const groupName = event.type === "tp" && event.tp_group_scope_id ? ((tpGroups ?? []).find((g) => g.id === event.tp_group_scope_id)?.name ?? null) : null;
+    eventMeta[event.id] = { mine, otherGroup, groupName, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
       sheetHref: sheetHrefByEventId.get(event.id) ?? registerHref,
       sheetLabel: sheetHrefByEventId.has(event.id) ? undefined : registerHref ? "Take the register" : undefined,
     };
