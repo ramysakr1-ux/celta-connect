@@ -723,9 +723,9 @@ export default async function TpDetailPage({
                 <div className="mt-3 flex flex-col gap-3">
                   <ReadOnlyField label="What went to plan?" value={selfEvaluation.what_went_well} />
                   <ReadOnlyField label="What didn't go as planned, and why?" value={selfEvaluation.what_not_as_planned} />
-                  <ReadOnlyField label="Evidence of learning" value={selfEvaluation.evidence_of_learning} />
-                  <ReadOnlyField label="What I'd do differently" value={selfEvaluation.what_differently} />
-                  <ReadOnlyField label="Focus for next TP" value={selfEvaluation.next_tp_focus} />
+                  <ReadOnlyField label="What evidence did you see that the learners had learnt?" value={selfEvaluation.evidence_of_learning} />
+                  <ReadOnlyField label="What would you do differently if you taught it again?" value={selfEvaluation.what_differently} />
+                  <ReadOnlyField label="What do you want to work on in the next TP?" value={selfEvaluation.next_tp_focus} />
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-muted">Not submitted yet.</p>

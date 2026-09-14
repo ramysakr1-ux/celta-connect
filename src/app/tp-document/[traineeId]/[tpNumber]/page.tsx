@@ -69,6 +69,13 @@ const SELF_EVAL_QUESTIONS = [
   { key: "what_not_as_planned", label: "What didn't go as planned, and why?", hue: GARNET },
   { key: "evidence_of_learning", label: "What evidence did you see that the learners had learnt?", hue: INK_WARM },
   { key: "what_differently", label: "What would you do differently if you taught it again?", hue: GOLD_INK },
+  // The candidate's own priority for the next lesson, written before they
+  // read the tutor's -- the form is explicit about that ("Your own
+  // priorities, before you read your tutor's"), which makes it the one
+  // self-evaluation answer that carries forward. The assembled document,
+  // which is the RECORD of the TP, left it out (found 14 Sep 2026 reading
+  // the document rather than asserting on it).
+  { key: "next_tp_focus", label: "What do you want to work on in the next TP?", hue: TEAL },
 ] as const;
 
 export default async function AssembledDocumentPage({

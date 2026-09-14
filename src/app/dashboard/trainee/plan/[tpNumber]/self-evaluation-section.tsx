@@ -92,10 +92,10 @@ export function SelfEvaluationSection({
         <div className="mt-4 flex flex-col gap-3">
           <ReadOnlyField label="What went to plan?" value={selfEvaluation.what_went_well} />
           <ReadOnlyField label="What didn't go as planned, and why?" value={selfEvaluation.what_not_as_planned} />
-          <ReadOnlyField label="Evidence of learning" value={selfEvaluation.evidence_of_learning} />
-          <ReadOnlyField label="What I'd do differently" value={selfEvaluation.what_differently} />
+          <ReadOnlyField label="What evidence did you see that the learners had learnt?" value={selfEvaluation.evidence_of_learning} />
+          <ReadOnlyField label="What would you do differently if you taught it again?" value={selfEvaluation.what_differently} />
           <ActionPointsReadOnly points={selfEvaluation.action_points} />
-          <ReadOnlyField label="Focus for next TP" value={selfEvaluation.next_tp_focus} />
+          <ReadOnlyField label="What do you want to work on in the next TP?" value={selfEvaluation.next_tp_focus} />
         </div>
       </div>
 
@@ -112,6 +112,16 @@ export function SelfEvaluationSection({
             <FeedbackPointList label="Action points in teaching" points={feedback.action_points_teaching} />
             <ReadOnlyField label="Overall comment" value={feedback.overall_comment} />
             <ReadOnlyField label="Comment on your self-evaluation" value={feedback.self_eval_comment} />
+            {/* The star means something, and only the printed document said
+                what. A candidate reading this on screen saw an unexplained
+                symbol against the points that matter most. */}
+            {[...feedback.action_points_planning, ...feedback.action_points_teaching].some(
+              (p) => (p as FeedbackPoint).starred
+            ) ? (
+              <p className="text-xs text-muted">
+                ★ Starred action points carry into the Personal Aims of your TP{tpNumber + 1} plan.
+              </p>
+            ) : null}
           </div>
         </div>
       ) : (
@@ -124,7 +134,7 @@ export function SelfEvaluationSection({
   );
 }
 
-function ReadOnlyField({ label, value }: { label: string; value?: string | null }) {
+export function ReadOnlyField({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
     <div>
@@ -169,7 +179,7 @@ function ActionPointsReadOnly({ points }: { points: SelfEvalActionPoint[] }) {
   );
 }
 
-function FeedbackPointList({ label, points }: { label: string; points: FeedbackPoint[] }) {
+export function FeedbackPointList({ label, points }: { label: string; points: FeedbackPoint[] }) {
   if (points.length === 0) return null;
   return (
     <div>

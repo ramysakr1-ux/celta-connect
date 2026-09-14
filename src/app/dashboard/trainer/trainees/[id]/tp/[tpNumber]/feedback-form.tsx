@@ -39,6 +39,7 @@ import type { AnalysisBlock, FeedbackPoint, PlanProcedureRow, ProblemSolutionPai
 import type { Database } from "@/lib/supabase/types";
 import { formatTime } from "@/lib/format-date";
 import { useCentreTimeZone } from "@/components/centre-time-zone";
+import { FeedbackPointList, ReadOnlyField } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-section";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 type TpPlan = Database["public"]["Tables"]["tp_plans"]["Row"];
@@ -139,6 +140,14 @@ export function FeedbackForm({
   }
 
   if (locked) {
+    // Once it was submitted this said "Tutor feedback / Submitted" and the
+    // grade, and nothing else -- so the tutor who WROTE it could never read
+    // it back, on either of their routes. The candidate could; the author
+    // could not. That breaks the ordinary things: preparing TP2's feedback
+    // against TP1's action points, writing a Stage record, a second tutor
+    // reviewing. Handbook 10.2 asks tutors to MAINTAIN "ongoing records of
+    // progress with clear action points", which is hard to do unseen.
+    // Found 14 Sep 2026 reading the tutor's side of a submitted TP.
     return (
       <div className="card p-6">
         <div className="flex items-center justify-between">
@@ -150,6 +159,18 @@ export function FeedbackForm({
         {feedback?.grade ? (
           <div className="mt-2">
             <StandardRatingPill rating={feedback.grade} />
+          </div>
+        ) : null}
+        {feedback ? (
+          <div className="mt-4 flex flex-col gap-4">
+            <FeedbackPointList label="Strengths in planning" points={feedback.strengths_planning as FeedbackPoint[]} />
+            <FeedbackPointList label="Action points in planning" points={feedback.action_points_planning as FeedbackPoint[]} />
+            <FeedbackPointList label="Strengths in teaching" points={feedback.strengths_teaching as FeedbackPoint[]} />
+            <FeedbackPointList label="Action points in teaching" points={feedback.action_points_teaching as FeedbackPoint[]} />
+            <ReadOnlyField label="Overall comment" value={feedback.overall_comment} />
+            <p className="text-xs text-muted">
+              ★ Starred action points carry into the Personal Aims of the TP{tpNumber + 1} plan.
+            </p>
           </div>
         ) : null}
       </div>
