@@ -555,7 +555,10 @@ export default async function TrainerTimetablePage({
     // about a missing register had no way to submit one (walked 14 Sep
     // 2026). Assessors are read-only here and get no register door.
     const registerHref = event.type === "tp" && !isAssessorViewer ? `/trainer/timetable/register/${event.id}` : null;
-    eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
+    const otherGroup = Boolean(
+      !isAssessorViewer && event.type === "tp" && event.tp_group_scope_id && ownedGroupIds.size > 0 && !ownedGroupIds.has(event.tp_group_scope_id)
+    );
+    eventMeta[event.id] = { mine, otherGroup, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
       sheetHref: sheetHrefByEventId.get(event.id) ?? registerHref,
       sheetLabel: sheetHrefByEventId.has(event.id) ? undefined : registerHref ? "Take the register" : undefined,
     };
@@ -744,6 +747,7 @@ export default async function TrainerTimetablePage({
                   : undefined
               }
               changeHint={isAssessorViewer ? undefined : "use Edit timetable, above, to change anything"}
+              defaultLens={isAssessorViewer ? "everything" : "mine"}
               viewerGroupLabel={viewerGroupLabel}
               today={today}
               nowIso={new Date().toISOString()}

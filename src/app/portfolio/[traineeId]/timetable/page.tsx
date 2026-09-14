@@ -206,6 +206,7 @@ export default async function TraineeTimetablePage({
     string,
     {
       mine: boolean;
+      otherGroup: boolean;
       ownTpSlot: boolean;
       teachingLetters: string | null;
       groupName: string | null;
@@ -218,6 +219,7 @@ export default async function TraineeTimetablePage({
       sheetHref: sheetHrefByEventId.get(event.id) ?? null,
       groupName: event.type === "tp" && event.tp_group_scope_id ? (tpGroupNameById.get(event.tp_group_scope_id) ?? null) : null,
       mine: isMineEvent(event),
+      otherGroup: Boolean(event.type === "tp" && event.tp_group_scope_id && viewerTpGroupId && event.tp_group_scope_id !== viewerTpGroupId),
       ownTpSlot: isOwnTpSlot(event),
       teachingLetters: teachingLettersFor(event),
       volunteerAttendance:

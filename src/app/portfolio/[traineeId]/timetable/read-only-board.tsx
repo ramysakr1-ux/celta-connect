@@ -62,6 +62,13 @@ export interface EventMeta {
   sheetHref?: string | null;
   /** What that door says; defaults to the booking sheet it was built for. */
   sheetLabel?: string;
+  /**
+   * A TP lesson belonging to the OTHER group: same round, same letter,
+   * another room at another level. Not a session this reader could be in,
+   * so under Mine it leaves the grid instead of fading -- fading kept every
+   * TP band two cards tall.
+   */
+  otherGroup?: boolean;
 }
 
 export interface ReadOnlyBoardProps {
@@ -79,12 +86,14 @@ export interface ReadOnlyBoardProps {
   mineMeaning?: string;
   /** What to say about changing the schedule; a tutor is pointed at the editor, not at "your tutor". */
   changeHint?: string;
+  /** Which lens the board opens on. Defaults to the reader's own sessions. */
+  defaultLens?: "mine" | "everything";
   today: string;
   nowIso: string;
   timeZone: string;
 }
 
-const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
+const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null, otherGroup: false };
 
 export function ReadOnlyTimetableBoard({
   events,
@@ -94,6 +103,7 @@ export function ReadOnlyTimetableBoard({
   viewerGroupLabel,
   mineMeaning,
   changeHint,
+  defaultLens,
   today,
   nowIso,
   timeZone,
@@ -106,7 +116,13 @@ export function ReadOnlyTimetableBoard({
     weeks.findIndex((w) => w.rows.some((r) => r.isoDate >= today))
   );
   const [weekIndex, setWeekIndex] = useState(initialWeek === -1 ? 0 : initialWeek);
-  const [mineOnly, setMineOnly] = useState(false);
+  // Ramy, 15 Sep 2026, on a TP band holding two cards with the same title:
+  // "everything is doubled... yesterday was fucked as well." Two groups
+  // teach at the same hour, so Everything shows every slot twice. The board
+  // opens on the reader's own group -- one card per slot -- and Everything
+  // stays one flip away. An assessor's Mine is their visit day alone, so
+  // their board opens on Everything (the page passes the lens in).
+  const [mineOnly, setMineOnly] = useState(defaultLens !== "everything");
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
 
   const week = weeks[weekIndex] ?? weeks[0];
@@ -292,7 +308,9 @@ export function ReadOnlyTimetableBoard({
               bandEvents.map((e) => ({ band: timeBands[i]?.label ?? "", event: e }))
             ),
           ];
-          const visible = rowItems.filter(({ event }) => !mineOnly || (eventMeta[event.id] ?? EMPTY_META).mine);
+          const visible = rowItems.filter(
+            ({ event }) => !mineOnly || ((eventMeta[event.id] ?? EMPTY_META).mine && !(eventMeta[event.id] ?? EMPTY_META).otherGroup)
+          );
           if (visible.length === 0) return null;
           return (
             <div
@@ -407,6 +425,12 @@ export function ReadOnlyTimetableBoard({
   );
 }
 
+/** What a cell shows under the current lens. */
+function visibleIn(events: TimetableEvent[], eventMeta: Record<string, EventMeta>, mineOnly: boolean): TimetableEvent[] {
+  if (!mineOnly) return events;
+  return events.filter((e) => !(eventMeta[e.id] ?? EMPTY_META).otherGroup);
+}
+
 function Cell({
   events,
   eventMeta,
@@ -422,6 +446,7 @@ function Cell({
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
 }) {
+  events = visibleIn(events, eventMeta, mineOnly);
   if (events.length === 0) return null;
 
   // Ramy, 28 Aug 2026: "the master timetable" -- simultaneous TP slots
