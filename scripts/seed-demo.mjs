@@ -1131,12 +1131,18 @@ async function main() {
   console.log("TP library:", BOOKS.length, "coursebooks,", pointCount, "points (3 per round)");
 
   // Per-group schedule: Group A teaches A2 then B1+, Group B the mirror, so the
-  // two groups are at two levels in parallel and swap at TP4 -- every candidate
-  // teaches both (§9.1.2). This is the row assign_tp_round reads to know which
-  // book feeds a group's round.
+  // two groups are at two levels in parallel and swap at TP5 -- four lessons
+  // of 45 minutes at each level, three hours each. Ramy, 15 Sep 2026: "six
+  // hours, eight TPs, every TP forty-five minutes, three hours at each level."
+  // The Handbook asks for at least two hours at each of two levels, one below
+  // intermediate (9.1.2), and puts Stage 2 "after 3 hours' TP and when
+  // candidates are swapping tutors/TP groups" (10.2) -- which is TP5. It used
+  // to swap at TP4 (three lessons at one level, five at the other) and stopped
+  // at TP6. This is the row assign_tp_round reads to know which book feeds a
+  // group's round.
   const SCHEDULE = {
-    "Group A": { 1: "A2", 2: "A2", 3: "A2", 4: "B1+", 5: "B1+", 6: "B1+" },
-    "Group B": { 1: "B1+", 2: "B1+", 3: "B1+", 4: "A2", 5: "A2", 6: "A2" },
+    "Group A": { 1: "A2", 2: "A2", 3: "A2", 4: "A2", 5: "B1+", 6: "B1+", 7: "B1+", 8: "B1+" },
+    "Group B": { 1: "B1+", 2: "B1+", 3: "B1+", 4: "B1+", 5: "A2", 6: "A2", 7: "A2", 8: "A2" },
   };
   for (const [groupName, byTp] of Object.entries(SCHEDULE)) {
     for (const [tp, level] of Object.entries(byTp)) {
@@ -3554,14 +3560,14 @@ async function main() {
       .eq("course_id", course.id)
       .eq("type", "tp");
     // Level per group, read off the schedule the engine also uses. Levels
-    // swap at TP4, matching the per-group course_tp_schedule above, so a
+    // swap at TP5, matching the per-group course_tp_schedule above, so a
     // card's level always agrees with the plan the engine assigned for it.
     // Room numbers used to be written here too ("Room 4 · B1+"); they were
     // invented -- the app has no rooms anywhere -- and Ramy, 15 Sep 2026:
     // "get rid of the rooms."
     const groupNameById = { [tpGroupIds["Group A"]]: "Group A", [tpGroupIds["Group B"]]: "Group B" };
     const firstLevel = { "Group A": "A2", "Group B": "B1+" };
-    const levelForGroupTp = (g, tp) => ((tp ?? 1) <= 3 ? firstLevel[g] : firstLevel[g] === "A2" ? "B1+" : "A2");
+    const levelForGroupTp = (g, tp) => ((tp ?? 1) <= 4 ? firstLevel[g] : firstLevel[g] === "A2" ? "B1+" : "A2");
     for (const e of tpEvents ?? []) {
       const g = groupNameById[e.tp_group_scope_id];
       if (!g) continue;
