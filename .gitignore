@@ -53,3 +53,8 @@ supabase/.temp
 .env.migration
 scripts/migration/rollback-values.json
 .tmp-*
+
+# Scratch directories for walk/verification harnesses — never part of the repo.
+.walk/
+.tmpchk/
+.tz/
