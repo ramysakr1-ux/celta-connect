@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { buildDayRows, bandIndexFor, categorize, isEventLive, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
 import { CATEGORY_STYLE, toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
-import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-timetable-view.md -- read-only 4-week glass-card board,
 // shared by trainee and staff-preview viewers of a trainee's portfolio
@@ -14,13 +13,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 
 
 // From the design file, verbatim.
-// Ramy, 15 Sep 2026: "why does the day now end at five?" It didn't -- the
-// 17:15 band was there, off the right edge. The grid was a fixed 1276px
-// minimum (64 + 150 + nine bands at 118px) inside a frame that scrolls
-// sideways, and on a laptop the last band sat past the edge with nothing to
-// say so. The bands now share whatever width the frame has, and the admin
-// column gives up a little, so every band of the day is on screen.
-const GRID_COLUMNS = "56px 128px repeat(9, minmax(0, 1fr))";
+const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
 const ROW_HEIGHT = 108;
 
 function CameraIcon() {
@@ -63,24 +56,11 @@ export interface EventMeta {
   // showing "0 of 0".
   volunteerAttendance?: { expected: number; total: number } | null;
   /**
-   * A TP lesson belonging to the OTHER group: same round, same letter,
-   * another room at another level. "Mine" fades what isn't yours, because a
-   * faded tile still says something is happening there -- but a parallel
-   * group's lesson is not a session this reader could be in, and leaving it
-   * in the grid is what made every TP band two cards tall. Ramy, 14 Sep
-   * 2026: "everything is doubled." In "Mine" these leave the grid; the
-   * lens shows them again.
-   */
-  otherGroup?: boolean;
-  /**
    * A booking sheet behind this tile (Stage 2 tutorials, consultation
    * blocks -- migrations 0094 / 0275): the panel shows a door to it.
    */
   sheetHref?: string | null;
-  /**
-   * What that door says. Defaults to the booking sheet it was built for; the
-   * tutor's board also uses it to reach a TP session's register.
-   */
+  /** What that door says; defaults to the booking sheet it was built for. */
   sheetLabel?: string;
 }
 
@@ -97,25 +77,14 @@ export interface ReadOnlyBoardProps {
    * trainer/(hub)/timetable/page.tsx.
    */
   mineMeaning?: string;
-  /**
-   * What to say about changing the schedule. A candidate is told to ask
-   * their tutor; a tutor reading their own course's board was being told
-   * the same thing, which is nobody's instruction (walked 14 Sep 2026).
-   */
+  /** What to say about changing the schedule; a tutor is pointed at the editor, not at "your tutor". */
   changeHint?: string;
-  /** Which lens the board opens on. Defaults to the reader's own sessions. */
-  defaultLens?: "mine" | "everything";
   today: string;
   nowIso: string;
   timeZone: string;
 }
 
-/** When one band holds more than one kind of session, the cards read in the
- *  order the day runs: what the whole group does, then the group room, then
- *  what a candidate books, then admin, then lunch. */
-const CARD_ORDER: DisplayCategory[] = ["wg", "rm", "iw", "admin", "lu"];
-
-const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null, otherGroup: false };
+const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
 
 export function ReadOnlyTimetableBoard({
   events,
@@ -125,7 +94,6 @@ export function ReadOnlyTimetableBoard({
   viewerGroupLabel,
   mineMeaning,
   changeHint,
-  defaultLens,
   today,
   nowIso,
   timeZone,
@@ -138,17 +106,11 @@ export function ReadOnlyTimetableBoard({
     weeks.findIndex((w) => w.rows.some((r) => r.isoDate >= today))
   );
   const [weekIndex, setWeekIndex] = useState(initialWeek === -1 ? 0 : initialWeek);
-  // Ramy, 14 Sep 2026, looking at a TP band holding two cards with the same
-  // title: "everything is doubled... it was crystal clear, it was alive."
-  // Both groups' lessons are real and both stay one click away -- but the
-  // board opens on the reader's own group, which is the week they actually
-  // live in. An assessor's "Mine" is their visit day alone, so their board
-  // still opens on everything (the page passes the lens in).
-  const [mineOnly, setMineOnly] = useState(defaultLens !== "everything");
+  const [mineOnly, setMineOnly] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
 
   const week = weeks[weekIndex] ?? weeks[0];
-  const liveEvent = events.find((e) => isEventLive(e, now, timeZone, timeBands)) ?? null;
+  const liveEvent = events.find((e) => isEventLive(e, now, timeZone)) ?? null;
   // for-claude-code-timetable-view.md: "time range + 'opened HH:MM'" -- opened
   // is the join-window's own start (isEventLive's -10min), the range's end is
   // the event's time band boundary, not a stored field on the event itself.
@@ -301,11 +263,11 @@ export function ReadOnlyTimetableBoard({
                   ) : null}
                 </div>
                 <div style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
-                  <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} timeBands={timeBands} mineOnly={mineOnly} onSelect={setSelectedEvent} />
+                  <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                 </div>
                 {row.bands.map((bandEvents, i) => (
                   <div key={i} style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
-                    <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} timeBands={timeBands} mineOnly={mineOnly} onSelect={setSelectedEvent} />
+                    <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                   </div>
                 ))}
               </div>
@@ -330,9 +292,7 @@ export function ReadOnlyTimetableBoard({
               bandEvents.map((e) => ({ band: timeBands[i]?.label ?? "", event: e }))
             ),
           ];
-          const visible = rowItems.filter(
-            ({ event }) => !mineOnly || ((eventMeta[event.id] ?? EMPTY_META).mine && !(eventMeta[event.id] ?? EMPTY_META).otherGroup)
-          );
+          const visible = rowItems.filter(({ event }) => !mineOnly || (eventMeta[event.id] ?? EMPTY_META).mine);
           if (visible.length === 0) return null;
           return (
             <div
@@ -351,7 +311,7 @@ export function ReadOnlyTimetableBoard({
                 const cat = toDisplayCategory(categorize(event));
                 const style = CATEGORY_STYLE[cat];
                 const meta = eventMeta[event.id] ?? EMPTY_META;
-                const live = isEventLive(event, now, timeZone, timeBands);
+                const live = isEventLive(event, now, timeZone);
                 return (
                   <button
                     key={event.id}
@@ -447,18 +407,11 @@ export function ReadOnlyTimetableBoard({
   );
 }
 
-/** What a cell shows under the current lens. */
-function visibleIn(events: TimetableEvent[], eventMeta: Record<string, EventMeta>, mineOnly: boolean): TimetableEvent[] {
-  if (!mineOnly) return events;
-  return events.filter((e) => !(eventMeta[e.id] ?? EMPTY_META).otherGroup);
-}
-
 function Cell({
   events,
   eventMeta,
   now,
   timeZone,
-  timeBands,
   mineOnly,
   onSelect,
 }: {
@@ -466,11 +419,9 @@ function Cell({
   eventMeta: Record<string, EventMeta>;
   now: Date;
   timeZone: string;
-  timeBands: TimeBand[];
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
 }) {
-  events = visibleIn(events, eventMeta, mineOnly);
   if (events.length === 0) return null;
 
   // Ramy, 28 Aug 2026: "the master timetable" -- simultaneous TP slots
@@ -495,56 +446,36 @@ function Cell({
     // In a mixed card, "Mine" now keeps only the events that are yours. A
     // card where nothing is yours still fades whole rather than emptying, so
     // the day keeps its shape.
-    // Ramy, 14 Sep 2026: "two cards, not one fused." A band can hold two
-    // different KINDS of session -- a whole-group input session and a
-    // bookable consultation -- and fusing them put two unrelated things in
-    // one card wearing the first one's colour, so they read as a single
-    // session nobody could quite place. Same kind still shares a card: that
-    // is what the stacking was built for (a plenary and the announcement
-    // that follows it, same room, same audience).
-    const byCategory = new Map<DisplayCategory, TimetableEvent[]>();
-    for (const event of events) {
-      const cat = toDisplayCategory(categorize(event));
-      byCategory.set(cat, [...(byCategory.get(cat) ?? []), event]);
-    }
-    const cards = [...byCategory.entries()].sort((a, b) => CARD_ORDER.indexOf(a[0]) - CARD_ORDER.indexOf(b[0]));
+    const mine = events.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
+    const shown = mineOnly && mine ? events.filter((e) => (eventMeta[e.id] ?? EMPTY_META).mine) : events;
+    const displayCat = toDisplayCategory(categorize(shown[0] ?? events[0]));
+    const style = CATEGORY_STYLE[displayCat];
+    const faded = mineOnly && !mine;
     return (
-      <div className="flex flex-col gap-1.5">
-        {cards.map(([displayCat, cardEvents]) => {
-          const style = CATEGORY_STYLE[displayCat];
-          const mine = cardEvents.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
-          const shown = mineOnly && mine ? cardEvents.filter((e) => (eventMeta[e.id] ?? EMPTY_META).mine) : cardEvents;
-          const faded = mineOnly && !mine;
-          return (
-            <div
-              key={displayCat}
-              className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
-              style={{
-                opacity: faded ? 0.25 : 1,
-                backdropFilter: "blur(10px)",
-                border: "1px solid oklch(100% 0 0 / 0.75)",
-                borderTop: `2.5px solid ${style.accent}`,
-                boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
-                background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
-              }}
-            >
-              {shown.map((event) => (
-                <SessionTile
-                  key={event.id}
-                  event={event}
-                  meta={eventMeta[event.id] ?? EMPTY_META}
-                  now={now}
-                  timeZone={timeZone}
-                  timeBands={timeBands}
-                  mineOnly={mineOnly}
-                  onSelect={onSelect}
-                  titleWeight={style.titleWeight}
-                  displayCat={displayCat}
-                />
-              ))}
-            </div>
-          );
-        })}
+      <div
+        className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
+        style={{
+          opacity: faded ? 0.25 : 1,
+          backdropFilter: "blur(10px)",
+          border: "1px solid oklch(100% 0 0 / 0.75)",
+          borderTop: `2.5px solid ${style.accent}`,
+          boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
+          background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
+        }}
+      >
+        {shown.map((event) => (
+          <SessionTile
+            key={event.id}
+            event={event}
+            meta={eventMeta[event.id] ?? EMPTY_META}
+            now={now}
+            timeZone={timeZone}
+            mineOnly={mineOnly}
+            onSelect={onSelect}
+            titleWeight={style.titleWeight}
+            displayCat={displayCat}
+          />
+        ))}
       </div>
     );
   }
@@ -584,7 +515,6 @@ function Cell({
               meta={eventMeta[event.id] ?? EMPTY_META}
               now={now}
               timeZone={timeZone}
-              timeBands={timeBands}
               mineOnly={mineOnly}
               onSelect={onSelect}
               titleWeight={style.titleWeight}
@@ -602,7 +532,6 @@ function SessionTile({
   meta,
   now,
   timeZone,
-  timeBands,
   mineOnly,
   onSelect,
   titleWeight,
@@ -612,7 +541,6 @@ function SessionTile({
   meta: EventMeta;
   now: Date;
   timeZone: string;
-  timeBands: TimeBand[];
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
   titleWeight: number;
@@ -621,7 +549,7 @@ function SessionTile({
   const { mine, ownTpSlot, teachingLetters: letters, groupName } = meta;
   const youTeach = mineOnly && ownTpSlot;
   const showCamera = displayCat !== "lu" && displayCat !== "admin";
-  const live = isEventLive(event, now, timeZone, timeBands);
+  const live = isEventLive(event, now, timeZone);
 
   return (
     <button type="button" onClick={() => onSelect(event)} className="flex flex-col items-start gap-1 text-left">
@@ -724,7 +652,7 @@ function DetailPanel({
         <div>
           <h2 className="font-serif text-lg text-ink">{event.title}</h2>
           <p className="text-xs text-muted">
-            {formatCalendarDate(event.event_date, { day: "numeric", month: "long", weekday: "long" })}
+            {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" })}
             {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
           </p>
         </div>

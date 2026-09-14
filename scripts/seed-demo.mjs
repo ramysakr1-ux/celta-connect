@@ -2756,7 +2756,7 @@ async function main() {
     { d: 1, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5b", "5d", "5f", "5i", "5j", "5k"] },
-    { d: 1, b: 8, type: "input_session", title: "Classroom arrangements and material use", tag: "whole_group", detail: null, linked: null, tp: null, slug: "classroom-arrangements", criteria: ["4c", "4f", "5a", "5e"] },
+    { d: 1, b: 8, type: "input_session", title: "Classroom management / Zoom", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4c", "4f", "5a", "5e"] },
     // The criteria the app's own generated skeleton gives this session --
     // 1b ("learning preferences and cultural factors") is carried by nothing
     // else on the timetable, and this is the session about the learner.
@@ -2769,7 +2769,6 @@ async function main() {
     { d: 2, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4a", "4b", "4e", "4h"] },
     { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["3a", "4l"] },
-    { d: 2, b: 9, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2e", "4i"] },
     { d: 3, b: 1, type: "tp", title: "TP1 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 2, type: "tp", title: "TP1 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 1 },
     { d: 3, b: 3, type: "tp", title: "TP1 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 1 },
@@ -2783,7 +2782,6 @@ async function main() {
     // two days before Language analysis, which is the session that needs the
     // grammar already in hand -- and after Eliciting and concept checking,
     // which is how you check a tense once you can name it.
-    { d: 3, b: 9, type: "input_session", title: "Tense and aspect", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2e", "4i"], slug: "tense-and-aspect" },
     // Which day each assignment is SET is what opens it for writing
     // (src/lib/assignment-release.ts reads the earliest timetabled event
     // carrying that linked_assignment_type). The schedule is Day 1 / 4 / 9 /
@@ -2821,7 +2819,7 @@ async function main() {
     // band; Phonology: sounds (the chart and phonemic script) takes the slot
     // it leaves on day 5, immediately before Language analysis -- which is
     // the session that needs the chart already in hand.
-    { d: 5, b: 7, type: "input_session", title: "Phonology: sounds", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"], slug: "phonology-sounds" },
+    { d: 5, b: 7, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"], slug: "phonology-sounds" },
     { d: 5, b: 8, type: "input_session", title: "Language analysis", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["4i", "4j", "4k"] },
     { d: 5, b: 9, type: "input_session", title: "Filmed observation 1", tag: "whole_group", detail: "With task", linked: null, tp: null },
     { d: 6, b: 1, type: "tp", title: "TP3 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 3 },
@@ -2857,7 +2855,7 @@ async function main() {
     { d: 8, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
     { d: 8, b: 7, type: "input_session", title: "Giving feedback on tasks", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5h", "5j"] },
     { d: 8, b: 8, type: "input_session", title: "Error correction", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2b", "5h"] },
-    { d: 8, b: 9, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"] },
+    { d: 10, b: 8, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2e", "4i"] },
     { d: 9, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) set", tag: null, detail: "The assignment session", linked: "LRT", tp: null },
     { d: 9, b: 1, type: "tp", title: "TP4 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 4 },
     { d: 9, b: 2, type: "tp", title: "TP4 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 4 },
@@ -2879,7 +2877,7 @@ async function main() {
     { d: 10, b: 7, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Tutors marking", linked: null, tp: null },
     // After the Stage 2 tutorials on day 9 rather than before them, which is
     // also the order that makes sense.
-    { d: 10, b: 8, type: "milestone", title: "Writing Stage 2 report \u00b7 ABC", tag: "individual", detail: "Own time", linked: null, tp: null },
+    { d: 8, b: 9, type: "milestone", title: "Writing Stage 2 report \u00b7 ABC", tag: "individual", detail: "Own time", linked: null, tp: null },
     { d: 10, b: 9, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Early finish, if done", linked: null, tp: null },
     { d: 11, b: 1, type: "tp", title: "TP5 \u00b7 A", tag: "group_room", detail: "New level", linked: null, tp: 5 },
     { d: 11, b: 2, type: "tp", title: "TP5 \u00b7 B", tag: "group_room", detail: "New level", linked: null, tp: 5 },
@@ -2913,7 +2911,7 @@ async function main() {
     // day 4 -- nine days before Teaching listening and the productive-skills
     // pair, so a candidate was asked to design skills tasks before the course
     // had taught any (criteria map, 13 Sep 2026). Due day 16 still.
-    { d: 13, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) set", tag: null, detail: "The assignment session", linked: "Skills", tp: null },
+    { d: 4, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) set", tag: null, detail: "The assignment session", linked: "Skills", tp: null },
     { d: 13, b: 1, type: "tp", title: "TP6 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 13, b: 2, type: "tp", title: "TP6 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 6 },
     { d: 13, b: 3, type: "tp", title: "TP6 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 6 },
@@ -2987,7 +2985,6 @@ async function main() {
     { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["5m", "5n"] },
     // The consultation day 4 gave up, in day 19's empty band.
-    { d: 19, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
