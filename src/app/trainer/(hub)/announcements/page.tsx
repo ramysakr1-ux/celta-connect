@@ -118,6 +118,21 @@ export default async function AnnouncementsPage() {
   const { data: authors } = authorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", authorIds) : { data: [] };
   const authorNameById = new Map((authors ?? []).map((a) => [a.id, a.full_name]));
 
+  // An announcement addressed to one candidate (the CELTA 5 sign-off
+  // notices are) was being labelled "whole cohort" here, which is the one
+  // thing about an announcement a tutor must not be misled about. Name the
+  // candidate instead.
+  const recipientIds = [...new Set((broadcasts ?? []).map((b) => b.visible_to_trainee_id).filter((id): id is string => !!id))];
+  const { data: recipients } =
+    recipientIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", recipientIds) : { data: [] };
+  const recipientNameById = new Map((recipients ?? []).map((r) => [r.id, r.full_name]));
+  const recipientLabel = (b: { visible_to_trainee_id: string | null; visible_to_tp_group_id: string | null }): string =>
+    b.visible_to_trainee_id
+      ? `${recipientNameById.get(b.visible_to_trainee_id) ?? "one candidate"} only`
+      : b.visible_to_tp_group_id
+        ? `${groupNameById.get(b.visible_to_tp_group_id) ?? "one group"} only`
+        : "whole cohort";
+
   // Was 0-2 days before the visit, which is too late to be a reminder --
   // Ramy, 30 Aug 2026, describing the assessor day: "it's been announced,
   // there's a countdown for it... and there's a reminder. So there's a whole
@@ -172,10 +187,11 @@ export default async function AnnouncementsPage() {
       pinned: b.pinned,
       keepOnDuplicate: b.keep_on_duplicate,
       anchorEventId: b.anchor_event_id ?? "",
-      anchorEventTitle: anchor?.title ?? "Unknown event",
+      anchorEventTitle: anchor?.title ?? null,
       anchorOffsetDays: b.anchor_offset_days ?? 0,
       fireDate,
       heldAt: b.held_at,
+      recipient: recipientLabel(b),
       canManage: isMct || b.author_id === trainer.id,
     };
   });
@@ -244,7 +260,7 @@ export default async function AnnouncementsPage() {
                       </span>
                       <span className="block truncate text-[12.5px] text-muted">
                         {authorNameById.get(b.author_id) ?? "Unknown"}
-                        {b.visible_to_tp_group_id ? ` · ${groupNameById.get(b.visible_to_tp_group_id) ?? "one group"} only` : " · whole cohort"}
+                        {` · ${recipientLabel(b)}`}
                       </span>
                     </span>
                   </div>

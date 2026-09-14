@@ -29,10 +29,13 @@ export interface ScheduledRowData {
   pinned: boolean;
   keepOnDuplicate: boolean;
   anchorEventId: string;
-  anchorEventTitle: string;
+  /** null when the row isn't anchored to a timetable event at all. */
+  anchorEventTitle: string | null;
   anchorOffsetDays: number;
   fireDate: string | null;
   heldAt: string | null;
+  /** Who it reaches: one candidate, one group, or the whole cohort. */
+  recipient: string;
 }
 
 // Announcements Scheduled panel's Edit action -- fully spec'd by Ramy:
@@ -120,12 +123,20 @@ function ReadRow({
         {held ? <span className="pill pill-neutral">Held</span> : null}
       </div>
       <p className="text-xs text-muted">
-        {held
-          ? "Won't send until resumed"
-          : row.fireDate
-            ? `Sends ${row.fireDate}`
-            : "Sends when triggered"}{" "}
-        — {row.anchorOffsetDays} day(s) relative to &quot;{row.anchorEventTitle}&quot;
+        {/* A row with no anchor event is never fired by the cron
+            (announcements-cron.ts only looks at anchored rows), so it waits
+            for a person -- the case the CELTA 5 Stage 3 sign-off notice is
+            deliberately in, per Ramy 14 Sep 2026: "for stage three it will
+            be up to the centre to decide... prepared and activated by the
+            MCT." Saying "0 day(s) relative to Unknown event" at it was
+            nonsense; so is offering Resume, which would clear the Held pill
+            and leave it sitting unsent for ever. */}
+        {row.anchorEventTitle === null
+          ? held
+            ? "Prepared, not scheduled — post it when the course is ready for it"
+            : "Not scheduled — post it when the course is ready for it"
+          : `${held ? "Won't send until resumed" : row.fireDate ? `Sends ${row.fireDate}` : "Sends when triggered"} — ${row.anchorOffsetDays} day(s) relative to "${row.anchorEventTitle}"`}
+        {` · ${row.recipient}`}
       </p>
       {!canManage ? null : justSaved ? (
         <span className="pill pill-neutral w-fit">Saved</span>
@@ -138,7 +149,7 @@ function ReadRow({
             </button>
           </form>
           <span className="text-border">|</span>
-          {held ? (
+          {held && row.anchorEventTitle === null ? null : held ? (
             <form action={resumeBroadcast}>
               <input type="hidden" name="broadcast_id" value={row.id} />
               <button type="submit" className="text-xs font-semibold text-primary hover:underline">
@@ -153,7 +164,7 @@ function ReadRow({
               </button>
             </form>
           )}
-          <span className="text-border">|</span>
+          {held && row.anchorEventTitle === null ? null : <span className="text-border">|</span>}
           <button type="button" onClick={onEdit} className="text-xs font-semibold text-primary hover:underline">
             Edit
           </button>
