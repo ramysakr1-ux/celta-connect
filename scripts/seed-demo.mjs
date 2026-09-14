@@ -2809,7 +2809,7 @@ async function main() {
     // 1d and 2a are assessed from TP1, and nothing on the course taught
     // either (criteria map, 13 Sep 2026). After TP1 rather than before it:
     // the teacher-talk count lands when you have just heard yourself teach.
-    { d: 4, b: 9, type: "input_session", title: "Rapport and teacher talk", tag: "whole_group", detail: null, linked: null, tp: null, slug: "rapport-and-teacher-talk", criteria: ["1d", "2a"] },
+    { d: 4, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 5, b: 1, type: "tp", title: "TP2 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 5, b: 2, type: "tp", title: "TP2 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 2 },
     { d: 5, b: 3, type: "tp", title: "TP2 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 2 },
@@ -2896,7 +2896,7 @@ async function main() {
     // This took day 11's bookable consultation band. The course runs seven
     // consultation slots instead of eight; there was no free band anywhere
     // in weeks 1-3 and nothing cheaper to move.
-    { d: 11, b: 9, type: "input_session", title: "Evaluating your plan", tag: "whole_group", detail: null, linked: null, tp: null, slug: "evaluating-your-plan", criteria: ["4n", "5m"] },
+    { d: 11, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
     { d: 12, b: 1, type: "tp", title: "TP5 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 5 },
     { d: 12, b: 2, type: "tp", title: "TP5 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 5 },
     { d: 12, b: 3, type: "tp", title: "TP5 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 5 },
