@@ -49,6 +49,19 @@ const marked = a.filter(x => ["approved","resubmission_required"].includes(x.fir
 console.log(`  ${marked.filter(x=>!x.first_overall_comment).length?"!!":"ok"} ${"assignment round released without an overall comment".padEnd(52)} ${marked.filter(x=>!x.first_overall_comment).length} / ${marked.length}`);
 console.log(`  ${marked.filter(x=>!x.first_criteria_marks||!Object.keys(x.first_criteria_marks).length).length?"!!":"ok"} ${"assignment released with no criteria marked".padEnd(52)} ${marked.filter(x=>!x.first_criteria_marks||!Object.keys(x.first_criteria_marks).length).length} / ${marked.length}`);
 
+// The unassessed teaching slot is a TYPE, not a title (migration 0296,
+// Ramy asked three times). A course whose slots are typed as something else
+// drops out of every place that counts teaching -- and Ramy's own
+// walkthrough course was in exactly that state on 14 Sep 2026, cloned
+// before the type existed.
+const { data: unassessed } = await db
+  .from("course_timetable_events")
+  .select("course_id, title, type, event_date")
+  .ilike("title", "%unassessed teach%");
+const mistyped = (unassessed ?? []).filter((e) => !/prep/i.test(e.title) && e.type !== "unassessed_tp");
+console.log(`  ${mistyped.length ? "!!" : "ok"} ${"unassessed teaching slot not typed unassessed_tp".padEnd(52)} ${mistyped.length} / ${(unassessed ?? []).length}`);
+if (mistyped.length) violations += 1;
+
 const noComment = marked.filter((x) => !x.first_overall_comment).length;
 const noMarks = marked.filter((x) => !x.first_criteria_marks || !Object.keys(x.first_criteria_marks).length).length;
 violations += (noComment ? 1 : 0) + (noMarks ? 1 : 0);
