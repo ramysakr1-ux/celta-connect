@@ -106,9 +106,12 @@ export async function renderFilmingConsentBuffer(): Promise<Buffer> {
         <View style={styles.callout}>
           <Text>
             Not part of the ordinary sign-up. A volunteer already agrees to the short recording they make
-            themselves, which is a different thing. This form is only used where a centre films lessons --
-            Cambridge allows up to three of the six observation hours to be filmed -- or teaches online with the
-            class on camera. Give it out before the first filmed lesson, in the learner&apos;s own language.
+            themselves, which is a different thing. This form is only used where a centre films its teaching
+            practice -- for the trainee to watch back, and for the tutor and an assessor to refer to -- or teaches
+            online with the class on camera. Cambridge does not ask for filmed teaching practice; the Handbook&apos;s
+            allowance for up to three filmed hours is about the six hours of directed observation of experienced
+            teachers, which is a different thing again. Give it out before the first filmed lesson, in the
+            learner&apos;s own language.
           </Text>
         </View>
 
@@ -116,7 +119,8 @@ export async function renderFilmingConsentBuffer(): Promise<Buffer> {
 
         <Text style={styles.intro}>
           You are learning English in a class taught by teachers in training. Some of those lessons are filmed so
-          the trainee teacher can watch themselves afterwards and so their tutor can assess the lesson. You will be
+          the trainee teacher can watch themselves afterwards, and so their tutor can look at the lesson again.
+          Their tutor is in the room during the lesson itself -- the recording does not replace that. You will be
           in the picture, and your voice will be on the recording. This page explains what that means, and asks
           whether you agree.
         </Text>
@@ -151,9 +155,9 @@ export async function renderFilmingConsentBuffer(): Promise<Buffer> {
 
         <Text style={styles.h2}>How long it is kept</Text>
         <Text style={styles.pLast}>
-          Recordings are kept on the centre&apos;s own secure storage until six months after the course ends, and
-          then deleted. That is the same period the centre keeps the trainee teachers&apos; coursework, because a
-          recording may be needed if a trainee questions their result.
+          Recordings are kept on the centre&apos;s own secure storage until six months after the course results are
+          issued, and then deleted. That is the same period the centre keeps the trainee teachers&apos; coursework,
+          because a recording may be needed if a trainee questions their result.
         </Text>
 
         <Text style={[styles.h2, { marginBottom: 10 }]}>Consent</Text>

@@ -96,7 +96,23 @@ export async function submitVolunteerSignupProfile(_prevState: VolunteerSignupSt
     })
     .select("id")
     .single();
-  if (profileError || !inserted) return { error: "Could not save your answers. Try again." };
+  if (profileError || !inserted) {
+    // Don't leave the recording behind in storage when the row it belongs
+    // to never existed.
+    await admin.storage.from("volunteer-signup-audio").remove([storagePath]);
+    // volunteer_signup_profiles is unique on the volunteer (migration
+    // 0088), so a second submit -- a back button, a double tap on a slow
+    // connection -- landed here and read "Could not save your answers.
+    // Try again", which is the opposite of what happened (walked 15 Sep
+    // 2026). They are already signed up; send them to their own page.
+    if (profileError?.code === "23505") {
+      await admin.from("volunteer_students").update({ signup_completed_at: now }).eq("id", volunteer.id).is("signup_completed_at", null);
+      redirect(`/student/${token}`);
+    }
+    // The message above is what the person reads; this is what we read.
+    console.error("[src/lib/fol/volunteer-signup-actions.ts:submitVolunteerSignupProfile]", profileError);
+    return { error: "Could not save your answers. Try again." };
+  }
 
   after(async () => {
     const transcript = await transcribeAudio(audioFile, audioFile.name);
