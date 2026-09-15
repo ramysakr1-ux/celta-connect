@@ -3,11 +3,13 @@ import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { can } from "@/lib/auth/centre-permissions";
+import { can, canView } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { formatDateTime } from "@/lib/format-date";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
 import { ZoomConnectionForm } from "@/app/centre/settings/zoom-connection-form";
+import { CentreProfileReadOnly } from "@/app/centre/settings/profile-read-only";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
@@ -36,6 +38,9 @@ export default async function CentreSettingsPage({
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const canEdit = can(ctx.roles, "centre.settings.edit", ctx.overrides);
+  // Read and change nothing: the Centre observer. See the note on
+  // CentreProfileReadOnly.
+  const canReadSettings = canView(ctx.roles, "centre.settings.edit", ctx.overrides);
   const mayAppoint = can(ctx.roles, "roles.grant", ctx.overrides);
   const isOwner = ctx.roles.includes("centre_owner");
 
@@ -178,6 +183,22 @@ export default async function CentreSettingsPage({
               />
               <ZoomConnectionForm connection={zoomConnection} connected={zoom_connected === "1"} error={zoom_error} timeZone={center.time_zone} />
             </div>
+          ) : canReadSettings ? (
+            <CentreProfileReadOnly
+              name={center.name}
+              centerNumber={center.center_number}
+              address={center.address}
+              primaryContactEmail={center.primary_contact_email}
+              timeZone={center.time_zone}
+              currency={center.currency}
+              appianUrl={center.appian_url}
+              filmsTpSessions={center.films_tp_sessions}
+              driveConnectedAt={driveConnection?.connected_at ?? null}
+              zoomConnectedAt={zoomConnection?.connected_at ?? null}
+              zoomAccountEmail={zoomConnection?.zoom_account_email ?? null}
+              paymentProvider={center.payment_provider}
+              paymentProviderConnectedAt={center.payment_provider_connected_at}
+            />
           ) : (
             <p className="text-sm text-muted">You don&apos;t hold a role that can edit centre settings.</p>
           )
@@ -198,6 +219,25 @@ export default async function CentreSettingsPage({
               <Link href="/centre/payments" className="self-start text-sm font-medium text-primary hover:underline">
                 Refund history
               </Link>
+            </div>
+          ) : canReadSettings ? (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-ink">
+                Connect never holds or moves money. It stores a reference to a payment made through the centre&apos;s
+                own provider — balances shown everywhere else in Connect are read from that reference, not moved by
+                Connect.
+              </div>
+              {/* Which provider, and since when. No connect, disconnect or
+                  key anywhere near a role that changes nothing. */}
+              <p className="text-sm text-ink">
+                {center.payment_provider
+                  ? `${center.payment_provider.replace(/^./, (c) => c.toUpperCase())} is the connected provider${
+                      center.payment_provider_connected_at
+                        ? `, since ${formatDateTime(center.payment_provider_connected_at, center.time_zone)}`
+                        : ""
+                    }.`
+                  : "No payment provider is connected."}
+              </p>
             </div>
           ) : (
             <p className="text-sm text-muted">You don&apos;t hold a role that can manage payment providers.</p>

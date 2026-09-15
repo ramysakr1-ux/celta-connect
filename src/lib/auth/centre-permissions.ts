@@ -165,6 +165,15 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
     "volunteers.view": "read",
     "enrolment.view": "read",
     "courseAdmin.view": "read",
+    // Ramy, 15 Sep 2026. The observer's whole job is reading the centre, and
+    // this was the one thing they could not read AT ALL: the Settings room
+    // answered "you don't hold a role that can edit centre settings" and
+    // showed nothing -- not the centre's own name, number, address, contact,
+    // time zone or currency, which is exactly the reference a read-only role
+    // needs. "read" is the level this matrix already has for that; every
+    // consumer of this capability gates on can(), never canView(), so this
+    // opens the read-only panel and nothing else.
+    "centre.settings.edit": "read",
     // Everything else is absent, including import.run -- an import creates
     // people, which is squarely "edit anything at all".
   },
