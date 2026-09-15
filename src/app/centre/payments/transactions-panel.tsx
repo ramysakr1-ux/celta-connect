@@ -1,3 +1,5 @@
+import { formatCurrency } from "@/lib/money-by-currency";
+
 export interface TransactionRow {
   id: string;
   provider: string;
@@ -48,7 +50,7 @@ export function TransactionsPanel({ transactions, timeZone }: { transactions: Tr
               <span className={`status-pill ${EVENT_PILL_CLASS[t.eventType]}`}>{EVENT_LABEL[t.eventType]}</span>
               <p className="mt-1 text-xs text-muted">{when(t.receivedAt)}</p>
             </div>
-            <p className="shrink-0 text-sm text-ink">{t.amount != null && t.currency ? `${t.currency} ${t.amount.toLocaleString("en-GB")}` : "--"}</p>
+            <p className="shrink-0 text-sm text-ink">{t.amount != null && t.currency ? formatCurrency(t.amount, t.currency) : "--"}</p>
           </li>
         ))}
       </ul>

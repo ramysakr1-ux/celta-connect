@@ -4,7 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
+import { requireAdmissionsHandler, canDecideAdmissions, canAgreeRefunds } from "@/lib/admissions-access";
 import { referApplicant } from "@/lib/admissions-referral";
 import {
   sendApplicantEmail,
@@ -1459,7 +1459,12 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
  */
 export async function agreeRefund(_prevState: FormState, formData: FormData): Promise<FormState> {
   const staff = await requireAdmissionsHandler();
-  if (!canDecideAdmissions(staff)) return { error: "You can't agree refunds." };
+  // A refund is money, so it asks the money question -- see canAgreeRefunds.
+  // This used to ask canDecideAdmissions, which is answered from
+  // profiles.role and let a trainer, a Course administrator and the
+  // read-only Centre observer move the centre's money.
+  const refundCentreId = staff.active_center_id ?? staff.center_id;
+  if (!(await canAgreeRefunds(staff, refundCentreId))) return { error: "You can't agree refunds." };
 
   const applicantId = (formData.get("applicant_id") as string | null) || null;
   const amountRaw = formData.get("amount");
@@ -1473,7 +1478,9 @@ export async function agreeRefund(_prevState: FormState, formData: FormData): Pr
 
   const supabase = await createClient();
   const { error } = await supabase.from("refunds").insert({
-    center_id: staff.center_id,
+    // The branch being worked in, which is where the payments room reads
+    // its refunds from.
+    center_id: refundCentreId,
     applicant_id: applicantId,
     amount,
     currency,
@@ -1491,13 +1498,18 @@ export async function agreeRefund(_prevState: FormState, formData: FormData): Pr
 
 export async function settleRefund(_prevState: FormState, formData: FormData): Promise<FormState> {
   const staff = await requireAdmissionsHandler();
-  if (!canDecideAdmissions(staff)) return { error: "You can't settle refunds." };
 
   const refundId = formData.get("refund_id");
   const cancel = formData.get("cancel") === "1";
   if (typeof refundId !== "string") return { error: "Something went wrong. Refresh and try again." };
 
   const supabase = await createClient();
+  // Asked at the refund's own centre, not at whichever one this person is
+  // acting in. RLS already bounds the update below to their centre; this is
+  // the money question on top of it.
+  const { data: refundRow } = await supabase.from("refunds").select("center_id").eq("id", refundId).maybeSingle();
+  if (!refundRow) return { error: "That refund is not in your centre." };
+  if (!(await canAgreeRefunds(staff, refundRow.center_id))) return { error: "You can't settle refunds." };
   const { error } = await supabase
     .from("refunds")
     .update(
@@ -1508,7 +1520,7 @@ export async function settleRefund(_prevState: FormState, formData: FormData): P
         : { status: "completed", completed_at: new Date().toISOString(), completed_by: staff.id }
     )
     .eq("id", refundId)
-    .eq("center_id", staff.center_id)
+    .eq("center_id", refundRow.center_id)
     .eq("status", "pending");
   if (error) {
     // The message above is what the person reads; this is what we read.

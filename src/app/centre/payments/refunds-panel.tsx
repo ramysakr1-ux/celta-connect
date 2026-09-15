@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { agreeRefund, settleRefund } from "@/app/dashboard/admissions/actions";
 import type { FormState } from "@/app/dashboard/admissions/actions";
 import { formatDate } from "@/lib/format-date";
+import { formatCurrency } from "@/lib/money-by-currency";
 
 const initial: FormState = { error: null };
 
@@ -36,7 +37,10 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
 
   const pending = refunds.filter((r) => r.status === "pending");
   const settled = refunds.filter((r) => r.status !== "pending");
-  const money = (r: RefundRow) => `${r.currency} ${r.amount.toLocaleString("en-GB")}`;
+  // "$500", not "USD 500" -- every other money figure in the app is
+  // formatted, and the bare ISO code beside a number is the same thing that
+  // once rendered "GBP2,000" on the Overview.
+  const money = (r: RefundRow) => formatCurrency(r.amount, r.currency);
   // The centre's zone, not the reader's -- a refund was agreed where the
   // centre is. See src/lib/format-date.ts.
   const day = (iso: string) => formatDate(iso, timeZone);
