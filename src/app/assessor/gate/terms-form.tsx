@@ -13,9 +13,13 @@ import { acceptAssessorTerms } from "@/app/assessor/gate/actions";
 //   1. unchanged from the original three (Certificates and Emails.dc.html),
 //      and matching CELTA 5's own "Cambridge English does not retain copies
 //      of portfolios";
-//   2. merges the original confidentiality term with Admin Handbook 2.4.6:
-//      "The assessor's report is the property of Cambridge, confidential,
-//      and must not be quoted from or used for advertising";
+//   2. merges the original confidentiality term with Administration
+//      Handbook 14.5, "The assessor's report" (printed p41): "The
+//      assessor's report is the property of Cambridge, must be treated
+//      confidentially and must not be quoted from or used for advertising
+//      purposes." The quote was right; the section number said 2.4.6, which
+//      is not a section of the June 2025 Handbook at all -- section 2 is
+//      Useful contacts. Corrected against the PDF 15 Sep 2026.
 //   3. promotes to a term the condition specs/ASSESSOR-GATE-TERMS.md had
 //      noted was only ever stated in prose.
 //

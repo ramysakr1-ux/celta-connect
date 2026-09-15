@@ -154,7 +154,7 @@ export default async function TrainerInTrainingPage() {
               <TitWorkspace supabase={supabase} courseTutor={ct} timeZone={timeZone} />
             ) : (
               // The assessor's read-only view: the record's state, not its
-              // working forms. Handbook §5.2.1 -- the assessor's own TinT
+              // working forms. TinT Handbook §5.2.1 -- the assessor's own TinT
               // day is where they see the rest.
               <section className="flex flex-col gap-3 rounded-[14px] border border-border bg-card px-[22px] py-5 text-sm">
                 <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">{nameOf(ct.profile_id)} · read-only</p>
