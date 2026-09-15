@@ -4,7 +4,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
-import { computeSessionTicks } from "@/lib/volunteer-attendance";
+import { computeSessionTicks, creditedHours } from "@/lib/volunteer-attendance";
+import { classLessons } from "@/lib/volunteer-class-session";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -65,7 +66,7 @@ export default async function CentreVolunteersPage({
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
   const [{ data: tpEvents }, { data: attendanceRows }, { data: declineRows }] = await Promise.all([
     courseIds.length > 0
-      ? admin.from("course_timetable_events").select("id, event_date, course_id").in("course_id", courseIds).eq("type", "tp")
+      ? admin.from("course_timetable_events").select("id, event_date, course_id, detail").in("course_id", courseIds).eq("type", "tp")
       : Promise.resolve({ data: [] }),
     volunteerIds.length > 0
       ? admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
@@ -79,14 +80,22 @@ export default async function CentreVolunteersPage({
   // -- unlike the trainer/trainee aggregate-only counts, the centre roster
   // is already a per-person list, so "who's coming to the next class"
   // shows right on that person's own row rather than as a separate summary.
-  const nextTpEventIdByCourse = new Map<string, string>();
+  // The next class, not the next row. Whose class it is depends on the
+  // volunteer's level (two levels run at the same hours), and a reply is
+  // recorded against one lesson of that day -- the volunteer's own page
+  // offers the first one -- so the answer is read across the whole day
+  // rather than off one row this page happened to pick (walked 15 Sep
+  // 2026: with the wrong row picked, a "can't make it" read as coming).
   const fallbackToday = toLocalIso(new Date(), DEFAULT_TIMEZONE);
-  for (const e of tpEvents ?? []) {
-    if (e.event_date < (todayByCourseId.get(e.course_id) ?? fallbackToday)) continue;
-    const current = nextTpEventIdByCourse.get(e.course_id);
-    const currentDate = current ? (tpEvents ?? []).find((x) => x.id === current)?.event_date : undefined;
-    if (!current || (currentDate && e.event_date < currentDate)) nextTpEventIdByCourse.set(e.course_id, e.id);
-  }
+  const nextClassDayEventIds = (courseId: string, level: string | null): string[] => {
+    const lessons = classLessons(
+      (tpEvents ?? []).filter((e) => e.course_id === courseId && e.event_date >= (todayByCourseId.get(courseId) ?? fallbackToday)),
+      level
+    );
+    if (lessons.length === 0) return [];
+    const nextDate = lessons.reduce((earliest, e) => (e.event_date < earliest ? e.event_date : earliest), lessons[0].event_date);
+    return lessons.filter((e) => e.event_date === nextDate).map((e) => e.id);
+  };
   const declinedKeys = new Set((declineRows ?? []).map((d) => `${d.volunteer_student_id}:${d.timetable_event_id}`));
 
   const groups = new Map<
@@ -102,12 +111,25 @@ export default async function CentreVolunteersPage({
   }
   const volunteerGroups = [...groups.values()]
     .map((g) => {
-      const ids = g.members.map((m) => m.id);
       const attendedEventIds = new Set(
-        (attendanceRows ?? []).filter((a) => ids.includes(a.volunteer_student_id)).map((a) => a.timetable_event_id)
+        (attendanceRows ?? [])
+          .filter((a) => g.members.some((m) => m.id === a.volunteer_student_id))
+          .map((a) => a.timetable_event_id)
       );
-      const sessions = computeSessionTicks(tpEvents ?? [], attendedEventIds, TP_LESSON_LENGTH_MINUTES);
-      const hours = sessions.reduce((sum, s) => sum + s.creditedMinutes, 0) / 60;
+      // Per registration, not per person: a session is one class's day on
+      // one course. Handing the whole centre's TP rows to the tick maths
+      // put every other course's lessons into the same day bucket, and on
+      // a two-group course put the other level's three lessons in as well
+      // -- so "present" asked for 4 of 6 a volunteer could never sit, and
+      // a day that did tick credited 4.5 hours for a 2.25-hour class
+      // (walked 15 Sep 2026).
+      const hours = g.members.reduce((sum, m) => {
+        const lessons = classLessons(
+          (tpEvents ?? []).filter((e) => e.course_id === m.courseId),
+          m.level
+        );
+        return sum + creditedHours(computeSessionTicks(lessons, attendedEventIds, TP_LESSON_LENGTH_MINUTES));
+      }, 0);
       // for-claude-code-volunteer-pool-header.md: "sage green for active
       // volunteers, muted grey once a volunteer's course has ended" -- a
       // volunteer linked across several courses reads as active as long as
@@ -174,10 +196,10 @@ export default async function CentreVolunteersPage({
                   hours={g.hours}
                   active={g.active}
                   members={g.members.map((m) => {
-                    const nextEventId = nextTpEventIdByCourse.get(m.courseId);
-                    const nextClassStatus: "coming" | "declined" | null = !nextEventId
+                    const nextDayIds = nextClassDayEventIds(m.courseId, m.level);
+                    const nextClassStatus: "coming" | "declined" | null = nextDayIds.length === 0
                       ? null
-                      : declinedKeys.has(`${m.id}:${nextEventId}`)
+                      : nextDayIds.some((id) => declinedKeys.has(`${m.id}:${id}`))
                         ? "declined"
                         : "coming";
                     return { id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course", level: m.level, nextClassStatus };

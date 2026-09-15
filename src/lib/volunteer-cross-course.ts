@@ -84,12 +84,21 @@ export async function getVolunteerIdentityData(
     return !mine || !its || mine === its;
   });
 
-  const sessions = computeSessionTicks(
-    myEvents.map((e) => ({ id: e.id, event_date: e.event_date })),
-    attendedEventIds,
-    TP_LESSON_LENGTH_MINUTES
+  // One course's day at a time: a session is one class's day, and two
+  // courses teaching on the same date would otherwise land in the same
+  // bucket and move both the "present" threshold and the hours credited.
+  const hoursCredited = courseIds.reduce(
+    (sum, courseId) =>
+      sum +
+      creditedHours(
+        computeSessionTicks(
+          myEvents.filter((e) => e.course_id === courseId).map((e) => ({ id: e.id, event_date: e.event_date })),
+          attendedEventIds,
+          TP_LESSON_LENGTH_MINUTES
+        )
+      ),
+    0
   );
-  const hoursCredited = creditedHours(sessions);
 
   // Was `new Date().toISOString().slice(0, 10)` -- the calendar date in
   // UTC, which is not the calendar date at any centre off UTC. For

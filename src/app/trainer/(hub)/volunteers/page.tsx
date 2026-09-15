@@ -7,6 +7,7 @@ import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 import { VolunteersV2, type VolunteerRowData, type ClassLabel } from "@/app/trainer/(hub)/volunteers/volunteers-v2";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeSessionTicks, creditedHours, blocksNeededForPresent, CERTIFICATE_HOURS_THRESHOLD, teachingDayNumber } from "@/lib/volunteer-attendance";
+import { classLessons, levelKey } from "@/lib/volunteer-class-session";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { isMctView } from "@/lib/act-preview";
@@ -38,7 +39,7 @@ export default async function VolunteersPage() {
       .is("removed_at", null)
       .order("name"),
     supabase.from("courses").select("id, name, end_date, center_id").eq("id", courseId).maybeSingle(),
-    supabase.from("course_timetable_events").select("id, event_date, event_time, zoom_url").eq("course_id", courseId).eq("type", "tp").order("event_date").order("event_time"),
+    supabase.from("course_timetable_events").select("id, event_date, event_time, zoom_url, detail").eq("course_id", courseId).eq("type", "tp").order("event_date").order("event_time"),
   ]);
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
@@ -87,15 +88,15 @@ export default async function VolunteersPage() {
   const { data: siblingRows } =
     personIds.length > 0
       ? // course-wide: hours follow the volunteer_person across every course they've volunteered on
-        await admin.from("volunteer_students").select("id, course_id, volunteer_person_id").in("volunteer_person_id", personIds)
-      : { data: [] as { id: string; course_id: string; volunteer_person_id: string | null }[] };
+        await admin.from("volunteer_students").select("id, course_id, volunteer_person_id, level").in("volunteer_person_id", personIds)
+      : { data: [] as { id: string; course_id: string; volunteer_person_id: string | null; level: string | null }[] };
   const priorSiblings = (siblingRows ?? []).filter((s) => s.course_id !== courseId);
   const priorCourseIds = [...new Set(priorSiblings.map((s) => s.course_id))];
   const priorSiblingIds = priorSiblings.map((s) => s.id);
   const [{ data: priorTpEvents }, { data: priorAttendance }] = await Promise.all([
     priorCourseIds.length > 0
-      ? admin.from("course_timetable_events").select("id, event_date, course_id").in("course_id", priorCourseIds).eq("type", "tp")
-      : Promise.resolve({ data: [] as { id: string; event_date: string; course_id: string }[] }),
+      ? admin.from("course_timetable_events").select("id, event_date, course_id, detail").in("course_id", priorCourseIds).eq("type", "tp")
+      : Promise.resolve({ data: [] as { id: string; event_date: string; course_id: string; detail: string | null }[] }),
     priorSiblingIds.length > 0
       ? // course-wide: attendance on the person's earlier courses
         admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", priorSiblingIds)
@@ -103,12 +104,19 @@ export default async function VolunteersPage() {
   ]);
   const priorHoursByPerson = new Map<string, { hours: number; courses: number }>();
   for (const personId of personIds) {
-    const memberIds = priorSiblings.filter((s) => s.volunteer_person_id === personId).map((s) => s.id);
-    if (memberIds.length === 0) continue;
-    const memberCourseIds = new Set(priorSiblings.filter((s) => s.volunteer_person_id === personId).map((s) => s.course_id));
+    const members = priorSiblings.filter((s) => s.volunteer_person_id === personId);
+    if (members.length === 0) continue;
+    const memberIds = members.map((s) => s.id);
+    const memberCourseIds = new Set(members.map((s) => s.course_id));
     const attended = new Set((priorAttendance ?? []).filter((a) => memberIds.includes(a.volunteer_student_id)).map((a) => a.timetable_event_id));
-    const events = (priorTpEvents ?? []).filter((e) => memberCourseIds.has(e.course_id));
-    const hours = creditedHours(computeSessionTicks(events, attended, TP_LESSON_LENGTH_MINUTES));
+    // Per registration and per class: one course's day at one level is one
+    // session. Pooling every earlier course's lessons into one date bucket
+    // inflated both the "present" threshold and the hours a ticked day
+    // credits (walked 15 Sep 2026).
+    const hours = members.reduce((sum, m) => {
+      const lessons = classLessons((priorTpEvents ?? []).filter((e) => e.course_id === m.course_id), m.level);
+      return sum + creditedHours(computeSessionTicks(lessons, attended, TP_LESSON_LENGTH_MINUTES));
+    }, 0);
     priorHoursByPerson.set(personId, { hours, courses: memberCourseIds.size });
   }
 
@@ -160,17 +168,31 @@ export default async function VolunteersPage() {
   const todayUnderway = stripIsToday && Boolean(todayStart) && localNow >= (todayStart ?? "").slice(0, 5);
 
   // The rule line's numbers come from the course's own typical day.
+  // ...and a class's own day: two levels run at the same hours, so counting
+  // every row said "4 of 6 lessons, 4.5 hours a session" for a class that
+  // is three lessons and 2.25 hours (walked 15 Sep 2026).
   const blocksPerDay = new Map<string, number>();
-  for (const e of tpEvents ?? []) blocksPerDay.set(e.event_date, (blocksPerDay.get(e.event_date) ?? 0) + 1);
+  for (const e of tpEvents ?? []) {
+    const key = `${e.event_date}|${levelKey(e.detail) ?? ""}`;
+    blocksPerDay.set(key, (blocksPerDay.get(key) ?? 0) + 1);
+  }
   const counts = [...blocksPerDay.values()];
   const typicalBlocks = counts.length > 0 ? counts.sort((a, b) => counts.filter((x) => x === a).length - counts.filter((x) => x === b).length).pop()! : 3;
   const sessionHours = (typicalBlocks * TP_LESSON_LENGTH_MINUTES) / 60;
+
+  // What one class sits through today, not what the course teaches today.
+  const todayByLevel = new Map<string, number>();
+  for (const e of todayEvents) {
+    const key = levelKey(e.detail) ?? "";
+    todayByLevel.set(key, (todayByLevel.get(key) ?? 0) + 1);
+  }
+  const lessonsInOneClassToday = todayByLevel.size > 0 ? Math.max(...todayByLevel.values()) : todayEvents.length;
 
   const rows: VolunteerRowData[] = (volunteers ?? []).map((v) => {
     const attended = attendedByVolunteer.get(v.id) ?? new Set<string>();
     // Held days and today only -- a day that hasn't happened yet is
     // "upcoming", not an absence.
-    const ticks = computeSessionTicks(tpEvents ?? [], attended, TP_LESSON_LENGTH_MINUTES).filter((t) => t.date <= today);
+    const ticks = computeSessionTicks(classLessons(tpEvents ?? [], v.level), attended, TP_LESSON_LENGTH_MINUTES).filter((t) => t.date <= today);
     const hoursHere = creditedHours(ticks);
     const prior = v.volunteer_person_id ? (priorHoursByPerson.get(v.volunteer_person_id) ?? { hours: 0, courses: 0 }) : { hours: 0, courses: 0 };
     const tok = tokenByVolunteer.get(v.id);
@@ -243,7 +265,7 @@ export default async function VolunteersPage() {
               totalClasses: tpDates.length,
               startTime: todayStart ? todayStart.slice(0, 5) : null,
               underway: todayUnderway,
-              lessonsToday: todayEvents.length,
+              lessonsToday: lessonsInOneClassToday,
             }
           : null
       }

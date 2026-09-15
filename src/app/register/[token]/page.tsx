@@ -43,7 +43,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
   const [{ data: course }, { data: volunteers }, { data: tpEvents }] = await Promise.all([
     admin.from("courses").select("name, start_date, end_date").eq("id", accessToken.course_id).maybeSingle(),
     admin.from("volunteer_students").select("id, name, level").eq("course_id", accessToken.course_id).is("removed_at", null).order("name"),
-    admin.from("course_timetable_events").select("id, event_date").eq("course_id", accessToken.course_id).eq("type", "tp").order("event_date"),
+    admin.from("course_timetable_events").select("id, event_date, detail").eq("course_id", accessToken.course_id).eq("type", "tp").order("event_date"),
   ]);
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);

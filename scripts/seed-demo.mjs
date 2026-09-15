@@ -3409,7 +3409,7 @@ async function main() {
       level: "Intermediate",
       signup_completed_at: new Date(Date.now() - 18 * 86400000).toISOString(),
     })
-    .select("id")
+    .select("id, level")
     .single();
   const { data: volunteerToken } = await supabase
     .from("course_access_tokens")
@@ -3466,9 +3466,12 @@ async function main() {
   // read "0 FOL entries" for every candidate and that instruction pointed at
   // nothing. A couple each, against the two volunteer learners they teach.
   {
+    // Emeka is Intermediate and Grace Elementary -- these two were the
+    // wrong way round, so the pooled log filed every error against the
+    // class the learner is not in (walked 15 Sep 2026).
     const folLearners = [
-      { id: volunteer.id, tpClass: "A2" },
-      { id: graceVolunteer.id, tpClass: "B1+" },
+      { id: volunteer.id, tpClass: "B1+" },
+      { id: graceVolunteer.id, tpClass: "A2" },
     ];
     const FOL_ERRORS = [
       { problem_type: "grammar", note: '"She don\'t like coffee" -- third-person -s dropped in the present simple.' },
@@ -3528,14 +3531,25 @@ async function main() {
   // missed entirely.
   const { data: earlyTpRows } = await supabase
     .from("course_timetable_events")
-    .select("id, event_date")
+    .select("id, event_date, detail")
     .eq("course_id", course.id)
     .eq("type", "tp")
     .order("event_date")
     .order("event_time");
-  const earlyDates = [...new Set((earlyTpRows ?? []).map((e) => e.event_date))].slice(0, 6);
+  // Their own class only. Two levels are taught at the same hours, so
+  // marking a volunteer present at all six of a day's lessons had them in
+  // two rooms at once -- and the "one lesson" day landed on whichever row
+  // came first, which was often the other level's (walked 15 Sep 2026).
+  const volunteerLevel = (volunteer.level ?? "").toLowerCase();
+  const isTheirClass = (e) => {
+    if (!e.detail) return true;
+    const d = e.detail.toLowerCase();
+    return volunteerLevel.startsWith("elem") ? d.startsWith("a2") : volunteerLevel.startsWith("inter") ? d.startsWith("b1") : true;
+  };
+  const myTpRows = (earlyTpRows ?? []).filter(isTheirClass);
+  const earlyDates = [...new Set(myTpRows.map((e) => e.event_date))].slice(0, 6);
   const attendanceRows = earlyDates.flatMap((date, i) => {
-    const blocks = (earlyTpRows ?? []).filter((e) => e.event_date === date);
+    const blocks = myTpRows.filter((e) => e.event_date === date);
     const take = i === 4 ? 1 : i === 5 ? 0 : blocks.length;
     return blocks.slice(0, take).map((e) => ({ volunteer_student_id: volunteer.id, timetable_event_id: e.id }));
   });

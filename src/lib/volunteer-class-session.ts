@@ -1,4 +1,3 @@
-import "server-only";
 import { CEFR_LEVELS, extractLevelCode } from "@/lib/levels";
 
 /**
@@ -51,4 +50,30 @@ export function isStartOfTheirClass(
       (e.event_time ?? "") < (event.event_time ?? "")
   );
   return !sameClassEarlier;
+}
+
+/**
+ * The lessons a volunteer is actually in.
+ *
+ * Attendance maths is per session, and a session is one class's day: on a
+ * two-group course that is three lettered lessons, not the six the course
+ * teaches across two levels in parallel. Counting all six breaks the rule
+ * in both directions -- present needs round(2N/3), so 4 of 6 where the
+ * volunteer can only ever sit 3, and a day that does tick credits the
+ * whole 6 x 45 as if they had been in two rooms at once (walked 15 Sep
+ * 2026: the centre pool and the register both did this).
+ *
+ * Pass the volunteer's own courses only; an unrecognised level matches
+ * everything, exactly as it did before any of this existed.
+ */
+export function classLessons<T extends { detail?: string | null }>(
+  events: T[],
+  volunteerLevel: string | null | undefined
+): T[] {
+  const mine = levelKey(volunteerLevel);
+  if (!mine) return events;
+  return events.filter((e) => {
+    const its = levelKey(e.detail);
+    return !its || its === mine;
+  });
 }
