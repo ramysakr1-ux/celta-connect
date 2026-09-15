@@ -418,7 +418,22 @@ async function main() {
 
   await copyTable("individual_tutorial_invites", await pick("individual_tutorial_invites", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
   await copyTable("formal_letters", await pick("formal_letters", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
-  await copyTable("volunteer_students", await pick("volunteer_students", { course_id: DEMO_COURSE_ID }).then((r) => r.data), { mapKind: "volunteer" });
+  // Every login on this course is demo- swapped for walk-, and the volunteers'
+  // addresses have to move with them -- same fault the assessor's address had
+  // on 12 Sep 2026: volunteer_students.email is free text, so the generic row
+  // copier carried the DEMO address across, and a session reminder from
+  // Ramy's own course would have gone to a demo mailbox that bounces. The
+  // cross-course person link is dropped too: volunteer_people is scoped to a
+  // centre, and this course is at another one.
+  await copyTable(
+    "volunteer_students",
+    (await pick("volunteer_students", { course_id: DEMO_COURSE_ID }).then((r) => r.data) ?? []).map((v) => ({
+      ...v,
+      email: typeof v.email === "string" ? v.email.replace(/^demo-/, EMAIL_PREFIX) : v.email,
+      volunteer_person_id: null,
+    })),
+    { mapKind: "volunteer" }
+  );
   await copyTable("course_broadcasts", await pick("course_broadcasts", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
 
   // --- The tutor swap, on the groups themselves -------------------------
