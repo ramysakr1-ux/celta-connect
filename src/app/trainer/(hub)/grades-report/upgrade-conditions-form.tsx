@@ -31,7 +31,7 @@ export function UpgradeConditionsForm({ traineeId, record }: { traineeId: string
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

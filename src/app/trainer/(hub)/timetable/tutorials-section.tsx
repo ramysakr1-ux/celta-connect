@@ -307,7 +307,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                       <button
                         type="button"
                         onClick={() => setSheetForm({ open: true, preselect: g.scope })}
-                        className={`${OUTLINE} justify-self-end trainer-hover-fill`}
+                        className={`${OUTLINE} justify-self-end wash`}
                         style={{ borderColor: "var(--hub-accent)", color: "var(--hub-accent)" }}
                       >
                         Place sheet
@@ -513,7 +513,7 @@ function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet
     return (
       <div className="rounded-[12px] border border-border bg-card px-6 py-5">
         <p className="font-serif text-[20px] font-semibold text-ink-warm">Sheet</p>
-        <p className="mt-1 text-[12.5px] text-muted">Click a block above, or a booked cell, and its sheet opens here.</p>
+        <p className="mt-1 text-[12.5px] text-muted">Click a block above, or a booked cell, and its sheet lift here.</p>
       </div>
     );
   }
@@ -603,7 +603,7 @@ function GridCellView({ cell, open, onToggle, onOpenSheet }: { cell: GridCell; o
   if (cell.sheet) {
     const ref = cell.sheet;
     return (
-      <button type="button" onClick={() => onOpenSheet(ref)} title={`${title} · opens the sheet below`} className={`${box} ${hover} w-full`}>
+      <button type="button" onClick={() => onOpenSheet(ref)} title={`${title} · lift the sheet below`} className={`${box} ${hover} w-full`}>
         {body}
       </button>
     );

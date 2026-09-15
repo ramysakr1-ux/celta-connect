@@ -162,7 +162,7 @@ export function FinalReportFields({
         <button
           type="submit"
           disabled={pending}
-          className="trainer-hover-fill self-start rounded-[6px] border border-border px-3 py-1.5 text-[13px] text-ink disabled:opacity-60"
+          className="wash self-start rounded-[6px] border border-border px-3 py-1.5 text-[13px] text-ink disabled:opacity-60"
         >
           {pending ? "Saving..." : "Save"}
         </button>

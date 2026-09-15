@@ -100,7 +100,7 @@ export function TutorRoleControl({
               type="submit"
               disabled={pending}
               onClick={() => setStaged(null)}
-              className="rounded-[6px] border border-border px-2.5 py-1 text-[11.5px] text-ink admin-hover-fill disabled:opacity-60"
+              className="rounded-[6px] border border-border px-2.5 py-1 text-[11.5px] text-ink wash disabled:opacity-60"
             >
               {pending ? "Changing..." : "Yes, change it"}
             </button>

@@ -193,7 +193,7 @@ export function TaskAnswerBox({
                         aria-pressed={c.choice === opt}
                         onClick={() => set(String(i), { ...c, choice: c.choice === opt ? undefined : opt })}
                         className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                          c.choice === opt ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted trainee-hover-fill"
+                          c.choice === opt ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash"
                         }`}
                       >
                         {opt}
@@ -259,7 +259,7 @@ export function TaskAnswerBox({
                         disabled={!on && atLimit}
                         onClick={() => set("picked", on ? picked.filter((p) => p !== opt) : [...picked, opt])}
                         className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${
-                          on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted trainee-hover-fill"
+                          on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash"
                         }`}
                       >
                         {opt}

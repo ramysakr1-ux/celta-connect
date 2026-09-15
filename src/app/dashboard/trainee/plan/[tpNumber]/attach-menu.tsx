@@ -95,7 +95,7 @@ export function AttachMenu({
         type="button"
         onClick={() => setMode(mode === null ? "menu" : null)}
         disabled={uploading}
-        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform lift disabled:opacity-60"
         style={{ background: "var(--color-primary)" }}
       >
         <Paperclip size={15} />

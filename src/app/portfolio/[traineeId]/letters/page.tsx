@@ -89,7 +89,7 @@ export default async function CandidateLettersPage({ params }: { params: Promise
         <Link
           key={l.id}
           href={`/portfolio/${traineeId}/letters/${l.id}`}
-          className="assessor-hover card flex items-start justify-between gap-4 p-5 no-underline"
+          className="lift card flex items-start justify-between gap-4 p-5 no-underline"
         >
           <span>
             <span className="block text-[13.5px] font-semibold text-ink">

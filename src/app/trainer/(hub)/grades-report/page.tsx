@@ -576,7 +576,7 @@ export default async function GradesReportPage() {
                         href={appianHref(appianUrl)}
                         target="_blank"
                         rel="noreferrer"
-                        className="trainer-hover-fill ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
+                        className="wash ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
                       >
                         Open Appian
                       </a>

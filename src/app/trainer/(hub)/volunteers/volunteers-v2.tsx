@@ -263,7 +263,7 @@ function CopyButton({ url, small = false }: { url: string; small?: boolean }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className={small ? "text-[11px] font-medium hover:underline" : "trainer-hover-fill h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink"}
+      className={small ? "text-[11px] font-medium hover:underline" : "wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink"}
       style={small ? { color: TEAL } : undefined}
     >
       {copied ? "Copied!" : "Copy"}
@@ -462,7 +462,7 @@ export function VolunteersV2({
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedId(r.id); }
                       }}
-                      className="grid w-full cursor-pointer grid-cols-[minmax(0,1.2fr)_196px_150px_112px_44px] items-center gap-x-3.5 border-b border-border-faint px-4 py-[11px] text-left transition-colors last:border-b-0 hover:bg-[color-mix(in_oklab,var(--hub-hover-accent)_7%,transparent)]"
+                      className="grid w-full cursor-pointer grid-cols-[minmax(0,1.2fr)_196px_150px_112px_44px] items-center gap-x-3.5 border-b border-border-faint px-4 py-[11px] text-left transition-colors last:border-b-0 hover:bg-[color-mix(in_oklab,var(--hover-accent)_7%,transparent)]"
                       style={isSelected ? { background: `color-mix(in oklab, ${TEAL_TINT} 45%, var(--color-card))`, boxShadow: `inset 3px 0 0 ${TEAL}` } : undefined}
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
@@ -650,7 +650,7 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
             {row.email && url ? (
               <form action={emailAction}>
                 <input type="hidden" name="volunteer_id" value={row.id} />
-                <button type="submit" disabled={emailing} className="trainer-hover-fill h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60">
+                <button type="submit" disabled={emailing} className="wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60">
                   {emailing ? "Sending…" : emailState.sent ? "Sent!" : "Email it"}
                 </button>
               </form>
@@ -662,7 +662,7 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
               }}
             >
               <input type="hidden" name="volunteer_id" value={row.id} />
-              <button type="submit" disabled={reissuing} className="trainer-hover-fill h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60">
+              <button type="submit" disabled={reissuing} className="wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60">
                 {reissuing ? "Re-issuing…" : "Re-issue"}
               </button>
             </form>
@@ -712,7 +712,7 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
               placeholder="No transcript yet — listen to their recording and paste one here (for Focus on the Learner)"
               className="w-full flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-[11px] text-ink outline-none focus:border-primary"
             />
-            <button type="submit" className="trainer-hover-fill shrink-0 rounded-[6px] border border-border px-2 py-1 text-[11px] text-ink">
+            <button type="submit" className="wash shrink-0 rounded-[6px] border border-border px-2 py-1 text-[11px] text-ink">
               Save
             </button>
           </form>

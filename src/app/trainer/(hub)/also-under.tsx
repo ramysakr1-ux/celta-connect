@@ -28,7 +28,7 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
           <a
             key={l.href}
             href={l.href}
-            className="trainer-hover inline-flex h-9 items-center rounded-full border border-border bg-card-inset px-4 text-[13px] font-semibold text-ink"
+            className="lift inline-flex h-9 items-center rounded-full border border-border bg-card-inset px-4 text-[13px] font-semibold text-ink"
 
           >
             {l.label}
@@ -37,7 +37,7 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
         <Link
           key={l.href}
           href={l.href}
-          className="trainer-hover inline-flex h-9 items-center rounded-full border border-border bg-card-inset px-4 text-[13px] font-semibold text-ink"
+          className="lift inline-flex h-9 items-center rounded-full border border-border bg-card-inset px-4 text-[13px] font-semibold text-ink"
 
         >
           {l.label}

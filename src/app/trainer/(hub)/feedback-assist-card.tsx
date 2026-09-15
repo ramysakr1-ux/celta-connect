@@ -87,7 +87,7 @@ export function FeedbackAssistCard({
                 }
                 setEditing((v) => !v);
               }}
-              className="trainer-hover-fill h-8 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
+              className="wash h-8 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
             >
               {editing ? "Cancel" : "Edit"}
             </button>

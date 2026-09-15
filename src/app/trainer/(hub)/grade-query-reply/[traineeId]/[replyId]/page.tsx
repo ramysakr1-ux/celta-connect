@@ -311,7 +311,7 @@ export default async function GradeQueryReplyDetailPage({
             <form action={markAppealResolved}>
               <input type="hidden" name="reply_id" value={reply.id} />
               <input type="hidden" name="trainee_id" value={traineeId} />
-              <button type="submit" className="self-start rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink wash">
                 Mark appeal resolved
               </button>
             </form>
@@ -319,7 +319,7 @@ export default async function GradeQueryReplyDetailPage({
             <form action={markAppealRaised}>
               <input type="hidden" name="reply_id" value={reply.id} />
               <input type="hidden" name="trainee_id" value={traineeId} />
-              <button type="submit" className="self-start rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink wash">
                 Mark a formal appeal raised
               </button>
             </form>

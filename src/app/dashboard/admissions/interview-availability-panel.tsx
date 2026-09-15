@@ -75,7 +75,7 @@ export function InterviewAvailabilityPanel({
             <span className="text-xs text-muted">Booking cut-off (hrs)</span>
             <input name="interview_cutoff_hours" type="number" min={0} defaultValue={settings.cutoffHours} className={`${inputClass} w-24`} />
           </label>
-          <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-xs font-semibold text-ink hover:border-primary admin-hover-fill">
+          <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-xs font-semibold text-ink hover:border-primary wash">
             Save
           </button>
         </form>
@@ -89,7 +89,7 @@ export function InterviewAvailabilityPanel({
             <p className="text-sm text-muted">No pattern set yet.</p>
           ) : (
             patterns.map((p) => (
-              <div key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm admin-hover">
+              <div key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm ring">
                 <span className="text-ink">
                   {p.interviewerName} -- {WEEKDAY_LABELS[p.weekday]}, {p.startTime.slice(0, 5)}-{p.endTime.slice(0, 5)} (
                   {p.mode === "online" ? "online" : "face to face"})
@@ -144,7 +144,7 @@ export function InterviewAvailabilityPanel({
             <p className="text-sm text-muted">No blocks set.</p>
           ) : (
             blocks.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm admin-hover">
+              <div key={b.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm ring">
                 <span className="text-ink">
                   {b.interviewerName ?? "Centre-wide"} -- {b.startDate}
                   {b.endDate !== b.startDate ? ` to ${b.endDate}` : ""}
@@ -177,7 +177,7 @@ export function InterviewAvailabilityPanel({
           <span className="text-xs text-muted">to</span>
           <input name="end_time" type="time" className={inputClass} />
           <input name="reason" placeholder="Reason (optional)" className={`${inputClass} min-w-[160px]`} />
-          <button type="submit" disabled={blockPending} className="h-9 rounded-[6px] border border-border px-3 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60 admin-hover-fill">
+          <button type="submit" disabled={blockPending} className="h-9 rounded-[6px] border border-border px-3 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60 wash">
             {blockPending ? "Saving…" : "Block"}
           </button>
         </form>

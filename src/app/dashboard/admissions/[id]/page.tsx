@@ -525,7 +525,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary admin-hover-fill">
+                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary wash">
                   Book with this interviewer
                 </button>
               </form>

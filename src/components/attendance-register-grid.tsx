@@ -13,10 +13,10 @@ function dateHeader(iso: string): { weekday: string; dayMonth: string } {
   };
 }
 
-// A little colour on hover, not much (Ramy, 5 Sep 2026). --hub-hover-accent
+// A little colour on hover, not much (Ramy, 5 Sep 2026). --hover-accent
 // is set by the trainer hub; the assessor pack and the register-viewer
 // page fall back to the teal.
-const ROW_HOVER = "hover:bg-[color-mix(in_oklab,var(--hub-hover-accent,var(--color-primary))_6%,transparent)]";
+const ROW_HOVER = "hover:bg-[color-mix(in_oklab,var(--hover-accent,var(--color-primary))_6%,transparent)]";
 
 // One column per teaching DAY, not per lesson. A session is a day (the
 // tick rule is round(2N/3) of that day's N lessons), and a two-group
@@ -95,7 +95,7 @@ export function AttendanceRegisterGrid({
                               ? `One lesson only -- ${d.attended} of ${d.lessons}, banks nothing`
                               : "Not marked present"
                         }
-                        className={`inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] text-xs font-medium transition-shadow hover:shadow-[inset_0_0_0_1px_var(--hub-hover-accent,var(--color-primary))] ${
+                        className={`inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] text-xs font-medium transition-shadow hover:shadow-[inset_0_0_0_1px_var(--hover-accent,var(--color-primary))] ${
                           d.present
                             ? "status-pill status-pill-on-track"
                             : d.attended > 0

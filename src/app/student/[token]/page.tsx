@@ -245,7 +245,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // candidates only from the course's Day-10 divergence session on.
   if (!volunteer.signup_completed_at) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="hover-trainee min-h-screen bg-background">
         <div className="container flex items-center gap-4 py-6">
           <Link href="/" className="hover:opacity-80">
             <Wordmark size="header" />
@@ -690,7 +690,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const teachersLabel = nextClassTeachers.length > 0 ? nextClassTeachers.map((t) => t.name).join(" and ") : null;
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-background px-4 py-8 md:py-12">
+    <div className="hover-trainee flex min-h-screen flex-col items-center bg-background px-4 py-8 md:py-12">
       {/* Ramy, 30 Aug 2026: "how do they keep this on their phones and
           desktop? Just create a shortcut?"
           
@@ -959,7 +959,7 @@ function NextClassCard({
           )}`}
           download="class.ics"
           title="Add to calendar"
-          className="volunteer-hover-fill flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
+          className="wash flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
         >
           <CalendarIcon />
         </a>
@@ -1091,7 +1091,7 @@ function NextClassBanner({
             timeZone={courseTimeZone}
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
-            className="trainee-hover-fill flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary px-6 text-[14.5px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
+            className="wash flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary px-6 text-[14.5px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
           />
         ) : (
           <span

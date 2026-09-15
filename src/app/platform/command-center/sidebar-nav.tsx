@@ -26,7 +26,7 @@ export function SidebarNav() {
           <Link
             key={s.href}
             href={s.href}
-            className="admin-hover-fill"
+            className="wash"
             style={{
               display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 7,
               fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none",

@@ -268,7 +268,7 @@ export function StaffChatDrawer({
                   setSelectedId(groupChannel.id);
                   setPickerOpen(false);
                 }}
-                className={`admin-hover flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2.5 text-left hover:bg-accent/40 ${
+                className={`wash flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2.5 text-left hover:bg-accent/40 ${
                   groupChannel.id === selectedId ? "bg-accent/25" : ""
                 }`}
               >
@@ -291,7 +291,7 @@ export function StaffChatDrawer({
                   type="button"
                   disabled={startingDm}
                   onClick={() => startDm(c)}
-                  className={`admin-hover flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2.5 text-left hover:bg-accent/40 disabled:opacity-60 ${
+                  className={`wash flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2.5 text-left hover:bg-accent/40 disabled:opacity-60 ${
                     isSelected ? "bg-accent/25" : ""
                   }`}
                 >
@@ -350,7 +350,7 @@ export function StaffChatDrawer({
             disabled={readOnly}
             aria-expanded={pickerOpen}
             aria-label="Choose who to message"
-            className={`admin-hover-fill flex h-10 shrink-0 items-center gap-2 rounded-[20px] bg-accent/40 pl-2 pr-3 hover:bg-accent/60 ${
+            className={`wash flex h-10 shrink-0 items-center gap-2 rounded-[20px] bg-accent/40 pl-2 pr-3 hover:bg-accent/60 ${
               readOnly ? "cursor-default opacity-60" : ""
             }`}
           >
@@ -409,7 +409,7 @@ export function StaffChatDrawer({
             aria-pressed={soundEnabled}
             title={soundEnabled ? "Sound on for new messages -- click to mute" : "Sound off for new messages -- click to enable"}
             aria-label={soundEnabled ? "Mute chat sound" : "Enable chat sound"}
-            className="admin-hover-fill hidden size-[34px] shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent/40 hover:text-ink sm:flex"
+            className="wash hidden size-[34px] shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent/40 hover:text-ink sm:flex"
           >
             {soundEnabled ? <Volume2 className="size-4" aria-hidden="true" /> : <VolumeX className="size-4" aria-hidden="true" />}
           </button>
@@ -418,7 +418,7 @@ export function StaffChatDrawer({
             type="button"
             onClick={toggleThread}
             aria-expanded={threadOpen}
-            className="admin-hover-fill flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
+            className="wash flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
           >
             {threadOpen ? "Hide" : "Thread"}
             {!threadOpen && unreadCount > 0 ? (

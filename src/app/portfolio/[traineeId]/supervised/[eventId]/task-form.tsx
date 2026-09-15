@@ -172,7 +172,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
           <div className="flex flex-col gap-2">
             {question.opts.map((opt, i) => {
               const isAnswered = answered !== null && answered !== undefined;
-              let cls = "border-border bg-card text-ink trainee-hover-fill";
+              let cls = "border-border bg-card text-ink wash";
               if (isAnswered) {
                 if (i === question.correct) cls = "border-primary bg-primary/10 text-primary";
                 else if (i === answered) cls = "border-destructive bg-destructive/10 text-destructive";
@@ -260,7 +260,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
               setTopicKey(t.key);
               setStage("notes");
             }}
-            className={`flex flex-col gap-1 rounded-[8px] border border-border ${t.spineClass} border-l-[3px] bg-card px-4 py-3.5 text-left trainee-hover`}
+            className={`flex flex-col gap-1 rounded-[8px] border border-border ${t.spineClass} border-l-[3px] bg-card px-4 py-3.5 text-left wash`}
           >
             <span className="text-sm font-semibold text-ink">{t.title}</span>
             <span className="text-xs text-muted">{t.covers}</span>

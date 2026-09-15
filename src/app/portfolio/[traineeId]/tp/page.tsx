@@ -301,7 +301,7 @@ export default async function TpHubPage({
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href={`/portfolio/${traineeId}/celta5`}
-              className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink"
+              className="wash rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink"
             >
               Log an observation
             </Link>
@@ -337,7 +337,7 @@ export default async function TpHubPage({
                   </div>
                 );
                 return href ? (
-                  <Link key={tpNumber} href={href} className="trainee-hover -mx-2 rounded-[6px] px-2">
+                  <Link key={tpNumber} href={href} className="lift -mx-2 rounded-[6px] px-2">
                     {row}
                   </Link>
                 ) : (
@@ -366,7 +366,7 @@ export default async function TpHubPage({
                 <Link
                   key={tpNumber}
                   href={`/portfolio/${traineeId}/tp/${tpNumber}`}
-                  className="trainee-hover -mx-2 flex items-start gap-3 rounded-[6px] border-t border-border-faint px-2 py-2.5 first:border-t-0"
+                  className="lift -mx-2 flex items-start gap-3 rounded-[6px] border-t border-border-faint px-2 py-2.5 first:border-t-0"
                   style={{ borderLeft: `3px solid ${isToday ? "var(--color-primary)" : "var(--color-muted)"}`, marginLeft: 0, paddingLeft: 10 }}
                 >
                   <span className="font-serif text-lg text-ink">TP{tpNumber}</span>

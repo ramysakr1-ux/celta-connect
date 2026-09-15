@@ -372,7 +372,7 @@ function Pill({
   // is itself a fact the assessor wants, and a pill that comes and goes
   // between candidates makes the set harder to read at a glance.
   return href ? (
-    <Link href={href} className={`assessor-hover no-underline ${cls}`}>
+    <Link href={href} className={`lift no-underline ${cls}`}>
       {body}
     </Link>
   ) : (
@@ -402,7 +402,7 @@ function Card({
   return (
     <Link
       href={href}
-      className="assessor-hover card flex items-start gap-3 p-4 no-underline"
+      className="lift card flex items-start gap-3 p-4 no-underline"
       style={{ borderLeft: `3px solid ${open ? AMBER : TEAL}` }}
     >
       <span className="shrink-0 pt-[3px] text-[10px] font-bold tabular-nums" style={{ color: MUTED }}>

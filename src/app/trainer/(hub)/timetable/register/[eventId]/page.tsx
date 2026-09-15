@@ -72,7 +72,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
         ) : (
           <div className="flex flex-col divide-y divide-border-faint">
             {(volunteers ?? []).map((v) => (
-              <label key={v.id} className="trainer-hover flex items-center gap-3 rounded-[8px] px-2 py-2.5 text-sm text-ink">
+              <label key={v.id} className="wash flex items-center gap-3 rounded-[8px] px-2 py-2.5 text-sm text-ink">
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attended.has(v.id)} className="size-4" />
                 <span className="flex-1">
                   {v.name}

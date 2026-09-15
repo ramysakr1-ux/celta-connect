@@ -54,7 +54,7 @@ export function ProductSwitcher({ connectHref }: { connectHref: string }) {
               href={p.href}
               target={p.href.startsWith("http") ? "_blank" : undefined}
               rel={p.href.startsWith("http") ? "noreferrer" : undefined}
-              className="admin-hover-fill"
+              className="wash"
               style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", textDecoration: "none" }}
             >
               <span style={{ width: 22, height: 22, borderRadius: 6, background: p.color, color: CARD, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>

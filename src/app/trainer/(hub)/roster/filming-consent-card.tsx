@@ -34,7 +34,7 @@ export function FilmingConsentCard({ candidates }: { candidates: ConsentCandidat
             <button
               type="submit"
               title={`${c.name} -- ${c.confirmed ? "click to mark as not yet collected" : "click to mark as collected"}`}
-              className="trainer-hover inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium"
+              className="wash inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium"
               style={
                 c.confirmed
                   ? { background: "oklch(93% 0.019 190)", color: "oklch(32% 0.05 195)", borderColor: "transparent" }

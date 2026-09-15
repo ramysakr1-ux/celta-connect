@@ -379,7 +379,7 @@ export default async function TrainerAssignmentsBoardPage() {
                       return (
                         <span key={type} className="min-w-0 pr-2">
                           {openable ? (
-                            <Link href={`/trainer/assignments/${a.id}`} className="trainer-hover inline-flex max-w-full">
+                            <Link href={`/trainer/assignments/${a.id}`} className="lift inline-flex max-w-full">
                               {chip}
                             </Link>
                           ) : (
@@ -420,7 +420,7 @@ export default async function TrainerAssignmentsBoardPage() {
                   <Link
                     key={`${q.assignmentId}-${q.order}`}
                     href={`/trainer/assignments/${q.assignmentId}`}
-                    className="trainer-hover flex items-center justify-between gap-3"
+                    className="lift flex items-center justify-between gap-3"
                     style={{ borderRadius: 10, border: `1px solid ${FAINT}`, borderLeft: `4px solid ${hue}`, background: SHEET, padding: "9px 12px" }}
                   >
                     <span className="min-w-0">

@@ -502,7 +502,7 @@ export default async function AssessorPage({
   const visibleCandidates = centreHasChosen && !wantsFullCohort ? selectedCandidates : candidates;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--color-background)" }}>
+    <div className="hover-assessor" style={{ minHeight: "100vh", background: "var(--color-background)" }}>
       <div
         style={{
           background: WARM, color: CREAM, padding: "10px 32px", display: "flex",
@@ -848,7 +848,7 @@ export default async function AssessorPage({
                   // drawer whose own "Open the whole portfolio" was the only way
                   // through; the card is now that link.
                   href={`/portfolio/${c.traineeId}`}
-                  className="card assessor-hover-fill no-underline"
+                  className="card wash no-underline"
                   style={{
                     background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
                     border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
@@ -1234,7 +1234,7 @@ export default async function AssessorPage({
                     href={href}
                     target={opensInApp ? undefined : "_blank"}
                     rel={opensInApp ? undefined : "noreferrer"}
-                    className="assessor-hover no-underline"
+                    className="lift no-underline"
                     style={rowStyle}
                   >
                     {body}
@@ -1251,7 +1251,7 @@ export default async function AssessorPage({
                   href={d.file_url ?? "#"}
                   target="_blank"
                   rel="noreferrer"
-                  className="assessor-hover no-underline"
+                  className="lift no-underline"
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                     padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -1493,7 +1493,7 @@ function Panel({
 // as well?"
 //
 // Worth saying what was actually wrong, because it was more than a missing
-// ring: every one of these rows already carried .assessor-hover, so the whole
+// ring: every one of these rows already carried the hover ring, so the whole
 // row lit up on hover -- but only the small "Open" anchor was clickable.
 // The hover was writing a cheque the row could not cash, and on a read-only
 // screen an assessor has no way to discover that except by clicking and
@@ -1503,7 +1503,7 @@ function DocRow({ label, href, status }: { label: string; href: string; status: 
   return (
     <Link
       href={href}
-      className="assessor-hover no-underline"
+      className="lift no-underline"
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",

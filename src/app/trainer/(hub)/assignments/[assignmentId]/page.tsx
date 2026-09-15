@@ -208,7 +208,7 @@ export default async function TrainerMarkAssignmentPage({
               className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
-          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainer-hover-fill">
+          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink wash">
             Save deadline
           </button>
         </form>
@@ -241,7 +241,7 @@ export default async function TrainerMarkAssignmentPage({
           </p>
           <Link
             href={`/trainer/malpractice/${assignment.open_case_id}`}
-            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill"
+            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
           >
             Open the case
           </Link>

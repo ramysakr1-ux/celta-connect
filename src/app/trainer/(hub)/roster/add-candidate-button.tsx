@@ -61,7 +61,7 @@ export function AddCandidateButton({ courseId, joinUrl }: { courseId: string; jo
             <button
               type="button"
               onClick={handleCopy}
-              className="rounded-[6px] border border-border px-3 py-2 text-xs text-ink trainer-hover-fill"
+              className="rounded-[6px] border border-border px-3 py-2 text-xs text-ink wash"
             >
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -79,7 +79,7 @@ export function AddCandidateButton({ courseId, joinUrl }: { courseId: string; jo
             <button
               type="submit"
               disabled={pending}
-              className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink trainer-hover-fill disabled:opacity-60"
+              className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink wash disabled:opacity-60"
             >
               {pending ? "Sending..." : state.sent ? "Sent!" : "Send"}
             </button>

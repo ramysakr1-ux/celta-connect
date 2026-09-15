@@ -124,7 +124,7 @@ export function FilmedObservationTaskPanel({
                     disabled={Boolean(completedAt)}
                     onClick={() => set("rating", on ? "" : opt)}
                     className={`rounded-full border px-3 py-1 text-xs font-semibold disabled:opacity-70 ${
-                      on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted trainee-hover-fill"
+                      on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash"
                     }`}
                   >
                     {opt}

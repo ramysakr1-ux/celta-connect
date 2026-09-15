@@ -55,7 +55,7 @@ export function AbsencePanel({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainee-hover-fill"
+            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash"
           >
             Record an absence
           </button>

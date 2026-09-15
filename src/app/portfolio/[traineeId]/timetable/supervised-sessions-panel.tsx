@@ -88,7 +88,7 @@ export function SupervisedSessionsPanel({
                       <input type="hidden" name="trainee_id" value={traineeId} />
                       <button
                         type="submit"
-                        className="self-start rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-xs font-medium text-ink trainee-hover-fill"
+                        className="self-start rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-xs font-medium text-ink wash"
                       >
                         Mark checked
                       </button>

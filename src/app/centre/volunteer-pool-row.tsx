@@ -33,7 +33,7 @@ export function VolunteerPoolRow({
   const primary = members[0];
 
   return (
-    <div className="admin-hover border-b border-border-faint px-5 py-2.5 last:border-none">
+    <div className="ring border-b border-border-faint px-5 py-2.5 last:border-none">
       <div className="flex items-center justify-between gap-3">
         <Avatar name={name} size="sm" className="self-start" />
         <div className="flex flex-1 flex-col gap-[3px]">

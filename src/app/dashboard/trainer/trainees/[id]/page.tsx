@@ -118,7 +118,7 @@ export default async function TraineeDetailPage({
               grade: feedback?.grade,
             });
             return (
-              <Link key={n} href={`/dashboard/trainer/trainees/${id}/tp/${n}`} className="card-interactive p-4">
+              <Link key={n} href={`/dashboard/trainer/trainees/${id}/tp/${n}`} className="card lift p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-serif text-ink">TP{n}</p>
                   {feedback?.submitted_at && feedback.grade ? <StandardRatingPill rating={feedback.grade} /> : null}

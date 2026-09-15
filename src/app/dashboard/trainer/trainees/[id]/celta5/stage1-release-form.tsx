@@ -64,7 +64,7 @@ export function Stage1ReleaseForm({
           type="submit"
           disabled={pending || (!completedAt && !released)}
           className={`rounded-[6px] px-4 py-2 text-sm font-semibold disabled:opacity-50 ${
-            released ? "border border-border text-ink admin-hover-fill" : "bg-primary text-primary-foreground"
+            released ? "border border-border text-ink wash" : "bg-primary text-primary-foreground"
           }`}
         >
           {pending ? "Saving…" : released ? "Un-release" : "Release to trainee"}

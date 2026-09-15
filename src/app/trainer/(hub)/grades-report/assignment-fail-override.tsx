@@ -75,7 +75,7 @@ export function AssignmentFailOverride({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] border border-border px-3 py-1 text-[12.5px] text-ink trainer-hover-fill disabled:opacity-60"
+          className="rounded-[6px] border border-border px-3 py-1 text-[12.5px] text-ink wash disabled:opacity-60"
         >
           {pending ? "Saving..." : "Record override"}
         </button>

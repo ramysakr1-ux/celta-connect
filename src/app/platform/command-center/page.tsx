@@ -32,7 +32,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 // be a regression the new spec never asked for, not an intentional cut.
 // Flagged back to Ramy rather than silently kept or silently dropped.
 //
-// Card/panel styling migrated onto the shared .card/.admin-hover design
+// Card/panel styling migrated onto the shared .card/.ring design
 // system 27 Aug 2026 (was hand-built inline styles copied straight from
 // command-center-visual-reference.html, never wired to the shared tokens).
 // Dynamic per-row dot colors (AttentionRow, below) stay inline -- each row
@@ -195,12 +195,12 @@ export default async function CommandCenterOverviewPage() {
       {myCourses.length > 0 ? (
         <div className="card flex flex-col gap-3.5 p-5">
           <h2 className="font-serif text-lg text-ink">Your courses</h2>
-          <p className="text-[11.5px] text-muted">Courses you&apos;re staffed on directly — opens the normal trainer view, same as any tutor.</p>
+          <p className="text-[11.5px] text-muted">Courses you&apos;re staffed on directly — lift the normal trainer view, same as any tutor.</p>
           {myCourses.map((c) => (
             <Link
               key={c.tutorLinkId}
               href={`/platform/command-center/enter-course/${c.courseId}`}
-              className="admin-hover flex items-center justify-between border-t border-border-faint py-3"
+              className="lift flex items-center justify-between border-t border-border-faint py-3"
             >
               <span className="text-sm font-semibold text-ink">
                 {c.centerName} · {c.label} — {(c.role ?? "role not set").replace(/_/g, " ")}
@@ -243,7 +243,7 @@ export default async function CommandCenterOverviewPage() {
                 return (
                   <div
                     key={c.id}
-                    className="admin-hover grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
+                    className="ring grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
                   >
                     <div className="px-5 py-[15px] text-[13.5px] font-semibold text-ink">
                       {c.name}
@@ -342,7 +342,7 @@ export default async function CommandCenterOverviewPage() {
               <p className="text-[12.5px] text-muted">Nothing yet.</p>
             ) : (
               (supportMessages ?? []).map((m) => (
-                <div key={m.id} className="admin-hover flex flex-col gap-0.5 border-t border-border-faint py-3">
+                <div key={m.id} className="ring flex flex-col gap-0.5 border-t border-border-faint py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[7px]">
                       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${m.read_at ? "bg-border" : "bg-gold"}`} />
@@ -365,7 +365,7 @@ export default async function CommandCenterOverviewPage() {
               <p className="text-[12.5px] text-muted">Nothing yet.</p>
             ) : (
               activity.map((item, i) => (
-                <div key={i} className="admin-hover flex items-baseline gap-2.5">
+                <div key={i} className="ring flex items-baseline gap-2.5">
                   <div className="w-11 shrink-0 text-[11px] text-muted">{relativeTime(item.at)}</div>
                   <div className="text-[12.5px] text-ink">{item.label}</div>
                 </div>
@@ -375,7 +375,7 @@ export default async function CommandCenterOverviewPage() {
 
           <Link
             href="/platform/accounts"
-            className="admin-hover-fill rounded-[6px] border border-border px-4 py-3 text-center text-[12.5px] font-semibold text-primary"
+            className="wash rounded-[6px] border border-border px-4 py-3 text-center text-[12.5px] font-semibold text-primary"
           >
             Accounts, subscriptions &amp; invoices
           </Link>
@@ -399,7 +399,7 @@ export default async function CommandCenterOverviewPage() {
 function AttentionRow({ dot, title, detail }: { dot: string; title: string; detail: string }) {
   return (
     <div
-      className="admin-hover flex items-start gap-3 rounded-[6px] px-3.5 py-3"
+      className="ring flex items-start gap-3 rounded-[6px] px-3.5 py-3"
       style={{
         background: `color-mix(in oklab, ${dot} 8%, var(--color-card))`,
         border: `1px solid color-mix(in oklab, ${dot} 24%, transparent)`,

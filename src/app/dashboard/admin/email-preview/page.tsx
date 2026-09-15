@@ -235,7 +235,7 @@ export default async function EmailPreviewPage({
             className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
               s.key === active.key
                 ? "border-ink bg-ink text-card"
-                : "admin-hover-fill border-border text-muted hover:border-rule hover:text-ink"
+                : "wash border-border text-muted hover:border-rule hover:text-ink"
             }`}
           >
             {s.label}

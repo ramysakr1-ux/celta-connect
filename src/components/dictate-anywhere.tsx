@@ -345,7 +345,7 @@ function InlineDictate() {
         onClick={toggle}
         aria-pressed={listening}
         className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-          listening ? "border-destructive bg-status-warning-bg text-destructive" : "border-border text-ink trainee-hover-fill"
+          listening ? "border-destructive bg-status-warning-bg text-destructive" : "border-border text-ink wash"
         }`}
       >
         <span aria-hidden>{listening ? "●" : "🎙"}</span>

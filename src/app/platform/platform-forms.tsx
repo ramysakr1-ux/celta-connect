@@ -58,7 +58,7 @@ export function CreateCentreForm() {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
-            className="shrink-0 text-xs font-semibold text-primary hover:underline admin-hover-fill"
+            className="shrink-0 text-xs font-semibold text-primary hover:underline wash"
           >
             {copied ? "Copied" : "Copy link"}
           </button>

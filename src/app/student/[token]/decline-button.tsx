@@ -23,7 +23,7 @@ export function DeclineButton({ token, eventId, alreadyDeclined }: { token: stri
           <button
             type="submit"
             disabled={undoPending}
-            className="volunteer-hover-fill h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+            className="wash h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
           >
             {undoPending ? "Sending…" : "Actually, I can come"}
           </button>
@@ -42,7 +42,7 @@ export function DeclineButton({ token, eventId, alreadyDeclined }: { token: stri
         <button
           type="submit"
           disabled={pending}
-          className="volunteer-hover-fill h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+          className="wash h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
         >
           {pending ? "Sending…" : "Let them know"}
         </button>

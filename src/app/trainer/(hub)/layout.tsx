@@ -82,7 +82,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // trainer's own session, and the assessor already has its own read-only
   // banner; forcing it into MCT/ACT coloring isn't asked for here.
   // Not isRealStaff-gated -- these vars are set on the whole shell (below),
-  // reaching assessor/tour sessions too, since .trainer-hover (globals.css)
+  // reaching assessor/tour sessions too, since .ring/.wash (globals.css)
   // is used unconditionally by hub pages regardless of session type. Its
   // ACT-shaped default there is a fine, unobtrusive fallback for a session
   // this spec never asked us to re-skin; only the header/tabs/logo
@@ -137,10 +137,10 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const hubVars = {
     "--hub-accent": accent,
     "--hub-accent-deep": accentDeep,
-    // .trainer-hover-fill (buttons) and .trainer-hover (rows) in globals.css
-    // read these -- Ramy, 27 Aug 2026: hover matches the role's own colour.
-    "--hub-hover-accent": accent,
-    "--hub-row-shadow": `inset 0 0 0 1px ${accent}, 0 3px 8px -3px color-mix(in oklab, ${accent} 45%, transparent)`,
+    // The motion rule's .ring and .wash (globals.css) read these -- Ramy,
+    // 27 Aug 2026: hover matches the role's own colour.
+    "--hover-accent": accent,
+    "--hover-fill": `color-mix(in oklab, ${accent} 20%, var(--color-card))`,
     // Ramy, 27 Aug 2026: the decorative teal/garnet card alternation
     // (.card-garnet/.sheet-garnet, unrelated to the role hover system
     // above) would otherwise pile a second, unrelated reason for garnet
@@ -223,7 +223,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             // says it.
             <Link
               href="/assessor"
-              className="trainer-hover-fill flex h-7 shrink-0 items-center rounded-full border border-border bg-card px-3 text-[11px] font-semibold text-ink"
+              className="wash flex h-7 shrink-0 items-center rounded-full border border-border bg-card px-3 text-[11px] font-semibold text-ink"
             >
               Assessor pack
             </Link>

@@ -266,23 +266,23 @@ export default async function TrainerResourceHubPage() {
           row, which is most of why this page looked unfinished next to the
           other tabs. Five columns, one row, and they read as a set. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Link href="/trainer/coursebooks" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/coursebooks" className="lift sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">TP points library</p>
           <p className="text-xs text-muted">The staged point-by-point content. Trainer-only -- never shown to trainees.</p>
         </Link>
-        <Link href="/trainer/audio" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/audio" className="lift sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">Multimedia</p>
           <p className="text-xs text-muted">Coursebook audio tracks. Manage uploads here; trainees can play them from their portfolio.</p>
         </Link>
-        <Link href="/trainer/video" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/video" className="lift sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">Video Library</p>
           <p className="text-xs text-muted">Training and observation videos, linked not uploaded. Trainees can watch from their portfolio.</p>
         </Link>
-        <Link href="/trainer/assignment-briefs" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/assignment-briefs" className="lift sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">Assignment briefs</p>
           <p className="text-xs text-muted">Upload and publish briefs. Trainees browse published sections from their portfolio.</p>
         </Link>
-        <Link href="/trainer/marking-guidance" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/marking-guidance" className="lift sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">Marking guidance</p>
           <p className="text-xs text-muted">Where this centre&apos;s line sits per criterion. Tutors and the assessor only -- never trainees.</p>
         </Link>

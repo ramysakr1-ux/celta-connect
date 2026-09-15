@@ -16,7 +16,7 @@ export function AssessorViewNotice() {
       <Link
         href="/assessor/exit"
         prefetch={false}
-        className="ml-auto rounded-[6px] border border-border bg-card px-3 py-1 text-[11.5px] font-medium text-ink trainer-hover-fill"
+        className="ml-auto rounded-[6px] border border-border bg-card px-3 py-1 text-[11.5px] font-medium text-ink wash"
       >
         Leave assessor view
       </Link>

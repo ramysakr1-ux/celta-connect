@@ -68,7 +68,7 @@ export function CloseOutCard({
         <button
           type="submit"
           className={`rounded-[6px] px-3 py-1.5 text-xs font-semibold ${
-            cambridgeGradesConfirmedAt ? "bg-primary text-card" : "admin-hover-fill border border-border text-ink"
+            cambridgeGradesConfirmedAt ? "bg-primary text-card" : "wash border border-border text-ink"
           }`}
         >
           {cambridgeGradesConfirmedAt ? `Confirmed ${formatDateTime(cambridgeGradesConfirmedAt, timeZone)}` : "Mark confirmed"}
@@ -108,7 +108,7 @@ export function CloseOutCard({
             <button
               type="submit"
               disabled={extendPending}
-              className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+              className="wash rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
             >
               {extendPending ? "Saving..." : "Extend deletion date"}
             </button>
@@ -235,7 +235,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={verifyPending}
-                className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+                className="wash rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
               >
                 {verifyPending ? "Checking..." : status === "verify_failed" ? "Re-check" : "Run verification"}
               </button>

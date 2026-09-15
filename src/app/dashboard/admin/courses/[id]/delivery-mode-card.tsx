@@ -19,7 +19,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="wash rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
         >
           Change
         </button>
@@ -49,7 +49,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
             setMode(savedMode);
             setEditing(false);
           }}
-          className="admin-hover-fill self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="wash self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
         >
           Cancel
         </button>

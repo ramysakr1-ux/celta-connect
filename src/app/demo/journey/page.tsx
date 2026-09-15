@@ -82,7 +82,7 @@ function Ripple({ from, to }: { from: string; to: { where: string; what: string;
           {t.href ? (
             <a
               href={t.href}
-              className="trainee-hover-fill flex flex-col justify-center rounded-[6px] border border-primary/40 bg-primary/5 px-3 py-2"
+              className="wash flex flex-col justify-center rounded-[6px] border border-primary/40 bg-primary/5 px-3 py-2"
             >
               <span className="text-[11px] font-bold tracking-[0.06em] text-primary uppercase">{t.where}</span>
               <span className="text-xs text-ink">{t.what}</span>
@@ -128,7 +128,7 @@ function Step({
         </div>
       </div>
       {href ? (
-        <a href={href} className="trainee-hover-fill inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
+        <a href={href} className="wash inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
           {hrefLabel ?? "Open →"}
         </a>
       ) : null}
@@ -459,7 +459,7 @@ export default async function JourneyPage() {
                 below, for seeing a real centre's own prompts and branding. */}
             <a
               href="/apply"
-              className="trainee-hover-fill inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted"
+              className="wash inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted"
             >
               Or see {realCenter?.name ?? "the real centre"}&apos;s live form → (don&apos;t submit that one)
             </a>

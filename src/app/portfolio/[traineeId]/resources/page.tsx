@@ -35,7 +35,7 @@ type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 function ResourceItemCard({ resource, isEditableStaff, traineeId }: { resource: ResourceRow; isEditableStaff: boolean; traineeId: string }) {
   const Icon = RESOURCE_TYPE_ICON[resource.resource_type];
   return (
-    <li className="trainee-hover-fill flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
+    <li className="wash flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
       <div className="flex items-start gap-2">
         <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
           <Icon className="size-3.5" aria-hidden="true" />
@@ -149,7 +149,7 @@ function InputSessionCard({
     <li>
       <Link
         href={`/input-sessions/${session.registrySlug}?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
-        className={`trainee-hover-fill ${shell}`}
+        className={`wash ${shell}`}
         style={bg}
       >
         {body}
@@ -712,7 +712,7 @@ export default async function ResourceHubPage({
                 <li key={s.id}>
                   <Link
                     href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
-                    className="trainee-hover flex flex-col overflow-hidden rounded-[6px] border border-border"
+                    className="lift flex flex-col overflow-hidden rounded-[6px] border border-border"
                     style={style}
                   >
                     {row}
@@ -830,9 +830,9 @@ export default async function ResourceHubPage({
                 <CambridgeDocumentsShelf docs={cambridgeDocs} editable={false} />
               </div>
             ) : key === "tp_points" ? (
-              <Link href="/trainer/coursebooks" className="sheet trainee-hover flex flex-col gap-1 p-4">
+              <Link href="/trainer/coursebooks" className="sheet lift flex flex-col gap-1 p-4">
                 <p className="text-sm font-semibold text-ink">TP Points Library</p>
-                <p className="text-xs text-muted">Staff-only — opens the trainer's coursebooks & TP points management.</p>
+                <p className="text-xs text-muted">Staff-only — lift the trainer's coursebooks & TP points management.</p>
               </Link>
             ) : key === "forms" ? (
               // Admin Handbook §6.3 requires every centre to give candidates
@@ -843,7 +843,7 @@ export default async function ResourceHubPage({
               // whether someone remembered to upload a PDF.
               <div className="flex flex-col gap-3">
                 <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
-                  <li className="trainee-hover-fill flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
+                  <li className="wash flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
                     <div className="flex items-start gap-2">
                       <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
                         <Stamp className="size-3.5" aria-hidden="true" />

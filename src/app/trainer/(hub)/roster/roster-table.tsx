@@ -130,7 +130,7 @@ export function RosterTable({
           aria-checked={showDetail}
           onClick={toggle}
           title="TP stages, observation hours, stage sign-offs, FOL, standing"
-          className={`trainer-hover inline-flex h-8 items-center gap-2 rounded-full border border-border px-3.5 text-[12.5px] font-semibold ${
+          className={`wash inline-flex h-8 items-center gap-2 rounded-full border border-border px-3.5 text-[12.5px] font-semibold ${
             showDetail ? "text-ink" : "bg-card text-muted"
           }`}
           style={showDetail ? { background: "color-mix(in oklab, var(--hub-accent) 8%, var(--color-card))" } : undefined}

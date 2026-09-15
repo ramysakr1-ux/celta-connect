@@ -257,7 +257,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
                   className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                     on
                       ? "border-primary bg-primary text-primary-foreground"
-                      : "admin-hover-fill border-border bg-card text-muted hover:text-ink"
+                      : "wash border-border bg-card text-muted hover:text-ink"
                   }`}
                 >
                   {d}

@@ -474,13 +474,13 @@ export default async function TpDetailPage({
                       candidate's own uploaded handouts into the file. */}
                   <a
                     href={`/tp-document/${traineeId}/${tpNumber}`}
-                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
+                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
                   >
                     The assembled document
                   </a>
                   <a
                     href={`/api/tp-plans/${plan!.id}/pdf`}
-                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
+                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
                   >
                     PDF with materials
                   </a>
@@ -720,7 +720,7 @@ export default async function TpDetailPage({
                               className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 shared
                                   ? "border-border bg-status-neutral-bg text-ink"
-                                  : "border-border text-muted trainee-hover-fill hover:text-primary"
+                                  : "border-border text-muted wash hover:text-primary"
                               }`}
                             >
                               {shared ? "Shared with students ✓" : "Share with students"}

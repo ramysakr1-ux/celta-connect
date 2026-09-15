@@ -73,7 +73,7 @@ export function SecondMarkingPanel({
             {failed ? "A fail must be in the double-marked sample. " : ""}
             {markerName ? `${markerName} marked this.` : "Marked."} Check the grading and the comments, then sign here as the second marker.
           </p>
-          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainee-hover-fill">
+          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink wash">
             Record my second marking
           </button>
         </form>

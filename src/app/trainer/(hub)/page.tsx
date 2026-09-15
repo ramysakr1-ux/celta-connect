@@ -95,7 +95,7 @@ function ClosingOutCard({
           <Link
             key={it.label}
             href={it.href}
-            className="trainer-hover-fill grid grid-cols-[14px_1fr] items-start gap-2.5 rounded-[8px] px-1.5 py-[9px] no-underline"
+            className="wash grid grid-cols-[14px_1fr] items-start gap-2.5 rounded-[8px] px-1.5 py-[9px] no-underline"
           >
             <span
               className="mt-[5px] size-2 rounded-full border-[1.5px]"
@@ -1003,11 +1003,11 @@ export default async function TodayPage() {
         </div>
         {trainer ? (
           <div className="flex flex-wrap items-center gap-2">
-            <Link href="/trainer/capture" className="trainer-hover-fill flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
+            <Link href="/trainer/capture" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
               Capture a point
             </Link>
             {canAnnounce ? (
-              <Link href="/trainer/announcements" className="trainer-hover-fill flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
+              <Link href="/trainer/announcements" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
                 Post announcement
               </Link>
             ) : null}
@@ -1063,7 +1063,7 @@ export default async function TodayPage() {
                   <Link
                     key={f.id}
                     href={`/portfolio/${f.id}`}
-                    className="trainer-hover flex items-center gap-3 rounded-[10px] border border-border bg-card px-3 py-[11px]"
+                    className="lift flex items-center gap-3 rounded-[10px] border border-border bg-card px-3 py-[11px]"
                   >
                     <Avatar name={f.name} size="sm" />
                     <span className="min-w-0">

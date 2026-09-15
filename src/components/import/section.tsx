@@ -77,7 +77,7 @@ export async function SpreadsheetImportSection({
             const tallies = (imp.tallies ?? {}) as { willImport?: number };
             const undoable = !imp.undone_at && isWithinUndoWindow(imp.created_at);
             return (
-              <div key={imp.id} className={`admin-hover flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+              <div key={imp.id} className={`ring flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm text-ink">{imp.source_filename}</p>
                   <p className="text-xs text-muted">

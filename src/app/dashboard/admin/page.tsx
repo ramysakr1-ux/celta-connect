@@ -282,7 +282,7 @@ export default async function AdminDashboardPage({
                       // an action inside a link.
                       <div
                         key={row.course.id}
-                        className="admin-hover flex items-center gap-3 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none admin-hover-fill"
+                        className="ring flex items-center gap-3 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none wash"
                       >
                       <Link
                         href={`/dashboard/admin/courses/${row.course.id}`}
@@ -336,7 +336,7 @@ export default async function AdminDashboardPage({
                   <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Closed</p>
                   <Link
                     href="/dashboard/admin/courses/closed"
-                    className="admin-hover-fill card flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-150"
+                    className="wash card flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-150"
                   >
                     <span className="text-sm text-ink">
                       {closedCourses.length} closed course{closedCourses.length === 1 ? "" : "s"}
@@ -369,7 +369,7 @@ export default async function AdminDashboardPage({
               <Link
                 key={m.label}
                 href={m.href}
-                className="admin-hover -mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none admin-hover-fill"
+                className="lift -mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none wash"
               >
                 <span className="text-xs text-ink">{m.label}</span>
                 <span className="text-xs tabular-nums text-muted">

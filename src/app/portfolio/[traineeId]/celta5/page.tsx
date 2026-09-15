@@ -1797,7 +1797,7 @@ export default async function PortfolioCelta5Page({
           <p className="text-ink">Final report ready to download.</p>
           <a
             href={`/api/celta5/${traineeId}/final-report`}
-            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
+            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
           >
             Download final report
           </a>

@@ -266,7 +266,7 @@ export function RecommendationPanel({
                   <button type="submit" disabled={pending} className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12] disabled:opacity-60" style={{ background: "var(--hub-accent)" }}>
                     {pending ? "Saving…" : "Save my choice"}
                   </button>
-                  <button type="button" onClick={() => setOverriding(false)} className="trainer-hover-fill rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
+                  <button type="button" onClick={() => setOverriding(false)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
                     Cancel
                   </button>
                 </div>
@@ -286,7 +286,7 @@ export function RecommendationPanel({
                   {pending ? "Saving…" : "Accept this suggestion"}
                 </button>
               </form>
-              <button type="button" onClick={() => setOverriding(true)} className="trainer-hover-fill rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
+              <button type="button" onClick={() => setOverriding(true)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
                 Choose different candidates
               </button>
               <span className="min-w-[240px] flex-1 text-[11.5px] leading-[1.45] text-muted">

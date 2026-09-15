@@ -75,7 +75,7 @@ export function ChatRetentionCard({
       <div className="flex justify-end">
         <button
           type="submit"
-          className="trainer-hover-fill inline-flex h-8 items-center rounded-[8px] border border-border bg-card px-3.5 text-[12.5px] font-semibold text-ink"
+          className="wash inline-flex h-8 items-center rounded-[8px] border border-border bg-card px-3.5 text-[12.5px] font-semibold text-ink"
         >
           Save
         </button>

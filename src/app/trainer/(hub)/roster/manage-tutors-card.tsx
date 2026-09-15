@@ -60,7 +60,7 @@ function AssignChip({ courseId, trainer }: { courseId: string; trainer: Assignab
         <button
           type="submit"
           disabled={pending}
-          className="trainer-hover-fill inline-flex h-[26px] items-center rounded-[6px] bg-card-inset px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60"
+          className="wash inline-flex h-[26px] items-center rounded-[6px] bg-card-inset px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60"
         >
           {pending ? "Adding…" : "Add to course"}
         </button>

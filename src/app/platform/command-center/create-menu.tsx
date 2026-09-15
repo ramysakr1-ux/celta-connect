@@ -68,7 +68,7 @@ export function CreateMenu() {
     <div ref={ref} style={{ position: "relative" }}>
       <div
         onClick={() => setOpen((v) => !v)}
-        className="admin-hover-fill"
+        className="wash"
         style={{ height: 34, padding: "0 15px", borderRadius: 6, background: GOLD, color: DARK, fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -84,7 +84,7 @@ export function CreateMenu() {
                 key={a.label}
                 href={a.href}
                 onClick={() => setOpen(false)}
-                className="admin-hover-fill"
+                className="wash"
                 style={{
                   display: "block", padding: "11px 14px", fontSize: 12.5, fontWeight: 500, color: INK, textDecoration: "none",
                   borderBottom: i < ACTIONS.length - 1 ? `1px solid ${BORDER}` : "none",

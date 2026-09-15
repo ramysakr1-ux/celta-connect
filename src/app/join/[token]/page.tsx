@@ -99,7 +99,7 @@ export default async function JoinPage({
           <Wordmark size="hero" />
         </Link>
         <p className="mt-1 text-sm text-muted">
-          You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>. Your workspace opens as
+          You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>. Your workspace lift as
           soon as you accept.
         </p>
         <JoinForm token={token} role={role} isUkCentre={center?.is_uk_centre ?? false} />

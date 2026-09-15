@@ -117,7 +117,7 @@ export function GroupTutorForm({
         <button
           type="submit"
           disabled={addPending}
-          className="admin-hover-fill h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
+          className="wash h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
         >
           {addPending ? "Saving…" : sorted.length === 0 ? "Set tutor" : "Add handover"}
         </button>
@@ -132,7 +132,7 @@ export function GroupTutorForm({
         <button
           type="submit"
           disabled={daysPending}
-          className="admin-hover-fill h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
+          className="wash h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
         >
           {daysPending ? "Saving…" : "Save"}
         </button>

@@ -52,7 +52,7 @@ export function CoursebookList({
                 <Link
                   key={cb.id}
                   href={`${basePath}/${cb.id}`}
-                  className="card-interactive flex items-center justify-between p-4"
+                  className="card lift flex items-center justify-between p-4"
                 >
                   <span className="text-ink">{cb.title}</span>
                   <span className="text-sm text-muted">{STATUS_LABEL[cb.generation_status]}</span>

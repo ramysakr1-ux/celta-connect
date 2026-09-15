@@ -174,7 +174,7 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
         <button
           type="button"
           onClick={handleInstallClick}
-          className="volunteer-hover-fill inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink hover:border-primary"
+          className="wash inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink hover:border-primary"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <rect x="5" y="2" width="14" height="20" rx="2" />

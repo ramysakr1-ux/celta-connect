@@ -43,7 +43,7 @@ function CoursebookCard({
   const [state, action, pending] = useActionState(updateCoursebookAccessNotes, initialState);
 
   return (
-    <li className={`sheet trainee-hover flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
+    <li className={`sheet ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <p className="text-sm font-semibold text-ink">{book.title}</p>
       <p className="text-xs text-muted">{book.level}</p>
       {isEditableStaff ? (
@@ -60,7 +60,7 @@ function CoursebookCard({
           <button
             type="submit"
             disabled={pending}
-            className="self-start rounded-[6px] border border-border px-2 py-1 text-xs text-ink trainee-hover-fill disabled:opacity-60"
+            className="self-start rounded-[6px] border border-border px-2 py-1 text-xs text-ink wash disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>

@@ -74,7 +74,7 @@ export function AccessPanel({
                 {canManage ? (
                   <form action={revokeTitAccess}>
                     <input type="hidden" name="id" value={g.id} />
-                    <button type="submit" className="rounded-[6px] border border-border px-2.5 py-1 text-[11.5px] font-semibold text-ink trainer-hover-fill">
+                    <button type="submit" className="rounded-[6px] border border-border px-2.5 py-1 text-[11.5px] font-semibold text-ink wash">
                       Revoke
                     </button>
                   </form>
@@ -110,7 +110,7 @@ export function AccessPanel({
                 className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm font-normal tracking-normal text-ink normal-case outline-none focus:border-primary"
               />
             </label>
-            <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-sm font-semibold text-ink trainer-hover-fill">
+            <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-sm font-semibold text-ink wash">
               Grant
             </button>
           </form>

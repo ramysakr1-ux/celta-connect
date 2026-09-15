@@ -71,7 +71,7 @@ export default function DemoLandingPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {ENTRIES.map((entry) => (
-            <a key={entry.href} href={entry.href} className="card-interactive flex flex-col gap-1.5 p-5">
+            <a key={entry.href} href={entry.href} className="card lift flex flex-col gap-1.5 p-5">
               <span className="font-serif text-lg text-ink">{entry.role}</span>
               <span className="text-sm text-muted">{entry.blurb}</span>
               <span className="mt-2 text-sm font-semibold text-primary">Enter demo &rarr;</span>
@@ -79,7 +79,7 @@ export default function DemoLandingPage() {
           ))}
         </div>
 
-        <a href="/demo/journey" className="card-interactive flex flex-col gap-1.5 p-5 text-center">
+        <a href="/demo/journey" className="card lift flex flex-col gap-1.5 p-5 text-center">
           <span className="font-serif text-lg text-ink">The application journey</span>
           <span className="text-sm text-muted">
             Step by step: how a trainee applies, interviews, and gets an offer -- and how a volunteer student signs

@@ -48,7 +48,7 @@ export function PipelineFunnel({
               className={`flex min-w-0 flex-col gap-1.5 rounded-[6px] border-t-[3px] px-3.5 py-3 text-left transition-colors ${
                 on
                   ? "border-t-primary bg-[color-mix(in_oklab,var(--color-primary)_42%,var(--color-card))] border border-primary/30"
-                  : "border-t-border-faint border border-border bg-transparent admin-hover-fill"
+                  : "border-t-border-faint border border-border bg-transparent wash"
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">
@@ -75,7 +75,7 @@ export function PipelineFunnel({
           ) : (
             <ul>
               {people.map((p) => (
-                <li key={p.id} className="border-b border-border-faint last:border-none admin-hover admin-hover-fill">
+                <li key={p.id} className="border-b border-border-faint last:border-none wash">
                   {/* A name here is a door to the applicant, not a label -- the
                       funnel listed people with nowhere to go until 12 Sep 2026,
                       and for an accepted applicant this and the course page are

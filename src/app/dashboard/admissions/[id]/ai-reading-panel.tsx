@@ -91,7 +91,7 @@ export function AiReadingPanel({
             An interview will be booked automatically -- held until{" "}
             {formatTime(applicant.interview_auto_send_at!, timeZone)}.
           </p>
-          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary admin-hover-fill">
+          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary wash">
             Hold
           </button>
         </form>

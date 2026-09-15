@@ -229,7 +229,7 @@ export default async function AdmissionsPage({
           <tbody>
             {stale.length > 0 ? (
               stale.map((a) => (
-                <tr key={a.id} className="admin-hover">
+                <tr key={a.id} className="ring">
                   <td>
                     <Link href={`/dashboard/admissions/${a.id}`} className="inline-flex items-center gap-2.5 font-medium text-ink hover:underline">
                       <Avatar name={a.full_name} size="sm" />
@@ -303,7 +303,7 @@ export default async function AdmissionsPage({
         {(openSlots ?? []).length > 0 ? (
           <ul className="flex flex-col gap-1.5">
             {(openSlots ?? []).map((s) => (
-              <li key={s.id} className="text-sm text-ink admin-hover">
+              <li key={s.id} className="text-sm text-ink ring">
                 {intakeNameById.get(s.intake_course_id) ?? "--"} -- {formatCalendarDate(s.slot_date, { weekday: "short" })} at {s.slot_time.slice(0, 5)} ({s.mode === "online" ? "Online" : "Face to face"}
                 {s.panel ? ", panel" : ""})
               </li>
@@ -366,7 +366,7 @@ export default async function AdmissionsPage({
           <p className="text-sm text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
           <ul className="flex flex-col gap-4">
             {Array.from(marketingByCourse.entries()).map(([courseId, { name, total, counts }]) => (
-              <li key={courseId} className="border-t border-border pt-3 admin-hover">
+              <li key={courseId} className="border-t border-border pt-3 ring">
                 <p className="text-sm font-medium text-ink">
                   {name} <span className="font-normal text-muted">({total})</span>
                 </p>
@@ -397,7 +397,7 @@ export default async function AdmissionsPage({
           </p>
           <ul className="flex flex-col gap-3">
             {Array.from(waitingByIntake.entries()).map(([intakeCourseId, { name, count }]) => (
-              <li key={intakeCourseId} className="flex items-center justify-between border-t border-border pt-3 admin-hover">
+              <li key={intakeCourseId} className="flex items-center justify-between border-t border-border pt-3 ring">
                 <span className="text-sm text-ink">{name}</span>
                 <OfferNextPlaceForm intakeCourseId={intakeCourseId} waitingCount={count} />
               </li>

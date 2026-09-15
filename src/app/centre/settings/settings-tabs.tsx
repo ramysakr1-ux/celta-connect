@@ -54,7 +54,7 @@ export function SettingsTabs({
             key={tab.key}
             type="button"
             onClick={() => setSection(tab.key)}
-            className={`admin-hover-fill -mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
+            className={`wash -mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
               section === tab.key
                 ? "border-primary text-primary"
                 : "border-transparent text-muted hover:text-ink"

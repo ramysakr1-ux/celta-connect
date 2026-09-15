@@ -46,7 +46,7 @@ function SlotPill({
           ? "cursor-not-allowed border-border-faint text-muted/50 line-through"
           : selected
             ? "border-primary bg-primary text-primary-foreground"
-            : "border-border text-muted trainer-hover-fill hover:text-ink"
+            : "border-border text-muted wash hover:text-ink"
       }`}
     >
       {lower}
@@ -119,7 +119,7 @@ export function ProvisionalGradeForm({
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] border border-border px-3 py-1 text-[13px] text-ink trainer-hover-fill disabled:opacity-60"
+            className="rounded-[6px] border border-border px-3 py-1 text-[13px] text-ink wash disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>

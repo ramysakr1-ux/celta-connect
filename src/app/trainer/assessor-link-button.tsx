@@ -61,7 +61,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
           type="button"
           onClick={() => handleClick()}
           disabled={state === "loading"}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill disabled:opacity-60"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash disabled:opacity-60"
         >
           {state === "loading"
             ? "Checking readiness…"
@@ -143,7 +143,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
         <button
           type="button"
           onClick={() => setEmailOpen((v) => !v)}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
         >
           Email the assessor
         </button>

@@ -98,7 +98,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
                 key={l.code}
                 type="button"
                 onClick={() => setLang(l.code)}
-                className={`volunteer-hover-fill flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left ${
+                className={`wash flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left ${
                   lang === l.code ? "border-[#1a5c5e] bg-[#fbf3e3]" : "border-[#eddfc4] bg-white"
                 }`}
               >

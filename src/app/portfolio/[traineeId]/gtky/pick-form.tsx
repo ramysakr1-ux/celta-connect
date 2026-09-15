@@ -55,7 +55,7 @@ export function GtkyPickForm({
                 <input type="hidden" name="slug" value={a.slug} />
                 <button
                   type="submit"
-                  className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm font-medium text-ink trainee-hover-fill"
+                  className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm font-medium text-ink wash"
                 >
                   Choose this one
                 </button>

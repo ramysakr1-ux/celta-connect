@@ -67,7 +67,7 @@ export function ScheduledPanel({
   }, [savedId]);
 
   return (
-    <div className="trainer-hover flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
+    <div className="ring flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
         <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Scheduled</h3>
         <span className="text-[12.5px] text-muted">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
@@ -117,7 +117,7 @@ function ReadRow({
 }) {
   const held = Boolean(row.heldAt);
   return (
-    <div className={`trainer-hover mx-2.5 flex flex-col gap-1.5 rounded-[10px] px-3 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
+    <div className={`ring mx-2.5 flex flex-col gap-1.5 rounded-[10px] px-3 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
       <div className="flex items-center gap-2">
         <p className="text-sm font-semibold text-ink">{row.title}</p>
         {held ? <span className="pill pill-neutral">Held</span> : null}
@@ -267,7 +267,7 @@ function EditRow({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-medium text-ink trainer-hover-fill"
+          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-medium text-ink wash"
         >
           Cancel
         </button>

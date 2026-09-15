@@ -108,7 +108,7 @@ export default async function CommandCenterMoneyPage() {
           recent.map((inv) => {
             const isOverdue = inv.status === "outstanding" && inv.due_date && new Date(inv.due_date) < overdueCutoff;
             return (
-              <div key={inv.id} className="admin-hover flex items-center justify-between gap-2.5 border-t border-border py-[9px]">
+              <div key={inv.id} className="ring flex items-center justify-between gap-2.5 border-t border-border py-[9px]">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <div className="text-[12.5px] font-semibold text-ink">{centerNameById.get(inv.center_id) ?? "Unknown centre"}</div>
                   <div className="text-[11px] text-muted">{inv.note ?? (inv.status === "paid" ? "Course fee" : "Invoice")}</div>

@@ -443,7 +443,7 @@ function DetailPanel({
               className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
             />
             <div className="flex items-center gap-2">
-              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
                 Save
               </button>
               <span className="text-[11px] text-muted">Leave it empty to remove the subtitle.</span>
@@ -469,7 +469,7 @@ function DetailPanel({
                 placeholder="4c, 5f"
                 className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
               />
-              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
                 Save
               </button>
             </form>
@@ -521,7 +521,7 @@ function DetailPanel({
                   What this slot opens on a candidate&apos;s Resources tab. Leave it on the first option to keep
                   matching by title.
                 </p>
-                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
                   Save
                 </button>
               </form>
@@ -547,7 +547,7 @@ function DetailPanel({
                 <option value="f2f">Face-to-face</option>
                 <option value="online">Online</option>
               </select>
-              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
                 Save
               </button>
             </form>
@@ -575,7 +575,7 @@ function DetailPanel({
                 ) : null}
               </label>
             ))}
-            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
               Save
             </button>
           </form>
@@ -611,7 +611,7 @@ function DetailPanel({
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs trainer-hover-fill">
+                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
                   Confirm
                 </button>
               </form>

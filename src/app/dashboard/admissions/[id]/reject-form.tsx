@@ -49,7 +49,7 @@ export function RejectForm({ applicantId, garnet = false }: { applicantId: strin
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-destructive/40 px-4 py-2 text-sm text-destructive hover:bg-destructive/5 disabled:opacity-60 admin-hover-fill"
+        className="self-start rounded-[6px] border border-destructive/40 px-4 py-2 text-sm text-destructive hover:bg-destructive/5 disabled:opacity-60 wash"
       >
         {pending ? "Saving..." : "Record rejection"}
       </button>

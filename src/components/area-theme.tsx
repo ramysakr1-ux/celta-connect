@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
  * which stops the colour being something you can say out loud.
  *
  * Setting the variables here rather than editing components is what makes
- * this cheap. Every .admin-hover-fill and .admin-hover inside picks the area
+ * this cheap. Every .wash and .ring inside picks the area
  * up automatically, because those classes read --area-accent and
  * --area-hover-fill with their old literals as fallbacks. An area with no
  * entry below simply looks the way it always did.
@@ -33,6 +33,10 @@ const AREA_BY_PREFIX: { prefix: string; className: string }[] = [
   // green below, so every hover on a garnet screen came back green. Ramy,
   // 1 Sep 2026: "can we make sure the hovering is relevant to the colour?
   // That sort of darker hover colour that matches the header."
+  // Not a room either: the trainee's own pages that still live under
+  // /dashboard carry the trainee shell's hover colour (motion rule, 16 Sep
+  // 2026), so a plum ring there matches the portfolio.
+  { prefix: "/dashboard/trainee", className: "hover-trainee" },
   { prefix: "/centre/owner", className: "area-owner" },
   { prefix: "/centre/volunteers", className: "area-volunteers" },
   { prefix: "/dashboard/admissions", className: "area-admissions" },

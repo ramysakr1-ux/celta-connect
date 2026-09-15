@@ -87,7 +87,7 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
             <Link
               key={`${a.kind}-${i}-${a.title}`}
               href={a.href}
-              className="trainer-hover grid grid-cols-[40px_1fr_auto] items-center gap-3.5 rounded-[10px] px-3 py-[11px]"
+              className="lift grid grid-cols-[40px_1fr_auto] items-center gap-3.5 rounded-[10px] px-3 py-[11px]"
             >
               <span
                 className="flex size-10 items-center justify-center rounded-[10px] text-[11.5px] font-bold tracking-[0.02em]"

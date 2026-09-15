@@ -28,7 +28,7 @@ export function CopyField({ value, label }: { value: string; label: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
       }}
-      className="trainer-hover-fill shrink-0 rounded-full border border-border px-2 py-[1px] text-[10px] font-bold tracking-[0.04em] text-muted uppercase"
+      className="wash shrink-0 rounded-full border border-border px-2 py-[1px] text-[10px] font-bold tracking-[0.04em] text-muted uppercase"
       aria-label={`Copy ${label}`}
     >
       {copied ? "Copied" : "Copy"}
@@ -129,7 +129,7 @@ export function CriteriaList({
                     <input type="hidden" name="op" value="add" />
                     <button
                       type="submit"
-                      className="trainer-hover flex w-full items-start gap-2 rounded-[5px] px-2 py-1 text-left text-[11px] leading-[1.45] text-ink"
+                      className="wash flex w-full items-start gap-2 rounded-[5px] px-2 py-1 text-left text-[11px] leading-[1.45] text-ink"
                     >
                       <span className="w-7 shrink-0 font-bold tabular-nums text-muted">{code}</span>
                       <span className="w-8 shrink-0 font-semibold text-muted">{ratings[code] ?? "—"}</span>

@@ -21,7 +21,7 @@ export function EmailPreview({ title, to, html }: { title: string; to: string; h
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="admin-hover-fill shrink-0 rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink"
+          className="wash shrink-0 rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink"
         >
           {open ? "Hide email" : "Show email"}
         </button>

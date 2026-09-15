@@ -133,7 +133,7 @@ export function InvoiceRowActions({ invoiceId }: { invoiceId: string }) {
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => markInvoicePaid(invoiceId))}
-        className="rounded-[6px] border border-primary/40 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60 admin-hover-fill"
+        className="rounded-[6px] border border-primary/40 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60 wash"
       >
         Mark paid
       </button>
@@ -141,7 +141,7 @@ export function InvoiceRowActions({ invoiceId }: { invoiceId: string }) {
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => markInvoiceVoid(invoiceId))}
-        className="rounded-[6px] border border-border-faint px-2.5 py-1 text-xs font-semibold text-muted hover:bg-card disabled:opacity-60 admin-hover-fill"
+        className="rounded-[6px] border border-border-faint px-2.5 py-1 text-xs font-semibold text-muted hover:bg-card disabled:opacity-60 wash"
       >
         Void
       </button>

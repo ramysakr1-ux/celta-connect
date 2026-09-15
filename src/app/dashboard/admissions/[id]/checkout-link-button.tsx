@@ -24,7 +24,7 @@ export function CheckoutLinkButton({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary disabled:opacity-60 admin-hover-fill"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary disabled:opacity-60 wash"
         >
           {pending ? "Creating link..." : existingUrl ? "Regenerate payment link" : "Send payment link"}
         </button>

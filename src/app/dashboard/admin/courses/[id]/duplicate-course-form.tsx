@@ -20,7 +20,7 @@ export function DuplicateCourseForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="admin-hover-fill rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+        className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
       >
         Duplicate this course
       </button>
@@ -92,7 +92,7 @@ export function DuplicateCourseForm({
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="admin-hover-fill self-start rounded-[6px] px-4 py-2 text-sm text-muted hover:text-ink"
+          className="wash self-start rounded-[6px] px-4 py-2 text-sm text-muted hover:text-ink"
         >
           Cancel
         </button>

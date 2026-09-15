@@ -943,7 +943,7 @@ export async function TodayTab({
           {heroSecondary ? (
             <Link
               href={heroSecondary.href}
-              className="trainee-hover-fill inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
+              className="wash inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
             >
               {heroSecondary.label}
             </Link>
@@ -978,7 +978,7 @@ export async function TodayTab({
                 <Link
                   key={`${w.href}-${i}`}
                   href={w.href}
-                  className="trainee-hover-ring grid grid-cols-[38px_1fr_auto] items-center gap-[13px] border-t border-border py-[11px]"
+                  className="lift grid grid-cols-[38px_1fr_auto] items-center gap-[13px] border-t border-border py-[11px]"
                 >
                   <span
                     aria-hidden

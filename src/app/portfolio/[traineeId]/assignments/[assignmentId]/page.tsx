@@ -203,7 +203,7 @@ export default async function AssignmentDetailPage({
         {canExportCoverSheet ? (
           <a
             href={`/api/portfolio/${traineeId}/assignments/${assignmentId}/cover-sheet`}
-            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover-fill"
+            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink wash"
           >
             Export cover sheet + assignment PDF
           </a>

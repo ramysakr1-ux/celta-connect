@@ -60,7 +60,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
         pending.map((r) => {
           const age = r.ageDays;
           return (
-            <div key={r.id} className="admin-hover flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+            <div key={r.id} className="ring flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
               <div>
                 <p className="text-sm text-ink">
                   {money(r)}

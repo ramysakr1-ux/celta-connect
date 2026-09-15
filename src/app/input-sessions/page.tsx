@@ -35,9 +35,11 @@ export default async function InputSessionsIndexPage({ searchParams }: { searchP
           ? ({
               "--hub-accent": role.accent,
               "--hub-accent-deep": role.accentDeep,
-              // globals.css already defaults this to teal at :root, so a
-              // candidate needs nothing set and still gets the platform ring.
-              "--hub-row-shadow": `inset 0 0 0 1px ${role.accent}, 0 3px 8px -3px color-mix(in oklab, ${role.accent} 45%, transparent)`,
+              // The motion rule's .ring/.wash fall back to teal when these are
+              // unset, so a candidate needs nothing and still gets the
+              // platform ring.
+              "--hover-accent": role.accent,
+              "--hover-fill": `color-mix(in oklab, ${role.accent} 20%, var(--color-card))`,
             } as React.CSSProperties)
           : undefined
       }
@@ -55,7 +57,7 @@ export default async function InputSessionsIndexPage({ searchParams }: { searchP
           <Link
             key={s.slug}
             href={`/input-sessions/${s.slug}${query}`}
-            className="trainer-hover flex items-center justify-between gap-4 rounded-[8px] border border-border bg-card px-4 py-3"
+            className="lift flex items-center justify-between gap-4 rounded-[8px] border border-border bg-card px-4 py-3"
           >
             <div>
               <p className="text-sm font-semibold text-ink">{s.title}</p>

@@ -54,7 +54,7 @@ function ItemCard({
   const unavailable = item.claimedByOther;
 
   return (
-    <li className={`sheet trainee-hover flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
+    <li className={`sheet ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <p className="text-sm font-semibold text-ink">
         {item.bookTitle}
         {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}
@@ -92,7 +92,7 @@ function ItemCard({
           <button
             type="submit"
             disabled={pending}
-            className="trainee-hover-fill h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
+            className="wash h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
           >
             {pending ? "Claiming…" : "Claim"}
           </button>

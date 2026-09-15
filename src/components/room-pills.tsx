@@ -77,7 +77,7 @@ export function RoomPills({ visible }: { visible: string[] }) {
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center gap-1.5">
         {others.map((r) => (
-          <Link key={r.key} href={r.href} className="room-pill" style={{ "--pill-c": r.colour } as React.CSSProperties}>
+          <Link key={r.key} href={r.href} className="room-pill lift" style={{ "--pill-c": r.colour } as React.CSSProperties}>
             {r.label}
           </Link>
         ))}

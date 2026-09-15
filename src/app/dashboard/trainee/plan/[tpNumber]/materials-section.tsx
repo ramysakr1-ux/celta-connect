@@ -136,7 +136,7 @@ export function MaterialsSection({
                     className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                       sharedMaterialIds.includes(m.id)
                         ? "border-border bg-status-neutral-bg text-ink"
-                        : "border-border text-muted trainee-hover-fill hover:text-primary"
+                        : "border-border text-muted wash hover:text-primary"
                     }`}
                   >
                     {sharedMaterialIds.includes(m.id) ? "Shared with students ✓" : "Share with students"}

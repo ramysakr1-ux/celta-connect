@@ -105,7 +105,7 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
         type="button"
         onClick={() => set(null)}
         className={`rounded-[5px] px-2.5 py-1 text-[11px] font-semibold ${
-          !current ? "bg-primary text-primary-foreground" : "admin-hover-fill text-muted hover:text-ink"
+          !current ? "bg-primary text-primary-foreground" : "wash text-muted hover:text-ink"
         }`}
       >
         All branches
@@ -119,7 +119,7 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
           // ambiguous across two cities.
           title={b.centerNumber ? `${b.name} · ${b.centerNumber}` : b.name}
           className={`rounded-[5px] px-2.5 py-1 text-[11px] font-semibold ${
-            current === b.id ? "bg-primary text-primary-foreground" : "admin-hover-fill text-muted hover:text-ink"
+            current === b.id ? "bg-primary text-primary-foreground" : "wash text-muted hover:text-ink"
           }`}
         >
           {b.name}

@@ -237,7 +237,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
           {/* The one figure here that was a dead end: it counted rows whose
               only rendering was six lines in another room. Now it opens
               them. */}
-          <Link href={`/centre/owner/log${branch ? `?branch=${branch}` : ""}`} className="owner-row-hover rounded-[10px]">
+          <Link href={`/centre/owner/log${branch ? `?branch=${branch}` : ""}`} className="wash rounded-[10px]">
             <StatCard label="Owner actions logged" value={String(ownerActionsThisMonth)} suffix="this month" />
           </Link>
         </div>
@@ -263,7 +263,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             {(grants ?? []).map((g, i) => (
               <div
                 key={g.id}
-                className={`owner-row-hover grid grid-cols-3 items-center gap-2.5 rounded px-3 py-3 ${i > 0 ? "border-t" : ""}`}
+                className={`wash grid grid-cols-3 items-center gap-2.5 rounded px-3 py-3 ${i > 0 ? "border-t" : ""}`}
                 style={{ borderColor: "var(--owner-line)" }}
               >
                 <span className="text-[12.5px] font-semibold">{nameById.get(g.profile_id) ?? "Unknown"}</span>
@@ -338,11 +338,9 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
           border-top: 3px solid var(--owner-garnet);
           box-shadow: 0 1px 2px rgba(30,15,10,0.03), 0 14px 32px -20px rgba(30,15,10,0.28);
         }
-        .owner-row-hover { transition: background-color 0.12s ease; }
         /* Was --owner-garnet-soft, an 8% wash you had to look for. The
            shared fill is the same one every other surface uses, so a row
            here highlights as firmly as a row anywhere else. */
-        .owner-row-hover:hover { background-color: var(--area-hover-fill, var(--owner-garnet-soft)); }
       `}</style>
       {/* Every landing carries the credit in the same corner (Ramy, 10 Sep
           2026). This one had none at all. */}

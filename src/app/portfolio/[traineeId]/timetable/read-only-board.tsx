@@ -284,7 +284,7 @@ export function ReadOnlyTimetableBoard({
                     own cell, and each cell ripples in on the spec's own
                     diagonal: column x 28ms + row x 40ms. */}
                 <div
-                  className="tt-tile"
+                  className="rise"
                   style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5, overflow: "visible", animationDelay: `${rowIndex * 40}ms` }}
                 >
                   <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
@@ -292,7 +292,7 @@ export function ReadOnlyTimetableBoard({
                 {row.bands.map((bandEvents, i) => (
                   <div
                     key={i}
-                    className="tt-tile"
+                    className="rise"
                     style={{
                       minHeight: ROW_HEIGHT,
                       boxSizing: "border-box",
@@ -407,7 +407,7 @@ export function ReadOnlyTimetableBoard({
             type="button"
             onClick={() => setWeekIndex(i)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold ${
-              i === weekIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted trainee-hover-fill"
+              i === weekIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted wash"
             }`}
           >
             Week {i + 1}
@@ -487,7 +487,7 @@ function Cell({
     const faded = mineOnly && !mine;
     return (
       <div
-        className="tt-card flex flex-col gap-1.5 overflow-hidden rounded-[10px] p-2"
+        className="lift-strong flex flex-col gap-1.5 overflow-hidden rounded-[10px] p-2"
         style={{
           height: TILE_HEIGHT,
           flex: "0 0 auto",
@@ -536,7 +536,7 @@ function Cell({
         return (
           <div
             key={event.id}
-            className="tt-card min-w-0 overflow-hidden rounded-[10px] p-2"
+            className="lift-strong min-w-0 overflow-hidden rounded-[10px] p-2"
             style={{
               height: TILE_HEIGHT,
               flex: "0 0 auto",
@@ -707,7 +707,7 @@ function DetailPanel({
         </button>
       </div>
       {meta.sheetHref ? (
-        <a href={meta.sheetHref} className="inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm font-medium text-ink trainee-hover-fill">
+        <a href={meta.sheetHref} className="inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm font-medium text-ink wash">
           {meta.sheetLabel ?? "Open the booking sheet"}
         </a>
       ) : null}

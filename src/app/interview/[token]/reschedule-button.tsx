@@ -17,7 +17,7 @@ export function RescheduleButton({ token }: { token: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="trainee-hover-fill w-fit rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink disabled:opacity-60"
+        className="wash w-fit rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink disabled:opacity-60"
       >
         {pending ? "Releasing your slot…" : "I need a different time"}
       </button>

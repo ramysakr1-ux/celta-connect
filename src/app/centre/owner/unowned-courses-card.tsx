@@ -74,7 +74,7 @@ export function UnownedCoursesCard({
             <form
               key={c.id}
               action={action}
-              className={`owner-row-hover flex flex-wrap items-center justify-between gap-3 px-2 py-3 ${
+              className={`wash flex flex-wrap items-center justify-between gap-3 px-2 py-3 ${
                 i > 0 ? "border-t border-[var(--owner-line)]" : ""
               }`}
             >

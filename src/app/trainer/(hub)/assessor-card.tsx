@@ -53,7 +53,7 @@ export function AssessorCard({
   // ACT, so this follows the person rather than being a fixed colour.
   return (
     <div
-      className="trainer-hover flex flex-col gap-4 rounded-[8px] border border-border bg-card px-[22px] py-5"
+      className="ring flex flex-col gap-4 rounded-[8px] border border-border bg-card px-[22px] py-5"
       style={{ borderTop: "3px solid var(--hub-accent)" }}
     >
       <div className="flex items-baseline justify-between gap-3">
@@ -74,7 +74,7 @@ export function AssessorCard({
             }
             setEditing((v) => !v);
           }}
-          className="trainer-hover-fill h-8 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
+          className="wash h-8 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
         >
           {editing ? "Cancel" : "Edit"}
         </button>
