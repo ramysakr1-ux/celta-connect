@@ -23,6 +23,7 @@ import { shortDate, shortTime, stageForWeek, positionTime, type SheetSlot, type 
 import { computeWeekOf } from "@/lib/course-progress";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
+import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-timetable-edit-vs-view.md: DragBoard (editing) and the
@@ -113,7 +114,7 @@ export default async function TrainerTimetablePage({
         } as TimetableEvent)
       : null;
 
-  const allEvents: TimetableEvent[] = gradingMeetingEvent ? [...baseEvents, gradingMeetingEvent] : baseEvents;
+  const allEventsWithBothGroups: TimetableEvent[] = gradingMeetingEvent ? [...baseEvents, gradingMeetingEvent] : baseEvents;
 
   // Ramy, 25 Aug 2026: "the trainers should show if they are... how many
   // volunteers... attending" -- aggregate only, no names. Total is fixed
@@ -137,8 +138,8 @@ export default async function TrainerTimetablePage({
   // The grid no longer prints a strong week header of its own (apply-to-app.md
   // §2.7), so the edit-mode header carries the overall date range instead.
   const weekRange = (() => {
-    if (allEvents.length === 0) return null;
-    const dates = [...allEvents].map((e) => e.event_date).sort();
+    if (allEventsWithBothGroups.length === 0) return null;
+    const dates = [...allEventsWithBothGroups].map((e) => e.event_date).sort();
     const fmt = (iso: string) =>
       formatCalendarDate(iso, { day: "numeric", month: "long" });
     const first = dates[0];
@@ -151,7 +152,7 @@ export default async function TrainerTimetablePage({
   // course_subgroup_members is scoped through this course's subgroups --
   // it used to be read with no filter at all, which on the assessor path
   // (admin client, no RLS) meant every subgroup member in the database.
-  const tpEventIds = allEvents.filter((e) => e.type === "tp").map((e) => e.id);
+  const tpEventIds = allEventsWithBothGroups.filter((e) => e.type === "tp").map((e) => e.id);
   const [
     { data: attendanceRows },
     { data: unmatchedRows },
@@ -244,6 +245,11 @@ export default async function TrainerTimetablePage({
   // guessed at, flagged here rather than silently hidden.
   const isAdmin = trainer?.role === "admin";
   const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => trainer && g.tutor_profile_id === trainer.id).map((g) => g.id));
+  // One TP card per slot -- three lessons a day on the board, not six. The
+  // tutor keeps their own group's row where they have one; see
+  // lib/timetable-one-per-slot.ts. Nothing is deleted: the other group's row
+  // still carries its own register, level and lesson records.
+  const allEvents: TimetableEvent[] = oneTpCardPerSlot(allEventsWithBothGroups, ownedGroupIds.size > 0 ? ownedGroupIds : null);
   const pairedTpGroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id).map((s) => s.tp_group_id));
   const blockEventById = new Map(allEvents.map((e) => [e.id, e]));
 

@@ -6,6 +6,7 @@ import { resolveTimeBands, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { halfTpDates, halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { groupCodeForHalf, isMine, type HalfInfo } from "@/lib/timetable-read-only";
+import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
 import { SupervisedSessionsPanel } from "@/app/portfolio/[traineeId]/timetable/supervised-sessions-panel";
 import type { TimetableEvent } from "@/lib/timetable-grid";
@@ -67,8 +68,8 @@ export default async function TraineeTimetablePage({
   const tpGroupNameById = new Map((tpGroups ?? []).map((g) => [g.id, g.name]));
 
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
-  const allEvents: TimetableEvent[] = events ?? [];
-  const tpEvents: TpTimetableEvent[] = allEvents.filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
+  const allEventsWithBothGroups: TimetableEvent[] = events ?? [];
+  const tpEvents: TpTimetableEvent[] = allEventsWithBothGroups.filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
 
   // Ramy, 25 Aug 2026: "the trainees also should know" how many volunteers
   // are coming -- same aggregate-only, no-names treatment as the trainer's
@@ -198,6 +199,11 @@ export default async function TraineeTimetablePage({
     supabase.from("stage2_tutorial_blocks").select("id, timetable_event_id").eq("course_id", trainee.course_id),
     supabase.from("consultation_blocks").select("id, timetable_event_id").eq("course_id", trainee.course_id),
   ]);
+  // One TP card per slot -- three lessons a day on the board, not six. The
+  // candidate keeps their own group's row, so the level and the join link on
+  // the card are theirs. See lib/timetable-one-per-slot.ts.
+  const allEvents: TimetableEvent[] = oneTpCardPerSlot(allEventsWithBothGroups, viewerTpGroupId ? new Set([viewerTpGroupId]) : null);
+
   const sheetHrefByEventId = new Map<string, string>([
     ...(stage2Blocks ?? []).map((b) => [b.timetable_event_id, `/portfolio/${traineeId}/stage2-tutorial/${b.id}`] as [string, string]),
     ...(consultationBlocks ?? []).map((b) => [b.timetable_event_id, `/portfolio/${traineeId}/consultation/${b.id}`] as [string, string]),
