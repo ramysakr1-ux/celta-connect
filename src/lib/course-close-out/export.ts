@@ -63,11 +63,22 @@ async function uploadPdf(
 // Same TP-materials-merge step as src/app/api/tp-plans/[planId]/pdf/route.ts
 // -- the archival copy should carry the trainee's own attached materials
 // too, not just the generated text record.
+const MIME_BY_TYPE: Record<string, string> = {
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
+
+export interface UnmergedMaterial {
+  name: string;
+  mimeType: string;
+  bytes: Buffer;
+}
+
 async function buildTpRecordWithMaterials(
   admin: Admin,
   base: Buffer,
   tpPlanId: string
-): Promise<Buffer> {
+): Promise<{ buffer: Buffer; unmerged: UnmergedMaterial[] }> {
   const { data: materials } = await admin
     .from("tp_materials")
     .select("*")
@@ -75,6 +86,20 @@ async function buildTpRecordWithMaterials(
     .order("created_at");
 
   const merged = await PDFDocument.load(base);
+  // A material that cannot be merged is CARRIED, never dropped.
+  //
+  // The upload form accepts PDF, images, .docx/.doc and .pptx/.ppt
+  // (attach-menu.tsx), and this merged only pdf and image -- so a
+  // candidate's Word handout or PowerPoint slides were `continue`d straight
+  // out of the archive, silently, and the archive is the only copy anyone
+  // keeps. The demo course happens to hold only PDFs and one PNG, which is
+  // why it never showed (walked 15 Sep 2026).
+  //
+  // Not converted: there is no LibreOffice or conversion service in this
+  // runtime, and a lossy re-render of somebody's worksheet would be worse
+  // than the file itself. Drive previews both formats natively, so the
+  // original goes in beside the record.
+  const unmerged: UnmergedMaterial[] = [];
   for (const material of materials ?? []) {
     if (!material.storage_path) continue;
     const { data: fileBlob } = await admin.storage.from("tp-materials").download(material.storage_path);
@@ -83,18 +108,39 @@ async function buildTpRecordWithMaterials(
 
     if (material.file_type === "pdf") {
       const materialDoc = await PDFDocument.load(bytes).catch(() => null);
-      if (!materialDoc) continue;
-      const pages = await merged.copyPages(materialDoc, materialDoc.getPageIndices());
-      pages.forEach((page) => merged.addPage(page));
-    } else if (material.file_type === "image") {
+      if (materialDoc) {
+        const pages = await merged.copyPages(materialDoc, materialDoc.getPageIndices());
+        pages.forEach((page) => merged.addPage(page));
+        continue;
+      }
+      // A PDF that will not parse still belongs in the folder.
+      unmerged.push({ name: material.file_name ?? "material.pdf", mimeType: "application/pdf", bytes: Buffer.from(bytes) });
+      continue;
+    }
+
+    if (material.file_type === "image") {
       const isPng = (material.file_name ?? "").toLowerCase().endsWith(".png");
       const image = await (isPng ? merged.embedPng(bytes) : merged.embedJpg(bytes)).catch(() => null);
-      if (!image) continue;
-      const page = merged.addPage([image.width, image.height]);
-      page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+      if (image) {
+        const page = merged.addPage([image.width, image.height]);
+        page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+        continue;
+      }
+      unmerged.push({
+        name: material.file_name ?? "material",
+        mimeType: isPng ? "image/png" : "image/jpeg",
+        bytes: Buffer.from(bytes),
+      });
+      continue;
     }
+
+    unmerged.push({
+      name: material.file_name ?? "material",
+      mimeType: MIME_BY_TYPE[material.file_type ?? ""] ?? "application/octet-stream",
+      bytes: Buffer.from(bytes),
+    });
   }
-  return Buffer.from(await merged.save());
+  return { buffer: Buffer.from(await merged.save()), unmerged };
 }
 
 function provisionalLabel(record: Database["public"]["Tables"]["celta5_records"]["Row"] | undefined): string {
@@ -601,8 +647,17 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
           selfEvaluation,
           feedback,
         });
-        const withMaterials = await buildTpRecordWithMaterials(admin, base, plan.id);
+        const { buffer: withMaterials, unmerged } = await buildTpRecordWithMaterials(admin, base, plan.id);
         await uploadPdf(accessToken, traineeFolder.id, `TP${tp_number} record - ${safeName(trainee.full_name)}.pdf`, withMaterials);
+        for (const m of unmerged) {
+          const ext = m.name.includes(".") ? "" : m.mimeType.includes("wordprocessing") ? ".docx" : m.mimeType.includes("presentation") ? ".pptx" : "";
+          await uploadFileToDrive(accessToken, {
+            name: `TP${tp_number} material - ${safeName(m.name)}${ext}`,
+            parentId: traineeFolder.id,
+            mimeType: m.mimeType,
+            bytes: m.bytes,
+          });
+        }
       }
 
       // Observations log
