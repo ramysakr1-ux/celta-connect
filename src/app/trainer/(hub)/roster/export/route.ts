@@ -6,11 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
-
-function csvCell(value: string | number): string {
-  const s = String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+import { csvCell } from "@/lib/csv";
 
 // Same three-way viewer resolution as the roster page itself -- trainer/
 // admin/assessor can all see the roster, so all three can export it.

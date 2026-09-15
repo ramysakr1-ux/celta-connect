@@ -25,6 +25,7 @@ import { esc } from "@/lib/email-layout";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
+import { csvCell } from "@/lib/csv";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -34,11 +35,6 @@ function formatDate(iso: string): string {
 
 function safeName(name: string): string {
   return name.replace(/[/\\:*?"<>|]/g, "-").trim();
-}
-
-function csvCell(value: unknown): string {
-  const s = value === null || value === undefined ? "" : String(value);
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 async function uploadCsv(accessToken: string, parentId: string, filename: string, csv: string): Promise<void> {

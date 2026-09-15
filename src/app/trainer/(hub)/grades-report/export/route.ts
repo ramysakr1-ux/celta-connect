@@ -4,11 +4,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeCohortRows } from "@/lib/grades-report";
-
-function csvCell(value: string | number): string {
-  const s = String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+import { csvCell } from "@/lib/csv";
 
 // Grades Report.dc.html 1a's "Export report" action. Same three-way viewer
 // resolution as the page itself and the roster export -- trainer/admin/

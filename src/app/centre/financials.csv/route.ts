@@ -3,6 +3,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { csvCell } from "@/lib/csv";
 
 // "Export financials" -- the outlined button top-right of Centre Admin's
 // Overview (Centre Admin.dc.html).
@@ -16,12 +18,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // person holds a role at -- centres RLS is `id = current_center_id()`, so a
 // session-scoped read cannot see a second branch even when the viewer
 // legitimately holds both.
-
-function csvCell(value: unknown): string {
-  const s = value === null || value === undefined ? "" : String(value);
-  // Quote anything that could break a column, and double any inner quote.
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
 
 export async function GET(request: Request) {
   const session = await getCurrentProfile();
@@ -42,11 +38,17 @@ export async function GET(request: Request) {
   const admin = createAdminClient();
 
   const [{ data: centres }, { data: courses }] = await Promise.all([
-    admin.from("centers").select("id, name").in("id", scope),
+    admin.from("centers").select("id, name, time_zone").in("id", scope),
     admin.from("courses").select("id, name, center_id, start_date, end_date").in("center_id", scope),
   ]);
 
   const centreName = new Map((centres ?? []).map((c) => [c.id, c.name]));
+  // A timestamp sliced to ten characters is a UTC date, and a UTC date is
+  // not the date the money moved anywhere else -- a payment taken at 01:00
+  // in Istanbul exported as the day before. Each centre's own clock decides.
+  const centreZone = new Map((centres ?? []).map((c) => [c.id, c.time_zone || DEFAULT_TIMEZONE]));
+  const payDate = (stamp: string | null | undefined, centerId: string | null | undefined): string =>
+    stamp ? toLocalIso(new Date(stamp), (centerId ? centreZone.get(centerId) : null) ?? DEFAULT_TIMEZONE) : "";
   const courseById = new Map((courses ?? []).map((c) => [c.id, c]));
   const courseIds = (courses ?? []).map((c) => c.id);
 
@@ -90,7 +92,7 @@ export async function GET(request: Request) {
         plan?.applicant_id ? (personName.get(plan.applicant_id) ?? "") : "",
         "Instalment",
         inst.due_date ?? "",
-        inst.paid_at ? String(inst.paid_at).slice(0, 10) : "",
+        payDate(inst.paid_at, course?.center_id),
         String(inst.amount ?? ""),
         inst.currency ?? "",
         inst.status ?? "",
@@ -115,7 +117,7 @@ export async function GET(request: Request) {
       a.full_name ?? "",
       "Deposit",
       "",
-      String(a.deposit_paid_at).slice(0, 10),
+      payDate(a.deposit_paid_at, a.center_id),
       String(a.deposit_amount ?? ""),
       a.deposit_currency ?? "",
       "paid",
