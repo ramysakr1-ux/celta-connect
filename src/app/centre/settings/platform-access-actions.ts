@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { getCentreRoleContext, canAtCentre } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -43,13 +43,25 @@ export async function invitePlatformOwner(_prev: PlatformAccessFormState, formDa
 export async function revokePlatformOwnerInvite(formData: FormData): Promise<void> {
   const session = await getCurrentProfile();
   if (!session?.profile) return;
-  const ctx = await getCentreRoleContext(session.profile);
-  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return;
   const inviteId = formData.get("invite_id");
   if (typeof inviteId !== "string") return;
 
   const admin = createAdminClient();
-  await admin.from("platform_owner_invites").update({ revoked_at: new Date().toISOString(), revoked_by: session.profile.id }).eq("id", inviteId);
+  // Whose invite is this?
+  //
+  // This checked the capability at whichever centre the person happened to
+  // be acting in and then updated by id alone -- no centre on the row, none
+  // on the update. A Centre manager at one centre could revoke any other
+  // centre's standing invite in the system (walked 15 Sep 2026).
+  const { data: invite } = await admin.from("platform_owner_invites").select("id, center_id").eq("id", inviteId).maybeSingle();
+  if (!invite) return;
+  if (!(await canAtCentre(session.profile, "centre.settings.edit", invite.center_id))) return;
+
+  await admin
+    .from("platform_owner_invites")
+    .update({ revoked_at: new Date().toISOString(), revoked_by: session.profile.id })
+    .eq("id", inviteId)
+    .eq("center_id", invite.center_id);
 
   revalidatePath("/centre/settings");
 }
