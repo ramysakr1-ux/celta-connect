@@ -4,6 +4,7 @@ import type { CourseStatus, Database } from "@/lib/supabase/types";
 import { computeAssessedTpStats } from "@/lib/course-progress";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { assignmentGradeCeiling } from "@/lib/provisional-grade";
 
 // Handbook 12.1.3: "The candidate portfolios should be up-to-date on the day
 // of the assessment." Up to date, not finished -- the visit is mid-course
@@ -186,6 +187,23 @@ export interface CandidateCardData {
   groupName: string | null;
   /** When the status was set -- the withdrawal date, for a withdrawn candidate. */
   courseStatusSetAt: string | null;
+  /**
+   * Handbook 11.6, said to the person it places the duty on.
+   *
+   * "In the case of a candidate who fails a single written assignment, the
+   * centre may recommend a final Pass grade... Where a Pass is recommended
+   * on this basis, the details should be documented by the assessor in the
+   * course report. Candidates in this category are not eligible for the
+   * award of Pass A. Candidates who fail more than one assignment are not
+   * eligible for a Pass."
+   *
+   * The rule was enforced against the tutor's grade picker and shown on the
+   * centre's own grades report, and nowhere in the assessor's pack -- so the
+   * assessor, who is the one told to document it, had no way to know which
+   * candidate it applied to (walked 15 Sep 2026). Null when no written
+   * assignment has been failed.
+   */
+  assignmentFailNote: string | null;
 }
 
 // The card grid's own per-candidate status dots -- same three dimensions
@@ -273,6 +291,24 @@ export async function buildCandidateCards(
       return status === "approved";
     });
 
+    // See the note on assignmentFailNote. Uses the same ceiling function the
+    // tutor's grade picker and the grades report already use, so the three
+    // can never disagree about the count.
+    const ceiling = assignmentGradeCeiling(
+      traineeAssignments,
+      (record as { assignment_fail_override_reason?: string | null } | undefined)?.assignment_fail_override_reason ?? null
+    );
+    const assignmentFailNote =
+      ceiling.failCount === 0
+        ? null
+        : ceiling.failCount === 1
+          ? `One written assignment failed. A Pass may still be recommended where there is sufficient evidence elsewhere, and the details are documented by the assessor in the course report; Pass A is not available (Handbook 11.6).${
+              ceiling.overridden ? ` The centre has recorded an override: ${ceiling.reason}` : ""
+            }`
+          : `${ceiling.failCount} written assignments failed -- not eligible for a Pass (Handbook 11.6).${
+              ceiling.overridden ? ` The centre has recorded an override: ${ceiling.reason}` : ""
+            }`;
+
     let flaggedIssue: string | null = null;
     if (stage3Open) flaggedIssue = "Stage Three record still open";
     else if (!assignmentsComplete) {
@@ -321,6 +357,7 @@ export async function buildCandidateCards(
       courseStatus: trainee.course_status,
       groupName: groupNameByTrainee.get(trainee.id) ?? null,
       courseStatusSetAt: trainee.course_status_set_at,
+      assignmentFailNote,
     };
   });
 }

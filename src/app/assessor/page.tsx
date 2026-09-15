@@ -889,6 +889,22 @@ export default async function AssessorPage({
                       {c.flaggedIssue}
                     </span>
                   ) : null}
+                  {/* Handbook 11.6 puts the documenting duty on the assessor,
+                      so the assessor is told which candidate it applies to.
+                      Not amber: a failed written assignment with a Pass
+                      recommended is a legitimate outcome the assessor writes
+                      up, not something wrong with the pack. */}
+                  {c.assignmentFailNote ? (
+                    <span
+                      style={{
+                        fontSize: 11, lineHeight: 1.45, color: MUTED, borderRadius: 5, padding: "6px 9px",
+                        background: "var(--color-frame)",
+                        border: `1px solid ${BORDER}`,
+                      }}
+                    >
+                      {c.assignmentFailNote}
+                    </span>
+                  ) : null}
                 </Link>
               ))}
               {visibleCandidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
