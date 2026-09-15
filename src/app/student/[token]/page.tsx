@@ -879,7 +879,7 @@ function TitleBlock({
 function NextClassFacts({ whereLabel, topicLabel, teachersLabel }: { whereLabel: string; topicLabel: string | null; teachersLabel: string | null }) {
   const facts: [string, string][] = [["Where", whereLabel]];
   if (topicLabel) facts.push(["Topic", topicLabel]);
-  if (teachersLabel) facts.push(["Teachers", teachersLabel]);
+  if (teachersLabel) facts.push([teachersLabel.includes(" and ") ? "Teachers" : "Teacher", teachersLabel]);
   return (
     <div className="flex flex-col gap-1.5">
       {facts.map(([label, value]) => (
@@ -1019,7 +1019,7 @@ function NextClassBanner({
   const facts: { label: string; value: string }[] = [
     { label: "Where", value: whereLabel },
     ...(topicLabel ? [{ label: "Topic", value: topicLabel }] : []),
-    ...(teachersLabel ? [{ label: "Teacher", value: teachersLabel }] : []),
+    ...(teachersLabel ? [{ label: teachersLabel.includes(" and ") ? "Teachers" : "Teacher", value: teachersLabel }] : []),
     {
       label: "So far",
       value: [
