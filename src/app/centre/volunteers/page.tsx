@@ -64,7 +64,7 @@ export default async function CentreVolunteersPage({
       : { data: [] };
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
-  const [{ data: tpEvents }, { data: attendanceRows }, { data: declineRows }] = await Promise.all([
+  const [{ data: tpEvents }, { data: attendanceRows }, { data: declineRows }, { data: confirmRows }] = await Promise.all([
     courseIds.length > 0
       ? admin.from("course_timetable_events").select("id, event_date, course_id, detail").in("course_id", courseIds).eq("type", "tp")
       : Promise.resolve({ data: [] }),
@@ -73,6 +73,9 @@ export default async function CentreVolunteersPage({
       : Promise.resolve({ data: [] }),
     volunteerIds.length > 0
       ? admin.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
+      : Promise.resolve({ data: [] }),
+    volunteerIds.length > 0
+      ? admin.from("volunteer_confirmations").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -97,6 +100,7 @@ export default async function CentreVolunteersPage({
     return lessons.filter((e) => e.event_date === nextDate).map((e) => e.id);
   };
   const declinedKeys = new Set((declineRows ?? []).map((d) => `${d.volunteer_student_id}:${d.timetable_event_id}`));
+  const confirmedKeys = new Set((confirmRows ?? []).map((c) => `${c.volunteer_student_id}:${c.timetable_event_id}`));
 
   const groups = new Map<
     string,
@@ -197,11 +201,18 @@ export default async function CentreVolunteersPage({
                   active={g.active}
                   members={g.members.map((m) => {
                     const nextDayIds = nextClassDayEventIds(m.courseId, m.level);
-                    const nextClassStatus: "coming" | "declined" | null = nextDayIds.length === 0
+                    // Three answers, not two: someone who has said nothing is
+                    // not "coming". The RSVP email is the only thing that
+                    // makes this word true, and the pool was printing
+                    // "Coming next class" beside every volunteer who simply
+                    // had not replied (walked 15 Sep 2026).
+                    const nextClassStatus: "coming" | "declined" | "no_reply" | null = nextDayIds.length === 0
                       ? null
                       : nextDayIds.some((id) => declinedKeys.has(`${m.id}:${id}`))
                         ? "declined"
-                        : "coming";
+                        : nextDayIds.some((id) => confirmedKeys.has(`${m.id}:${id}`))
+                          ? "coming"
+                          : "no_reply";
                     return { id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course", level: m.level, nextClassStatus };
                   })}
                   canEdit={canEdit}

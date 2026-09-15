@@ -3900,23 +3900,38 @@ async function main() {
 
   // RSVP replies for the next teaching day: Emeka said yes, Grace can't.
   const todayIsoV2 = isoDaysFromNow(0);
-  const { data: nextTpDay } = await supabase
+  // One reply per person per class, against the first lesson of their own
+  // class that day -- which is the lesson the RSVP email links to. This
+  // used to take the next three rows whatever their level, so on a
+  // two-group course each volunteer answered for the other's class as well
+  // as their own (walked 15 Sep 2026).
+  const { data: upcomingTp } = await supabase
     .from("course_timetable_events")
-    .select("id, event_date")
+    .select("id, event_date, event_time, detail")
     .eq("course_id", course.id)
     .eq("type", "tp")
     .gte("event_date", todayIsoV2)
     .order("event_date")
-    .order("event_time")
-    .limit(3);
-  for (const e of nextTpDay ?? []) {
-    await supabase.from("volunteer_confirmations").insert({ volunteer_student_id: volunteer.id, timetable_event_id: e.id });
-    await supabase.from("volunteer_declines").upsert(
-      { volunteer_student_id: graceVolunteer.id, timetable_event_id: e.id },
+    .order("event_time");
+  const firstLessonOfTheirClass = (level) => {
+    const wanted = (level ?? "").toLowerCase().startsWith("elem") ? "a2" : "b1";
+    return (upcomingTp ?? []).find((e) => !e.detail || e.detail.toLowerCase().startsWith(wanted)) ?? null;
+  };
+  const emekaLesson = firstLessonOfTheirClass("Intermediate");
+  const graceLesson = firstLessonOfTheirClass("Elementary");
+  if (emekaLesson) {
+    await supabase.from("volunteer_confirmations").upsert(
+      { volunteer_student_id: volunteer.id, timetable_event_id: emekaLesson.id },
       { onConflict: "volunteer_student_id,timetable_event_id" }
     );
   }
-  console.log("volunteer v2: emails + person link + 9 prior hours + RSVP replies for", (nextTpDay ?? [])[0]?.event_date ?? "no upcoming TP");
+  if (graceLesson) {
+    await supabase.from("volunteer_declines").upsert(
+      { volunteer_student_id: graceVolunteer.id, timetable_event_id: graceLesson.id },
+      { onConflict: "volunteer_student_id,timetable_event_id" }
+    );
+  }
+  console.log("volunteer v2: emails + person link + 9 prior hours + RSVP replies for", emekaLesson?.event_date ?? "no upcoming TP");
 
   // Emeka's sign-up recording -- so the student card's Listen player and
   // "Transcript on file" line have something real behind them (Ramy,

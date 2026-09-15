@@ -19,7 +19,7 @@ export function VolunteerPoolRow({
   // for-claude-code-volunteer-pool-header.md: sage green while at least one
   // linked course is still running, muted grey once every one has ended.
   active: boolean;
-  members: { id: string; courseName: string; level: string | null; nextClassStatus: "coming" | "declined" | null }[];
+  members: { id: string; courseName: string; level: string | null; nextClassStatus: "coming" | "declined" | "no_reply" | null }[];
   canEdit: boolean;
   linkOptions: { id: string; name: string }[];
 }) {
@@ -108,14 +108,17 @@ function LevelTag({ level, courseName }: { level: string | null; courseName: str
 // -- the only place in the app that shows a per-volunteer name next to
 // their next-class attendance status, rather than the trainer/trainee
 // aggregate-only count.
-function NextClassStatusTag({ status }: { status: "coming" | "declined" | null }) {
+function NextClassStatusTag({ status }: { status: "coming" | "declined" | "no_reply" | null }) {
   if (!status) return null;
+  const colour =
+    status === "coming"
+      ? "var(--color-status-on-track-text)"
+      : status === "declined"
+        ? "var(--color-status-at-risk-text)"
+        : "var(--color-muted)";
   return (
-    <span
-      className="text-[11px] font-semibold"
-      style={{ color: status === "coming" ? "var(--color-status-on-track-text)" : "var(--color-status-at-risk-text)" }}
-    >
-      {status === "coming" ? "Coming next class" : "Can't make next class"}
+    <span className="text-[11px] font-semibold" style={{ color: colour }}>
+      {status === "coming" ? "Coming next class" : status === "declined" ? "Can't make next class" : "No reply yet"}
     </span>
   );
 }
