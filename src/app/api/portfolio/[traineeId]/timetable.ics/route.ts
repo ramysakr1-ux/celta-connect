@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { courseTimetableIcs, icsFilename } from "@/lib/timetable-ics";
+import { courseTimetableIcs, icsFilename, tpGroupIdForTrainee } from "@/lib/timetable-ics";
 
 // for-claude-code-trainee-interface.md's Timetable tab "Add to my
 // calendar" action. Trainee-self, staff, or assessor can all fetch this --
@@ -29,7 +29,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   if (!trainee?.course_id) return NextResponse.json({ error: "Not found." }, { status: 404 });
   if (assessorCourseId && trainee.course_id !== assessorCourseId) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
-  return new NextResponse(await courseTimetableIcs(supabase, trainee.course_id), {
+  // Their own group's lessons, one entry per slot.
+  const groupId = await tpGroupIdForTrainee(supabase, traineeId);
+  return new NextResponse(await courseTimetableIcs(supabase, trainee.course_id, groupId ? new Set([groupId]) : null), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": icsFilename(trainee.full_name),

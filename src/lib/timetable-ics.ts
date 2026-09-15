@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, TimeBand } from "@/lib/supabase/types";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { bandIndexFor, resolveTimeBands, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 
 // One course timetable, as a calendar file. Written once and shared by the
 // candidate's "Add to my calendar" and the tutor's own link (Ramy, 14 Sep
@@ -64,18 +65,36 @@ export function buildTimetableIcs(events: IcsEvent[], timeZone: string, timeBand
 /** Reads one course's timetable and returns it as a calendar file's text. */
 export async function courseTimetableIcs(
   supabase: SupabaseClient<Database>,
-  courseId: string
+  courseId: string,
+  /** The reader's own TP group(s), so their calendar carries their lessons. */
+  viewerGroupIds: Set<string> | null = null
 ): Promise<string> {
   const [{ data: events }, { data: course }] = await Promise.all([
     supabase
       .from("course_timetable_events")
-      .select("id, title, event_date, event_time, detail")
+      .select("id, type, title, event_date, event_time, detail, tp_group_scope_id")
       .eq("course_id", courseId)
       .order("event_date"),
     supabase.from("courses").select("center_id, time_bands").eq("id", courseId).maybeSingle(),
   ]);
   const timeZone = (course?.center_id ? await getCachedCenter(course.center_id) : null)?.time_zone ?? DEFAULT_TIMEZONE;
-  return buildTimetableIcs(events ?? [], timeZone, resolveTimeBands(course?.time_bands));
+  // One entry per TP slot, the same rule the board draws by -- a calendar
+  // with every lesson twice is the doubling again, in the download.
+  return buildTimetableIcs(oneTpCardPerSlot(events ?? [], viewerGroupIds), timeZone, resolveTimeBands(course?.time_bands));
+}
+
+/** The TP group a candidate belongs to, for the rule above. */
+export async function tpGroupIdForTrainee(supabase: SupabaseClient<Database>, traineeId: string): Promise<string | null> {
+  const { data: member } = await supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle();
+  if (!member) return null;
+  const { data: subgroup } = await supabase.from("course_subgroups").select("tp_group_id").eq("id", member.subgroup_id).maybeSingle();
+  return subgroup?.tp_group_id ?? null;
+}
+
+/** The TP group(s) a tutor runs. */
+export async function tpGroupIdsForTutor(supabase: SupabaseClient<Database>, courseId: string, profileId: string): Promise<Set<string>> {
+  const { data: groups } = await supabase.from("course_tp_groups").select("id").eq("course_id", courseId).eq("tutor_profile_id", profileId);
+  return new Set((groups ?? []).map((g) => g.id));
 }
 
 /** `Content-Disposition` for a download named after whoever asked for it. */

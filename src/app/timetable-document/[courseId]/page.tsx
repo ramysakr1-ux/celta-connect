@@ -7,6 +7,8 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { buildDayRows, categorize, resolveTimeBands, type TimetableEvent } from "@/lib/timetable-grid";
 import { toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
 import { formatCalendarDate } from "@/lib/format-date";
+import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
+import { tpGroupIdForTrainee, tpGroupIdsForTutor } from "@/lib/timetable-ics";
 import { PrintButton } from "@/app/timetable-document/[courseId]/print-button";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +66,14 @@ export default async function TimetableDocumentPage({ params }: { params: Promis
 
   const centre = course.center_id ? await getCachedCenter(course.center_id) : null;
   const timeBands = resolveTimeBands(course.time_bands);
-  const rows = buildDayRows((events ?? []) as TimetableEvent[], timeBands);
+  // One entry per TP slot, as on the board: the reader's own group's.
+  const viewerGroupIds =
+    viewer?.role === "trainee"
+      ? await tpGroupIdForTrainee(supabase, viewer.id).then((id) => (id ? new Set([id]) : null))
+      : viewer
+        ? await tpGroupIdsForTutor(supabase, courseId, viewer.id).then((g) => (g.size > 0 ? g : null))
+        : null;
+  const rows = buildDayRows(oneTpCardPerSlot((events ?? []) as TimetableEvent[], viewerGroupIds), timeBands);
 
   const weeks: { label: string; rows: typeof rows }[] = [];
   for (const row of rows) {

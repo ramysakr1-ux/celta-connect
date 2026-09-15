@@ -1,4 +1,13 @@
-import type { TimetableEvent } from "@/lib/timetable-grid";
+/** The fields the rule needs -- so the calendar feed and the printed
+ *  timetable, which select fewer columns than the board, can use it too. */
+interface SlotRow {
+  id: string;
+  type: string;
+  title: string;
+  event_date: string;
+  event_time: string | null;
+  tp_group_scope_id: string | null;
+}
 
 /**
  * The timetable is the course PROGRAMME, and a TP slot appears on it once.
@@ -18,8 +27,8 @@ import type { TimetableEvent } from "@/lib/timetable-grid";
  * by group id, stably. Nothing is deleted: the other group's row is still
  * there for its register, its plans and its records.
  */
-export function oneTpCardPerSlot(events: TimetableEvent[], viewerGroupIds: Set<string> | null): TimetableEvent[] {
-  const bySlot = new Map<string, TimetableEvent[]>();
+export function oneTpCardPerSlot<T extends SlotRow>(events: T[], viewerGroupIds: Set<string> | null): T[] {
+  const bySlot = new Map<string, T[]>();
   for (const e of events) {
     if (e.type !== "tp") continue;
     const key = `${e.event_date}|${e.event_time ?? ""}|${e.title}`;
