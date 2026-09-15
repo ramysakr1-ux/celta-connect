@@ -4,6 +4,19 @@ import type { Database } from "@/lib/supabase/types";
 import { computeSessionTicks, creditedHours, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { DEFAULT_TIMEZONE, toLocalIso } from "@/lib/timetable-grid";
+import { CEFR_LEVELS, extractLevelCode } from "@/lib/levels";
+
+// A volunteer belongs to a CLASS, and a class is a level. Their level is
+// stored the old way ("Elementary", "Intermediate"); a TP card carries the
+// coursebook's code ("A2", "B1+"). Same fact, two spellings -- so both sides
+// are reduced to a bare code, and B1+ counts as B1. Anything unrecognised
+// matches everything, which is what the page did before this rule existed.
+function levelKey(level: string | null | undefined): string | null {
+  if (!level) return null;
+  const raw = extractLevelCode(level.trim());
+  const byName = CEFR_LEVELS.find((l) => l.name.toLowerCase() === raw.toLowerCase());
+  return (byName?.code ?? raw).replace(/\+$/, "").toUpperCase();
+}
 
 export { TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD };
 
@@ -49,9 +62,10 @@ export async function getVolunteerIdentityData(
   if (!self) return { hoursCredited: 0, classes: [], memberVolunteerStudentIds: [volunteerStudentId] };
 
   const { data: siblings } = self.volunteer_person_id
-    ? await admin.from("volunteer_students").select("id, course_id").eq("volunteer_person_id", self.volunteer_person_id)
-    : { data: [{ id: self.id, course_id: self.course_id }] };
-  const members = siblings && siblings.length > 0 ? siblings : [{ id: self.id, course_id: self.course_id }];
+    ? await admin.from("volunteer_students").select("id, course_id, level").eq("volunteer_person_id", self.volunteer_person_id)
+    : await admin.from("volunteer_students").select("id, course_id, level").eq("id", self.id);
+  const members = siblings && siblings.length > 0 ? siblings : [{ id: self.id, course_id: self.course_id, level: null }];
+  const levelByCourseId = new Map(members.map((m) => [m.course_id, levelKey((m as { level?: string | null }).level)]));
   const memberIds = members.map((m) => m.id);
   const courseIds = [...new Set(members.map((m) => m.course_id))];
 
@@ -72,8 +86,18 @@ export async function getVolunteerIdentityData(
   );
   const attendedEventIds = new Set((attendanceRows ?? []).map((a) => a.timetable_event_id));
 
+  // Only the lessons of the class this volunteer is in. Two groups teach two
+  // levels at the same hours, so without this a volunteer's page listed both
+  // -- 96 lessons on a course that teaches them 48, "78 missed" on a day
+  // they attended, and every class shown twice (walked 15 Sep 2026).
+  const myEvents = (tpEvents ?? []).filter((e) => {
+    const mine = levelByCourseId.get(e.course_id);
+    const its = levelKey(e.detail);
+    return !mine || !its || mine === its;
+  });
+
   const sessions = computeSessionTicks(
-    (tpEvents ?? []).map((e) => ({ id: e.id, event_date: e.event_date })),
+    myEvents.map((e) => ({ id: e.id, event_date: e.event_date })),
     attendedEventIds,
     TP_LESSON_LENGTH_MINUTES
   );
@@ -85,7 +109,19 @@ export async function getVolunteerIdentityData(
   // and 03:00 local read as still upcoming; for the Los Angeles branch
   // (GMT-7) an evening class flipped to "past" hours before it was taught.
   const now = new Date();
-  const classes: VolunteerClassSummary[] = (tpEvents ?? [])
+  // One card per class, not per lesson: a volunteer sits through the whole
+  // session, which is three lettered lessons back to back. The tick maths
+  // already treats a date as one session; the list now says the same.
+  const firstOfDay = new Map<string, (typeof myEvents)[number]>();
+  for (const e of myEvents) {
+    const key = `${e.course_id}|${e.event_date}`;
+    const held = firstOfDay.get(key);
+    if (!held || (e.event_time ?? "") < (held.event_time ?? "")) firstOfDay.set(key, e);
+  }
+  const attendedDates = new Set(
+    myEvents.filter((e) => attendedEventIds.has(e.id)).map((e) => `${e.course_id}|${e.event_date}`)
+  );
+  const classes: VolunteerClassSummary[] = [...firstOfDay.values()]
     .map((e) => ({
       id: memberIds.find((id) => members.find((m) => m.id === id)?.course_id === e.course_id) ?? volunteerStudentId,
       courseId: e.course_id,
@@ -93,7 +129,9 @@ export async function getVolunteerIdentityData(
       eventId: e.id,
       eventDate: e.event_date,
       eventTime: e.event_time,
-      attended: e.event_date < toLocalIso(now, tzByCourseId.get(e.course_id) ?? DEFAULT_TIMEZONE) ? attendedEventIds.has(e.id) : null,
+      attended: e.event_date < toLocalIso(now, tzByCourseId.get(e.course_id) ?? DEFAULT_TIMEZONE)
+        ? attendedDates.has(`${e.course_id}|${e.event_date}`)
+        : null,
       zoomUrl: e.zoom_url,
       detail: e.detail,
       linkedTpNumber: e.linked_tp_number,
