@@ -135,7 +135,24 @@ export function CloseOutCard({
               ))}
             </div>
           ) : (
-            <form action={receiptAction} className="flex flex-wrap items-end gap-3 rounded-[6px] border border-border p-3">
+            <>
+              {/* Said at the moment the seven-day clock starts, because that
+                  is the moment it matters. Handbook 12.1.3: "Candidate
+                  portfolios should remain accessible to candidates for six
+                  months after the issue of results"; 12.1.2: "Before final
+                  submission, candidates should ensure they have their own
+                  saved copy of the portfolio." Connect gives a candidate no
+                  way to take that copy today -- their CELTA 5 and an
+                  assignment cover sheet, and nothing else -- so the centre
+                  is the only one who can make it true. Flagged rather than
+                  silently enforced: the seven days are Ramy's design. */}
+              <p className="rounded-[6px] border border-border bg-card-inset p-3 text-xs leading-[1.6] text-muted">
+                Before you confirm: Handbook 12.1.3 asks that candidate portfolios stay accessible to
+                candidates for six months after results, and 12.1.2 that candidates keep their own saved
+                copy. Connect clears their working copy seven days after this receipt, and it cannot hand
+                them an archive of it -- so make sure they have one.
+              </p>
+              <form action={receiptAction} className="flex flex-wrap items-end gap-3 rounded-[6px] border border-border p-3">
               <input type="hidden" name="course_id" value={courseId} />
               <div className="flex flex-1 flex-col gap-1.5">
                 <label htmlFor="signed_name" className="text-xs text-muted">
@@ -156,7 +173,8 @@ export function CloseOutCard({
               >
                 {receiptPending ? "Confirming..." : "Confirm receipt"}
               </button>
-            </form>
+              </form>
+            </>
           )}
           {receiptState.error ? <p className="text-sm text-destructive">{receiptState.error}</p> : null}
         </div>
