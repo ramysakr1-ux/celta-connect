@@ -395,10 +395,22 @@ export async function sendToSecondMarker(_prevState: FormState, formData: FormDa
   if (secondMarkerId === marker.id) {
     return { error: "A second mark has to be someone else's -- that is what makes it a second mark." };
   }
+
+  const supabase = await createClient();
+  // ...and not the tutor who marked it first, who need not be whoever is
+  // clicking. An MCT opening a colleague's marked script could send it back
+  // to that same colleague: every later step refuses them (recordSecondMarking
+  // and recordBlindSecondMark both check marker_id), so nothing invalid could
+  // be recorded -- but the row sat in the double-marking record as "in
+  // progress" for ever, on the screen an assessor reads (walked 15 Sep 2026).
+  const { data: existing } = await supabase.from("assignments").select("marker_id").eq("id", assignmentId).maybeSingle();
+  if (existing?.marker_id && existing.marker_id === secondMarkerId) {
+    return { error: "A second mark has to be someone else's -- that tutor marked this one first." };
+  }
+
   const draft = await saveMarkingDraft(_prevState, formData);
   if (draft.error) return draft;
 
-  const supabase = await createClient();
   const { error } = await supabase
     .from("assignments")
     .update({ second_marker_id: secondMarkerId, in_double_marking_sample: true })
