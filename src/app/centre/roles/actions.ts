@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, CENTRE_ROLES, roleLabel, type CentreRole } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS, type Area } from "@/lib/auth/areas";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // A role is valid to grant/invite either as one of the four built-in slugs,
 // or as a custom role the owner has already defined for this centre --
@@ -353,6 +354,10 @@ export async function assignArea(_prev: AssignAreaState, formData: FormData): Pr
 
   revalidatePath("/centre/roles");
   return {
-    notice: `${AREA_LABELS[areaKey]} is now ${target.full_name}'s${endsAt ? `, until ${endsAt}` : ""}.`,
+    // Never a raw ISO date in something a person reads -- the page's own
+    // "until 1 Oct 2026" line beside it got this right, this notice did not.
+    notice: `${AREA_LABELS[areaKey]} is now ${target.full_name}'s${
+      endsAt ? `, until ${formatCalendarDate(endsAt, { day: "numeric", month: "short", year: "numeric" })}` : ""
+    }.`,
   };
 }

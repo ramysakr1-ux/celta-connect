@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext, canViewAtCentre, canAtCentre } from "@/lib/auth/centre-roles";
 import { canView, can } from "@/lib/auth/centre-permissions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
+import { formatCalendarDate } from "@/lib/format-date";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
@@ -69,13 +70,15 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
 
   const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
+  const courseDay = (iso: string | null) =>
+    iso ? formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" }) : "not set";
   const state = computeCourseState(course.start_date, course.end_date, today);
   const standing =
     state === "running"
       ? computeWeekOf(course.start_date, course.end_date, today).replace(/^w/, "W")
       : state === "upcoming"
         ? "Not started yet"
-        : `Ended ${course.end_date}`;
+        : `Ended ${courseDay(course.end_date)}`;
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,8 +93,10 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
               {[course.course_code, course.delivery_mode].filter(Boolean).join(" · ")}
             </p>
             <h1 className="mt-1 font-serif text-xl text-ink">{course.name}</h1>
+            {/* Never an ISO date in front of a person -- this read
+                "2026-08-31 → 2026-09-25". */}
             <p className="mt-1 text-sm text-muted">
-              {course.start_date} &rarr; {course.end_date}
+              {courseDay(course.start_date)} &rarr; {courseDay(course.end_date)}
             </p>
           </div>
           <span className="shrink-0 rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-semibold text-ink">
