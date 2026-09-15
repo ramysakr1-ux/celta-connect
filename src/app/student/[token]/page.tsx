@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { teachersForClassDay } from "@/lib/volunteer-class-teachers";
+import { teachersForClassDays } from "@/lib/volunteer-class-teachers";
 import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { DeclineButton } from "@/app/student/[token]/decline-button";
 import { ClassMaterialsLink } from "@/app/student/[token]/class-materials-link";
@@ -376,13 +376,6 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // VALUE against plan_assignments.tp_number (not a foreign key), and one
   // calendar TP day can host several trainees' rotation slots, so this
   // shows everyone teaching that round rather than a single "the" lesson.
-  const nextClassTeachers: { name: string; topic: string | null }[] = nextClass
-    ? await teachersForClassDay(admin, {
-        courseId: nextClass.courseId,
-        eventDate: nextClass.eventDate,
-        volunteerLevel: volunteer?.level ?? null,
-      })
-    : [];
 
   // "This course" -- deliberately narrower than the cross-course hours
   // above: N of M classes attended, this course only, no percentage.
@@ -513,6 +506,20 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const upcomingForList = classes.filter((c) => !isPast(c));
   const pastForList = classes.filter(isPast);
   const listClasses = [...upcomingForList.slice(-1), ...pastForList.slice(0, 2)];
+  // Who teaches this volunteer's class, per day -- their own three lessons
+  // at their own level, resolved from each card's group and letter. One
+  // pass for the next class and the three listed rows on this course.
+  const teachersByDate = await teachersForClassDays(admin, {
+    courseId: accessToken.course_id,
+    eventDates: [
+      ...(nextClass?.courseId === accessToken.course_id ? [nextClass.eventDate] : []),
+      ...listClasses.filter((c) => c.courseId === accessToken.course_id).map((c) => c.eventDate),
+    ],
+    volunteerLevel: volunteer?.level ?? null,
+  });
+  const nextClassTeachers: { name: string; topic: string | null }[] =
+    nextClass?.courseId === accessToken.course_id ? (teachersByDate.get(nextClass.eventDate) ?? []) : [];
+
   const tpKeysNeeded = listClasses.filter((c) => c.linkedTpNumber != null).map((c) => ({ courseId: c.courseId, tpNumber: c.linkedTpNumber as number }));
   const listCourseIds = [...new Set(tpKeysNeeded.map((k) => k.courseId))];
   const { data: listAssignments } = listCourseIds.length
@@ -531,7 +538,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   }
   const rows = listClasses.map((c) => ({
     ...c,
-    topic: c.linkedTpNumber != null ? (topicByKey.get(`${c.courseId}:${c.linkedTpNumber}`) ?? null) : null,
+    // Their own class's first lesson that day, not whichever candidate on
+    // the course happened to come back first for that TP number -- which
+    // was usually the other level's lesson (walked 15 Sep 2026).
+    topic:
+      (c.courseId === accessToken.course_id ? teachersByDate.get(c.eventDate)?.find((t) => t.topic)?.topic : null) ??
+      (c.linkedTpNumber != null ? (topicByKey.get(`${c.courseId}:${c.linkedTpNumber}`) ?? null) : null),
     rowMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (materialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
   }));
 

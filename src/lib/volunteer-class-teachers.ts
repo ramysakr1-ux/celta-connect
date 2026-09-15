@@ -39,24 +39,27 @@ function letterOf(title: string): string | null {
  * letters are its own A-F in base-slot order (tp-letters.ts), so the three
  * lessons resolve to exactly three candidates.
  */
-export async function teachersForClassDay(
+export async function teachersForClassDays(
   admin: SupabaseClient<Database>,
   {
     courseId,
-    eventDate,
+    eventDates,
     volunteerLevel,
-  }: { courseId: string; eventDate: string; volunteerLevel: string | null | undefined }
-): Promise<ClassTeacher[]> {
+  }: { courseId: string; eventDates: string[]; volunteerLevel: string | null | undefined }
+): Promise<Map<string, ClassTeacher[]>> {
+  const dates = [...new Set(eventDates)].filter(Boolean);
+  if (dates.length === 0) return new Map();
+
   const { data: dayEvents } = await admin
     .from("course_timetable_events")
     .select("id, title, event_date, event_time, detail, linked_tp_number, tp_group_scope_id")
     .eq("course_id", courseId)
     .eq("type", "tp")
-    .eq("event_date", eventDate)
+    .in("event_date", dates)
     .order("event_time");
 
   const mine = classLessons((dayEvents ?? []) as DayEvent[], volunteerLevel);
-  if (mine.length === 0) return [];
+  if (mine.length === 0) return new Map();
 
   const [{ data: subgroups }, { data: members }] = await Promise.all([
     admin.from("course_subgroups").select("id, tp_group_id, half_order").eq("course_id", courseId),
@@ -80,15 +83,15 @@ export async function teachersForClassDay(
     }
   }
 
-  const wanted: { traineeId: string; tpNumber: number | null }[] = [];
+  const wanted: { date: string; traineeId: string; tpNumber: number | null }[] = [];
   for (const e of mine) {
     const letter = letterOf(e.title);
     const groupId = e.tp_group_scope_id;
     if (!letter || !groupId) continue;
     const traineeId = traineeByGroupLetter.get(`${groupId}:${letter}`);
-    if (traineeId) wanted.push({ traineeId, tpNumber: e.linked_tp_number });
+    if (traineeId) wanted.push({ date: e.event_date, traineeId, tpNumber: e.linked_tp_number });
   }
-  if (wanted.length === 0) return [];
+  if (wanted.length === 0) return new Map();
 
   const traineeIds = [...new Set(wanted.map((w) => w.traineeId))];
   const tpNumbers = [...new Set(wanted.map((w) => w.tpNumber).filter((n): n is number => n != null))];
@@ -105,11 +108,14 @@ export async function teachersForClassDay(
   ]);
   const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
 
-  return wanted.map((w) => {
+  const byDate = new Map<string, ClassTeacher[]>();
+  for (const w of wanted) {
     const a = (assignments ?? []).find((x) => x.trainee_id === w.traineeId && x.tp_number === w.tpNumber);
-    return {
+    const entry = {
       name: nameById.get(w.traineeId) ?? "Your teacher",
       topic: a?.short_title || a?.main_lesson_aim || null,
     };
-  });
+    byDate.set(w.date, [...(byDate.get(w.date) ?? []), entry]);
+  }
+  return byDate;
 }
