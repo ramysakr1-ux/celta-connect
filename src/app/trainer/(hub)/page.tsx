@@ -25,6 +25,7 @@ import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
 import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, cohortSizeProblems, tpClassSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP } from "@/lib/hub-accent";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -866,11 +867,11 @@ export default async function TodayPage() {
     return { ...first, message: `${group.length} × ${first.message}`, detail: group.map((g) => g.detail).join(" · ") };
   });
 
-  // v4's role accent: MCT garnet, ACT gold. The hub header still carries its
-  // older ink/garnet pairing -- restyling that bar is Phase 4 work on the
-  // layout, not this page.
-  const accent = isMct ? "oklch(42% 0.13 27)" : "oklch(60% 0.11 70)";
-  const accentDeep = isMct ? "oklch(36% 0.12 27)" : "oklch(50% 0.11 65)";
+  // v4's role accent: MCT garnet, ACT gold -- the same constants the (hub)
+  // layout puts on --hub-accent, so the two cannot drift the first time one
+  // is tuned (B6, live audit 15 Sep 2026; they were literals here).
+  const accent = isMct ? HUB_GARNET : HUB_GOLD;
+  const accentDeep = isMct ? HUB_GARNET_DEEP : HUB_GOLD_DEEP;
 
   const weekOf =
     course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;

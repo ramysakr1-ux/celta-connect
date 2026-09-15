@@ -216,7 +216,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           >
             <Wordmark size="header-compact" gapPx={9} />
           </Link>
-          <HeaderCredit />
+          <HeaderCredit landingPath="/trainer" />
           {assessorPreview ? (
             // The wordmark alone is not a discoverable way back -- nobody
             // reads a logo as "return to the thing I was previewing". This

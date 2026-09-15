@@ -191,7 +191,7 @@ export default async function TrainerRosterPage() {
   return (
     <div className="flex flex-col gap-[18px]">
       <PageHead
-        eyebrow={`${courseCode} · Roster · click a row to open a portfolio`}
+        eyebrow={`${courseCode} · Roster`}
         title={
           <>
             {scope?.traineeIds

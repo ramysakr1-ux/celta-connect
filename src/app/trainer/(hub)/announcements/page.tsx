@@ -7,6 +7,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AnnouncementComposer } from "@/app/trainer/(hub)/announcements/composer";
 import { ScheduledPanel, type ScheduledRowData } from "@/app/trainer/(hub)/announcements/scheduled-panel";
 import { formatCalendarDateObject } from "@/lib/format-date";
+import { PageHead } from "@/app/trainer/(hub)/page-head";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -198,14 +199,14 @@ export default async function AnnouncementsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Announcements</h1>
-        <p className="mt-1 text-sm text-muted">
-          The only way to reach the whole cohort at once -- there&apos;s no cohort chat channel. Candidates see these on
-          their home screen, above their to-do list.
-        </p>
-      </div>
+      {/* C3, live audit 15 Sep 2026: this was its own eyebrow + 34px h1,
+          close enough to PageHead that it should just be the component.
+          The eyebrow names the owning tab -- this page is Also-under Today. */}
+      <PageHead
+        eyebrow="Today · Announcements"
+        title="Announcements"
+        lede="The only way to reach the whole cohort at once -- there's no cohort chat channel. Candidates see these on their home screen, above their to-do list."
+      />
 
       {/* Today's idiom: one shadowed spine (the composer), flat cards beside
           it, rows with a badge and a hover ring. Ramy, 5 Sep 2026, on the

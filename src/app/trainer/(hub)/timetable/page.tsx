@@ -718,8 +718,11 @@ export default async function TrainerTimetablePage({
               same glass-card design as the trainee's read-only board
               (for-claude-code-timetable-view.md), reused as-is. */}
           <PageHead eyebrow={`${course?.name ?? "Course"} · Timetable`} title={weekRange ?? "Timetable"}>
+            {/* B8, live audit 15 Sep 2026: editing is a few-times-a-course
+                action, so it is not the page's one solid button. Nothing on
+                the view needs to be primary. */}
             {isMct ? (
-              <Link href="/trainer/timetable?mode=edit" className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
+              <Link href="/trainer/timetable?mode=edit" className={HUB_BUTTON}>
                 Edit timetable
               </Link>
             ) : null}

@@ -12,6 +12,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { isMctView } from "@/lib/act-preview";
 import { formatCalendarDate } from "@/lib/format-date";
+import { PageHead } from "@/app/trainer/(hub)/page-head";
 
 // §14 + design_handoff_volunteer_students_v2 (Ramy, 5 Sep 2026). The
 // trainer-side register: Today strip (RSVP replies + Zoom presence),
@@ -124,10 +125,13 @@ export default async function VolunteersPage() {
   if (!trainer) {
     return (
       <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="font-serif text-2xl text-ink">Attendance register</h1>
-          <p className="mt-1 text-sm text-muted">Volunteer student attendance at teaching practice sessions.</p>
-        </div>
+        {/* C4, live audit 15 Sep 2026: the assessor saw a different head
+            style on this one tab. Same component as everything else. */}
+        <PageHead
+          eyebrow="Volunteers · attendance register"
+          title="Attendance register"
+          lede="Volunteer student attendance at teaching practice sessions."
+        />
         <AttendanceRegisterGrid events={tpEvents ?? []} volunteers={volunteers ?? []} attendance={attendanceRows ?? []} />
       </div>
     );
