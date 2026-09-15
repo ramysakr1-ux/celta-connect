@@ -18,8 +18,28 @@ import { createAdminClient } from "@/lib/supabase/admin";
 async function wipeOneCourse(admin: ReturnType<typeof createAdminClient>, courseId: string): Promise<void> {
   const { data: trainees } = await admin.from("profiles").select("id").eq("course_id", courseId).eq("role", "trainee");
 
+  // Release every foreign key pointing at these candidates before touching
+  // their accounts. Deleting an auth.users row cascades its profiles row,
+  // and tables reference profiles without on delete cascade --
+  // restart_transfers.source_trainee_id and
+  // deferral_transfers.source_trainee_id are NOT NULL among them. So a
+  // candidate who failed and restarted on the next course could not be
+  // deleted when their original course closed out: deleteUser() raised, the
+  // course was left half-wiped with some accounts already gone, its status
+  // stayed 'grace_period', and every following night tried and failed the
+  // same way. Exactly the fault migration 0251 fixed for "delete this
+  // centre"; 0308 is its course-scoped twin (walked 15 Sep 2026).
+  const { error: releaseError } = await admin.rpc("course_release_trainee_references", { p_course_id: courseId });
+  if (releaseError) {
+    throw new Error(`Could not prepare the course for wiping (${releaseError.message}). Nothing was deleted.`);
+  }
+
   for (const trainee of trainees ?? []) {
-    await admin.auth.admin.deleteUser(trainee.id);
+    const { error } = await admin.auth.admin.deleteUser(trainee.id);
+    // Stop rather than carry on: a partial wipe is the worst outcome --
+    // some candidates gone, the course still in grace_period, and the
+    // export already signed for.
+    if (error) throw new Error(`Could not remove a candidate account: ${error.message}`);
   }
 
   // "What does not carry: chat, links, workspace URL" -- volunteer/assessor/

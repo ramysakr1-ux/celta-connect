@@ -4151,6 +4151,12 @@ export interface Database {
       // profiles so their auth accounts can actually be deleted. Called by
       // the delete-centre action before the account loop; centre_hard_delete
       // calls it too, so a caller that forgets still succeeds.
+      // migration 0308 -- the course-scoped twin of the above, so close-out
+      // can delete the candidates of one course. Tutors are never touched.
+      course_release_trainee_references: {
+        Args: { p_course_id: string };
+        Returns: void;
+      };
       centre_release_profile_references: {
         Args: { p_center_id: string };
         Returns: void;
