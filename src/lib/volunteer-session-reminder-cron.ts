@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPushToOwners } from "@/lib/push/send";
 import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { isStartOfTheirClass } from "@/lib/volunteer-class-session";
 
 const WINDOW_START_MINUTES = 25;
 const WINDOW_END_MINUTES = 35;
@@ -33,7 +34,7 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
   const wideEnd = new Date(windowEnd.getTime() + 24 * 60 * 60 * 1000);
   const { data: candidateEvents } = await admin
     .from("course_timetable_events")
-    .select("id, course_id, event_date, event_time")
+    .select("id, course_id, event_date, event_time, detail")
     .eq("type", "tp")
     .not("event_time", "is", null)
     .gte("event_date", wideStart.toISOString().slice(0, 10))
@@ -57,12 +58,16 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
   if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
 
   const courseIds = [...new Set(dueEvents.map((e) => e.course_id))];
-  const { data: volunteers } = await admin.from("volunteer_students").select("id, course_id").in("course_id", courseIds);
+  const { data: volunteers } = await admin.from("volunteer_students").select("id, course_id, level").in("course_id", courseIds);
 
   let reminded = 0;
 
   for (const event of dueEvents) {
-    const eventVolunteerIds = (volunteers ?? []).filter((v) => v.course_id === event.course_id).map((v) => v.id);
+    // Their own class, once a day -- not one push per lettered lesson, and
+    // never the other level's class.
+    const eventVolunteerIds = (volunteers ?? [])
+      .filter((v) => v.course_id === event.course_id && isStartOfTheirClass(event, candidateEvents ?? [], v.level))
+      .map((v) => v.id);
     if (eventVolunteerIds.length === 0) continue;
 
     const [{ data: declines }, { data: alreadySent }] = await Promise.all([

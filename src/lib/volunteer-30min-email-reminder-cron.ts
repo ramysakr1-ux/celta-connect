@@ -4,6 +4,7 @@ import { sendApplicantEmail, volunteer30MinReminderEmailHtml } from "@/lib/admis
 import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { teachingDayNumber } from "@/lib/volunteer-attendance";
 import { extractLevelCode } from "@/lib/levels";
+import { isStartOfTheirClass } from "@/lib/volunteer-class-session";
 import { formatCalendarDate } from "@/lib/format-date";
 
 const WINDOW_START_MINUTES = 25;
@@ -32,7 +33,7 @@ export async function runVolunteer30MinEmailReminderCron(): Promise<{ eventsChec
   const wideEnd = new Date(windowEnd.getTime() + 24 * 60 * 60 * 1000);
   const { data: candidateEvents } = await admin
     .from("course_timetable_events")
-    .select("id, course_id, title, event_date, event_time, zoom_url")
+    .select("id, course_id, title, event_date, event_time, zoom_url, detail")
     .eq("type", "tp")
     .not("event_time", "is", null)
     .gte("event_date", wideStart.toISOString().slice(0, 10))
@@ -75,7 +76,16 @@ export async function runVolunteer30MinEmailReminderCron(): Promise<{ eventsChec
     const center = course ? centerById.get(course.center_id) : null;
     if (!course || !center) continue;
 
-    const eventVolunteers = (volunteers ?? []).filter((v) => v.course_id === event.course_id && v.email && !v.reminders_opted_out);
+    // Their own class, once a day: two groups teach two levels at the same
+    // hours and each day is three lettered lessons, so without this a
+    // volunteer got six of these for one class (walked 15 Sep 2026).
+    const eventVolunteers = (volunteers ?? []).filter(
+      (v) =>
+        v.course_id === event.course_id &&
+        v.email &&
+        !v.reminders_opted_out &&
+        isStartOfTheirClass(event, candidateEvents ?? [], v.level)
+    );
     if (eventVolunteers.length === 0) continue;
     const volunteerIds = eventVolunteers.map((v) => v.id);
 

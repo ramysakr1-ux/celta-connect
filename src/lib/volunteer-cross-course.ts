@@ -4,19 +4,7 @@ import type { Database } from "@/lib/supabase/types";
 import { computeSessionTicks, creditedHours, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { DEFAULT_TIMEZONE, toLocalIso } from "@/lib/timetable-grid";
-import { CEFR_LEVELS, extractLevelCode } from "@/lib/levels";
-
-// A volunteer belongs to a CLASS, and a class is a level. Their level is
-// stored the old way ("Elementary", "Intermediate"); a TP card carries the
-// coursebook's code ("A2", "B1+"). Same fact, two spellings -- so both sides
-// are reduced to a bare code, and B1+ counts as B1. Anything unrecognised
-// matches everything, which is what the page did before this rule existed.
-function levelKey(level: string | null | undefined): string | null {
-  if (!level) return null;
-  const raw = extractLevelCode(level.trim());
-  const byName = CEFR_LEVELS.find((l) => l.name.toLowerCase() === raw.toLowerCase());
-  return (byName?.code ?? raw).replace(/\+$/, "").toUpperCase();
-}
+import { levelKey } from "@/lib/volunteer-class-session";
 
 export { TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD };
 
