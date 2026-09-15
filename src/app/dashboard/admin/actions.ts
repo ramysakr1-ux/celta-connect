@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { getCentreRoleContext, canAtCentre } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 import { holdsCentre } from "@/lib/branch-scope";
@@ -46,11 +46,13 @@ export async function createCourse(
       const { data: exists } = await createAdminClient().from("centers").select("id").eq("id", postedCenterId).maybeSingle();
       if (!exists) return { error: "That centre no longer exists." };
       targetCenterId = postedCenterId;
+    } else if (!(await canAtCentre(admin, "course.create", postedCenterId))) {
+      // Membership of a branch is not authority in it: this checked only
+      // that the centre was one they could switch into, so a Centre manager
+      // at one branch who is a read-only observer at another could create a
+      // course in the branch where they only watch (walked 15 Sep 2026).
+      return { error: "You cannot create a course at that centre." };
     } else {
-      const ctx = await getCentreRoleContext(admin);
-      if (!ctx.availableCenterIds.includes(postedCenterId)) {
-        return { error: "You cannot create a course at that centre." };
-      }
       targetCenterId = postedCenterId;
     }
   }

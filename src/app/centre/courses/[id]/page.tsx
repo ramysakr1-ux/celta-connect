@@ -2,7 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { getCentreRoleContext, canViewAtCentre, canAtCentre } from "@/lib/auth/centre-roles";
 import { canView, can } from "@/lib/auth/centre-permissions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -25,7 +25,6 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
   const profile = session.profile;
 
   const ctx = await getCentreRoleContext(profile);
-  if (!canView(ctx.roles, "courseAdmin.view", ctx.overrides)) redirect("/centre");
 
   const admin = createAdminClient();
   const { data: course } = await admin
@@ -35,7 +34,11 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
     )
     .eq("id", id)
     .maybeSingle();
-  if (!course || !ctx.availableCenterIds.includes(course.center_id)) notFound();
+  if (!course) notFound();
+  // Asked at the COURSE's own centre: "can switch into that branch" is not
+  // "may read that branch's course record" (walked 15 Sep 2026).
+  if (!(await canViewAtCentre(profile, "courseAdmin.view", course.center_id))) notFound();
+  const mayEditPayments = await canAtCentre(profile, "payments.edit", course.center_id);
 
   // Ramy, 27 Aug 2026 (round 2): getCachedCenter only needs `course`,
   // already resolved above -- it doesn't need tutorRows/traineeCount first,
@@ -136,7 +139,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
           editRecord without having any payments access at all. Gating on
           the wrong capability here would have quietly kept this form
           visible to that role even after removing its payments grants. */}
-      {can(ctx.roles, "payments.edit", ctx.overrides) ? (
+      {mayEditPayments ? (
         <PricingForm
           courseId={course.id}
           feeAmount={course.fee_amount}

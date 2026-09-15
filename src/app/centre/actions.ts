@@ -2,16 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
-import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { can } from "@/lib/auth/centre-permissions";
+import { canAtCentre, canViewAtCentre } from "@/lib/auth/centre-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { linkVolunteerPeople, unlinkVolunteer } from "@/lib/volunteer-identity";
-import { canView } from "@/lib/auth/centre-permissions";
 
 export async function linkVolunteerAction(formData: FormData): Promise<void> {
   const profile = await requireRole("admin");
-  const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return;
 
   const volunteerStudentIdA = formData.get("volunteer_student_id_a");
   const volunteerStudentIdB = formData.get("volunteer_student_id_b");
@@ -29,7 +25,9 @@ export async function linkVolunteerAction(formData: FormData): Promise<void> {
   const centerIds = new Set((coursesInvolved ?? []).map((c) => c.center_id));
   if (centerIds.size !== 1) return;
   const [centerId] = centerIds;
-  if (!centerId || !ctx.availableCenterIds.includes(centerId)) return;
+  // The capability has to hold AT THAT CENTRE, not merely at whichever one
+  // this person is currently acting in (walked 15 Sep 2026).
+  if (!centerId || !(await canAtCentre(profile, "centre.settings.edit", centerId))) return;
 
   await linkVolunteerPeople(admin, { centerId, volunteerStudentIdA, volunteerStudentIdB });
 
@@ -38,8 +36,6 @@ export async function linkVolunteerAction(formData: FormData): Promise<void> {
 
 export async function unlinkVolunteerAction(formData: FormData): Promise<void> {
   const profile = await requireRole("admin");
-  const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return;
 
   const volunteerStudentId = formData.get("volunteer_student_id");
   if (typeof volunteerStudentId !== "string") return;
@@ -48,7 +44,7 @@ export async function unlinkVolunteerAction(formData: FormData): Promise<void> {
   const { data: row } = await admin.from("volunteer_students").select("course_id").eq("id", volunteerStudentId).maybeSingle();
   if (!row) return;
   const { data: course } = await admin.from("courses").select("center_id").eq("id", row.course_id).maybeSingle();
-  if (!course || !ctx.availableCenterIds.includes(course.center_id)) return;
+  if (!course || !(await canAtCentre(profile, "centre.settings.edit", course.center_id))) return;
 
   await unlinkVolunteer(admin, volunteerStudentId);
 
@@ -62,9 +58,7 @@ export async function unlinkVolunteerAction(formData: FormData): Promise<void> {
 // everyone, matching a team inbox rather than individual unread state.
 export async function markAdmissionsNotificationsRead(centerId: string): Promise<void> {
   const profile = await requireRole("admin");
-  const ctx = await getCentreRoleContext(profile);
-  if (!canView(ctx.roles, "admissions.view", ctx.overrides)) return;
-  if (!ctx.availableCenterIds.includes(centerId)) return;
+  if (!(await canViewAtCentre(profile, "admissions.view", centerId))) return;
 
   const admin = createAdminClient();
   await admin

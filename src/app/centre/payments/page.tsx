@@ -34,8 +34,12 @@ export default async function PaymentProvidersPage() {
     supabase
       .from("refunds")
       .select("id, amount, currency, reason, status, settlement, agreed_at, applicant_id")
-      // single-centre: a branch's own payment records and notifications
-      .eq("center_id", profile.center_id)
+      // single-centre: a branch's own payment records and notifications.
+      // Was profile.center_id while the three queries beside it used
+      // centerId, so a branch owner working in another branch saw their
+      // HOME branch's refunds under this branch's providers, notifications
+      // and transactions (walked 15 Sep 2026).
+      .eq("center_id", centerId)
       .order("agreed_at", { ascending: false })
       .limit(40),
     // runMissedInstalmentsCron (src/lib/payments-cron.ts) has been writing

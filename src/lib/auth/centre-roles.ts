@@ -2,6 +2,7 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { GrantLevel, OverrideMatrix } from "@/lib/auth/centre-permissions";
+import { can, canView } from "@/lib/auth/centre-permissions";
 
 export interface CentreRoleContext {
   /** Roles held in the centre the viewer is currently acting in -- built-in slugs or owner-defined custom role keys. */
@@ -174,3 +175,37 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
 }): Promise<CentreRoleContext> {
   return getCachedCentreRoleData(profile.id, profile.center_id, profile.active_center_id ?? null, profile.role);
 });
+
+/**
+ * Does this person hold a capability AT A PARTICULAR CENTRE?
+ *
+ * getCentreRoleContext answers for the centre being acted in, and its
+ * `availableCenterIds` is only "every centre they may switch into". Several
+ * write paths checked the capability against the active centre and then
+ * accepted a target centre from `availableCenterIds` -- so someone who is a
+ * Centre manager at one branch and a read-only observer at another could
+ * act with the manager's powers in the branch where they only watch
+ * (walked 15 Sep 2026). Branch membership is not branch authority.
+ */
+export async function canAtCentre(
+  profile: { id: string; center_id: string; active_center_id?: string | null; role?: string },
+  capability: string,
+  centerId: string
+): Promise<boolean> {
+  const ctx = await getCentreRoleContext({ ...profile, active_center_id: centerId });
+  // Falls back to the home centre when the requested one is not granted --
+  // in which case the answer is about the wrong centre, so refuse.
+  if (ctx.activeCenterId !== centerId) return false;
+  return can(ctx.roles, capability, ctx.overrides);
+}
+
+/** Read-side counterpart of canAtCentre. */
+export async function canViewAtCentre(
+  profile: { id: string; center_id: string; active_center_id?: string | null; role?: string },
+  capability: string,
+  centerId: string
+): Promise<boolean> {
+  const ctx = await getCentreRoleContext({ ...profile, active_center_id: centerId });
+  if (ctx.activeCenterId !== centerId) return false;
+  return canView(ctx.roles, capability, ctx.overrides);
+}

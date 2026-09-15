@@ -3,8 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { can } from "@/lib/auth/centre-permissions";
+import { canAtCentre } from "@/lib/auth/centre-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface FormState {
@@ -20,11 +19,6 @@ export async function updateCoursePricing(_prevState: FormState, formData: FormD
   const session = await getCurrentProfile();
   const profile = session?.profile;
   if (!profile) return { error: "Not signed in." };
-  const ctx = await getCentreRoleContext(profile);
-  // for-claude-code-centre-role-rename-and-payments-fix.md §2: payments.edit,
-  // not course.editRecord -- this writes fee/deposit fields, and Course
-  // administrator holds course.editRecord without any payments access.
-  if (!can(ctx.roles, "payments.edit", ctx.overrides)) return { error: "You can't edit payments." };
 
   const courseId = formData.get("course_id");
   if (typeof courseId !== "string") return { error: "Missing course." };
@@ -46,7 +40,15 @@ export async function updateCoursePricing(_prevState: FormState, formData: FormD
 
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("center_id").eq("id", courseId).maybeSingle();
-  if (!course || !ctx.availableCenterIds.includes(course.center_id)) return { error: "Course not found." };
+  if (!course) return { error: "Course not found." };
+  // for-claude-code-centre-role-rename-and-payments-fix.md §2: payments.edit,
+  // not course.editRecord -- this writes fee/deposit fields, and Course
+  // administrator holds course.editRecord without any payments access.
+  //
+  // Asked at the COURSE's centre. It used to check the capability wherever
+  // this person happened to be acting and then accept any course at any
+  // branch they could switch into (walked 15 Sep 2026).
+  if (!(await canAtCentre(profile, "payments.edit", course.center_id))) return { error: "You can't edit payments." };
 
   const { error } = await admin
     .from("courses")

@@ -108,9 +108,22 @@ export async function transferCentreOwnership(_prevState: TransferOwnershipState
   if (!currentGrant) return { error: "Could not find your own owner grant. Try again." };
 
   await admin.from("centre_roles").update({ revoked_at: now }).eq("id", currentGrant.id);
-  const { error: grantError } = await admin
-    .from("centre_roles")
-    .insert({ center_id: centerId, profile_id: newOwner.id, role: "centre_owner", granted_by: profile.id });
+  // Upsert, not insert: centre_roles is unique on (profile, centre, role),
+  // so handing the centre back to a previous owner -- whose old grant is
+  // revoked, not deleted -- failed on the constraint every time and read
+  // "Could not complete the transfer. Try again." Same reactivation the
+  // Admin roster's own grant does (walked 15 Sep 2026).
+  const { error: grantError } = await admin.from("centre_roles").upsert(
+    {
+      center_id: centerId,
+      profile_id: newOwner.id,
+      role: "centre_owner",
+      granted_by: profile.id,
+      granted_at: now,
+      revoked_at: null,
+    },
+    { onConflict: "profile_id,center_id,role" }
+  );
   if (grantError) {
     // The message below is what the person reads; this is what we read.
     console.error("[centre/settings:transferCentreOwnership]", grantError);

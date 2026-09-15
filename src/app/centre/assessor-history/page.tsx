@@ -78,9 +78,9 @@ export default async function AssessorHistoryPage({
           <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
           <h1 className="font-serif text-[34px] leading-[1.14] font-semibold text-ink">Assessor history</h1>
           <p className="text-sm leading-[1.6] text-muted text-pretty">
-            Handbook 13.3: the same assessor must not be used for more than two consecutive courses, and may not assess more than two courses
-            concurrently at one centre. A centre does not choose its assessor and repeat visits are common, so this is not enforced — it is kept
-            visible so a centre administrator can see the pattern.
+            Handbook 13.3: the same assessor must not be used for more than two consecutive courses. Handbook 13.8: an assessor must not assess
+            more than two concurrent courses at a centre. A centre does not choose its assessor and repeat visits are common, so this is not
+            enforced — it is kept visible so a centre administrator can see the pattern.
           </p>
         </div>
         <BackLink href="/centre" label={"Overview"} />
