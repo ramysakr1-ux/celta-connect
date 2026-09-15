@@ -12,6 +12,7 @@ import {
 import { DELIVERY_MODE_LABEL } from "@/lib/delivery-mode";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 import { Wordmark } from "@/components/wordmark";
+import { formatCalendarDate } from "@/lib/format-date";
 
 interface Intake {
   id: string;
@@ -162,16 +163,19 @@ export function ApplicationForm({
               onChange={(e) => setSelectedIntakeId(e.target.value)}
               className={inputClass}
             >
+              {/* A5/A6, high-traffic audit 16 Sep 2026: this printed the raw
+                  ISO dates ("2026-10-05 - 2026-10-30") with double hyphens,
+                  on the one page an applicant sees first. */}
               {intakes.map((i) => (
                 <option key={i.id} value={i.id}>
-                  {i.name} ({i.startDate} - {i.endDate}) --{" "}
-                  {DELIVERY_MODE_LABEL[i.deliveryMode]} -- {i.availabilityLabel}
+                  {i.name} ({formatCalendarDate(i.startDate)} – {formatCalendarDate(i.endDate)}) ·{" "}
+                  {DELIVERY_MODE_LABEL[i.deliveryMode]} · {i.availabilityLabel}
                 </option>
               ))}
             </select>
             {selectedIntake?.full ? (
               <p className="text-xs text-muted">
-                This intake is full. You can still apply -- you&apos;ll be added
+                This intake is full. You can still apply – you&apos;ll be added
                 to the waiting list.
               </p>
             ) : null}
@@ -180,7 +184,7 @@ export function ApplicationForm({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="full_name" className="text-sm text-muted">
-                Full name -- as on your passport
+                Full name – as on your passport
               </label>
               <input
                 id="full_name"
@@ -307,7 +311,7 @@ export function ApplicationForm({
               className="text-sm text-muted"
             >
               Any English language teaching experience? (little or none is fine
-              -- CELTA is an introductory course)
+              – CELTA is an introductory course)
             </label>
             <textarea
               id="elt_experience_summary"
@@ -407,10 +411,10 @@ export function ApplicationForm({
             <div className="flex flex-col gap-3 border-t border-border pt-4">
               <p className="text-sm font-semibold text-ink">Speaking task</p>
               <p className="text-xs text-muted">
-                This isn&apos;t an interview -- there&apos;s no follow-up, no
+                This isn&apos;t an interview – there&apos;s no follow-up, no
                 conversation. Pick a prompt, record your response, and submit.
                 It&apos;s reviewed by a person ahead of your real interview.
-                Aim for 1-2 minutes -- there&apos;s no penalty for going over
+                Aim for 1–2 minutes – there&apos;s no penalty for going over
                 or under.
               </p>
               <div className="flex flex-col gap-1.5">

@@ -92,7 +92,7 @@ export default async function ApplyPage({
     if (remaining === null) {
       availabilityLabel = "places available";
     } else if (remaining <= 0) {
-      availabilityLabel = "full -- waiting list";
+      availabilityLabel = "full – waiting list";
     } else if (remaining <= center.application_low_availability_threshold) {
       availabilityLabel = `${remaining} place${remaining === 1 ? "" : "s"} left`;
     } else {
