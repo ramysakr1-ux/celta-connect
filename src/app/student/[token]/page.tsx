@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { teachersForClassDay } from "@/lib/volunteer-class-teachers";
 import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { DeclineButton } from "@/app/student/[token]/decline-button";
 import { ClassMaterialsLink } from "@/app/student/[token]/class-materials-link";
@@ -193,7 +194,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   }
 
   const [{ data: volunteer }, { data: course }, { data: sharedMaterials }] = await Promise.all([
-    admin.from("volunteer_students").select("name, signup_completed_at").eq("id", accessToken.volunteer_student_id).maybeSingle(),
+    admin.from("volunteer_students").select("name, signup_completed_at, level").eq("id", accessToken.volunteer_student_id).maybeSingle(),
     admin.from("courses").select("name, start_date, end_date, center_id, time_bands").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
@@ -375,23 +376,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // VALUE against plan_assignments.tp_number (not a foreign key), and one
   // calendar TP day can host several trainees' rotation slots, so this
   // shows everyone teaching that round rather than a single "the" lesson.
-  let nextClassTeachers: { name: string; topic: string | null }[] = [];
-  if (nextClass?.linkedTpNumber != null) {
-    const { data: assignments } = await admin
-      .from("plan_assignments")
-      .select("trainee_id, short_title, main_lesson_aim")
-      .eq("course_id", nextClass.courseId)
-      .eq("tp_number", nextClass.linkedTpNumber);
-    const traineeIds = [...new Set((assignments ?? []).map((a) => a.trainee_id))];
-    const { data: trainerProfiles } = traineeIds.length
-      ? await admin.from("profiles").select("id, full_name").in("id", traineeIds)
-      : { data: [] };
-    const nameById = new Map((trainerProfiles ?? []).map((p) => [p.id, p.full_name]));
-    nextClassTeachers = (assignments ?? []).map((a) => ({
-      name: nameById.get(a.trainee_id) ?? "Your teacher",
-      topic: a.short_title || a.main_lesson_aim || null,
-    }));
-  }
+  const nextClassTeachers: { name: string; topic: string | null }[] = nextClass
+    ? await teachersForClassDay(admin, {
+        courseId: nextClass.courseId,
+        eventDate: nextClass.eventDate,
+        volunteerLevel: volunteer?.level ?? null,
+      })
+    : [];
 
   // "This course" -- deliberately narrower than the cross-course hours
   // above: N of M classes attended, this course only, no percentage.
