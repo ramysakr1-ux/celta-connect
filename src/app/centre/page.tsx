@@ -9,6 +9,7 @@ import { AdmissionsChangeIndicator } from "@/app/centre/admissions-change-indica
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { formatCalendarDate } from "@/lib/format-date";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { sumByCurrency, formatTotals, formatCurrency, isMixed } from "@/lib/money-by-currency";
 
 // Centre Admin's Overview.
 //
@@ -50,7 +51,7 @@ export default async function CentreOverviewPage({
       .in("center_id", scope)
       .order("start_date", { ascending: false }),
     canSeeAdmissions
-      ? admin.from("applicants").select("id, stage, center_id, deposit_amount, deposit_paid_at").in("center_id", scope)
+      ? admin.from("applicants").select("id, stage, center_id, deposit_amount, deposit_currency, deposit_paid_at").in("center_id", scope)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view", ctx.overrides)
       ? admin.from("payments").select("amount, currency, status, due_date, paid_at, payment_plan_id, center_id").in("center_id", scope)
@@ -95,7 +96,7 @@ export default async function CentreOverviewPage({
       ? admin.from("payment_plans").select("id, course_id, applicant_id").in("course_id", courseIds)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view", ctx.overrides)
-      ? admin.from("refunds").select("id, amount").in("center_id", scope).eq("status", "pending")
+      ? admin.from("refunds").select("id, amount, currency").in("center_id", scope).eq("status", "pending")
       : Promise.resolve({ data: [] }),
   ]);
   const assessorProfileIds = [...new Set((assessorLinkRows ?? []).map((r) => r.profile_id))];
@@ -121,11 +122,14 @@ export default async function CentreOverviewPage({
   const volunteerPersonCount = new Set((volunteers ?? []).map((v) => v.volunteer_person_id ?? v.id)).size;
 
   const courseOfPlan = new Map((plans ?? []).map((p) => [p.id, p.course_id]));
+  const owedRowsByCourse = new Map<string, { amount: number; currency: string | null }[]>();
   const owedByCourse = new Map<string, number>();
   for (const p of payments ?? []) {
     if (p.status !== "pending" && p.status !== "missed") continue;
     const cid = courseOfPlan.get(p.payment_plan_id);
-    if (cid) owedByCourse.set(cid, (owedByCourse.get(cid) ?? 0) + Number(p.amount));
+    if (!cid) continue;
+    owedByCourse.set(cid, (owedByCourse.get(cid) ?? 0) + Number(p.amount));
+    owedRowsByCourse.set(cid, [...(owedRowsByCourse.get(cid) ?? []), { amount: Number(p.amount), currency: p.currency }]);
   }
 
   const now = new Date();
@@ -161,20 +165,15 @@ export default async function CentreOverviewPage({
   );
   const depositsHeld = withDeposit.reduce((sum, a) => sum + Number(a.deposit_amount ?? 0), 0);
   const missed = (payments ?? []).filter((p) => p.status === "missed");
-  // Was `(payments ?? [])[0]?.currency ?? ""` -- the ISO code off the first
-  // payment row, then string-concatenated below, which rendered "GBP2,000".
-  // It also ignored centers.currency entirely, so setting the centres to USD
-  // changed nothing here, and a centre with no payments yet showed a bare
-  // "2,000" with no currency at all.
+  // The centre's own currency, with the first payment row behind it for a
+  // centre that has not set one, and GBP behind that. It is only the
+  // FALLBACK now: every figure below totals per currency.
   //
-  // The centre's own currency is the answer; the first payment row is the
-  // fallback for a centre that has not set one, and GBP behind that.
-  //
-  // Known limitation, unchanged by this: these totals SUM payments without
-  // regard to each row's own currency. That is correct while a centre bills
-  // in one currency (all three do) and wrong the moment one does not -- it
-  // would add dollars to pounds. Converting needs rates and a decision about
-  // which currency to report in, so it is deliberately not guessed here.
+  // An older note here said these totals summing without regard to each
+  // row's currency was "correct while a centre bills in one currency (all
+  // three do)". The demo centre alone holds $4,200 and £2,000 outstanding,
+  // so it never was: it printed "$6,200", which is not an amount of
+  // anything (walked 15 Sep 2026).
   const currencyCode =
     (centres ?? []).map((c) => (c as { currency?: string | null }).currency).find((c) => c && /^[A-Z]{3}$/.test(c)) ??
     (payments ?? [])[0]?.currency ??
@@ -190,12 +189,6 @@ export default async function CentreOverviewPage({
     stageByBranch.set(a.stage, per);
   }
 
-  const moneyFormatter = new Intl.NumberFormat(currencyCode === "USD" ? "en-US" : "en-GB", {
-    style: "currency",
-    currency: currencyCode,
-    maximumFractionDigits: 0,
-  });
-  const money = (n: number) => moneyFormatter.format(n);
   const dateRange = (a: string | null, b: string | null) => {
     const fmt = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
     return a && b ? `${fmt(a)} – ${fmt(b)}` : "Dates not set";
@@ -226,16 +219,42 @@ export default async function CentreOverviewPage({
     { running: 0, upcoming: 0, closed: 0 }
   );
 
+  const collectedTotals = sumByCurrency(paid, currencyCode);
+  const outstandingTotals = sumByCurrency(owing, currencyCode);
+  const depositTotals = sumByCurrency(
+    withDeposit.map((a) => ({ amount: a.deposit_amount, currency: a.deposit_currency })),
+    currencyCode
+  );
+  const refundTotals = sumByCurrency(pendingRefunds, currencyCode);
+
   const metrics = [
-    { label: "Collected this month", value: money(collectedThisMonth), note: `${paid.length} confirmed payment${paid.length === 1 ? "" : "s"}`, alert: false },
-    { label: "Outstanding balance", value: money(outstanding), note: owingCourseCount > 0 ? `across ${owingCourseCount} course${owingCourseCount === 1 ? "" : "s"}` : "nothing owed", alert: outstanding > 0 },
-    { label: "Deposits held", value: money(depositsHeld), note: `${withDeposit.length} place${withDeposit.length === 1 ? "" : "s"}, not yet fully paid`, alert: false },
+    {
+      label: "Collected this month",
+      value: formatTotals(collectedTotals, currencyCode),
+      note: `${paid.length} confirmed payment${paid.length === 1 ? "" : "s"}${isMixed(collectedTotals) ? ", two currencies" : ""}`,
+      alert: false,
+    },
+    {
+      label: "Outstanding balance",
+      value: formatTotals(outstandingTotals, currencyCode),
+      note:
+        owingCourseCount > 0
+          ? `across ${owingCourseCount} course${owingCourseCount === 1 ? "" : "s"}${isMixed(outstandingTotals) ? ", two currencies" : ""}`
+          : "nothing owed",
+      alert: outstanding > 0,
+    },
+    {
+      label: "Deposits held",
+      value: formatTotals(depositTotals, currencyCode),
+      note: `${withDeposit.length} place${withDeposit.length === 1 ? "" : "s"}, not yet fully paid`,
+      alert: false,
+    },
     // "Refunds pending" -- agreed but not yet returned. Alerts on any amount
     // at all, unlike the others: a refund somebody was promised and never
     // received is a different kind of problem from money merely outstanding.
     {
       label: "Refunds pending",
-      value: money(refundsPending),
+      value: formatTotals(refundTotals, currencyCode),
       note: pendingRefunds.length
         ? `${pendingRefunds.length} awaiting payout`
         : "Nothing awaiting action",
@@ -339,7 +358,7 @@ export default async function CentreOverviewPage({
                 </Link>
                 {canView(ctx.roles, "payments.view", ctx.overrides) ? (
                   <span className={`w-28 shrink-0 text-sm ${owed > 0 ? "text-destructive" : "text-muted"}`}>
-                    {owed > 0 ? `${money(owed)} due` : "Fully paid"}
+                    {owed > 0 ? `${formatTotals(sumByCurrency(owedRowsByCourse.get(c.id) ?? [], currencyCode), currencyCode)} due` : "Fully paid"}
                   </span>
                 ) : null}
                 <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${state.cls}`}>{state.label}</span>
@@ -435,7 +454,12 @@ export default async function CentreOverviewPage({
                       Missed instalment{multiBranch ? ` · ${branchName.get(p.center_id)}` : ""}
                     </span>
                     <span className="text-sm text-muted tabular-nums">
-                      {money(Number(p.amount))} · due {p.due_date}
+                      {/* Each row in its own currency, and a date written
+                          the way a person says it -- this printed the page's
+                          currency over whatever the instalment was actually
+                          billed in, and a raw "2026-09-09". */}
+                      {formatCurrency(Number(p.amount), p.currency ?? currencyCode)}
+                      {p.due_date ? ` · due ${formatCalendarDate(p.due_date, { day: "numeric", month: "short", year: "numeric" })}` : ""}
                     </span>
                   </div>
                 ))

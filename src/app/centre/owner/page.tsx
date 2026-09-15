@@ -4,7 +4,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { computeCourseState } from "@/lib/course-progress";
-import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { sumByCurrency, formatTotals } from "@/lib/money-by-currency";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { roleLabel, CAPABILITY_LABELS, type Capability } from "@/lib/auth/centre-permissions";
 import { CapabilityCustomizer } from "@/app/centre/owner/capability-customizer";
@@ -152,7 +153,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
   // are independent of each other -- run together, not one after the other.
   const [{ data: payments }, { data: vis }] = await Promise.all([
     planIds.length
-      ? admin.from("payments").select("amount, status, payment_plan_id").in("payment_plan_id", planIds)
+      ? admin.from("payments").select("amount, currency, status, payment_plan_id").in("payment_plan_id", planIds)
       : Promise.resolve({ data: [] }),
     siblingBranches.length > 0
       ? admin
@@ -163,13 +164,22 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
       : Promise.resolve({ data: [] as { viewer_center_id: string; target_center_id: string; visibility: string }[] }),
   ]);
   const visibilityRows = vis ?? [];
-  const outstandingBalance = (payments ?? [])
-    .filter((p) => p.status === "pending" || p.status === "missed")
-    .reduce((sum, p) => sum + Number(p.amount), 0);
+  // Per currency. This summed every outstanding amount into one number and
+  // stamped the active centre's currency on it -- and on "All branches" it
+  // added the branches together too, so the demo owner's landing read
+  // "£8,000" for $4,200 + £2,000 + $1,800 while the Centre overview called
+  // the same money "$6,200" (walked 15 Sep 2026).
+  const outstandingTotals = sumByCurrency(
+    (payments ?? []).filter((p) => p.status === "pending" || p.status === "missed"),
+    center?.currency
+  );
 
   const peopleWithRole = new Set((grants ?? []).map((g) => g.profile_id)).size;
 
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  // "This month" on the centre's own calendar, not the server's -- built
+  // from the server's zone (UTC on Vercel) the boundary sat hours out for
+  // every centre off UTC.
+  const monthStart = zonedTimeToUtc(`${today.slice(0, 7)}-01`, "00:00", timeZone).toISOString();
   const ownerActionsThisMonth = (ownerActions ?? []).filter((a) => a.created_at >= monthStart).length;
 
   const capabilityRows: { key: string; label: string }[] = [
@@ -204,7 +214,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
       <div className="flex flex-col gap-[30px] px-11 py-9">
         <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
           <StatCard label="Courses running" value={String(coursesRunning)} />
-          <StatCard label="Outstanding balance" value={formatMoney(outstandingBalance, center?.currency)} accent />
+          <StatCard label="Outstanding balance" value={formatTotals(outstandingTotals, center?.currency)} accent />
           <StatCard label="People with a centre role" value={String(peopleWithRole)} />
           {/* The one figure here that was a dead end: it counted rows whose
               only rendering was six lines in another room. Now it opens
