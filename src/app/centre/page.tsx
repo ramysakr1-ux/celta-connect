@@ -8,6 +8,7 @@ import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
 import { AdmissionsChangeIndicator } from "@/app/centre/admissions-change-indicator";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { formatCalendarDate } from "@/lib/format-date";
+import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Centre Admin's Overview.
 //
@@ -42,14 +43,14 @@ export default async function CentreOverviewPage({
   const admin = createAdminClient();
   const canSeeAdmissions = canView(ctx.roles, "admissions.view", ctx.overrides);
   const [{ data: centres }, { data: courses }, { data: applicants }, { data: payments }, { count: unreadAdmissionsCount }] = await Promise.all([
-    admin.from("centers").select("id, name, center_number, currency").in("id", mine),
+    admin.from("centers").select("id, name, center_number, currency, time_zone").in("id", mine),
     admin
       .from("courses")
       .select("id, name, center_id, start_date, end_date, delivery_mode, course_code")
       .in("center_id", scope)
       .order("start_date", { ascending: false }),
     canSeeAdmissions
-      ? admin.from("applicants").select("stage, center_id, deposit_amount, deposit_paid_at").in("center_id", scope)
+      ? admin.from("applicants").select("id, stage, center_id, deposit_amount, deposit_paid_at").in("center_id", scope)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view", ctx.overrides)
       ? admin.from("payments").select("amount, currency, status, due_date, paid_at, payment_plan_id, center_id").in("center_id", scope)
@@ -91,7 +92,7 @@ export default async function CentreOverviewPage({
           .limit(5)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view", ctx.overrides) && courseIds.length > 0
-      ? admin.from("payment_plans").select("id, course_id").in("course_id", courseIds)
+      ? admin.from("payment_plans").select("id, course_id, applicant_id").in("course_id", courseIds)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view", ctx.overrides)
       ? admin.from("refunds").select("id, amount").in("center_id", scope).eq("status", "pending")
@@ -128,7 +129,13 @@ export default async function CentreOverviewPage({
   }
 
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  // "This month" on the centre's own calendar, not the server's. Built from
+  // the server's local zone (UTC on Vercel), the first of the month landed
+  // hours out for every centre off UTC, so a payment taken late on the last
+  // day of a month could count toward the wrong one.
+  const overviewZone = (centres ?? []).find((c) => c.id === (ctx.activeCenterId ?? profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const localToday = toLocalIso(now, overviewZone);
+  const monthStart = zonedTimeToUtc(`${localToday.slice(0, 7)}-01`, "00:00", overviewZone).toISOString();
   const paid = (payments ?? []).filter((p) => p.status === "paid" && p.paid_at && p.paid_at >= monthStart);
   const collectedThisMonth = paid.reduce((sum, p) => sum + Number(p.amount), 0);
   const owing = (payments ?? []).filter((p) => p.status === "pending" || p.status === "missed");
@@ -137,7 +144,21 @@ export default async function CentreOverviewPage({
   const pendingRefunds = pendingRefundRows ?? [];
   const refundsPending = pendingRefunds.reduce((sum, r) => sum + Number(r.amount), 0);
 
-  const withDeposit = (applicants ?? []).filter((a) => a.deposit_paid_at);
+  // "Deposits held -- N places, not yet fully paid" was every applicant who
+  // had ever paid a deposit: people who later withdrew or were turned down,
+  // and people who have since paid in full. Neither is a place the centre is
+  // holding money against, and the caption asserted something nothing
+  // checked (walked 15 Sep 2026).
+  const GONE: string[] = ["rejected_before_interview", "rejected_after_interview", "not_this_time", "withdrawn_application"];
+  const owingByApplicant = new Set(
+    owing.map((p) => (plans ?? []).find((pl) => pl.id === p.payment_plan_id)?.applicant_id).filter(Boolean) as string[]
+  );
+  const settledApplicantIds = new Set(
+    (plans ?? []).map((pl) => pl.applicant_id).filter((id): id is string => Boolean(id) && !owingByApplicant.has(id as string))
+  );
+  const withDeposit = (applicants ?? []).filter(
+    (a) => a.deposit_paid_at && !GONE.includes(a.stage) && !settledApplicantIds.has(a.id)
+  );
   const depositsHeld = withDeposit.reduce((sum, a) => sum + Number(a.deposit_amount ?? 0), 0);
   const missed = (payments ?? []).filter((p) => p.status === "missed");
   // Was `(payments ?? [])[0]?.currency ?? ""` -- the ISO code off the first
