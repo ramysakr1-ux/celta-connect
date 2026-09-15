@@ -35,27 +35,27 @@ export async function setBranchVisibility(formData: FormData): Promise<void> {
   if (typeof viewerCenterId !== "string" || typeof targetCenterId !== "string" || (visibility !== "view_only" && visibility !== "blocked")) {
     return;
   }
-  // Only an owner at one of the two branches involved may set this --
-  // requireOwner() already proved owner somewhere, this confirms it's the
-  // right somewhere. centerId is the owner's OWN active centre; the pair
-  // must include it, otherwise they're trying to set visibility between two
-  // branches neither of which they own.
-  if (viewerCenterId !== centerId && targetCenterId !== centerId) return;
   if (viewerCenterId === targetCenterId) return;
 
-  const admin = createAdminClient();
-  // ...and both sides must be branches of the same organisation, which is
-  // the only set this screen ever offers. The check above only proved ONE
-  // side was theirs, so an owner could have pointed a row at a centre with
-  // no relationship to them at all -- and this table is a grant, read as
-  // one the moment anything beyond this page reads it (walked 15 Sep 2026).
-  const { data: bothCentres } = await admin
-    .from("centers")
-    .select("id, organisation_id")
-    .in("id", [viewerCenterId, targetCenterId]);
-  const orgIds = new Set((bothCentres ?? []).map((c) => c.organisation_id));
-  if ((bothCentres ?? []).length !== 2 || orgIds.size !== 1 || orgIds.has(null)) return;
+  // Owner at BOTH sides, not merely at one of them.
+  //
+  // The old check accepted the pair as long as one half was the owner's own
+  // centre, so a row could be written pointing at a centre with no
+  // relationship to them -- and this table is a grant, read as one the
+  // moment anything beyond this page reads it. Owning both is also exactly
+  // what this screen offers: an owner configuring their own branches
+  // (walked 15 Sep 2026).
+  const ownsBoth = (
+    await Promise.all(
+      [viewerCenterId, targetCenterId].map(async (id) => {
+        const at = await getCentreRoleContext({ ...profile, active_center_id: id });
+        return at.activeCenterId === id && at.roles.includes("centre_owner");
+      })
+    )
+  ).every(Boolean);
+  if (!ownsBoth) return;
 
+  const admin = createAdminClient();
   const { error } = await admin
     .from("centre_branch_visibility")
     .upsert(

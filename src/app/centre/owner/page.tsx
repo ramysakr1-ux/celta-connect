@@ -104,8 +104,26 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
     grantProfileIds.length
       ? admin.from("profiles").select("id, full_name, course_id").in("id", grantProfileIds)
       : Promise.resolve({ data: [] }),
-    center?.organisation_id
-      ? admin.from("centers").select("id, name").eq("organisation_id", center.organisation_id).neq("id", centerId)
+    // The owner's other branches.
+    //
+    // This asked centers.organisation_id, and NOTHING in this app ever
+    // writes that column -- the organisations table is empty in production.
+    // So Diane, who owns both Istanbul and Los Angeles and is offered both
+    // in the header, saw an empty Branch visibility card: the feature was
+    // built and then locked behind a column no screen fills in (walked
+    // 15 Sep 2026). "Her branches" is the set she actually holds, which is
+    // the same set the header's own switcher is built from. An organisation
+    // sibling still counts when the column IS set.
+    mine.length > 1 || center?.organisation_id
+      ? admin
+          .from("centers")
+          .select("id, name, organisation_id")
+          .or(
+            center?.organisation_id
+              ? `id.in.(${mine.join(",")}),organisation_id.eq.${center.organisation_id}`
+              : `id.in.(${mine.join(",")})`
+          )
+          .neq("id", centerId)
       : Promise.resolve({ data: [] as { id: string; name: string }[] }),
   ]);
   const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
