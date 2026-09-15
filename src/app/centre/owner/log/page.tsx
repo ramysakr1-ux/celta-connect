@@ -4,7 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDateTime } from "@/lib/format-date";
 
 // The list behind "Owner actions logged -- 3 this month".
@@ -92,7 +92,10 @@ export default async function OwnerActionLogPage({
 
   const timeZone = cachedCentre?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
-  const monthStart = `${today.slice(0, 7)}-01`;
+  // The same instant the owner's landing counts from -- that page links
+  // here with its own figure, and a date-prefix string compare against a
+  // timestamptz disagreed with it by up to a day at the boundary.
+  const monthStart = zonedTimeToUtc(`${today.slice(0, 7)}-01`, "00:00", timeZone).toISOString();
   const thisMonth = (entries ?? []).filter((e) => e.created_at >= monthStart).length;
 
   return (

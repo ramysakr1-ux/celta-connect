@@ -101,7 +101,10 @@ export function AdminRoster({
             <div key={inv.id} className="admin-hover flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2">
               <span className="text-sm text-ink">{roleLabel(inv.role, customRoles)}</span>
               <span className="text-xs text-muted">{formatDate(inv.created_at, timeZone, { year: "numeric" })}</span>
-              <RevokeInviteButton inviteId={inv.id} />
+              {/* Same gate as the grant and revoke controls beside it. This
+                  showed for everyone who could open the tab, so a Centre
+                  observer got a Withdraw button the server then refused. */}
+              {mayAppoint ? <RevokeInviteButton inviteId={inv.id} /> : null}
             </div>
           ))}
         </div>
