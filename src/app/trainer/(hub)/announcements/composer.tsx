@@ -73,11 +73,13 @@ export function AnnouncementComposer({
       className="trainer-hover flex flex-col gap-3 overflow-hidden rounded-[12px] border border-border bg-frame pb-4"
       style={{ boxShadow: "0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}
     >
-      {/* The sub-page card header: one ink-brown bar, label inside, on every
-          card of the page -- the same bar Today's assessor card uses, so it
-          is one colour system, not a fruit salad (Ramy, 5 Sep 2026). */}
-      <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
-        <h2 className="font-serif text-[20px] font-semibold">Write an announcement</h2>
+      {/* The card heading is Today's: serif title in ink-warm, the count on
+          the right in muted. B5, live audit 15 Sep 2026: the ink-warm bar
+          these cards wore since 5 Sep was a third card idiom -- no other
+          hub card has a dark header (Today's assessor card is a dark tile,
+          not a bar). */}
+      <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
+        <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Write an announcement</h2>
       </div>
       <div className="flex flex-col gap-3 px-[18px]">
 

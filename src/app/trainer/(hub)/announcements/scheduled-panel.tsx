@@ -68,9 +68,9 @@ export function ScheduledPanel({
 
   return (
     <div className="trainer-hover flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
-      <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
-        <h3 className="font-serif text-[20px] font-semibold">Scheduled</h3>
-        <span className="text-[12.5px] text-gold">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
+      <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
+        <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Scheduled</h3>
+        <span className="text-[12.5px] text-muted">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
       </div>
       {scheduled.length === 0 ? (
         <p className="px-[18px] py-4 text-sm text-muted">Anchor an announcement to a timetable event and it waits here until it fires.</p>

@@ -39,7 +39,7 @@ export function RegisterLinkButton({ small = false }: { small?: boolean }) {
         onClick={handleClick}
         disabled={state === "loading"}
         title="Copies a link to the register for someone without a Connect account -- reception can see attendance and add walk-ins, nothing else"
-        className={small ? "trainer-hover-fill inline-flex h-[34px] items-center gap-2 rounded-[6px] border border-border bg-card px-3 text-[12px] font-semibold whitespace-nowrap text-ink disabled:opacity-60" : `${HUB_BUTTON} disabled:opacity-60`}
+        className={`${HUB_BUTTON} disabled:opacity-60`}
       >
         {/* The design's little chain glyph -- the button hands over a link. */}
         {small ? (

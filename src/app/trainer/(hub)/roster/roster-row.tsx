@@ -342,7 +342,7 @@ export function RosterRowView({
 
   return (
     <div
-      className={`roster-row cursor-pointer border-b border-[oklch(90%_0.012_82)] last:border-b-0 ${frozen ? "opacity-60" : ""}`}
+      className={`roster-row cursor-pointer border-b border-border last:border-b-0 ${frozen ? "opacity-60" : ""}`}
       // The colour that follows the person (avatar.tsx) runs across their
       // whole row, faintly -- Ramy, 5 Sep 2026: "avatar will run through
       // the whole line", neighbouring rows naturally different shades.

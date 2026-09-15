@@ -320,15 +320,15 @@ export function VolunteersV2({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <a href="/api/filming-consent.pdf" className="trainer-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-3 text-[12px] font-semibold whitespace-nowrap text-ink">
+          <a href="/api/filming-consent.pdf" className={HUB_BUTTON}>
             Filming consent form
           </a>
           <RegisterLinkButton small />
           <button
             type="button"
             onClick={() => setAddOpen((v) => !v)}
-            className="inline-flex h-[34px] items-center rounded-[6px] px-3.5 text-[12px] font-semibold whitespace-nowrap text-primary-foreground transition-[filter] hover:brightness-110"
-            style={{ background: "var(--hub-accent)" }}
+            className={HUB_PRIMARY}
+            style={HUB_PRIMARY_STYLE}
           >
             {addOpen ? "Cancel" : "Add student"}
           </button>

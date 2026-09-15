@@ -13,9 +13,12 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
   if (links.length === 0) return null;
   // Ramy, 5 Sep 2026: no "Also under" label, no arrows ("where is that
   // arrow pointing?"), a pill with a permanent colour, a little bigger.
-  // Soft gold, the same tint as the announcement template pill, so every
-  // sub-page door in the hub is one recognisable thing; hover = the role
-  // ring like every other door. `tab` is kept for the accessible name.
+  // B4, live audit 15 Sep 2026: that colour was soft gold, which is also
+  // the ACT's role accent, the Marking badge and the whole "Your day" box
+  // on the MCT's Today -- four meanings for one tint. The pills sit on
+  // card-inset now, one recognisable shape with no colour claim; hover =
+  // the role ring like every other door. `tab` is kept for the
+  // accessible name.
   return (
     <div className="flex flex-wrap gap-2" aria-label={`Also under ${tab}`}>
       {links.map((l) =>
@@ -25,12 +28,8 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
           <a
             key={l.href}
             href={l.href}
-            className="trainer-hover inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-semibold"
-            style={{
-              background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))",
-              borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)",
-              color: "oklch(40% 0.09 68)",
-            }}
+            className="trainer-hover inline-flex h-9 items-center rounded-full border border-border bg-card-inset px-4 text-[13px] font-semibold text-ink"
+
           >
             {l.label}
           </a>
@@ -38,12 +37,8 @@ export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; 
         <Link
           key={l.href}
           href={l.href}
-          className="trainer-hover inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-semibold"
-          style={{
-            background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))",
-            borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)",
-            color: "oklch(40% 0.09 68)",
-          }}
+          className="trainer-hover inline-flex h-9 items-center rounded-full border border-border bg-card-inset px-4 text-[13px] font-semibold text-ink"
+
         >
           {l.label}
         </Link>

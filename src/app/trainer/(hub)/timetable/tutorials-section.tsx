@@ -436,7 +436,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
           {data.rows.map((r) => (
             <div
               key={r.id}
-              className="grid min-h-[66px] grid-cols-[260px_repeat(4,minmax(0,1fr))] items-center gap-x-3 border-b border-[oklch(90%_0.012_82)] px-5 py-2.5 last:border-b-0"
+              className="grid min-h-[66px] grid-cols-[260px_repeat(4,minmax(0,1fr))] items-center gap-x-3 border-b border-border px-5 py-2.5 last:border-b-0"
               style={{ background: `color-mix(in oklab, ${toneForName(r.name)} 7%, var(--color-card))` }}
             >
               <div className="flex min-w-0 items-center gap-3">

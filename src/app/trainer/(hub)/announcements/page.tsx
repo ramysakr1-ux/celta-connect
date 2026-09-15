@@ -228,8 +228,8 @@ export default async function AnnouncementsPage() {
              row. Section 7 of the polish pass says the same thing from the
              other side: an announcement row is read, not opened. */
           <div className="flex flex-col gap-2 overflow-hidden rounded-[12px] border border-border bg-frame pb-4">
-            <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
-              <h2 className="font-serif text-[20px] font-semibold">Write an announcement</h2>
+            <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
+              <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Write an announcement</h2>
             </div>
             <p className="px-[18px] text-sm text-muted">
               Whole-cohort announcements are sent by the main course tutor. You can post to a TP group once you are named
@@ -242,9 +242,9 @@ export default async function AnnouncementsPage() {
           <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={canCompose} />
 
           <section className="flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
-            <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
-              <h3 className="font-serif text-[20px] font-semibold">Posted</h3>
-              <span className="text-[12.5px] text-gold">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>
+            <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
+              <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Posted</h3>
+              <span className="text-[12.5px] text-muted">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>
             </div>
             <div className="flex flex-col px-2.5 pt-2 pb-2.5">
               {posted.map((b) => {
