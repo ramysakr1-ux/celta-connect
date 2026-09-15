@@ -41,8 +41,21 @@ export async function setBranchVisibility(formData: FormData): Promise<void> {
   // must include it, otherwise they're trying to set visibility between two
   // branches neither of which they own.
   if (viewerCenterId !== centerId && targetCenterId !== centerId) return;
+  if (viewerCenterId === targetCenterId) return;
 
   const admin = createAdminClient();
+  // ...and both sides must be branches of the same organisation, which is
+  // the only set this screen ever offers. The check above only proved ONE
+  // side was theirs, so an owner could have pointed a row at a centre with
+  // no relationship to them at all -- and this table is a grant, read as
+  // one the moment anything beyond this page reads it (walked 15 Sep 2026).
+  const { data: bothCentres } = await admin
+    .from("centers")
+    .select("id, organisation_id")
+    .in("id", [viewerCenterId, targetCenterId]);
+  const orgIds = new Set((bothCentres ?? []).map((c) => c.organisation_id));
+  if ((bothCentres ?? []).length !== 2 || orgIds.size !== 1 || orgIds.has(null)) return;
+
   const { error } = await admin
     .from("centre_branch_visibility")
     .upsert(
