@@ -245,7 +245,7 @@ function ShareClassButton({ level }: { level: string | null }) {
       {/* Ramy, 5 Sep 2026: "Share with class" read like sharing materials
           -- the button delivers each student their own Connect link. */}
       <button type="submit" disabled={pending} title="Emails every student in this class their own Connect link" className="text-[11px] font-semibold hover:underline" style={{ color: TEAL }}>
-        {pending ? "Sending…" : state.sentCount !== null ? `Emailed ${state.sentCount}` : "Email everyone their link"}
+        {pending ? "Sending…" : state.sentCount !== null ? (state.sentCount > 0 ? `Emailed ${state.sentCount}` : "Nobody to email") : "Email everyone their link"}
       </button>
       {state.error ? <span className="text-[11px] text-destructive">{state.error}</span> : null}
     </form>
@@ -406,11 +406,16 @@ export function VolunteersV2({
           {byClass.length === 0 ? <div className="sheet p-6 text-sm text-muted">No volunteer students added yet.</div> : null}
           {byClass.map((c) => {
             const drifting = c.members.filter((r) => r.oneLessonCount >= 2 || r.absentCount >= 2).length;
-            const neverOpened = c.members.filter((r) => !r.lastOpenedAt).length;
+            // A student with no token has no link to open. Counting them as
+            // "never opened" told a tutor a link had gone out and been
+            // ignored, when none was ever issued (walked 15 Sep 2026).
+            const noLinkYet = c.members.filter((r) => !r.token).length;
+            const neverOpened = c.members.filter((r) => r.token && !r.lastOpenedAt).length;
             const meta = [
               `${c.members.length} student${c.members.length === 1 ? "" : "s"}`,
               todayInfo?.startTime ? `${todayInfo.isToday ? "today" : todayInfo.dateLabel} ${todayInfo.startTime}` : null,
               drifting > 0 ? `${drifting} drifting` : null,
+              noLinkYet > 0 ? `${noLinkYet} without a link yet` : null,
               neverOpened > 0 ? `${neverOpened} never opened link` : null,
             ]
               .filter(Boolean)
@@ -485,7 +490,7 @@ export function VolunteersV2({
                       </span>
                       <span className="flex items-center gap-1.5 text-[12px]" style={{ color: r.lastOpenedAt ? TEAL : AMBER }}>
                         <span className="block size-1.5 rounded-full bg-current" />
-                        {r.lastOpenedAt ? `Opened ${stampLabel(r.lastOpenedAt, timeZone).toLowerCase()}` : "Never opened"}
+                        {r.lastOpenedAt ? `Opened ${stampLabel(r.lastOpenedAt, timeZone).toLowerCase()}` : r.token ? "Never opened" : "No link yet"}
                       </span>
                       <span onClick={(e) => e.stopPropagation()}>{r.token ? <CopyButton small url={`${siteOrigin}/student/${r.token}`} /> : null}</span>
                     </div>

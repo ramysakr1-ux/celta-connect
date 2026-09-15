@@ -132,11 +132,15 @@ export async function sendClassStartingEmails(_prevState: ShareClassState, formD
   const { data: volunteers } = await query;
 
   let sentCount = 0;
+  const reasons: string[] = [];
   for (const volunteer of volunteers ?? []) {
     const result = await sendVolunteerClassStartingEmail(admin, volunteer, { skipIfAlreadySent: false });
     if (result.sent) sentCount += 1;
+    else if (result.reason) reasons.push(`${volunteer.name}: ${result.reason}`);
   }
-  return { error: null, sentCount };
+  // "Emailed 0" with no reason is the least useful thing this could say, and
+  // the reason is always knowable -- most often no join link yet.
+  return { error: sentCount === 0 && reasons.length > 0 ? reasons.join(" · ") : null, sentCount };
 }
 
 // A single read-only, no-login link for center business/admissions staff --

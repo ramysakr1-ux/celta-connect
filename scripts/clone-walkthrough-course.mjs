@@ -434,6 +434,24 @@ async function main() {
     })),
     { mapKind: "volunteer" }
   );
+  // A volunteer gets their join link the moment they are added
+  // (register/[token]/actions.ts) -- the clone inserts the rows directly, so
+  // it has to mint the links itself. Fresh tokens for this course, never the
+  // demo's: without them the volunteers page reads "never opened" for a link
+  // that was never issued, and "Email everyone their link" emails nobody.
+  const volunteerIdsCopied = [...maps.volunteer.values()];
+  if (volunteerIdsCopied.length > 0) {
+    const endOfCourse = new Date(`${courseRow.end_date}T23:59:59Z`).toISOString();
+    const { error: tokenError } = await supabase.from("course_access_tokens").insert(
+      volunteerIdsCopied.map((id) => ({
+        course_id: newCourse.id,
+        role: "volunteer_student",
+        volunteer_student_id: id,
+        expires_at: endOfCourse,
+      }))
+    );
+    console.log(`  volunteer join links: ${tokenError ? "FAILED " + tokenError.message : volunteerIdsCopied.length}`);
+  }
   await copyTable("course_broadcasts", await pick("course_broadcasts", { course_id: DEMO_COURSE_ID }).then((r) => r.data));
 
   // --- The tutor swap, on the groups themselves -------------------------
