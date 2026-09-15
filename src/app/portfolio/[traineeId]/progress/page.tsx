@@ -216,6 +216,30 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
           <p className="text-[11px] text-muted">No grade lives here. This is your own reflection against the five CELTA components, not an assessment.</p>
         </div>
 
+        {/* Handbook 12.1.2: "Before final submission, candidates should
+            ensure they have their own saved copy of the portfolio", and the
+            CELTA 5 booklet tells them in Cambridge's own words that they may
+            keep copies of anything they wish to retain. Until 15 Sep 2026
+            nothing delivered that -- their coursework had no export at all,
+            and the centre clears Connect's copy a week after close-out.
+            This is the same bundle the centre files in Drive, zipped. */}
+        <div className="sheet flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-ink">Your portfolio, to keep</p>
+            <p className="max-w-[62ch] text-xs text-muted">
+              Your CELTA 5, every teaching practice record with its plan, materials and tutor feedback, your marked
+              assignments and your observations log &mdash; the same set your centre files. Connect clears its copy
+              after the course closes, so take yours before then.
+            </p>
+          </div>
+          <a
+            href={`/api/portfolio/${traineeId}/archive`}
+            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
+          >
+            Download my portfolio
+          </a>
+        </div>
+
         <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Observation hours</p>
           <div className="flex flex-col">
