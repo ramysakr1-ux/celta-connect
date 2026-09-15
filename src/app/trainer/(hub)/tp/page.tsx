@@ -174,8 +174,12 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
         eyebrow={`${courseCode} · Teaching practice · ${isMct ? (wholeCourseChosen ? "both groups" : "your group") : "your group"}`}
         title="Teaching practice"
       >
+        {/* B3, live audit 15 Sep 2026: this read "Rotation & TP points" while
+            the Also-under row below it offered "TP points library" -- two
+            doors to the library from one header. The button is the
+            rotation's door; the library keeps its pill. */}
         <Link href="/trainer/rotation" className={HUB_BUTTON}>
-          Rotation &amp; TP points
+          Rotation
         </Link>
         {/* Ramy, 6 Sep 2026: the Roster pill came off -- Roster is already a
             top-level tab, so this was a second door to a room you can
