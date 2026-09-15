@@ -24,7 +24,7 @@ import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
-import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpClassSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -757,6 +757,23 @@ export default async function TodayPage() {
       sizeByGroup.set(tpGroupId, (sizeByGroup.get(tpGroupId) ?? 0) + 1);
     }
     problems.push(...tpGroupSizeProblems({ groups: (tpGroups ?? []).map((g) => ({ id: g.id, name: g.name, size: sizeByGroup.get(g.id) ?? 0 })) }));
+
+    // Handbook 9.1.3's class-size floor -- see tpClassSizeProblems. Grouped
+    // by level, because that is what a class is here: two run in parallel
+    // and a volunteer belongs to one of them.
+    const { data: courseVolunteers } = await admin
+      .from("volunteer_students")
+      .select("level")
+      .eq("course_id", courseId)
+      .is("removed_at", null);
+    const volunteersByLevel = new Map<string, number>();
+    for (const v of courseVolunteers ?? []) {
+      const label = v.level?.trim() || "Level not set";
+      volunteersByLevel.set(label, (volunteersByLevel.get(label) ?? 0) + 1);
+    }
+    problems.push(
+      ...tpClassSizeProblems({ classes: [...volunteersByLevel].map(([level, volunteers]) => ({ level, volunteers })) })
+    );
 
     // Levels are per group now (migration 0288): each group teaches its own
     // two levels, so the rule is checked per group. Fetched standalone with

@@ -222,6 +222,51 @@ export function tpGroupSizeProblems(input: { groups: { id: string; name: string;
 }
 
 /**
+ * A teaching practice class too small to be assessed.
+ *
+ * Handbook §9.1.3: "a minimum of 50% of teaching practice must be with
+ * classes of an average of eight students. Classes of fewer than five
+ * students are not normally valid for assessment purposes."
+ *
+ * Only the second sentence is checked here. It is unambiguous, it is about
+ * a class as it stands rather than a proportion across the course, and it
+ * is the one an assessor raises -- "assessors check records of student
+ * attendance and the level of the classes taught" (same section). The
+ * average-of-eight half is stated in the detail rather than computed,
+ * because "50% of teaching practice" needs a judgement about what is being
+ * halved that the Handbook does not make for us.
+ *
+ * A class is one level: two levels run in parallel and a volunteer belongs
+ * to one of them, so five volunteers on the course split three and two is
+ * two classes that are both too small, not one that is fine.
+ *
+ * Counted from the roster, not from attendance -- this is about whether the
+ * class exists at a valid size, which a centre can still act on by
+ * recruiting. Who turned up on a given day is the register's business.
+ */
+export function tpClassSizeProblems(input: {
+  classes: { level: string; volunteers: number }[];
+}): ComplianceProblem[] {
+  const MINIMUM = 5;
+  const tooSmall = input.classes.filter((c) => c.volunteers > 0 && c.volunteers < MINIMUM);
+  if (tooSmall.length === 0) return [];
+  return [
+    {
+      tag: "TP class size",
+      message:
+        tooSmall.length === 1
+          ? `The ${tooSmall[0].level} class has ${tooSmall[0].volunteers} student${tooSmall[0].volunteers === 1 ? "" : "s"} -- fewer than five is not normally valid for assessment`
+          : `${tooSmall.length} TP classes have fewer than five students -- not normally valid for assessment`,
+      detail: `${tooSmall
+        .map((c) => `${c.level}: ${c.volunteers}`)
+        .join(" · ")} · half of all TP should be with classes averaging eight`,
+      href: "/trainer/volunteers",
+      cite: "9.1.3",
+    },
+  ];
+}
+
+/**
  * The coursebook schedule cannot give candidates two significantly different
  * levels with one below intermediate.
  *
