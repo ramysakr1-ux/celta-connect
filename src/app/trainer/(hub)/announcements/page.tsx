@@ -222,7 +222,12 @@ export default async function AnnouncementsPage() {
             cohortAllowed={isMct}
           />
         ) : (
-          <div className="trainer-hover flex flex-col gap-2 overflow-hidden rounded-[12px] border border-border bg-frame pb-4">
+          /* A4, live audit 15 Sep 2026: the hover ring means "this opens".
+             None of the three announcement surfaces that carried it is a
+             link -- this fallback card, the Posted section, and each posted
+             row. Section 7 of the polish pass says the same thing from the
+             other side: an announcement row is read, not opened. */
+          <div className="flex flex-col gap-2 overflow-hidden rounded-[12px] border border-border bg-frame pb-4">
             <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
               <h2 className="font-serif text-[20px] font-semibold">Write an announcement</h2>
             </div>
@@ -236,7 +241,7 @@ export default async function AnnouncementsPage() {
         <div className="flex flex-col gap-5">
           <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={canCompose} />
 
-          <section className="trainer-hover flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
+          <section className="flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
             <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
               <h3 className="font-serif text-[20px] font-semibold">Posted</h3>
               <span className="text-[12.5px] text-gold">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>
@@ -248,7 +253,7 @@ export default async function AnnouncementsPage() {
                 // for the centre's own day instead (en-CA is ISO order).
                 const when = new Date(`${new Date(b.sent_at ?? b.created_at).toLocaleDateString("en-CA", { timeZone })}T00:00:00`);
                 return (
-                  <div key={b.id} className="trainer-hover grid grid-cols-[40px_1fr] items-center gap-3.5 rounded-[10px] px-3 py-[10px]">
+                  <div key={b.id} className="grid grid-cols-[40px_1fr] items-center gap-3.5 rounded-[10px] px-3 py-[10px]">
                     <span className="flex size-10 flex-col items-center justify-center rounded-[10px] bg-ink-warm text-primary-foreground">
                       <span className="text-[13px] leading-none font-bold">{when.getDate()}</span>
                       <span className="text-[9px] leading-none tracking-[0.06em] uppercase">{formatCalendarDateObject(when, { month: "short" })}</span>

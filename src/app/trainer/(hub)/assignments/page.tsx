@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { requireRole } from "@/lib/auth/require-role";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -87,7 +88,16 @@ function chipLabel(cell: BoardCell, opensDay: number | null, dueDay: number | nu
 }
 
 export default async function TrainerAssignmentsBoardPage() {
-  const trainer = await requireRole("trainer");
+  // A1, live audit 15 Sep 2026. This was requireRole("trainer") alone, so a
+  // centre admin or the platform owner clicking the Assignments tab was
+  // bounced -- every other tab in the hub admits trainer, admin and
+  // platform_owner. Same gate as Roster and Today.
+  const session = await getCurrentProfile();
+  const trainer =
+    session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner"
+      ? session.profile
+      : null;
+  if (!trainer) redirect("/login");
   const supabase = await createClient();
   const courseId = trainer.course_id;
 
@@ -356,7 +366,7 @@ export default async function TrainerAssignmentsBoardPage() {
                       return (
                         <span key={type} className="min-w-0 pr-2">
                           {openable ? (
-                            <Link href={`/trainer/assignments/${a.id}`} className="trainee-hover inline-flex max-w-full">
+                            <Link href={`/trainer/assignments/${a.id}`} className="trainer-hover inline-flex max-w-full">
                               {chip}
                             </Link>
                           ) : (
@@ -397,7 +407,7 @@ export default async function TrainerAssignmentsBoardPage() {
                   <Link
                     key={`${q.assignmentId}-${q.order}`}
                     href={`/trainer/assignments/${q.assignmentId}`}
-                    className="trainee-hover flex items-center justify-between gap-3"
+                    className="trainer-hover flex items-center justify-between gap-3"
                     style={{ borderRadius: 10, border: `1px solid ${FAINT}`, borderLeft: `4px solid ${hue}`, background: SHEET, padding: "9px 12px" }}
                   >
                     <span className="min-w-0">
@@ -463,11 +473,7 @@ export default async function TrainerAssignmentsBoardPage() {
             <p style={{ fontSize: 11, lineHeight: 1.5, color: MUTED }}>
               Handbook 9.2.3: a proportion of each assignment must be double-marked — three of each up to nine candidates,
               four up to sixteen, five up to twenty-four — and the sample must include any fail assignments. Both tutors
-              initial what they have checked, and the centre keeps the record.{" "}
-              <Link href="/assessor/double-marking" className="underline" style={{ color: TEAL }}>
-                The record the assessor sees
-              </Link>
-              .
+              initial what they have checked, and the centre keeps the record. The sample above is that record.
             </p>
           </div>
         </div>

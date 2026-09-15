@@ -544,15 +544,18 @@ export default async function TodayPage() {
     dueByType.set(a.assignment_type, entry);
   }
   for (const [type, { total, submitted }] of dueByType) {
-    // Used to dump on the roster. The marking queue is where submissions
-    // are opened; it lists exactly these.
+    // Used to dump on the roster, then on /trainer/tp -- and the comment
+    // saying "the marking queue is where submissions are opened" was written
+    // before the marking board existed (13 Sep 2026). The board IS the
+    // marking queue and lists exactly these; TP is the teaching-practice
+    // room and never opened a written assignment (A2, live audit 15 Sep).
     alerts.push({
       kind: "marking",
       badge: type.replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase() || "AS",
       due: "Today",
       title: `${type} due today`,
       meta: `${submitted} of ${total} submitted`,
-      href: "/trainer/tp",
+      href: "/trainer/assignments",
     });
   }
 
