@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
+import { PageHead, HUB_BUTTON } from "@/app/trainer/(hub)/page-head";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -40,8 +41,10 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("course_timetable_events").select("id, event_date, event_time, detail, type, title").eq("course_id", courseId).order("event_date").order("event_time"),
     supabase.from("centers").select("feedback_same_day_hours").eq("id", trainer.center_id).maybeSingle(),
-    supabase.from("courses").select("start_date, end_date").eq("id", courseId).maybeSingle(),
+    supabase.from("courses").select("start_date, end_date, course_code, name").eq("id", courseId).maybeSingle(),
   ]);
+
+  const courseCode = course?.course_code || course?.name || "Course";
 
   const rosterIds = (roster ?? []).map((r) => r.id);
   const subgroupIds = (subgroupRows ?? []).map((g) => g.id);
@@ -157,51 +160,60 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-        <div className="flex max-w-[760px] flex-col gap-2">
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-serif text-[22px] leading-tight font-semibold text-ink-warm">Teaching practice</h1>
-            <span
-              className="rounded-full px-2.5 py-[3px] text-[10.5px] font-bold tracking-[0.08em] text-primary-foreground uppercase"
-              style={{ background: "var(--hub-accent)" }}
-            >
-              {isMct ? (wholeCourseChosen ? "MCT · both groups" : "MCT · your group") : "ACT · your group"}
-            </span>
-          </div>
-          {/* The debt line is the page in one sentence -- red when anything
-              has slipped past the centre's own same-day rule. */}
-          <p
-            className="border-l-4 pl-3 font-serif text-[28px] leading-[1.15] font-medium text-ink-warm"
-            style={{ borderColor: lateCount > 0 ? "oklch(45% 0.16 27)" : "var(--hub-accent)" }}
-          >
-            {debtLine}
-          </p>
-          <p className="text-[13px] text-muted">
-            {weekLabel ? `${weekLabel.charAt(0).toUpperCase()}${weekLabel.slice(1)} · ` : ""}
-            feedback is due the same day · lessons leave this page once feedback is saved.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href="/trainer/rotation"
-            className="trainer-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-3 text-[12px] font-semibold whitespace-nowrap text-ink"
-          >
-            Rotation &amp; TP points
-          </Link>
-          {/* Ramy, 6 Sep 2026: the Roster pill came off -- Roster is already a
-              top-level tab, so this was a second door to a room you can
-              reach from anywhere. In its place, the one preference that
-              actually shapes what you are about to write on this page: the
-              Direct and Encouraging phrasing your feedback is drafted in.
-              It used to sit behind "Settings" beside your name, which named
-              the furniture rather than the thing. */}
-          <Link
-            href="/trainer/settings"
-            className="trainer-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-3 text-[12px] font-semibold whitespace-nowrap text-ink"
-          >
-            Feedback wording
-          </Link>
-        </div>
+      {/* B2, live audit 15 Sep 2026. This page built its own head -- a 22px
+          h1, the role pill beside it, and h-[34px]/6px buttons -- so the one
+          tab a tutor lives in during a course looked unlike every other tab.
+          PageHead now, with the scope in the eyebrow where the rest of the
+          hub puts it, and HUB_BUTTON for the actions.
+
+          The debt line survives: it is the page in one sentence, and the
+          audit asked for it to. It sits under the head rather than inside
+          it, because PageHead's lede is one muted sentence and this is a
+          28px serif statement that goes red when something has slipped. */}
+      <PageHead
+        eyebrow={`${courseCode} · Teaching practice · ${isMct ? (wholeCourseChosen ? "both groups" : "your group") : "your group"}`}
+        title="Teaching practice"
+      >
+        <Link href="/trainer/rotation" className={HUB_BUTTON}>
+          Rotation &amp; TP points
+        </Link>
+        {/* Ramy, 6 Sep 2026: the Roster pill came off -- Roster is already a
+            top-level tab, so this was a second door to a room you can
+            reach from anywhere. In its place, the one preference that
+            actually shapes what you are about to write on this page: the
+            Direct and Encouraging phrasing your feedback is drafted in.
+            It used to sit behind "Settings" beside your name, which named
+            the furniture rather than the thing. */}
+        <Link href="/trainer/settings" className={HUB_BUTTON}>
+          Feedback wording
+        </Link>
+      </PageHead>
+
+      {/* Also-under directly under the header, per (hub)/README.md -- it was
+          at the foot of the page, which is the one place the rule says it
+          must not be. */}
+      <AlsoUnder
+        tab="Teaching Practice"
+        links={[
+          { href: "/trainer/coursebooks", label: "TP points library" },
+          { href: "/trainer/pre-course-task", label: "Pre-course tasks" },
+          { href: "/trainer/observation-tasks", label: "Observation tasks" },
+          { href: "/trainer/observation-hours", label: "Observation hours" },
+          { href: "/trainer/gtky", label: "Day-one activities" },
+        ]}
+      />
+
+      <div className="flex max-w-[760px] flex-col gap-2">
+        <p
+          className="border-l-4 pl-3 font-serif text-[28px] leading-[1.15] font-medium text-ink-warm"
+          style={{ borderColor: lateCount > 0 ? "oklch(45% 0.16 27)" : "var(--hub-accent)" }}
+        >
+          {debtLine}
+        </p>
+        <p className="text-[13px] text-muted">
+          {weekLabel ? `${weekLabel.charAt(0).toUpperCase()}${weekLabel.slice(1)} · ` : ""}
+          feedback is due the same day · lessons leave this page once feedback is saved.
+        </p>
       </div>
 
       {shown.length > 0 ? (
@@ -228,17 +240,6 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
 
       <TodayCard today={queue.today} tomorrow={queue.tomorrow} />
 
-      {/* The tab's occasional pages, one door each. */}
-      <AlsoUnder
-        tab="Teaching Practice"
-        links={[
-          { href: "/trainer/coursebooks", label: "TP points library" },
-          { href: "/trainer/pre-course-task", label: "Pre-course tasks" },
-          { href: "/trainer/observation-tasks", label: "Observation tasks" },
-          { href: "/trainer/observation-hours", label: "Observation hours" },
-          { href: "/trainer/gtky", label: "Day-one activities" },
-        ]}
-      />
     </div>
   );
 }

@@ -15,11 +15,11 @@ import {
   type BoardCell,
   type BoardCellState,
 } from "@/lib/assignment-board";
-import { TpSheet } from "@/components/tp-sheet";
 // Tokens come from the plain module, never from tp-sheet: that file is
 // "use client", and a client module's exports reach a server component as
 // references rather than values.
-import { BAND, BORDER, CARD, FAINT, GARNET, GOLD_INK, INK, MUTED, SHEET, TEAL, ZEBRA } from "@/lib/sheet-tokens";
+import { BORDER, CARD, FAINT, GARNET, GOLD_INK, INK, INK_WARM, MUTED, SHEET, TEAL, ZEBRA } from "@/lib/sheet-tokens";
+import { PageHead } from "@/app/trainer/(hub)/page-head";
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
@@ -187,30 +187,27 @@ export default async function TrainerAssignmentsBoardPage() {
   const secondMarks = decorated.filter((d) => d.cell.state === "second_pending").length;
   const toSettle = decorated.filter((d) => d.cell.state === "settle").length;
 
-  const band = BAND.teal;
   const dayLine = progress ? `Day ${progress.currentDay} of ${progress.totalDays}` : "Not started";
 
   return (
-    <TpSheet maxWidth={1320}>
-      {/* ---------- band ---------- */}
-      <div className="flex flex-wrap items-end justify-between gap-6 rounded-t-[14px]" style={{ background: band.fill, padding: "18px 26px 16px" }}>
-        <div className="flex min-w-0 flex-col gap-[3px]">
-          <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.16em", color: band.eyebrow }}>
-            {[course?.name, dayLine, `${active.length} candidates`].filter(Boolean).join(" · ")}
-          </p>
-          <h2 className="font-serif" style={{ fontSize: 29, fontWeight: 400, color: "oklch(98.5% 0.006 90)", lineHeight: 1.15 }}>
-            Assignments · marking
-          </h2>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <HeadPill label={`${toMark} to mark`} on={toMark > 0} />
-          <HeadPill label={`${secondMarks} second mark`} on={secondMarks > 0} />
-          <HeadPill label={`${toSettle} to settle`} on={toSettle > 0} settle />
-        </div>
-      </div>
+    <div className="flex flex-col gap-[18px]">
+      {/* B1, live audit 15 Sep 2026, option (a). The board was a TpSheet with
+          a solid teal band -- the trainee document idiom -- sitting inside
+          the hub frame, so the one tab where four assignments per candidate
+          are tracked read as a page pasted in from somewhere else. PageHead
+          and a hub card now; the grid, the strip and the rail are untouched.
 
+          No Also-under row: (hub)/README.md lists no sub-pages under
+          Assignments, and a tab with no sub-pages shows no row. */}
+      <PageHead eyebrow={[course?.name, dayLine, `${active.length} candidates`].filter(Boolean).join(" · ")} title="Assignments · marking">
+        <HeadPill label={`${toMark} to mark`} on={toMark > 0} />
+        <HeadPill label={`${secondMarks} second mark`} on={secondMarks > 0} />
+        <HeadPill label={`${toSettle} to settle`} on={toSettle > 0} settle />
+      </PageHead>
+
+      <div className="card overflow-hidden">
       {/* ---------- §1a timetable strip ---------- */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" style={{ background: CARD, borderBottom: `1px solid ${FAINT}`, padding: "13px 26px" }}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" style={{ background: CARD, borderBottom: `1px solid ${FAINT}`, padding: "13px 20px" }}>
         {releaseOrder.map((type) => {
           const release = clock.releaseByType.get(type);
           const open = clock.isOpen(type);
@@ -263,7 +260,23 @@ export default async function TrainerAssignmentsBoardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px]">
         {/* ---------- §1b the grid ---------- */}
-        <div style={{ padding: "16px 20px 22px 26px" }}>
+        <div style={{ padding: "16px 20px 22px" }}>
+          {/* Polish pass §6: the grid says what it is, and the four chip
+              shapes are keyed once here rather than learnt by inference.
+              Shape is the handoff's (22px pill, 11px bold); the colours are
+              read off CHIP above so the key can never drift from the chips
+              it explains. */}
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2">
+            <h2 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: INK_WARM, lineHeight: 1.2 }}>
+              Every candidate, every assignment
+            </h2>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <LegendChip label="Passed" look={CHIP.pass} />
+              <LegendChip label="Needs someone" look={CHIP.awaiting} />
+              <LegendChip label="Needs settling" look={CHIP.settle} />
+              <LegendChip label="Not yet open" look={CHIP.locked} />
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <div style={{ minWidth: 720 }}>
               <div
@@ -478,7 +491,8 @@ export default async function TrainerAssignmentsBoardPage() {
           </div>
         </div>
       </div>
-    </TpSheet>
+      </div>
+    </div>
   );
 }
 
@@ -490,21 +504,44 @@ const SHORT: Record<string, string> = {
   "Plagiarism Reflection": "Reflection",
 };
 
+// B1: these used to sit on the teal band, so "on" was a pale tint on a dark
+// ground. On the hub's own paper they are tinted pills on white, and an
+// empty count is an outline rather than an invisible one.
 function HeadPill({ label, on, settle = false }: { label: string; on: boolean; settle?: boolean }) {
+  const hue = settle ? GARNET : GOLD_INK;
   return (
     <span
-      className="flex items-center gap-1.5"
+      className="flex h-[26px] items-center gap-1.5"
       style={{
         borderRadius: 999,
-        background: on ? (settle ? "oklch(86% 0.09 82)" : "oklch(86% 0.06 195)") : "transparent",
-        border: on ? "none" : `1px solid ${BAND.teal.eyebrow}`,
-        color: on ? (settle ? "oklch(30% 0.042 58)" : "oklch(26% 0.05 195)") : BAND.teal.status,
-        padding: "4px 11px",
+        background: on ? `color-mix(in oklab, ${hue} 12%, transparent)` : "transparent",
+        border: `1px solid ${on ? `color-mix(in oklab, ${hue} 35%, transparent)` : BORDER}`,
+        color: on ? hue : MUTED,
+        padding: "0 11px",
         fontSize: 11.5,
         fontWeight: 600,
       }}
     >
       {settle && on ? <span style={{ width: 5, height: 5, borderRadius: 999, background: GARNET }} /> : null}
+      {label}
+    </span>
+  );
+}
+
+function LegendChip({ label, look }: { label: string; look: ChipLook }) {
+  return (
+    <span
+      className="inline-flex h-[22px] items-center"
+      style={{
+        borderRadius: 999,
+        border: `1px ${look.dashed ? "dashed" : "solid"} ${look.border}`,
+        background: look.fill,
+        color: look.text,
+        padding: "0 9px",
+        fontSize: 11,
+        fontWeight: 700,
+      }}
+    >
       {label}
     </span>
   );
