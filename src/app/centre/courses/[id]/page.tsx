@@ -54,7 +54,13 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
     ? await admin.from("profiles").select("id, full_name, email").in("id", tutorProfileIds)
     : { data: [] };
   const profileById = new Map((tutorProfiles ?? []).map((p) => [p.id, p]));
-  const tutors = (tutorRows ?? []).map((t) => ({
+  // A course_tutors row with no tutor_role is not a tutor. The permission
+  // layer writes one for a Course administrator -- "approved on this course,
+  // but not on the teaching roster" (migration 0103) -- and this card listed
+  // them under Tutors as "Role not set", which reads like an unfinished
+  // setup rather than someone who was never on the teaching team (walked
+  // 15 Sep 2026).
+  const tutors = (tutorRows ?? []).filter((t) => t.tutor_role).map((t) => ({
     name: profileById.get(t.profile_id)?.full_name ?? "Unknown",
     email: profileById.get(t.profile_id)?.email ?? "",
     role: t.tutor_role,
