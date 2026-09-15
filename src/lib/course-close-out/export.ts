@@ -141,7 +141,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
 
     const { data: trainees } = await admin
       .from("profiles")
-      .select("id, full_name")
+      .select("id, full_name, course_status")
       .eq("course_id", courseId)
       .eq("role", "trainee")
       .order("full_name");
@@ -360,7 +360,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
         center: center ? { name: center.name, logo_url: center.logo_url, time_zone: center.time_zone } : null,
         centerId: closeOut.center_id,
         tutorNames: (trainers ?? []).map((t) => t.full_name),
-        trainee: { id: trainee.id, full_name: trainee.full_name },
+        trainee: { id: trainee.id, full_name: trainee.full_name, courseStatus: trainee.course_status },
         record: recordByTrainee.get(trainee.id) ?? null,
         assignments: (assignments ?? []).filter((a) => a.trainee_id === trainee.id),
       });

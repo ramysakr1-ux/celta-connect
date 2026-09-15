@@ -12,6 +12,7 @@ import { renderFormalLetterBuffer, type FormalLetterInput } from "@/lib/formal-l
 import { renderAssignmentCoverSheetBuffer } from "@/lib/assignment-cover-sheet-pdf/document";
 import { renderTpPdfBuffer } from "@/lib/tp-pdf/document";
 import { renderObservationsLogBuffer } from "./observations-log-pdf";
+import { buildWithdrawalLetterInput } from "@/lib/letters/withdrawal";
 import { formatCalendarDate } from "@/lib/format-date";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
@@ -132,7 +133,7 @@ export async function buildCandidatePortfolio(
     center: { name: string; logo_url: string | null; time_zone: string | null } | null;
     centerId: string;
     tutorNames: string[];
-    trainee: { id: string; full_name: string };
+    trainee: { id: string; full_name: string; courseStatus?: string | null };
     record: Database["public"]["Tables"]["celta5_records"]["Row"] | null;
     assignments: Database["public"]["Tables"]["assignments"]["Row"][];
   }
@@ -246,6 +247,71 @@ if (record) {
 // was actually issued. Renders the stored snapshot, same reasoning as
 // /api/formal-letter/[letterId]/route.ts: a filed written record, not
 // regenerated from live data at export time.
+// Handbook 12.1.1, Section A, "where appropriate": "a fail warning letter
+// from the centre alerting the candidate to the possibility of failure"
+// and "candidate letter of withdrawal".
+//
+// Neither was here. The portfolio carried the REFERENCE letter, which
+// 12.1.1 does not list, and left out the two it names -- so the archive was
+// missing exactly the letters Cambridge asks a portfolio to contain
+// (walked 15 Sep 2026). An assignment warning goes in on the same footing:
+// it is a fail warning about written work, issued by the centre for the
+// same reason.
+const { data: warningLetters } = await admin
+  .from("formal_letters")
+  .select("letter_type, snapshot, issued_at")
+  .eq("trainee_id", trainee.id)
+  .in("letter_type", ["fail_risk", "assignment_warning"])
+  .order("issued_at");
+for (const letter of warningLetters ?? []) {
+  const label = letter.letter_type === "fail_risk" ? "Fail warning letter" : "Assignment warning letter";
+  files.push({
+    name: `${label} - ${safeName(trainee.full_name)}.pdf`,
+    mimeType: "application/pdf",
+    bytes: await renderFormalLetterBuffer(letter.snapshot as unknown as FormalLetterInput),
+  });
+}
+
+// The withdrawal letter, for a candidate who withdrew. Built rather than
+// stored -- it has no formal_letters row; /api/withdrawal-letter renders it
+// from the candidate's own status the same way.
+if (ctx.trainee.courseStatus === "withdrawn") {
+  const { data: full } = await admin
+    .from("profiles")
+    .select("course_status_set_at, course_status_set_by, course_status_note, withdrawal_reportable")
+    .eq("id", trainee.id)
+    .maybeSingle();
+  const { data: courseRow } = await admin
+    .from("courses")
+    .select("entry_form_sent_at, center_id")
+    .eq("id", courseId)
+    .maybeSingle();
+  const { data: issuer } = full?.course_status_set_by
+    ? await admin.from("profiles").select("full_name").eq("id", full.course_status_set_by).maybeSingle()
+    : { data: null };
+  const { data: centreRow } = await admin.from("centers").select("center_number").eq("id", ctx.centerId).maybeSingle();
+  const letterInput = await buildWithdrawalLetterInput(admin, {
+    traineeId: trainee.id,
+    traineeName: trainee.full_name,
+    courseId,
+    courseName: course.name,
+    courseStartDate: course.start_date,
+    courseEndDate: course.end_date,
+    centerName: center?.name ?? "Your centre",
+    centerNumber: centreRow?.center_number ?? null,
+    withdrawnAt: full?.course_status_set_at ?? new Date().toISOString(),
+    reportable: Boolean(full?.withdrawal_reportable),
+    note: full?.course_status_note ?? null,
+    entryFormSentAt: courseRow?.entry_form_sent_at ?? null,
+    issuedByName: issuer?.full_name ?? center?.name ?? "The centre",
+  });
+  files.push({
+    name: `Withdrawal letter - ${safeName(trainee.full_name)}.pdf`,
+    mimeType: "application/pdf",
+    bytes: await renderFormalLetterBuffer(letterInput),
+  });
+}
+
 const { data: referenceLetter } = await admin
   .from("formal_letters")
   .select("snapshot")

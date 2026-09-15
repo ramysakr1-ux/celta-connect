@@ -33,7 +33,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   const admin = createAdminClient();
   const { data: trainee } = await admin
     .from("profiles")
-    .select("id, full_name, course_id, center_id, role")
+    .select("id, full_name, course_id, center_id, role, course_status")
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee || trainee.role !== "trainee" || !trainee.course_id) {
@@ -74,7 +74,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
     center: center ?? null,
     centerId: course.center_id,
     tutorNames: (tutorProfiles ?? []).map((t) => t.full_name),
-    trainee: { id: trainee.id, full_name: trainee.full_name },
+    trainee: { id: trainee.id, full_name: trainee.full_name, courseStatus: trainee.course_status },
     record: record ?? null,
     assignments: assignments ?? [],
   });
