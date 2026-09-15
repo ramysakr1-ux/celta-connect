@@ -3,7 +3,8 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
+import { requireAdmissionsHandler, canActOnMoney } from "@/lib/admissions-access";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getActivePaymentProvider } from "@/lib/payments/provider";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
@@ -43,7 +44,12 @@ export async function createPaymentPlan(_prevState: PaymentFormState, formData: 
   const count = Number(instalmentCount);
   if (!Number.isFinite(total) || total <= 0) return { error: "Enter a valid total amount." };
   if (!Number.isInteger(count) || count < 1 || count > 12) return { error: "Instalments must be a whole number from 1 to 12." };
-  if (!canDecideAdmissions(staff)) return { error: "Only a verified course tutor or a nominated admissions decider can set up a payment plan." };
+  // Money, not an admissions decision -- see canActOnMoney. canDecideAdmissions
+  // is read from profiles.role, so every trainer on every course held this.
+  const moneyCentreId = staff.active_center_id ?? staff.center_id;
+  if (!(await canActOnMoney(staff, moneyCentreId))) {
+    return { error: "Your role can't set up a payment plan." };
+  }
 
   const supabase = await createClient();
   const { data: applicant } = await supabase
@@ -107,7 +113,8 @@ export async function markPaymentManual(formData: FormData): Promise<void> {
   const paid = formData.get("paid") === "true";
   const note = (formData.get("marked_note") as string | null)?.trim() || null;
   if (typeof paymentId !== "string" || typeof applicantId !== "string") return;
-  if (!canDecideAdmissions(staff)) return;
+  // Marking an instalment paid is a money act -- see canActOnMoney.
+  if (!(await canActOnMoney(staff, staff.active_center_id ?? staff.center_id))) return;
 
   const supabase = await createClient();
   await supabase
@@ -132,7 +139,9 @@ export async function createProviderCheckoutLink(_prevState: PaymentFormState, f
   const paymentId = formData.get("payment_id");
   const applicantId = formData.get("applicant_id");
   if (typeof paymentId !== "string" || typeof applicantId !== "string") return { error: "Something went wrong. Refresh and try again." };
-  if (!canDecideAdmissions(staff)) return { error: "Only a verified course tutor or a nominated admissions decider can send a payment link." };
+  if (!(await canActOnMoney(staff, staff.active_center_id ?? staff.center_id))) {
+    return { error: "Your role can't send a payment link." };
+  }
 
   const supabase = await createClient();
   const [{ data: payment }, { data: applicant }] = await Promise.all([
@@ -189,8 +198,13 @@ export async function markPaymentNotificationRead(formData: FormData): Promise<v
   if (typeof notificationId !== "string") return;
 
   const centerId = ctx.activeCenterId ?? session.profile.center_id;
-  const supabase = await createClient();
-  await supabase
+  // The admin client. payment_notifications has a select policy and nothing
+  // else (migration 0087), so this update through the session client matched
+  // no rows, returned no error, and left Dismiss doing nothing at all
+  // (walked 15 Sep 2026). The capability check above is the real gate, as it
+  // is everywhere else in Centre Management.
+  const admin = createAdminClient();
+  await admin
     .from("payment_notifications")
     .update({ read_at: new Date().toISOString() })
     .eq("id", notificationId)

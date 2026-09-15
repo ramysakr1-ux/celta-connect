@@ -4,7 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdmissionsHandler, canDecideAdmissions, canAgreeRefunds } from "@/lib/admissions-access";
+import { requireAdmissionsHandler, canDecideAdmissions, canActOnMoney } from "@/lib/admissions-access";
 import { referApplicant } from "@/lib/admissions-referral";
 import {
   sendApplicantEmail,
@@ -1459,12 +1459,12 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
  */
 export async function agreeRefund(_prevState: FormState, formData: FormData): Promise<FormState> {
   const staff = await requireAdmissionsHandler();
-  // A refund is money, so it asks the money question -- see canAgreeRefunds.
+  // A refund is money, so it asks the money question -- see canActOnMoney.
   // This used to ask canDecideAdmissions, which is answered from
   // profiles.role and let a trainer, a Course administrator and the
   // read-only Centre observer move the centre's money.
   const refundCentreId = staff.active_center_id ?? staff.center_id;
-  if (!(await canAgreeRefunds(staff, refundCentreId))) return { error: "You can't agree refunds." };
+  if (!(await canActOnMoney(staff, refundCentreId))) return { error: "You can't agree refunds." };
 
   const applicantId = (formData.get("applicant_id") as string | null) || null;
   const amountRaw = formData.get("amount");
@@ -1521,7 +1521,7 @@ export async function settleRefund(_prevState: FormState, formData: FormData): P
   if (refundRow.status !== "pending") return { error: "That refund has already been settled." };
   // Asked at the refund's own centre, not at whichever one this person is
   // acting in.
-  if (!(await canAgreeRefunds(staff, refundRow.center_id))) return { error: "You can't settle refunds." };
+  if (!(await canActOnMoney(staff, refundRow.center_id))) return { error: "You can't settle refunds." };
   const { error } = await adminClient
     .from("refunds")
     .update(
