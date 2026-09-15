@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
-import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
+import { computeObservationHours, OBSERVATION_HOURS_REQUIRED, OBSERVATION_FILMED_CAP_HOURS } from "@/lib/observation-hours";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
@@ -231,7 +231,19 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
             </div>
             <div className="flex items-start gap-3 py-2.5">
               <span className="w-9 shrink-0 text-sm font-semibold text-ink">{filmedHours.toFixed(1)}h</span>
-              <p className="text-xs text-muted">filmed, capped separately -- does not count toward the peer minimum</p>
+              {/* Handbook 11.2: "six hours' directed observation of lessons
+                  taught by experienced ELT professionals, up to three hours
+                  of which may be of filmed lessons." Filmed hours count
+                  TOWARD the six, capped at three -- the caption said
+                  "capped separately -- does not count toward the peer
+                  minimum", which reads as though they count toward nothing
+                  (walked 15 Sep 2026). The maths was always right; only the
+                  sentence explaining it was not. */}
+              <p className="text-xs text-muted">
+                {filmedHours > OBSERVATION_FILMED_CAP_HOURS
+                  ? `filmed -- ${OBSERVATION_FILMED_CAP_HOURS}h of it counts toward the ${OBSERVATION_HOURS_REQUIRED}h above, the rest does not (Handbook 11.2)`
+                  : `filmed -- part of the ${OBSERVATION_HOURS_REQUIRED}h above; up to ${OBSERVATION_FILMED_CAP_HOURS}h may be (Handbook 11.2)`}
+              </p>
             </div>
           </div>
           <p className="text-[11px] text-muted">Full log below -- every entry ties back to a specific session.</p>

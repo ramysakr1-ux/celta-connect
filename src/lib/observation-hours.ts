@@ -7,6 +7,7 @@
 // function.
 export const OBSERVATION_HOURS_REQUIRED = 6;
 export const OBSERVATION_FILMED_CAP_MINUTES = 3 * 60;
+export const OBSERVATION_FILMED_CAP_HOURS = OBSERVATION_FILMED_CAP_MINUTES / 60;
 
 export interface ObservationHoursSummary {
   hoursCounted: number;
