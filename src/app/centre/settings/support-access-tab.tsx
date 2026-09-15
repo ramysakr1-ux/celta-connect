@@ -118,7 +118,12 @@ export function SupportAccessTab({
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <span className={`pill ${STATUS_PILL[g.status]}`}>{STATUS_LABEL[g.status]}</span>
-                    {g.status === "active" ? (
+                    {/* Revoking is the same decision as granting, so it
+                        shows for the same people. It used to show for
+                        everyone who could open the tab, including the
+                        read-only Centre observer, whose click the server
+                        then silently refused. */}
+                    {g.status === "active" && canGrantBilling ? (
                       <form action={revokeSupportGrant}>
                         <input type="hidden" name="grant_id" value={g.id} />
                         <button type="submit" className="text-xs text-destructive hover:underline">

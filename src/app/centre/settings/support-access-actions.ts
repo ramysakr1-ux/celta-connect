@@ -90,12 +90,22 @@ export async function revokeSupportGrant(formData: FormData): Promise<void> {
   const { data: grant } = await admin.from("platform_support_grants").select("id, center_id, course_id, scope, granted_by").eq("id", grantId).maybeSingle();
   if (!grant) return;
 
-  // Whoever could have granted this can revoke it: a centre_roles holder
-  // for the centre, or the course's own MCT for a course-scope grant. Not
-  // limited to the original granter -- a grant made by an MCT who has
-  // since left should still be revocable by the centre.
-  const ctx = await getCentreRoleContext(profile);
-  const centreAuthorized = ctx.roles.includes("centre_administrator") || ctx.roles.includes("centre_owner") || ctx.roles.includes("centre_manager");
+  // Whoever could have granted this can revoke it: a Centre manager or the
+  // Centre owner AT THE GRANT'S OWN CENTRE, or the course's own MCT for a
+  // course-scope grant. Not limited to the original granter -- a grant made
+  // by an MCT who has since left should still be revocable by the centre.
+  //
+  // Two things were wrong here (walked 15 Sep 2026). The role list included
+  // `centre_manager`, which is the slug for the READ-ONLY Centre observer
+  // ("wants the numbers, changes nothing") -- so the one role that changes
+  // nothing could cut off Connect support. And the roles were read at
+  // whichever centre the actor happened to be acting in, never compared
+  // against grant.center_id, so a manager at one centre could revoke a
+  // grant belonging to another.
+  const at = await getCentreRoleContext({ ...profile, active_center_id: grant.center_id });
+  const centreAuthorized =
+    at.activeCenterId === grant.center_id &&
+    (at.roles.includes("centre_administrator") || at.roles.includes("centre_owner"));
   const mctAuthorized = grant.scope === "course" && grant.course_id ? await isCourseMct(admin, profile.id, grant.course_id) : false;
   if (!centreAuthorized && !mctAuthorized) return;
 
