@@ -271,11 +271,11 @@ export function LessonPlanForm({
             handoff's literal oklch(88% 0.03 78), so a candidate who has chosen
             Sky or Sage still gets their own paper here. */}
         <div
-          className="rounded-[14px] p-3 sm:p-5"
+          className="rounded-[12px] p-3 sm:p-5"
           style={{ background: "color-mix(in oklab, var(--color-background) 84%, var(--color-ink) 7%)" }}
         >
           <div
-            className="mx-auto rounded-[14px]"
+            className="mx-auto rounded-[12px]"
             style={{
               maxWidth: 1240,
               background: SHEET,

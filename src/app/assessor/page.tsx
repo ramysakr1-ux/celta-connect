@@ -1047,7 +1047,7 @@ export default async function AssessorPage({
                       lesson plan for exactly that reason -- but the panel should not
                       read as three observations. */}
                   {teachingOrderNames.length > 2 ? (
-                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
                       You co-observe <strong style={{ color: INK }}>two</strong> of the {teachingOrderNames.length} lessons above
                       (Handbook 14.2), agreed with the centre.{" "}
                       {visitPlansIn >= teachingOrderNames.length
@@ -1057,7 +1057,7 @@ export default async function AssessorPage({
                   ) : null}
 
                   {centreProposal ? (
-                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
                       The centre proposes <strong style={{ color: INK }}>{centreProposal.names.join(" and ")}</strong> for observation
                       {" "}&mdash; {centreProposal.by}, {centreProposal.at}
                       {centreProposal.ownChoice
@@ -1067,7 +1067,7 @@ export default async function AssessorPage({
                     </span>
                   ) : null}
 
-                  <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                  <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
                     {concernsCount && concernsCount > 0
                       ? `${concernsCount} candidate${concernsCount === 1 ? " has" : "s have"} asked to speak with you. Names are not shown before the meeting.`
                       : "No candidate has asked to speak with you."}
@@ -1301,7 +1301,7 @@ export default async function AssessorPage({
                   (malpracticeCases ?? []).map((c) => (
                     <div
                       key={c.id}
-                      style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 14, borderBottom: "1px solid oklch(90% 0.012 85)" }}
+                      style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 14, borderBottom: "1px solid oklch(88% 0.016 82)" }}
                     >
                       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
                         <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>

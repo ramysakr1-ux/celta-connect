@@ -222,7 +222,7 @@ export default async function AnnouncementsPage() {
             cohortAllowed={isMct}
           />
         ) : (
-          <div className="trainer-hover flex flex-col gap-2 overflow-hidden rounded-[14px] border border-border bg-frame pb-4">
+          <div className="trainer-hover flex flex-col gap-2 overflow-hidden rounded-[12px] border border-border bg-frame pb-4">
             <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
               <h2 className="font-serif text-[20px] font-semibold">Write an announcement</h2>
             </div>
@@ -236,7 +236,7 @@ export default async function AnnouncementsPage() {
         <div className="flex flex-col gap-5">
           <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={canCompose} />
 
-          <section className="trainer-hover flex flex-col overflow-hidden rounded-[14px] border border-border bg-frame">
+          <section className="trainer-hover flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
             <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
               <h3 className="font-serif text-[20px] font-semibold">Posted</h3>
               <span className="text-[12.5px] text-gold">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>

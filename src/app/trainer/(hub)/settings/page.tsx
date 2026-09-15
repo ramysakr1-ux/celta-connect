@@ -48,7 +48,7 @@ export default async function TrainerSettingsPage() {
           initialSupportive={feedbackAssist.supportive}
         />
       ) : (
-        <p className="rounded-[14px] border border-border bg-card px-[22px] py-5 text-sm text-muted">
+        <p className="rounded-[12px] border border-border bg-card px-[22px] py-5 text-sm text-muted">
           Feedback assist is a tutor&apos;s own tool and only appears when you are signed in as one.
         </p>
       )}
@@ -57,7 +57,7 @@ export default async function TrainerSettingsPage() {
           or ACT, and by the Centre manager from Centre management. One screen,
           one door from each side. Unlike feedback wording above, this one is
           shared: what you change, every tutor at the centre gets. */}
-      <div className="rounded-[14px] border border-border bg-card px-[22px] py-5">
+      <div className="rounded-[12px] border border-border bg-card px-[22px] py-5">
         <h2 className="font-serif text-lg text-ink-warm">Criteria glossary</h2>
         <p className="mt-1 max-w-[62ch] text-sm text-muted">
           The words that attach a CELTA 5 code to a feedback point as you type &mdash; &ldquo;rapport&rdquo; tags 1d,

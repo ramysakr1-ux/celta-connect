@@ -70,7 +70,7 @@ export function AnnouncementComposer({
   return (
     <form
       action={formAction}
-      className="trainer-hover flex flex-col gap-3 overflow-hidden rounded-[14px] border border-border bg-frame pb-4"
+      className="trainer-hover flex flex-col gap-3 overflow-hidden rounded-[12px] border border-border bg-frame pb-4"
       style={{ boxShadow: "0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}
     >
       {/* The sub-page card header: one ink-brown bar, label inside, on every

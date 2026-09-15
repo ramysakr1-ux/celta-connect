@@ -54,7 +54,7 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
 
       {/* The accent tint for every sheet, in the viewer's role colour (Ramy, 5 Sep 2026: "go with the ACT's"). */}
       <div
-        className="flex flex-col gap-3.5 rounded-[14px] border-[1.5px] px-6 py-5"
+        className="flex flex-col gap-3.5 rounded-[12px] border-[1.5px] px-6 py-5"
         style={{ background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" }}
       >
         <div className="flex items-start justify-between gap-4">

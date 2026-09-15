@@ -408,7 +408,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
 
       {visitDate ? (
         <div
-          className="flex flex-wrap items-end justify-between gap-4 rounded-[14px] px-[22px] py-5 text-[oklch(96%_0.008_85)]"
+          className="flex flex-wrap items-end justify-between gap-4 rounded-[12px] px-[22px] py-5 text-[oklch(96%_0.008_85)]"
           style={{ background: "var(--color-ink-warm)" }}
         >
           <div className="flex flex-col gap-1">
@@ -542,7 +542,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           initialAppianReference={course?.appian_notification_reference ?? null}
         />
 
-        <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
+        <section className="flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
             <div className="flex flex-col gap-[3px]">
               <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Hand over the pack</p>
               <p className="text-sm text-muted">

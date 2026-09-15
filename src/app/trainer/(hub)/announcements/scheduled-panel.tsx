@@ -67,7 +67,7 @@ export function ScheduledPanel({
   }, [savedId]);
 
   return (
-    <div className="trainer-hover flex flex-col overflow-hidden rounded-[14px] border border-border bg-frame">
+    <div className="trainer-hover flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
       <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
         <h3 className="font-serif text-[20px] font-semibold">Scheduled</h3>
         <span className="text-[12.5px] text-gold">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>

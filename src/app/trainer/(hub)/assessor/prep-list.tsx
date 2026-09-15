@@ -90,7 +90,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
 
   return (
     <section
-      className="trainer-hover flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5"
+      className="trainer-hover flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5"
       style={{ borderTop: "3px solid var(--hub-accent)" }}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-3">

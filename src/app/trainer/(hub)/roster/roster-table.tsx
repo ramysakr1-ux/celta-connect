@@ -143,7 +143,7 @@ export function RosterTable({
       </div>
 
       {/* The only shadowed card on the page (handoff, "Roster table"). */}
-      <div className="overflow-x-auto rounded-[14px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
+      <div className="overflow-x-auto rounded-[12px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
         <div className="min-w-[1120px]">
           <div className={`${ROSTER_COLS} items-end border-b border-border px-4 pt-3.5 pb-2.5 text-[10.5px] leading-[1.2] font-bold tracking-[0.08em] text-muted uppercase`}>
             <Th>Candidate</Th>

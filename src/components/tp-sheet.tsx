@@ -58,11 +58,11 @@ export function TpSheet({
 }) {
   return (
     <div
-      className="rounded-[14px] p-3 sm:p-5"
+      className="rounded-[12px] p-3 sm:p-5"
       style={{ background: "color-mix(in oklab, var(--color-background) 84%, var(--color-ink) 7%)" }}
     >
       <div
-        className="mx-auto rounded-[14px]"
+        className="mx-auto rounded-[12px]"
         style={{
           maxWidth,
           background: SHEET,

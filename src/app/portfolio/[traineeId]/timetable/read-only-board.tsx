@@ -232,7 +232,7 @@ export function ReadOnlyTimetableBoard({
           column, nine bands at a 118px floor that stretch to fill. Hidden
           below 900px, where the day list takes over. */}
       <div
-        className="hidden overflow-x-auto rounded-[14px] min-[900px]:block"
+        className="hidden overflow-x-auto rounded-[12px] min-[900px]:block"
         style={{
           padding: "4px 16px 12px",
           border: "1px solid oklch(88% 0.016 82)",

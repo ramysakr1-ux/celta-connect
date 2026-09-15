@@ -51,7 +51,7 @@ const GOLD_INK = "oklch(44% 0.095 68)";
 const GOLD_WASH = "oklch(94.5% 0.065 85)";
 const GARNET = "oklch(42% 0.13 27)";
 const BORDER = "oklch(88% 0.016 82)";
-const FAINT = "oklch(91.2% 0.0152 83)";
+const FAINT = "oklch(88% 0.016 82)";
 const CARD = "oklch(96.4% 0.014 85)";
 const ZEBRA = "oklch(97.6% 0.01 88)";
 

@@ -47,7 +47,7 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
 
   return (
     <section
-      className="flex flex-col rounded-[14px] border border-border bg-frame"
+      className="flex flex-col rounded-[12px] border border-border bg-frame"
       style={{ boxShadow: "0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 px-[18px] pt-4 pb-2.5">

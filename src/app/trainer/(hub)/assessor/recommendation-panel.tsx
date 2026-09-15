@@ -109,7 +109,7 @@ export function RecommendationPanel({
     setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : prev.length >= 2 ? [prev[1], id] : [...prev, id]));
 
   return (
-    <section className="flex flex-col gap-1 rounded-[14px] border border-border bg-card px-[22px] py-5" style={{ borderTop: "3px solid var(--hub-accent)" }}>
+    <section className="flex flex-col gap-1 rounded-[12px] border border-border bg-card px-[22px] py-5" style={{ borderTop: "3px solid var(--hub-accent)" }}>
       <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
         What Connect suggests
       </p>

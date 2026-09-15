@@ -60,7 +60,7 @@ export function YourDay({ slots, serverNowMs, accent }: { slots: DaySlot[]; serv
     // Announcements/Concerns pills use (also-under.tsx), so "Your day" reads
     // as the same family of thing on the hub rather than a plain frame.
     <section
-      className="flex flex-col rounded-[14px] border"
+      className="flex flex-col rounded-[12px] border"
       style={{
         background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))",
         borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)",

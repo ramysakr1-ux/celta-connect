@@ -81,13 +81,13 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
       </div>
 
       {(concerns ?? []).length === 0 ? (
-        <p className="rounded-[14px] border border-border bg-card px-[22px] py-5 text-sm text-muted">
+        <p className="rounded-[12px] border border-border bg-card px-[22px] py-5 text-sm text-muted">
           Nobody has taken this route. That is the ordinary state &mdash; the tutors&apos; own inbox is where most concerns
           land.
         </p>
       ) : (
         (concerns ?? []).map((c) => (
-          <section key={c.id} className="flex flex-col gap-3 rounded-[14px] border border-border bg-card px-[22px] py-5">
+          <section key={c.id} className="flex flex-col gap-3 rounded-[12px] border border-border bg-card px-[22px] py-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-sm font-semibold text-ink">
                 {c.anonymous ? "Anonymous" : (nameById.get(c.trainee_id) ?? "Candidate")}

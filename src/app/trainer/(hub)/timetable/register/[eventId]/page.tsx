@@ -54,7 +54,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
 
       <form
         action={setAttendance}
-        className="flex flex-col gap-3.5 rounded-[14px] border-[1.5px] px-6 py-5"
+        className="flex flex-col gap-3.5 rounded-[12px] border-[1.5px] px-6 py-5"
         style={{ background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" }}
       >
         <input type="hidden" name="event_id" value={event.id} />

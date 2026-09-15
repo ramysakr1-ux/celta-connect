@@ -237,7 +237,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Card 1 -- Tutorials (teal) */}
         <div
-          className="flex flex-col gap-1.5 rounded-[14px] border px-5 pt-4 pb-2"
+          className="flex flex-col gap-1.5 rounded-[12px] border px-5 pt-4 pb-2"
           style={{ background: `color-mix(in oklab, ${TEAL_BAR} 7%, var(--color-card))`, borderColor: `color-mix(in oklab, ${TEAL_BAR} 30%, transparent)` }}
         >
           <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
@@ -345,7 +345,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
 
         {/* Card 2 -- Consultation blocks (gold) */}
         <div
-          className="flex flex-col gap-1.5 rounded-[14px] border px-5 pt-4 pb-2"
+          className="flex flex-col gap-1.5 rounded-[12px] border px-5 pt-4 pb-2"
           style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, borderColor: `color-mix(in oklab, ${GOLD_BAR} 40%, transparent)` }}
         >
           <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
@@ -423,7 +423,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
       </div>
 
       {/* The candidate grid -- the section's one shadowed card. */}
-      <div className="overflow-x-auto rounded-[14px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
+      <div className="overflow-x-auto rounded-[12px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
         <div className="min-w-[960px]">
           <div className="grid grid-cols-[260px_repeat(4,minmax(0,1fr))] items-end gap-x-3 border-b border-border px-5 pt-3.5 pb-2.5 text-[10.5px] font-bold tracking-[0.08em] text-muted uppercase">
             <div>Candidate</div>
@@ -467,7 +467,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
       {/* Bottom row (handoff): the opened sheet on the left, the booking rule on the right. */}
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         <OpenedSheet data={data} sheet={sheet} isMct={isMct} />
-        <div className="flex flex-col gap-2 rounded-[14px] border px-6 py-5" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, borderColor: `color-mix(in oklab, ${GOLD_BAR} 40%, transparent)` }}>
+        <div className="flex flex-col gap-2 rounded-[12px] border px-6 py-5" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, borderColor: `color-mix(in oklab, ${GOLD_BAR} 40%, transparent)` }}>
           <p className="text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(40% 0.09 68)" }}>
             Booking rule
           </p>
@@ -511,7 +511,7 @@ function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet
   }
   if (!title) {
     return (
-      <div className="rounded-[14px] border border-border bg-card px-6 py-5">
+      <div className="rounded-[12px] border border-border bg-card px-6 py-5">
         <p className="font-serif text-[20px] font-semibold text-ink-warm">Sheet</p>
         <p className="mt-1 text-[12.5px] text-muted">Click a block above, or a booked cell, and its sheet opens here.</p>
       </div>
@@ -524,7 +524,7 @@ function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet
     // different colours. Let's go with the ACT's" -- the accent tint for
     // every opened sheet, in the viewer's own role colour.
     <div
-      className="flex flex-col gap-3.5 rounded-[14px] border-[1.5px] px-6 py-5"
+      className="flex flex-col gap-3.5 rounded-[12px] border-[1.5px] px-6 py-5"
       style={{ background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" }}
     >
       <div className="flex items-start justify-between gap-4">

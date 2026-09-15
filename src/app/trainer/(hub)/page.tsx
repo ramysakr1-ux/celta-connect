@@ -82,7 +82,7 @@ function ClosingOutCard({
   const remaining = items.filter((i) => !i.done).length;
   return (
     <section
-      className="flex flex-col rounded-[14px] border"
+      className="flex flex-col rounded-[12px] border"
       style={{ background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)" }}
     >
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
@@ -1042,7 +1042,7 @@ export default async function TodayPage() {
           <NeedsYou alerts={scopedAlerts} accent={accentDeep} />
 
           {flagged.length > 0 ? (
-            <section className="flex flex-col rounded-[14px] border border-border bg-frame">
+            <section className="flex flex-col rounded-[12px] border border-border bg-frame">
               <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
                 <div className="flex items-baseline gap-2.5">
                   <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Flagged candidates</h3>
@@ -1099,7 +1099,7 @@ export default async function TodayPage() {
           {isMct && course?.assessor_visit_date ? (
             <Link
               href="/trainer/assessor"
-              className="flex flex-col gap-1.5 rounded-[14px] px-[18px] py-4 text-[oklch(96%_0.008_85)] transition-[filter] hover:brightness-[1.13]"
+              className="flex flex-col gap-1.5 rounded-[12px] px-[18px] py-4 text-[oklch(96%_0.008_85)] transition-[filter] hover:brightness-[1.13]"
               style={{ background: "var(--color-ink-warm)" }}
             >
               <span className="flex justify-between text-[10.5px] font-bold tracking-[0.11em] text-gold uppercase">

@@ -42,7 +42,7 @@ export function AccessPanel({
   const live = grants.filter((g) => !g.revokedAt);
   const past = grants.filter((g) => g.revokedAt);
   return (
-    <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
+    <section className="flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
       <div className="flex flex-col gap-[3px]">
         <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Who can see this</p>
         <p className="text-sm text-muted">
