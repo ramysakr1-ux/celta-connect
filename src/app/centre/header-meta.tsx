@@ -32,13 +32,27 @@ export function CentreHeaderMeta({
   const pathname = usePathname() ?? "";
   const onOwnerScreen = pathname === "/centre/owner" || pathname.startsWith("/centre/owner/");
 
+  // Only where it actually narrows something.
+  //
+  // The filter lives in the header, so it appeared on every room -- including
+  // the five that resolve their centre from the active one and never read
+  // ?branch at all: Settings, Payment providers, Admin roles, a course record
+  // and the volunteer importer. Clicking "Los Angeles" there changed the URL,
+  // lit up Los Angeles, and re-rendered Istanbul (walked 15 Sep 2026).
+  //
+  // An allowlist rather than a list of exceptions: a new room that does not
+  // read ?branch should not silently inherit a control that lies about it.
+  // The owner's screens have their own branch row (OwnerBranchRow).
+  const FILTERS_HERE = ["/centre", "/centre/volunteers", "/centre/concerns", "/centre/assessor-history"];
+  const filterNarrowsThisPage = FILTERS_HERE.includes(pathname);
+
   // The owner's branches move out of this cramped right-aligned line and
   // onto a row of their own (OwnerBranchRow), so that a centre group with
   // nine branches reads as nine branches rather than as an overflowing
   // control squeezed against Sign out.
   return (
     <>
-      {onOwnerScreen ? null : <BranchFilter branches={branches} />}
+      {onOwnerScreen || !filterNarrowsThisPage ? null : <BranchFilter branches={branches} />}
       {onOwnerScreen ? null : (
         <>
           <span>{fullName}</span>
