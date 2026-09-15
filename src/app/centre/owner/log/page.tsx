@@ -42,6 +42,7 @@ const ACTION_LABELS: Record<string, string> = {
   "roles.invite.revoke": "Withdrew an invitation",
   "tutor.role_changed": "Changed a tutor's role",
   "close_out.deletion_delayed": "Delayed a course close-out deletion",
+  "ownership.transfer": "Transferred centre ownership",
 };
 
 function actionLabel(action: string): string {

@@ -132,10 +132,19 @@ export async function transferCentreOwnership(_prevState: TransferOwnershipState
     return { error: "Could not complete the transfer. Try again." };
 }
 
+  // A slug like every other entry, with the before/after pair the log was
+  // built for (migration 0263). This wrote a free-text sentence and no
+  // previous/new value at all -- the most consequential action a centre can
+  // take was the one row in the log that said least (walked 15 Sep 2026).
   await admin.from("centre_owner_actions").insert({
     center_id: centerId,
     actor_profile_id: profile.id,
-    action: `Transferred ownership to ${newOwnerEmail}`,
+    action: "ownership.transfer",
+    target_table: "centre_roles",
+    target_id: newOwner.id,
+    previous_value: profile.email,
+    new_value: newOwnerEmail,
+    detail: { from_email: profile.email, to_email: newOwnerEmail },
   });
 
   revalidatePath("/centre/settings");
