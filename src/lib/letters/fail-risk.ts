@@ -10,11 +10,25 @@ import { formatCalendarDate } from "@/lib/format-date";
 // point after the Stage 3 tutorial." Slashed pairs (migration 0036) are the
 // three real "undecided" states -- Fail/Pass is the one that includes Fail
 // as a live possibility, so it triggers the same as an outright Fail.
+//
+// It did not. The comment said "or Fail/Pass" and the code compared against
+// "Fail" alone, so the one candidate the rule is most clearly about -- a
+// borderline still in play, with lessons left to act on -- never prompted
+// for a letter (walked 15 Sep 2026).
+//
+// Handbook 10.2 is written in exactly those terms: "POTENTIAL Fail
+// candidates should also be issued with a Fail letter which makes the
+// possible Fail outcome clear... issued sufficiently in advance of the end
+// of the course, ideally with at least two lessons left to teach." A
+// Fail/Pass after the Stage 3 tutorial is the definition of a potential
+// Fail; an outright Fail is past the point the letter exists to change.
+const FAIL_RISK_GRADES = ["Fail", "Fail/Pass"];
+
 export function isFailRiskTriggered(record: {
   provisional_grade: string | null;
   stage3_tutorial_given: boolean;
 }): boolean {
-  return Boolean(record.stage3_tutorial_given && record.provisional_grade === "Fail");
+  return Boolean(record.stage3_tutorial_given && record.provisional_grade && FAIL_RISK_GRADES.includes(record.provisional_grade));
 }
 
 function formatDate(iso: string): string {

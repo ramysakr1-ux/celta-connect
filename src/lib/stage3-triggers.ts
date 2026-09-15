@@ -14,6 +14,18 @@ import type { StandardRating } from "@/lib/supabase/types";
 // booklet doesn't print -- candidates who have received indications of Pass B
 // or Pass A but have not maintained their progress.
 //
+// Cambridge is genuinely two-minded about that fourth one, and the next
+// person should know rather than assume a clean mandate (checked against
+// the PDF, 15 Sep 2026). It sits in the same bulleted list under "must be
+// completed by tutors in the final third of the course for all candidates
+// who", and it carries footnote 2: "Although it is not a requirement of the
+// CELTA, where the possibility of a higher grade has been noted at the
+// Stage 2 tutorial, tutors should consider including a Stage 3 tutorial to
+// make explicit the criteria for the award of a higher grade." Treated as
+// mandatory here, which is the safe reading of an ambiguous source: a
+// missed Stage Three is a compliance failure, a spare one is a tutorial
+// that turns out to be reassuring.
+//
 // The centre-wide setting below is ours, not Cambridge's: 10.2 neither grants
 // nor forbids giving Stage Three to every candidate. It is safe because it
 // only ever adds candidates.
@@ -88,7 +100,14 @@ export function computeStage3Triggers(input: Stage3TriggerInput): Stage3Trigger[
   return fired;
 }
 
-/** Cambridge-mandated triggers only -- the floor a centre setting cannot lower. */
+/**
+ * The floor a centre setting cannot lower.
+ *
+ * Not purely Cambridge's, despite what this said: `assignment_failed` is
+ * Ramy's rule (31 Aug 2026) and `higher_grade_not_maintained` carries
+ * 10.2's own "not a requirement of the CELTA" footnote. Everything except
+ * the centre's own give-it-to-everyone setting counts as the floor.
+ */
 export function isStage3Mandatory(triggers: Stage3Trigger[]): boolean {
   return triggers.some((t) => t !== "centre_gives_to_all");
 }
