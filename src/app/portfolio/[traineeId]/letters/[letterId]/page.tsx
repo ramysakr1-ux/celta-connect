@@ -84,7 +84,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
         </div>
 
         <a href={`/api/formal-letter/${letterId}`} className="self-start text-sm font-medium text-primary hover:underline">
-          Download PDF →
+          Download PDF
         </a>
 
         <div className="border-t border-border-faint pt-3">

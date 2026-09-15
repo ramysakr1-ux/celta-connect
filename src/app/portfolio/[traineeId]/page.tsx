@@ -558,7 +558,7 @@ export default async function CourseStreamPage({
                   rel="noopener noreferrer"
                   className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
                 >
-                  Download withdrawal letter →
+                  Download withdrawal letter
                 </a>
               ) : null}
               {trainee.course_status === "deferred" && deferralTransfer ? (

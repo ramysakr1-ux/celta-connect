@@ -30,7 +30,7 @@ export function DeferralLetterSection({
             {l.acknowledged_at ? "acknowledged" : "awaiting acknowledgement"}
           </span>
           <a href={`/api/formal-letter/${l.id}`} className="font-semibold text-primary hover:underline">
-            Download →
+            Download
           </a>
         </div>
       ))}

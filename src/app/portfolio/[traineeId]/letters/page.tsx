@@ -100,7 +100,7 @@ export default async function CandidateLettersPage({ params }: { params: Promise
               {l.acknowledged_at ? `Acknowledged by the candidate ${longDate(l.acknowledged_at, timeZone)}.` : "Not yet acknowledged."}
             </span>
           </span>
-          <span className="shrink-0 pt-0.5 text-[11px] font-semibold text-primary">Open →</span>
+          <span className="shrink-0 pt-0.5 text-[11px] font-semibold text-primary">Open</span>
         </Link>
       ))}
 

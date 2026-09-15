@@ -359,8 +359,11 @@ function Pill({
           {state}
         </span>
       </span>
-      <span className="shrink-0 text-[11px] font-semibold" style={{ color: href ? TEAL : "transparent" }}>
-        →
+      {/* No trailing arrow on a label (Ramy, 5 Sep 2026) -- the pill's own
+          shape and hover say it opens. The placeholder kept the row's
+          spacing when there is nothing to open, so it stays as a spacer. */}
+      <span className="shrink-0 text-[11px] font-semibold" style={{ color: "transparent" }} aria-hidden>
+        &nbsp;
       </span>
     </>
   );
@@ -422,7 +425,7 @@ function Card({
         </span>
       </span>
       <span className="shrink-0 pt-[3px] text-[11px] font-semibold" style={{ color: TEAL }}>
-        Open →
+        Open
       </span>
     </Link>
   );
