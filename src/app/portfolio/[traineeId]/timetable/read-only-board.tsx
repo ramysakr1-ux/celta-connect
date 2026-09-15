@@ -256,7 +256,7 @@ export function ReadOnlyTimetableBoard({
               {band.label.replace(/\s*[–-]\s*/, " – ")}
             </div>
           ))}
-          {(week?.rows ?? []).map((row) => {
+          {(week?.rows ?? []).map((row, rowIndex) => {
             const isToday = row.isoDate === today;
             return (
               <div
@@ -281,11 +281,27 @@ export function ReadOnlyTimetableBoard({
                     <p className="text-[8.5px] font-bold tracking-[0.1em] text-primary uppercase">Today</p>
                   ) : null}
                 </div>
-                <div style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
+                {/* overflow visible so a lifted card is not clipped by its
+                    own cell, and each cell ripples in on the spec's own
+                    diagonal: column x 28ms + row x 40ms. */}
+                <div
+                  className="tt-tile"
+                  style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5, overflow: "visible", animationDelay: `${rowIndex * 40}ms` }}
+                >
                   <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                 </div>
                 {row.bands.map((bandEvents, i) => (
-                  <div key={i} style={{ minHeight: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
+                  <div
+                    key={i}
+                    className="tt-tile"
+                    style={{
+                      minHeight: ROW_HEIGHT,
+                      boxSizing: "border-box",
+                      padding: 5,
+                      overflow: "visible",
+                      animationDelay: `${(i + 1) * 28 + rowIndex * 40}ms`,
+                    }}
+                  >
                     <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                   </div>
                 ))}
@@ -481,7 +497,7 @@ function Cell({
     const faded = mineOnly && !mine;
     return (
       <div
-        className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
+        className="tt-card flex flex-col gap-1.5 rounded-[10px] p-2"
         style={{
           opacity: faded ? 0.25 : 1,
           backdropFilter: "blur(10px)",
@@ -528,7 +544,7 @@ function Cell({
         return (
           <div
             key={event.id}
-            className="min-w-0 rounded-[10px] p-2 transition-opacity duration-150"
+            className="tt-card min-w-0 rounded-[10px] p-2"
             style={{
               opacity: faded ? 0.25 : 1,
               backdropFilter: "blur(10px)",
@@ -609,7 +625,7 @@ function CameraChip({ event, live, mine }: { event: TimetableEvent; live: boolea
 
   const icon = (
     <span
-      className="mt-0.5 inline-flex size-[22px] items-center justify-center rounded-full"
+      className={`tt-join${clickable ? " tt-join-live" : ""} mt-0.5 inline-flex size-[22px] items-center justify-center rounded-full`}
       style={
         clickable
           ? { background: "oklch(38% 0.072 195)", color: "white" }
