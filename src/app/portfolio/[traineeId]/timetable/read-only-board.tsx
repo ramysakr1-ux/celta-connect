@@ -86,7 +86,7 @@ export interface ReadOnlyBoardProps {
   mineMeaning?: string;
   /** What to say about changing the schedule; a tutor is pointed at the editor, not at "your tutor". */
   changeHint?: string;
-  /** Which lens the board opens on. Defaults to the reader's own sessions. */
+  /** Which lens the board opens on. Defaults to everything. */
   defaultLens?: "mine" | "everything";
   today: string;
   nowIso: string;
@@ -122,7 +122,10 @@ export function ReadOnlyTimetableBoard({
   // opens on the reader's own group -- one card per slot -- and Everything
   // stays one flip away. An assessor's Mine is their visit day alone, so
   // their board opens on Everything (the page passes the lens in).
-  const [mineOnly, setMineOnly] = useState(defaultLens !== "everything");
+  // Ramy, 15 Sep 2026, once each TP card named its group: "open on both
+  // groups by default." Everything is the opening lens again; Mine is the
+  // flip.
+  const [mineOnly, setMineOnly] = useState(defaultLens === "mine");
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
 
   const week = weeks[weekIndex] ?? weeks[0];
