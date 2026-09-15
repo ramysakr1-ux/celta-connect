@@ -205,9 +205,7 @@ export interface ReassignState {
  * rather than in the render that drew the button.
  */
 export async function reassignUnownedCourse(_prev: ReassignState, formData: FormData): Promise<ReassignState> {
-  // ctx comes back from requireOwner rather than being fetched again --
-  // getCentreRoleContext is a real round trip, and it has already run.
-  const { profile, ctx } = await requireOwner();
+  const { profile } = await requireOwner();
   const courseId = formData.get("courseId");
   const centreRoleId = formData.get("centreRoleId");
   if (typeof courseId !== "string" || typeof centreRoleId !== "string" || !courseId || !centreRoleId) {
@@ -215,10 +213,17 @@ export async function reassignUnownedCourse(_prev: ReassignState, formData: Form
   }
 
   const admin = createAdminClient();
-  const mine = ctx.availableCenterIds.filter(Boolean);
 
   const { data: course } = await admin.from("courses").select("id, name, center_id").eq("id", courseId).maybeSingle();
-  if (!course || !mine.includes(course.center_id)) {
+  if (!course) return { error: "That course is not at a centre you own.", ok: null };
+  // Owner AT THAT CENTRE. This asked availableCenterIds -- every centre they
+  // can switch into -- while requireOwner() had only proved owner at the one
+  // they were acting in, so an owner of one branch who is a read-only
+  // observer at another could hand out that branch's courses. The message
+  // said "a centre you own"; the check said "a centre you can reach"
+  // (walked 15 Sep 2026).
+  const atCourseCentre = await getCentreRoleContext({ ...profile, active_center_id: course.center_id });
+  if (atCourseCentre.activeCenterId !== course.center_id || !atCourseCentre.roles.includes("centre_owner")) {
     return { error: "That course is not at a centre you own.", ok: null };
   }
 
