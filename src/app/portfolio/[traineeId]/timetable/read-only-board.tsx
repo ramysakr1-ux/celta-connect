@@ -15,6 +15,12 @@ import { CATEGORY_STYLE, toDisplayCategory, type DisplayCategory } from "@/lib/t
 // From the design file, verbatim.
 const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
 const ROW_HEIGHT = 108;
+/** The card inside a cell: 108px row less the cell's 5px padding top and
+ *  bottom. "Every populated cell is one identical tile (one grid column,
+ *  108px row) regardless of session duration" -- README, Tile sizing
+ *  (settled), and the handoff HTML's own `height: 100%` on the card. Lunch
+ *  included: it is a tile like any other, it just recedes in colour. */
+const TILE_HEIGHT = ROW_HEIGHT - 10;
 
 function CameraIcon() {
   return (
@@ -481,8 +487,10 @@ function Cell({
     const faded = mineOnly && !mine;
     return (
       <div
-        className="tt-card flex flex-col gap-1.5 rounded-[10px] p-2"
+        className="tt-card flex flex-col gap-1.5 overflow-hidden rounded-[10px] p-2"
         style={{
+          height: TILE_HEIGHT,
+          flex: "0 0 auto",
           opacity: faded ? 0.25 : 1,
           backdropFilter: "blur(10px)",
           border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -528,8 +536,10 @@ function Cell({
         return (
           <div
             key={event.id}
-            className="tt-card min-w-0 rounded-[10px] p-2"
+            className="tt-card min-w-0 overflow-hidden rounded-[10px] p-2"
             style={{
+              height: TILE_HEIGHT,
+              flex: "0 0 auto",
               opacity: faded ? 0.25 : 1,
               backdropFilter: "blur(10px)",
               border: "1px solid oklch(100% 0 0 / 0.75)",
@@ -580,7 +590,7 @@ function SessionTile({
   const live = isEventLive(event, now, timeZone);
 
   return (
-    <button type="button" onClick={() => onSelect(event)} className="flex flex-col items-start gap-1 text-left">
+    <button type="button" onClick={() => onSelect(event)} className="flex h-full w-full min-h-0 flex-col items-start gap-1 text-left">
       <span className="text-[11.5px] leading-snug text-ink" style={{ fontWeight: titleWeight }}>
         {event.title}
       </span>
@@ -590,8 +600,12 @@ function SessionTile({
           {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
-      {youTeach ? <span className="pill pill-neutral text-[9px]">You teach</span> : null}
-      {showCamera ? <CameraChip event={event} live={live} mine={mine} /> : null}
+      {youTeach ? <span className="pill pill-neutral mt-auto text-[9px]">You teach</span> : null}
+      {showCamera ? (
+        <span className={youTeach ? "" : "mt-auto"}>
+          <CameraChip event={event} live={live} mine={mine} />
+        </span>
+      ) : null}
     </button>
   );
 }
