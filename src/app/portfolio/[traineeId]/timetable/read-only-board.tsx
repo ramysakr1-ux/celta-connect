@@ -62,13 +62,6 @@ export interface EventMeta {
   sheetHref?: string | null;
   /** What that door says; defaults to the booking sheet it was built for. */
   sheetLabel?: string;
-  /**
-   * A TP lesson belonging to the OTHER group: same round, same letter,
-   * another room at another level. Not a session this reader could be in,
-   * so under Mine it leaves the grid instead of fading -- fading kept every
-   * TP band two cards tall.
-   */
-  otherGroup?: boolean;
 }
 
 export interface ReadOnlyBoardProps {
@@ -93,7 +86,7 @@ export interface ReadOnlyBoardProps {
   timeZone: string;
 }
 
-const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null, otherGroup: false };
+const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
 
 export function ReadOnlyTimetableBoard({
   events,
@@ -327,9 +320,7 @@ export function ReadOnlyTimetableBoard({
               bandEvents.map((e) => ({ band: timeBands[i]?.label ?? "", event: e }))
             ),
           ];
-          const visible = rowItems.filter(
-            ({ event }) => !mineOnly || ((eventMeta[event.id] ?? EMPTY_META).mine && !(eventMeta[event.id] ?? EMPTY_META).otherGroup)
-          );
+          const visible = rowItems.filter(({ event }) => !mineOnly || (eventMeta[event.id] ?? EMPTY_META).mine);
           if (visible.length === 0) return null;
           return (
             <div
@@ -444,12 +435,6 @@ export function ReadOnlyTimetableBoard({
   );
 }
 
-/** What a cell shows under the current lens. */
-function visibleIn(events: TimetableEvent[], eventMeta: Record<string, EventMeta>, mineOnly: boolean): TimetableEvent[] {
-  if (!mineOnly) return events;
-  return events.filter((e) => !(eventMeta[e.id] ?? EMPTY_META).otherGroup);
-}
-
 function Cell({
   events,
   eventMeta,
@@ -465,7 +450,6 @@ function Cell({
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
 }) {
-  events = visibleIn(events, eventMeta, mineOnly);
   if (events.length === 0) return null;
 
   // Ramy, 28 Aug 2026: "the master timetable" -- simultaneous TP slots

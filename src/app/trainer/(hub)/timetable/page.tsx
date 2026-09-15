@@ -555,15 +555,11 @@ export default async function TrainerTimetablePage({
     // about a missing register had no way to submit one (walked 14 Sep
     // 2026). Assessors are read-only here and get no register door.
     const registerHref = event.type === "tp" && !isAssessorViewer ? `/trainer/timetable/register/${event.id}` : null;
-    const otherGroup = Boolean(
-      !isAssessorViewer && event.type === "tp" && event.tp_group_scope_id && ownedGroupIds.size > 0 && !ownedGroupIds.has(event.tp_group_scope_id)
-    );
     // Ramy, 15 Sep 2026: "show the group name on the TP card." Two groups
     // teach the same three slots at the same times, so without it two cards
-    // in a band read as the same lesson twice. The candidate's board has
-    // carried it since 12 Sep; the tutor's never did.
+    // in a band read as the same lesson twice.
     const groupName = event.type === "tp" && event.tp_group_scope_id ? ((tpGroups ?? []).find((g) => g.id === event.tp_group_scope_id)?.name ?? null) : null;
-    eventMeta[event.id] = { mine, otherGroup, groupName, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
+    eventMeta[event.id] = { mine, groupName, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
       sheetHref: sheetHrefByEventId.get(event.id) ?? registerHref,
       sheetLabel: sheetHrefByEventId.has(event.id) ? undefined : registerHref ? "Take the register" : undefined,
     };
