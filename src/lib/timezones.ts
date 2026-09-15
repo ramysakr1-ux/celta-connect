@@ -31,5 +31,5 @@ export const TIMEZONE_OPTIONS: { value: string; label: string }[] = Intl.support
   .sort((a, b) => a.offsetMinutes - b.offsetMinutes || a.value.localeCompare(b.value))
   .map(({ value, offsetMinutes }) => ({
     value,
-    label: `${offsetLabel(offsetMinutes)} -- ${value.replace(/_/g, " ")}`,
+    label: `${offsetLabel(offsetMinutes)} · ${value.replace(/_/g, " ")}`,
   }));
