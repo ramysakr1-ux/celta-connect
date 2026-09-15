@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCurrency } from "@/lib/money-by-currency";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // for-claude-code-command-center.md, built 2026-08-25, restructured to
 // command-center-full-spec.md's sidebar-nav shell the same day. Ramy's own
@@ -132,7 +134,16 @@ export default async function CommandCenterOverviewPage() {
   const ACTIVATION_DAYS = 7;
   const activationCutoff = new Date();
   activationCutoff.setDate(activationCutoff.getDate() - ACTIVATION_DAYS);
-  const staleOnboarding = (pendingCentreInvites ?? []).filter((i) => new Date(i.created_at) < activationCutoff);
+  // Scoped to the centres Ramy actually holds a door into, like the
+  // malpractice rows beside it. centre_admin_invites is a CENTRE inviting
+  // its own colleague -- internal staffing, not Connect's onboarding of the
+  // centre -- and this listed every centre's, by name, including centres
+  // with none of the three doors. The rule at the top of this file is that
+  // such a centre "shows only its name and whether a course is currently
+  // running -- nothing else, no drill-through" (walked 15 Sep 2026).
+  const staleOnboarding = (pendingCentreInvites ?? []).filter(
+    (i) => accessibleCenterIds.has(i.center_id) && new Date(i.created_at) < activationCutoff
+  );
 
   const in30Days = new Date();
   in30Days.setDate(in30Days.getDate() + 30);
@@ -159,7 +170,10 @@ export default async function CommandCenterOverviewPage() {
       .filter((i) => accessibleCenterIds.has(i.center_id) || i.status === "paid")
       .map((i) => ({
         at: i.paid_at ?? i.created_at,
-        label: `${centerNameById.get(i.center_id) ?? "A centre"}'s ${i.currency}${i.amount.toLocaleString()} invoice ${i.status === "paid" ? "paid" : i.status === "void" ? "voided" : "recorded"}`,
+        // "USD5,600" until 15 Sep 2026 -- currency here is an ISO code, and
+        // the Money and Accounts pages had already been fixed for exactly
+        // this; the overview was the one left concatenating.
+        label: `${centerNameById.get(i.center_id) ?? "A centre"}'s ${formatCurrency(i.amount, i.currency)} invoice ${i.status === "paid" ? "paid" : i.status === "void" ? "voided" : "recorded"}`,
       })),
   ]
     .filter((a) => a.at)
@@ -288,7 +302,7 @@ export default async function CommandCenterOverviewPage() {
                     key={i.id}
                     dot={GOLD}
                     title={`Overdue payment, ${Math.floor((Date.now() - new Date(i.due_date!).getTime()) / 86400000)} days`}
-                    detail={`${centerNameById.get(i.center_id) ?? "A centre"} — ${i.currency}${i.amount.toLocaleString()} outstanding, past the ${OVERDUE_DAYS}-day reminder.`}
+                    detail={`${centerNameById.get(i.center_id) ?? "A centre"} — ${formatCurrency(i.amount, i.currency)} outstanding, past the ${OVERDUE_DAYS}-day reminder.`}
                   />
                 ))}
                 {staleOnboarding.map((i) => (
@@ -300,7 +314,14 @@ export default async function CommandCenterOverviewPage() {
                   />
                 ))}
                 {renewalsDue.map((s, i) => (
-                  <AttentionRow key={i} dot={GOLD} title="Renewal due" detail={`${centerNameById.get(s.center_id) ?? "A centre"} — renews ${s.renewal_date}.`} />
+                  <AttentionRow
+                    key={i}
+                    dot={GOLD}
+                    title="Renewal due"
+                    detail={`${centerNameById.get(s.center_id) ?? "A centre"} — renews ${
+                      s.renewal_date ? formatCalendarDate(s.renewal_date, { day: "numeric", month: "short", year: "numeric" }) : "date not set"
+                    }.`}
+                  />
                 ))}
               </>
             )}
