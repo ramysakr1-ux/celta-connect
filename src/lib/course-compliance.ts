@@ -222,6 +222,45 @@ export function tpGroupSizeProblems(input: { groups: { id: string; name: string;
 }
 
 /**
+ * A cohort outside the size Cambridge allows a course to run at.
+ *
+ * Handbook §7.1: "The minimum number of candidates to run a course is
+ * four... The maximum number of candidates on a course is 24 with 4
+ * teaching practice groups." And, for the low end, an explicit instruction
+ * the centre has to act on rather than merely notice: "If a centre has
+ * either a course or a TP group with fewer than four candidates, they must
+ * notify CELTA Admin and consult their JCA for guidance to ensure that
+ * course requirements are met."
+ *
+ * TP GROUP size is already checked (four to six, tpGroupSizeProblems); the
+ * COURSE total was not, so a course of three or of twenty-six passed every
+ * check in this file. Counted on active candidates: a withdrawal can take a
+ * cohort under four mid-course, which is exactly when the centre needs to
+ * be told, and the detail says what §7.1 asks them to do about it.
+ */
+export function cohortSizeProblems(input: { activeCandidates: number }): ComplianceProblem[] {
+  const MIN = 4;
+  const MAX = 24;
+  const n = input.activeCandidates;
+  if (n === 0 || (n >= MIN && n <= MAX)) return [];
+  return [
+    {
+      tag: "Cohort size",
+      message:
+        n < MIN
+          ? `${n} active candidate${n === 1 ? "" : "s"} -- a course runs on a minimum of four`
+          : `${n} active candidates -- the maximum on a course is ${MAX}`,
+      detail:
+        n < MIN
+          ? "Notify CELTA Admin and consult your Joint Chief Assessor for guidance (Handbook 7.1)"
+          : `${n - MAX} over, across a maximum of four teaching practice groups`,
+      href: "/trainer/roster",
+      cite: "7.1",
+    },
+  ];
+}
+
+/**
  * A teaching practice class too small to be assessed.
  *
  * Handbook §9.1.3: "a minimum of 50% of teaching practice must be with

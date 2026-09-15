@@ -24,7 +24,7 @@ import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
-import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpClassSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, cohortSizeProblems, tpClassSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -757,6 +757,9 @@ export default async function TodayPage() {
       sizeByGroup.set(tpGroupId, (sizeByGroup.get(tpGroupId) ?? 0) + 1);
     }
     problems.push(...tpGroupSizeProblems({ groups: (tpGroups ?? []).map((g) => ({ id: g.id, name: g.name, size: sizeByGroup.get(g.id) ?? 0 })) }));
+    // Handbook 7.1's course-level bounds, four to twenty-four. The group
+    // check above is a different rule with a different number.
+    problems.push(...cohortSizeProblems({ activeCandidates: activeIds.size }));
 
     // Handbook 9.1.3's class-size floor -- see tpClassSizeProblems. Grouped
     // by level, because that is what a class is here: two run in parallel

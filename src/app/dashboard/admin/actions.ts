@@ -107,6 +107,13 @@ export async function createCourse(
   if (cohortSize !== null && (!Number.isInteger(cohortSize) || cohortSize <= 0)) {
     return { error: "Maximum cohort size should be a whole number." };
   }
+  // Handbook 7.1: "The maximum number of candidates on a course is 24 with 4
+  // teaching practice groups." Refused at creation rather than raised as a
+  // compliance problem later, because a cohort cap is a number somebody
+  // types once and it can simply be right.
+  if (cohortSize !== null && cohortSize > 24) {
+    return { error: "The maximum cohort on a CELTA course is 24 (Handbook 7.1)." };
+  }
 
   const supabase = await createClient();
   const { data: createdCourse, error } = await supabase.from("courses").insert({
