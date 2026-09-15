@@ -7,6 +7,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { sendVolunteerClassStartingEmail } from "@/lib/volunteer-class-starting";
 import { linkVolunteerByEmail } from "@/lib/volunteer-identity";
+import { endOfCourseDay } from "@/lib/access-link-expiry";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 export interface FormState {
   error: string | null;
@@ -44,7 +46,7 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
     await linkVolunteerByEmail(createAdminClient(), { volunteerStudentId: volunteer.id, centerId: trainer.center_id, email });
   }
 
-  const expiresAt = new Date(`${course.end_date}T23:59:59Z`).toISOString();
+  const expiresAt = endOfCourseDay(course.end_date, (await getCachedCenter(trainer.center_id))?.time_zone);
   const { error: tokenError } = await supabase.from("course_access_tokens").insert({
     course_id: trainer.course_id,
     role: "volunteer_student",
@@ -97,7 +99,7 @@ export async function reissueVolunteerLink(_prevState: ReissueState, formData: F
     course_id: trainer.course_id,
     role: "volunteer_student",
     volunteer_student_id: volunteer.id,
-    expires_at: new Date(`${course.end_date}T23:59:59Z`).toISOString(),
+    expires_at: endOfCourseDay(course.end_date, (await getCachedCenter(trainer.center_id))?.time_zone),
   });
   if (error) {
     console.error("[trainer/(hub)/volunteers:reissueVolunteerLink]", error);
@@ -165,7 +167,7 @@ export async function getOrCreateRegisterViewToken(): Promise<{ token: string | 
   const { data: course } = await supabase.from("courses").select("end_date").eq("id", trainer.course_id).maybeSingle();
   if (!course) return { token: null, error: "Could not find your course." };
 
-  const expiresAt = new Date(`${course.end_date}T23:59:59Z`).toISOString();
+  const expiresAt = endOfCourseDay(course.end_date, (await getCachedCenter(trainer.center_id))?.time_zone);
   const { data: created, error } = await supabase
     .from("course_access_tokens")
     .insert({ course_id: trainer.course_id, role: "register_viewer", expires_at: expiresAt })

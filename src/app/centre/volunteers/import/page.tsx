@@ -14,6 +14,12 @@ export default async function VolunteerImportPage() {
   const ctx = await getCentreRoleContext(profile);
   const mayImport = ctx.roles.length === 0 || can(ctx.roles, "volunteers.manage", ctx.overrides);
   if (!mayImport) redirect("/centre/volunteers");
+  // The branch you are actually looking at. A branch owner switching to
+  // another branch got their HOME centre's courses here, so the only
+  // courses offered were ones the pool beside it wasn't showing (walked
+  // 15 Sep 2026) -- same `activeCenterId ?? center_id` every other room in
+  // Centre Management uses.
+  const centerId = ctx.activeCenterId ?? profile.center_id;
 
   return (
     <div className="flex flex-col gap-6">
@@ -27,7 +33,7 @@ export default async function VolunteerImportPage() {
         </Link>
       </div>
 
-      <SpreadsheetImportSection kind="volunteers" centerId={profile.center_id} />
+      <SpreadsheetImportSection kind="volunteers" centerId={centerId} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { can } from "@/lib/auth/centre-permissions";
 import { getAccessTokenFromRefreshToken } from "@/lib/google/oauth";
 import { analyseVolunteerRows, type VolunteerColumnMapping, type VolunteerImportAnalysis } from "@/lib/volunteer-spreadsheet-import";
 import { isWithinUndoWindow } from "@/lib/spreadsheet-import";
+import { endOfCourseDay } from "@/lib/access-link-expiry";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // Ramy, 25/26 Aug 2026: "center management also have one" -- the volunteer
 // counterpart to src/app/centre/import/actions.ts, gated on the
@@ -22,20 +24,22 @@ async function requireVolunteerImportRole() {
   if (ctx.roles.length > 0 && !can(ctx.roles, "volunteers.manage", ctx.overrides)) {
     throw new Error("Your role can't manage volunteers.");
   }
-  return profile;
+  // The branch being worked in, not the home one -- see the note on the
+  // import page.
+  return { profile, centerId: ctx.activeCenterId ?? profile.center_id };
 }
 
 // Same centre-level Drive connection the applicant import and TP-materials
 // pickers already use -- one connection, set once in Settings, good for
 // every picker in the app.
 export async function getCenterDriveAccessTokenForVolunteerImport(): Promise<{ accessToken: string } | { error: string }> {
-  const profile = await requireVolunteerImportRole();
+  const { centerId } = await requireVolunteerImportRole();
   const admin = createAdminClient();
 
   const { data: connection } = await admin
     .from("center_google_connections")
     .select("refresh_token")
-    .eq("center_id", profile.center_id)
+    .eq("center_id", centerId)
     .maybeSingle();
 
   if (!connection) return { error: "Your centre hasn't connected Google Drive yet -- connect it in Settings first." };
@@ -65,6 +69,7 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
   if (ctx.roles.length > 0 && !can(ctx.roles, "volunteers.manage", ctx.overrides)) {
     return { error: "Your role can't manage volunteers." };
   }
+  const centerId = ctx.activeCenterId ?? profile.center_id;
   const supabase = await createClient();
 
   const courseId = formData.get("course_id") as string | null;
@@ -89,7 +94,7 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
     .from("courses")
     .select("id, end_date")
     .eq("id", courseId)
-    .eq("center_id", profile.center_id)
+    .eq("center_id", centerId)
     .maybeSingle();
   if (!course) return { error: "That course isn't in your centre." };
 
@@ -103,7 +108,7 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
   const { data: importRow, error: importError } = await supabase
     .from("spreadsheet_imports")
     .insert({
-      center_id: profile.center_id,
+      center_id: centerId,
       intake_course_id: courseId,
       kind: "volunteers",
       source_filename: sourceFilename,
@@ -116,7 +121,7 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
   if (importError || !importRow) return { error: "Could not start the import. Nothing was created." };
 
   const admin = createAdminClient();
-  const expiresAt = new Date(`${course.end_date}T23:59:59Z`).toISOString();
+  const expiresAt = endOfCourseDay(course.end_date, (await getCachedCenter(centerId))?.time_zone);
 
   const { data: inserted, error: insertError } = await admin
     .from("volunteer_students")
@@ -155,7 +160,7 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
 }
 
   revalidatePath("/centre/volunteers");
-  revalidatePath("/centre/import");
+  revalidatePath("/centre/volunteers/import");
   return { importId: importRow.id, imported: inserted.length };
 }
 
@@ -170,6 +175,7 @@ export async function undoVolunteerImport(_prev: UndoVolunteerImportState, formD
   if (ctx.roles.length > 0 && !can(ctx.roles, "volunteers.manage", ctx.overrides)) {
     return { error: "Your role can't manage volunteers." };
   }
+  const centerId = ctx.activeCenterId ?? profile.center_id;
   const supabase = await createClient();
 
   const importId = formData.get("import_id") as string | null;
@@ -179,7 +185,7 @@ export async function undoVolunteerImport(_prev: UndoVolunteerImportState, formD
     .from("spreadsheet_imports")
     .select("id, created_at, undone_at, kind")
     .eq("id", importId)
-    .eq("center_id", profile.center_id)
+    .eq("center_id", centerId)
     .maybeSingle();
   if (!imp || imp.kind !== "volunteers") return { error: "That import isn't in your centre." };
   if (imp.undone_at) return { error: "That import has already been undone." };
@@ -219,6 +225,6 @@ export async function undoVolunteerImport(_prev: UndoVolunteerImportState, formD
     .eq("id", importId);
 
   revalidatePath("/centre/volunteers");
-  revalidatePath("/centre/import");
+  revalidatePath("/centre/volunteers/import");
   return { removed: ids.length };
 }

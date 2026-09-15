@@ -11,6 +11,8 @@ import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { buildAssessorInviteEmailHtml } from "@/lib/assessor-invite-email";
 import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
+import { endOfCourseDay } from "@/lib/access-link-expiry";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // for-claude-code-assessor-pack-decisions.md §1: "Centres need a way to
 // mark which candidates are 'selected for this visit'... a simple toggle."
@@ -85,7 +87,10 @@ export async function getOrCreateAssessorToken(): Promise<AssessorTokenResult> {
   // weeks of the course end date." A link that died at course close cut them
   // off exactly while they were writing. Ramy, 12 Sep 2026: course end + 14
   // days. (Email #18's "Access ends" line and the spec say the same now.)
-  const expiresAt = new Date(new Date(`${course.end_date}T23:59:59Z`).getTime() + ASSESSOR_REPORT_WINDOW_DAYS * 86400000).toISOString();
+  const expiresAt = new Date(
+    new Date(endOfCourseDay(course.end_date, (await getCachedCenter(trainer.center_id))?.time_zone)).getTime() +
+      ASSESSOR_REPORT_WINDOW_DAYS * 86400000
+  ).toISOString();
   const { data: created, error } = await supabase
     .from("course_access_tokens")
     .insert({ course_id: trainer.course_id, role: "assessor", expires_at: expiresAt })
