@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // specs/build-spec.md §2: "do not allow [close-out] while: a deferred
 // candidate has no destination course chosen (or an explicit 'hold at
@@ -7,13 +7,29 @@ import { createClient } from "@/lib/supabase/server";
 // final grades. Hold the erasure, not the export." -- read here for the
 // admin UI, and re-checked server-side in initiateCloseOut before any
 // state changes, since a UI check alone is never enough authorization.
+//
+// Read through the ADMIN client, not the caller's session.
+//
+// It used to use the session client, and grade_query_replies' policy is
+// `course_id = current_course_id()` -- the reader's own active course. A
+// centre admin running close-out has no active course, and an MCT closing
+// a course they are not currently switched into does not match either, so
+// the open-appeals query came back empty and the "a grade appeal is still
+// open" reason silently disappeared. The candidate whose grade was under
+// appeal would have had their account and all their coursework
+// permanently deleted seven days later, which is the exact thing this rule
+// exists to prevent (walked 15 Sep 2026).
+//
+// A safety check has to read what is true, not what the person asking
+// happens to be able to see. Every caller is already authorised to be on
+// the screen.
 export interface CloseOutBlockingReason {
   code: "deferred_without_destination" | "extension_outstanding" | "cambridge_not_confirmed" | "grade_appeal_open";
   message: string;
 }
 
 export async function getCloseOutBlockingReasons(courseId: string): Promise<CloseOutBlockingReason[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const reasons: CloseOutBlockingReason[] = [];
 
   const [{ data: course }, { data: unlinkedDeferrals }, { data: extensionTrainees }, { data: openAppeals }] = await Promise.all([

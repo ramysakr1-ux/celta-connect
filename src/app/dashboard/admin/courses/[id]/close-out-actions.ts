@@ -25,6 +25,7 @@ async function refuseIfDemo(courseId: string): Promise<string | null> {
   return center?.is_demo ? DEMO_REFUSAL : null;
 }
 import { holdsCentre } from "@/lib/branch-scope";
+import { canAtCentre } from "@/lib/auth/centre-roles";
 
 export interface FormState {
   error: string | null;
@@ -41,9 +42,23 @@ const NOT_MCT_ERROR = "Only the main course tutor can run close-out.";
 
 async function requireMctCloseOutAccess(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  trainer: { role: string; id: string; course_id: string | null }
+  trainer: { role: string; id: string; center_id: string; active_center_id?: string | null; course_id: string | null },
+  courseCentreId: string
 ): Promise<boolean> {
-  if (trainer.role === "admin" || !trainer.course_id) return true;
+  // The centre side of this was `trainer.role === "admin"`, which is the
+  // whole centre-admin family -- including the Course administrator, whom
+  // the design explicitly excludes ("MCT territory once the course is
+  // running, not Course Admin's"), and the READ-ONLY Centre observer.
+  //
+  // Signing the receipt starts a seven-day clock that permanently deletes
+  // every candidate's account and all their coursework. It is the most
+  // destructive action in the app, and it was gated on a job title
+  // (walked 15 Sep 2026). centre.settings.edit is held by the Centre
+  // manager and the Centre owner alone, which is the "full access" this
+  // was reaching for.
+  if (trainer.role === "platform_owner") return true;
+  if (trainer.role === "admin") return canAtCentre(trainer, "centre.settings.edit", courseCentreId);
+  if (!trainer.course_id) return false;
   return isMctOnCourse(supabase, trainer.course_id, trainer.id);
 }
 
@@ -59,7 +74,7 @@ export async function toggleCambridgeGradesConfirmed(formData: FormData): Promis
   if (!course) return;
 
   const supabase = await createClient();
-  if (!(await requireMctCloseOutAccess(supabase, trainer))) return;
+  if (!(await requireMctCloseOutAccess(supabase, trainer, course.center_id))) return;
   const { data: current } = await supabase.from("courses").select("cambridge_grades_confirmed_at").eq("id", courseId).single();
 
   await supabase
@@ -101,7 +116,7 @@ export async function recordCertificateGrade(_prevState: FormState, formData: Fo
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
-  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
+  if (!(await requireMctCloseOutAccess(supabase, trainer, course.center_id))) return { error: NOT_MCT_ERROR };
   const { error } = await supabase
     .from("celta5_records")
     .update(
@@ -149,7 +164,7 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
-  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
+  if (!(await requireMctCloseOutAccess(supabase, trainer, course.center_id))) return { error: NOT_MCT_ERROR };
 
   const demoRefusal = await refuseIfDemo(courseId);
   if (demoRefusal) return { error: demoRefusal };
@@ -217,7 +232,7 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
-  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
+  if (!(await requireMctCloseOutAccess(supabase, trainer, course.center_id))) return { error: NOT_MCT_ERROR };
 
   const blockingReasons = await getCloseOutBlockingReasons(courseId);
   if (blockingReasons.length > 0) {
@@ -276,7 +291,7 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
-  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
+  if (!(await requireMctCloseOutAccess(supabase, trainer, course.center_id))) return { error: NOT_MCT_ERROR };
 
   const demoRefusal = await refuseIfDemo(courseId);
   if (demoRefusal) return { error: demoRefusal };
@@ -332,7 +347,7 @@ export async function exportCloseOut(_prevState: FormState, formData: FormData):
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
-  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
+  if (!(await requireMctCloseOutAccess(supabase, trainer, course.center_id))) return { error: NOT_MCT_ERROR };
 
   const demoRefusal = await refuseIfDemo(courseId);
   if (demoRefusal) return { error: demoRefusal };
