@@ -13,6 +13,18 @@ import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 import { getTraineeStreamDayOrNext } from "@/lib/trainee-day";
 import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
+import { ordinal } from "@/lib/stage2-tutorials";
+import { classLessons, levelKey } from "@/lib/volunteer-class-session";
+
+// "1 of 2 coming" once somebody has replied; "nobody has replied yet" when
+// nobody has. Silence is not a yes, and a bare "0 of 2 coming" would read
+// as a refusal rather than as no answer.
+function volunteerLine(v: { expected: number; total: number }): string {
+  const noun = v.total === 1 ? "volunteer" : "volunteers";
+  if (v.expected === 0) return `${v.total} ${noun} · nobody has replied yet`;
+  return `${v.expected} of ${v.total} ${noun} coming`;
+}
+
 
 const TP_LESSON_LENGTH_MINUTES = 45;
 // Matches celta5/page.tsx's own local OBSERVATION_HOURS_REQUIRED -- kept as
@@ -399,24 +411,54 @@ export async function TodayTab({
       ? await supabase.from("tp_coursebooks").select("level").eq("id", tpPoint.tp_coursebook_id).maybeSingle()
       : { data: null };
     // Volunteer headcount -- Ramy, 25 Aug 2026: "the trainees also should
-    // know... maybe it will show on their TP cards" -- same aggregate
-    // already built for the TP detail page (tp/[tpNumber]/page.tsx):
-    // every active volunteer_students row for the course counts as
-    // "coming" unless they explicitly declined this specific timetable
-    // event. Admin client, not the trainee's own -- volunteer_declines has
-    // no trainee RLS policy (0143_volunteer_declines.sql), same reason
-    // that page already uses one.
+    // know... maybe it will show on their TP cards".
+    //
+    // Three things were wrong with it (walked 15 Sep 2026):
+    //
+    //   - It counted every volunteer on the COURSE. Two levels run at the
+    //     same hours, so a candidate teaching B1+ was told "2 of 2
+    //     volunteers coming" when one of the two attends the A2 class and
+    //     will never be in their room.
+    //   - Silence counted as yes. Everyone was "coming" unless they had
+    //     declined, so a class nobody had answered for read as full.
+    //   - It checked declines against THIS lesson only, while a volunteer
+    //     replies once for the class-day, against its first lesson -- so a
+    //     decline at 10:00 still read as coming at 11:45.
+    //
+    // Admin client, not the trainee's own -- volunteer_declines has no
+    // trainee RLS policy (0143_volunteer_declines.sql).
     const admin = createAdminClient();
-    const { data: courseVolunteers } = await admin.from("volunteer_students").select("id").eq("course_id", courseId).is("removed_at", null);
-    const courseVolunteerIds = (courseVolunteers ?? []).map((v) => v.id);
+    const { data: courseVolunteers } = await admin
+      .from("volunteer_students")
+      .select("id, level")
+      .eq("course_id", courseId)
+      .is("removed_at", null);
+    const myLevel = levelKey(coursebook?.level ?? null);
+    const classVolunteers = (courseVolunteers ?? []).filter((v) => {
+      const theirs = levelKey(v.level);
+      return !myLevel || !theirs || theirs === myLevel;
+    });
+    const courseVolunteerIds = classVolunteers.map((v) => v.id);
     let volunteers: { expected: number; total: number } | null = null;
     if (courseVolunteerIds.length > 0) {
-      const { data: declines } = await admin
-        .from("volunteer_declines")
-        .select("volunteer_student_id")
-        .eq("timetable_event_id", event.id)
-        .in("volunteer_student_id", courseVolunteerIds);
-      volunteers = { total: courseVolunteerIds.length, expected: courseVolunteerIds.length - (declines?.length ?? 0) };
+      // Every lesson of that class that day: the reply is one reply for the
+      // class, left against whichever lesson the email linked to.
+      const { data: dayEvents } = await admin
+        .from("course_timetable_events")
+        .select("id, detail")
+        .eq("course_id", courseId)
+        .eq("type", "tp")
+        .eq("event_date", dateIso);
+      const dayIds = classLessons(dayEvents ?? [], coursebook?.level ?? null).map((e) => e.id);
+      const [{ data: declines }, { data: confirmations }] = await Promise.all([
+        admin.from("volunteer_declines").select("volunteer_student_id").in("timetable_event_id", dayIds).in("volunteer_student_id", courseVolunteerIds),
+        admin.from("volunteer_confirmations").select("volunteer_student_id").in("timetable_event_id", dayIds).in("volunteer_student_id", courseVolunteerIds),
+      ]);
+      const said = new Set((declines ?? []).map((d) => d.volunteer_student_id));
+      const coming = new Set(
+        (confirmations ?? []).map((c) => c.volunteer_student_id).filter((id) => !said.has(id))
+      );
+      volunteers = { total: courseVolunteerIds.length, expected: coming.size };
     }
     return {
       date: dateIso,
@@ -684,10 +726,10 @@ export async function TodayTab({
             bigSub: [
               teachingTomorrow.eventTime ? teachingTomorrow.eventTime.slice(0, 5) : null,
               teachingTomorrow.level,
-              `${teachingTomorrow.teachingOrder === 1 ? "1st" : teachingTomorrow.teachingOrder === 2 ? "2nd" : `${teachingTomorrow.teachingOrder}th`} of ${teachingTomorrow.groupSize} tomorrow`,
+              `${ordinal(teachingTomorrow.teachingOrder)} of ${teachingTomorrow.groupSize} tomorrow`,
               `${TP_LESSON_LENGTH_MINUTES} min`,
               teachingTomorrow.groupName ? `Group ${teachingTomorrow.groupName}` : null,
-              teachingTomorrow.volunteers ? `${teachingTomorrow.volunteers.expected} of ${teachingTomorrow.volunteers.total} volunteers coming` : null,
+              teachingTomorrow.volunteers ? volunteerLine(teachingTomorrow.volunteers) : null,
             ]
               .filter(Boolean)
               .join(" · "),
@@ -704,10 +746,10 @@ export async function TodayTab({
                 formatCalendarDate(teachingNext.date, { day: "numeric", month: "long" }),
                 teachingNext.eventTime ? teachingNext.eventTime.slice(0, 5) : null,
                 teachingNext.level,
-                `${teachingNext.teachingOrder === 1 ? "1st" : teachingNext.teachingOrder === 2 ? "2nd" : `${teachingNext.teachingOrder}th`} of ${teachingNext.groupSize}`,
+                `${ordinal(teachingNext.teachingOrder)} of ${teachingNext.groupSize}`,
                 `${TP_LESSON_LENGTH_MINUTES} min`,
                 teachingNext.groupName ? `Group ${teachingNext.groupName}` : null,
-                teachingNext.volunteers ? `${teachingNext.volunteers.expected} of ${teachingNext.volunteers.total} volunteers coming` : null,
+                teachingNext.volunteers ? volunteerLine(teachingNext.volunteers) : null,
               ]
                 .filter(Boolean)
                 .join(" · "),

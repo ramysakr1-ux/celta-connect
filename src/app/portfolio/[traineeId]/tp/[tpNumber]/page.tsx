@@ -36,6 +36,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
 import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-only";
+import { levelKey } from "@/lib/volunteer-class-session";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 
@@ -226,32 +227,48 @@ export default async function TpDetailPage({
 
     const { data: dayEvents } = await admin
       .from("course_timetable_events")
-      .select("id, tp_group_scope_id")
+      .select("id, tp_group_scope_id, detail")
       .eq("course_id", trainee.course_id)
       .eq("type", "tp")
       .eq("linked_tp_number", tpNumber)
       .eq("event_date", lessonDate);
-    const eventIds = (dayEvents ?? [])
-      .filter((e) => !subgroup?.tp_group_id || !e.tp_group_scope_id || e.tp_group_scope_id === subgroup.tp_group_id)
-      .map((e) => e.id);
+    const myEvents = (dayEvents ?? []).filter(
+      (e) => !subgroup?.tp_group_id || !e.tp_group_scope_id || e.tp_group_scope_id === subgroup.tp_group_id
+    );
+    const eventIds = myEvents.map((e) => e.id);
+    // The level this candidate's own class is taught at, straight off their
+    // own timetable rows.
+    const myClassLevel = myEvents.map((e) => e.detail).find(Boolean) ?? null;
 
     if (eventIds.length > 0) {
+      // The volunteers of THIS class, and only those who have said yes.
+      //
+      // It counted every volunteer on the course -- two levels run at the
+      // same hours, so half of them attend the other room -- and treated
+      // silence as a yes, so a class nobody had answered for read as full
+      // (walked 15 Sep 2026). Same fix as the candidate's Today card.
       const { data: courseVolunteers } = await admin
         .from("volunteer_students")
-        .select("id")
+        .select("id, level")
         .eq("course_id", trainee.course_id)
         .is("removed_at", null);
-      const courseVolunteerIds = (courseVolunteers ?? []).map((v) => v.id);
+      const myLevel = levelKey(myClassLevel);
+      const courseVolunteerIds = (courseVolunteers ?? [])
+        .filter((v) => {
+          const theirs = levelKey(v.level);
+          return !myLevel || !theirs || theirs === myLevel;
+        })
+        .map((v) => v.id);
       if (courseVolunteerIds.length > 0) {
-        const { data: declines } = await admin
-          .from("volunteer_declines")
-          .select("volunteer_student_id")
-          .in("timetable_event_id", eventIds)
-          .in("volunteer_student_id", courseVolunteerIds);
-        // A volunteer who declined any of their group's slots that day is not
+        const [{ data: declines }, { data: confirmations }] = await Promise.all([
+          admin.from("volunteer_declines").select("volunteer_student_id").in("timetable_event_id", eventIds).in("volunteer_student_id", courseVolunteerIds),
+          admin.from("volunteer_confirmations").select("volunteer_student_id").in("timetable_event_id", eventIds).in("volunteer_student_id", courseVolunteerIds),
+        ]);
+        // A volunteer who declined any of their class's slots that day is not
         // coming to this one either; counted once however many they declined.
         const declined = new Set((declines ?? []).map((d) => d.volunteer_student_id));
-        volunteerAttendance = { total: courseVolunteerIds.length, expected: courseVolunteerIds.length - declined.size };
+        const coming = new Set((confirmations ?? []).map((c) => c.volunteer_student_id).filter((id) => !declined.has(id)));
+        volunteerAttendance = { total: courseVolunteerIds.length, expected: coming.size };
       }
     }
   }
@@ -439,7 +456,11 @@ export default async function TpDetailPage({
             </h1>
             <p className="mt-1 text-sm text-muted">
               {densityLabel.name}
-              {volunteerAttendance ? ` · ${volunteerAttendance.expected} of ${volunteerAttendance.total} volunteers coming` : ""}
+              {volunteerAttendance
+                ? volunteerAttendance.expected === 0
+                  ? ` · ${volunteerAttendance.total} volunteer${volunteerAttendance.total === 1 ? "" : "s"} · nobody has replied yet`
+                  : ` · ${volunteerAttendance.expected} of ${volunteerAttendance.total} volunteers coming`
+                : ""}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
