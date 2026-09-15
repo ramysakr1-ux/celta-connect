@@ -1476,8 +1476,16 @@ export async function agreeRefund(_prevState: FormState, formData: FormData): Pr
   if (!Number.isFinite(amount) || amount <= 0) return { error: "How much is being refunded?" };
   if (!currency) return { error: "Which currency?" };
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("refunds").insert({
+  // The admin client, which is what migration 0116 always said this would
+  // be: "writes go through the admin client after the action checks
+  // payments.edit". Neither half was true -- the check was
+  // canDecideAdmissions (fixed above), and the write went through the
+  // SESSION client against a table whose only policy is a select. So every
+  // attempt to agree a refund was refused by RLS, there has never been a
+  // single row in the table, and "Refunds pending" could only ever read
+  // zero (walked 15 Sep 2026).
+  const adminClient = createAdminClient();
+  const { error } = await adminClient.from("refunds").insert({
     // The branch being worked in, which is where the payments room reads
     // its refunds from.
     center_id: refundCentreId,
@@ -1503,14 +1511,18 @@ export async function settleRefund(_prevState: FormState, formData: FormData): P
   const cancel = formData.get("cancel") === "1";
   if (typeof refundId !== "string") return { error: "Something went wrong. Refresh and try again." };
 
-  const supabase = await createClient();
-  // Asked at the refund's own centre, not at whichever one this person is
-  // acting in. RLS already bounds the update below to their centre; this is
-  // the money question on top of it.
-  const { data: refundRow } = await supabase.from("refunds").select("center_id").eq("id", refundId).maybeSingle();
+  // Same as agreeRefund: the admin client, after the money check. Settling
+  // ran through the session client against a table with no update policy,
+  // so it matched no rows, returned no error, and reported success while
+  // changing nothing.
+  const adminClient = createAdminClient();
+  const { data: refundRow } = await adminClient.from("refunds").select("center_id, status").eq("id", refundId).maybeSingle();
   if (!refundRow) return { error: "That refund is not in your centre." };
+  if (refundRow.status !== "pending") return { error: "That refund has already been settled." };
+  // Asked at the refund's own centre, not at whichever one this person is
+  // acting in.
   if (!(await canAgreeRefunds(staff, refundRow.center_id))) return { error: "You can't settle refunds." };
-  const { error } = await supabase
+  const { error } = await adminClient
     .from("refunds")
     .update(
       cancel
