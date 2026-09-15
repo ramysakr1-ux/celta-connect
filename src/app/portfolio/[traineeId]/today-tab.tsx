@@ -433,7 +433,12 @@ export async function TodayTab({
       .select("id, level")
       .eq("course_id", courseId)
       .is("removed_at", null);
-    const myLevel = levelKey(coursebook?.level ?? null);
+    // The level off the candidate's OWN timetable row, with the coursebook
+    // as the fallback. tp_coursebooks.level is only set where the round was
+    // assigned from the library, and where it is not the filter below did
+    // nothing -- the demo course's TP6 read "2 volunteers" for a class that
+    // has one.
+    const myLevel = levelKey((event as { detail?: string | null }).detail ?? coursebook?.level ?? null);
     const classVolunteers = (courseVolunteers ?? []).filter((v) => {
       const theirs = levelKey(v.level);
       return !myLevel || !theirs || theirs === myLevel;
@@ -449,7 +454,7 @@ export async function TodayTab({
         .eq("course_id", courseId)
         .eq("type", "tp")
         .eq("event_date", dateIso);
-      const dayIds = classLessons(dayEvents ?? [], coursebook?.level ?? null).map((e) => e.id);
+      const dayIds = classLessons(dayEvents ?? [], (event as { detail?: string | null }).detail ?? coursebook?.level ?? null).map((e) => e.id);
       const [{ data: declines }, { data: confirmations }] = await Promise.all([
         admin.from("volunteer_declines").select("volunteer_student_id").in("timetable_event_id", dayIds).in("volunteer_student_id", courseVolunteerIds),
         admin.from("volunteer_confirmations").select("volunteer_student_id").in("timetable_event_id", dayIds).in("volunteer_student_id", courseVolunteerIds),
