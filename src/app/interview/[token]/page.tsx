@@ -5,6 +5,7 @@ import { getPickerTimeOptions, hasBookableOption, flagNoInterviewSlots } from "@
 import { SlotPicker } from "@/app/interview/[token]/slot-picker";
 import { interviewWhen } from "@/lib/interview-time";
 import { RescheduleButton } from "@/app/interview/[token]/reschedule-button";
+import { EntryNotice } from "@/components/entry-notice";
 
 const TERMINAL_STAGES = new Set([
   "rejected_before_interview",
@@ -32,13 +33,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
     .maybeSingle();
 
   if (!applicant || TERMINAL_STAGES.has(applicant.stage)) {
-    return (
-      <Shell>
-        <p className="mt-4 text-sm text-destructive">
-          This link is invalid, or is no longer active. Contact the centre if you believe this is a mistake.
-        </p>
-      </Shell>
-    );
+    return <EntryNotice heading="This interview link is no longer active">Contact the centre if you believe this is a mistake.</EntryNotice>;
   }
 
   const [{ data: course }, { data: center }] = await Promise.all([
@@ -125,11 +120,14 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
   );
 }
 
+// Neither state of this gate carries a teal primary -- the slots are outlined
+// rows and Reschedule is a secondary -- so the sheet's rule is gold (Ramy,
+// 26 Aug 2026; gates spec A1).
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
-      <div className="sheet-entry p-8">
+      <div className="sheet-entry sheet-entry-gold p-8">
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>

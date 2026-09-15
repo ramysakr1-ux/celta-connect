@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { JoinForm } from "@/app/join/[token]/join-form";
 import { Wordmark } from "@/components/wordmark";
 import type { UserRole } from "@/lib/supabase/types";
+import { EntryNotice } from "@/components/entry-notice";
 
 // Unified with /login and every tokenized-link gate onto one entry-moment
 // look (sheet-entry + the real Wordmark) rather than this page's own
@@ -41,7 +42,7 @@ export default async function JoinPage({
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-entry p-8">
+        <div className={`sheet-entry p-8 ${center?.admissions_email ? "" : "sheet-entry-gold"}`}>
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>
@@ -56,7 +57,7 @@ export default async function JoinPage({
           {center?.admissions_email ? (
             <a
               href={`mailto:${center.admissions_email}`}
-              className="mt-4 inline-block rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card hover:bg-ink-warm/90"
+              className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
               Email {center.name}
             </a>
@@ -72,20 +73,7 @@ export default async function JoinPage({
   }
 
   if (!course) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-entry p-8">
-          <Link href="/" className="inline-block hover:opacity-80">
-            <Wordmark size="hero" />
-          </Link>
-          <p className="mt-4 text-sm text-destructive">
-            This join link is invalid or has expired. Ask your centre admin for a new one.
-          </p>
-        </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This join link has expired">It is invalid or no longer active. Ask your centre admin for a new one.</EntryNotice>;
   }
 
   const role: UserRole = course.trainee_join_token === token ? "trainee" : "trainer";

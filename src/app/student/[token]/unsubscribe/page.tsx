@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { UnsubscribeButton } from "@/app/student/[token]/unsubscribe/unsubscribe-button";
+import { EntryNotice } from "@/components/entry-notice";
 
 // Ramy, 25 Aug 2026: "if they don't wanna be notified in the email, they
 // can just disable it in the email itself" -- a landing page rather than a
@@ -20,18 +21,7 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
     .maybeSingle();
 
   if (!accessToken?.volunteer_student_id || new Date(accessToken.expires_at) < new Date()) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-          <div className="sheet-accent p-8 text-center">
-            <Link href="/" className="inline-block hover:opacity-80">
-              <Wordmark size="hero" />
-            </Link>
-            <p className="mt-4 text-sm text-destructive">This link has expired or isn&apos;t valid. Ask your teacher for a new one.</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This link has expired">Ask your teacher for a new one.</EntryNotice>;
   }
 
   const { data: volunteer } = await admin
@@ -44,7 +34,9 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-accent p-8 text-center">
+        {/* No teal primary on this screen -- the one control is an outlined
+            toggle -- so the rule is gold (Ramy, 26 Aug 2026). */}
+        <div className="sheet-entry sheet-entry-gold p-8 text-center">
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>

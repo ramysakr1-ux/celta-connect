@@ -20,6 +20,7 @@ import { resolveTimeBands, toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
+import { EntryNotice } from "@/components/entry-notice";
 
 // Four evenly-spaced markers scaled to whatever the centre has set --
 // quarters of the threshold, rounded to the nearest 10 hours, rather than
@@ -192,20 +193,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   }
 
   if (!accessToken || !accessToken.volunteer_student_id || new Date(accessToken.expires_at) < new Date()) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-accent p-8 text-center">
-          <Link href="/" className="inline-block hover:opacity-80">
-            <Wordmark size="hero" />
-          </Link>
-          <p className="mt-4 text-sm text-destructive">
-            This link has expired or isn&apos;t valid. Ask your teacher for a new one.
-          </p>
-        </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This link has expired">Ask your teacher for a new one.</EntryNotice>;
   }
 
   const [{ data: volunteer }, { data: course }, { data: sharedMaterials }] = await Promise.all([
@@ -226,18 +214,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     : DEFAULT_TIMEZONE;
 
   if (!volunteer) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-accent p-8 text-center">
-          <Link href="/" className="inline-block hover:opacity-80">
-            <Wordmark size="hero" />
-          </Link>
-          <p className="mt-4 text-sm text-destructive">This link isn&apos;t valid. Ask your teacher for a new one.</p>
-        </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This link isn't valid">Ask your teacher for a new one.</EntryNotice>;
   }
 
   // One-time collection, before the ongoing dashboard ever shows -- feeds

@@ -13,7 +13,7 @@ export default async function LoginPage({
     <div className="entry-ground flex flex-1 flex-col">
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-accent p-8">
+        <div className="sheet-entry p-8">
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>

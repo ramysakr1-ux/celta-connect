@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
 import { AddVolunteerForm } from "@/app/register/[token]/add-volunteer-form";
 import { BulkImportForm } from "@/app/register/[token]/bulk-import-form";
-import { Wordmark } from "@/components/wordmark";
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 import { formatCalendarDate } from "@/lib/format-date";
+import { EntryNotice } from "@/components/entry-notice";
 
 // A separate no-login link for center business/admissions staff -- distinct
 // from the app's own `admin` UserRole. They have no account at all and
@@ -24,20 +23,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
     .maybeSingle();
 
   if (!accessToken || new Date(accessToken.expires_at) < new Date()) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-accent p-8 text-center">
-          <Link href="/" className="inline-block hover:opacity-80">
-            <Wordmark size="hero" />
-          </Link>
-          <p className="mt-4 text-sm text-destructive">
-            This link has expired or isn&apos;t valid. Ask the trainer for a new one.
-          </p>
-        </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This link has expired">Ask the trainer for a new one.</EntryNotice>;
   }
 
   const [{ data: course }, { data: volunteers }, { data: tpEvents }] = await Promise.all([

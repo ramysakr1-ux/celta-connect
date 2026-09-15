@@ -805,9 +805,14 @@ h6 {
     box-shadow: none;
   }
 
-  /* Kept as separate classes (not merged into one) only because call sites
-     still reference three different names -- all three now render
-     identically. */
+  /* The entry gates' sheet (login, set-or-reset, join, join-centre, offer,
+     interview, the volunteer's and the register's dead-link screens). Gates
+     spec A1, 16 Sep 2026: one class, and its top rule follows Ramy's 26 Aug
+     rule -- teal while the screen carries the teal primary button, gold when
+     it does not (.sheet-entry-gold), and plain brown on a dead link
+     (.sheet-entry-plain), because a dead link is not an alarm. /apply keeps
+     .sheet-accent and applies the same rule inline; the portfolio's
+     .sheet-accent cards are not gates. */
   .sheet-entry {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
@@ -815,6 +820,14 @@ h6 {
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
+  }
+
+  .sheet-entry-gold {
+    border-top-color: var(--color-gold);
+  }
+
+  .sheet-entry-plain {
+    border-top-color: var(--color-bronze);
   }
 
   /* Deprecated alias -- prefer .sheet-entry. */

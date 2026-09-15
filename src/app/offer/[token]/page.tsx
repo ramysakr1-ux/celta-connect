@@ -4,6 +4,7 @@ import { Wordmark } from "@/components/wordmark";
 import { OfferAcceptForm } from "@/app/offer/[token]/offer-accept-form";
 import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { EntryNotice } from "@/components/entry-notice";
 
 const longDate = (iso: string) => formatCalendarDate(iso, { month: "long", year: "numeric" });
 
@@ -35,21 +36,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
     (applicant.place_offer_expires_at && applicant.place_offer_expires_at < new Date().toISOString());
 
   if (invalid) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-entry p-8">
-          <Link href="/" className="inline-block hover:opacity-80">
-            <Wordmark size="hero" />
-          </Link>
-          <p className="mt-4 text-sm text-destructive">
-            This offer link is invalid, expired, or has already been used. Contact the centre if you believe this is
-            a mistake.
-          </p>
-        </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This offer link has expired">It is past its deadline, already used, or not valid. Contact the centre if you believe this is a mistake.</EntryNotice>;
   }
 
   const [{ data: course }, { data: center }] = await Promise.all([

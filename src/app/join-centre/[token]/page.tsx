@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { JoinCentreForm } from "@/app/join-centre/[token]/join-centre-form";
 import { Wordmark } from "@/components/wordmark";
 import { roleLabel as resolveRoleLabel } from "@/lib/auth/centre-permissions";
+import { EntryNotice } from "@/components/entry-notice";
 
 // Invitations.dc.html 1c: "account + centre agreement, once per centre."
 // Unlike the trainee/trainer /join/[token] flow this opens the centre, not
@@ -19,20 +20,7 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
     .maybeSingle();
 
   if (!invite || invite.used_at || invite.revoked_at) {
-    return (
-      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-entry p-8">
-          <Link href="/" className="inline-block hover:opacity-80">
-            <Wordmark size="hero" />
-          </Link>
-          <p className="mt-4 text-sm text-destructive">
-            This invite link is invalid or has already been used. Ask the centre owner for a new one.
-          </p>
-        </div>
-        </div>
-      </div>
-    );
+    return <EntryNotice heading="This invite can't be used">It is invalid, withdrawn, or has already been used. Ask the centre owner for a new one.</EntryNotice>;
   }
 
   const [{ data: center }, { data: customRoles }] = await Promise.all([
