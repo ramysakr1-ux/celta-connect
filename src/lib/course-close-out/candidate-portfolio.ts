@@ -452,5 +452,36 @@ files.push({
     observations: observations ?? [],
   }),
 });
+  // A short manifest, so the folder says what it is.
+  //
+  // Handbook 12.1.1 lists what a portfolio consists of, and a reader six
+  // months later -- a centre opening Drive, or the candidate themselves --
+  // should not have to infer which of those items are present and which are
+  // absent on purpose. The CELTA 5 is the one that is commonly absent:
+  // isBookletExportReady requires every signature, so a portfolio taken
+  // mid-course does not carry it, and silently omitting the candidate's
+  // attendance record along with it is worse than saying so (walked 15 Sep
+  // 2026).
+  const bookletPresent = files.some((f) => f.name.startsWith("CELTA5 - "));
+  const manifest = [
+    `${trainee.full_name} -- ${course.name}`,
+    `${formatCalendarDate(course.start_date)} to ${formatCalendarDate(course.end_date, { year: "numeric" })}`,
+    center?.name ? center.name : "",
+    "",
+    "Contents of this portfolio (Administration Handbook 12.1.1):",
+    "",
+    ...files.map((f) => `  ${f.name}`),
+    "",
+    bookletPresent
+      ? ""
+      : "The CELTA 5 is not here yet. It is released once every signature on it is complete --\nyours and your tutors' -- and it carries your attendance record, so both appear together.\nDownload this again after the record is signed off.",
+    "",
+    "Written assignments appear once marked. Teaching practice records appear once the plan,",
+    "your self-evaluation and your tutor's feedback have all been submitted.",
+  ]
+    .filter((line, i, all) => !(line === "" && all[i - 1] === ""))
+    .join("\n");
+  files.unshift({ name: "Contents.txt", mimeType: "text/plain; charset=utf-8", bytes: Buffer.from(manifest, "utf-8") });
+
   return files;
 }
