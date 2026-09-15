@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { addTimetableEvent, type FormState } from "@/app/trainer/(hub)/timetable/actions";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER } from "@/lib/assignment-info";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -178,7 +179,7 @@ export function AddEventForm({
                 </option>
                 {existingEvents.map((e) => (
                   <option key={e.id} value={e.id}>
-                    {e.title} -- {e.event_date}
+                    {e.title} -- {formatCalendarDate(e.event_date, { day: "numeric", month: "short", year: "numeric" })}
                   </option>
                 ))}
               </select>

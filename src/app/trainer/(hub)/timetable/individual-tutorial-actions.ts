@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { sendPushToOwners } from "@/lib/push/send";
 import { distinctTpDates, halfTpDates } from "@/lib/rotation";
+import { formatCalendarDate } from "@/lib/format-date";
 
 export interface FormState {
   error: string | null;
@@ -190,7 +191,9 @@ export async function cancelIndividualTutorialInvite(formData: FormData): Promis
     { profileIds: [invite.trainee_id] },
     {
       title: `${label} tutorial cancelled`,
-      body: event?.event_date ? `Your ${event.event_date} slot has been cancelled -- your tutor will set a new time.` : "Your tutor will set a new time.",
+      body: event?.event_date
+        ? `Your ${formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })} slot has been cancelled -- your tutor will set a new time.`
+        : "Your tutor will set a new time.",
       url: `/portfolio/${invite.trainee_id}`,
     }
   );

@@ -34,6 +34,7 @@ import {
 import { SHADOW_DAYS_REQUIRED, TIT_MODE_LABEL } from "@/lib/trainer-in-training-constants";
 import { useCentreTimeZone } from "@/components/centre-time-zone";
 import { formatDate } from "@/lib/format-date";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
 const inputClass = "rounded-[6px] border border-input bg-card px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary";
@@ -136,7 +137,7 @@ export function ObservedSessionRow({
     <div className="flex items-center justify-between gap-3 py-1.5">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-ink">{event.title}</p>
-        <p className="text-xs text-muted">{event.event_date}</p>
+        <p className="text-xs text-muted">{formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</p>
       </div>
       {observedId ? (
         <div className="flex items-center gap-2">

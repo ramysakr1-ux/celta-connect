@@ -7,6 +7,7 @@ import { createCourse, type FormState } from "@/app/dashboard/admin/actions";
 import { DeliveryModePicker } from "@/components/delivery-mode-picker";
 import { TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE } from "@/lib/tutor-roles";
 import type { DeliveryMode } from "@/lib/delivery-mode";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const initialState: FormState = { error: null };
 
@@ -82,7 +83,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
     setSummary({
       code: g("course_code"),
       name: g("name"),
-      dates: g("start_date") && g("end_date") ? `${g("start_date")} – ${g("end_date")}` : "",
+      dates: g("start_date") && g("end_date") ? `${formatCalendarDate(g("start_date"), { day: "numeric", month: "short", year: "numeric" })} – ${formatCalendarDate(g("end_date"), { day: "numeric", month: "short", year: "numeric" })}` : "",
       cohort: g("cohort_size"),
       inviteEmail: g("invite_email"),
       assessorName: g("assessor_name"),

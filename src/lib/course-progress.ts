@@ -2,6 +2,7 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { halfTpDates } from "@/lib/rotation";
 import type { Database, SubmissionStatus } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type AssignmentType = Database["public"]["Tables"]["assignments"]["Row"]["assignment_type"];
 type TimetableEvent = Pick<
@@ -50,7 +51,7 @@ export function computeProgressIssues(input: {
       if (!taughtTpNumbers.has(event.linked_tp_number)) {
         issues.push({
           label: `TP${event.linked_tp_number}`,
-          detail: `not yet taught -- was due ${event.event_date}`,
+          detail: `not yet taught -- was due ${formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}`,
         });
       }
       continue;
@@ -62,7 +63,7 @@ export function computeProgressIssues(input: {
       if (!status || status === "not_submitted") {
         issues.push({
           label: ASSIGNMENT_INFO[assignmentType]?.title ?? event.linked_assignment_type,
-          detail: `awaiting submission -- was due ${event.event_date}`,
+          detail: `awaiting submission -- was due ${formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}`,
         });
       }
       continue;
@@ -74,7 +75,7 @@ export function computeProgressIssues(input: {
       if (!status || status === "not_submitted") {
         issues.push({
           label: `${ASSIGNMENT_INFO[assignmentType]?.title ?? event.linked_assignment_type} resubmission`,
-          detail: `awaiting submission -- was due ${event.event_date}`,
+          detail: `awaiting submission -- was due ${formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}`,
         });
       }
     }

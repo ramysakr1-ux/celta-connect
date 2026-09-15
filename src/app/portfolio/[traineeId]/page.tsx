@@ -19,6 +19,7 @@ import { AssessorViewNotice } from "./assessor-view-notice";
 import { buildDeferralDraft } from "@/lib/letters/deferral";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { DeferralLetterSection } from "./deferral-letter-section";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -538,7 +539,7 @@ export default async function CourseStreamPage({
                 <div className="mt-1 flex flex-col gap-1 text-xs text-muted">
                   <p>&ldquo;{deferralTransfer.reasons}&rdquo;</p>
                   <p>{deferralTransfer.hours_carried.toFixed(1)} hours carried.</p>
-                  {deferralTransfer.reintegration_deadline ? <p>Re-integrate by {deferralTransfer.reintegration_deadline}.</p> : null}
+                  {deferralTransfer.reintegration_deadline ? <p>Re-integrate by {formatCalendarDate(deferralTransfer.reintegration_deadline, { day: "numeric", month: "short", year: "numeric" })}.</p> : null}
                   <p className="font-semibold text-ink">
                     {deferralTransfer.linked_at ? "Linked to a destination course." : "Not yet linked to a destination course."}
                   </p>

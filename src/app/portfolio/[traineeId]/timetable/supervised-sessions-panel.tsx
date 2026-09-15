@@ -1,5 +1,6 @@
 import { checkSupervisedSession } from "@/app/portfolio/[traineeId]/supervised/[eventId]/actions";
 import { SUPERVISED_QUIZ_TOPICS, type QuizTopicKey } from "@/lib/supervised-quiz-content";
+import { formatCalendarDate } from "@/lib/format-date";
 
 interface SupervisedEventRow {
   id: string;
@@ -58,7 +59,7 @@ export function SupervisedSessionsPanel({
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-ink">{event.title}</p>
-                  <p className="text-xs text-muted">{event.event_date}</p>
+                  <p className="text-xs text-muted">{formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {submitted && completion?.score != null && completion?.question_count != null ? (

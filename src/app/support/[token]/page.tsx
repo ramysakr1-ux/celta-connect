@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveActiveGrantByToken, logGrantActivity } from "@/lib/platform-support";
 import { computeCriteriaPct } from "@/lib/celta-criteria";
 import { CountdownBadge } from "@/app/support/[token]/countdown-badge";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // specs/for-claude-code-platform-support-access.md, "1b is support@'s
 // scoped view once granted." Design not in the repo -- built deliberately
@@ -137,7 +138,7 @@ async function CourseScopedView({ admin, courseId }: { admin: ReturnType<typeof 
                 <li key={i} className="list-row flex items-center justify-between gap-4">
                   <span className="text-sm text-ink">{e.title ?? e.type}</span>
                   <span className="text-xs text-muted">
-                    {e.event_date} {e.event_time ?? ""}
+                    {formatCalendarDate(e.event_date, { day: "numeric", month: "short", year: "numeric" })} {e.event_time?.slice(0, 5) ?? ""}
                   </span>
                 </li>
               ))}

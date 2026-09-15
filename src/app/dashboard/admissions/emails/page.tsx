@@ -6,6 +6,7 @@ import { resolveBranchScope } from "@/lib/branch-scope";
 import { formatDate as fmtDateTime } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const STATUS_LABEL: Record<string, string> = {
   sent: "Sent",
@@ -112,7 +113,7 @@ export default async function EmailDeliveryPage({
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.course_code ?? c.name} {c.start_date ? `— ${c.start_date}` : ""}
+                  {c.course_code ?? c.name} {c.start_date ? `— ${formatCalendarDate(c.start_date, { day: "numeric", month: "short", year: "numeric" })}` : ""}
                 </option>
               ))}
             </select>
