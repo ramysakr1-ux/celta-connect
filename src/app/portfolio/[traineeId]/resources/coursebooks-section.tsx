@@ -43,7 +43,7 @@ function CoursebookCard({
   const [state, action, pending] = useActionState(updateCoursebookAccessNotes, initialState);
 
   return (
-    <li className={`sheet ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
+    <li className={`sheet hover-ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <p className="text-sm font-semibold text-ink">{book.title}</p>
       <p className="text-xs text-muted">{book.level}</p>
       {isEditableStaff ? (

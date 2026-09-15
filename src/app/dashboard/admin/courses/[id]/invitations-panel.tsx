@@ -139,7 +139,7 @@ export function InvitationsPanel({
         <div className="mt-3 flex flex-col gap-1.5">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Invited, not yet joined</p>
           {pending.map((inv) => (
-            <div key={inv.id} className="ring flex flex-wrap items-center justify-between gap-2 border-b border-border-faint py-1.5 last:border-none">
+            <div key={inv.id} className="hover-ring flex flex-wrap items-center justify-between gap-2 border-b border-border-faint py-1.5 last:border-none">
               <span className="text-sm text-ink">
                 {inv.fullName ?? inv.email}
                 {inv.fullName ? <span className="text-muted"> · {inv.email}</span> : null}

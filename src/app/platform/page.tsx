@@ -80,7 +80,7 @@ export default async function PlatformPage() {
           <p className="px-5 py-4 text-sm text-muted">No centres yet.</p>
         ) : (
           (centers ?? []).map((c) => (
-            <div key={c.id} className="list-row ring flex items-center justify-between gap-3">
+            <div key={c.id} className="list-row hover-ring flex items-center justify-between gap-3">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium text-ink">
                   {c.name}

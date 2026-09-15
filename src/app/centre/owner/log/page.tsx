@@ -122,7 +122,7 @@ export default async function OwnerActionLogPage({
           {(entries ?? []).map((e, i) => (
             <div
               key={e.id}
-              className={`ring flex items-start justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
+              className={`hover-ring flex items-start justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
             >
               <div className="flex flex-col gap-0.5">
                 <p className="text-sm text-ink">{actionLabel(e.action)}</p>

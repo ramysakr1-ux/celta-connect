@@ -54,7 +54,7 @@ function ItemCard({
   const unavailable = item.claimedByOther;
 
   return (
-    <li className={`sheet ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
+    <li className={`sheet hover-ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <p className="text-sm font-semibold text-ink">
         {item.bookTitle}
         {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}

@@ -156,7 +156,7 @@ export default async function CommandCenterPeoplePage() {
           return (
             <div
               key={c.id}
-              className="ring grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
+              className="hover-ring grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
             >
               <div className="px-5 py-[13px] text-[13px] font-semibold text-ink">
                 {centerNameById.get(c.center_id) ?? "Unknown centre"}

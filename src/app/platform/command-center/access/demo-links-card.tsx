@@ -112,7 +112,7 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
         <p className="text-[12.5px] text-muted">No active demo links.</p>
       ) : (
         activeLinks.map((link) => (
-          <div key={link.id} className="ring flex items-center justify-between gap-2.5 border-t border-border py-2.5">
+          <div key={link.id} className="hover-ring flex items-center justify-between gap-2.5 border-t border-border py-2.5">
             <div className="flex min-w-0 flex-col gap-0.5">
               <div className="text-[12.5px] font-semibold text-ink">
                 {ROLE_LABEL[link.roleKey as DemoLoginRoleKey] ?? link.roleKey} · {link.centreName}

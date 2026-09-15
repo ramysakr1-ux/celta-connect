@@ -33,7 +33,7 @@ export function ReferralRequestRow({
   const [declining, setDeclining] = useState(false);
 
   return (
-    <div className={`card flex flex-col gap-3 p-6 ring ${garnet ? "card-garnet" : ""}`}>
+    <div className={`card flex flex-col gap-3 p-6 hover-ring ${garnet ? "card-garnet" : ""}`}>
       <div>
         <p className="text-sm font-semibold text-ink">{request.applicantName}</p>
         <p className="text-xs text-muted">{request.applicantEmail}</p>

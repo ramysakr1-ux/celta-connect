@@ -82,7 +82,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // trainer's own session, and the assessor already has its own read-only
   // banner; forcing it into MCT/ACT coloring isn't asked for here.
   // Not isRealStaff-gated -- these vars are set on the whole shell (below),
-  // reaching assessor/tour sessions too, since .ring/.wash (globals.css)
+  // reaching assessor/tour sessions too, since .hover-ring/.wash (globals.css)
   // is used unconditionally by hub pages regardless of session type. Its
   // ACT-shaped default there is a fine, unobtrusive fallback for a session
   // this spec never asked us to re-skin; only the header/tabs/logo

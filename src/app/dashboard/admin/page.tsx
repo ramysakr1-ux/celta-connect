@@ -282,7 +282,7 @@ export default async function AdminDashboardPage({
                       // an action inside a link.
                       <div
                         key={row.course.id}
-                        className="ring flex items-center gap-3 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none wash"
+                        className="hover-ring flex items-center gap-3 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none wash"
                       >
                       <Link
                         href={`/dashboard/admin/courses/${row.course.id}`}

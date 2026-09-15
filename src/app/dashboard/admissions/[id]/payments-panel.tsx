@@ -59,7 +59,7 @@ export function PaymentsPanel({
       ) : (
         <ul className="flex flex-col gap-3">
           {sorted.map((payment) => (
-            <li key={payment.id} className="rounded-[6px] border border-border p-3 ring">
+            <li key={payment.id} className="rounded-[6px] border border-border p-3 hover-ring">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-ink">

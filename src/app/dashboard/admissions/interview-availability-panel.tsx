@@ -89,7 +89,7 @@ export function InterviewAvailabilityPanel({
             <p className="text-sm text-muted">No pattern set yet.</p>
           ) : (
             patterns.map((p) => (
-              <div key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm ring">
+              <div key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm hover-ring">
                 <span className="text-ink">
                   {p.interviewerName} -- {WEEKDAY_LABELS[p.weekday]}, {p.startTime.slice(0, 5)}-{p.endTime.slice(0, 5)} (
                   {p.mode === "online" ? "online" : "face to face"})
@@ -144,7 +144,7 @@ export function InterviewAvailabilityPanel({
             <p className="text-sm text-muted">No blocks set.</p>
           ) : (
             blocks.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm ring">
+              <div key={b.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm hover-ring">
                 <span className="text-ink">
                   {b.interviewerName ?? "Centre-wide"} -- {b.startDate}
                   {b.endDate !== b.startDate ? ` to ${b.endDate}` : ""}

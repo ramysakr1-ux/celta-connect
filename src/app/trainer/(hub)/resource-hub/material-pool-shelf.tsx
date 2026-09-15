@@ -101,7 +101,7 @@ export function MaterialPoolShelf({ items, readOnly = false }: { items: Material
 
 function ItemCard({ item, removable }: { item: MaterialPoolItemView; removable: boolean }) {
   return (
-    <div className="ring rounded-[6px] border border-border p-3">
+    <div className="hover-ring rounded-[6px] border border-border p-3">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-semibold text-ink">

@@ -242,7 +242,7 @@ export function ImportWizard({
             {headers.map((header, i) => {
               const value = mapping[header];
               return (
-                <div key={`${header}-${i}`} className={`ring flex items-center gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                <div key={`${header}-${i}`} className={`hover-ring flex items-center gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <span className="w-40 shrink-0 truncate text-sm text-ink">{header || "(unnamed column)"}</span>
                   <span className="text-xs text-muted">&rarr;</span>
                   <select
@@ -285,7 +285,7 @@ export function ImportWizard({
                 holds those rows back entirely.
               </p>
               {statusValues.map((v) => (
-                <div key={v} className="ring flex items-center gap-3 py-1">
+                <div key={v} className="hover-ring flex items-center gap-3 py-1">
                   <span className="w-40 shrink-0 truncate text-sm text-ink">{v}</span>
                   <span className="text-xs text-muted">&rarr;</span>
                   <select
@@ -360,7 +360,7 @@ export function ImportWizard({
             {analysis.rows.map((r) => (
               <div
                 key={r.rowNumber}
-                className={`ring mb-1 flex items-center gap-3 rounded-[6px] border-l-[3px] bg-surface-muted/40 py-2 pr-3 pl-3 ${
+                className={`hover-ring mb-1 flex items-center gap-3 rounded-[6px] border-l-[3px] bg-surface-muted/40 py-2 pr-3 pl-3 ${
                   r.verdict === "import"
                     ? "border-l-primary"
                     : r.verdict === "missing_email"

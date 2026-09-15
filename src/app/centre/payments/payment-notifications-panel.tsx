@@ -27,7 +27,7 @@ export function PaymentNotificationsPanel({ notifications, canEdit, timeZone }: 
       </div>
       <ul className="flex flex-col">
         {notifications.map((n) => (
-          <li key={n.id} className="ring flex items-center justify-between gap-3 border-b border-status-warning-text/20 px-5 py-3 last:border-none">
+          <li key={n.id} className="hover-ring flex items-center justify-between gap-3 border-b border-status-warning-text/20 px-5 py-3 last:border-none">
             <div>
               <p className="text-sm text-ink">{n.message}</p>
               <p className="mt-0.5 text-xs text-muted">{day(n.createdAt)}</p>

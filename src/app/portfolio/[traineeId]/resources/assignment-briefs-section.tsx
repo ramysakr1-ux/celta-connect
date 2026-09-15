@@ -16,7 +16,7 @@ function BriefCard({ brief, garnet }: { brief: BriefRow; garnet: boolean }) {
   const info = ASSIGNMENT_INFO[brief.assignment_type];
 
   return (
-    <li className={`sheet ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
+    <li className={`sheet hover-ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <button type="button" onClick={() => setOpen((o) => !o)} className="text-left text-sm font-semibold text-ink hover:text-primary">
         {info?.title ?? brief.assignment_type} {open ? "▾" : "▸"}
       </button>

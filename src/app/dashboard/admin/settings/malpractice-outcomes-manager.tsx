@@ -37,7 +37,7 @@ export function MalpracticeOutcomesManager({ options }: { options: OutcomeOption
 
 function OutcomeRow({ option }: { option: OutcomeOption }) {
   return (
-    <li className="ring flex items-center justify-between gap-3 rounded-[6px] border border-border px-3 py-2">
+    <li className="hover-ring flex items-center justify-between gap-3 rounded-[6px] border border-border px-3 py-2">
       <div className="min-w-0">
         <p className="truncate text-sm text-ink">{option.label}</p>
         <p className="text-xs text-muted">

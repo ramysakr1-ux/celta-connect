@@ -50,7 +50,7 @@ export function AssignmentCriteriaManager({ criteria }: { criteria: Criterion[] 
 function CriterionRow({ criterion }: { criterion: Criterion }) {
   return (
     <li
-      className={`ring flex items-center justify-between gap-3 rounded-[6px] border px-3 py-2 ${
+      className={`hover-ring flex items-center justify-between gap-3 rounded-[6px] border px-3 py-2 ${
         criterion.active ? "border-border" : "border-border-faint opacity-60"
       }`}
     >

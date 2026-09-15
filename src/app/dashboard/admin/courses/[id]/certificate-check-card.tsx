@@ -20,7 +20,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
   );
 
   return (
-    <div className={`ring flex flex-col gap-2 rounded-[6px] border p-3 ${mismatch ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
+    <div className={`hover-ring flex flex-col gap-2 rounded-[6px] border p-3 ${mismatch ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-ink">{candidate.fullName}</p>

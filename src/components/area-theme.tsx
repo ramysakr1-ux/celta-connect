@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
  * which stops the colour being something you can say out loud.
  *
  * Setting the variables here rather than editing components is what makes
- * this cheap. Every .wash and .ring inside picks the area
+ * this cheap. Every .wash and .hover-ring inside picks the area
  * up automatically, because those classes read --area-accent and
  * --area-hover-fill with their old literals as fallbacks. An area with no
  * entry below simply looks the way it always did.

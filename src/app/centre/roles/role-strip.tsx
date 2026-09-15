@@ -169,7 +169,7 @@ export function RoleStrip({
 
         <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
           {permsFor(selected).map((p) => (
-            <div key={p.text} className="ring flex items-start gap-2.5 rounded-[6px] bg-surface-muted/60 px-3 py-2 wash">
+            <div key={p.text} className="hover-ring flex items-start gap-2.5 rounded-[6px] bg-surface-muted/60 px-3 py-2 wash">
               <span className="mt-px shrink-0 text-sm">
                 <Mark grant={p.grant} />
               </span>

@@ -143,7 +143,7 @@ export default async function AdmissionsSettingsPage() {
         </p>
         <ul className="flex flex-col gap-2">
           {(prompts ?? []).map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 ring">
+            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 hover-ring">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{p.prompt_type}</span>
                 <p className="text-sm text-ink">{p.prompt_text}</p>
@@ -189,7 +189,7 @@ export default async function AdmissionsSettingsPage() {
         </p>
         <ul className="flex flex-col gap-2">
           {(speakingPrompts ?? []).map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 ring">
+            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 hover-ring">
               <p className="text-sm text-ink">{p.prompt_text}</p>
               <form action={toggleSpeakingPromptActive}>
                 <input type="hidden" name="prompt_id" value={p.id} />
@@ -233,7 +233,7 @@ export default async function AdmissionsSettingsPage() {
         ) : null}
         <ul className="flex flex-col gap-2">
           {(questions ?? []).map((q) => (
-            <li key={q.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 ring">
+            <li key={q.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 hover-ring">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{COVERAGE_LABEL[q.coverage_area]}</span>
                 <p className="text-sm text-ink">{q.question_text}</p>

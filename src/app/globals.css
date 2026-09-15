@@ -1174,8 +1174,8 @@ h6 {
                tiles, figure cards that link, room pills, demo cards.
      .wash  -- toggles or acts in place without leaving: buttons, tab items,
                chips, checkbox rows, form rows.
-     .ring  -- a read-only row that highlights for scanning and does nothing
-               on click.
+     .hover-ring -- a read-only row that highlights for scanning and does
+               nothing on click.
    Static things -- figures, static cards, text -- carry none of them.
 
    The colour stays in a variable, so none of the three needs a per-room
@@ -1232,11 +1232,13 @@ h6 {
     background-color: var(--hover-fill, var(--area-hover-fill, color-mix(in oklab, var(--color-primary) 30%, var(--color-card)))) !important;
   }
 
-  .ring {
+  /* Not ".ring": that is a Tailwind utility (box-shadow in the utilities
+     layer), and it beat this rule on every row until the name changed. */
+  .hover-ring {
     transition: box-shadow 120ms ease;
   }
 
-  .ring:hover {
+  .hover-ring:hover {
     box-shadow: inset 0 0 0 1px var(--hover-accent, var(--area-accent, var(--color-primary)));
   }
 
@@ -1364,7 +1366,7 @@ h6 {
   .lift,
   .lift-strong,
   .wash,
-  .ring,
+  .hover-ring,
   .tt-join {
     transition: none;
   }
