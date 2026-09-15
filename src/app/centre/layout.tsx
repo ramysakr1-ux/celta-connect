@@ -88,8 +88,13 @@ export default async function CentreLayout({ children }: { children: React.React
     ...(canView(ctx.roles, "admissions.view", ctx.overrides) ? ["admissions"] : []),
   ];
 
-  // Settings follows the capability its own page enforces.
-  const canSettings = can(ctx.roles, "centre.settings.edit", ctx.overrides);
+  // Settings follows the capability its own page enforces -- at VIEW level,
+  // the same reasoning as Admissions above. Since 15 Sep 2026 the Centre
+  // observer holds centre.settings.edit at "read" and the page renders them
+  // the centre's record instead of a refusal, so gating the door on "can
+  // act" would leave the one role defined by looking at things able to read
+  // the room only by typing its URL.
+  const canSettings = canView(ctx.roles, "centre.settings.edit", ctx.overrides);
   const canConcerns = can(ctx.roles, "concerns.manage", ctx.overrides);
   const canCreateCourse = can(ctx.roles, "course.create", ctx.overrides);
 
