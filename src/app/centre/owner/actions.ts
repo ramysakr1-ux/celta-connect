@@ -5,12 +5,19 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { CENTRE_ROLES, type CentreRole, type GrantLevel } from "@/lib/auth/centre-permissions";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 async function requireOwner() {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
   if (!ctx.roles.includes("centre_owner")) throw new Error("Only the Centre owner can do this.");
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  // Every action in this file writes through the admin client, which the
+  // demo's write-blocking trigger never sees -- so the role builder, custom
+  // roles and branch visibility all persisted on the shared demo. One
+  // chokepoint, since they all come through here.
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) throw new Error(demo);
   return { profile, centerId, ctx };
 }
 

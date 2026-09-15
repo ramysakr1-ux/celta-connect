@@ -10,6 +10,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import type { Database } from "@/lib/supabase/types";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 export interface PaymentFormState {
   error: string | null;
@@ -50,6 +51,8 @@ export async function createPaymentPlan(_prevState: PaymentFormState, formData: 
   if (!(await canActOnMoney(staff, moneyCentreId))) {
     return { error: "Your role can't set up a payment plan." };
   }
+  const demo = await refuseIfDemoCentre(moneyCentreId);
+  if (demo) return { error: demo };
 
   const supabase = await createClient();
   const { data: applicant } = await supabase
@@ -115,6 +118,7 @@ export async function markPaymentManual(formData: FormData): Promise<void> {
   if (typeof paymentId !== "string" || typeof applicantId !== "string") return;
   // Marking an instalment paid is a money act -- see canActOnMoney.
   if (!(await canActOnMoney(staff, staff.active_center_id ?? staff.center_id))) return;
+  if (await refuseIfDemoCentre(staff.active_center_id ?? staff.center_id)) return;
 
   const supabase = await createClient();
   await supabase
@@ -198,6 +202,7 @@ export async function markPaymentNotificationRead(formData: FormData): Promise<v
   if (typeof notificationId !== "string") return;
 
   const centerId = ctx.activeCenterId ?? session.profile.center_id;
+  if (await refuseIfDemoCentre(centerId)) return;
   // The admin client. payment_notifications has a select policy and nothing
   // else (migration 0087), so this update through the session client matched
   // no rows, returned no error, and left Dismiss doing nothing at all

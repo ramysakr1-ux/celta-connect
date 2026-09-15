@@ -2,6 +2,7 @@ import "server-only";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 /**
  * Requires a CAPABILITY, not a job title.
@@ -41,6 +42,19 @@ export async function requireCapability(capability: string) {
   if (!can(ctx.roles, capability, ctx.overrides)) {
     throw new Error("Your role at this centre does not allow that.");
   }
+
+  // Every action behind this helper writes through the admin client, which
+  // the demo's write-blocking trigger never sees -- it only fires for
+  // `auth.role() = 'authenticated'`, and the service role is exempt so the
+  // seed can write the demo in the first place. So a visitor signed in with
+  // a demo centre-admin link could rename the centre, change its time zone,
+  // disconnect its Drive and reshape its roster, and it all stuck (walked
+  // 15 Sep 2026). One chokepoint, since every one of them comes through
+  // here. The platform owner's standing pass above is deliberately
+  // untouched.
+  const demo = await refuseIfDemoCentre(ctx.activeCenterId ?? profile.center_id);
+  if (demo) throw new Error(demo);
+
   return profile;
 }
 

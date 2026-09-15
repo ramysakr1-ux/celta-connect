@@ -8,6 +8,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, CENTRE_ROLES, roleLabel, type CentreRole } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS, type Area } from "@/lib/auth/areas";
 import { formatCalendarDate } from "@/lib/format-date";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 // A role is valid to grant/invite either as one of the four built-in slugs,
 // or as a custom role the owner has already defined for this centre --
@@ -47,6 +48,8 @@ export async function grantCentreRole(_prev: GrantRoleState, formData: FormData)
   if (!role) return { error: "Pick a role." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const admin = createAdminClient();
   if (!(await isValidRoleForCentre(admin, role, centerId))) return { error: "Pick a role." };
   const supabase = await createClient();
@@ -120,6 +123,8 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
   const email = (formData.get("email") as string | null)?.trim().toLowerCase() || null;
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const admin = createAdminClient();
   if (!(await isValidRoleForCentre(admin, role, centerId))) return { error: "Pick a role." };
   const { data: invite, error } = await admin
@@ -184,6 +189,8 @@ export async function revokeCentreAdminInvite(_prev: RevokeInviteState, formData
   if (!inviteId) return { error: "Missing the invite." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const admin = createAdminClient();
   const { data: invite } = await admin
     .from("centre_admin_invites")
@@ -222,6 +229,8 @@ export async function revokeCentreRole(_prev: RevokeRoleState, formData: FormDat
   if (!grantId) return { error: "Missing the grant." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const admin = createAdminClient();
 
   const { data: grant } = await admin
@@ -317,6 +326,8 @@ export async function assignArea(_prev: AssignAreaState, formData: FormData): Pr
   if (!email) return { error: "Who is this for?" };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const supabase = await createClient();
   const { data: target } = await supabase
     .from("profiles")

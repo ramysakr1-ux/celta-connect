@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { PAYMENT_PROVIDERS, providerByKey } from "@/lib/payments/providers";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 export interface ConnectProviderState {
   error?: string;
@@ -38,6 +39,8 @@ export async function connectProvider(_prev: ConnectProviderState, formData: For
   if (!provider) return { error: "Pick a provider." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
 
   // Honest refusal rather than a button that appears to work: only Stripe has
   // an adapter, and connecting a provider the app cannot then talk to would
@@ -76,6 +79,8 @@ export async function disconnectProvider(_prev: ConnectProviderState, formData: 
   void formData;
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const supabase = await createClient();
   const { error } = await supabase
     .from("centers")

@@ -12,6 +12,7 @@ import { sendApplicantEmail } from "@/lib/admissions-email";
 import { signOut } from "@/app/login/actions";
 import { ensureCourseArchived } from "@/lib/course-close-out/export";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 export interface FormState {
   error: string | null;
@@ -31,6 +32,8 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
   if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return { error: "You can't edit centre settings." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
   const name = (formData.get("name") as string | null)?.trim();
   const address = (formData.get("address") as string | null)?.trim() || null;
   const primaryContactEmail = (formData.get("primary_contact_email") as string | null)?.trim() || null;
@@ -90,6 +93,9 @@ export async function transferCentreOwnership(_prevState: TransferOwnershipState
   const { data: center } = await admin.from("centers").select("name").eq("id", centerId).maybeSingle();
   if (!center) return { error: "Centre not found." };
   if (confirmName !== center.name) return { error: "Type the centre's exact name to confirm." };
+
+  const demo = await refuseIfDemoCentre(centerId);
+  if (demo) return { error: demo };
 
   const { data: newOwner } = await admin.from("profiles").select("id, center_id").eq("email", newOwnerEmail).maybeSingle();
   if (!newOwner || newOwner.center_id !== centerId) {

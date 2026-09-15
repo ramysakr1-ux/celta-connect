@@ -20,6 +20,7 @@ import { interviewWhen } from "@/lib/interview-time";
 import { sendInterviewConfirmationToApplicant } from "@/lib/interview-confirmation";
 import { holdsCentre } from "@/lib/branch-scope";
 import { formatCalendarDate } from "@/lib/format-date";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
 const ORDINAL_WORD: Record<number, string> = {
@@ -1465,6 +1466,8 @@ export async function agreeRefund(_prevState: FormState, formData: FormData): Pr
   // read-only Centre observer move the centre's money.
   const refundCentreId = staff.active_center_id ?? staff.center_id;
   if (!(await canActOnMoney(staff, refundCentreId))) return { error: "You can't agree refunds." };
+  const demoRefund = await refuseIfDemoCentre(refundCentreId);
+  if (demoRefund) return { error: demoRefund };
 
   const applicantId = (formData.get("applicant_id") as string | null) || null;
   const amountRaw = formData.get("amount");
@@ -1522,6 +1525,8 @@ export async function settleRefund(_prevState: FormState, formData: FormData): P
   // Asked at the refund's own centre, not at whichever one this person is
   // acting in.
   if (!(await canActOnMoney(staff, refundRow.center_id))) return { error: "You can't settle refunds." };
+  const demoSettle = await refuseIfDemoCentre(refundRow.center_id);
+  if (demoSettle) return { error: demoSettle };
   const { error } = await adminClient
     .from("refunds")
     .update(
