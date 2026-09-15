@@ -591,12 +591,16 @@ function SessionTile({
 
   return (
     <button type="button" onClick={() => onSelect(event)} className="flex h-full w-full min-h-0 flex-col items-start gap-1 text-left">
-      <span className="text-[11.5px] leading-snug text-ink" style={{ fontWeight: titleWeight }}>
+      <span className="line-clamp-2 text-[11.5px] leading-[1.25] text-ink" style={{ fontWeight: titleWeight }}>
         {event.title}
       </span>
-      {event.detail ? <span className="text-[10px] text-muted">{event.detail}</span> : null}
-      {letters || groupName || event.event_time ? (
-        <span className="text-[10px] text-muted">
+      {/* One meta line, as the design has it: the subtitle if there is one,
+          otherwise time, group and letters. A second line pushed the join
+          icon off the floor of a fixed tile. */}
+      {event.detail ? (
+        <span className="line-clamp-2 text-[10px] leading-[1.3] text-muted">{event.detail}</span>
+      ) : letters || groupName || event.event_time ? (
+        <span className="text-[10px] leading-[1.3] text-muted">
           {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
