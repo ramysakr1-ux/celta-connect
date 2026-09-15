@@ -6,11 +6,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // flagged clone of the real app," extended per
 // connect-multi-role-demo-spec-2026-08-22.md to five roles). Mints a fresh
 // single-use magic-link session for one seeded demo account and lands the
-// visitor already logged in. Every write any of them might attempt is
-// blocked at the database layer regardless (migration 0079's trigger,
-// scoped to centers.is_demo), so sharing these accounts across every
-// visitor concurrently is safe -- nothing any of them do can affect what
-// the next visitor sees.
+// visitor already logged in.
+//
+// Sharing one account across every visitor rests on a write block, and that
+// block is narrower than this comment used to claim. Migration 0079's
+// trigger fires only for `auth.role() = 'authenticated'`; the service role
+// is exempt so the seed can write the demo, so every action that goes
+// through createAdminClient() walks past it. src/lib/demo-guard.ts closes
+// that at the chokepoints Centre Management writes through
+// (requireCapability, requireOwner, and the centre-settings/roles/money
+// actions); the trainer and trainee write paths are the same class and are
+// NOT yet covered (walked 15 Sep 2026).
 export async function mintDemoMagicLink(email: string, next: string | ((profileId: string) => string)) {
   const admin = createAdminClient();
   // SITE_URL must be the CANONICAL host, including www where the domain

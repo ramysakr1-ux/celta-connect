@@ -1,6 +1,9 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { computeSessionTicks } from "@/lib/volunteer-attendance";
+import { classLessons } from "@/lib/volunteer-class-session";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 
 // Ramy, 25 Aug 2026, rejecting the first build of this page (a flat name-
 // by-name roster): "this is a command center for all my projects, not for
@@ -46,13 +49,22 @@ export default async function CommandCenterPeoplePage() {
     );
   }
 
+  const { data: courseRows } = await admin
+    .from("courses")
+    .select("id")
+    .in("center_id", accessibleCenterIds);
+  const accessibleCourseIds = (courseRows ?? []).map((c) => c.id);
+
   const [{ data: courses }, { data: trainees }, { data: trainers }, { data: volunteers }, { data: tpEvents }, { data: attendance }] = await Promise.all([
     admin.from("courses").select("id, name, center_id, start_date, end_date").in("center_id", accessibleCenterIds).order("start_date", { ascending: false }),
     admin.from("profiles").select("course_id").eq("role", "trainee").in("center_id", accessibleCenterIds),
     admin.from("profiles").select("course_id").eq("role", "trainer").in("center_id", accessibleCenterIds),
-    admin.from("volunteer_students").select("id, course_id").is("removed_at", null),
-    admin.from("course_timetable_events").select("id, course_id, event_date").eq("type", "tp"),
-    admin.from("volunteer_attendance").select("id, timetable_event_id, volunteer_students(course_id)"),
+    // Scoped to these centres' own courses. All three used to fetch the
+    // whole table and filter in JS -- every volunteer, every TP row and
+    // every attendance mark in the database, on each load.
+    admin.from("volunteer_students").select("id, course_id, level").is("removed_at", null).in("course_id", accessibleCourseIds),
+    admin.from("course_timetable_events").select("id, course_id, event_date, detail").eq("type", "tp").in("course_id", accessibleCourseIds),
+    admin.from("volunteer_attendance").select("id, timetable_event_id"),
   ]);
 
   const coursesList = courses ?? [];
@@ -72,18 +84,27 @@ export default async function CommandCenterPeoplePage() {
   const trainerCountByCourse = countBy(trainers);
   const volunteerCountByCourse = countBy((volunteers ?? []).filter((v) => courseIds.has(v.course_id)));
 
-  const tpSessionsSoFarByCourse = new Map<string, number>();
-  for (const e of tpEvents ?? []) {
-    if (!courseIds.has(e.course_id) || e.event_date > todayFor(courseCenterById.get(e.course_id))) continue;
-    tpSessionsSoFarByCourse.set(e.course_id, (tpSessionsSoFarByCourse.get(e.course_id) ?? 0) + 1);
-  }
-
-  const eventCourseById = new Map((tpEvents ?? []).map((e) => [e.id, e.course_id]));
-  const attendanceCountByCourse = new Map<string, number>();
-  for (const a of attendance ?? []) {
-    const courseId = eventCourseById.get(a.timetable_event_id);
-    if (!courseId || !courseIds.has(courseId)) continue;
-    attendanceCountByCourse.set(courseId, (attendanceCountByCourse.get(courseId) ?? 0) + 1);
+  // Volunteer attendance, per session -- not per timetable row.
+  //
+  // This counted attendance marks against volunteers x TP EVENTS, and on a
+  // two-group course a day is six events across two levels while a
+  // volunteer sits through the three of their own class. So the
+  // denominator was double and every rate read at half (walked 15 Sep
+  // 2026). Same maths the register and the centre pool use: a session is
+  // one class's day, present is round(2N/3) of its lessons.
+  const attendedEventIds = new Set((attendance ?? []).map((a) => a.timetable_event_id));
+  const sessionsByCourse = new Map<string, { held: number; attended: number }>();
+  for (const v of volunteers ?? []) {
+    if (!courseIds.has(v.course_id)) continue;
+    const lessons = classLessons(
+      (tpEvents ?? []).filter((e) => e.course_id === v.course_id && e.event_date <= todayFor(courseCenterById.get(v.course_id))),
+      v.level
+    );
+    const ticks = computeSessionTicks(lessons, attendedEventIds, TP_LESSON_LENGTH_MINUTES);
+    const row = sessionsByCourse.get(v.course_id) ?? { held: 0, attended: 0 };
+    row.held += ticks.length;
+    row.attended += ticks.filter((t) => t.ticked).length;
+    sessionsByCourse.set(v.course_id, row);
   }
 
   const totalTrainees = [...traineeCountByCourse.values()].reduce((s, n) => s + n, 0);
@@ -129,10 +150,9 @@ export default async function CommandCenterPeoplePage() {
           const running = c.start_date <= courseToday && c.end_date >= courseToday;
           const ended = c.end_date < courseToday;
           const volunteerCount = volunteerCountByCourse.get(c.id) ?? 0;
-          const sessionsSoFar = tpSessionsSoFarByCourse.get(c.id) ?? 0;
-          const attended = attendanceCountByCourse.get(c.id) ?? 0;
-          const possible = volunteerCount * sessionsSoFar;
-          const attendancePct = possible > 0 ? Math.round((attended / possible) * 100) : null;
+          const sessions = sessionsByCourse.get(c.id) ?? { held: 0, attended: 0 };
+          const sessionsSoFar = volunteerCount > 0 ? Math.round(sessions.held / volunteerCount) : 0;
+          const attendancePct = sessions.held > 0 ? Math.round((sessions.attended / sessions.held) * 100) : null;
           return (
             <div
               key={c.id}
