@@ -50,7 +50,22 @@ function formatShortDate(iso: string): string {
 // treatment for this page specifically. Reuses the app's own existing
 // on-track (teal)/at-risk (garnet) status tokens rather than inventing new
 // literals, same pair used for status pills elsewhere in the app.
-function StatusPill({ attended }: { attended: boolean | null }) {
+// Three states, not two-and-a-half. A class that has finished but has no
+// register submitted yet is neither upcoming nor missed -- the page used to
+// call it "Upcoming" all evening, directly under a hero that had already
+// moved on to tomorrow's class (walked 15 Sep 2026).
+function StatusPill({ attended, awaitingRegister }: { attended: boolean | null; awaitingRegister?: boolean }) {
+  if (attended === null && awaitingRegister) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+        style={{ background: "var(--color-card-inset)", color: "var(--color-muted)" }}
+      >
+        <span className="size-1.5 rounded-full bg-current" />
+        Not marked yet
+      </span>
+    );
+  }
   if (attended === null) {
     return (
       <span
@@ -536,8 +551,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       topicByTpTrainee.set(`${a.tp_number}:${a.trainee_id}`, (a.short_title || a.main_lesson_aim) as string);
     }
   }
+  // "Upcoming" is what the hero's own clock says is still to come -- the
+  // same band-end test, not a date comparison.
+  const upcomingEventIds = new Set(upcoming.map((c) => c.eventId));
   const rows = listClasses.map((c) => ({
     ...c,
+    awaitingRegister: c.attended === null && !upcomingEventIds.has(c.eventId),
     // Their own class's first lesson that day, not whichever candidate on
     // the course happened to come back first for that TP number -- which
     // was usually the other level's lesson (walked 15 Sep 2026).
@@ -1104,6 +1123,7 @@ interface ClassRow {
   topic: string | null;
   courseName: string;
   attended: boolean | null;
+  awaitingRegister: boolean;
   rowMaterials: RowMaterial[];
 }
 
@@ -1127,7 +1147,7 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <StatusPill attended={c.attended} />
+              <StatusPill attended={c.attended} awaitingRegister={c.awaitingRegister} />
               <ClassMaterialsLink materials={c.rowMaterials} />
             </div>
           </div>
@@ -1171,7 +1191,7 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
             </div>
             <div className="truncate">{c.topic ?? c.courseName}</div>
             <div>
-              <StatusPill attended={c.attended} />
+              <StatusPill attended={c.attended} awaitingRegister={c.awaitingRegister} />
             </div>
             <div>{c.rowMaterials.length > 0 ? <ClassMaterialsLink materials={c.rowMaterials} /> : <span className="text-muted">—</span>}</div>
           </div>
