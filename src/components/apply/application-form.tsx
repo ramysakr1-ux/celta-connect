@@ -165,10 +165,12 @@ export function ApplicationForm({
             >
               {/* A5/A6, high-traffic audit 16 Sep 2026: this printed the raw
                   ISO dates ("2026-10-05 - 2026-10-30") with double hyphens,
-                  on the one page an applicant sees first. */}
+                  on the one page an applicant sees first. Year on the end
+                  date (Ramy, 16 Sep 2026) so two intakes across a new year
+                  cannot be confused. */}
               {intakes.map((i) => (
                 <option key={i.id} value={i.id}>
-                  {i.name} ({formatCalendarDate(i.startDate)} – {formatCalendarDate(i.endDate)}) ·{" "}
+                  {i.name} ({formatCalendarDate(i.startDate)} – {formatCalendarDate(i.endDate, { year: "numeric" })}) ·{" "}
                   {DELIVERY_MODE_LABEL[i.deliveryMode]} · {i.availabilityLabel}
                 </option>
               ))}
