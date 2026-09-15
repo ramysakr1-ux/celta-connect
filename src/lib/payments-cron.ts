@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatCurrency } from "@/lib/money-by-currency";
 
 // "A missed instalment is not an automatic consequence (no auto-suspension,
 // no auto-email) -- it becomes a payments task that sits until a human acts
@@ -52,7 +53,9 @@ export async function runMissedInstalmentsCron(): Promise<{ missed: number }> {
       center_id: payment.center_id,
       payment_id: payment.id,
       type: "instalment_missed",
-      message: `${applicantName} -- instalment ${payment.instalment_index} (${payment.amount} ${payment.currency}) is overdue.`,
+      // "£1,000", not "1000 GBP" -- this message is read by a person on the
+      // payments panel.
+      message: `${applicantName} -- instalment ${payment.instalment_index} (${formatCurrency(payment.amount, payment.currency)}) is overdue.`,
     });
     missed++;
   }
