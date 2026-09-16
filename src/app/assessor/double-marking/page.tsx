@@ -8,12 +8,9 @@ import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
 import { doubleMarkingPerAssignment } from "@/lib/assessor-requirements";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
+import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
+import { AMBER, FAINT, INK, MUTED, TEAL } from "@/components/assessor/tokens";
 
-const INK = "oklch(23.5% 0.017 65)";
-const MUTED = "oklch(51% 0.017 70)";
-const TEAL = "oklch(38% 0.072 195)";
-const FAINT = "oklch(63% 0.012 82)";
-const AMBER = "oklch(44% 0.095 68)";
 
 // Handbook 9.2.3: "Centres should keep a record of which assignments have
 // been double-marked; course assessors may ask to see this record." The pack
@@ -69,25 +66,28 @@ export default async function AssessorDoubleMarkingPage() {
       <AssessorReadOnlyBanner subject="the course" />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
-            Assessor access — read-only · double-marking record
-          </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>Double-marking record</h1>
-          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
-            Which written assignments on {course.name} a second tutor has checked, and when. Handbook §9.2.3 asks for{" "}
-            {quota ? `${quota} of each assignment on a course of ${active.length}` : "a sample of each assignment"}, the sample to include
-            any fails, and both tutors&apos; initials on the work — here, the first marker&apos;s decision and the second marker&apos;s
-            own signature, each with its time.
-          </p>
+          <AssessorHead
+            eyebrow="Assessor access — read-only · double-marking record"
+            title={<>Double-marking record</>}
+            lede={
+              <>
+                Which written assignments on {course.name} a second tutor has checked, and when. Handbook §9.2.3 asks for{" "}
+                {quota ? `${quota} of each assignment on a course of ${active.length}` : "a sample of each assignment"}, the sample to include
+                any fails, and both tutors&apos; initials on the work — here, the first marker&apos;s decision and the second marker&apos;s
+                own signature, each with its time.
+              </>
+            }
+          />
 
           {!anyRecorded ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: 16, fontSize: "var(--text-meta)", color: FAINT }}>
               No second marking has been recorded on this course yet. A centre that keeps its record on paper uploads it under
               centre documents.
             </p>
           ) : null}
 
-          {ASSIGNMENT_ORDER.map((type, i) => {
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 26 }}>
+          {ASSIGNMENT_ORDER.map((type) => {
             const ofType = rows.filter((a) => a.assignment_type === type);
             const marked = ofType.filter((a) => {
               const r = resolveAssignmentResult(a);
@@ -97,9 +97,9 @@ export default async function AssessorDoubleMarkingPage() {
             const failsNotChecked = ofType.filter((a) => resolveAssignmentResult(a) === "fail" && !a.second_marker_recorded_at);
             const met = quota !== null && doubleMarked.length >= quota;
             return (
-              <div key={type} className="card" style={{ marginTop: i === 0 ? 26 : 14, padding: "18px 20px" }}>
+              <div key={type} className="card" style={{ padding: 16 }}>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{ASSIGNMENT_INFO[type].title}</h2>
+                  <AssessorSubHead>{ASSIGNMENT_INFO[type].title}</AssessorSubHead>
                   <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: met ? TEAL : marked.length === 0 ? MUTED : AMBER }}>
                     {doubleMarked.length} double-marked
                     {quota ? ` of ${quota} needed` : ""} · {marked.length} of {ofType.length} marked
@@ -151,6 +151,7 @@ export default async function AssessorDoubleMarkingPage() {
               </div>
             );
           })}
+          </div>
         </div>
       </div>
     </div>

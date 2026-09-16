@@ -6,12 +6,9 @@ import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
+import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
+import { AMBER, FAINT, INK, MUTED, TEAL } from "@/components/assessor/tokens";
 
-const INK = "oklch(23.5% 0.017 65)";
-const MUTED = "oklch(51% 0.017 70)";
-const TEAL = "oklch(38% 0.072 195)";
-const FAINT = "oklch(63% 0.012 82)";
-const AMBER = "oklch(44% 0.095 68)";
 
 // Handbook 14.1 puts "Application files / Including rejected applicants" in
 // the pack the centre has ready, and 12.2 says what may be in them: "names
@@ -118,20 +115,20 @@ export default async function AssessorApplicationFilesPage() {
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
           {/* The banner above carries the one door back to the pack. */}
-          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
-            Assessor access — read-only · application files
-          </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>
-            Application files
-          </h1>
-          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
-            Selection on {course.name}: the written task, the language awareness answer, the marks against the scheme
-            and the interview record for every applicant the centre decided on — {accepted.length} accepted,{" "}
-            {others.length} not. Names only, as §12.2 asks; nothing else that identifies them is shown here.
-          </p>
+          <AssessorHead
+            eyebrow="Assessor access — read-only · application files"
+            title={<>Application files</>}
+            lede={
+              <>
+                Selection on {course.name}: the written task, the language awareness answer, the marks against the scheme
+                and the interview record for every applicant the centre decided on — {accepted.length} accepted,{" "}
+                {others.length} not. Names only, as §12.2 asks; nothing else that identifies them is shown here.
+              </>
+            }
+          />
 
           {files.length === 0 ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: 16, fontSize: "var(--text-meta)", color: FAINT }}>
               No selection decisions for this course went through Connect, so there are no files to draw on here.
               A centre that selected on paper uploads its application files under centre documents.
             </p>
@@ -155,6 +152,7 @@ export default async function AssessorApplicationFilesPage() {
         <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginTop: first ? 26 : 30 }}>
           {title} · {files.length}
         </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 14 }}>
         {files.map((a) => {
           const record = recordByApplicant.get(a.id) ?? null;
           const prompt = a.writing_task_prompt_id ? promptById.get(a.writing_task_prompt_id) : null;
@@ -165,9 +163,9 @@ export default async function AssessorApplicationFilesPage() {
             : [];
           const marked = Boolean(a.marked_at);
           return (
-            <div key={a.id} className="card" style={{ marginTop: 14, padding: "18px 20px" }}>
+            <div key={a.id} className="card" style={{ padding: 16 }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{a.full_name}</h2>
+                <AssessorSubHead>{a.full_name}</AssessorSubHead>
                 <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: a.stage === "accepted" || a.stage === "offer_sent" ? TEAL : MUTED }}>
                   {DECISION_LABEL[a.stage] ?? a.stage}
                   {a.stage === "waiting_list" && a.waiting_list_position ? ` · position ${a.waiting_list_position}` : ""}
@@ -290,6 +288,7 @@ export default async function AssessorApplicationFilesPage() {
             </div>
           );
         })}
+        </div>
       </>
     );
   }

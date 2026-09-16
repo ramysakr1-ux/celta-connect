@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCandidateCards } from "@/lib/assessor-pack";
+import { Figure } from "@/components/assessor/figure";
+import { AMBER, FAINT, INK, MUTED, TEAL } from "@/components/assessor/tokens";
 import { halfOwningDate, halfTpDates } from "@/lib/rotation";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 
@@ -24,11 +26,6 @@ import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 // its own card, because it is the one document the assessor reads before
 // walking into a room rather than while moderating.
 
-const INK = "oklch(23.5% 0.017 65)";
-const MUTED = "oklch(51% 0.017 70)";
-const FAINT = "oklch(63% 0.012 82)";
-const TEAL = "oklch(38% 0.072 195)";
-const AMBER = "oklch(44% 0.1 68)";
 
 export async function AssessorPortfolioLanding({ traineeId, courseId }: { traineeId: string; courseId: string }) {
   const admin = createAdminClient();
@@ -303,8 +300,7 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
           href={`/api/withdrawal-letter/${traineeId}`}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center justify-between gap-3 rounded-[9px] border border-border bg-card px-4 py-3"
-          style={{ borderLeft: `3px solid ${AMBER}` }}
+          className="lift hover-ring flex items-center justify-between gap-3 rounded-[9px] border border-border bg-card px-4 py-3 no-underline"
         >
           <span>
             <span className="block text-meta font-semibold text-ink">Withdrawal letter</span>
@@ -312,7 +308,7 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
               The candidate&apos;s signed withdrawal, countersigned by the centre — Handbook §14.2. Opens as a PDF.
             </span>
           </span>
-          <span className="shrink-0 text-meta font-semibold" style={{ color: AMBER }}>
+          <span className="shrink-0 text-meta font-semibold" style={{ color: TEAL }}>
             Open
           </span>
         </a>
@@ -320,18 +316,6 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
 
       <p className="text-label text-muted">
         Read-only. Nothing here can be edited, and nothing you open is recorded against the candidate.
-      </p>
-    </div>
-  );
-}
-
-function Figure({ label, value, of, ink }: { label: string; value: string; of?: string; ink?: string }) {
-  return (
-    <div>
-      <p className="text-micro font-semibold tracking-[0.05em] text-muted uppercase">{label}</p>
-      <p className="mt-1 font-serif text-h2 leading-none" style={{ color: ink ?? INK }}>
-        {value}
-        {of ? <span className="ml-1.5 font-sans text-meta text-muted">{of}</span> : null}
       </p>
     </div>
   );
@@ -372,7 +356,7 @@ function Pill({
   // is itself a fact the assessor wants, and a pill that comes and goes
   // between candidates makes the set harder to read at a glance.
   return href ? (
-    <Link href={href} className={`lift no-underline ${cls}`}>
+    <Link href={href} className={`lift hover-ring no-underline ${cls}`}>
       {body}
     </Link>
   ) : (
@@ -402,7 +386,7 @@ function Card({
   return (
     <Link
       href={href}
-      className="lift card flex items-start gap-3 p-4 no-underline"
+      className="lift hover-ring card flex items-start gap-3 p-4 no-underline"
       style={{ borderLeft: `3px solid ${open ? AMBER : TEAL}` }}
     >
       <span className="shrink-0 pt-[3px] text-micro font-bold tabular-nums" style={{ color: MUTED }}>

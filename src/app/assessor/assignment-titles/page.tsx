@@ -5,9 +5,9 @@ import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssesso
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO, ASSIGNMENT_WORD_COUNT } from "@/lib/assignment-info";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
+import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
+import { INK, MUTED } from "@/components/assessor/tokens";
 
-const INK = "oklch(23.5% 0.017 65)";
-const MUTED = "oklch(51% 0.017 70)";
 
 // Ramy, 29 Aug 2026: "Assignment titles doesn't take you there." The
 // pack's "Assignment titles" row used to link to the first candidate's
@@ -49,24 +49,25 @@ export default async function AssessorAssignmentTitlesPage() {
       <AssessorReadOnlyBanner subject="the course" />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
-            Assessor access — read-only · assignment titles
-          </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>
-            The four written assignments
-          </h1>
-          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
-            The same four titles for every candidate on {course.name}, each {ASSIGNMENT_WORD_COUNT}. Where this centre
-            has published its own brief, its wording is shown beneath the title; the marks against these are in each
-            candidate&apos;s portfolio.
-          </p>
+          <AssessorHead
+            eyebrow="Assessor access — read-only · assignment titles"
+            title={<>The four written assignments</>}
+            lede={
+              <>
+                The same four titles for every candidate on {course.name}, each {ASSIGNMENT_WORD_COUNT}. Where this centre
+                has published its own brief, its wording is shown beneath the title; the marks against these are in each
+                candidate&apos;s portfolio.
+              </>
+            }
+          />
 
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 26 }}>
           {ASSIGNMENT_ORDER.map((type, i) => {
             const info = ASSIGNMENT_INFO[type];
             const template = templateByType.get(type);
             const sections = (template?.sections ?? []) as TemplateSection[];
             return (
-              <div key={type} className="card" style={{ marginTop: i === 0 ? 26 : 14, padding: "18px 20px" }}>
+              <div key={type} className="card" style={{ padding: 16 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                   <span
                     style={{
@@ -76,7 +77,7 @@ export default async function AssessorAssignmentTitlesPage() {
                   >
                     {i + 1}
                   </span>
-                  <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{info.title}</h2>
+                  <AssessorSubHead>{info.title}</AssessorSubHead>
                 </div>
                 <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 6, lineHeight: 1.6 }}>{info.description}</p>
 
@@ -102,6 +103,7 @@ export default async function AssessorAssignmentTitlesPage() {
               </div>
             );
           })}
+          </div>
         </div>
       </div>
     </div>

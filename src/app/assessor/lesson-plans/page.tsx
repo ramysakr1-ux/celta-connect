@@ -5,11 +5,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssessorPreview } from "@/lib/auth/portfolio-access";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { halfOwningDate, halfTpDates, rotationPosition } from "@/lib/rotation";
+import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
+import { FAINT, INK, MUTED, TEAL } from "@/components/assessor/tokens";
 
-const INK = "oklch(23.5% 0.017 65)";
-const MUTED = "oklch(51% 0.017 70)";
-const TEAL = "oklch(38% 0.072 195)";
-const FAINT = "oklch(63% 0.012 82)";
 
 function longDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -99,31 +97,32 @@ export default async function AssessorLessonPlansPage() {
       <AssessorReadOnlyBanner subject="the course" />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
-            Assessor access — read-only · lesson plans for the day
-          </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>
-            {visitDate ? longDate(visitDate) : "Lesson plans for the visit"}
-          </h1>
-          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
-            {visitDate && tpNumber > 0
-              ? `The plans for the teaching practice you will observe on ${course.name} — TP ${tpNumber}, in teaching order.`
-              : "The plans for the teaching practice you will observe, in teaching order."}
-          </p>
+          <AssessorHead
+            eyebrow="Assessor access — read-only · lesson plans for the day"
+            title={<>{visitDate ? longDate(visitDate) : "Lesson plans for the visit"}</>}
+            lede={
+              <>
+                {visitDate && tpNumber > 0
+                ? `The plans for the teaching practice you will observe on ${course.name} — TP ${tpNumber}, in teaching order.`
+                : "The plans for the teaching practice you will observe, in teaching order."}
+              </>
+            }
+          />
 
           {!visitDate ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: 16, fontSize: "var(--text-meta)", color: FAINT }}>
               No assessor visit date has been set for this course yet, so there is no day to draw plans from. The main
               course tutor sets the date; the plans appear here once they do.
             </p>
           ) : tpNumber === 0 || teaching.length === 0 ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: 16, fontSize: "var(--text-meta)", color: FAINT }}>
               No teaching practice is timetabled for {longDate(visitDate)}, so there are no lesson plans for that day.
               The full course timetable is in the pack.
             </p>
           ) : (
-            teaching.map((t, i) => (
-              <div key={t.traineeId} className="card" style={{ marginTop: i === 0 ? 26 : 14, padding: "18px 20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 26 }}>{
+            teaching.map((t) => (
+              <div key={t.traineeId} className="card" style={{ padding: 16 }}>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                     <span
@@ -134,7 +133,7 @@ export default async function AssessorLessonPlansPage() {
                     >
                       {t.order}
                     </span>
-                    <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{t.name}</h2>
+                    <AssessorSubHead>{t.name}</AssessorSubHead>
                   </div>
                   <Link
                     href={`/portfolio/${t.traineeId}/tp/${tpNumber}`}
@@ -168,6 +167,7 @@ export default async function AssessorLessonPlansPage() {
                 )}
               </div>
             ))
+            }</div>
           )}
         </div>
       </div>

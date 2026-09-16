@@ -16,38 +16,16 @@ import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents
 import { buildAssessorRequirements, doubleMarkingPerAssignment, type AssessmentKind } from "@/lib/assessor-requirements";
 import { AppianReference } from "@/app/assessor/appian-reference";
 import { appianHref } from "@/lib/appian";
+import { AssessorHead } from "@/components/assessor/assessor-head";
+import { Figure, FigureRow } from "@/components/assessor/figure";
+import { Panel, DocRow } from "@/components/assessor/panel";
+import { CandidateCard } from "@/components/assessor/candidate-card";
+import { AMBER, CREAM, GOLD, INK, MUTED, TEAL, WARM } from "@/components/assessor/tokens";
 
-// The design file's own palette, so status colour is not re-invented here.
-// Re-pointed 2026-08-21 per the color audit: gold is reserved for the Pass
-// A grade tint only (GOLD_TINT below), never a generic deadline/section
-// accent -- those uses move to AMBER or MUTED. Green is fully retired as a
-// status color -- TEAL takes over every "met/complete" use GREEN used to
-// have (readiness dots, hours logged, document status).
-const MUTED_ACCENT = "oklch(51% 0.017 70)";
-const TEAL = "oklch(37.5% 0.058 195)";
-const AMBER = "oklch(44% 0.1 68)";
-const GOLD = "oklch(63% 0.096 72)";
-
-
-// Verbatim from Assessor Visit.dc.html's own GRADE table. These are not
-// decoration: Pass A is gold, Pass B is silver, a plain Pass is deliberately
-// NEUTRAL, and Fail is red. The previous mapping used the app's generic pill
-// classes and coloured a plain Pass green -- which read as "good" on a grade
-// that is simply a pass, and left Pass B and Pass looking alike.
-//
-// Green in this design means complete/good as a STATUS (a met dot, hours
-// logged), never a grade. Keeping the two apart is the point.
-const GOLD_TINT = "color-mix(in oklab, oklch(60% 0.11 70) 18%, var(--color-card))";
-const SILVER_TINT = "color-mix(in oklab, oklch(65% 0.008 90) 30%, var(--color-card))";
-const RED_TINT = "color-mix(in oklab, oklch(45% 0.16 27) 14%, var(--color-card))";
-
-const GRADE: Record<string, { bg: string; ink: string }> = {
-  "Pass A": { bg: GOLD_TINT, ink: "oklch(40% 0.09 68)" },
-  "Pass B": { bg: SILVER_TINT, ink: "oklch(42% 0.01 90)" },
-  Pass: { bg: "oklch(94% 0.012 85)", ink: "oklch(51% 0.017 70)" },
-  Fail: { bg: RED_TINT, ink: "oklch(45% 0.16 27)" },
-};
-
+// The assessor's palette lives in components/assessor/tokens.ts now -- one
+// teal, one amber, one gold, shared by the pack, its five sub-pages and the
+// candidate portfolio landing (spec B3). The grade tints travel with the
+// candidate card that uses them.
 // for-claude-code-assessor-interface.md -- the real dedicated single
 // screen, replacing what used to be a bare redirect into a trimmed slice
 // of the trainer UI (roster/grades-report/attendance-register with fewer
@@ -460,17 +438,7 @@ export default async function AssessorPage({
   const fmtCaseDate = (ts: string) =>
     new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone });
 
-  const CARD = "var(--color-card)";
-  const BORDER = "oklch(88% 0.016 82)";
-  const INK = "oklch(23.5% 0.017 65)";
-  const MUTED = "oklch(51% 0.017 70)";
-  const WARM = "oklch(30% 0.042 58)";
-  const TEAL = "oklch(38% 0.072 195)";
-  const CREAM = "oklch(97% 0.008 88)";
-  // for-claude-code-trainee-assessor-card-system.md's header underline --
-  // = --color-gold, distinct from the page's own GOLD const above (that
-  // one's tuned for the Pass A tint/dot, a different job).
-  const GOLD_UNDERLINE = "oklch(60% 0.11 70)";
+
 
   // The six rows the design names, in its order. Values come from real
   // records, so where the app genuinely doesn't hold something the row says so
@@ -546,11 +514,11 @@ export default async function AssessorPage({
           fontSize: "var(--text-meta)", textAlign: "center",
         }}
       >
-        This pack is laid out for a larger screen &mdash; open it on a laptop or tablet for the full width.
+        This pack is laid out for a larger screen &mdash; open it on a laptop for the full width.
       </p>
       <header
         style={{
-          height: 92, background: WARM, borderBottom: `3px solid ${GOLD_UNDERLINE}`, display: "flex",
+          height: 92, background: WARM, borderBottom: `3px solid ${GOLD}`, display: "flex",
           alignItems: "center", justifyContent: "space-between", padding: "0 32px",
         }}
       >
@@ -586,7 +554,7 @@ export default async function AssessorPage({
             names exactly one course, so this one gets the whole day bar and not
             just the time -- and it is the day they are here to moderate. */}
         <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
-          <HeaderClock supabase={admin} courseId={courseId} timeZone={timeZone} accent={GOLD_UNDERLINE} tone="dark" />
+          <HeaderClock supabase={admin} courseId={courseId} timeZone={timeZone} accent={GOLD} tone="dark" />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* assessor-visit-pack-full-spec.md: "Links to Appian's login page
@@ -645,18 +613,11 @@ export default async function AssessorPage({
         className="frame"
         style={{ margin: "40px 32px 44px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 22 }}
       >
-        <div>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
-            <div>
-              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
-                {center?.name ?? "Centre"} · {center?.center_number ?? ""} · {course.name}
-                {courseDates ? ` · ${courseDates}` : ""}
-              </p>
-              <h1 style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, color: INK, marginTop: 6 }}>
-                Assessor visit{course.assessor_visit_date ? ` — ${longDate(course.assessor_visit_date)}` : ""}
-              </h1>
-            </div>
-            <div style={{ display: "flex", gap: 34 }}>
+        <AssessorHead
+          eyebrow={`${center?.name ?? "Centre"} · ${center?.center_number ?? ""} · ${course.name}${courseDates ? ` · ${courseDates}` : ""}`}
+          title={`Assessor visit${course.assessor_visit_date ? ` — ${longDate(course.assessor_visit_date)}` : ""}`}
+          actions={
+            <FigureRow>
               <Figure label="Provisional grades due" value={sendByDate ? shortDate(sendByDate) : "Not set"} ink={AMBER} />
               <Figure
                 label="Portfolios complete"
@@ -673,9 +634,9 @@ export default async function AssessorPage({
                 value={`${readiness.gradesApprovedCount} of ${readiness.totalCandidates} confirmed`}
                 ink={readiness.gradesApprovedCount >= readiness.totalCandidates ? TEAL : AMBER}
               />
-            </div>
-          </div>
-        </div>
+            </FigureRow>
+          }
+        />
 
         {/* Handbook 14.1's handover item, and 15.2's precondition for the
             assessor opening their report. First thing under the figures
@@ -776,7 +737,7 @@ export default async function AssessorPage({
                   // was doing nothing to hold three columns of text
                   // together; the panel's own gold, well diluted, groups them
                   // into a grid without turning each one into a box.
-                  borderTop: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 38%, transparent)`,
+                  borderTop: `1px solid color-mix(in oklab, ${GOLD} 38%, transparent)`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
@@ -797,7 +758,7 @@ export default async function AssessorPage({
                 style={{
                   padding: "11px 15px",
                   background: "var(--color-frame)",
-                  borderTop: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 55%, transparent)`,
+                  borderTop: `1px solid color-mix(in oklab, ${GOLD} 55%, transparent)`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
@@ -841,71 +802,7 @@ export default async function AssessorPage({
             ) : null}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
               {visibleCandidates.map((c) => (
-                <Link
-                  key={c.traineeId}
-                  // Ramy, 30 Aug 2026: "I think I want to cut the middleman...
-                  // you don't need two gates." The card used to open a summary
-                  // drawer whose own "Open the whole portfolio" was the only way
-                  // through; the card is now that link.
-                  href={`/portfolio/${c.traineeId}`}
-                  className="card wash no-underline"
-                  style={{
-                    background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
-                    border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
-                    borderLeft: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
-                    padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                    <span style={{ fontSize: "var(--text-body)", fontWeight: 600, color: INK }}>{c.name}</span>
-                    {c.provisionalLabel ? (
-                      <span
-                        style={{
-                          fontSize: "var(--text-micro)", fontWeight: 700, padding: "3px 9px", borderRadius: 99,
-                          background: (GRADE[c.provisionalLabel] ?? GRADE.Pass).bg,
-                          color: (GRADE[c.provisionalLabel] ?? GRADE.Pass).ink,
-                          flex: "none", whiteSpace: "nowrap",
-                        }}
-                      >
-                        {c.provisionalLabel}
-                      </span>
-                    ) : null}
-                  </div>
-                  <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
-                    {c.tpsTaught}/8 TPs · {c.hoursAssessed.toFixed(1)} hrs{c.levels.length > 0 ? ` · ${c.levels.join(", ")}` : ""}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <Dot ok={c.celta5Complete} label="CELTA 5" />
-                    <Dot ok={c.tpsComplete} label="TPs" />
-                    <Dot ok={c.assignmentsComplete} label="Assignments" />
-                  </div>
-                  {c.flaggedIssue ? (
-                    <span
-                      style={{
-                        fontSize: "var(--text-label)", lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
-                        background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, var(--color-card))",
-                      }}
-                    >
-                      {c.flaggedIssue}
-                    </span>
-                  ) : null}
-                  {/* Handbook 11.6 puts the documenting duty on the assessor,
-                      so the assessor is told which candidate it applies to.
-                      Not amber: a failed written assignment with a Pass
-                      recommended is a legitimate outcome the assessor writes
-                      up, not something wrong with the pack. */}
-                  {c.assignmentFailNote ? (
-                    <span
-                      style={{
-                        fontSize: "var(--text-label)", lineHeight: 1.45, color: MUTED, borderRadius: 5, padding: "6px 9px",
-                        background: "var(--color-frame)",
-                        border: `1px solid ${BORDER}`,
-                      }}
-                    >
-                      {c.assignmentFailNote}
-                    </span>
-                  ) : null}
-                </Link>
+                <CandidateCard key={c.traineeId} c={c} />
               ))}
               {visibleCandidates.length === 0 ? <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>No candidates on this course.</p> : null}
             </div>
@@ -918,7 +815,7 @@ export default async function AssessorPage({
                     is the "Assessment timetable", so that is what it is called
                     here rather than a phrasing of our own. */}
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                  <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
+                  <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>
                     Assessment timetable
                   </p>
                   {/* Ramy, 30 Aug 2026: "this arrow in the full timetable is
@@ -948,8 +845,8 @@ export default async function AssessorPage({
                 <div
                   className="card"
                   style={{
-                    border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 26%, transparent)`,
-                    borderTop: `3px solid ${GOLD_UNDERLINE}`,
+                    border: `1px solid color-mix(in oklab, ${GOLD} 26%, transparent)`,
+                    borderTop: `3px solid ${GOLD}`,
                     padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                   }}
                 >
@@ -1107,19 +1004,8 @@ export default async function AssessorPage({
             </Panel>
 
             {moodleSchedule.length > 0 ? (
-              <div>
-                <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
-                  Moodle schedule
-                </p>
-                <div
-                  className="card card-gold"
-                  style={{
-                    borderLeftColor: "color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-                    borderRightColor: "color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-                    borderBottomColor: "color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-                    padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
-                  }}
-                >
+              <Panel title="Moodle schedule">
+                <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
                   <p style={{ fontSize: "var(--text-label)", color: MUTED }}>
                     Which Moodle sections candidates were asked to complete, and the centre-delivered input that
                     augmented each one (Handbook 3.4).
@@ -1136,10 +1022,10 @@ export default async function AssessorPage({
                     </div>
                   ))}
                 </div>
-              </div>
+              </Panel>
             ) : null}
 
-            <Panel title="Centre documents" accent="garnet">
+            <Panel title="Centre documents">
               {CENTRE_DOCUMENTS.map((doc) => {
                 // "Marking guidance" is the one line item that now lives in
                 // the app itself, not the resources upload table -- see
@@ -1288,7 +1174,7 @@ export default async function AssessorPage({
             </Panel>
 
             <div>
-              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
+              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
                 Malpractice cases
               </p>
               <div
@@ -1434,88 +1320,4 @@ function COHORT_DOC_HREF(name: string): string {
     default:
       return "#";
   }
-}
-
-function Figure({ label, value, ink }: { label: string; value: string; ink?: string }) {
-  return (
-    <div>
-      <p style={{ fontSize: "var(--text-micro)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
-        {label}
-      </p>
-      <p style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: "var(--text-h2)", lineHeight: 1, color: ink ?? "oklch(23.5% 0.017 65)", marginTop: 5 }}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function Dot({ ok, label }: { ok: boolean; label: string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: ok ? TEAL : AMBER }} />
-      <span style={{ fontSize: "var(--text-micro)", color: "oklch(51% 0.017 70)" }}>{label}</span>
-    </span>
-  );
-}
-
-// Ramy, 27 Aug 2026: the decorative teal/garnet card-line alternation
-// (same pilot as Centre Admin's overview page) applies only to panels with
-// no status meaning of their own -- "gold" here isn't part of that
-// alternation, it's this page's own pre-existing warm highlight (kept as an
-// inline override, at its own tuned value, distinct from .card-gold's
-// slightly different hue) and stays available even though no current call
-// site uses it.
-function Panel({
-  title,
-  children,
-  accent = "teal",
-}: {
-  title: string;
-  children: React.ReactNode;
-  accent?: "teal" | "gold" | "garnet";
-}) {
-  return (
-    <div>
-      <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
-        {title}
-      </p>
-      <div
-        className={`card overflow-hidden ${accent === "garnet" ? "card-garnet" : ""}`}
-        style={accent === "gold" ? { borderTopColor: "oklch(60% 0.11 70)" } : undefined}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// Ramy, 30 Aug 2026: "can we have a hovering effect on the centre documents
-// as well?"
-//
-// Worth saying what was actually wrong, because it was more than a missing
-// ring: every one of these rows already carried the hover ring, so the whole
-// row lit up on hover -- but only the small "Open" anchor was clickable.
-// The hover was writing a cheque the row could not cash, and on a read-only
-// screen an assessor has no way to discover that except by clicking and
-// having nothing happen. The row is the link now, so the ring means what it
-// looks like it means.
-function DocRow({ label, href, status }: { label: string; href: string; status: string }) {
-  return (
-    <Link
-      href={href}
-      className="lift no-underline"
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-        padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
-      }}
-    >
-      <span>
-        <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: "oklch(23.5% 0.017 65)", display: "block" }}>{label}</span>
-        <span style={{ fontSize: "var(--text-micro)", color: TEAL }}>{status}</span>
-      </span>
-      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none" }}>
-        Open
-      </span>
-    </Link>
-  );
 }

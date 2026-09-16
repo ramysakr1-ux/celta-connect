@@ -31,6 +31,11 @@ const PATH_LABELS: { test: (p: string) => boolean; label: string }[] = [
   // titles" rather than "the trainer's".
   { test: (p) => p.startsWith("/assessor/assignment-titles"), label: "Assignment titles" },
   { test: (p) => p.startsWith("/assessor/lesson-plans"), label: "Lesson plans for the day" },
+  // Named rather than left to the fallback, which humanised the segment into
+  // "Application Files" with a capital F (spec C4).
+  { test: (p) => p.startsWith("/assessor/application-files"), label: "Application files" },
+  { test: (p) => p.startsWith("/assessor/double-marking"), label: "Double-marking record" },
+  { test: (p) => p.startsWith("/assessor/marking-guidance"), label: "Marking guidance" },
   { test: (p) => p.startsWith("/trainer/tp"), label: "Teaching Practice" },
   { test: (p) => p.startsWith("/trainer/rotation"), label: "Rotation" },
   { test: (p) => p.startsWith("/trainer/coursebooks"), label: "Coursebooks" },
@@ -41,7 +46,6 @@ const PATH_LABELS: { test: (p: string) => boolean; label: string }[] = [
   { test: (p) => /^\/portfolio\/[^/]+$/.test(p), label: "Portfolio overview" },
   { test: (p) => /^\/portfolio\/[^/]+\/assignments(\/|$)/.test(p), label: "Assignments" },
   { test: (p) => /^\/portfolio\/[^/]+\/celta5$/.test(p), label: "CELTA 5 record" },
-  { test: (p) => /^\/portfolio\/[^/]+\/progress$/.test(p), label: "Progress" },
   { test: (p) => /^\/portfolio\/[^/]+\/tp(\/|$)/.test(p), label: "Teaching practice" },
   { test: (p) => /^\/portfolio\/[^/]+\/resources$/.test(p), label: "Resources" },
   { test: (p) => /^\/portfolio\/[^/]+\/pre-course-task$/.test(p), label: "Pre-course task" },

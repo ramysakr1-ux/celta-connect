@@ -1327,9 +1327,13 @@ h6 {
 
   /* The assessor: garnet, a fixed colour -- Ramy, 27 Aug 2026, "garnet, not
      derived from the header". */
+  /* Gold, not garnet (for-claude-code-assessor-pack-complete.md B2, 16 Sep
+     2026): garnet is the MCT's room colour and said nothing in a pack whose
+     identity is ink-warm and gold. It was inherited from the old
+     .assessor-hover pair the motion rule replaced. */
   .hover-assessor {
-    --hover-accent: var(--color-garnet);
-    --hover-fill: color-mix(in oklab, var(--color-garnet) 20%, var(--color-card));
+    --hover-accent: var(--color-gold);
+    --hover-fill: color-mix(in oklab, var(--color-gold) 20%, var(--color-card));
   }
 
   /* Entrance: panels rise in on first paint, staggered 0 / 60 / 80 / 140ms

@@ -10,6 +10,7 @@ import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatDate } from "@/lib/format-date";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
 
 const TAB_ORDER: AssignmentTypeValue[] = [...ASSIGNMENT_ORDER, "Plagiarism Reflection"];
 
@@ -51,29 +52,29 @@ export default async function AssessorMarkingGuidancePage() {
       <AssessorReadOnlyBanner />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
-            Assessor access — read-only · marking guidance
-          </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: "oklch(23.5% 0.017 65)" }}>
-            This centre&apos;s standardisation evidence
-          </h1>
-          <p style={{ fontSize: "var(--text-meta)", color: "oklch(51% 0.017 70)", marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
-            Written by this centre&apos;s own tutors at standardisation meetings, not by Cambridge or by Connect. Kept
-            beside each criterion while marking.
-          </p>
+          <AssessorHead
+            eyebrow="Assessor access — read-only · marking guidance"
+            title={<>This centre&apos;s standardisation evidence</>}
+            lede={
+              <>
+                Written by this centre&apos;s own tutors at standardisation meetings, not by Cambridge or by Connect. Kept
+                beside each criterion while marking.
+              </>
+            }
+          />
 
           {TAB_ORDER.map((type) => {
             const criteria = allCriteria[type];
             const byKey = guidanceMap.get(type);
             return (
               <div key={type} style={{ marginTop: 32 }}>
-                <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{ASSIGNMENT_INFO[type].title}</h2>
+                <AssessorSubHead>{ASSIGNMENT_INFO[type].title}</AssessorSubHead>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
                   {criteria.map((c) => {
                     const row = byKey?.get(c.key);
                     const hasContent = row && (row.met_text || row.grey_text || row.not_text || row.agreed_text);
                     return (
-                      <div key={c.key} className="card" style={{ padding: "16px 18px" }}>
+                      <div key={c.key} className="card" style={{ padding: 16 }}>
                         <p style={{ fontSize: "var(--text-body)", fontWeight: 600, marginBottom: hasContent ? 12 : 0, color: "oklch(23.5% 0.017 65)" }}>{c.text}</p>
                         {hasContent ? (
                           <>
