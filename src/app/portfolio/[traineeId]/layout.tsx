@@ -278,8 +278,6 @@ export default async function PortfolioLayout({
             (preCourseSections ?? []).map((s) => s.id)
           )
       : { data: [] };
-  const preCourseTotal = preCourseItems?.length ?? 0;
-  const preCourseAnswered = (preCourseResponses ?? []).filter((r) => responseIsAnswered(r.response)).length;
 
   // Trajectory: trainer/assessor-only informal estimate, computed the exact
   // same way the CELTA5 page does (tutor's Stage Two ratings, falling back
@@ -292,6 +290,7 @@ export default async function PortfolioLayout({
   // second, RPC-based fetch path just for this one meta count; the
   // trainee's real celta5 tab already has its own correct, RLS-safe query).
   let criteriaPctMeta = "";
+  let nextTpNeedingFeedback: number | null = null;
   if (isStaffView) {
     const lessonIds = (lessons ?? []).map((l) => l.id);
     const [{ data: matrix }, { data: criteriaTags }] = await Promise.all([
@@ -313,6 +312,24 @@ export default async function PortfolioLayout({
     );
     trajectory = computeTrajectory(trajectoryInputs);
     criteriaPctMeta = `${computeCriteriaPct(matrixByCode)}%`;
+
+    // A3, 16 Sep 2026: "Write TP feedback" was a tutor's button inside the
+    // candidate's own TP room. A trainer opens a candidate page in the
+    // trainer's shell with their own actions in their own bar (15 Sep rule),
+    // so it belongs here beside the staff tabs. The destination is the
+    // earliest TP whose self-evaluation is in and whose feedback is not --
+    // the same state the room's own status pill calls "Awaiting tutor
+    // feedback".
+    const [{ data: selfEvals }, { data: feedbackRows }] = await Promise.all([
+      supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", trainee.id),
+      supabase.from("tp_feedback").select("tp_number, submitted_at").eq("trainee_id", trainee.id),
+    ]);
+    const fedBack = new Set((feedbackRows ?? []).filter((f) => f.submitted_at).map((f) => f.tp_number));
+    nextTpNeedingFeedback =
+      (selfEvals ?? [])
+        .filter((e) => e.submitted_at && !fedBack.has(e.tp_number))
+        .map((e) => e.tp_number)
+        .sort((x, y) => x - y)[0] ?? null;
   }
 
   const assignmentsLeft = Math.max((assignments ?? []).length - assignmentsPassed, 0);
@@ -560,7 +577,17 @@ export default async function PortfolioLayout({
         </div>
       ) : (
         <div className="container flex flex-1 gap-8 py-8">
-          <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
+          <div className="flex w-[232px] shrink-0 flex-col gap-3">
+            <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
+            {isStaff && nextTpNeedingFeedback ? (
+              <Link
+                href={`/portfolio/${trainee.id}/tp/${nextTpNeedingFeedback}`}
+                className="inline-flex h-10 items-center justify-center rounded-[6px] bg-primary px-3.5 text-body font-semibold text-primary-foreground hover:bg-primary/90"
+              >
+                Write TP feedback
+              </Link>
+            ) : null}
+          </div>
           <div className="frame min-w-0 flex-1 p-6">{children}</div>
         </div>
       )}

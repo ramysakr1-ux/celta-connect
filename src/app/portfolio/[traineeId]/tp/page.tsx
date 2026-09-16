@@ -6,7 +6,6 @@ import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-ac
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getTpCardStatus, TP_LESSON_LENGTH_MINUTES, type TpCardStatus } from "@/lib/tp-plan-content";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { computeCriteriaPct, CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
 import type { Database } from "@/lib/supabase/types";
 import { formatCalendarDate } from "@/lib/format-date";
@@ -107,7 +106,6 @@ export default async function TpHubPage({
   // the portfolio sidebar's "CELTA 5 / N%" meta already draws (a trainee's
   // own real celta5 tab reads this via a different RPC-based, RLS-safe
   // path -- not duplicated here for one summary card).
-  const canSeeCriteria = isStaff || Boolean(assessorCourseId);
   // The candidate themselves, as opposed to merely "not staff" -- an
   // assessor has no session, so `!isStaff` was true for them and handed
   // them the candidate's own action buttons ("Log an observation", "Open
@@ -211,44 +209,11 @@ export default async function TpHubPage({
   const visibleTpNumbers = isStaff ? [...TP_NUMBERS] : TP_NUMBERS.filter((n) => n <= highestTaught + 1);
   const assessedHours = (tpsTaught * TP_LESSON_LENGTH_MINUTES) / 60;
 
-  let criteriaPct: number | null = null;
-  if (canSeeCriteria) {
-    const admin = createAdminClient();
-    const { data: matrix } = await admin.from("celta5_matrix").select("criteria_code, tutor_status_stage2").eq("trainee_id", traineeId);
-    const matrixByCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m.tutor_status_stage2]));
-    criteriaPct = computeCriteriaPct(matrixByCode);
-  }
-  // Was a hardcoded "41" in the label below -- fixed 2026-08-20 to derive
-  // from the same source of truth computeCriteriaPct itself uses (41 real
-  // codes; a fabricated "3c" briefly took this to 42 between 2026-08-19 and
-  // 2026-08-20, see celta-criteria.ts), so it can't drift out of sync again.
-  const achievedCount = criteriaPct !== null ? Math.round((criteriaPct / 100) * CELTA_CRITERIA_CODES.length) : 0;
-
-  // "Write TP feedback" needs a real destination -- the earliest TP whose
-  // self-evaluation is in but feedback isn't yet, matching the exact same
-  // "Awaiting tutor feedback" state the row's own status pill already shows
-  // (getTpCardStatus), rather than a second, possibly-disagreeing check.
-  const nextTpNeedingFeedback = TP_NUMBERS.find((tpNumber) => {
-    const plan = planByTpNumber.get(tpNumber);
-    if (!plan) return false;
-    const tpPlan = tpPlanByTpNumber.get(tpNumber);
-    const selfEvaluation = selfEvalByTpNumber.get(tpNumber);
-    const feedback = feedbackByTpNumber.get(tpNumber);
-    const status = getTpCardStatus({
-      planSubmitted: Boolean(tpPlan?.submitted_at),
-      taught: Boolean(plan.taught_at),
-      selfEvalSubmitted: Boolean(selfEvaluation?.submitted_at),
-      feedbackSubmitted: Boolean(feedback?.submitted_at),
-      grade: feedback?.grade,
-    });
-    return status.label === "Awaiting tutor feedback";
-  });
 
   // for-claude-code-trainee-interface.md's "My teaching" header has two
   // trainee-facing shortcuts (mockup: "Log an observation" / "Open TP2
   // plan") that this page never had -- same "next TP needing X" pattern
-  // as nextTpNeedingFeedback above, just for "not yet planned" instead of
-  // "not yet fed back".
+  // "next TP needing X" pattern, for "not yet planned".
   const nextTpNeedingPlan = TP_NUMBERS.find((tpNumber) => {
     const plan = planByTpNumber.get(tpNumber);
     if (!plan || plan.taught_at) return false;
@@ -289,14 +254,6 @@ export default async function TpHubPage({
             {tpsTaught} of 8 taught · {assessedHours.toFixed(1)} hrs assessed
           </h2>
         </div>
-        {isStaff && nextTpNeedingFeedback ? (
-          <Link
-            href={`/portfolio/${traineeId}/tp/${nextTpNeedingFeedback}`}
-            className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-body font-semibold text-primary-foreground"
-          >
-            Write TP feedback
-          </Link>
-        ) : null}
         {isOwnWorkspace ? (
           <div className="flex shrink-0 items-center gap-2">
             <Link
@@ -425,25 +382,14 @@ export default async function TpHubPage({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {canSeeCriteria ? (
-          <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
-            <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
-            <div className="flex items-baseline gap-2.5">
-              <span className="font-serif text-display leading-none text-ink">{criteriaPct}%</span>
-              <span className="text-label text-muted">{achievedCount} of {CELTA_CRITERIA_CODES.length} met</span>
-            </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
-              <div className="h-1 rounded-full bg-primary" style={{ width: `${criteriaPct}%` }} />
-            </div>
-          </div>
-        ) : null}
+      {/* A3, 16 Sep 2026: a staff-only "Criteria - stage 2 - N%" card used to
+          sit here, inside the candidate's own room. The same percentage is
+          already in the staff header (the trajectory pill and the CELTA 5
+          meta), so it was a third place for one number to disagree from.
 
-        {/* Ramy, 29 Aug 2026: "at the bottom it says written assignments
-            -- we don't need them there, because there is a written
-            assignments tab." It duplicated the tab in full, including
-            status, so the two could disagree the moment one was edited. */}
-      </div>
+          Ramy, 29 Aug 2026, on what else used to be here: "at the bottom it
+          says written assignments -- we don't need them there, because there
+          is a written assignments tab." */}
     </div>
   );
 }

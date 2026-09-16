@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { BackLink } from "@/components/back-link";
+import { WORKSPACE_TABS } from "@/app/portfolio/[traineeId]/workspace-tabs";
 
 // The room concept, applied to the whole trainee workspace.
 //
@@ -33,9 +34,11 @@ const FULL_BLEED = [/\/filmed-observation\/[^/]+$/, /\/timetable$/];
  *  rooms of their own -- a tutorial invite opens in the stream's context. */
 const STREAM_ROUTES = [/\/individual-tutorial\//, /\/stage2-tutorial\//];
 
-/** Which door a room is, so the pill can name it on the way out. Matches
- *  TraineeSidebarNav's own hrefs, so a tab added there works here. */
-const DOORS = ["/resources", "/tp", "/assignments", "/celta5", "/progress"];
+/** Which door a room is, so the pill can name it on the way out. Derived
+ *  from WORKSPACE_TABS (A1, 16 Sep 2026), so a room added there works here
+ *  -- this was a hand-kept copy and still listed /progress, which is a
+ *  redirect now. */
+const DOORS = WORKSPACE_TABS.map((t) => t.href).filter((h) => h !== "");
 
 export function PortfolioFocusRow({
   sidebar,

@@ -24,8 +24,15 @@ type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 // `assignments` rows/statuses, just re-linked into the portfolio shell and
 // keyed by the :traineeId param instead of the logged-in trainee so staff
 // can view any trainee's assignments too.
-export default async function AssignmentsPage({ params }: { params: Promise<{ traineeId: string }> }) {
+export default async function AssignmentsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ traineeId: string }>;
+  searchParams: Promise<{ preview?: string }>;
+}) {
   const { traineeId } = await params;
+  const { preview } = await searchParams;
   const session = await getPortfolioViewer();
   const assessorCourseId = !session?.profile ? await getAssessorCourseId() : null;
   if (!session?.profile && !assessorCourseId) notFound();
@@ -56,7 +63,13 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
   // Staff/assessor previewing always see the full set -- gating is a
   // candidate-facing pacing device, not a real access restriction (same
   // reasoning as every other staff-sees-everything carve-out in this app).
-  const isStaffViewer = Boolean(assessorCourseId) || (session?.profile != null && session.profile.role !== "trainee");
+  // A4, 16 Sep 2026: this tested the role alone, so a tutor using
+  // "Preview as trainee" still saw every assignment open -- the one thing
+  // the preview exists to show them is what is still shut. tp/page.tsx read
+  // the param and this did not. Same reading now; an assessor is never
+  // previewing, so they are unaffected.
+  const isStaffViewer =
+    Boolean(assessorCourseId) || (session?.profile != null && session.profile.role !== "trainee" && preview !== "trainee");
   const releaseFor = (assignmentType: string) =>
     isStaffViewer || !clock || clock.isOpen(assignmentType) ? null : (clock.releaseByType.get(assignmentType) ?? null);
 
