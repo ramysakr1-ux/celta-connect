@@ -353,7 +353,14 @@ export function DragBoard({
                             // it always opened); clicking the selected tile
                             // again clears the selection.
                             onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
-                            className={`rounded-[6px] border-l-[3px] px-2 py-1 text-left transition-[transform,opacity,box-shadow] duration-200 ${
+                            // `transition` rather than transition-[transform,opacity,box-shadow]:
+                            // Tailwind turns that comma-arbitrary value into a
+                            // rule that also emits its own box-shadow, which
+                            // beat the inline selection ring and computed it
+                            // away to a transparent zero (caught on production,
+                            // 16 Sep 2026). The default transition covers all
+                            // three properties anyway.
+                            className={`rounded-[6px] border-l-[3px] px-2 py-1 text-left transition duration-200 ${
                               !locked && canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
                             } hover:-translate-y-0.5 hover:scale-[1.02]`}
                             style={{
