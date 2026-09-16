@@ -39,7 +39,9 @@ export function Figure({
         }}
       >
         {value}
-        {of ? <span style={{ fontSize: "var(--text-meta)", color: MUTED, marginLeft: 6 }}>{of}</span> : null}
+        {/* A real space, not just the margin: without it a screen reader says
+            "4of 8". */}
+        {of ? <span style={{ fontSize: "var(--text-meta)", color: MUTED, marginLeft: 6 }}> {of}</span> : null}
       </p>
     </div>
   );
