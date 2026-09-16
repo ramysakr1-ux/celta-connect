@@ -18,11 +18,18 @@ export async function GET() {
   const admin = createAdminClient();
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
+  // Not `maybeSingle()` on the email: a second row with the same address was
+  // seeded on 13 Sep 2026, so this matched two applicants and returned null,
+  // and the route fell back to "/" -- which redirects to /login. That is what
+  // "the journey links don't work" was (16 Sep 2026). Oldest row wins, which
+  // is the original fixture; the duplicate is data to clean separately.
 
   const { data: applicant } = await admin
     .from("applicants")
     .select("id")
     .eq("email", "demo-applicant-journey@celtaconnect.com")
+    .order("created_at", { ascending: true })
+    .limit(1)
     .maybeSingle();
   if (!applicant) return fallback();
 

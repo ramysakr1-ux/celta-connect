@@ -184,25 +184,37 @@ export function DragBoard({
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
-  // "Moved, but check it" -- the schedule-rule warning, which is not a failure
-  // and must not wear the failure colour.
-  const [moveWarning, setMoveWarning] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   if (weeks.length === 0) return null;
 
   const handleDrop = (isoDate: string) => {
     if (!draggingEventId || draggingOriginDate === isoDate) return;
-    // §4 asks for the drop to be refused on a garnet chip "per the existing
-    // validation rule". There is no existing validation rule -- the server
-    // moves the event and re-syncs the dates -- and the group a deadline
-    // belongs to is read from a title label that is already stale on the demo
-    // course. So the move goes through and the warning stays on screen: a
-    // false refusal takes the timetable away from the MCT over a guess, which
-    // is the more expensive way to be wrong. Flagged to Ramy.
+    // §4: "Drop is refused on a garnet chip, per the existing validation
+    // rule." It warned instead of refusing for a day, because the group a
+    // deadline belongs to is read from its title and the demo course's titles
+    // still said ABC/DEF after the 11 Sep rename -- refusing on a label that
+    // named nothing would have taken the timetable away from the MCT over a
+    // guess. Those labels are corrected now (both courses and the seed), the
+    // mapping holds under both naming schemes, and Ramy asked for the refusal:
+    // 16 Sep 2026, "make the drag board refuse the drop now".
+    //
+    // It only ever fires on a title that NAMES a group -- halfFromTitle
+    // returns null otherwise, and an unlabelled deadline drops wherever it is
+    // put. The strip has been showing the garnet chip the whole time you were
+    // dragging, so the refusal is never the first you hear of it.
     const dragged = events.find((e) => e.id === draggingEventId);
     const broken = dragged ? ruleBreak(dragged, isoDate, events) : null;
-    setMoveWarning(broken ? `Moved, but check it: ${broken}. The assignment schedule rule wants a group's deadline on a day it is not teaching.` : null);
+    if (broken) {
+      setDraggingEventId(null);
+      setDraggingOriginDate(null);
+      setDragOverDate(null);
+      setMoveError(
+        `Not moved -- ${broken}. The assignment schedule rule wants a group's deadline on a day it is not teaching.`
+      );
+      return;
+    }
+    setMoveError(null);
     const eventId = draggingEventId;
     setDraggingEventId(null);
     setDraggingOriginDate(null);
@@ -282,15 +294,6 @@ export function DragBoard({
               ))}
             </div>
           )}
-        </div>
-      ) : null}
-
-      {moveWarning ? (
-        <div className="flex items-center justify-between gap-3 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-body text-status-warning-text">
-          {moveWarning}
-          <button type="button" onClick={() => setMoveWarning(null)} className="text-label underline">
-            Dismiss
-          </button>
         </div>
       ) : null}
 
