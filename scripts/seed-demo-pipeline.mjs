@@ -350,7 +350,18 @@ for (const [centre, course, names, stages] of [
   for (let i = 0; i < names.length; i++) {
     const [full_name, slug] = names[i];
     const email = slug.includes("@") ? slug : `${slug}@example.com`;
-    const { data: exists } = await supabase.from("applicants").select("id, stage").eq("email", email).eq("center_id", centre.id).maybeSingle();
+    // order/limit rather than a bare maybeSingle(): on two rows with the same
+    // address maybeSingle returns null, so this would have inserted a THIRD
+    // (16 Sep 2026 -- a duplicate journey applicant did exactly this to the
+    // demo's three journey links).
+    const { data: exists } = await supabase
+      .from("applicants")
+      .select("id, stage")
+      .eq("email", email)
+      .eq("center_id", centre.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
     // An applicant already there keeps the stage they are at -- a demo may
     // have moved them since, and the file must match where they stand.
     const stage = exists?.stage ?? stages[i % stages.length];

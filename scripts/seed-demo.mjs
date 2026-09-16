@@ -3762,27 +3762,47 @@ async function main() {
         deposit_amount: 500,
         deposit_paid_at: new Date(Date.now() - 35 * 86400000).toISOString(),
       },
-      {
-        // The applicant the JOURNEY walks -- distinct from the two above,
-        // which exist for the payments views.
-        //
-        // /demo/journey/interview and /demo/journey/offer both look this
-        // person up by email, reset them to a fresh not-yet-booked state and
-        // redirect. With no row to find, both took their fallback and landed
-        // on /login -- two dead links on the page Ramy demos from, failing
-        // silently. Same shape as Grace Adeyemi and the volunteer signup.
-        //
-        // Left at task_returned on purpose: that is the stage the interview
-        // route expects to move them on from, and it is where the journey
-        // picks them up.
-        center_id: center.id,
-        intake_course_id: course.id,
-        full_name: "Tariq Osei",
-        email: "demo-applicant-journey@celtaconnect.com",
-        stage: "task_returned",
-      },
+      // The applicant the JOURNEY walks is added below, not here -- it has to
+      // check first. See the note on journeyApplicant.
     ])
     .select("id, full_name");
+
+  // The applicant the JOURNEY walks -- distinct from the two above, which
+  // exist for the payments views.
+  //
+  // /demo/journey/interview and /demo/journey/offer both look this person up
+  // by email, reset them to a fresh not-yet-booked state and redirect. With no
+  // row to find, both take their fallback and land on /login -- two dead links
+  // on the page Ramy demos from, failing silently.
+  //
+  // Inserted only when there is not one already, and NOT as part of the array
+  // above. It went in unconditionally on 13 Sep 2026 and produced a second row
+  // with the same address in the same centre: the routes look the person up
+  // with maybeSingle(), two rows return null, and all three journey links went
+  // back to failing the same silent way they were added to fix (found 16 Sep
+  // 2026, walking the demo). A demo centre is torn down before a full rebuild,
+  // so this normally finds nothing -- the guard is for every other way this
+  // script gets run.
+  //
+  // task_returned on purpose: that is the stage the interview route expects to
+  // move them on from, and it is where the journey picks them up.
+  const { data: existingJourney } = await supabase
+    .from("applicants")
+    .select("id")
+    .eq("email", "demo-applicant-journey@celtaconnect.com")
+    .eq("center_id", center.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (!existingJourney) {
+    await supabase.from("applicants").insert({
+      center_id: center.id,
+      intake_course_id: course.id,
+      full_name: "Tariq Osei",
+      email: "demo-applicant-journey@celtaconnect.com",
+      stage: "task_returned",
+    });
+  }
   const noor = applicants.find((a) => a.full_name === "Noor Iqbal");
   const ben = applicants.find((a) => a.full_name === "Ben Foster");
 
