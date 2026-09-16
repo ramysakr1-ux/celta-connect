@@ -95,8 +95,12 @@ export function StreamHero({
   // Part 5: the next non-lunch slot's category decides the side card's tint.
   const upcoming = day.slots.filter((s) => s.category !== "lu" && s.endsAtMs > now && s.id !== slot?.id).slice(0, 3);
 
+  // Two columns only when there is something in the second one. Late in the
+  // day every remaining session is behind you, "Next for you" drops, and a
+  // hero holding a 320px column of nothing open to its right looked like a
+  // card that had failed to load.
   return (
-    <div className="grid items-start gap-[14px] lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div className={`grid items-start gap-[14px] ${upcoming.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
       {slot && teaching ? (
         <TeachingHero slot={slot} teaching={teaching} now={now} mounted={mounted} />
       ) : (
