@@ -56,6 +56,7 @@ import { stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/
 import { computeStage3Status } from "@/lib/stage3-status";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { RoomHead } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 // CELTA 5's own wording for the overall-progress options (p.19, p.24).
 // The booklet prints the sentence, not the enum, and "not recorded" is a
@@ -260,7 +261,7 @@ export default async function PortfolioCelta5Page({
     // UTC date; currentTpRound below already reads the centre's real
     // time_zone the correct way, this call was just missed.
     const progressIssues = computeProgressIssues({
-      today: toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE),
+      today: await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE),
       timetableEvents: timetableEvents ?? [],
       taughtTpNumbers,
       assignmentStatusByType,
@@ -1095,7 +1096,7 @@ export default async function PortfolioCelta5Page({
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
-  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE));
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE));
 
   // remaining-compliance.md item 4: CELTA 5 front matter (candidate name,
   // centre number, tutors) populated from real data, never typed by hand.

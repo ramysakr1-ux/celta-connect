@@ -20,6 +20,7 @@ import { buildDeferralDraft } from "@/lib/letters/deferral";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { DeferralLetterSection } from "./deferral-letter-section";
 import { formatCalendarDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -133,7 +134,7 @@ export default async function CourseStreamPage({
     );
   }
 
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   // Broadcasts carry three scope columns (visible_to_trainee_id / _tp_group_id
   // / _subgroup_id); the marking action, Stage 2 nudges and rotation releases

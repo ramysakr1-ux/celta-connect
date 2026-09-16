@@ -10,6 +10,7 @@ import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
 import type { TimetableEvent } from "@/lib/timetable-grid";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
+import { demoToday } from "@/lib/demo-clock";
 
 // for-claude-code-timetable-view.md's read-only 4-week board -- trainee's
 // own view, and what staff see when previewing a trainee's portfolio
@@ -37,7 +38,7 @@ export default async function TraineeTimetablePage({
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   // Scavenger hunt Q2 ("Who else is in Group ABC with you?") -- the group
   // name shows in this page's own header, so a real trainee landing here

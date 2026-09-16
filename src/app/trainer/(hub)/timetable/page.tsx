@@ -25,6 +25,7 @@ import { ordinal } from "@/lib/stage2-tutorials";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 import { formatCalendarDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 // for-claude-code-timetable-edit-vs-view.md: DragBoard (editing) and the
 // glass-card view (for-claude-code-timetable-view.md) are two different
@@ -133,7 +134,7 @@ export default async function TrainerTimetablePage({
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
   const isCustomTimeBands = Boolean(course?.time_bands && course.time_bands.length > 0);
   const timeZone = (course ? (await getCachedCenter(course.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   // The grid no longer prints a strong week header of its own (apply-to-app.md
   // §2.7), so the edit-mode header carries the overall date range instead.

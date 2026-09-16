@@ -1,4 +1,5 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
+import { parseDemoDay } from "@/lib/demo-clock";
 
 // Moved from /demo now that /demo itself is the five-entry-point landing
 // page (connect-multi-role-demo-spec-2026-08-22.md).
@@ -12,6 +13,10 @@ import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 // Blake), who is the ASSISTANT course tutor on that course, so the MCT link
 // opened the ACT view and vice versa. Jordan is an MCT, but on the Spring
 // course, which is not the one the demo opens.
-export async function GET() {
-  return mintDemoMagicLink("demo-trainer2@celtaconnect.com", "/trainer");
+// `?day=N` pins the demo clock before the magic-link hop
+// (for-claude-code-demo-clock.md). No day means the real clock, and it clears
+// any day a previous link left behind.
+export async function GET(request: Request) {
+  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
+  return mintDemoMagicLink("demo-trainer2@celtaconnect.com", "/trainer", day);
 }

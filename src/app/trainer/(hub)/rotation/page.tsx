@@ -21,6 +21,7 @@ import { GroupTutorForm } from "@/app/trainer/(hub)/rotation/group-tutor-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";
+import { demoToday } from "@/lib/demo-clock";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
 
@@ -164,7 +165,7 @@ export default async function TrainerRotationPage() {
 
   const tpEventRows = tpEvents ?? [];
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   // Handbook 9.1.3: "two-day minimum break midway, no more than six
   // consecutive TP days." The break-check only means something once a

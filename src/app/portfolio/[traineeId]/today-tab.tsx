@@ -15,6 +15,7 @@ import { StreamHero } from "@/app/portfolio/[traineeId]/stream-hero";
 import { buildHeroState, type TeachingOn } from "@/app/portfolio/[traineeId]/stream-hero-state";
 import { buildWaitingList, type WaitingItem } from "@/app/portfolio/[traineeId]/waiting-list";
 import { classLessons, levelKey } from "@/lib/volunteer-class-session";
+import { demoToday, demoNow } from "@/lib/demo-clock";
 
 
 // Same pattern as fol-spot-check/page.tsx's own local relativeTime -- kept
@@ -64,7 +65,7 @@ export async function TodayTab({
    *  with the assessor" control shows for them and not a staff preview. */
   viewerIsCandidate?: boolean;
 }) {
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   const tomorrow = addDaysIso(today, 1);
 
   const [
@@ -620,7 +621,7 @@ export async function TodayTab({
       .upsert(unreadIds.map((id) => ({ broadcast_id: id, trainee_id: traineeId })), { ignoreDuplicates: true });
   }
 
-  const serverNowMs = Date.now();
+  const serverNowMs = (await demoNow(timeZone)).getTime();
   const dateLabel = formatCalendarDate(today, {
     weekday: "long",
     day: "numeric",

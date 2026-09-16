@@ -14,6 +14,7 @@ import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { resolveBrief } from "@/lib/assignment-brief";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 // The candidate's document, and the assessor's read-only record of it.
 //
@@ -144,7 +145,7 @@ export default async function AssignmentDetailPage({
   // shows what is attached now and a locked first round keeps what it had.
   const appendicesForRound = (r: "first" | "resubmission") =>
     (appendixRows ?? []).filter((a) => a.round === r);
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   const deadlinePassed = Boolean(
     assignment.due_date && round === "first" && !locked && assignment.due_date < today
   );

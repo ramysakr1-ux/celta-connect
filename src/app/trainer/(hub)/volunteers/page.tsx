@@ -13,6 +13,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { isMctView } from "@/lib/act-preview";
 import { formatCalendarDate } from "@/lib/format-date";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
+import { demoToday } from "@/lib/demo-clock";
 
 // §14 + design_handoff_volunteer_students_v2 (Ramy, 5 Sep 2026). The
 // trainer-side register: Today strip (RSVP replies + Zoom presence),
@@ -51,7 +52,7 @@ export default async function VolunteersPage() {
       : Promise.resolve({ data: null }),
   ]);
   const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   // The strip covers today's session -- or, on a day with none, the NEXT
   // one (Ramy, 5 Sep 2026): the RSVP email lands ~20h before a class, so
   // the replies are exactly what a tutor wants to see the evening before,

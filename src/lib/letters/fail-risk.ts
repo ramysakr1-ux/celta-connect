@@ -5,6 +5,7 @@ import { distinctTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 // Letters.dc.html 1a: "A provisional grade of Fail, or Fail/Pass, at any
 // point after the Stage 3 tutorial." Slashed pairs (migration 0036) are the
@@ -75,7 +76,7 @@ export async function buildFailRiskDraft(
     .maybeSingle();
 
   const remaining = (planAssignments ?? []).filter((p) => !p.taught_at).map((p) => `TP${p.tp_number}`);
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   const distinctDates = distinctTpDates((allEvents ?? []) as TpTimetableEvent[]);
   const dayIndex = distinctDates.indexOf(today);
   const dayLine = dayIndex >= 0 ? `Day ${dayIndex + 1} of ${distinctDates.length}` : null;

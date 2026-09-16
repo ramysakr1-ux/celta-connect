@@ -9,6 +9,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { courseElapsedFraction } from "@/lib/course-progress";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
+import { demoToday } from "@/lib/demo-clock";
 
 export type Celta5SignoffStatus = "not_started" | "candidate_signed" | "both_signed";
 
@@ -344,7 +345,7 @@ export async function fetchRosterRows(
     if (!responseIsAnswered(row.response)) continue;
     preCourseAnsweredByTrainee.set(row.trainee_id, (preCourseAnsweredByTrainee.get(row.trainee_id) ?? 0) + 1);
   }
-  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
+  const today = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
   const expectedHoursSoFar = Math.max(
     1,
     course?.start_date && course?.end_date

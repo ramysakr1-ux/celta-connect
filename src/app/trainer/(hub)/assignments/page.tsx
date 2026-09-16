@@ -21,6 +21,7 @@ import {
 import { BORDER, CARD, FAINT, GARNET, GOLD_INK, INK, INK_WARM, MUTED, SHEET, TEAL, ZEBRA } from "@/lib/sheet-tokens";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
 import type { Database } from "@/lib/supabase/types";
+import { demoToday } from "@/lib/demo-clock";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 
@@ -110,7 +111,7 @@ export default async function TrainerAssignmentsBoardPage() {
   }
 
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   const [{ data: course }, { data: trainees }, { data: assignmentRows }, progress, clock, criteriaByType] =
     await Promise.all([

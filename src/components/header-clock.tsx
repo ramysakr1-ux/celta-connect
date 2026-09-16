@@ -5,6 +5,7 @@ import { buildStreamDay, type StreamDay } from "@/lib/course-stream-day";
 import type { TimetableEvent } from "@/lib/timetable-grid";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { DayBar } from "@/components/day-bar";
+import { demoToday, demoNow } from "@/lib/demo-clock";
 
 // The clock in a landing's header.
 //
@@ -65,8 +66,8 @@ export async function HeaderClock({
   accent: string;
   tone: "dark" | "light";
 }) {
-  const serverNowMs = Date.now();
-  const todayIso = toLocalIso(new Date(), timeZone);
+  const serverNowMs = (await demoNow(timeZone, courseId ?? undefined)).getTime();
+  const todayIso = await demoToday(timeZone);
   const day = courseId ? await getCourseStreamDay(supabase, courseId, todayIso, timeZone) : null;
   const anchor = day?.slots[0] ?? null;
 

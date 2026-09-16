@@ -21,6 +21,8 @@ import { Figure, FigureRow } from "@/components/assessor/figure";
 import { Panel, DocRow } from "@/components/assessor/panel";
 import { CandidateCard } from "@/components/assessor/candidate-card";
 import { AMBER, CREAM, GOLD, INK, MUTED, TEAL, WARM } from "@/components/assessor/tokens";
+import { demoToday } from "@/lib/demo-clock";
+import { DemoDayTag } from "@/components/demo-day-tag";
 
 // The assessor's palette lives in components/assessor/tokens.ts now -- one
 // teal, one amber, one gold, shared by the pack, its five sub-pages and the
@@ -117,7 +119,7 @@ export default async function AssessorPage({
 
   const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone, courseId);
 
   // MCT-set, not computed from assessor_visit_date -- see migration 0127.
   // Same rule the grades report works to, or the pack and the tutors' own
@@ -554,6 +556,7 @@ export default async function AssessorPage({
             names exactly one course, so this one gets the whole day bar and not
             just the time -- and it is the day they are here to moderate. */}
         <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
+          <DemoDayTag courseId={courseId} tone="dark" />
           <HeaderClock supabase={admin} courseId={courseId} timeZone={timeZone} accent={GOLD} tone="dark" />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

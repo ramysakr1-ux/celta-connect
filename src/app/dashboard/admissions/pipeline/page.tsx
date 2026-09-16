@@ -9,6 +9,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatDate, formatCalendarDate } from "@/lib/format-date";
 import { RoomHead } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 // Admissions Pipeline.dc.html: "A course fills in stages, and each stage
 // leaks... this is the one screen that shows where the leak is while
@@ -28,7 +29,7 @@ export default async function AdmissionsPipelinePage({
   const { scope } = await resolveBranchScope(staff, branch);
   const supabase = createAdminClient();
   const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   const { data: courses } = await supabase
     .from("courses")

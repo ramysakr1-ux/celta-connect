@@ -1,4 +1,5 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
+import { parseDemoDay } from "@/lib/demo-clock";
 
 // Signs in as Priya Raman, who actually holds `centre_administrator` --
 // the role that displays as "Centre manager".
@@ -12,6 +13,10 @@ import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 //
 // No destination given: resolveLandingPath sends each role to its own home
 // now, which is the thing being demonstrated.
-export async function GET() {
-  return mintDemoMagicLink("demo-centre-manager@celtaconnect.com", "/dashboard");
+// `?day=N` pins the demo clock before the magic-link hop
+// (for-claude-code-demo-clock.md). No day means the real clock, and it clears
+// any day a previous link left behind.
+export async function GET(request: Request) {
+  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
+  return mintDemoMagicLink("demo-centre-manager@celtaconnect.com", "/dashboard", day);
 }

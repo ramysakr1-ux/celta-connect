@@ -33,6 +33,9 @@ export async function getPlatformOwnerGreeting(fullName: string | null): Promise
     (courses ?? [])
       .filter((c) => {
         const timeZone = timezoneByCenterId.get(c.center_id) ?? DEFAULT_TIMEZONE;
+        // The real clock, deliberately: this is a count of every centre on the
+        // platform, and a demo visitor's ?day= must not move what the platform
+        // owner is told is running tonight (for-claude-code-demo-clock.md).
         return computeCourseState(c.start_date, c.end_date, toLocalIso(new Date(), timeZone)) === "running";
       })
       .map((c) => c.center_id)

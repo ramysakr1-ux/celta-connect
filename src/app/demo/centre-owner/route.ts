@@ -1,4 +1,5 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
+import { parseDemoDay } from "@/lib/demo-clock";
 
 // Lands on the Centre Owner screen itself, not on Centre Management.
 //
@@ -12,6 +13,10 @@ import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 //
 // Same account, different destination -- the owner screen is a place, not a
 // separate login.
-export async function GET() {
-  return mintDemoMagicLink("demo-centre-admin@celtaconnect.com", "/centre/owner");
+// `?day=N` pins the demo clock before the magic-link hop
+// (for-claude-code-demo-clock.md). No day means the real clock, and it clears
+// any day a previous link left behind.
+export async function GET(request: Request) {
+  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
+  return mintDemoMagicLink("demo-centre-admin@celtaconnect.com", "/centre/owner", day);
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { pickDemoCourse } from "@/lib/demo-course";
+import { DEMO_DAY_COOKIE, parseDemoDay } from "@/lib/demo-clock";
 
 // Sixth demo entry point (the original five -- centre-admin, course-admin,
 // volunteer, trainer, trainee -- didn't include this one). Assessors never
@@ -12,7 +13,17 @@ import { pickDemoCourse } from "@/lib/demo-course";
 // "portfolios must be complete" business rule for a live course, and
 // shouldn't be able to make the demo link flaky depending on what the
 // seed data happens to look like on a given day.
-export async function GET() {
+// `?day=N` pins the demo clock on the way through, the same as every other
+// demo entry (for-claude-code-demo-clock.md). These two mint a token rather
+// than a magic link, so they set the cookie on their own redirect.
+function withDemoDay(response: NextResponse, request: Request): NextResponse {
+  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
+  if (day === null) response.cookies.delete(DEMO_DAY_COOKIE);
+  else response.cookies.set(DEMO_DAY_COOKIE, String(day), { path: "/", sameSite: "lax", maxAge: 60 * 60 * 12 });
+  return response;
+}
+
+export async function GET(request: Request) {
   const admin = createAdminClient();
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
@@ -53,7 +64,7 @@ export async function GET() {
         .update({ terms_accepted_at: new Date().toISOString() })
         .eq("token", existing.token);
     }
-    return NextResponse.redirect(new URL(`/assessor/${existing.token}`, siteUrl));
+    return withDemoDay(NextResponse.redirect(new URL(`/assessor/${existing.token}`, siteUrl)), request);
   }
 
   // Demo courses can have an end_date in the past (the "Closed" spring
@@ -79,5 +90,5 @@ export async function GET() {
     .single();
   if (!created) return fallback();
 
-  return NextResponse.redirect(new URL(`/assessor/${created.token}`, siteUrl));
+  return withDemoDay(NextResponse.redirect(new URL(`/assessor/${created.token}`, siteUrl)), request);
 }

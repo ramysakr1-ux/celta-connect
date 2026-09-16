@@ -28,6 +28,7 @@ import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambri
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { formatCalendarDate } from "@/lib/format-date";
 import { RoomHead } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 
@@ -256,7 +257,7 @@ export default async function ResourceHubPage({
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   if (viewer?.role === "trainee" && trainee.course_id) {
     await markScavengerHuntFound(supabase, trainee.course_id, viewer.id, "syllabus");

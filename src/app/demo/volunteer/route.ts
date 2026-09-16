@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { pickDemoCourse } from "@/lib/demo-course";
+import { DEMO_DAY_COOKIE, parseDemoDay } from "@/lib/demo-clock";
 
 // Volunteer students never get a real Supabase Auth account (migration
 // 0030) -- so unlike the other four demo entries, this one doesn't mint a
 // magic link. It looks up the permanently reusable token
 // scripts/seed-demo.mjs already created and redirects straight into the
 // same tokenized /student/[token] view any real volunteer uses.
-export async function GET() {
+// `?day=N` pins the demo clock on the way through, the same as every other
+// demo entry (for-claude-code-demo-clock.md). These two mint a token rather
+// than a magic link, so they set the cookie on their own redirect.
+function withDemoDay(response: NextResponse, request: Request): NextResponse {
+  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
+  if (day === null) response.cookies.delete(DEMO_DAY_COOKIE);
+  else response.cookies.set(DEMO_DAY_COOKIE, String(day), { path: "/", sameSite: "lax", maxAge: 60 * 60 * 12 });
+  return response;
+}
+
+export async function GET(request: Request) {
   const admin = createAdminClient();
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
@@ -48,5 +59,5 @@ export async function GET() {
     .maybeSingle();
   if (!accessToken) return fallback();
 
-  return NextResponse.redirect(new URL(`/student/${accessToken.token}`, siteUrl));
+  return withDemoDay(NextResponse.redirect(new URL(`/student/${accessToken.token}`, siteUrl)), request);
 }

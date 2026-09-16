@@ -9,6 +9,7 @@ import { runLanguagePrecheck } from "@/lib/language-precheck";
 import { getCourseReleaseClock } from "@/lib/assignment-release";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 type SectionResponseInsert = Database["public"]["Tables"]["assignment_section_responses"]["Insert"];
 
@@ -76,7 +77,7 @@ async function releaseBlock(
     .eq("id", assignment.trainee_id)
     .maybeSingle();
   const timeZone = trainee?.center_id ? ((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
-  const clock = await getCourseReleaseClock(supabase, assignment.course_id, toLocalIso(new Date(), timeZone));
+  const clock = await getCourseReleaseClock(supabase, assignment.course_id, await demoToday(timeZone));
   if (clock.isOpen(assignment.assignment_type)) return null;
 
   const release = clock.releaseByType.get(assignment.assignment_type);

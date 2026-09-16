@@ -11,6 +11,7 @@ import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { RoomHead, ROOM_BUTTON } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 // Dedicated screen per Volunteer Pool.dc.html (Desktop/Connect.zip handoff,
 // 2026-08-20): "reached from the 'Volunteer pool' card on the Centre Admin
@@ -52,11 +53,13 @@ export default async function CentreVolunteersPage({
   const centerIdByCourseId = new Map((courses ?? []).map((c) => [c.id, c.center_id]));
   const timezoneByCenterId = new Map(scopeCenters.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
   const todayByCourseId = new Map(
-    courseIds.map((id) => {
-      const centerId = centerIdByCourseId.get(id);
-      const timeZone = (centerId ? timezoneByCenterId.get(centerId) : null) ?? DEFAULT_TIMEZONE;
-      return [id, toLocalIso(new Date(), timeZone)];
-    })
+    await Promise.all(
+      courseIds.map(async (id): Promise<[string, string]> => {
+        const centerId = centerIdByCourseId.get(id);
+        const timeZone = (centerId ? timezoneByCenterId.get(centerId) : null) ?? DEFAULT_TIMEZONE;
+        return [id, await demoToday(timeZone, id)];
+      })
+    )
   );
 
   const { data: volunteers } =
@@ -90,7 +93,7 @@ export default async function CentreVolunteersPage({
   // offers the first one -- so the answer is read across the whole day
   // rather than off one row this page happened to pick (walked 15 Sep
   // 2026: with the wrong row picked, a "can't make it" read as coming).
-  const fallbackToday = toLocalIso(new Date(), DEFAULT_TIMEZONE);
+  const fallbackToday = await demoToday(DEFAULT_TIMEZONE);
   const nextClassDayEventIds = (courseId: string, level: string | null): string[] => {
     const lessons = classLessons(
       (tpEvents ?? []).filter((e) => e.course_id === courseId && e.event_date >= (todayByCourseId.get(courseId) ?? fallbackToday)),

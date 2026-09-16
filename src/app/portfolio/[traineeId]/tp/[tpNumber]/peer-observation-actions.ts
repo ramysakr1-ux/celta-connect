@@ -8,6 +8,7 @@ import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { criteriaForTpDate, getPeerGroupMembers } from "@/lib/peer-observation";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { demoToday } from "@/lib/demo-clock";
 
 export interface PeerNoteFormState {
   error: string | null;
@@ -57,7 +58,7 @@ async function findOrCreateSheet(
   ]);
 
   const timeZone = course ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
-  const criteriaCodes = criteriaForTpDate(sessions ?? [], toLocalIso(new Date(), timeZone));
+  const criteriaCodes = criteriaForTpDate(sessions ?? [], await demoToday(timeZone));
   const { prompt1, prompt2 } = buildPrompts(criteriaCodes);
 
   const { data: created, error } = await admin

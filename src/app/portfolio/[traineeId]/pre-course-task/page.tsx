@@ -8,6 +8,7 @@ import { ScavengerHuntPanel } from "@/app/portfolio/[traineeId]/pre-course-task/
 import type { Database } from "@/lib/supabase/types";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 type Item = Database["public"]["Tables"]["pre_course_task_items"]["Row"];
 
@@ -74,7 +75,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
   // UTC date, wrong for this real trainee-facing eligibility gate.
   const centre = await getCachedCenter(trainee.center_id);
   const timeZone = centre?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   // Migration 0079 refuses every signed-in write at a demo centre, and this
   // page's autosave never checked the refusal -- it promised "saves as you
   // go" and lost everything typed. Ramy, 5 Sep 2026: fix it. The honest

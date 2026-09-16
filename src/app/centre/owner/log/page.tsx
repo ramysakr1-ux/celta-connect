@@ -7,6 +7,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDateTime } from "@/lib/format-date";
 import { OwnerRegisterStyles } from "@/app/centre/owner/owner-register";
+import { demoToday } from "@/lib/demo-clock";
 
 // The list behind "Owner actions logged -- 3 this month".
 //
@@ -92,7 +93,7 @@ export default async function OwnerActionLogPage({
   const zoneByCentre = new Map((centres ?? []).map((c) => [c.id, c.time_zone ?? DEFAULT_TIMEZONE]));
 
   const timeZone = cachedCentre?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   // The same instant the owner's landing counts from -- that page links
   // here with its own figure, and a date-prefix string compare against a
   // timestamptz disagreed with it by up to a day at the boundary.

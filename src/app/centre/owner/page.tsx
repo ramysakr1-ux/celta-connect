@@ -17,6 +17,7 @@ import { BranchChip } from "@/components/branch-chip";
 import { HeaderCredit } from "@/components/designer-credit";
 import { OwnerRegisterStyles } from "@/app/centre/owner/owner-register";
 import { InstallPrompt } from "@/components/install-prompt";
+import { demoToday } from "@/lib/demo-clock";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -93,7 +94,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
     ]);
 
   const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   const courseIds = (courses ?? []).map((c) => c.id);
   const coursesRunning = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "running").length;

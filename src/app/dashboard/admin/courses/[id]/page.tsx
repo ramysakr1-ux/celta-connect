@@ -20,6 +20,7 @@ import { CarriedWorkPanel, type PendingTransfer } from "@/app/dashboard/admin/co
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { demoToday } from "@/lib/demo-clock";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
@@ -105,7 +106,7 @@ export default async function CourseAdminDetailPage({
   const { data: approvalMarker } = approvalSubmittedBy
     ? await supabase.from("profiles").select("full_name").eq("id", approvalSubmittedBy).maybeSingle()
     : { data: null };
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
   // reached from says "17 Aug – 11 Sept" (audit, 6 Sep 2026).
   const calendarDay = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" });

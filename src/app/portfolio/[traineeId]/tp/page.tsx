@@ -10,6 +10,7 @@ import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/li
 import type { Database } from "@/lib/supabase/types";
 import { formatCalendarDate } from "@/lib/format-date";
 import { RoomHead, ROOM_BUTTON, ROOM_PRIMARY } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
 
@@ -138,7 +139,7 @@ export default async function TpHubPage({
   // Cosmetic "Today" highlight only, not a compliance boundary -- not worth
   // this page's first center/timezone fetch just to swap DEFAULT_TIMEZONE
   // for the real one.
-  const today = toLocalIso(new Date(), DEFAULT_TIMEZONE);
+  const today = await demoToday(DEFAULT_TIMEZONE);
 
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const lessonByTpNumber = new Map((lessons ?? []).map((l) => [l.tp_number as number, l]));

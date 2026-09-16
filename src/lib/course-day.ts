@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { demoNow } from "@/lib/demo-clock";
 
 // "Day N" of the course = the Nth distinct timetabled date, not a raw
 // calendar-day count -- ties FOL's Day 1/10/12 language to the same clock
@@ -28,7 +29,11 @@ export async function isCourseDayReached(
   if (!targetDate) return false;
 
   const center = await getCachedCenter(course.center_id);
-  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
+  // demoNow, not new Date(): on the demo centre a ?day=N link moves the whole
+  // course clock, and a gate that ignored it would open the wrong doors on the
+  // day the visitor asked for (for-claude-code-demo-clock.md).
+  const today = toLocalIso(await demoNow(timeZone, courseId), timeZone);
   return today >= targetDate;
 }
 
@@ -56,7 +61,8 @@ export async function computeCourseDayProgress(
 
   const distinctDates = Array.from(new Set(data.map((row) => row.event_date))).sort();
   const center = course ? await getCachedCenter(course.center_id) : null;
-  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(await demoNow(timeZone, courseId), timeZone);
   const daysReached = distinctDates.filter((d) => d <= today).length;
   if (daysReached === 0) return null;
 

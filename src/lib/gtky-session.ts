@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 export interface GtkySessionEvent {
   id: string;
@@ -57,6 +58,6 @@ export async function findGtkySession(
     events = (data ?? []) as GtkySessionEvent[];
   }
   if (events.length === 0) return null;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   return events.find((e) => e.event_date >= today) ?? events[events.length - 1];
 }

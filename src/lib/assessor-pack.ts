@@ -5,6 +5,7 @@ import { computeAssessedTpStats } from "@/lib/course-progress";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { assignmentGradeCeiling } from "@/lib/provisional-grade";
+import { demoToday } from "@/lib/demo-clock";
 
 // Handbook 12.1.3: "The candidate portfolios should be up-to-date on the day
 // of the assessment." Up to date, not finished -- the visit is mid-course
@@ -22,7 +23,7 @@ async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: st
   const { data: course } = await supabase.from("courses").select("assessor_visit_date, center_id").eq("id", courseId).maybeSingle();
   if (course?.assessor_visit_date) return course.assessor_visit_date;
   const timeZone = course?.center_id ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
-  return toLocalIso(new Date(), timeZone);
+  return await demoToday(timeZone);
 }
 
 function dueByCutoff(a: { due_date: string | null }, cutoff: string): boolean {

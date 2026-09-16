@@ -14,6 +14,7 @@ import { isMctOnCourse } from "@/lib/course-mct";
 import { checkStage1RecordsMilestone, checkFinalGradeMilestone } from "@/lib/cohort-milestones";
 import type { CriteriaRating, StandardRating } from "@/lib/supabase/types";
 import { formatCalendarDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 export interface FormState {
   error: string | null;
@@ -1126,7 +1127,7 @@ async function finalDayBlock(
   // final day -- exactly the early release this function exists to prevent
   // -- and for one east of it the final morning was still "yesterday".
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   if (today < course.end_date) {
     const finalDay = formatCalendarDate(course.end_date, {
       day: "numeric",

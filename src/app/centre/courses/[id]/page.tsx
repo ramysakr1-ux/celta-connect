@@ -11,6 +11,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
 import { PricingForm } from "@/app/centre/courses/[id]/pricing-form";
 import { RoomHead } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 
 // for-claude-code-course-admin-final-scope.md: "A view-only drill-in to any
@@ -69,7 +70,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
   }));
 
   const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   const courseDay = (iso: string | null) =>
     iso ? formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" }) : "not set";
   const state = computeCourseState(course.start_date, course.end_date, today);

@@ -10,6 +10,7 @@ import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Greeting } from "@/app/student/[token]/greeting";
 import type { Metadata } from "next";
@@ -17,6 +18,7 @@ import { InstallPrompt } from "@/components/install-prompt";
 import { getVolunteerIdentityData, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { resolveTimeBands, toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoNow } from "@/lib/demo-clock";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
@@ -31,10 +33,9 @@ function milestonesFor(threshold: number): number[] {
   return [...new Set(marks)].sort((a, b) => a - b);
 }
 
-function formatEventDate(iso: string): string {
+function formatEventDate(iso: string, todayIso: string): string {
   const date = new Date(`${iso}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date(`${todayIso}T00:00:00`);
   const diffDays = Math.round((date.getTime() - today.getTime()) / 86400000);
   const dayLabel = formatCalendarDateObject(date, { weekday: "long", day: "numeric", month: "long" });
   if (diffDays === 0) return `Today, ${dayLabel}`;
@@ -232,6 +233,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           </Link>
           <HeaderCredit />
           <div className="flex min-w-0 flex-1">
+            <DemoDayTag courseId={accessToken.course_id} />
             <HeaderClock
               supabase={admin}
               courseId={accessToken.course_id}
@@ -310,7 +312,11 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     const [h, m] = band.end.split(":").map(Number);
     return h * 60 + m;
   };
-  const nowMs = Date.now();
+  // The demo clock: a volunteer's link can carry ?day=N, and "your next class"
+  // has to be the next class on the day the story is standing in
+  // (for-claude-code-demo-clock.md). A real centre is never shifted.
+  const nowMs = (await demoNow(DEFAULT_TIMEZONE, accessToken.course_id)).getTime();
+  const todayIso = toLocalIso(new Date(nowMs), courseTimeZone);
   const upcoming = classes
     .filter((c) => c.courseId === accessToken.course_id)
     .filter((c) => {
@@ -654,7 +660,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     ? formatCalendarDate(course.start_date, { day: "numeric", month: "short" })
     : null;
   const courseDatesLabel = startDateLabel && endDateLabel ? `${startDateLabel} – ${endDateLabel}` : endDateLabel;
-  const headline = nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet";
+  const headline = nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate, todayIso).split(",")[0].toLowerCase()}` : "No classes scheduled yet";
   // The room belongs on the card. Ramy: "there's no room number on the hero
   // card." course_timetable_events.detail is the centre's own free text for
   // an event (migration 0229) and is where a room number lives, so it rides
@@ -726,7 +732,8 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                   sessions they may be walking into, on the centre's clock
                   rather than their own. */}
               <div className="ml-6 flex min-w-0 flex-1">
-                <HeaderClock
+                <DemoDayTag courseId={accessToken.course_id} />
+            <HeaderClock
                   supabase={admin}
                   courseId={accessToken.course_id}
                   timeZone={courseTimeZone}
@@ -746,6 +753,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               </div>
               {nextClass ? (
                 <NextClassBanner
+                  todayIso={todayIso}
                   courseTimeZone={courseTimeZone}
                   nextClass={nextClass}
                   whereLabel={whereLabel}
@@ -794,6 +802,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop={false} />
               {nextClass ? (
                 <NextClassCard
+                  todayIso={todayIso}
                   courseTimeZone={courseTimeZone}
                   nextClass={nextClass}
                   whereLabel={whereLabel}
@@ -882,6 +891,7 @@ interface NextClassLike {
 
 function NextClassCard({
   nextClass,
+  todayIso,
   whereLabel,
   topicLabel,
   teachersLabel,
@@ -892,6 +902,7 @@ function NextClassCard({
   courseTimeZone,
 }: {
   nextClass: NextClassLike;
+  todayIso: string;
   courseTimeZone: string;
   whereLabel: string;
   topicLabel: string | null;
@@ -907,7 +918,7 @@ function NextClassCard({
       style={{ borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)", background: "oklch(99.2% 0.005 90)" }}
     >
       <div className="flex items-baseline justify-between gap-2">
-        <p className="font-serif text-h3 font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        <p className="font-serif text-h3 font-semibold text-ink">{formatEventDate(nextClass.eventDate, todayIso)}</p>
         {/* Labelled for the same reason the desktop panel is: a bare time
             beside a date reads as a clock rather than as when the class
             begins. */}
@@ -973,6 +984,7 @@ function NextClassCard({
 // Just put the information there instead of the long line."
 function NextClassBanner({
   nextClass,
+  todayIso,
   whereLabel,
   topicLabel,
   teachersLabel,
@@ -985,6 +997,7 @@ function NextClassBanner({
   courseTimeZone,
 }: {
   nextClass: NextClassLike;
+  todayIso: string;
   courseTimeZone: string;
   whereLabel: string;
   topicLabel: string | null;
@@ -1030,7 +1043,7 @@ function NextClassBanner({
           thing said it twice in two type sizes. Ramy: "we understand this.
           The next class is enough." */}
       <div className="flex items-baseline justify-between gap-3">
-        <p className="font-serif text-h2 font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        <p className="font-serif text-h2 font-semibold text-ink">{formatEventDate(nextClass.eventDate, todayIso)}</p>
         {/* "Starts", not a bare number. Ramy read the unlabelled pill as a
             clock and asked why it wasn't moving -- fair, since a lone 10:00
             in a dark pill at a card corner looks like a widget rather than a

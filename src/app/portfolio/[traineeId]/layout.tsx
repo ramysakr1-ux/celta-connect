@@ -16,6 +16,7 @@ import { HeaderCredit } from "@/components/designer-credit";
 import { TrainerHubChrome } from "@/components/trainer-hub-chrome";
 import { ViewingAsTutor } from "@/components/viewing-as-tutor";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { TraineeNotebook } from "@/app/portfolio/[traineeId]/trainee-notebook";
 import { NOTEBOOK_PAPERS, PAGE_PALETTES, pagePaletteVars, type NotebookPaper, type PagePalette, type TraineeNote } from "@/lib/trainee-notebook";
@@ -43,6 +44,7 @@ import { computeCourseDayProgress } from "@/lib/course-day";
 import { Avatar } from "@/components/avatar";
 import { formatCalendarDate } from "@/lib/format-date";
 import { CentreTimeZoneProvider } from "@/components/centre-time-zone";
+import { demoToday, demoNow } from "@/lib/demo-clock";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -165,7 +167,7 @@ export default async function PortfolioLayout({
   let traineeDay: TraineeDayView | null = null;
   if (showTraineeNav && trainee.course_id) {
     const { data: courseDates } = await supabase.from("courses").select("start_date, end_date").eq("id", trainee.course_id).maybeSingle();
-    const todayIso = toLocalIso(new Date(), timeZone);
+    const todayIso = await demoToday(timeZone);
     const weekOf = courseDates?.start_date && courseDates?.end_date ? computeWeekOf(courseDates.start_date, courseDates.end_date, todayIso) : null;
     const parts = weekOf?.match(/week (\d+) of (\d+)/);
     bannerWeekNumber = parts ? Number(parts[1]) : null;
@@ -239,7 +241,9 @@ export default async function PortfolioLayout({
       ).data?.[0]
     : null;
 
-  const today = toLocalIso(new Date(), timeZone);
+  const demoInstant = await demoNow(timeZone);
+  const serverNowMs = demoInstant.getTime();
+  const today = toLocalIso(demoInstant, timeZone);
   const [
     { data: lessons },
     { data: preCourseSections },
@@ -504,7 +508,8 @@ export default async function PortfolioLayout({
                     shell's landing. */}
                 <HeaderCredit onDark landingPath={`/portfolio/${trainee.id}`} />
                 <div className="min-w-0 flex-1 md:hidden" />
-                <div className="shrink-0 md:order-3">
+                <div className="flex shrink-0 items-center gap-2.5 md:order-3">
+                  <DemoDayTag tone="dark" />
                   <TraineeHeaderCorner
                     traineeId={trainee.id}
                     traineeName={trainee.full_name}
@@ -524,7 +529,7 @@ export default async function PortfolioLayout({
                 <div className="flex min-w-0 flex-1 md:order-2">
                   <HeaderDayBar
                     day={traineeDay.day}
-                    serverNowMs={Date.now()}
+                    serverNowMs={serverNowMs}
                     timeZone={timeZone}
                     dayLabel={
                       traineeDay.isToday

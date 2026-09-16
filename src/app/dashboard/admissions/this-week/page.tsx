@@ -5,6 +5,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatCalendarDate } from "@/lib/format-date";
 import { RoomHead } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI"] as const;
 
@@ -45,7 +46,7 @@ export default async function ThisWeeksInterviewsPage({
   const supabase = createAdminClient();
 
   const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const todayIso = toLocalIso(new Date(), timeZone);
+  const todayIso = await demoToday(timeZone);
   // On a Saturday or Sunday "this week" is over: show the one coming, which
   // is the one anybody opening this page at the weekend is preparing for.
   const thisMonday = mondayOfIso(todayIso);

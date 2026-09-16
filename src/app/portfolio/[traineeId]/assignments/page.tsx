@@ -19,6 +19,7 @@ import { getCourseReleaseClock, type AssignmentRelease } from "@/lib/assignment-
 import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import type { Database } from "@/lib/supabase/types";
 import { RoomHead, ROOM_PRIMARY } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 
@@ -60,7 +61,7 @@ export default async function AssignmentsPage({
   // reading of it.
   const { data: trainee } = await supabase.from("profiles").select("course_id, center_id").eq("id", traineeId).maybeSingle();
   const timeZone = trainee?.center_id ? ((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   const clock = trainee?.course_id ? await getCourseReleaseClock(supabase, trainee.course_id, today) : null;
   // Staff/assessor previewing always see the full set -- gating is a
   // candidate-facing pacing device, not a real access restriction (same

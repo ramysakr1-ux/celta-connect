@@ -38,6 +38,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-only";
 import { levelKey } from "@/lib/volunteer-class-session";
 import { RoomHead } from "@/components/room-head";
+import { demoToday } from "@/lib/demo-clock";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 
@@ -204,7 +205,7 @@ export default async function TpDetailPage({
   //
   // taught_at still counts, for a lesson taught early or logged by hand.
   const lessonDate = trainee.course_id ? await tpLessonDate(supabase, trainee.course_id, traineeId, tpNumber) : null;
-  const centreToday = toLocalIso(new Date(), (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  const centreToday = await demoToday((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
   const lessonTaught = Boolean(assignment?.taught_at) || Boolean(lessonDate && lessonDate <= centreToday);
 
   let volunteerAttendance: { expected: number; total: number } | null = null;

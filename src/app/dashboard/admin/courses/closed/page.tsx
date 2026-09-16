@@ -7,6 +7,7 @@ import { computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatCalendarDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: "Closed --
 // past courses, collapsed to a simple list/link to history." The landing
@@ -25,7 +26,7 @@ export default async function ClosedCoursesPage({
   const { scope } = await resolveBranchScope(profile, branch);
   const supabase = createAdminClient();
   const timeZone = (await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   const { data: courses } = await supabase
     .from("courses")

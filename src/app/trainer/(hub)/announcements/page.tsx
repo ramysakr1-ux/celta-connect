@@ -8,6 +8,7 @@ import { AnnouncementComposer } from "@/app/trainer/(hub)/announcements/composer
 import { ScheduledPanel, type ScheduledRowData } from "@/app/trainer/(hub)/announcements/scheduled-panel";
 import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
+import { demoToday } from "@/lib/demo-clock";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -29,7 +30,7 @@ export default async function AnnouncementsPage() {
   const courseId = trainer.course_id;
   const supabase = hubReadClient(trainer, courseId);
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   const [{ data: course }, { data: upcomingEvents }, { data: broadcasts }, { count: traineeCount }, { count: trainerCount }] =
     await Promise.all([

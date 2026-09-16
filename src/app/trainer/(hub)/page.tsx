@@ -26,6 +26,7 @@ import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
 import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, cohortSizeProblems, tpClassSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP } from "@/lib/hub-accent";
+import { demoToday, demoNow } from "@/lib/demo-clock";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -214,7 +215,7 @@ export default async function TodayPage() {
     | null;
   const centerId = trainer?.center_id ?? course?.center_id ?? null;
   const timeZone = (centerId ? (await getCachedCenter(centerId))?.time_zone : null) ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
   const traineeIds = rows.map((r) => r.id);
@@ -624,7 +625,7 @@ export default async function TodayPage() {
   // lunch break. Milestones, due-dates and lunch are the timetable's, not a
   // person's; TP rows follow the group scope. Events carry no tutor of their
   // own, so input and supervised sessions are shown to every tutor.
-  const serverNowMs = Date.now();
+  const serverNowMs = (await demoNow(timeZone)).getTime();
   const SLOT_MINUTES: Record<string, number> = { tp: 3 * 60, unassessed_tp: 60, input_session: 60, supervised_session: 60 };
   const rawSlots: DaySlot[] = (todayEvents ?? [])
     .filter(

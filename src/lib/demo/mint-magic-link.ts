@@ -1,6 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DEMO_DAY_COOKIE } from "@/lib/demo-clock";
 
 // Shared by every /demo/<role> entry point (build-spec.md's "Demo -- a
 // flagged clone of the real app," extended per
@@ -17,7 +18,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // (requireCapability, requireOwner, and the centre-settings/roles/money
 // actions); the trainer and trainee write paths are the same class and are
 // NOT yet covered (walked 15 Sep 2026).
-export async function mintDemoMagicLink(email: string, next: string | ((profileId: string) => string)) {
+export async function mintDemoMagicLink(
+  email: string,
+  next: string | ((profileId: string) => string),
+  /** `?day=N` off the demo link -- pins the demo clock (for-claude-code-demo-clock.md). */
+  demoDay?: number | null
+) {
   const admin = createAdminClient();
   // SITE_URL must be the CANONICAL host, including www where the domain
   // redirects to it. Every URL below is built from it, so a value of
@@ -66,5 +72,20 @@ export async function mintDemoMagicLink(email: string, next: string | ((profileI
   confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
   confirmUrl.searchParams.set("type", "magiclink");
   confirmUrl.searchParams.set("next", typeof next === "function" ? next(profile.id) : next);
-  return NextResponse.redirect(confirmUrl);
+  const response = NextResponse.redirect(confirmUrl);
+  // The demo clock rides a cookie rather than the URL, so it survives the
+  // magic-link hop (mint -> confirm -> landing) and every click after it.
+  // Setting it to null clears it, which is how a link with no ?day= puts a
+  // visitor back on the real clock instead of leaving them wherever the last
+  // link left them.
+  if (demoDay === null || demoDay === undefined) {
+    response.cookies.delete(DEMO_DAY_COOKIE);
+  } else {
+    response.cookies.set(DEMO_DAY_COOKIE, String(demoDay), {
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 12,
+    });
+  }
+  return response;
 }

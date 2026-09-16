@@ -1,4 +1,5 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
+import { parseDemoDay } from "@/lib/demo-clock";
 
 // Pairs with /demo/trainer (the main course tutor, Marcus Webb) -- this one
 // logs in as the assistant course tutor instead (Jordan Blake,
@@ -11,6 +12,10 @@ import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 // Ramy, 2026-08-25: MCT and ACT get different layouts (garnet vs teal hub
 // header/hover, per trainer/(hub)/layout.tsx's role-scoped --hub-* vars) and
 // he wanted a separate link for each rather than one shared trainer entry.
-export async function GET() {
-  return mintDemoMagicLink("demo-trainer@celtaconnect.com", "/trainer");
+// `?day=N` pins the demo clock before the magic-link hop
+// (for-claude-code-demo-clock.md). No day means the real clock, and it clears
+// any day a previous link left behind.
+export async function GET(request: Request) {
+  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
+  return mintDemoMagicLink("demo-trainer@celtaconnect.com", "/trainer", day);
 }

@@ -9,6 +9,7 @@ import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 // Checkpoint 12 -- "aggregate view for the tutor" (build-spec.md item 18).
 //
@@ -88,7 +89,7 @@ export default async function TrainerPreCourseTaskPage() {
   // The centre's day, not the UTC day: the answer key opens 48 hours before
   // the course starts, and a gate on the UTC day opened it hours early or
   // late depending on the centre's zone (12 Sep 2026).
-  const today = toLocalIso(new Date(), (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  const today = await demoToday((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
   const answerKeyDate = course.start_date ? answerKeyOpensOn(course.start_date) : null;
   const answerKeyOpen = Boolean(answerKeyDate && today >= answerKeyDate);
 

@@ -22,6 +22,7 @@ import { buildPrepSummary } from "@/lib/assessor-prep-state";
 import { PrepList } from "@/app/trainer/(hub)/assessor/prep-list";
 import { tintModeration } from "@/lib/tint-moderation";
 import { TintBlock } from "@/app/trainer/(hub)/assessor/tint-block";
+import { demoToday } from "@/lib/demo-clock";
 
 // The assessor's room. MCT only.
 //
@@ -74,7 +75,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
 
   const supabase = hubReadClient(trainer, courseId);
   const timeZone = (trainer.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
 
   // `select("*")` for the same reason Today gives: assessment_kind (0254)
   // and appian_notification_reference (0256) are migration-added columns,

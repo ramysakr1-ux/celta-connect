@@ -20,6 +20,7 @@ import { isCourseStatusReadOnly } from "@/lib/course-status";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { computeWeekOf } from "@/lib/course-progress";
+import { demoToday } from "@/lib/demo-clock";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
 // shared with the CSV export route below so the two can't drift on what a
@@ -101,7 +102,7 @@ export default async function TrainerRosterPage() {
   const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
   // "provisional, week N" under the Pass A / B summary tile (roster v2).
   const weekLabel =
-    courseRow?.start_date && courseRow?.end_date ? computeWeekOf(courseRow.start_date, courseRow.end_date, toLocalIso(new Date(), timeZone)) : null;
+    courseRow?.start_date && courseRow?.end_date ? computeWeekOf(courseRow.start_date, courseRow.end_date, await demoToday(timeZone)) : null;
   for (const r of frozenRows ?? []) {
     if (!startDate || !r.course_status_set_at) continue;
     const left = toLocalIso(new Date(r.course_status_set_at), timeZone);

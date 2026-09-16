@@ -34,6 +34,7 @@ import { FailRiskLetterSection } from "@/app/dashboard/trainer/trainees/[id]/cel
 import { isReferenceLetterEligible, buildReferenceLetterDraft } from "@/lib/letters/reference";
 import { ReferenceLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/reference-letter-section";
 import { computeStage3MixedModeLock } from "@/lib/delivery-mode";
+import { demoToday } from "@/lib/demo-clock";
 
 const TRAJECTORY_LABEL: Record<string, string> = {
   "Pass A": "Pass A",
@@ -120,7 +121,7 @@ export default async function Celta5RecordPage({
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
   const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
-  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date(), timeZone));
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], await demoToday(timeZone));
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const { data: criteriaTags } =

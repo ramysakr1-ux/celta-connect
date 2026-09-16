@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 /**
  * The course the demo is about: the one running at the centre today, or --
@@ -20,7 +21,7 @@ export async function pickDemoCourse<T extends { start_date: string }>(
   select: string
 ): Promise<T | null> {
   const timeZone = (await getCachedCenter(centerId))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
+  const today = await demoToday(timeZone);
   const { data: started } = await admin
     .from("courses")
     .select(select)

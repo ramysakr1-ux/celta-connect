@@ -18,6 +18,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 import { CourseStatePill, type CourseState } from "@/components/course-state-pill";
 import { RoomHead, ROOM_PRIMARY } from "@/components/room-head";
 import { BranchChip } from "@/components/branch-chip";
+import { demoToday } from "@/lib/demo-clock";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -82,7 +83,7 @@ export default async function AdminDashboardPage({
     supabase.from("profiles").select("course_id, role").in("center_id", scope).not("course_id", "is", null),
     supabase.from("course_timetable_events").select("course_id, event_date"),
   ]);
-  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
+  const today = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
 
   const courseIds = (courses ?? []).map((c) => c.id);
   const { data: applicants } = courseIds.length

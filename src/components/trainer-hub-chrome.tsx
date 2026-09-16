@@ -10,6 +10,7 @@ import { showWholeCourse, showMyGroup } from "@/app/trainer/(hub)/scope-actions"
 import { seesWholeCourse } from "@/lib/hub-scope";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId, isAssessorPreview, isAssessorTourMode } from "@/lib/auth/portfolio-access";
@@ -271,6 +272,9 @@ export async function TrainerHubChrome({
           ) : null}
           <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} hideBelowMd={phoneBar} />
           <div className="flex shrink-0 items-center gap-[11px]">
+            {/* The demo clock, if one is pinned -- it moves what this whole
+                shell calls today, so it is named beside the role pill. */}
+            <DemoDayTag />
             {isRealStaff && isMctReal ? (
               // The pill is the preview toggle for a real MCT -- one click
               // into the ACT view, one click back (Ramy, 5 Sep 2026).

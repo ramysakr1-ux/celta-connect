@@ -40,6 +40,7 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CriteriaRating } from "@/lib/supabase/types";
 import { FinalReportFields } from "@/app/trainer/(hub)/grades-report/final-report-fields";
 import { appianHref } from "@/lib/appian";
+import { demoToday } from "@/lib/demo-clock";
 
 // Assessor-facing compiled Grades Report -- the whole cohort in one
 // continuous document, matching the shape of a real center's actual
@@ -94,7 +95,7 @@ export default async function GradesReportPage() {
   // and would otherwise disagree with the server about the date near
   // midnight. Negative means overdue.
   const gradesTimeZone = (trainer?.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
-  const gradesToday = toLocalIso(new Date(), gradesTimeZone);
+  const gradesToday = await demoToday(gradesTimeZone);
   const provisionalDaysOut = provisionalDueAt
     ? Math.ceil((new Date(`${provisionalDueAt.slice(0, 10)}T00:00:00`).getTime() - new Date(`${gradesToday}T00:00:00`).getTime()) / 86400000)
     : null;
