@@ -19,6 +19,7 @@ import { RoomHead } from "@/components/room-head";
 import { CarriedWorkPanel, type PendingTransfer } from "@/app/dashboard/admin/courses/[id]/carried-work-panel";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
+import { refuseIfDemoCentre } from "@/lib/demo-guard";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
@@ -55,7 +56,12 @@ export default async function CourseAdminDetailPage({
   // unlinked row at the course's centre and the panel offers this course's
   // own candidates to link them to.
   const ctx = await getCentreRoleContext(admin);
-  const mayLinkTransfers = can(ctx.roles, "admissions.manage", ctx.overrides);
+  // requireCapability refuses every write on a demo centre, so on the demo a
+  // filled-in form could only ever throw -- and a void server action has
+  // nowhere to put the refusal, so the visitor would get a crashed page
+  // rather than a sentence. Proven by clicking it, 16 Sep 2026.
+  const mayLinkTransfers =
+    can(ctx.roles, "admissions.manage", ctx.overrides) && !(await refuseIfDemoCentre(course.center_id));
 
   const [{ data: center }, { data: tutorRows }, { data: applicants }] = await Promise.all([
     // single-centre: the Appian URL of the centre this course belongs to

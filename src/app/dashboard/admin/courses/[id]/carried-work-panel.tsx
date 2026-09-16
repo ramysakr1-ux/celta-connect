@@ -48,8 +48,8 @@ export function CarriedWorkPanel({
       <div>
         <h2 className="font-serif text-lg text-ink">Carried work waiting to be linked</h2>
         <p className="mt-1 text-sm text-muted">
-          {transfers.length === 1 ? "A candidate was" : `${transfers.length} candidates were`} marked for a restart or
-          a deferral on an earlier course, and what they had already done is being held. Once they have joined this
+          {transfers.length === 1 ? "A candidate was" : `${transfers.length} candidates were`}{" "}
+          marked for a restart or a deferral on an earlier course, and what they had already done is being held. Once they have joined this
           course, say which person they are and their work is written onto this course&apos;s record.
         </p>
       </div>
