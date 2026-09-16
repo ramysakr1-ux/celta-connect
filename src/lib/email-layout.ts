@@ -35,6 +35,12 @@ export const EMAIL_TONE = {
    * This is the colour on the spine and the buttons of the interview
    * invitation, the offer, the acceptance and the workspace invitation, so it
    * is the one that was actually being looked at.
+   *
+   * Confirmations (offer accepted, place confirmed) are teal too. They used
+   * to be a `green` tone that pointed at this same hex -- kept as a second
+   * name so a call site could say "confirmation" -- until the 16 Sep 2026
+   * email pass (gates/volunteer/email/motion spec, A6): four names for two
+   * colours is a legend nobody can read. Five tones, five colours.
    */
   teal: "#1a5c5e",
   /** Waiting, time-limited, warm. Gold is otherwise reserved for the brand
@@ -45,21 +51,12 @@ export const EMAIL_TONE = {
   /** Rejection, flag. */
   red: "#972622",
   /**
-   * Confirmation, positive. Green is fully retired from this project's
-   * colour legend, so a `green`-toned email now means the same thing as
-   * `teal` -- same hex, kept as its own name only so call sites can still
-   * say "this is a confirmation" rather than "this is teal/positive".
-   */
-  green: "#1a5c5e",
-  /**
    * Advisory / pending -- waiting-list emails. Split out from `gold` on the
    * 2026-08-21 pass: those emails are semantically amber (needs-attention),
    * not gold (which is reserved), so they get their own print/email-safe
    * amber hex distinct from both `teal` and `gold`.
    */
   amber: "#8a6116",
-  /** Plain acknowledgements, nothing to signal. */
-  muted: "#6d655c",
   /**
    * The sober one, for the rejections and "the course filled before a place
    * came free".
@@ -71,7 +68,9 @@ export const EMAIL_TONE = {
    *
    * So this is the warm muted brown rather than teal or gold. It is visibly a
    * line, which is what was asked for, without a bright bar celebrating at
-   * someone who has just been turned down.
+   * someone who has just been turned down. Plain acknowledgements with
+   * nothing to signal take it too (they were a `muted` alias of the same
+   * hex until 16 Sep 2026).
    */
   plain: "#6d655c",
 } as const;

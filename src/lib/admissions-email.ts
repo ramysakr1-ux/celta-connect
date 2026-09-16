@@ -384,7 +384,7 @@ export function referralEmailHtml(input: {
 
   return emailShell({
     heading: "Your application is still with us",
-    tone: "muted",
+    tone: "plain",
     body,
   });
 }
@@ -1251,7 +1251,7 @@ export function volunteerClassStartingEmailHtml(input: {
     heading: "Your free English classes start Monday",
     // Confirmation -- green is retired from the palette and now equals
     // teal (see EMAIL_TONE), so this renders as the app's real teal.
-    tone: "green",
+    tone: "teal",
     body:
       p(
         `Thank you for volunteering. You will be in the ${input.levelName} class, taught by a group of international teachers, observed by a teacher trainer.`
@@ -1289,7 +1289,7 @@ export function volunteerRsvpEmailHtml(input: {
       <tr>
         <td width="50%" style="padding-right:6px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-            <tr><td align="center" style="border-radius:6px;background:${EMAIL_TONE.green};">
+            <tr><td align="center" style="border-radius:6px;background:${EMAIL_TONE.teal};">
               <a href="${input.yesUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:6px;">Yes, I&rsquo;ll be there</a>
             </td></tr>
           </table>
@@ -1306,7 +1306,7 @@ export function volunteerRsvpEmailHtml(input: {
 
   return emailShell({
     heading: `See you tomorrow, ${esc(input.firstName)}?`,
-    tone: "green",
+    tone: "teal",
     body:
       p(`Your ${input.courseName} class is tomorrow. Let your teachers know if you'll make it -- it helps them plan the lesson.`) +
       rawP(twoButtons),
@@ -1335,7 +1335,7 @@ export function volunteer30MinReminderEmailHtml(input: {
 }): string {
   return emailShell({
     heading: "Your class starts in 30 minutes",
-    tone: "green",
+    tone: "teal",
     body: p("Log in early to check today's materials. The Join link opens 10 minutes before class."),
     facts: [
       { label: "Your class", value: input.classFact },
