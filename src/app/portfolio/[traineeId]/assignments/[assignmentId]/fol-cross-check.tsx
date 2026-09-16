@@ -34,7 +34,7 @@ export function FolCrossCheck({ claims, poolEntries }: { claims: Claim[]; poolEn
   if (claims.length === 0) return null;
 
   return (
-    <div className="sheet flex flex-col gap-2 p-6">
+    <div className="plain-card flex flex-col gap-2 p-6">
       <h2 className="font-serif text-h3 text-ink">Focus on the Learner -- claimed problems</h2>
       <p className="text-body text-muted">Cross-checked against the class log. A flag means the citation doesn&apos;t trace to a logged instance.</p>
       <ul className="flex flex-col gap-1.5">

@@ -51,7 +51,7 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
     <div className="flex flex-col gap-6">
       <BackLink href={`/portfolio/${traineeId}/timetable`} label="Timetable" />
 
-      <div className="sheet">
+      <div className="plain-card">
         <p className="text-label text-muted">Consultation</p>
         <h1 className="font-serif text-h2 text-ink">
           {tutor?.full_name ?? "Your tutor"} · {event ? `${shortDate(event.event_date)} ${shortTime(event.event_time)}` : ""}
@@ -62,7 +62,7 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
         </p>
       </div>
 
-      <div className="sheet">
+      <div className="plain-card">
         <div className="flex flex-col">
           {(slots ?? []).map((s, i) => {
             const isMine = s.trainee_id === myProfileId;

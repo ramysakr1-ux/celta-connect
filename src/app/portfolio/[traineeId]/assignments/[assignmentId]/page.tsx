@@ -222,7 +222,7 @@ export default async function AssignmentDetailPage({
       ) : null}
 
       {!template ? (
-        <div className="sheet p-6">
+        <div className="plain-card p-6">
           <p className="text-muted">
             {isStaff
               ? "This assignment's brief hasn't been published yet."
@@ -231,7 +231,7 @@ export default async function AssignmentDetailPage({
         </div>
       ) : assessorCourseId ? (
         assignment.first_status === "not_submitted" ? (
-          <div className="sheet p-6">
+          <div className="plain-card p-6">
             <p className="text-muted">Not yet submitted.</p>
           </div>
         ) : (

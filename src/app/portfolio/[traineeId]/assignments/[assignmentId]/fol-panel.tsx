@@ -52,7 +52,7 @@ export function FolPanel({
   // rather than computed from a counter.
   return (
     <div className="flex flex-col gap-4">
-      <div className="sheet flex flex-col gap-3 p-6">
+      <div className="plain-card flex flex-col gap-3 p-6">
         <h2 className="font-serif text-h3 text-ink">Log an observation</h2>
         <p className="text-body text-muted">
           Tap a learner from the register whenever you notice a grammar or pronunciation problem, in class or out.
@@ -111,7 +111,7 @@ export function FolPanel({
         </form>
       </div>
 
-      <div className="sheet flex flex-col gap-2 p-6">
+      <div className="plain-card flex flex-col gap-2 p-6">
         <h2 className="font-serif text-h3 text-ink">The pool -- {poolEntries.length} logged so far</h2>
         {poolEntries.length === 0 ? (
           <p className="text-body text-muted">Nothing logged yet -- yours will be the first.</p>
@@ -131,7 +131,7 @@ export function FolPanel({
       </div>
 
       {day10Reached ? (
-        <div className="sheet flex flex-col gap-3 p-6">
+        <div className="plain-card flex flex-col gap-3 p-6">
           <h2 className="font-serif text-h3 text-ink">Claim a problem</h2>
           <p className="text-body text-muted">
             Name a specific structure or sound backed by what&apos;s in the pool (or the sign-up recordings, now
@@ -177,13 +177,13 @@ export function FolPanel({
           {claimState.warning ? <p className="text-body text-muted">{claimState.warning}</p> : null}
         </div>
       ) : (
-        <div className="sheet p-6">
+        <div className="plain-card p-6">
           <p className="text-body text-muted">Claims open on the divergence session day.</p>
         </div>
       )}
 
       {myClaims.length > 0 ? (
-        <div className="sheet flex flex-col gap-2 p-6">
+        <div className="plain-card flex flex-col gap-2 p-6">
           <h2 className="font-serif text-h3 text-ink">Your claims</h2>
           <ul className="flex flex-col gap-1.5">
             {myClaims.map((c) => (

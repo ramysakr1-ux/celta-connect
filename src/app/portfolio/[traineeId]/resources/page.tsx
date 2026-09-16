@@ -36,7 +36,7 @@ type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 function ResourceItemCard({ resource, isEditableStaff, traineeId }: { resource: ResourceRow; isEditableStaff: boolean; traineeId: string }) {
   const Icon = RESOURCE_TYPE_ICON[resource.resource_type];
   return (
-    <li className="wash flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
+    <li className="plain-card hover-ring flex flex-col gap-[5px] p-[14px]">
       <div className="flex items-start gap-2">
         <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
           <Icon className="size-3.5" aria-hidden="true" />
@@ -217,7 +217,7 @@ function PlainCategoryGrid({
   emptyNote?: string;
 }) {
   if (resources.length === 0)
-    return <p className="sheet border-dashed text-body text-muted">{emptyNote ?? "Nothing here yet."}</p>;
+    return <p className="plain-card border-dashed text-body text-muted">{emptyNote ?? "Nothing here yet."}</p>;
   return (
     <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
       {resources.map((r) => (
@@ -741,7 +741,7 @@ export default async function ResourceHubPage({
             the rest are on your timetable to attend.
           </p>
           {courseInputSessions.length === 0 ? (
-            <p className="sheet border-dashed text-body text-muted">No input sessions scheduled yet.</p>
+            <p className="plain-card border-dashed text-body text-muted">No input sessions scheduled yet.</p>
           ) : (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
               {courseInputSessions.map((s) => (
@@ -773,7 +773,7 @@ export default async function ResourceHubPage({
               materialPoolEnabled ? (
                 <MaterialPoolSection items={materialItems} canClaim={canClaimMaterial} />
               ) : (
-                <p className="sheet border-dashed text-body text-muted">Not enabled for this course.</p>
+                <p className="plain-card border-dashed text-body text-muted">Not enabled for this course.</p>
               )
             ) : key === "multimedia" ? (
               <div className="flex flex-col gap-5">
@@ -792,7 +792,7 @@ export default async function ResourceHubPage({
                     know the shelf is empty and what to do about it. */}
                 <div>
                   <h4 className="text-body font-medium text-ink">Video</h4>
-                  <p className="sheet mt-2 border-dashed text-body text-muted">
+                  <p className="plain-card mt-2 border-dashed text-body text-muted">
                     No video linked to this coursebook yet. Your tutor can add one, and the general video
                     shelf below is available in the meantime.
                   </p>
@@ -813,7 +813,7 @@ export default async function ResourceHubPage({
                 <CambridgeDocumentsShelf docs={cambridgeDocs} editable={false} />
               </div>
             ) : key === "tp_points" ? (
-              <Link href="/trainer/coursebooks" className="sheet lift flex flex-col gap-1 p-4">
+              <Link href="/trainer/coursebooks" className="plain-card lift hover-ring flex flex-col gap-1 p-[14px]">
                 <p className="text-body font-semibold text-ink">TP Points Library</p>
                 <p className="text-label text-muted">Staff-only — lift the trainer's coursebooks & TP points management.</p>
               </Link>
@@ -826,7 +826,7 @@ export default async function ResourceHubPage({
               // whether someone remembered to upload a PDF.
               <div className="flex flex-col gap-3">
                 <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
-                  <li className="wash flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
+                  <li className="plain-card hover-ring flex flex-col gap-[5px] p-[14px]">
                     <div className="flex items-start gap-2">
                       <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
                         <Stamp className="size-3.5" aria-hidden="true" />

@@ -105,7 +105,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
     // needs to render something -- the old submitted view, unchanged.
     if (completion?.score == null || completion?.question_count == null) {
       return (
-        <div className="sheet flex flex-col gap-3">
+        <div className="plain-card flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <p className="text-body font-semibold text-ink">Submitted</p>
             <p className="text-label text-muted">Time spent: {formatDuration(completion!.time_spent_seconds)}</p>
@@ -120,7 +120,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
       );
     }
     return (
-      <div className="sheet flex flex-col items-center gap-2 py-2 text-center">
+      <div className="plain-card flex flex-col items-center gap-2 py-2 text-center">
         <p className="font-serif text-h1 text-ink">
           {completion.score} / {completion.question_count}
         </p>
@@ -139,7 +139,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
 
   if (stage === "result" && result) {
     return (
-      <div className="sheet flex flex-col items-center gap-2 py-2 text-center">
+      <div className="plain-card flex flex-col items-center gap-2 py-2 text-center">
         <p className="font-serif text-h1 text-ink">
           {result.score} / {result.questionCount}
         </p>
@@ -157,7 +157,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
     const answered = answers[qIndex];
     const isLast = qIndex + 1 === topic.questions.length;
     return (
-      <div className="sheet flex flex-col gap-3">
+      <div className="plain-card flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
           <h2 className="font-serif text-h3 text-ink">{topic.title} quiz</h2>
           <span className={`text-body font-bold tabular-nums ${secondsLeft < 60 ? "text-destructive" : "text-muted"}`}>
@@ -215,7 +215,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
 
   if (stage === "notes" && topic) {
     return (
-      <div className="sheet flex flex-col gap-4">
+      <div className="plain-card flex flex-col gap-4">
         <div>
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{topic.title} · review notes</p>
           <h2 className="mt-1 font-serif text-h3 text-ink">Recap before the quiz</h2>
@@ -245,7 +245,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
   }
 
   return (
-    <div className="sheet flex flex-col gap-4">
+    <div className="plain-card flex flex-col gap-4">
       <p className="text-label text-muted">Time on this task: {formatDuration(liveSeconds)}</p>
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Supervised review</p>

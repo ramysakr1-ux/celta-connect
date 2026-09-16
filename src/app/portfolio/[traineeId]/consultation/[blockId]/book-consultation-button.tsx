@@ -13,7 +13,7 @@ export function BookConsultationButton({ blockId, assignments, ownTutor }: { blo
   const [state, formAction, pending] = useActionState(bookConsultationSlot, initialState);
 
   return (
-    <form action={formAction} className="sheet flex flex-wrap items-center justify-between gap-3">
+    <form action={formAction} className="plain-card flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-body text-ink">Claim the next open position.</p>
         <p className="text-label text-muted">

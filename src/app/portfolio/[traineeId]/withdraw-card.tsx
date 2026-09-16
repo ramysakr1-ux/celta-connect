@@ -61,7 +61,7 @@ export function CandidateStatusCard({
   const hoursCarriedOverridden = hoursCarried !== hoursAttended;
 
   return (
-    <div className="sheet-accent h-fit">
+    <div className="plain-card h-fit">
       <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
 
       {pendingRequest ? (

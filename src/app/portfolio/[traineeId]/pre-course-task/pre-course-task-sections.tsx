@@ -72,7 +72,7 @@ function SectionBlock({
   const answered = items.filter((i) => responseIsAnswered(responsesByItemId.get(i.id))).length;
 
   return (
-    <div className="sheet flex flex-col gap-3">
+    <div className="plain-card flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{section.title}</p>
         {items.length > 0 ? (

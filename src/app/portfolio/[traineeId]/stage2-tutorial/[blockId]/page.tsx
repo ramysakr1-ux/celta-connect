@@ -43,7 +43,7 @@ export default async function TraineeStage2TutorialPage({
     <div className="flex flex-col gap-6">
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
-      <div className="sheet">
+      <div className="plain-card">
         <p className="text-label text-muted">Stage 2 tutorials</p>
         <h1 className="font-serif text-h2 text-ink">
           {event ? `${formatCalendarDate(event.event_date, { weekday: "long" })} · ${event.event_time?.slice(0, 5) ?? ""}` : "Stage 2 tutorials"}
@@ -57,7 +57,7 @@ export default async function TraineeStage2TutorialPage({
 
       {/* Decorative teal/garnet alternation against the header sheet above --
           no status meaning of its own, same rule as everywhere else. */}
-      <div className="sheet">
+      <div className="plain-card">
         <div className="flex flex-col">
           {(slots ?? []).map((s, i) => {
             const isMine = s.trainee_id === myProfileId;

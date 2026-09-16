@@ -239,7 +239,7 @@ export default async function TraineeTimetablePage({
           including a sessionless assessor. It rides in the board's head now
           (trainee spec B1), not on a row of its own above the board. */}
       {allEvents.length === 0 ? (
-        <div className="sheet text-body text-muted">No events yet.</div>
+        <div className="plain-card text-body text-muted">No events yet.</div>
       ) : (
         <ReadOnlyTimetableBoard
           events={allEvents}

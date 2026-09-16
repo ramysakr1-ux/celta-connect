@@ -23,7 +23,7 @@ export default async function RaiseConcernPage({ params }: { params: Promise<{ t
     <div className="flex flex-col gap-4">
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
-      <div className="sheet flex flex-col gap-4">
+      <div className="plain-card flex flex-col gap-4">
         <div>
           <h1 className="font-serif text-h2 text-ink">Raise a concern</h1>
           <p className="mt-1 text-body text-muted">

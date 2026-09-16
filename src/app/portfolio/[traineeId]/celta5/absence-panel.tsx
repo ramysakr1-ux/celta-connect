@@ -41,7 +41,7 @@ export function AbsencePanel({
   const booklet = variant === "booklet";
 
   return (
-    <div className={booklet ? "flex flex-col gap-3" : "sheet flex flex-col gap-3"}>
+    <div className={booklet ? "flex flex-col gap-3" : "plain-card flex flex-col gap-3"}>
       <div className="flex items-start justify-between gap-3">
         <div>
           {booklet ? null : <h3 className="font-serif text-h3 text-ink">Attendance</h3>}

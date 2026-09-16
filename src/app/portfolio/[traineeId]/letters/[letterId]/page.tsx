@@ -57,7 +57,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
     <div className="flex flex-col gap-4">
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
-      <div className="sheet flex flex-col gap-3">
+      <div className="plain-card flex flex-col gap-3">
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{snapshot.kicker ?? "Formal letter"}</p>
         <h1 className="font-serif text-h2 text-ink">{LETTER_TITLE[letter.letter_type] ?? snapshot.docTitle}</h1>
         <p className="text-body text-muted">Issued {formatLetterDate(letter.issued_at)}</p>

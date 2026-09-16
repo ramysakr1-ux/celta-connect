@@ -69,7 +69,7 @@ export function AssignmentResultSignature({
         : "You have one resubmission for this assignment. Your tutor will set the deadline.";
 
   return (
-    <div className="sheet flex flex-col gap-2">
+    <div className="plain-card flex flex-col gap-2">
       <h3 className="font-serif text-h3 text-ink">Your result</h3>
       <p className="text-body text-ink">{resultLine}</p>
       <p className="text-body text-muted">{consequence}</p>

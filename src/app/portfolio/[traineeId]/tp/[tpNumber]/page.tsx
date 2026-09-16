@@ -166,7 +166,7 @@ export default async function TpDetailPage({
         />
         {/* Decorative teal/garnet alternation against the header sheet
             above -- no status meaning of its own, same rule as elsewhere. */}
-        <div className="sheet p-6">
+        <div className="plain-card p-6">
           {!sheet || !sheet.revealed_at ? (
             <PeerNoteForm
               traineeId={traineeId}
@@ -425,7 +425,7 @@ export default async function TpDetailPage({
   // feedback" beside a plan being written.
   const criteriaEvidenced =
     plan && feedback?.submitted_at ? (
-      <div className="sheet p-6">
+      <div className="plain-card p-6">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Criteria evidenced{criteriaCodes.length > 0 ? ` · ${criteriaCodes.length}` : ""}
         </p>
@@ -458,7 +458,7 @@ export default async function TpDetailPage({
       {/* Decorative teal/garnet alternation down this stack of plain
           content sheets ("Brief" above stays teal) -- no status
           meaning of its own, same rule as everywhere else. */}
-      <div id="plan" className="sheet scroll-mt-20 p-6">
+      <div id="plan" className="plain-card scroll-mt-20 p-6">
         <h2 className="font-serif text-h3 text-ink">What they planned</h2>
         {!plan ? (
           <p className="mt-2 text-body text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
@@ -545,7 +545,7 @@ export default async function TpDetailPage({
       </div>
 
       {languageAnalysis ? (
-        <div id="analysis" className="sheet scroll-mt-20 p-6">
+        <div id="analysis" className="plain-card scroll-mt-20 p-6">
           <h2 className="font-serif text-h3 text-ink">Language Analysis ({languageAnalysis.type})</h2>
           <div className="mt-3">
             <LanguageAnalysisReadOnly analysis={languageAnalysis} />
@@ -554,7 +554,7 @@ export default async function TpDetailPage({
       ) : null}
 
       {materials && materials.length > 0 ? (
-        <div id="materials" className="sheet scroll-mt-20 p-6">
+        <div id="materials" className="plain-card scroll-mt-20 p-6">
           <h2 className="font-serif text-h3 text-ink">Materials</h2>
           <ul className="mt-2 flex flex-col gap-2 text-body text-ink">
             {materials.map((m) => {
@@ -590,7 +590,7 @@ export default async function TpDetailPage({
         </div>
       ) : null}
 
-      <div id="self" className="sheet scroll-mt-20 p-6">
+      <div id="self" className="plain-card scroll-mt-20 p-6">
         <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
         {selfEvaluation?.submitted_at ? (
           <div className="mt-3 flex flex-col gap-3">
@@ -657,13 +657,15 @@ export default async function TpDetailPage({
         </RoomHead>
 
         {!isStaff && bannerMessage ? (
-          <div className="sheet flex items-center gap-2 border-primary/20 bg-accent/30 text-body text-ink">
+          <div className="plain-card flex items-center gap-2 border-primary/20 bg-accent/30 text-body text-ink">
             <span aria-hidden="true">🔒</span>
             {bannerMessage}
           </div>
         ) : null}
 
-        <nav className="sheet flex items-center gap-1 !p-1.5">
+        {/* Trainee spec B6: the anchors stay, but the row is a row of pills now
+            rather than a card with a coloured edge sitting on the page. */}
+        <nav className="flex flex-wrap items-center gap-1">
           {[
             { key: "brief", label: "Brief" },
             { key: "plan", label: "Plan" },
@@ -686,7 +688,7 @@ export default async function TpDetailPage({
           ))}
         </nav>
 
-        <div id="brief" className="sheet scroll-mt-20 p-6">
+        <div id="brief" className="plain-card scroll-mt-20 p-6">
           <div className="flex items-start justify-between gap-4">
             <h2 className="font-serif text-h3 text-ink">Assigned brief</h2>
             <span className="badge-solid">{densityLabel.name}</span>
@@ -763,7 +765,7 @@ export default async function TpDetailPage({
           <>
             {writerMounted ? (
               <details className="group">
-                <summary className="sheet wash flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3.5">
+                <summary className="plain-card wash flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3.5">
                   <span className="text-body font-semibold text-ink">
                     The plan, as submitted
                     <span className="ml-2 font-normal text-muted">aims · procedure · language analysis · materials · self-evaluation</span>
@@ -794,7 +796,7 @@ export default async function TpDetailPage({
                 level={coursebook?.level ?? null}
               />
             ) : plan ? (
-              <div className="sheet p-6">
+              <div className="plain-card p-6">
                 <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
                 <p className="mt-2 text-body text-muted">Not yet submitted.</p>
               </div>
@@ -827,7 +829,7 @@ export default async function TpDetailPage({
                   tpNumber={tpNumber}
                 />
               ) : (
-                <div className="sheet rounded-[9px] border-t-ink p-6">
+                <div className="plain-card rounded-[9px] p-6">
                   <h2 className="font-serif text-h3 text-ink">Materials</h2>
                   <p className="mt-2 text-body text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
                 </div>
@@ -860,7 +862,7 @@ export default async function TpDetailPage({
         )}
 
         {peerSheet?.revealed_at && (peerNotes ?? []).length > 0 ? (
-          <div className="sheet p-6">
+          <div className="plain-card p-6">
             <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">From your peers</p>
             <p className="mt-1 text-label text-muted">
               Not a Cambridge document -- kept out of the portfolio, CELTA5, and the assessor pack.

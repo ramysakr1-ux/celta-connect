@@ -39,7 +39,7 @@ export default async function SupervisedSessionPage({
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
       <BackLink href={`/portfolio/${traineeId}/timetable`} label={"Timetable"} />
-      <div className="sheet">
+      <div className="plain-card">
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">
           {formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "long" })}
           {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}

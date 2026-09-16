@@ -36,7 +36,7 @@ export default async function TraineeSessionMaterialsPage({
   const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
   const courseId = trainee?.course_id;
   if (!courseId) {
-    return <div className="sheet text-body text-muted">No course assigned.</div>;
+    return <div className="plain-card text-body text-muted">No course assigned.</div>;
   }
 
   const { data: events } = await supabase
@@ -69,7 +69,7 @@ export default async function TraineeSessionMaterialsPage({
         </p>
       </div>
 
-      <form method="get" className="sheet flex flex-wrap items-end gap-3">
+      <form method="get" className="plain-card flex flex-wrap items-end gap-3">
         <div className="flex flex-1 flex-col gap-1.5">
           <label className="text-body text-muted">Session</label>
           <select name="event" defaultValue={eventId ?? ""} className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary">

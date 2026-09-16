@@ -18,7 +18,7 @@ export function VideoLibrarySection({ videos }: { videos: VideoRow[] }) {
       </p>
       <ul className="mt-3 flex flex-col gap-2">
         {videos.map((v) => (
-          <li key={v.id} className="hover-ring rounded-[6px] border border-border-faint px-3 py-2">
+          <li key={v.id} className="plain-card hover-ring p-[14px]">
             <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="text-body font-medium text-primary hover:underline">
               {v.title}
             </a>

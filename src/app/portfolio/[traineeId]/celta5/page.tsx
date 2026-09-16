@@ -119,7 +119,7 @@ export default async function PortfolioCelta5Page({
   // simulation.
   if (isStaff && preview === "trainee") {
     return (
-      <div className="sheet p-6 text-body text-muted">
+      <div className="plain-card p-6 text-body text-muted">
         CELTA 5 preview isn&apos;t available here -- the trainee&apos;s grade fields are masked at the database
         level for their own session specifically, not just hidden in this page&apos;s markup, so staff can&apos;t
         safely simulate that exact view. To verify what a trainee sees on this record, check with their real
@@ -209,7 +209,7 @@ export default async function PortfolioCelta5Page({
     const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
 
     if (!record) {
-      return <div className="sheet p-6 text-body text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
+      return <div className="plain-card p-6 text-body text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
     }
 
     const taughtAssignments = (plans ?? []).filter((p) => p.taught_at);
@@ -1169,7 +1169,7 @@ export default async function PortfolioCelta5Page({
 
   if (!record) {
     return (
-      <div className="sheet p-6 text-body text-muted">
+      <div className="plain-card p-6 text-body text-muted">
         No CELTA 5 record exists for this trainee yet. It&apos;s created automatically when they&apos;re invited -- if this
         trainee predates that, an admin will need to add it manually.
       </div>
@@ -1244,7 +1244,7 @@ export default async function PortfolioCelta5Page({
     (obsTasks ?? []).length > 0 ? (
       <div>
         <h3 className="font-serif text-h3 text-ink">Observation tasks</h3>
-        <div className="sheet mt-2 flex flex-col gap-3">
+        <div className="plain-card mt-2 flex flex-col gap-3">
           {(obsTasks ?? []).map((task) => {
             const submission = staffSubmissionByTaskId.get(task.id);
             return (
@@ -1288,7 +1288,7 @@ export default async function PortfolioCelta5Page({
       {/* Decorative teal/garnet alternation -- shared by both the assessor
           and trainer-edit views below, since this block renders once and is
           reused in both branches. */}
-      <div className="sheet mt-3 overflow-hidden !p-0">
+      <div className="plain-card mt-3 overflow-hidden !p-0">
         {observations && observations.length > 0 ? (
           <table className="table-plain w-full">
             <thead>
@@ -1674,7 +1674,7 @@ export default async function PortfolioCelta5Page({
         {/* Assessor-only, deliberately outside the booklet: these are
             Connect's own working aids, not part of Cambridge's document,
             and an assessor should never mistake one for the other. */}
-        <div className="sheet">
+        <div className="plain-card">
           <p className="text-body text-muted">Trajectory (estimated, informal -- not part of the CELTA 5)</p>
           <div className="mt-3">
             <TrajectoryGradientBars byDimension={trajectoryByDimension} />
@@ -1683,7 +1683,7 @@ export default async function PortfolioCelta5Page({
 
         <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
 
-        <div className="sheet">
+        <div className="plain-card">
           <p className="text-body text-muted">Final recommended grade</p>
           {record.final_recommended_grade ? (
             <>
@@ -1706,7 +1706,7 @@ export default async function PortfolioCelta5Page({
     <div className="flex flex-col gap-4">
       {headerBlock}
 
-      <div className="sheet">
+      <div className="plain-card">
         <p className="text-body text-muted">Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)</p>
         <div className="mt-3">
           <TrajectoryGradientBars byDimension={trajectoryByDimension} />
@@ -1796,7 +1796,7 @@ export default async function PortfolioCelta5Page({
       ) : null}
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-        <div className="sheet flex items-center justify-between gap-3">
+        <div className="plain-card flex items-center justify-between gap-3">
           <p className="text-ink">Final report ready to download.</p>
           <a
             href={`/api/celta5/${traineeId}/final-report`}

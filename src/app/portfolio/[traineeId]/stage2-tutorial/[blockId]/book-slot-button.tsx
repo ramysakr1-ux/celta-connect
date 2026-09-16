@@ -9,7 +9,7 @@ export function BookSlotButton({ blockId }: { blockId: string }) {
   const [state, formAction, pending] = useActionState(bookStage2Slot, initialState);
 
   return (
-    <form action={formAction} className="sheet flex items-center justify-between gap-3">
+    <form action={formAction} className="plain-card flex items-center justify-between gap-3">
       <p className="text-body text-ink">Claim the next open position.</p>
       <div className="flex items-center gap-3">
         {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}

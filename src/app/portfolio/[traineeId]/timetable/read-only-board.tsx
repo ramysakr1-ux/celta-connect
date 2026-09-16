@@ -710,7 +710,7 @@ function DetailPanel({
   }
 
   return (
-    <div className="sheet flex flex-col gap-3">
+    <div className="plain-card flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="font-serif text-h3 text-ink">{event.title}</h2>

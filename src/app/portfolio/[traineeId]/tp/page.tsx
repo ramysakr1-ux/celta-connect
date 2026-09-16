@@ -266,7 +266,8 @@ export default async function TpHubPage({
       </RoomHead>
 
       <div className={`grid grid-cols-1 gap-4 ${!isStaff && carriedForward.length > 0 ? "lg:grid-cols-[1.5fr_1fr]" : ""}`}>
-        <div className="sheet flex flex-col gap-1 border-t-[3px] border-t-primary">
+        {/* Trainee spec B3: plain cards carry no coloured edge. */}
+        <div className="plain-card flex flex-col gap-1">
           <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">Your lessons</p>
           <div className="flex flex-col">
             {visibleTpNumbers.map((tpNumber) => {
@@ -314,8 +315,11 @@ export default async function TpHubPage({
                 <Link
                   key={tpNumber}
                   href={`/portfolio/${traineeId}/tp/${tpNumber}`}
-                  className="lift -mx-2 flex items-start gap-3 rounded-[6px] border-t border-border-faint px-2 py-2.5 first:border-t-0"
-                  style={{ borderLeft: `3px solid ${isToday ? "var(--color-primary)" : "var(--color-muted)"}`, marginLeft: 0, paddingLeft: 10 }}
+                  // Trainee spec B3: the row's 3px left edge is gone. It was
+                  // teal for today and grey otherwise, which is the one thing
+                  // the row's own pill already says -- and a coloured edge
+                  // that repeats a label is an edge a candidate has to learn.
+                  className="lift hover-ring -mx-2 flex items-start gap-3 rounded-[6px] border-t border-border-faint px-2 py-2.5 first:border-t-0"
                 >
                   <span className="font-serif text-h3 text-ink">TP{tpNumber}</span>
                   <div className="flex flex-1 flex-col gap-0.5">
@@ -355,7 +359,7 @@ export default async function TpHubPage({
           // Decorative teal/garnet alternation against "Your lessons" beside
           // it -- no status meaning of its own (the warning-colored eyebrow
           // text inside is untouched).
-          <div className="sheet flex flex-col gap-2.5">
+          <div className="plain-card flex flex-col gap-2.5">
             <p className="text-label font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
             <p className="text-label text-muted">
               Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan

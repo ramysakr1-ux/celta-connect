@@ -300,7 +300,7 @@ export default async function CourseStreamPage({
 
       <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-2">
         {(broadcasts ?? []).length === 0 ? (
-          <p className="sheet text-body text-muted">No broadcasts yet.</p>
+          <p className="plain-card text-body text-muted">No broadcasts yet.</p>
         ) : (
           (broadcasts ?? []).map((b, i) => {
             const author = b.profiles as unknown as { full_name: string; role: string } | null;
@@ -342,7 +342,7 @@ export default async function CourseStreamPage({
               // Decorative teal/garnet alternation down this repeating list --
               // same purely-decorative rule as e.g. dashboard/admin's course
               // groups, no status meaning of its own.
-              <div key={b.id} className={`sheet`}>
+              <div key={b.id} className={`plain-card`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted">
@@ -391,7 +391,7 @@ export default async function CourseStreamPage({
                     href={b.attachment_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="sheet-interactive mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-label font-medium text-ink"
+                    className="plain-card lift mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-label font-medium text-ink"
                   >
                     <Paperclip className="size-3.5 shrink-0" aria-hidden="true" />
                     {b.attachment_name ?? "Attachment"}
@@ -414,7 +414,7 @@ export default async function CourseStreamPage({
 
       <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6">
-          <div className={`sheet-accent h-fit`}>
+          <div className={`plain-card h-fit`}>
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
             {(timetableEvents ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col">
@@ -450,7 +450,7 @@ export default async function CourseStreamPage({
           </div>
 
           {isRegisteredTutor ? (
-            <div className={`sheet-accent h-fit`}>
+            <div className={`plain-card h-fit`}>
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
               <p className="mt-1 text-label text-muted">
                 Everything else belongs in the app, where it&apos;s on the record and the whole group sees it.
@@ -473,7 +473,7 @@ export default async function CourseStreamPage({
             </div>
           ) : null}
 
-          <div className={`sheet-accent h-fit`}>
+          <div className={`plain-card h-fit`}>
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
             {(tutors ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col gap-2">
@@ -511,7 +511,7 @@ export default async function CourseStreamPage({
               pendingRequest={pendingWithdrawalRequest}
             />
           ) : isStaff && trainee.course_status !== "active" ? (
-            <div className={`sheet-accent h-fit`}>
+            <div className={`plain-card h-fit`}>
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
               <p className="mt-2 text-body font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
               {trainee.course_status_set_at ? (

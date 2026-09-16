@@ -41,7 +41,7 @@ export default async function TraineeIndividualTutorialPage({
     <div className="flex flex-col gap-6">
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
-      <div className="sheet flex flex-col gap-3">
+      <div className="plain-card flex flex-col gap-3">
         <p className="text-label text-muted">{label} tutorial</p>
         <h1 className="font-serif text-h2 text-ink">
           {event?.event_date}

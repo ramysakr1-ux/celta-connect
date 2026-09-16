@@ -25,7 +25,7 @@ export function AssessorMeetingCard({
   const [state, formAction, pending] = useActionState(requestAssessorMeeting, initialState);
 
   return (
-    <div className="sheet-accent">
+    <div className="plain-card">
       <h2 className="font-serif text-h3 text-ink">Speaking with the assessor</h2>
       <p className="mt-1 text-body text-muted">
         An assessor from Cambridge visits on {visitDate}. Part of the visit is a private meeting with candidates,

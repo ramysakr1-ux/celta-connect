@@ -29,7 +29,7 @@ function TrackRow({ row }: { row: AudioRow }) {
   }
 
   return (
-    <li className="hover-ring flex flex-col gap-2 rounded-[6px] border border-border-faint px-3 py-2">
+    <li className="plain-card hover-ring flex flex-col gap-2 p-[14px]">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-body text-ink">{row.file_name}</p>
@@ -61,7 +61,7 @@ export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
     return (
       <div>
         <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
-        <p className="sheet mt-3 border-dashed text-body text-muted">
+        <p className="plain-card mt-3 border-dashed text-body text-muted">
           Coursebook audio your tutors add for teaching practice — nothing here yet.
         </p>
       </div>

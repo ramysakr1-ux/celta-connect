@@ -87,22 +87,20 @@ export default async function AssignmentsPage({
     .sort((a, b) => ASSIGNMENT_ORDER.indexOf(a.assignment_type) - ASSIGNMENT_ORDER.indexOf(b.assignment_type));
   const reflectionAssignments = (assignmentsRaw ?? []).filter((a) => a.assignment_type === "Plagiarism Reflection");
   // The card's "Tutor feedback" line read assignments.tutor_feedback, which
-  // the marking action never writes (comments are per section, in
-  // assignment_section_responses) -- so every assignment a tutor had actually
-  // marked said "No feedback yet." Fall back to the latest round's first
-  // comment when the overall note is empty.
-  const assignmentIds = (assignmentsRaw ?? []).map((a) => a.id);
-  const { data: commentRows } =
-    assignmentIds.length > 0
-      ? await supabase
-          .from("assignment_section_responses")
-          .select("assignment_id, first_comments, resubmission_comments")
-          .in("assignment_id", assignmentIds)
-      : { data: [] };
+  // the marking action never wrote -- so every assignment a tutor had really
+  // marked said "No feedback yet." It fell back to the first SECTION comment
+  // instead, which quoted a note about one criterion as if it were the
+  // verdict.
+  //
+  // Trainee spec B5: drop the fallback now that the overall comment exists
+  // and is required on every release (tutor assignments handoff 2d -- the
+  // marking action refuses to release without one). The card quotes the
+  // sentence the candidate is meant to read first, or says there is none.
+  // One fewer query, too: the section rows were only ever read for this.
   const feedbackPreview = new Map<string, string>();
-  for (const r of commentRows ?? []) {
-    const text = (r.resubmission_comments ?? "").trim() || (r.first_comments ?? "").trim();
-    if (text && !feedbackPreview.has(r.assignment_id)) feedbackPreview.set(r.assignment_id, text);
+  for (const a of assignmentsRaw ?? []) {
+    const text = (a.resubmission_overall_comment ?? "").trim() || (a.first_overall_comment ?? "").trim();
+    if (text) feedbackPreview.set(a.id, text);
   }
   // A pass is a pass, not a closed round: a resubmission FAIL also carries
   // resubmission_status "approved", so counting that as passed inflated the
@@ -154,7 +152,7 @@ export default async function AssignmentsPage({
             />
           ))
         ) : (
-          <p className="sheet text-body text-muted">No assignments yet.</p>
+          <p className="plain-card text-body text-muted">No assignments yet.</p>
         )}
       </div>
 
@@ -263,7 +261,7 @@ function AssignmentCard({
         ) : (
           <>
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
-            <p className="mt-1 line-clamp-2 text-body text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
+            <p className="mt-1 line-clamp-2 text-body text-ink">{feedbackPreview || "No feedback yet."}</p>
           </>
         )}
       </div>

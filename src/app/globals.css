@@ -851,6 +851,23 @@ h6 {
      on --color-background (.entry-ground, unchanged) -- no extra .frame
      layer, since these are single small centered cards, not content-heavy
      pages with something to nest inside. */
+  /* The candidate's plain card (trainee spec B2, 16 Sep 2026). The
+     candidate shell used .sheet for everything -- the staff document idiom,
+     3px teal top rule and a shadow -- so a lesson tile, a criterion row and
+     a page of prose all arrived with the same weight and the same coloured
+     edge, and the edge meant nothing.
+     
+     The rule the spec sets: a PLAIN CARD (this) for static content, and the
+     glass tile (CATEGORY_STYLE) for anything that is a timetable event. No
+     shadow, no coloured edge, 10px radius; colour on a card in the
+     candidate's shell now always means something. */
+  .plain-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
   .sheet-accent {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);

@@ -90,7 +90,7 @@ export function ResourceComposer({
   return (
       <form
         onSubmit={handleSubmit}
-        className="sheet flex flex-col gap-3"
+        className="plain-card flex flex-col gap-3"
         style={{
           background: "color-mix(in oklab, var(--hub-accent, var(--color-primary)) 9%, var(--color-card))",
           borderColor: "color-mix(in oklab, var(--hub-accent, var(--color-primary)) 25%, transparent)",
