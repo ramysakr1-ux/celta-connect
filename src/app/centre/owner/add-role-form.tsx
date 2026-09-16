@@ -14,7 +14,7 @@ export function AddRoleForm() {
         <input
           name="label"
           placeholder="Add a new role — e.g. Centre Director, Across-course Administrator…"
-          className="h-[37px] flex-1 rounded-md px-3.5 text-meta"
+          className="h-[37px] flex-1 rounded-md px-3.5 text-[12.5px]"
           style={{ border: "1px solid var(--owner-line)", background: "var(--owner-paper)" }}
         />
         <button
@@ -27,7 +27,7 @@ export function AddRoleForm() {
         </button>
       </div>
       {state.error ? (
-        <p className="text-label" style={{ color: "var(--owner-garnet)" }}>
+        <p className="text-xs" style={{ color: "var(--owner-garnet)" }}>
           {state.error}
         </p>
       ) : null}

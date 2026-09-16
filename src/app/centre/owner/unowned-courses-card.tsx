@@ -44,18 +44,18 @@ export function UnownedCoursesCard({
   return (
     <div className="owner-card flex flex-col gap-4 px-7 py-6">
       <div className="flex flex-col gap-1">
-        <h2 className="owner-serif text-h3">
+        <h2 className="owner-serif text-[19px]">
           {courses.length === 1 ? "A course with no administrator" : `${courses.length} courses with no administrator`}
         </h2>
-        <p className="text-meta" style={{ color: "var(--owner-muted)" }}>
+        <p className="text-[12.5px]" style={{ color: "var(--owner-muted)" }}>
           Nobody holds these. Whoever was administering them no longer does — they left, or their role was
           removed. Until someone is named, no one inside the course can invite, group or timetable.
         </p>
       </div>
 
-      {state.error ? <p className="text-meta text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-[12.5px] text-destructive">{state.error}</p> : null}
       {state.ok ? (
-        <p className="text-meta" style={{ color: "var(--owner-garnet)" }}>
+        <p className="text-[12.5px]" style={{ color: "var(--owner-garnet)" }}>
           {state.ok}
         </p>
       ) : null}
@@ -64,7 +64,7 @@ export function UnownedCoursesCard({
         // Assigning writes a scope row against an existing course
         // administrator grant, so there has to be one to write against.
         // Saying that plainly beats an empty picker.
-        <p className="text-meta" style={{ color: "var(--owner-muted)" }}>
+        <p className="text-[12.5px]" style={{ color: "var(--owner-muted)" }}>
           Nobody at this centre holds a Course administrator role yet. Appoint someone on the Roles tab first, then
           hand the course over here.
         </p>
@@ -80,8 +80,8 @@ export function UnownedCoursesCard({
             >
               <input type="hidden" name="courseId" value={c.id} />
               <div className="flex flex-col gap-0.5">
-                <span className="text-body font-medium">{c.name}</span>
-                <span className="text-label" style={{ color: "var(--owner-muted)" }}>
+                <span className="text-sm font-medium">{c.name}</span>
+                <span className="text-[11.5px]" style={{ color: "var(--owner-muted)" }}>
                   {/* courses.start_date is a DATE column, and bare
                       new Date("2026-09-01") reads it as UTC midnight, so
                       anywhere west of UTC this printed the day before.
@@ -96,7 +96,7 @@ export function UnownedCoursesCard({
                   name="centreRoleId"
                   required
                   defaultValue=""
-                  className="rounded-[5px] border border-[var(--owner-line)] bg-[var(--owner-paper)] px-2.5 py-1.5 text-meta"
+                  className="rounded-[5px] border border-[var(--owner-line)] bg-[var(--owner-paper)] px-2.5 py-1.5 text-[13px]"
                 >
                   <option value="" disabled>
                     Hand it to…

@@ -16,6 +16,12 @@ const EXEMPT = [
   /booklet-sections\.tsx$/,
   // The Notebook keeps its own paper register.
   /trainee-notebook/,
+  // The centre owner's screen is a deliberate register of its own -- ink
+  // band, parchment, garnet rule, 33px title, 19px headings -- kept by Part
+  // 1 of the centre-side spec. Ramy, 16 Sep 2026, after the scale had
+  // flattened it to 17. owner-branch-row.tsx is NOT part of it: that is the
+  // branch filter on ordinary Centre Management pages.
+  /^src\/app\/centre\/owner\//,
   // PDF routes and email templates: inline styles for renderers and mail
   // clients that never see this stylesheet.
   /^src\/app\/api\//,

@@ -102,21 +102,21 @@ export default async function OwnerActionLogPage({
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Centre owner</p>
-          <h1 className="font-serif text-h1 text-ink">Owner actions</h1>
-          <p className="max-w-[560px] text-meta text-muted">
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre owner</p>
+          <h1 className="font-serif text-2xl text-ink">Owner actions</h1>
+          <p className="max-w-[560px] text-[13px] text-muted">
             Every intervention an owner makes is recorded — visible logging, not silent senior access.{" "}
             {thisMonth} {thisMonth === 1 ? "action" : "actions"} this month
             {aggregated ? " across all branches" : ""}.
           </p>
         </div>
-        <Link href={`/centre/owner${branch ? `?branch=${branch}` : ""}`} className="text-body text-muted hover:text-ink">
+        <Link href={`/centre/owner${branch ? `?branch=${branch}` : ""}`} className="text-sm text-muted hover:text-ink">
           Back to centre owner
         </Link>
       </div>
 
       {(entries ?? []).length === 0 ? (
-        <div className="sheet text-body text-muted">Nothing logged yet.</div>
+        <div className="sheet text-sm text-muted">Nothing logged yet.</div>
       ) : (
         <div className="card flex flex-col">
           {(entries ?? []).map((e, i) => (
@@ -125,8 +125,8 @@ export default async function OwnerActionLogPage({
               className={`hover-ring flex items-start justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
             >
               <div className="flex flex-col gap-0.5">
-                <p className="text-body text-ink">{actionLabel(e.action)}</p>
-                <p className="text-label text-muted">
+                <p className="text-sm text-ink">{actionLabel(e.action)}</p>
+                <p className="text-xs text-muted">
                   {nameOf.get(e.actor_profile_id) ?? "Unknown"}
                   {aggregated && branchOf.get(e.center_id) ? ` · ${branchOf.get(e.center_id)}` : ""}
                   {/* Recorded since migration 0263. Only shown when it is
@@ -138,7 +138,7 @@ export default async function OwnerActionLogPage({
                     : ""}
                 </p>
               </div>
-              <span className="shrink-0 text-label text-muted tabular-nums">
+              <span className="shrink-0 text-xs text-muted tabular-nums">
                 {formatDateTime(e.created_at, zoneByCentre.get(e.center_id) ?? DEFAULT_TIMEZONE)}
               </span>
             </div>

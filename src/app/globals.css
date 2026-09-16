@@ -140,8 +140,10 @@
    nothing else.
 
    Exceptions that keep their own sizes, by design: the CELTA 5 booklet
-   (a Cambridge document), the Notebook (its own paper register), the PDF
-   routes and the email templates (inline styles for mail clients).
+   (a Cambridge document), the Notebook (its own paper register), the centre
+   owner's screen (ink band, parchment, 33px title, 19px headings -- kept by
+   Part 1 of the centre-side spec), the PDF routes and the email templates
+   (inline styles for mail clients).
    ------------------------------------------------------------------------ */
 @theme {
   --text-micro: 10.5px;        /* criteria codes, tag chips, table column heads */
