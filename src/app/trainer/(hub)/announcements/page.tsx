@@ -180,7 +180,12 @@ export default async function AnnouncementsPage() {
 
   const scheduledRows: ScheduledRowData[] = scheduled.map((b) => {
     const anchor = b.anchor_event_id ? anchorById.get(b.anchor_event_id) : null;
-    const fireDate = anchor && b.anchor_offset_days !== null ? addDays(anchor.event_date, b.anchor_offset_days) : null;
+    // Said the way a person says it. It was printing the raw ISO string
+    // ("Sends 2026-08-31"), which §7's uppercase meta line made unmissable --
+    // and an ISO date in the UI is a standing no (formatCalendarDate, never
+    // the column value).
+    const fireIso = anchor && b.anchor_offset_days !== null ? addDays(anchor.event_date, b.anchor_offset_days) : null;
+    const fireDate = fireIso ? formatCalendarDate(fireIso, { weekday: "short", year: "numeric" }) : null;
     return {
       id: b.id,
       title: b.title,
