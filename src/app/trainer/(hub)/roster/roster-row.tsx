@@ -150,9 +150,9 @@ function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
       <Cell label="Supervised" warn={row.supervisedTotal > 0 && row.supervisedDone < row.supervisedTotal}>
         {row.supervisedTotal > 0 ? (
           <Link
-            href={`/portfolio/${row.id}/timetable`}
+            href="/trainer/supervised-review"
             onClick={stop}
-            title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
+            title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click for per-session status across the group`}
             className={CELL_LINK}
           >
             {row.supervisedDone}/{row.supervisedTotal}

@@ -233,7 +233,17 @@ export default async function TrainerRosterPage() {
         courseCode={courseCode}
         frozenSubById={frozenSubById}
         weekLabel={weekLabel}
-        leading={trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "FOL pool by class" }]} /> : null}
+        leading={
+          trainer ? (
+            <AlsoUnder
+              tab="Roster"
+              links={[
+                { href: "/trainer/fol-spot-check", label: "FOL pool by class" },
+                { href: "/trainer/supervised-review", label: "Supervised review" },
+              ]}
+            />
+          ) : null
+        }
       />
 
       {filmsTpSessions ? (

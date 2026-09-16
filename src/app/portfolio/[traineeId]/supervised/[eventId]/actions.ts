@@ -66,6 +66,9 @@ export async function checkSupervisedSession(formData: FormData): Promise<void> 
     .eq("trainee_id", traineeId)
     .not("submitted_at", "is", null);
 
+  // The tutor ticks this off in their own room now (trainee A3), and the
+  // candidate's timetable still shows their own state.
+  revalidatePath("/trainer/supervised-review");
   revalidatePath(`/portfolio/${traineeId}/timetable`);
 }
 

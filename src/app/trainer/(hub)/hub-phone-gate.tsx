@@ -26,6 +26,7 @@ const TASKS: Record<string, string> = {
   settings: "Your settings",
   concerns: "Concerns",
   "support-access": "Support access",
+  "supervised-review": "Supervised review",
   "trainer-in-training": "Trainer-in-Training",
   coursebooks: "The TP points library",
   "pre-course-task": "Pre-course tasks",

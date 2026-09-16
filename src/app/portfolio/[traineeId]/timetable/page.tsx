@@ -8,7 +8,6 @@ import { halfTpDates, halfOwningDate, type TpTimetableEvent } from "@/lib/rotati
 import { groupCodeForHalf, isMine, type HalfInfo } from "@/lib/timetable-read-only";
 import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
-import { SupervisedSessionsPanel } from "@/app/portfolio/[traineeId]/timetable/supervised-sessions-panel";
 import type { TimetableEvent } from "@/lib/timetable-grid";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
@@ -264,13 +263,6 @@ export default async function TraineeTimetablePage({
         />
       )}
 
-      {isStaff ? (
-        <SupervisedSessionsPanel
-          traineeId={traineeId}
-          events={allEvents.filter((e) => e.type === "supervised_session").map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))}
-          completions={supervisedCompletions ?? []}
-        />
-      ) : null}
     </div>
   );
 }

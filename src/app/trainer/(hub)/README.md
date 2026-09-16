@@ -17,7 +17,7 @@ pill row (`also-under.tsx`) directly under its header, and nowhere else on
 that tab:
 
 - Today: Announcements (MCT), Concerns, Support access (MCT)
-- Roster: Error log spot check
+- Roster: Error log spot check, Supervised review
 - Timetable: Share session materials
 - Teaching Practice: TP points library, Pre-course tasks, Observation
   tasks, Observation hours, Day-one activities (Rotation has its own card)
