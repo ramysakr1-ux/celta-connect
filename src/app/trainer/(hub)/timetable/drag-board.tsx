@@ -353,14 +353,19 @@ export function DragBoard({
                             // it always opened); clicking the selected tile
                             // again clears the selection.
                             onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
-                            // `transition` rather than transition-[transform,opacity,box-shadow]:
-                            // Tailwind turns that comma-arbitrary value into a
-                            // rule that also emits its own box-shadow, which
-                            // beat the inline selection ring and computed it
-                            // away to a transparent zero (caught on production,
-                            // 16 Sep 2026). The default transition covers all
-                            // three properties anyway.
-                            className={`rounded-[6px] border-l-[3px] px-2 py-1 text-left transition duration-200 ${
+                            // transition-transform ONLY, and the selection
+                            // ring is an outline rather than a box-shadow.
+                            // Both because of the same thing, found on
+                            // production 16 Sep 2026: a tile off-screen in
+                            // this horizontally scrolling board sits in a
+                            // subtree the browser is not rendering, so a
+                            // transition on it never progresses -- it stays
+                            // "running" at its start value and that value
+                            // beats the inline style, `!important` included.
+                            // The ring and the fade were both being computed
+                            // away. Nothing that carries STATE is transitioned
+                            // here now; only the hover lift is.
+                            className={`rounded-[6px] border-l-[3px] px-2 py-1 text-left transition-transform duration-200 ${
                               !locked && canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
                             } hover:-translate-y-0.5 hover:scale-[1.02]`}
                             style={{
@@ -376,10 +381,9 @@ export function DragBoard({
                                   : selectedEvent && selectedEvent.id !== event.id
                                     ? 0.55
                                     : 1,
-                              boxShadow:
-                                selectedEvent?.id === event.id
-                                  ? "0 0 0 2px var(--color-primary)"
-                                  : undefined,
+                              outline:
+                                selectedEvent?.id === event.id ? "2px solid var(--color-primary)" : undefined,
+                              outlineOffset: selectedEvent?.id === event.id ? "-2px" : undefined,
                             }}
                           >
                             <div className="flex items-center gap-1">
