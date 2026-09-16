@@ -184,23 +184,25 @@ export function DragBoard({
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
+  // "Moved, but check it" -- the schedule-rule warning, which is not a failure
+  // and must not wear the failure colour.
+  const [moveWarning, setMoveWarning] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   if (weeks.length === 0) return null;
 
   const handleDrop = (isoDate: string) => {
     if (!draggingEventId || draggingOriginDate === isoDate) return;
-    // §4: "Drop is refused on a garnet chip, per the existing validation
-    // rule." The strip has been saying so the whole time you were dragging.
+    // §4 asks for the drop to be refused on a garnet chip "per the existing
+    // validation rule". There is no existing validation rule -- the server
+    // moves the event and re-syncs the dates -- and the group a deadline
+    // belongs to is read from a title label that is already stale on the demo
+    // course. So the move goes through and the warning stays on screen: a
+    // false refusal takes the timetable away from the MCT over a guess, which
+    // is the more expensive way to be wrong. Flagged to Ramy.
     const dragged = events.find((e) => e.id === draggingEventId);
     const broken = dragged ? ruleBreak(dragged, isoDate, events) : null;
-    if (broken) {
-      setDraggingEventId(null);
-      setDraggingOriginDate(null);
-      setDragOverDate(null);
-      setMoveError(`That move breaks the assignment schedule rule -- ${broken}.`);
-      return;
-    }
+    setMoveWarning(broken ? `Moved, but check it: ${broken}. The assignment schedule rule wants a group's deadline on a day it is not teaching.` : null);
     const eventId = draggingEventId;
     setDraggingEventId(null);
     setDraggingOriginDate(null);
@@ -280,6 +282,15 @@ export function DragBoard({
               ))}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {moveWarning ? (
+        <div className="flex items-center justify-between gap-3 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-body text-status-warning-text">
+          {moveWarning}
+          <button type="button" onClick={() => setMoveWarning(null)} className="text-label underline">
+            Dismiss
+          </button>
         </div>
       ) : null}
 

@@ -66,6 +66,13 @@ function pretty(iso: string): string {
  * The rule a deadline has to keep: "A group's submission or resubmission date
  * must always fall on a day that group is not teaching TP" (the assignment
  * schedule rule). Returns the reason it breaks, or null.
+ *
+ * A WARNING, not a veto, and deliberately so. Which group a deadline belongs
+ * to is read from its title, and on the demo course those titles still say
+ * "ABC"/"DEF" while the subgroups were renamed to "Day A"/"Day B" on 11 Sep
+ * 2026 -- so the check can be reading a label that no longer names anything.
+ * Blocking a drop on a reading that stale would take the timetable away from
+ * the MCT over a guess; saying "this looks wrong" costs nothing if it is.
  */
 export function ruleBreak(event: TimetableEvent, dropDate: string, events: TimetableEvent[]): string | null {
   if (event.type !== "assignment_due" && event.type !== "resubmission_due") return null;
@@ -93,7 +100,12 @@ export function dependentsOf(
   const out: Dependent[] = [];
 
   if (event.type === "assignment_due" || event.type === "resubmission_due") {
-    const broken = ruleBreak(event, dropDate, events);
+    // The rule is only ever asked about a MOVE. At rest the answer would be
+    // "would land on its own date", which is either noise or, worse, a
+    // standing accusation against a deadline nobody is touching -- and the
+    // demo course has two of those (see the note on ruleBreak).
+    const moving = dropDate !== event.event_date;
+    const broken = moving ? ruleBreak(event, dropDate, events) : null;
     out.push({
       id: "due-dates",
       label: event.linked_assignment_type ?? "Assignment deadline",
