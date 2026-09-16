@@ -8,12 +8,13 @@ import { getAssessorCourseId, getPortfolioTrainee, getPortfolioViewer } from "@/
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
-import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
 import { buildRailStatus, type RailStatus } from "@/lib/trainee-rail-status";
 import { getTraineeStreamDayOrNext, type TraineeDayView } from "@/lib/trainee-day";
 import { HeaderDayBar } from "@/app/portfolio/[traineeId]/header-day-bar";
 import { HeaderCredit } from "@/components/designer-credit";
+import { TrainerHubChrome } from "@/components/trainer-hub-chrome";
+import { ViewingAsTutor } from "@/components/viewing-as-tutor";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { TraineeNotebook } from "@/app/portfolio/[traineeId]/trainee-notebook";
@@ -28,7 +29,6 @@ import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import {
   CELTA_CRITERIA_CODES,
-  computeCriteriaPct,
   computeCriteriaSuggestion,
   computeTrajectory,
   type Trajectory,
@@ -242,13 +242,14 @@ export default async function PortfolioLayout({
   const today = toLocalIso(new Date(), timeZone);
   const [
     { data: lessons },
-    { data: assignments },
     { data: preCourseSections },
     { data: preCourseResponses },
     { data: todaysEvents },
   ] = await Promise.all([
     supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
-    supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
+    // §10 (16 Sep 2026): the assignment counts that sat here existed only to
+    // fill the staff sidebar's per-room meta, and the sidebar is gone -- one
+    // query fewer on every candidate page a tutor or assessor opens.
     supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
     supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", trainee.id),
     trainee.course_id
@@ -261,10 +262,6 @@ export default async function PortfolioLayout({
   ]);
   const quietHoursNote = computeQuietHoursNote((todaysEvents ?? []).map((e) => e.event_time), new Date(), today, timeZone);
 
-  const tpsTaught = (lessons ?? []).length;
-  const assignmentsPassed = (assignments ?? []).filter(
-    (a) => a.first_status === "approved" || a.resubmission_status === "approved"
-  ).length;
   // Tasks answered, not sections self-ticked -- same shared
   // responseIsAnswered the task page, the Hub door and the roster use, so
   // every place that shows this fraction shows the same one.
@@ -289,7 +286,6 @@ export default async function PortfolioLayout({
   // matrix fetch (kept blank for a trainee's own view rather than adding a
   // second, RPC-based fetch path just for this one meta count; the
   // trainee's real celta5 tab already has its own correct, RLS-safe query).
-  let criteriaPctMeta = "";
   let nextTpNeedingFeedback: number | null = null;
   if (isStaffView) {
     const lessonIds = (lessons ?? []).map((l) => l.id);
@@ -311,7 +307,6 @@ export default async function PortfolioLayout({
       (code) => matrixByCode.get(code) ?? computeCriteriaSuggestion(tagsByCriteria.get(code) ?? []) ?? null
     );
     trajectory = computeTrajectory(trajectoryInputs);
-    criteriaPctMeta = `${computeCriteriaPct(matrixByCode)}%`;
 
     // A3, 16 Sep 2026: "Write TP feedback" was a tutor's button inside the
     // candidate's own TP room. A trainer opens a candidate page in the
@@ -332,17 +327,108 @@ export default async function PortfolioLayout({
         .sort((x, y) => x - y)[0] ?? null;
   }
 
-  const assignmentsLeft = Math.max((assignments ?? []).length - assignmentsPassed, 0);
-  const sidebarMeta = {
-    courseStream: "",
-    resourceHub: "",
-    tp: `${tpsTaught}/8`,
-    assignments: assignmentsLeft > 0 ? `${assignmentsLeft} due` : "",
-    celta5: criteriaPctMeta,
-    // for-claude-code-progress-tab-build.md -- no read-tracking to derive a
-    // real count from yet, same "" rule already applied to courseStream/
-    // resourceHub above rather than fabricating one.
-  };
+  // sidebarMeta and its PortfolioTabs sidebar went with §10 (16 Sep 2026):
+  // the candidate's doors ride in the trainer's own bar now, without the
+  // per-room counts -- a tutor is looking at one record, not shopping.
+
+  // MCT polish pass §10, 16 Sep 2026: a trainer opening anything that belongs
+  // to a candidate gets it in the TRAINER's own frame -- their header, their
+  // tab row, their chat -- with a thin strip under it naming whose page this
+  // is, and none of the candidate's chrome. The candidate's shell is the
+  // candidate's; it was noise around a tutor's working screen, and the staff
+  // sidebar was a second navigation competing with the one the trainer
+  // already had at the top of the page.
+  //
+  // The assessor keeps their own treatment below (rail dropped, read-only
+  // banner, full width) -- that IS the viewer's-own-shell rule, built to
+  // Ramy's 30 Aug call, and the assessor spec's Part 1 says keep it.
+  //
+  // `?preview=trainee` stays on this path: a layout cannot read searchParams
+  // (see preview-chrome.tsx), so preview is client-side swaps inside whichever
+  // tree renders. It showed staff chrome before this change too.
+  if (isStaff && !assessorCourseId) {
+    return (
+      <CentreTimeZoneProvider timeZone={timeZone}>
+        <TrainerHubChrome
+          bare
+          suppressChat
+          banner={
+            <ViewingAsTutor
+              traineeName={trainee.full_name}
+              traineeId={trainee.id}
+              back={{ href: "/trainer/roster", label: "Roster" }}
+              pills={
+                <>
+                  {isCourseStatusReadOnly(trainee.course_status) ? (
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-label font-semibold text-destructive">
+                      <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                      {COURSE_STATUS_LABEL[trainee.course_status]}
+                    </span>
+                  ) : trainee.course_status === "extension" ? (
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-0.5 text-label font-semibold text-primary">
+                      <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                      Extension
+                    </span>
+                  ) : null}
+                  {trajectory ? (
+                    <HideDuringPreview>
+                      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-label font-semibold text-status-warning-text">
+                        <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                        Tracking {STANDING_LABEL[trajectory]}
+                      </span>
+                    </HideDuringPreview>
+                  ) : null}
+                  {trainee.special_consideration ? (
+                    <HideDuringPreview>
+                      {/* The free text is the course tutors' alone (Ramy,
+                          30 Aug 2026, asked who is entitled to read it:
+                          "tutors"). Everyone else sees that a declaration
+                          exists, which is the part that bears on a judgement. */}
+                      <span
+                        title={viewer?.role === "trainer" ? (trainee.special_consideration ?? undefined) : undefined}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-label font-semibold text-ink"
+                      >
+                        <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                        Special consideration declared
+                      </span>
+                    </HideDuringPreview>
+                  ) : null}
+                </>
+              }
+              actions={
+                nextTpNeedingFeedback ? (
+                  <Link
+                    href={`/portfolio/${trainee.id}/tp/${nextTpNeedingFeedback}`}
+                    className="inline-flex shrink-0 items-center rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground"
+                  >
+                    Write TP feedback
+                  </Link>
+                ) : null
+              }
+            />
+          }
+        >
+          {isCourseStatusReadOnly(trainee.course_status) ? (
+            <div className="mb-4 rounded-[6px] border border-destructive/20 bg-destructive/8 px-4 py-2 text-label text-destructive">
+              {COURSE_STATUS_LABEL[trainee.course_status]} -- this portfolio is kept as a record but is read-only
+              going forward.
+            </div>
+          ) : null}
+          <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
+          <div className="frame min-w-0 flex-1 p-6">{children}</div>
+        </TrainerHubChrome>
+        <ChatDrawerSwitcher
+          staffProfileId={viewer?.id ?? null}
+          staffChat={staffChat}
+          traineeId={trainee.id}
+          traineePreviewChat={traineePreviewChat}
+          traineePreviewLatestMessage={traineePreviewLatestMessage}
+          quietHoursNote={null}
+          raiseForMobileNav={false}
+        />
+      </CentreTimeZoneProvider>
+    );
+  }
 
   return (
     // The centre's zone, in reach of every client component under this
@@ -567,9 +653,8 @@ export default async function PortfolioLayout({
 
       <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 
-      {/* Trainee's sidebar+content row already rendered above, inside the
-          unified sheet -- this is the staff/assessor PortfolioTabs layout
-          only now. */}
+      {/* The candidate's own sidebar+content row is rendered above, inside
+          the unified sheet. What follows is the assessor's view. */}
       {/* Ramy, 30 Aug 2026: "when the assessor is inside the portfolio, we
           don't need to see the trainee's workspace tabs. It should be the
           whole page." The rail is the candidate's own workspace navigation;
@@ -578,23 +663,12 @@ export default async function PortfolioLayout({
           out through the read-only banner. Dropping it gives a long CELTA 5
           or a week of timetable the full width, which is what those records
           want anyway. */}
-      {showTraineeNav ? null : assessorCourseId ? (
+      {/* Assessor only. A trainer takes the trainer's own frame (§10, the
+          early return at the top of this file), so the 232px PortfolioTabs
+          sidebar that used to sit here is gone -- its doors ride in the
+          trainer's own bar now. */}
+      {showTraineeNav ? null : (
         <div className="container flex flex-1 flex-col gap-4 py-8">
-          <div className="frame min-w-0 flex-1 p-6">{children}</div>
-        </div>
-      ) : (
-        <div className="container flex flex-1 gap-8 py-8">
-          <div className="flex w-[232px] shrink-0 flex-col gap-3">
-            <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
-            {isStaff && nextTpNeedingFeedback ? (
-              <Link
-                href={`/portfolio/${trainee.id}/tp/${nextTpNeedingFeedback}`}
-                className="inline-flex h-10 items-center justify-center rounded-[6px] bg-primary px-3.5 text-body font-semibold text-primary-foreground hover:bg-primary/90"
-              >
-                Write TP feedback
-              </Link>
-            ) : null}
-          </div>
           <div className="frame min-w-0 flex-1 p-6">{children}</div>
         </div>
       )}
