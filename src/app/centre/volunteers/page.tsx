@@ -190,7 +190,10 @@ export default async function CentreVolunteersPage({
             <span className="text-xs text-muted">{(volunteers ?? []).length} registrations across the centre</span>
           </div>
           {volunteerGroups.length === 0 ? (
-            <p className="px-5 py-4 text-xs text-muted">Nobody registered yet.</p>
+            <p className="px-5 py-4 text-xs text-muted">
+              Nobody registered yet. That is the ordinary state until the centre shares its sign-up link &mdash;
+              volunteers add themselves through it.
+            </p>
           ) : (
             <div className="flex flex-col">
               {volunteerGroups.map((g) => (

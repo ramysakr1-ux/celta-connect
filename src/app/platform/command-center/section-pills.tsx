@@ -61,12 +61,19 @@ export function SectionPills() {
             <div key={s.href} style={{ flex: "1 1 0", display: "flex", justifyContent: "center" }}>
               <Link
                 href={s.href}
+                // B6 (centre side, 16 Sep 2026): the room pills and these
+                // said the same thing -- where am I -- in two shapes, at
+                // 0.1em and 0.05em tracking, and with two different
+                // treatments for a pill you are NOT on. The room pill's
+                // spec now: 11/700/0.1em, and a section you are not in is
+                // border-only rather than tinted. The three-rule frame and
+                // the four colours are untouched.
                 style={{
-                  fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase",
-                  padding: "6px 15px", borderRadius: 5, textDecoration: "none", whiteSpace: "nowrap",
-                  border: `1px solid ${on ? s.colour : `color-mix(in oklab, ${s.colour} 40%, transparent)`}`,
+                  fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                  padding: "5px 11px", borderRadius: 5, textDecoration: "none", whiteSpace: "nowrap",
+                  border: `1px solid ${on ? s.colour : `color-mix(in oklab, ${s.colour} 30%, transparent)`}`,
                   color: on ? "oklch(99% 0.004 85)" : s.colour,
-                  background: on ? s.colour : `color-mix(in oklab, ${s.colour} 9%, ${SAND})`,
+                  background: on ? s.colour : "transparent",
                 }}
               >
                 {s.label}

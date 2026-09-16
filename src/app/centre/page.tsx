@@ -404,7 +404,10 @@ export default async function CentreOverviewPage({
               </Link>
             </div>
             {stageCounts.size === 0 ? (
-              <p className="px-5 py-4 text-sm text-muted">Nobody in the pipeline yet.</p>
+              <p className="px-5 py-4 text-sm text-muted">
+                Nobody in the pipeline yet. That is the ordinary state before a course opens for applications &mdash;
+                the pipeline fills from the application form.
+              </p>
             ) : (
               [...stageCounts.entries()].map(([stage, count], i) => (
                 <div key={stage} className={`hover-ring px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
