@@ -1803,12 +1803,19 @@ async function main() {
 
     // When each type is DUE -- what src/lib/assignment-due-dates.ts resolves
     // for this course (Ramy, 12 Sep 2026: "the timetable due event wins"):
-    // LRT and LfC from the ported timetable's own due events (LRT · DEF day
-    // 17, LRT · ABC day 18, LfC day 19); Focus on the Learner from the rule
+    // LRT and LfC from the ported timetable's own due events (LRT · Day A day
+    // 17, LRT · Day B day 18, LfC day 19); Focus on the Learner from the rule
     // (cohort day 12); Skills from its own due event on day 16. A half is
     // def.half; the seed's DUE_DAY is a function of it for that reason.
+    //
+    // The two LRT days were the wrong way round until 16 Sep 2026. Day 17 is
+    // half 2's own TP day and day 18 is half 1's, and the seed gave each half
+    // the deadline that landed on the day it was teaching -- which is exactly
+    // what the assignment schedule rule forbids ("a group's submission date
+    // must always fall on a day that group is not teaching TP"). Swapped, so
+    // each half's deadline falls on the other half's teaching day.
     const DUE_DAY = (assignment_type, half) =>
-      ({ "Focus on Learner": 12, LRT: half === 2 ? 17 : 18, Skills: 16, LfC: 19 })[assignment_type];
+      ({ "Focus on Learner": 12, LRT: half === 2 ? 18 : 17, Skills: 16, LfC: 19 })[assignment_type];
 
     // --- State builders. Each returns the mark-state columns for one row;
     //     the loop adds course_id/trainee_id/assignment_type/due_date. ---
@@ -2222,7 +2229,7 @@ async function main() {
         first_submitted_at: daysAgoIso(7),
         first_own_work_confirmed: true,
         marker_id: trainerId,
-        due_date: cDay(DUE_DAY("LRT", 1)), // Kofi is half 1 -- LRT · ABC
+        due_date: cDay(DUE_DAY("LRT", 1)), // Kofi is half 1 -- LRT · Day A
         // returnAssignment refuses to send a round back without naming at
         // least one unmet criterion -- Handbook 9.2.2, so the candidate knows
         // what to rewrite. This insert wrote the table directly and skipped
@@ -2962,7 +2969,7 @@ async function main() {
     // had none, so the roster rule put Skills in week 2 and every submission
     // read late. The due event wins; this is it.
     { d: 16, b: 0, type: "assignment_due", title: "Assignment 3 (Skills) due", tag: null, detail: "09:00", linked: "Skills", tp: null },
-    { d: 17, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 DEF", tag: null, detail: null, linked: "LRT", tp: null },
+    { d: 17, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 Day A", tag: null, detail: null, linked: "LRT", tp: null },
     { d: 17, b: 1, type: "tp", title: "TP7 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 7 },
     { d: 17, b: 2, type: "tp", title: "TP7 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 7 },
     { d: 17, b: 3, type: "tp", title: "TP7 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 7 },
@@ -2976,7 +2983,7 @@ async function main() {
     { d: 17, b: 7, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: "LfC", tp: null },
     { d: 17, b: 8, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: "LfC", tp: null },
     { d: 17, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
-    { d: 18, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 ABC", tag: null, detail: null, linked: "LRT", tp: null },
+    { d: 18, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 Day B", tag: null, detail: null, linked: "LRT", tp: null },
     { d: 18, b: 1, type: "tp", title: "TP8 \u00b7 A", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 18, b: 2, type: "tp", title: "TP8 \u00b7 B", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
     { d: 18, b: 3, type: "tp", title: "TP8 \u00b7 C", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
