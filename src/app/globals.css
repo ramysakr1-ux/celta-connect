@@ -57,6 +57,15 @@
      gold, in the other direction. Ramy, 10 Sep 2026: "we need some colour
      there... use a bit more garnet." */
   --color-garnet-lift: oklch(62% 0.17 27);
+  /* The same treatment for gold: light enough to read on the ink-warm header
+     band, and the wordmark's own lifted gold to the eye. Ramy, 16 Sep 2026
+     (trainee spec C2): the candidate's day bar had garnet doing three jobs at
+     once -- elapsed on the header bar, overdue in Catch up, "now" on the
+     track. The elapsed fill takes gold, which leaves garnet meaning lateness
+     and the live moment and nothing else. A shade lighter than --color-gold
+     so the bar's own-TP block, which is --color-gold, still reads as a
+     separate thing sitting on it. */
+  --color-gold-lift: oklch(70% 0.12 72);
   --color-ink-warm: oklch(30% 0.042 58); /* warm dark brown, one step lighter/warmer than --color-ink -- the wordmark tile, and headings/primary buttons/checkboxes on entry surfaces (rename-to-connect.md) */
   /* Command Center's own gold, at two strengths, for the rules inside its
      tables. Ramy, 3 Sep 2026: "make those lines between centres... a nice
@@ -182,6 +191,7 @@
   --color-gold: var(--color-gold);
   --color-gold-foreground: var(--color-gold-foreground);
   --color-gold-ink: var(--color-gold-ink);
+  --color-gold-lift: var(--color-gold-lift);
   --color-garnet-lift: var(--color-garnet-lift);
   --color-ink-warm: var(--color-ink-warm);
   --color-rule-gold: var(--color-rule-gold);

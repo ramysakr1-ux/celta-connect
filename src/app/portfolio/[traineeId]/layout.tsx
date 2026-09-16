@@ -409,6 +409,10 @@ export default async function PortfolioLayout({
                     tileBg="color-mix(in oklab, oklch(98.5% 0.006 90) 12%, transparent)"
                   />
                 </Link>
+                {/* Every screen, not just the landing. Trainee spec C1 asked
+                    for landing-only; Ramy, 16 Sep 2026, kept the 10 Sep
+                    settlement -- the credit lives in the header band beside
+                    the mark on all seven headers, and that is not reopened. */}
                 <HeaderCredit onDark />
                 <div className="min-w-0 flex-1 md:hidden" />
                 <div className="shrink-0 md:order-3">
