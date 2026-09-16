@@ -93,10 +93,17 @@ const demoCourseDates = cache(async (courseId?: string): Promise<string[]> => {
       .limit(1)
       .maybeSingle();
     if (!centre) return [];
+    // The RUNNING course, not the newest. The seed gained a next intake on
+    // 12 Sep 2026 so live applications had somewhere to land; it starts five
+    // weeks out and has no timetable, so "newest by start_date" resolved to a
+    // course with no days and the clock quietly fell back to the real one.
+    // Same rule as pickDemoCourse, on the real clock because that is what this
+    // function exists to shift.
     const { data: course } = await admin
       .from("courses")
       .select("id")
       .eq("center_id", centre.id)
+      .lte("start_date", new Date().toISOString().slice(0, 10))
       .order("start_date", { ascending: false })
       .limit(1)
       .maybeSingle();

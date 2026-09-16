@@ -2,7 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { demoToday } from "@/lib/demo-clock";
 
 /**
  * The course the demo is about: the one running at the centre today, or --
@@ -21,7 +20,11 @@ export async function pickDemoCourse<T extends { start_date: string }>(
   select: string
 ): Promise<T | null> {
   const timeZone = (await getCachedCenter(centerId))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = await demoToday(timeZone);
+  // The real clock on purpose, not demoNow: this decides WHICH course the demo
+  // is about, and the demo clock moves within that course. Reading the shifted
+  // day here would send /demo/<role>?day=40 into the next intake -- and
+  // demoNow has to resolve this course to answer at all.
+  const today = toLocalIso(new Date(), timeZone);
   const { data: started } = await admin
     .from("courses")
     .select(select)
