@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const ELICIT_TECHNIQUES = [
   { name: "Visuals / realia", hint: "Show, don't tell", example: 'Hold up a real umbrella and ask "What\'s this?" instead of defining the word — the object elicits the label from students who already know it.' },
@@ -71,7 +72,7 @@ function ElicitingTechniques() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <p className="text-label font-bold text-ink">Eliciting — drawing it out instead of giving it</p>
+        <SessionLabel>Eliciting — drawing it out instead of giving it</SessionLabel>
         <p className="text-label text-muted">Get learners to produce or work out language themselves before you supply it. Click each technique for a real example.</p>
       </div>
       {ELICIT_TECHNIQUES.map((e, i) => (
@@ -96,7 +97,7 @@ function ElicitOrTell() {
   const [picked, setPicked] = useState<Record<number, "elicit" | "tell">>({});
   return (
     <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-      <p className="text-meta font-bold text-ink">Match: elicit, or just tell them?</p>
+      <SessionLabel>Match: elicit, or just tell them?</SessionLabel>
       <p className="text-label text-muted">A teaching moment below. Would eliciting actually work here, or is telling faster and clearer? Click your answer.</p>
       {ELICIT_SCENARIOS.map((s, i) => {
         const pick = picked[i];
@@ -136,7 +137,7 @@ function SpotBadCcq() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Spot the bad CCQ</p>
+        <SessionLabel>Spot the bad CCQ</SessionLabel>
         <p className="text-label text-muted">{picked !== null ? "1 of 5 examined" : "0 of 5 examined"}</p>
       </div>
       <p className="text-label text-muted">
@@ -178,7 +179,7 @@ function WriteYourOwn() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <p className="text-label font-bold text-ink">Write your own CCQs</p>
+        <SessionLabel>Write your own CCQs</SessionLabel>
         <p className="text-label text-muted">For each target item, write two CCQs. Compare with a model once you&apos;ve tried.</p>
       </div>
       {WRITE_ITEMS.map((w, i) => (
@@ -208,7 +209,7 @@ function BeyondCcqs() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-0.5">
-        <p className="text-label font-bold text-ink">Beyond CCQs — match the technique</p>
+        <SessionLabel>Beyond CCQs — match the technique</SessionLabel>
         <p className="text-label text-muted">CCQs aren&apos;t the only tool. Match each technique to when you&apos;d actually use it.</p>
       </div>
       {TECHNIQUES.map((t, i) => (
@@ -344,7 +345,7 @@ export default function ElicitingAndConceptCheckingSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone ever said &quot;yes, I understand&quot; in a foreign language class, and not
@@ -365,7 +366,7 @@ export default function ElicitingAndConceptCheckingSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Discuss: near misses</p>
+          <SessionLabel>Discuss: near misses</SessionLabel>
           <p className="text-label text-muted">These sound like CCQs but aren&apos;t quite. Click each to see why, then discuss: what would fix it?</p>
         </div>
         {NEAR_MISSES.map((n) => (

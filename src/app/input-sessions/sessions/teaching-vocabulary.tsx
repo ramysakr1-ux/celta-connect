@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
 import { AnswerKey } from "@/components/input-sessions/answer-key";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const TERMS = [
   { term: "Lexical set", definition: "A group of words that share a topic, e.g. weather words." },
@@ -52,7 +53,7 @@ function ChooseTechnique() {
   const [picked, setPicked] = useState<Record<number, string>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Choose a technique for each item</p>
+      <SessionLabel>Choose a technique for each item</SessionLabel>
       <p className="text-label text-muted">For each word, click the technique you&apos;d actually use to clarify it — then check.</p>
       {CHOOSE_ITEMS.map((item, ci) => {
         const pick = picked[ci];
@@ -157,7 +158,7 @@ export default function TeachingVocabularySession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: how many words do you think &quot;take up (a hobby)&quot; actually is — one, or more
@@ -172,7 +173,7 @@ export default function TeachingVocabularySession() {
 
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Build the collocations</p>
+          <SessionLabel>Build the collocations</SessionLabel>
           <p className="text-label text-muted">
             Vocabulary rarely stands alone. Click the words that naturally collocate with &quot;make,&quot; then with
             &quot;do.&quot;
@@ -186,7 +187,7 @@ export default function TeachingVocabularySession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Discuss: your own examples</p>
+          <SessionLabel>Discuss: your own examples</SessionLabel>
           <p className="text-label text-muted">Think of your own next TP point&apos;s vocabulary. For each question, jot a quick answer before comparing with a partner.</p>
         </div>
         {DISCUSS_QS.map((q, i) => (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const CONCEPTS = [
   { label: "Non-literate vs. non-fluent", detail: "A learner may speak conversational English well but have never learned to read or write any language, including their own — literacy and oral fluency develop independently." },
@@ -113,7 +114,7 @@ function AdaptHandout() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
       <div className="flex items-baseline justify-between">
-        <p className="text-meta font-bold text-ink">Adapt the handout</p>
+        <SessionLabel>Adapt the handout</SessionLabel>
         <p className="text-micro font-semibold text-muted">
           Handout {index + 1} of {ADAPT_OPTIONS.length}
         </p>
@@ -175,7 +176,7 @@ export default function TeachingLiteracySession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 3 minutes</p>
+        <SessionLabel>Lead-in · 3 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">Look at the line below for two seconds, then look away. What did it say?</p>
           <div className="mt-2.5 rounded-[6px] bg-accent px-3.5 py-2.5 text-center text-h2 tracking-wide text-ink">
@@ -189,7 +190,7 @@ export default function TeachingLiteracySession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">What &quot;literacy&quot; covers here · 10 minutes</p>
+        <SessionLabel>What &quot;literacy&quot; covers here · 10 minutes</SessionLabel>
         <p className="text-label text-muted">Click each to reveal what it actually looks like in the room.</p>
         {CONCEPTS.map((c, i) => (
           <ConceptCard key={c.label} n={i + 1} label={c.label} detail={c.detail} />
@@ -197,7 +198,7 @@ export default function TeachingLiteracySession() {
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-meta font-bold text-ink">Spot the pre-literacy barrier</p>
+        <SessionLabel>Spot the pre-literacy barrier</SessionLabel>
         <p className="text-label text-muted">
           Each of these is a real moment from a beginner class. Decide: does this need a literacy adaptation, or is it a
           normal beginner-level language gap? Click to check.
@@ -210,7 +211,7 @@ export default function TeachingLiteracySession() {
       <AdaptHandout />
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Techniques for a pre-literate class · 12 minutes</p>
+        <SessionLabel>Techniques for a pre-literate class · 12 minutes</SessionLabel>
         <p className="text-label text-muted">
           In pairs, look at each technique below and agree: would you use this in week one, or only once basic letter
           recognition is established? Click to compare with the note.
@@ -221,7 +222,7 @@ export default function TeachingLiteracySession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Wrap-up · 5 minutes</p>
+        <SessionLabel>Wrap-up · 5 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             In one sentence each: what&apos;s one thing you&apos;d check about a new learner&apos;s literacy before assuming their

@@ -6,6 +6,7 @@ import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/tr
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
 import { AnswerKey } from "@/components/input-sessions/answer-key";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const DISCUSS = [
   { question: "Why analyse language before you teach it, rather than just teaching what you already know?", answer: "Because what you already know is intuitive, not explicit — you can use \"used to\" correctly without being able to explain why it's wrong to say \"I use to play.\" Teaching requires the explicit version." },
@@ -81,7 +82,7 @@ function LiveDraft() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <p className="text-label font-bold text-ink">Live draft — your next TP point, on the real sheet</p>
+        <SessionLabel>Live draft — your next TP point, on the real sheet</SessionLabel>
         <div className="flex items-center gap-0.5 rounded-[7px] border border-border bg-accent p-0.5">
           {LA_TYPES.map((t) => (
             <button
@@ -183,7 +184,7 @@ export default function LanguageAnalysisSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone ever been asked a grammar question mid-lesson they couldn&apos;t answer?
@@ -193,7 +194,7 @@ export default function LanguageAnalysisSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">Why analyse it first?</p>
+        <SessionLabel>Why analyse it first?</SessionLabel>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {DISCUSS.map((d) => (
             <RevealCard key={d.question} variant="hero" question={d.question} answer={d.answer} />

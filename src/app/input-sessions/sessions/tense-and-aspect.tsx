@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
 import { AnswerKey } from "@/components/input-sessions/answer-key";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const TERMS = [
   { term: "Tense", definition: "The grammatical marking of time — past, present, future — usually shown by the verb form." },
@@ -55,7 +56,7 @@ function ChooseAspect() {
   const [picked, setPicked] = useState<Record<number, string>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Choose the aspect the context needs</p>
+      <SessionLabel>Choose the aspect the context needs</SessionLabel>
       <p className="text-label text-muted">Each situation only works with one option — click your answer, then check.</p>
       {CHOOSE_ITEMS.map((item, ci) => {
         const pick = picked[ci];
@@ -143,7 +144,7 @@ function SortByAspect() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <p className="text-label font-bold text-ink">Sort by aspect</p>
+        <SessionLabel>Sort by aspect</SessionLabel>
         <p className="text-label text-muted">Same idea, different tense. Click each sentence into Simple or Continuous.</p>
       </div>
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
@@ -211,7 +212,7 @@ export default function TenseAndAspectSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             &quot;I&apos;ve read three books this month&quot; and &quot;I&apos;ve been reading a book about Istanbul all
@@ -228,7 +229,7 @@ export default function TenseAndAspectSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Discuss: these pairs</p>
+          <SessionLabel>Discuss: these pairs</SessionLabel>
           <p className="text-label text-muted">
             Same idea, two aspects. With a partner, agree what changes in meaning — not just which is &quot;more
             correct.&quot;

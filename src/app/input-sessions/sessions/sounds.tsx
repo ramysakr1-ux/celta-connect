@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { VoicePicker, speakWithVoice } from "@/components/input-sessions/voice-picker";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const CHART = [
   { symbol: "iː", example: "sheep" }, { symbol: "ɪ", example: "ship" }, { symbol: "ʊ", example: "book" }, { symbol: "uː", example: "boot" },
@@ -101,7 +102,7 @@ function MatchTerms() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Terminology — match it up</p>
+        <SessionLabel>Terminology — match it up</SessionLabel>
         <p className="text-label text-muted">{solved.size ? `${solved.size} of ${MATCH_PAIRS.length} matched` : ""}</p>
       </div>
       <p className="text-label text-muted">Click a term, then click the definition you think it goes with.</p>
@@ -179,7 +180,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Now try it yourself — clap for what you heard</p>
+        <SessionLabel>Now try it yourself — clap for what you heard</SessionLabel>
         <p className="text-label text-muted">{answered ? `${correctCount} of ${answered} correct` : ""}</p>
       </div>
       <p className="text-label text-muted">
@@ -241,7 +242,7 @@ function Dictation({ voiceIdx }: { voiceIdx: number }) {
   const [picks, setPicks] = useState<Record<number, string>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-label font-bold text-ink">Dictation — sound to spelling</p>
+      <SessionLabel>Dictation — sound to spelling</SessionLabel>
       <p className="text-label text-muted">English spelling doesn&apos;t reliably show pronunciation. Listen and pick the word that matches the sound, not the sound that matches the usual spelling.</p>
       {DICTATION.map((d, di) => {
         const picked = picks[di];
@@ -359,7 +360,7 @@ export default function SoundsSession() {
       <VoicePicker voiceIdx={voiceIdx} setVoiceIdx={setVoiceIdx} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="flex items-center gap-3 rounded-[8px] border border-border bg-card p-4">
           <button
             type="button"
@@ -384,7 +385,7 @@ export default function SoundsSession() {
       <MatchTerms />
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Where the sound is made</p>
+        <SessionLabel>Where the sound is made</SessionLabel>
         <p className="text-label text-muted">Click each sound to hear it, then say it back yourself and notice where your own tongue, lips or teeth move.</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="text-label leading-relaxed text-ink">
@@ -411,7 +412,7 @@ export default function SoundsSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">The phonemic chart, spoken</p>
+        <SessionLabel>The phonemic chart, spoken</SessionLabel>
         <p className="text-label text-muted">Click any symbol to hear the sound in isolation, then in a real word.</p>
         <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
           {CHART.map((c) => (
@@ -433,7 +434,7 @@ export default function SoundsSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Articulation — how to physically produce it</p>
+        <SessionLabel>Articulation — how to physically produce it</SessionLabel>
         <p className="text-label text-muted">
           A learner can&apos;t copy a written symbol — they need to see the mouth move. On the site below, click each
           of these four sounds on the real IPA chart and watch the video, then write down what you actually see —
@@ -472,7 +473,7 @@ export default function SoundsSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Where learners typically struggle</p>
+        <SessionLabel>Where learners typically struggle</SessionLabel>
         <p className="text-label text-muted">The same four pairs from the clap game — each is a known trouble spot for a common set of L1 backgrounds.</p>
         {STRUGGLES.map((s) => (
           <div key={s.pair} className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">

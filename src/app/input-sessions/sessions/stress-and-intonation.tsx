@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { VoicePicker } from "@/components/input-sessions/voice-picker";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const VOICE_PREFS = [
   (v: SpeechSynthesisVoice) => /Google UK English Female/i.test(v.name),
@@ -100,7 +101,7 @@ function IntonationSection({ voiceIdx }: { voiceIdx: number }) {
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-label font-bold text-ink">Intonation — question or statement?</p>
+      <SessionLabel>Intonation — question or statement?</SessionLabel>
       <p className="text-label text-muted">
         The words don&apos;t change, only the tune does. &quot;You&apos;re coming.&quot; falling means a statement;
         rising means a question — click each line to hear the tune, then guess before revealing.
@@ -135,7 +136,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-label font-bold text-ink">Marking stress for LRT</p>
+      <SessionLabel>Marking stress for LRT</SessionLabel>
       <p className="text-label text-muted">
         The convention: a bold syllable, or a small mark before it — <strong className="font-semibold">re</strong>
         cord vs re<strong className="font-semibold">cord</strong>. Click a word to hear it, then click the syllable
@@ -199,7 +200,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-label font-bold text-ink">Primary and secondary stress</p>
+      <SessionLabel>Primary and secondary stress</SessionLabel>
       <p className="text-label text-muted">
         Longer words often carry two stresses, not one — a strong primary stress and a weaker secondary stress. Click
         the speaker to hear the word said naturally (the synthesised voice can&apos;t fake syllable-level stress
@@ -265,7 +266,7 @@ function ContrastiveStress() {
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-label font-bold text-ink">Extension, if there&apos;s time — stress carries attitude</p>
+      <SessionLabel>Extension, if there&apos;s time — stress carries attitude</SessionLabel>
       <p className="text-label text-muted">Same sentence, same words — the stressed word changes what&apos;s actually meant. Read the context, then click the word you&apos;d stress in the reply.</p>
       {CONTRASTIVE.map((c, ci) => {
         const words = c.reply.split(" ");

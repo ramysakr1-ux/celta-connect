@@ -5,6 +5,7 @@ import { unlinkVolunteerAction } from "@/app/centre/actions";
 import { LinkVolunteerControl } from "@/app/centre/link-volunteer-control";
 import { extractLevelCode, levelPillClass } from "@/lib/levels";
 import { Avatar } from "@/components/avatar";
+import { ChevronDown } from "lucide-react";
 
 export function VolunteerPoolRow({
   name,
@@ -16,8 +17,11 @@ export function VolunteerPoolRow({
 }: {
   name: string;
   hours: number;
-  // for-claude-code-volunteer-pool-header.md: sage green while at least one
-  // linked course is still running, muted grey once every one has ended.
+  // for-claude-code-volunteer-pool-header.md: the room's own colour while at
+  // least one linked course is still running, muted grey once every one has
+  // ended. Remainder pass A7: this was an inline oklch(35% 0.075 155) -- a
+  // green that was neither the volunteer room's accent nor the platform's
+  // teal, and the only place in the app it appeared.
   active: boolean;
   members: { id: string; courseName: string; level: string | null; nextClassStatus: "coming" | "declined" | "no_reply" | null }[];
   canEdit: boolean;
@@ -43,15 +47,27 @@ export function VolunteerPoolRow({
             <NextClassStatusTag status={primary.nextClassStatus} />
           </div>
           {members.length > 1 ? (
-            <button type="button" onClick={() => setExpanded((v) => !v)} className="text-left text-label font-semibold text-primary hover:underline">
-              Linked &middot; {members.length} courses {expanded ? "▲" : "▼"}
+            // Remainder pass B7: the affordance was a "▲"/"▼" glyph at 11px,
+            // the only text-arrow disclosure in the app. The shared chevron,
+            // like every other one.
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+              className="flex items-center gap-1 text-left text-label font-semibold text-primary hover:underline"
+            >
+              Linked &middot; {members.length} courses
+              <ChevronDown
+                aria-hidden="true"
+                className={`size-3.5 transition-transform duration-150 ${expanded ? "rotate-180" : ""}`}
+              />
             </button>
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-3.5">
           <span
             className="text-label font-semibold tabular-nums"
-            style={{ color: active ? "oklch(35% 0.075 155)" : "var(--color-muted)" }}
+            style={{ color: active ? "var(--area-accent, var(--color-primary))" : "var(--color-muted)" }}
           >
             {hours.toFixed(1)} hrs
           </span>

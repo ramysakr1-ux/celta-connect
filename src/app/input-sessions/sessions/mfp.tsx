@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const PILLARS = [
   { label: "Meaning", color: "var(--color-primary)", text: "What the item means, checked with CCQs — not the definition, the concept." },
@@ -76,7 +77,7 @@ function WriteCcq() {
   const [open, setOpen] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Write a CCQ — meaning</p>
+      <SessionLabel>Write a CCQ — meaning</SessionLabel>
       <p className="text-label text-muted">For each target item, write one CCQ that isolates the tricky part of the meaning. Compare with the model once you&apos;ve tried.</p>
       {CCQ_ITEMS.map((c, i) => (
         <div key={c.item} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
@@ -105,7 +106,7 @@ function AnalyseForm() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Analyse the form</p>
+      <SessionLabel>Analyse the form</SessionLabel>
       <p className="text-label text-muted">Click the piece of each pattern that&apos;s most likely to trip students up.</p>
       {FORM_ITEMS.map((fm, fi) => {
         const picked = picks[fi];
@@ -147,7 +148,7 @@ function QuickFire() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Meaning, form, pron, or appropriacy? Quick fire</p>
+        <SessionLabel>Meaning, form, pron, or appropriacy? Quick fire</SessionLabel>
         <p className="text-label text-muted">{`${correctCount} of ${MF_ITEMS.length} correct`}</p>
       </div>
       <p className="text-label text-muted">For each task type, click which of the four it&apos;s checking.</p>
@@ -192,7 +193,7 @@ function WeakForms() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Transcribe the weak forms</p>
+      <SessionLabel>Transcribe the weak forms</SessionLabel>
       <p className="text-label text-muted">Listen for how each phrase is actually said in fast speech, not how it&apos;s spelled. Click your guess, then check.</p>
       {WEAK_FORM_ITEMS.map((w, i) => {
         const picked = picks[i];
@@ -232,7 +233,7 @@ function MarkStress() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Mark the sentence — stress and weak forms</p>
+      <SessionLabel>Mark the sentence — stress and weak forms</SessionLabel>
       <p className="text-label text-muted">Click the word you think carries the main sentence stress in each example.</p>
       {STRESS_ITEMS.map((item, si) => {
         const picked = picks[si];
@@ -272,7 +273,7 @@ function Appropriacy() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Appropriacy — which register?</p>
+      <SessionLabel>Appropriacy — which register?</SessionLabel>
       <p className="text-label text-muted">Same meaning, different register. Click who you&apos;d actually say each one to.</p>
       {APPROPRIACY_ITEMS.map((ap, ai) => {
         const picked = picks[ai];
@@ -312,7 +313,7 @@ function SpotTheFlaw() {
   const [open, setOpen] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Spot the flaw — MFPA done badly</p>
+      <SessionLabel>Spot the flaw — MFPA done badly</SessionLabel>
       <p className="text-label text-muted">Each mini-plan skips part of MFP. Click to reveal what&apos;s missing.</p>
       {FLAWS.map((f, i) => (
         <div key={f.title} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
@@ -455,7 +456,7 @@ export default function MfpSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone taught a grammar point perfectly, then watched students say it
@@ -465,7 +466,7 @@ export default function MfpSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">The three, in thirty seconds each</p>
+        <SessionLabel>The three, in thirty seconds each</SessionLabel>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {PILLARS.map((p) => (
             <div key={p.label} className="rounded-[8px] border border-t-[3px] bg-card p-3.5" style={{ borderTopColor: p.color, borderColor: "var(--color-border)" }}>

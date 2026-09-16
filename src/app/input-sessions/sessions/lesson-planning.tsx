@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const ABBR = [
   { term: "OHP", def: "Overhead projector" },
@@ -421,7 +422,7 @@ function StagingExample() {
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[130px_90px_55px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <SessionLabel>{r.stage}</SessionLabel>
                 <p className="text-label text-muted">{r.interaction}</p>
                 <p className="text-label text-muted">{r.time}</p>
                 <p className="text-label leading-relaxed text-muted">{r.text}</p>
@@ -444,7 +445,7 @@ function LessonPlanDraft() {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[400px_1fr]">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-4">
-          <p className="text-label font-bold text-ink">Front page — draft it live, on the real document</p>
+          <SessionLabel>Front page — draft it live, on the real document</SessionLabel>
           {AIM_FIELDS.map((f, i) => (
             <div key={f.label} className="flex flex-col gap-1">
               <p className="text-label text-muted">{f.label}</p>
@@ -461,7 +462,7 @@ function LessonPlanDraft() {
         </div>
 
         <div className="flex flex-col gap-2.5 rounded-[6px] border border-border bg-card p-4">
-          <p className="text-label font-bold text-ink">Anticipated Problems &amp; Solutions</p>
+          <SessionLabel>Anticipated Problems &amp; Solutions</SessionLabel>
           <p className="text-label italic leading-snug text-muted">Think classroom management, not language — that&apos;s tomorrow&apos;s session.</p>
           {[0, 1].map((i) => (
             <div key={i} className="flex flex-col gap-1.5 border-b border-dashed border-border-faint pb-2.5 last:border-b-0">
@@ -556,7 +557,7 @@ export default function LessonPlanningSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone here ever taught, or tried to teach, without writing anything down first?
@@ -566,7 +567,7 @@ export default function LessonPlanningSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">Open with these two questions</p>
+        <SessionLabel>Open with these two questions</SessionLabel>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {QUESTION_CARDS.map((q) => (
             <QuestionCard key={q.question} question={q.question} answers={q.answers} />
@@ -579,7 +580,7 @@ export default function LessonPlanningSession() {
       <StagingExample />
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">TP2 · three points per teaching group, however many groups the cohort needs</p>
+        <SessionLabel>TP2 · three points per teaching group, however many groups the cohort needs</SessionLabel>
         <p className="max-w-[1000px] text-label leading-relaxed text-muted">
           A shared input session, not a per-group one. Each group runs ABC on Thursday and DEF on Friday from its own
           three points, at its own level and coursebook. The cards below are stand-ins to show the shape only — every

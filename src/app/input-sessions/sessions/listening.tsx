@@ -7,6 +7,7 @@ import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
 import { OrderExercise } from "@/components/input-sessions/order-exercise";
 import { AnswerKey } from "@/components/input-sessions/answer-key";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const TERMS = [
   { term: "Gist", definition: "Listening once for the general idea, not the details." },
@@ -145,7 +146,7 @@ function DialoguePlayer() {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-label font-bold text-ink">Stage 3 · Listen to the dialogue and check if your ideas were right or wrong</p>
+      <SessionLabel>Stage 3 · Listen to the dialogue and check if your ideas were right or wrong</SessionLabel>
       <div className="flex flex-col gap-3 rounded-[8px] border border-border bg-card p-5">
         <div className="flex items-center gap-3">
           <button
@@ -232,7 +233,7 @@ function StagingExample() {
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <SessionLabel>{r.stage}</SessionLabel>
                 <p className="text-label text-muted">{r.time}</p>
                 <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
@@ -269,7 +270,7 @@ export default function ListeningSession() {
       <MatchTermsExercise terms={TERMS} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Stage 2</p>
+        <SessionLabel>Stage 2</SessionLabel>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-4">
           <p className="text-meta text-ink">How do you think a listening lesson should be staged?</p>
           <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
@@ -280,7 +281,7 @@ export default function ListeningSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Stage 4</p>
+          <SessionLabel>Stage 4</SessionLabel>
           <p className="text-label italic text-muted">More time now — answer these from the dialogue, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (

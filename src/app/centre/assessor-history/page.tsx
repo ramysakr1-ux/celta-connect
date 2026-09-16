@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -73,6 +72,10 @@ export default async function AssessorHistoryPage({
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Remainder pass B3: a BackLink sat at the RIGHT end of this row, which
+          is where nothing else in the app puts the way back. This page is
+          inside Centre Management, so the dropped room pill is already the way
+          out; a second one said it twice, in the wrong corner. */}
       <div className="flex items-end justify-between gap-4">
         <div className="flex max-w-[820px] flex-col gap-[13px]">
           <p className="text-label font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
@@ -83,7 +86,6 @@ export default async function AssessorHistoryPage({
             enforced — it is kept visible so a centre administrator can see the pattern.
           </p>
         </div>
-        <BackLink href="/centre" label={"Overview"} />
       </div>
 
       {history.length === 0 ? (

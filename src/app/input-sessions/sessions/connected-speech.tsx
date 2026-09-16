@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
 import { VoicePicker, speakWithVoice } from "@/components/input-sessions/voice-picker";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 interface Example {
   label: string;
@@ -101,7 +102,7 @@ function HomophoneLines() {
   const [shown, setShown] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-label font-bold text-ink">Lead-in, alternative · read these aloud</p>
+      <SessionLabel>Lead-in, alternative · read these aloud</SessionLabel>
       <p className="text-label text-muted">Sound out each line fast — they&apos;re homophone strings, not real sentences on the page.</p>
       {HOMOPHONE_LINES.map((h, i) => (
         <div key={h.line} className="flex items-center gap-3 rounded-[8px] border border-border bg-card px-3.5 py-3">
@@ -253,7 +254,7 @@ export default function ConnectedSpeechSession() {
       <VoicePicker voiceIdx={voiceIdx} setVoiceIdx={setVoiceIdx} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 3 minutes</p>
+        <SessionLabel>Lead-in · 3 minutes</SessionLabel>
         <div className="flex items-center gap-3 rounded-[8px] border border-border bg-card p-4">
           <button
             type="button"

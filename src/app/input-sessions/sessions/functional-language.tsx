@@ -7,6 +7,7 @@ import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
 import { OrderExercise } from "@/components/input-sessions/order-exercise";
 import { AnswerKey } from "@/components/input-sessions/answer-key";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const TERMS = [
   { term: "Exponent", definition: 'One of several phrases that carry out a function — e.g. "How about...?" for suggesting.' },
@@ -52,7 +53,7 @@ function RankByFormality() {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Rank these exponents, most to least formal</p>
+      <SessionLabel>Rank these exponents, most to least formal</SessionLabel>
       <p className="text-label text-muted">Function: making a suggestion. Click each in order, most formal first.</p>
       <div className="flex flex-col gap-1.5">
         {picked.map((item, i) => (
@@ -117,7 +118,7 @@ function StagingExample() {
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <SessionLabel>{r.stage}</SessionLabel>
                 <p className="text-label text-muted">{r.time}</p>
                 <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
@@ -150,7 +151,7 @@ export default function FunctionalLanguageSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: how many different ways can you think of, right now, to ask someone to close a
@@ -168,7 +169,7 @@ export default function FunctionalLanguageSession() {
       <MatchTermsExercise terms={TERMS} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Stage 2</p>
+        <SessionLabel>Stage 2</SessionLabel>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">How do you think a functional language lesson should be staged?</p>
           <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
@@ -176,7 +177,7 @@ export default function FunctionalLanguageSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
+        <SessionLabel>Stage 3 · Read the text and check if your ideas were right or wrong</SessionLabel>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-body font-semibold text-ink">Staging a functional language lesson</p>
           <p className="text-meta leading-relaxed text-ink">
@@ -196,7 +197,7 @@ export default function FunctionalLanguageSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Stage 4</p>
+          <SessionLabel>Stage 4</SessionLabel>
           <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (

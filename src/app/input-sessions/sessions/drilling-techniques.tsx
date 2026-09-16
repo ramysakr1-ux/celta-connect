@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { VideoReveal } from "@/components/input-sessions/video-reveal";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 interface Drill {
   name: string;
@@ -75,7 +76,10 @@ function DrillCard({ n, drill }: { n: string; drill: Drill }) {
       {open ? (
         <div className="flex flex-col gap-1.5 pl-7">
           <p className="text-label leading-relaxed text-muted">{drill.desc}</p>
-          <p className="rounded-[6px] bg-accent px-3 py-2 font-mono text-label text-ink">{drill.example}</p>
+          {/* Remainder pass B8: this was the only monospace text in the
+              product. A drill example is somebody speaking, not code -- serif
+              italic, the app's own quoted-speech treatment. */}
+          <p className="rounded-[6px] bg-accent px-3 py-2 font-serif text-body italic text-ink">{drill.example}</p>
         </div>
       ) : null}
     </button>
@@ -103,12 +107,12 @@ export default function DrillingTechniquesSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Warmer · 5 minutes</p>
+        <SessionLabel>Warmer · 5 minutes</SessionLabel>
         <VideoReveal embedUrl="https://www.youtube.com/embed/lz0IT4Uk2xQ?si=6KQSBkeS1d-tYfSl" />
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-meta font-bold text-ink">Discuss first · 5 minutes</p>
+        <SessionLabel>Discuss first · 5 minutes</SessionLabel>
         <p className="text-label text-muted">In pairs, discuss each question, then click to compare with the trainer&apos;s notes.</p>
         {DISCUSS.map((d) => (
           <DiscussCard key={d.question} {...d} />
@@ -116,7 +120,7 @@ export default function DrillingTechniquesSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Six drill types, trainer-modelled · 20 minutes</p>
+        <SessionLabel>Six drill types, trainer-modelled · 20 minutes</SessionLabel>
         <p className="text-label text-muted">Trainer models each one live with the room first — then click a card to reveal the description and try it on your partner.</p>
         {DRILLS.map((d, i) => (
           <DrillCard key={d.name} n={String(i + 1).padStart(2, "0")} drill={d} />
@@ -124,7 +128,7 @@ export default function DrillingTechniquesSession() {
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-meta font-bold text-ink">Match the drill to the problem · 10 minutes</p>
+        <SessionLabel>Match the drill to the problem · 10 minutes</SessionLabel>
         <p className="text-label text-muted">A learner has a specific problem below. Which drill type actually fixes it? Click your answer.</p>
         {SCENARIOS.map((s) => (
           <ChoiceScenarioCard key={s.text} scenario={s} />
@@ -132,7 +136,7 @@ export default function DrillingTechniquesSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">Four more techniques · 15 minutes</p>
+        <SessionLabel>Four more techniques · 15 minutes</SessionLabel>
         <p className="text-label text-muted">Same pattern — trainer models, then click to reveal.</p>
         {DRILLS_2.map((d, i) => (
           <DrillCard key={d.name} n={String(i + 7).padStart(2, "0")} drill={d} />
@@ -140,7 +144,7 @@ export default function DrillingTechniquesSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Drill each other in an unknown language · 10 minutes</p>
+        <SessionLabel>Drill each other in an unknown language · 10 minutes</SessionLabel>
         <div className="flex flex-col gap-1.5 rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             In pairs: teach your partner one short phrase in a language neither of you has studied (ask the trainer for a
@@ -155,7 +159,7 @@ export default function DrillingTechniquesSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Wrap-up · 5 minutes</p>
+        <SessionLabel>Wrap-up · 5 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             Drilling produces accurate, fluent form — but it&apos;s not communication yet. That&apos;s exactly where the next

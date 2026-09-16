@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession } from "@/components/input-sessions/trainer-notes";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exercise";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const TERMS = [
   { term: "Skimming / Gist", definition: "Reading or listening fast over a whole text to get the main idea." },
@@ -200,7 +201,7 @@ export default function ReceptiveSkillsSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Stage 2</p>
+        <SessionLabel>Stage 2</SessionLabel>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-4">
           <p className="text-meta text-ink">How do you think receptive skills lessons should be taught?</p>
           <p className="text-label italic text-muted">Discuss with your partner, about a minute.</p>
@@ -208,7 +209,7 @@ export default function ReceptiveSkillsSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
+        <SessionLabel>Stage 3 · Read the text and check if your ideas were right or wrong</SessionLabel>
         <div className="flex flex-col gap-2.5 rounded-[8px] border border-border bg-card p-5">
           <p className="font-serif text-h3 font-semibold text-ink">Staging a receptive skills lesson</p>
           <p className="text-meta leading-relaxed text-ink">
@@ -238,7 +239,7 @@ export default function ReceptiveSkillsSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">Stage 4</p>
+          <SessionLabel>Stage 4</SessionLabel>
           <p className="text-label italic text-muted">More time now — look again at the text and answer these questions, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (

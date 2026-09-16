@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 interface Stage {
   name: string;
@@ -84,7 +85,7 @@ function CompactExampleCard({ stage }: { stage: Stage }) {
       style={{ borderLeft: `4px solid ${stage.accent}` }}
     >
       <div className="flex items-baseline justify-between">
-        <p className="text-meta font-bold text-ink">{stage.name}</p>
+        <SessionLabel>{stage.name}</SessionLabel>
         <p className="text-micro font-semibold" style={{ color: stage.accent }}>{stage.control}</p>
       </div>
       {open ? <p className="text-label leading-relaxed text-muted">{stage.example}</p> : null}
@@ -102,7 +103,7 @@ function LoopCard({ loop }: { loop: (typeof LOOPS)[number] }) {
       style={{ borderLeft: `4px solid ${loop.accent}` }}
     >
       <div className="flex items-baseline justify-between">
-        <p className="text-meta font-bold text-ink">{loop.name}</p>
+        <SessionLabel>{loop.name}</SessionLabel>
         <p className="text-micro font-semibold" style={{ color: loop.accent }}>{loop.tag}</p>
       </div>
       {open ? <p className="text-label leading-relaxed text-muted">{loop.task}</p> : null}
@@ -133,7 +134,7 @@ export default function LanguagePracticeSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 5 minutes</p>
+        <SessionLabel>Lead-in · 5 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             A learner can drill &quot;Why don&apos;t we go for coffee?&quot; perfectly. Does that mean they can actually use it — to
@@ -143,7 +144,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">The three stages, one target structure each way · 25 minutes</p>
+        <SessionLabel>The three stages, one target structure each way · 25 minutes</SessionLabel>
         <p className="text-label text-muted">Same language throughout: offering and suggesting. Click each stage to see it worked, then try it yourselves.</p>
         {STAGES.map((s) => (
           <StageCard key={s.name} stage={s} />
@@ -151,7 +152,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-meta font-bold text-ink">Sort the activity by stage · 8 minutes</p>
+        <SessionLabel>Sort the activity by stage · 8 minutes</SessionLabel>
         <p className="text-label text-muted">Each activity below could be run at one of the three stages. Pick which.</p>
         {SORT_ITEMS.map((s) => (
           <ChoiceScenarioCard key={s.text} scenario={s} />
@@ -159,7 +160,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-label font-bold text-ink">More worked examples, same three stages · 8 minutes</p>
+        <SessionLabel>More worked examples, same three stages · 8 minutes</SessionLabel>
         <p className="text-label text-muted">A second target structure (&quot;going to&quot; — future plans), so the framework generalises rather than sticking to one example. Click to reveal.</p>
         {MORE_EXAMPLES.map((m) => (
           <CompactExampleCard key={m.name} stage={m} />
@@ -167,7 +168,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">Loop task — do all three stages back to back · 12 minutes</p>
+        <SessionLabel>Loop task — do all three stages back to back · 12 minutes</SessionLabel>
         <p className="text-label text-muted">One target structure (&quot;used to&quot; — past habits), one quick task per stage, three to four minutes each. Click a loop to see it and run it live before moving to the next.</p>
         {LOOPS.map((l) => (
           <LoopCard key={l.name} loop={l} />
@@ -175,7 +176,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Spot the mismatch · 6 minutes</p>
+        <SessionLabel>Spot the mismatch · 6 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             A trainee labels their pairwork activity &quot;free practice&quot; because learners are talking in pairs — but every
@@ -186,7 +187,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Design your own · 5 minutes</p>
+        <SessionLabel>Design your own · 5 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             In pairs: take the target language &quot;wish + past simple&quot; (present regrets). Design one activity for each
@@ -196,7 +197,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Wrap-up · 3 minutes</p>
+        <SessionLabel>Wrap-up · 3 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             A lesson doesn&apos;t need all three stages every time — but if you only ever drill and never free-practice,

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 const SHAPES = [
   { name: "PPP", spine: "var(--color-primary)", stages: "Lead-in → Present (meaning, form, pronunciation) → Practice (accuracy) → Production (fluency) → Error correction" },
@@ -93,7 +94,7 @@ function CardSort() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Card sort — pin each stage to its shape</p>
+        <SessionLabel>Card sort — pin each stage to its shape</SessionLabel>
         <p className="text-label text-muted">{`${Object.keys(placed).length} of ${STAGES.length} pinned`}</p>
       </div>
       <p className="text-label text-muted">Click a stage, then the shape you think it belongs to.</p>
@@ -169,7 +170,7 @@ function BuildSequence() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Build the sequence — pick a shape</p>
+        <SessionLabel>Build the sequence — pick a shape</SessionLabel>
         <p className="text-label text-muted">
           {done ? (allCorrect ? "Correct order!" : "Not quite — click a slot to remove it and retry") : `${built.length} of ${correct.length} placed`}
         </p>
@@ -236,7 +237,7 @@ function NameThatFramework() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-label font-bold text-ink">Name that framework</p>
+        <SessionLabel>Name that framework</SessionLabel>
         <p className="text-label text-muted">{`${count} of ${SCENARIOS.length} correct`}</p>
       </div>
       {SCENARIOS.map((s, si) => (
@@ -275,7 +276,7 @@ function StageTimer() {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-label font-bold text-ink">Stage timer — pacing challenge</p>
+      <SessionLabel>Stage timer — pacing challenge</SessionLabel>
       <p className="text-label leading-relaxed text-muted">
         You have 45 minutes for a Text-Based lesson. Budget the minutes across the three stages below — the total
         should land close to 45.
@@ -355,7 +356,7 @@ export default function LessonFrameworkSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
+        <SessionLabel>Lead-in · 2 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: when you plan a lesson, what&apos;s the first decision you make — the language point,
@@ -365,13 +366,13 @@ export default function LessonFrameworkSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">The one question that decides your shape</p>
+        <SessionLabel>The one question that decides your shape</SessionLabel>
         <DecisionTree />
       </div>
 
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <p className="text-label font-bold text-ink">The six shapes, stage by stage</p>
+          <SessionLabel>The six shapes, stage by stage</SessionLabel>
           <p className="text-label text-muted">Study these for a couple of minutes before the card sort below — you&apos;ll need them.</p>
         </div>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">

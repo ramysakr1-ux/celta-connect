@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { SessionLabel } from "@/components/input-sessions/session-label";
 
 interface Item {
   name: string;
@@ -87,7 +88,7 @@ export default function ProfessionalDevelopmentSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-label font-bold text-ink">Pick a card, or click through all four yourself</p>
+        <SessionLabel>Pick a card, or click through all four yourself</SessionLabel>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {CARDS.map((c, i) => (
             <button
@@ -140,7 +141,7 @@ export default function ProfessionalDevelopmentSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-label font-bold text-ink">Whole-group share-back · ~10 minutes</p>
+        <SessionLabel>Whole-group share-back · ~10 minutes</SessionLabel>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             Each group: one thing worth telling the room, one question you couldn&apos;t answer. See if another group&apos;s card
@@ -158,7 +159,7 @@ export default function ProfessionalDevelopmentSession() {
 
       {CARDS.map((c) => (
         <div key={c.title} className="flex flex-col gap-2">
-          <p className="text-meta font-bold text-ink">{c.title}</p>
+          <SessionLabel>{c.title}</SessionLabel>
           {c.items.map((item) => (
             <div key={item.name} className="flex items-baseline gap-2.5 border-b border-border-faint py-2">
               <p className="min-w-[190px] text-meta font-semibold text-ink">{item.name}</p>

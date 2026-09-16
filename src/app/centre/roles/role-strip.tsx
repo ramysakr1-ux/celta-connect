@@ -56,9 +56,12 @@ const STYLE: Record<CentreRole, RoleStyle> = {
   },
   centre_owner: {
     who: "the centre's own way back in",
-    tone: "text-destructive",
-    spine: "bg-destructive",
-    band: "bg-destructive/8 border-destructive/25",
+    // Remainder pass B5: the owner's colour is garnet, and the code keeps
+    // garnet and destructive apart on purpose -- this role is the centre's
+    // most senior, not a dangerous action.
+    tone: "text-garnet",
+    spine: "bg-garnet",
+    band: "bg-garnet/8 border-garnet/25",
     rule: "The reach stops at the centre boundary. Nobody at Connect holds a key to a centre's courses, and there is no role above this one — a centre that hands over its grading needs to know the platform cannot quietly read it.",
   },
 };
@@ -134,7 +137,10 @@ export function RoleStrip({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 overflow-hidden rounded-[8px] border border-border bg-card lg:grid-cols-4">
+      {/* Remainder pass B6: was grid-cols-2 lg:grid-cols-4, but the list is
+          four built-ins plus however many custom roles the owner has defined --
+          two of those left a 4+2 layout with two orphans on a second row. */}
+      <div className="grid grid-cols-2 overflow-hidden rounded-[8px] border border-border bg-card sm:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
         {allRoleKeys.map((role, i) => {
           const s = styleFor(role);
           const active = role === selected;
@@ -143,9 +149,15 @@ export function RoleStrip({
               key={role}
               type="button"
               onClick={() => setSelected(role)}
+              // Remainder pass A6: the active segment used to be a 42% teal
+              // wash -- the strongest fill in the app, stronger than the room
+              // pill's own active state -- with role-coloured text sitting on
+              // it, so the centre owner's garnet label read off a teal block.
+              // The spine is the signal; the fill is just the resting state,
+              // at the room's own hover strength.
               className={`relative px-5 py-4 text-left transition-colors duration-150 ${i < allRoleKeys.length - 1 ? "lg:border-r lg:border-border" : ""} ${
                 active
-                  ? "bg-[color-mix(in_oklab,var(--color-primary)_42%,var(--color-card))]"
+                  ? "bg-[var(--area-hover-fill,color-mix(in_oklab,var(--color-primary)_14%,var(--color-card)))]"
                   : "bg-surface-muted/40 wash"
               }`}
             >
