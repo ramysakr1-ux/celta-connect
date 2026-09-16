@@ -14,6 +14,7 @@ import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
 import { PlatformAccessTab, type PlatformAccessRow, type AccessLogRow } from "@/app/centre/settings/platform-access-tab";
 import { ProviderList } from "@/app/centre/payments/provider-list";
+import { MoneyPanels } from "@/app/centre/payments/money-panels";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
 import { computeGrantStatus } from "@/lib/platform-support";
 import { RoomHead } from "@/components/room-head";
@@ -215,9 +216,10 @@ export default async function CentreSettingsPage({
                 connectedAt={center.payment_provider_connected_at}
                 credentialsPresent={credentialsPresent}
               />
-              <Link href="/centre/payments" className="self-start text-sm font-medium text-primary hover:underline">
-                Refund history
-              </Link>
+              {/* A6: overdue instalments, refunds and webhook transactions used
+                  to be a page of their own reached from a "Refund history" link
+                  here and from nowhere else. One place for money settings. */}
+              <MoneyPanels centerId={centerId} canEdit={can(ctx.roles, "payments.edit", ctx.overrides)} />
             </div>
           ) : canReadSettings ? (
             <div className="flex flex-col gap-4">

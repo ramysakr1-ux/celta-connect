@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { recordCertificateGrade, type FormState } from "@/app/dashboard/admin/courses/[id]/close-out-actions";
+import { recordCertificateGrade, type FormState } from "@/app/trainer/(hub)/grades-report/close-out-actions";
 
 const initialState: FormState = { error: null };
 const GRADES = ["Pass", "Pass B", "Pass A", "Fail"] as const;

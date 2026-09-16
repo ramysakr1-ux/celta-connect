@@ -14,7 +14,7 @@ import { FilmingConsentCard } from "@/app/trainer/(hub)/roster/filming-consent-c
 import { ManageTutorsCard } from "@/app/trainer/(hub)/roster/manage-tutors-card";
 import { DeliveryModeCard } from "@/app/trainer/(hub)/roster/delivery-mode-card";
 import { ChatRetentionCard } from "@/app/trainer/(hub)/roster/chat-retention-card";
-import type { AssignableTrainer } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
+import type { AssignableTrainer } from "@/app/trainer/(hub)/roster/assign-tutor-panel";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 import { isCourseStatusReadOnly } from "@/lib/course-status";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";

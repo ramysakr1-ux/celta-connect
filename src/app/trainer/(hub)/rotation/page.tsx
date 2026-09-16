@@ -15,9 +15,9 @@ import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-no
 import { ClassGroupingForm } from "@/app/trainer/(hub)/rotation/class-grouping-form";
 import { AimConstraintsForm } from "@/app/trainer/(hub)/rotation/aim-constraints-form";
 import { RotationTabs } from "@/app/trainer/(hub)/rotation/rotation-tabs";
-import { CreateSubgroupForm, PairSubgroupsForm, UnpairButton, AddMemberForm } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
+import { CreateSubgroupForm, PairSubgroupsForm, UnpairButton, AddMemberForm } from "@/app/trainer/(hub)/rotation/subgroups-form";
 import { RemoveMemberButton } from "@/app/trainer/(hub)/rotation/remove-member-button";
-import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-form";
+import { GroupTutorForm } from "@/app/trainer/(hub)/rotation/group-tutor-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";

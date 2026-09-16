@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { assignExistingTutor, type AssignTutorState } from "./assign-tutor-actions";
+import { assignExistingTutor, type AssignTutorState } from "@/app/dashboard/admin/courses/[id]/assign-tutor-actions";
 import { TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE } from "@/lib/tutor-roles";
 
 const initial: AssignTutorState = { error: null };

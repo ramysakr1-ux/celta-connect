@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { addTpGroupTutorAssignment, removeTpGroupTutorAssignment, setTpGroupTutor } from "./subgroup-actions";
-import type { FormState } from "./subgroup-actions";
+import { addTpGroupTutorAssignment, removeTpGroupTutorAssignment, setTpGroupTutor } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
+import type { FormState } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
 
 const initial: FormState = { error: null };
 

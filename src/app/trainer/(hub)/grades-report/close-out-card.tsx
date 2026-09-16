@@ -8,7 +8,7 @@ import {
   extendGracePeriod,
   toggleCambridgeGradesConfirmed,
   type FormState,
-} from "@/app/dashboard/admin/courses/[id]/close-out-actions";
+} from "@/app/trainer/(hub)/grades-report/close-out-actions";
 import type { CloseOutVerificationReport, CourseCloseOutStatus } from "@/lib/supabase/types";
 import type { CloseOutBlockingReason } from "@/lib/course-close-out/blocking-rules";
 import { useCentreTimeZone } from "@/components/centre-time-zone";

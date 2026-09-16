@@ -1502,7 +1502,7 @@ export async function agreeRefund(_prevState: FormState, formData: FormData): Pr
   if (error) return { error: `Could not record the refund: ${error.message}` };
 
   revalidatePath("/centre");
-  revalidatePath("/centre/payments");
+  revalidatePath("/centre/settings");
   if (applicantId) revalidatePath(`/dashboard/admissions/${applicantId}`);
   return { error: null };
 }
@@ -1546,6 +1546,6 @@ export async function settleRefund(_prevState: FormState, formData: FormData): P
   }
 
   revalidatePath("/centre");
-  revalidatePath("/centre/payments");
+  revalidatePath("/centre/settings");
   return { error: null };
 }

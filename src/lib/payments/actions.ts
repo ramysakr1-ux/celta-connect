@@ -215,5 +215,5 @@ export async function markPaymentNotificationRead(formData: FormData): Promise<v
     .eq("id", notificationId)
     .eq("center_id", centerId);
 
-  revalidatePath("/centre/payments");
+  revalidatePath("/centre/settings");
 }

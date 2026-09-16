@@ -13,7 +13,7 @@ import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getCambridgeDocuments } from "@/lib/cambridge-documents";
 import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
 import { MaterialPoolShelf } from "@/app/trainer/(hub)/resource-hub/material-pool-shelf";
-import { MaterialPoolToggleCard } from "@/app/dashboard/admin/courses/[id]/material-pool-toggle-card";
+import { MaterialPoolToggleCard } from "@/app/trainer/(hub)/resource-hub/material-pool-toggle-card";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";

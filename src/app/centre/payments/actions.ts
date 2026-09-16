@@ -49,7 +49,7 @@ export async function connectProvider(_prev: ConnectProviderState, formData: For
   if (!provider.adapter) {
     const admin = createAdminClient();
     await admin.from("centers").update({ payment_provider: provider.key, payment_provider_connected_at: null }).eq("id", centerId);
-    revalidatePath("/centre/payments");
+    revalidatePath("/centre/settings");
     return {
       notice: `${provider.name} selected, but Connect has no integration for it yet — card payment stays unavailable until one is built. Bank transfer, cash and invoice are unaffected.`,
     };
@@ -66,7 +66,7 @@ export async function connectProvider(_prev: ConnectProviderState, formData: For
     .eq("id", centerId);
   if (error) return { error: `Could not save that: ${error.message}` };
 
-  revalidatePath("/centre/payments");
+  revalidatePath("/centre/settings");
   return { notice: `${provider.name} connected for this centre.` };
 }
 
@@ -92,7 +92,7 @@ export async function disconnectProvider(_prev: ConnectProviderState, formData: 
     return { error: "Could not disconnect." };
   }
 
-  revalidatePath("/centre/payments");
+  revalidatePath("/centre/settings");
   return { notice: "Disconnected. Card payment is off; the other three methods are unaffected." };
 }
 

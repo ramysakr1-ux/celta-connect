@@ -5,7 +5,7 @@ import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-
 import { OwnedAssignmentsControl } from "@/app/dashboard/admin/courses/[id]/owned-assignments-control";
 import { inviteToCourse, revokeInvitation, type InviteState } from "@/app/dashboard/admin/courses/[id]/invitation-actions";
 import { assignExistingTutor, leaveSecondaryCourse, type AssignTutorState } from "@/app/dashboard/admin/courses/[id]/assign-tutor-actions";
-import type { AssignableTrainer } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
+import type { AssignableTrainer } from "@/app/trainer/(hub)/roster/assign-tutor-panel";
 import { tutorRoleLabel, TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE } from "@/lib/tutor-roles";
 import { Avatar } from "@/components/avatar";
 
