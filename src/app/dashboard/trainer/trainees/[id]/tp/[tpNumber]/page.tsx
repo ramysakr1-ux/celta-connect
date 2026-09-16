@@ -1,14 +1,14 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { getCentreGlossary } from "@/lib/centre-glossary";
-import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-only";
+import { BackLink } from "@/components/back-link";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { formatDateTime } from "@/lib/format-date";
+import { formatDateTime, formatCalendarDate } from "@/lib/format-date";
+import { tpLessonDate } from "@/lib/tp-lesson-date";
 
 export default async function TrainerTpCardPage({
   params,
@@ -52,9 +52,9 @@ export default async function TrainerTpCardPage({
             {trainee.full_name} -- TP{tpNumber}
           </h1>
           <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
-          <Link href={`/dashboard/trainer/trainees/${id}`} className="mt-4 inline-block text-sm text-primary hover:underline">
-            Back to {trainee.full_name}
-          </Link>
+          <div className="mt-4">
+            <BackLink href={`/dashboard/trainer/trainees/${id}`} label={trainee.full_name} />
+          </div>
         </div>
       </div>
     );
@@ -62,10 +62,10 @@ export default async function TrainerTpCardPage({
 
   const feedbackAssist = trainer.course_id ? await getFeedbackAssistState(trainer.course_id, trainer.id) : null;
 
-  const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluation }, { data: feedback }, { data: captureNotes }] =
+  const [{ data: languageAnalysis }, { data: assignment }, { data: selfEvaluation }, { data: feedback }, { data: captureNotes }] =
     await Promise.all([
       supabase.from("tp_language_analyses").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
-      supabase.from("tp_materials").select("*").eq("tp_plan_id", plan.id).order("created_at"),
+      supabase.from("plan_assignments").select("main_lesson_aim, tp_point_id").eq("trainee_id", id).eq("tp_number", tpNumber).maybeSingle(),
       supabase.from("tp_self_evaluations").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
       supabase.from("tp_feedback").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
       // specs/build-spec.md §7's mobile capture feature -- points jotted on
@@ -83,118 +83,32 @@ export default async function TrainerTpCardPage({
 
   const glossary = await getCentreGlossary(trainee.center_id);
 
+  // The band's eyebrow reads TP · date · level · title, the same line the
+  // candidate's own page shows. This page never passed them, so the tutor's
+  // band said "Teaching Practice 4" and nothing else.
+  const lessonDate = trainer.course_id ? await tpLessonDate(supabase, trainer.course_id, id, tpNumber) : null;
+  const { data: point } = assignment?.tp_point_id
+    ? await supabase.from("tp_points").select("tp_coursebook_id").eq("id", assignment.tp_point_id).maybeSingle()
+    : { data: null };
+  const { data: coursebook } = point?.tp_coursebook_id
+    ? await supabase.from("tp_coursebooks").select("level").eq("id", point.tp_coursebook_id).maybeSingle()
+    : { data: null };
+
+  // Feedback writer A1 + A2, high-traffic audit 16 Sep 2026. This page used
+  // to render the lesson plan as five read-only cards -- aims, class
+  // profile, the whole procedure table, language analysis, materials, the
+  // self-evaluation -- and then mount the writer, whose step 1 renders the
+  // plan again with comment affordances and whose step 3 quotes the whole
+  // self-evaluation. Every tutor, every TP, scrolled past two screens of
+  // duplicate before they could write. The writer's step 1 IS the plan.
+  //
+  // What the head card carried -- name, TP, submitted-when, the way back --
+  // is the band's sub-line and the pill above it, so the page is one object
+  // in one register rather than a room card stacked on a document.
   return (
-    <div className="flex flex-col gap-6">
-      <div className="card flex items-center justify-between p-6">
-        <div>
-          <h1 className="font-serif text-xl text-ink">
-            {trainee.full_name} -- TP{tpNumber}
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            {plan.submitted_at ? `Lesson plan submitted ${formatDateTime(plan.submitted_at, timeZone)}` : "Draft in progress"}
-          </p>
-        </div>
-        <Link href={`/dashboard/trainer/trainees/${id}`} className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary">
-          Back to {trainee.full_name}
-        </Link>
-      </div>
-
-      <div className="card p-6">
-        <h2 className="font-serif text-lg text-ink">What they planned</h2>
-        {!plan.submitted_at ? (
-          <p className="mt-2 text-sm text-muted">Not submitted yet -- shown here as a live draft.</p>
-        ) : null}
-        <div className="mt-4 flex flex-col gap-3">
-          <ReadOnlyField label="Main Aims" value={plan.main_aims} />
-          <ReadOnlyField label="Subsidiary Aims" value={plan.subsidiary_aims} />
-          <ReadOnlyField label="Personal Aims" value={plan.personal_aims} />
-          <ReadOnlyField label="Class Profile" value={plan.class_profile} />
-          <ReadOnlyField label="Materials description" value={plan.materials_description} />
-          {plan.anticipated_problems.length > 0 ? (
-            <div>
-              <p className="text-sm text-muted">Anticipated problems & solutions</p>
-              <ul className="mt-1 flex flex-col gap-1">
-                {plan.anticipated_problems.map((p, i) =>
-                  p.problem || p.solution ? (
-                    <li key={i} className="text-ink">
-                      <b>Problem:</b> {p.problem} <b>Solution:</b> {p.solution}
-                    </li>
-                  ) : null
-                )}
-              </ul>
-            </div>
-          ) : null}
-          {plan.procedure.length > 0 ? (
-            <div>
-              <p className="text-sm text-muted">Procedure</p>
-              <table className="mt-2 w-full min-w-[700px] border-collapse text-sm">
-                <thead>
-                  <tr>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {plan.procedure.map((row, i) => (
-                    <tr key={i}>
-                      {/* The stage AIM was dropped here, in the portfolio view
-                          and in the PDF -- it only ever appeared on the
-                          candidate's own copy. The tutor reading this table is
-                          the person assessing staging and aims (4b, 4c, 4e),
-                          so the aim has to be in front of them. Found walking
-                          TP8, 12 Sep 2026, the same shape of gap as the
-                          anticipated problems earlier that day. */}
-                      <td className="border-b border-border-faint p-2 align-top text-ink">
-                        {row.stage}
-                        {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
-                      </td>
-                      <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">{row.procedure}</td>
-                      <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
-                      <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      {languageAnalysis ? (
-        <div className="card p-6">
-          <h2 className="font-serif text-lg text-ink">Language Analysis ({languageAnalysis.type})</h2>
-          <div className="mt-3">
-            <LanguageAnalysisReadOnly analysis={languageAnalysis} />
-          </div>
-        </div>
-      ) : null}
-
-      {materials && materials.length > 0 ? (
-        <div className="card p-6">
-          <h2 className="font-serif text-lg text-ink">Materials</h2>
-          <ul className="mt-2 flex flex-col gap-1 text-sm text-ink">
-            {materials.map((m) => (
-              <li key={m.id}>{m.file_name ?? m.slides_url}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <div className="card p-6">
-        <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
-        {selfEvaluation?.submitted_at ? (
-          <div className="mt-3 flex flex-col gap-3">
-            <ReadOnlyField label="What went to plan?" value={selfEvaluation.what_went_well} />
-            <ReadOnlyField label="What didn't go as planned, and why?" value={selfEvaluation.what_not_as_planned} />
-            <ReadOnlyField label="Evidence of learning" value={selfEvaluation.evidence_of_learning} />
-            <ReadOnlyField label="What I'd do differently" value={selfEvaluation.what_differently} />
-            <ReadOnlyField label="Focus for next TP" value={selfEvaluation.next_tp_focus} />
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-muted">Not submitted yet.</p>
-        )}
+    <div className="flex flex-col gap-4">
+      <div>
+        <BackLink href={`/dashboard/trainer/trainees/${id}`} label={trainee.full_name} />
       </div>
 
       <FeedbackForm
@@ -210,6 +124,10 @@ export default async function TrainerTpCardPage({
         glossary={glossary}
         toneAssistEnabled={feedbackAssist?.enabled ?? false}
         captureNotes={captureNotes ?? []}
+        lessonTitle={assignment?.main_lesson_aim ?? null}
+        lessonWhen={lessonDate ? formatCalendarDate(lessonDate, { weekday: "long", day: "numeric", month: "long" }) : null}
+        level={coursebook?.level ?? null}
+        subLine={`${trainee.full_name} · ${plan.submitted_at ? `Lesson plan submitted ${formatDateTime(plan.submitted_at, timeZone)}` : "Lesson plan still in draft"}`}
       />
 
       {plan.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at ? (
@@ -220,16 +138,6 @@ export default async function TrainerTpCardPage({
           Download PDF record
         </a>
       ) : null}
-    </div>
-  );
-}
-
-function ReadOnlyField({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
-  return (
-    <div>
-      <p className="text-sm text-muted">{label}</p>
-      <p className="whitespace-pre-line text-ink">{value}</p>
     </div>
   );
 }

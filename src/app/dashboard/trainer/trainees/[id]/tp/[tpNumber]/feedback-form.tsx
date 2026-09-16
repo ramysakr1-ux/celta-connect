@@ -95,6 +95,7 @@ export function FeedbackForm({
   lessonTitle = null,
   lessonWhen = null,
   level = null,
+  subLine = null,
   glossary,
 }: {
   planId: string;
@@ -111,6 +112,8 @@ export function FeedbackForm({
   lessonTitle?: string | null;
   lessonWhen?: string | null;
   level?: string | null;
+  /** Under the title: the candidate and when their plan came in. */
+  subLine?: string | null;
   /** The centre's criteria glossary, edited from /centre/criteria-glossary. */
   glossary?: Record<string, string[]>;
 }) {
@@ -207,6 +210,7 @@ export function FeedbackForm({
                 </>
               )
             }
+            subLine={subLine ?? undefined}
             status={<SaveStatusPill role="teal" label={draftPending || submitPending ? "Saving…" : "Draft"} />}
             right={<StepSwitcher step={step} onChange={setStep} />}
           />
