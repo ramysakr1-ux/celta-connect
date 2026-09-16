@@ -56,7 +56,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
     : DEFAULT_TIMEZONE;
 
   return (
-    <div style={{ fontFamily: "Karla, Helvetica, sans-serif", background: SAND, minHeight: "100vh" }}>
+    {/* platform-room: a card in here carries no edge -- Command Center has its
+        own three rules and no room colour (centre side A1, 16 Sep 2026). */}
+    <div className="platform-room" style={{ fontFamily: "Karla, Helvetica, sans-serif", background: SAND, minHeight: "100vh" }}>
       <div style={{ height: 3, background: GOLD }} />
       <div style={{ background: SAND, padding: "16px 40px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
