@@ -13,6 +13,7 @@ import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 import { getTraineeStreamDayOrNext } from "@/lib/trainee-day";
 import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
+import { StreamHero } from "@/app/portfolio/[traineeId]/stream-hero";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { classLessons, levelKey } from "@/lib/volunteer-class-session";
 
@@ -868,25 +869,23 @@ export async function TodayTab({
   // takes the handoff's SHAPE and keeps the app's states, rather than losing
   // four of them to match a prototype that never had to render them.
   const teachTime = teachingToday?.eventTime ? teachingToday.eventTime.slice(0, 5) : null;
-  const heroTitle = teachingToday
-    ? `You teach${teachTime ? ` at ${teachTime}` : " today"} — ${teachingToday.title}`
-    : (genericHero?.big ?? "Your day");
-  const heroPrimary = teachingToday
-    ? teachingToday.joinable && teachingToday.zoomUrl
-      ? { href: teachingToday.zoomUrl, label: "Join the room", external: true }
-      : { href: `/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`, label: "Open your plan", external: false }
-    : genericHero
-      ? { href: genericHero.ctaHref, label: genericHero.ctaLabel, external: false }
+  // "Tomorrow · 09:30" / "Friday · 09:30" -- the time column a lesson that is
+  // not today still gets (Part 5), from whichever future teaching day the
+  // hero is actually about.
+  const laterTeaching = teachingTomorrow ?? teachingNext;
+  const heroLaterTime =
+    !teachingToday && laterTeaching?.eventTime
+      ? {
+          at: laterTeaching.eventTime.slice(0, 5),
+          when:
+            heroKind === "teaching_tomorrow"
+              ? "Tomorrow"
+              : new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "long" }).format(
+                  new Date(`${laterTeaching.date}T12:00:00Z`)
+                ),
+        }
       : null;
-  // design_handoff_trainee_landing pairs a primary with a real second action --
-  // "Join the room" / "Open your plan" -- not a standing Timetable link, which
-  // the design does not have and which the rail already reaches. Timetable is
-  // the fallback only when there is no second action worth offering.
-  const heroSecondary = teachingToday
-    ? teachingToday.joinable && teachingToday.zoomUrl
-      ? { href: `/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`, label: "Open your plan" }
-      : { href: `/portfolio/${traineeId}/timetable`, label: "Timetable" }
-    : { href: `/portfolio/${traineeId}/timetable`, label: "Timetable" };
+
   // The line to the right of "Your day" answers one question -- am I teaching
   // today -- so it takes the hero's label only where that label happens to
   // answer it ("You teach tomorrow", "You teach Friday"). It used to take it
@@ -904,52 +903,54 @@ export async function TodayTab({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* The headline and the buttons only sit side by side once there is room
-          for both. On a 375px phone this row gave the h1 42 pixels of width and
-          200 of height -- one word per line -- because the buttons kept their
-          half of it. Below lg they stack and the headline gets the page --
-          lg rather than sm because the workspace rail returns at md, which is
-          where the headline's share of the row gets tight again. */}
-      <div className="flex flex-col items-start gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-5">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <StreamEyebrow firstName={firstName} dateLabel={dateLabel} serverNowMs={serverNowMs} timeZone={timeZone} />
-          <h1 className="font-serif text-h1 leading-tight text-ink lg:text-display">{heroTitle}</h1>
-          {!teachingToday && genericHero?.bigSub ? (
-            <p className="text-meta text-muted">{genericHero.bigSub}</p>
-          ) : null}
-        </div>
-        <div className="flex shrink-0 items-center gap-2.5">
-          {heroPrimary ? (
-            heroPrimary.external ? (
-              <a
-                href={heroPrimary.href}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-meta font-semibold text-primary-foreground"
-              >
-                <span aria-hidden className="size-[5px] rounded-full bg-gold" />
-                {heroPrimary.label}
-              </a>
-            ) : (
-              <Link
-                href={heroPrimary.href}
-                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-meta font-semibold text-primary-foreground"
-              >
-                <span aria-hidden className="size-[5px] rounded-full bg-gold" />
-                {heroPrimary.label}
-              </Link>
-            )
-          ) : null}
-          {heroSecondary ? (
-            <Link
-              href={heroSecondary.href}
-              className="wash inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-[14px] text-meta font-medium text-ink"
-            >
-              {heroSecondary.label}
-            </Link>
-          ) : null}
-        </div>
-      </div>
+      {/* Course Stream's hero is the glass tile now (trainee spec B4 and
+          Part 5): the one thing on the page that IS today's lesson used to
+          be the only thing on it not wearing the timetable's glass. The
+          eyebrow stays above it, as the spec asks. */}
+      <StreamEyebrow firstName={firstName} dateLabel={dateLabel} serverNowMs={serverNowMs} timeZone={timeZone} />
+      <StreamHero
+        day={streamDay}
+        serverNowMs={serverNowMs}
+        teaching={
+          teachingToday
+            ? {
+                eventId: teachingToday.eventId,
+                tpNumber: teachingToday.tpNumber,
+                letter: teachingToday.teachingOrder
+                  ? String.fromCharCode(64 + teachingToday.teachingOrder)
+                  : null,
+                groupName: teachingToday.groupName,
+                title: teachingToday.title,
+                meta: [
+                  teachingToday.level,
+                  teachingToday.volunteers
+                    ? teachingToday.volunteers.expected === 0
+                      ? `${teachingToday.volunteers.total} volunteer${teachingToday.volunteers.total === 1 ? "" : "s"} · nobody has replied yet`
+                      : `${teachingToday.volunteers.expected} of ${teachingToday.volunteers.total} volunteers coming`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ") || null,
+                planHref: `/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`,
+                zoomUrl: teachingToday.zoomUrl,
+              }
+            : null
+        }
+        generic={
+          genericHero
+            ? {
+                label: genericHero.label,
+                big: genericHero.big,
+                bigSub: genericHero.bigSub,
+                ctaHref: genericHero.ctaHref,
+                ctaLabel: genericHero.ctaLabel,
+                // A lesson that is not today keeps its time column and loses
+                // the Join button (Part 5).
+                time: heroLaterTime,
+              }
+            : null
+        }
+      />
 
       <StreamDayTrack
         day={streamDay}
