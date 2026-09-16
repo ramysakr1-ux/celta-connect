@@ -79,6 +79,11 @@ export default async function CommandCenterMoneyPage() {
     <div className="card flex max-w-[720px] flex-col gap-3.5 p-5">
       <div className="flex items-center justify-between">
         <h2 className="font-serif text-[17px] font-semibold text-ink">Billing &amp; payments</h2>
+        {/* A10: Accounts was reachable from nowhere but a saved URL. Money is
+            its parent, so Money is its door. */}
+        <Link href="/platform/accounts" className="text-[11px] font-bold text-primary hover:underline">
+          Accounts, across every centre
+        </Link>
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted">
           <div className="h-1.5 w-1.5 rounded-full bg-muted" />
           Not connected

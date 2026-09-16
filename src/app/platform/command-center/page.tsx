@@ -216,7 +216,10 @@ export default async function CommandCenterOverviewPage() {
           <div className="card !p-0">
             <div className="flex items-center justify-between px-5 pt-[18px] pb-1.5">
               <h2 className="font-serif text-[17px] font-semibold text-ink">Centres</h2>
-              <Link href="/platform" className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90">
+              <Link
+                href="/platform/command-center/centres/new"
+                className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90"
+              >
                 + Add a centre
               </Link>
             </div>

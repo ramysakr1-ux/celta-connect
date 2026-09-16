@@ -47,6 +47,9 @@ const BORDER = "oklch(0.895 0.012 82)";
 // the list and the href:null branch below becomes unreachable. Keeping the
 // annotation keeps that branch valid for the next unbuilt item.
 const ACTIONS: { label: string; href: string | null }[] = [
+  // A10, 16 Sep 2026: creating a centre was a card on /platform, the second
+  // home. It is here now, where every other "create" already was.
+  { label: "Create a centre", href: "/platform/command-center/centres/new" },
   { label: "Create a course", href: "/centre/courses/new" },
   { label: "Add a role/permission", href: "/centre/roles" },
 ];

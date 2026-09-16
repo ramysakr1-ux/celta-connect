@@ -4,6 +4,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { computeSessionTicks } from "@/lib/volunteer-attendance";
 import { classLessons } from "@/lib/volunteer-class-session";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
+import { ChangeRoleForm } from "@/app/platform/platform-forms";
 
 // Ramy, 25 Aug 2026, rejecting the first build of this page (a flat name-
 // by-name roster): "this is a command center for all my projects, not for
@@ -121,6 +122,17 @@ export default async function CommandCenterPeoplePage() {
 
   return (
     <div className="flex flex-col gap-[22px]">
+      {/* A10, 16 Sep 2026: this was a card on /platform, the platform owner's
+          second home. Setting someone's account-level role is a People
+          question, so it is on the People page. */}
+      <div className="card flex flex-col gap-3.5 p-5">
+        <div>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Change a user&apos;s role</h2>
+          <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
+        </div>
+        <ChangeRoleForm />
+      </div>
+
       <div className="grid grid-cols-4 gap-3">
         {kpis.map((stat, i) => (
           <div key={stat.label} className={`card flex flex-col gap-1.5 px-[18px] py-4`}>

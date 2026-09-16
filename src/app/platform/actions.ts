@@ -43,7 +43,7 @@ export async function createCentreAndFirstAdmin(_prev: CreateCentreState, formDa
     .single();
   if (inviteErr) return { error: `Centre created, but the invite failed: ${inviteErr.message}` };
 
-  revalidatePath("/platform");
+  revalidatePath("/platform/command-center");
   return { createdToken: invite.token, centerName: name };
 }
 
@@ -78,6 +78,6 @@ export async function changeUserRole(_prev: ChangeRoleState, formData: FormData)
   const { error } = await admin.from("profiles").update({ role }).eq("id", target.id);
   if (error) return { error: `Could not change that role: ${error.message}` };
 
-  revalidatePath("/platform");
+  revalidatePath("/platform/command-center");
   return { notice: `${target.full_name} is now ${role}.` };
 }

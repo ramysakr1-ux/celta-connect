@@ -152,7 +152,7 @@ export default async function CommandCenterPage() {
       <div className="frame flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <BackLink href="/platform/command-center" label={"Command center"} />
+          <BackLink href="/platform/command-center/money" label={"Money"} />
           <h1 className="mt-2 font-serif text-2xl text-ink">Accounts</h1>
           <p className="mt-1 text-sm text-muted">Revenue and accounts across every centre — platform-owner only.</p>
         </div>
