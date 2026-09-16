@@ -409,11 +409,14 @@ export default async function PortfolioLayout({
                     tileBg="color-mix(in oklab, oklch(98.5% 0.006 90) 12%, transparent)"
                   />
                 </Link>
-                {/* Every screen, not just the landing. Trainee spec C1 asked
-                    for landing-only; Ramy, 16 Sep 2026, kept the 10 Sep
-                    settlement -- the credit lives in the header band beside
-                    the mark on all seven headers, and that is not reopened. */}
-                <HeaderCredit onDark />
+                {/* Landing only, like every other shell. Ramy first kept the
+                    10 Sep "every screen" settlement here; when it turned out
+                    the trainer hub, Centre Management, Course Admin and
+                    Admissions had all since moved to landing-only, he settled
+                    it the other way: "landing only everywhere, make the
+                    trainee match" (16 Sep 2026). Course Stream is this
+                    shell's landing. */}
+                <HeaderCredit onDark landingPath={`/portfolio/${trainee.id}`} />
                 <div className="min-w-0 flex-1 md:hidden" />
                 <div className="shrink-0 md:order-3">
                   <TraineeHeaderCorner

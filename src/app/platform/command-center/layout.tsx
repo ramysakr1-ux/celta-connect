@@ -71,7 +71,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: "var(--text-h3)", color: INK }}>Connect</div>
           <div style={{ width: 1, height: 18, background: BORDER }} />
           <div style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
-          <HeaderCredit onDark />
+          {/* Landing only: this layout wraps people, money, centres, access
+              and the enter screens too (Ramy, 16 Sep 2026). */}
+          <HeaderCredit onDark landingPath="/platform/command-center" />
         </div>
         <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
           <HeaderClock supabase={createAdminClient()} timeZone={ownerTimeZone} accent={GOLD} tone="light" />

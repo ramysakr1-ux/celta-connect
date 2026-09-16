@@ -35,7 +35,8 @@ export function TraineeHeaderCorner({
   // corner, the page's bottom-right, and a floating position clear of the chat
   // bars, colliding with something in each -- Ramy: "it keeps moving, and it
   // blocks the view, and it's not consistent." It lives in the header band now,
-  // beside the mark, on every screen. See HeaderCredit.
+  // beside the mark -- on each shell's landing only, since 16 Sep 2026. See
+  // HeaderCredit.
   return (
     <div className="flex shrink-0 items-center gap-2.5">
       {/* A course that has ended says so. It used to go on counting "Day 20
