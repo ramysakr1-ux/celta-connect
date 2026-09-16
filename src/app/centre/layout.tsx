@@ -150,16 +150,17 @@ export default async function CentreLayout({ children }: { children: React.React
         </form>
       </div>
 
-      {/* Centre Management's own 3px rule, in bronze -- the quieter half of
-          the coloured-band pattern the owner screen, the volunteer pool and
-          the trainer hub already use. This header is two container rows
-          sitting on the page ground rather than a bar, so the rule goes under
-          the whole block instead of on a header element.
+      {/* The room's own 3px rule -- the quieter half of the coloured-band
+          pattern the owner screen, the volunteer pool and the trainer hub
+          already use. This header is two container rows sitting on the page
+          ground rather than a bar, so the rule goes under the whole block
+          instead of on a header element.
 
-          Bronze, not garnet: garnet already names the ACT in the trainer hub,
-          and one hue should not mean two unrelated things. globals.css calls
-          --color-bronze "the third accent, from the Centre Admin design
-          system" -- it was made for this section. */}
+          C1, 16 Sep 2026: this comment promised a rule in bronze and nothing
+          rendered one -- AreaHeaderRule existed and was used nowhere. It
+          renders here now, in --area-rule, so the rule is the colour of the
+          room you are standing in rather than a fifth hue of its own. That
+          is what the four-room model already says everywhere else. */}
       <AreaHeaderRule />
       <OwnerBranchRow branches={switchable} />
 
