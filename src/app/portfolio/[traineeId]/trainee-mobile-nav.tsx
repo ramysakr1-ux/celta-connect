@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TRAINEE_NAV_TABS, isTraineeTabActive } from "@/app/portfolio/[traineeId]/trainee-mobile-nav-tabs";
+import { MOBILE_TABS, isTabActive } from "@/app/portfolio/[traineeId]/workspace-tabs";
 
+// A1, 16 Sep 2026: this bar had its own six-item list, including Progress
+// (retired 29 Aug) and its own labels. It derives from WORKSPACE_TABS now --
+// same rooms as the rail, in the rail's order, with the timetable as the one
+// phone-only extra and shortLabel where a full name will not fit.
+//
 // specs/build-spec.md §7: the trainee is the one role using this daily for
 // five weeks, some "have no laptop" -- the six-tab TraineeTopNav (built for
 // desktop, gap-6 horizontal) has no room to breathe below ~700px, so this
@@ -21,9 +26,9 @@ export function TraineeMobileNav({ traineeId }: { traineeId: string }) {
       className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-border bg-card md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      {TRAINEE_NAV_TABS.map((tab) => {
+      {MOBILE_TABS.map((tab) => {
         const href = `${base}${tab.href}`;
-        const active = isTraineeTabActive(pathname, base, tab.href);
+        const active = isTabActive(pathname, base, tab);
         return (
           <Link
             key={tab.href}
@@ -33,7 +38,7 @@ export function TraineeMobileNav({ traineeId }: { traineeId: string }) {
             }`}
           >
             <span className={`size-1.5 rounded-full ${active ? "bg-primary" : "bg-transparent"}`} />
-            {tab.label}
+            {tab.shortLabel}
           </Link>
         );
       })}

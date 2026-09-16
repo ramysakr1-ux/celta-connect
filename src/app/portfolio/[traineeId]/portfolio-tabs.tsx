@@ -2,33 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { WORKSPACE_TABS } from "@/app/portfolio/[traineeId]/workspace-tabs";
 
-const TABS = [
-  { href: "", label: "Course Stream", metaKey: "courseStream" },
-  { href: "/pre-course-task", label: "Pre-course task", metaKey: "preCourseTask" },
-  { href: "/resources", label: "Resource Hub", metaKey: "resourceHub" },
-  { href: "/tp", label: "Teaching Practice", metaKey: "tp" },
-  { href: "/assignments", label: "Written Assignments", metaKey: "assignments" },
-  { href: "/celta5", label: "CELTA 5", metaKey: "celta5" },
-  // for-claude-code-progress-tab.md's decision: its own persistent tab, not
-  // folded into CELTA 5 or Teaching Practice -- self-assessment, sign-off,
-  // and observation hours need to be reliably findable, not buried behind
-  // "waiting on you" links. Last position, per for-claude-code-progress-tab-
-  // build.md's tab order.
-  { href: "/progress", label: "Progress", metaKey: "progress" },
-] as const;
+// A1, 16 Sep 2026: this list had seven doors where the candidate's own rail
+// has five -- it kept Pre-course task (dropped from the rail 28 Aug) and
+// Progress (retired 29 Aug). Staff and candidate see the same rooms now.
+const TABS = WORKSPACE_TABS;
 
 export interface PortfolioSidebarMeta {
   // "" (blank) is a deliberate choice for anything with no real data model
   // yet -- checkpoint 2 explicitly avoids fabricating a "N new" style count
   // where there's no read-tracking to back it (see courseStream/resourceHub).
   courseStream: string;
-  preCourseTask: string;
   resourceHub: string;
   tp: string;
   assignments: string;
   celta5: string;
-  progress: string;
 }
 
 // Was a horizontal top tab bar; checkpoint 2 (App Redesign.dc.html 1d --

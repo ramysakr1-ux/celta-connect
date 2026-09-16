@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { RailStatus } from "@/lib/trainee-rail-status";
+import { WORKSPACE_TABS } from "@/app/portfolio/[traineeId]/workspace-tabs";
 
 // for-claude-code-trainee-assessor-card-system.md / Trainee Walkthrough.dc.html:
 // a left "Workspace" rail, not TraineeTopNav's horizontal tabs -- and a
@@ -18,24 +19,7 @@ import type { RailStatus } from "@/lib/trainee-rail-status";
 // dropped as its own sidebar item (it's still a real route, just reached
 // through the Today landing page's hero/Waiting-on-you cards instead of a
 // standing nav entry for something only relevant before day one).
-const SIDEBAR_TABS = [
-  { href: "", label: "Course Stream", alsoMatch: ["/timetable", "/individual-tutorial", "/stage2-tutorial"] },
-  { href: "/resources", label: "Resource Hub" },
-  { href: "/tp", label: "Teaching Practice" },
-  { href: "/assignments", label: "Written Assignments" },
-  // Ramy, 29 Aug 2026: "CELTA 5 at the bottom where you're working on it,
-  // and then something says Progress, and it's exactly the same. We don't
-  // need both."
-  //
-  // He is right, and the Progress page's own comment already conceded it:
-  // "some query logic is duplicated with celta5/page.tsx's trainee branch
-  // -- an accepted tradeoff." Same self-assessment block, same observation
-  // tasks, same observations of experienced teachers. CELTA 5 is the
-  // superset (criteria matrix, the three stages, signatures, attendance,
-  // absences), so it is the one that stays. The /progress route still
-  // exists and still works if linked directly; it is just not a tab.
-  { href: "/celta5", label: "CELTA 5" },
-] as const;
+const SIDEBAR_TABS = WORKSPACE_TABS;
 
 // Desktop only (`hidden md:flex`), same breakpoint TraineeTopNav used --
 // TraineeMobileNav's own bottom bar (unrelated, unchanged) covers narrow

@@ -318,7 +318,6 @@ export default async function PortfolioLayout({
   const assignmentsLeft = Math.max((assignments ?? []).length - assignmentsPassed, 0);
   const sidebarMeta = {
     courseStream: "",
-    preCourseTask: preCourseTotal > 0 ? `${preCourseAnswered}/${preCourseTotal}` : "",
     resourceHub: "",
     tp: `${tpsTaught}/8`,
     assignments: assignmentsLeft > 0 ? `${assignmentsLeft} due` : "",
@@ -326,7 +325,6 @@ export default async function PortfolioLayout({
     // for-claude-code-progress-tab-build.md -- no read-tracking to derive a
     // real count from yet, same "" rule already applied to courseStream/
     // resourceHub above rather than fabricating one.
-    progress: "",
   };
 
   return (
