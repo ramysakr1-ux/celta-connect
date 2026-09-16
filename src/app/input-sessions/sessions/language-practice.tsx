@@ -113,7 +113,7 @@ function LoopCard({ loop }: { loop: (typeof LOOPS)[number] }) {
 export default function LanguagePracticeSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · Input session · ~72 minutes · 2 of 2 — pairs with Drilling Techniques"
+      slug="language-practice"
       title="Language practice — from controlled to free."
       intro="Drilling gets the form right with no real message. This session is about what comes after: three stages of practice activity that gradually hand control from teacher to learner, ending in a loop task that runs all three stages back to back on the same structure."
       agenda={[

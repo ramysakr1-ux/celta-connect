@@ -75,7 +75,7 @@ export default function ProfessionalDevelopmentSession() {
 
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · Group task + takeaway sheet · ~30 minutes, flexible"
+      slug="professional-development"
       title="Professional development & career advice — life after the certificate."
       intro="Lighter than the rest of this course, on purpose. Four groups, four topic cards, each group reads theirs and comes back with two things worth telling the room. Everyone leaves with the full resource sheet below to keep."
     >

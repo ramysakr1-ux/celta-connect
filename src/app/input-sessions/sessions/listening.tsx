@@ -247,7 +247,7 @@ function StagingExample() {
 export default function ListeningSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · loop input"
+      slug="listening"
       title="Listening — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson it teaches: pre-taught vocab, a discussion of how listening should be taught, then listening to a dialogue to check those ideas. Do the tasks first — the debrief afterward is where it gets named."
       agenda={[

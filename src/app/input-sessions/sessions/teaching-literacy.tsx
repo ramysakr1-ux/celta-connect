@@ -158,7 +158,7 @@ function AdaptHandout() {
 export default function TeachingLiteracySession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · Input session · 45 minutes · learner literacy"
+      slug="teaching-literacy"
       title="Teaching literacy — when the barrier isn't the language."
       intro="Some learners can't yet read or write fluently in ANY script, including their own. This session is about noticing that, and adapting — not about ESOL methodology in general, which the rest of this course already covers."
       agenda={[

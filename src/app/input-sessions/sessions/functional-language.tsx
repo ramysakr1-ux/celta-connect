@@ -132,7 +132,7 @@ function StagingExample() {
 export default function FunctionalLanguageSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · language awareness"
+      slug="functional-language"
       title="Functional language — taught the way you'll teach it."
       intro="Functional language isn't one grammar structure — it's a set of phrases that all do the same social job. This session is staged the way a functional lesson is staged. Do the tasks first — naming what happened is what the debrief is for."
       agenda={[

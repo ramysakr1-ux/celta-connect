@@ -139,7 +139,7 @@ function CollocationGroup({ verb, base, correctSet }: { verb: string; base: stri
 export default function TeachingVocabularySession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · language awareness"
+      slug="teaching-vocabulary"
       title="Teaching vocabulary and lexis."
       intro="A word isn't one fact to give — it's several: meaning, form, pronunciation, and how it combines with other words. This session works through a real item using techniques you'll use in your own teaching."
       agenda={[

@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 -- "Classroom Arrangements Input Session",
 // the second of Classroom management's two day-one slots.
@@ -99,14 +100,12 @@ const STAGES: (ChoiceScenario & { stage: string })[] = [
   },
 ];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
 
 export default function ClassroomArrangementsSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · classroom skills · day one, second slot"
+      slug="classroom-arrangements"
       title="Classroom arrangements and material use"
       intro="The room’s shape and what’s on the walls or in trainees’ hands changes what a lesson can do before a single word is spoken. This session is about matching the arrangement to the activity, not defaulting to whatever’s already set up."
       agenda={[

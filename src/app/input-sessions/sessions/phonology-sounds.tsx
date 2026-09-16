@@ -6,6 +6,7 @@ import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exer
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
 import { VoicePicker, speakWithVoice } from "@/components/input-sessions/voice-picker";
+import { GOLD, MUTED, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §2a -- "Phonology: sounds", slug
 // phonology-sounds, 60 minutes. The hands-on script session, and session 2
@@ -77,11 +78,8 @@ const VOICING: { ipa: string; word: string; first: "v" | "u"; last: "v" | "u" }[
   { ipa: "/jet/", word: "yet", first: "v", last: "u" },
 ];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
 const WARM = "oklch(30% 0.042 58)";
-const MUTED = "oklch(51% 0.017 70)";
 
 type Cell = [string, string, string] | null;
 const VOWELS: Cell[] = [
@@ -145,7 +143,7 @@ export default function PhonologySoundsSession() {
 
   return (
     <SessionShell
-      eyebrow="Input session · 60 minutes · phonology, spoken aloud · session 2 of the sounds pair"
+      slug="phonology-sounds"
       title="Phonology: sounds"
       intro="Sounds against letters, the terminology, where consonants are made, voicing, the whole phonemic chart spoken aloud, and then writing in phonemic script until it stops feeling foreign. Every word on this page can be heard, not just read."
       agenda={[

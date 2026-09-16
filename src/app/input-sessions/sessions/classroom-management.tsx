@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, MUTED, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §4 -- "Classroom Management Input Session",
 // the last of the five finished-but-never-ported designs. It has TWO slots on
@@ -128,15 +129,12 @@ const INSTRUCTION_TASKS: { prompt: string; needsICQ: boolean }[] = [
   },
 ];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
-const MUTED = "oklch(51% 0.017 70)";
 
 export default function ClassroomManagementSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 60 minutes core, plus a 30-minute online extension · classroom skills"
+      slug="classroom-management"
       title="Classroom management — think on your feet"
       intro="Classroom management is decisions made in real time, under a clock, with five things happening at once. The activities below put trainees in that position directly — nothing here is a worksheet. Correction gets its own dedicated session."
       agenda={[

@@ -138,7 +138,7 @@ function DebriefWithTrainerNotes() {
 export default function GuidedDiscoverySession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · loop input"
+      slug="guided-discovery"
       title="Guided discovery — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson framework it teaches. Do the tasks first — naming what happened is what the debrief is for."
       agenda={[

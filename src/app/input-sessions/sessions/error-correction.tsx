@@ -6,6 +6,7 @@ import { OrderExercise } from "@/components/input-sessions/order-exercise";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
 import { VideoReveal } from "@/components/input-sessions/video-reveal";
+import { GOLD, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §4 -- "Error Correction Input Session".
 //
@@ -104,14 +105,12 @@ const PRACTICE: { utterance: string; suggestion: string }[] = [
   },
 ];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
 
 export default function ErrorCorrectionSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · classroom skills"
+      slug="error-correction"
       title="Facilitating self & peer correction of oral errors"
       intro="Not whether to correct, but how to get the learner — or the person next to them — to do it. Two sequences to put in order, twelve techniques, then five real errors to choose a technique for."
       agenda={[

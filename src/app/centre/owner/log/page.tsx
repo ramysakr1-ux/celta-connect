@@ -6,6 +6,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDateTime } from "@/lib/format-date";
+import { OwnerRegisterStyles } from "@/app/centre/owner/owner-register";
 
 // The list behind "Owner actions logged -- 3 this month".
 //
@@ -99,52 +100,69 @@ export default async function OwnerActionLogPage({
   const thisMonth = (entries ?? []).filter((e) => e.created_at >= monthStart).length;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre owner</p>
-          <h1 className="font-serif text-2xl text-ink">Owner actions</h1>
-          <p className="max-w-[560px] text-[13px] text-muted">
+    <div className="owner-surface -m-6 flex flex-col">
+      {/* Remainder pass A5: this page is the owner's, not Centre
+          Management's. It used to render in the room idiom -- cream page,
+          plain cards, a grey text link back -- so an owner clicked a figure
+          on their own dark-band screen and landed somewhere else entirely. */}
+      <div className="owner-header flex flex-wrap items-start justify-between gap-6 px-11 py-9">
+        <div className="min-w-0">
+          <p className="owner-eyebrow" style={{ color: "oklch(78% 0.03 75)" }}>
+            Centre owner · Owner actions
+          </p>
+          <h1 className="owner-serif mt-2 text-[33px] font-semibold text-[oklch(98%_0.008_85)]">Owner actions</h1>
+          <p className="mt-2 max-w-[560px] text-[13px] leading-relaxed text-[oklch(74%_0.025_75)]">
             Every intervention an owner makes is recorded — visible logging, not silent senior access.{" "}
             {thisMonth} {thisMonth === 1 ? "action" : "actions"} this month
             {aggregated ? " across all branches" : ""}.
           </p>
         </div>
-        <Link href={`/centre/owner${branch ? `?branch=${branch}` : ""}`} className="text-sm text-muted hover:text-ink">
+        <Link
+          href={`/centre/owner${branch ? `?branch=${branch}` : ""}`}
+          className="owner-serif shrink-0 text-[15px] underline decoration-1 underline-offset-4"
+          style={{ color: "oklch(84% 0.05 75)" }}
+        >
           Back to centre owner
         </Link>
       </div>
 
-      {(entries ?? []).length === 0 ? (
-        <div className="sheet text-sm text-muted">Nothing logged yet.</div>
-      ) : (
-        <div className="card flex flex-col">
-          {(entries ?? []).map((e, i) => (
-            <div
-              key={e.id}
-              className={`hover-ring flex items-start justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
-            >
-              <div className="flex flex-col gap-0.5">
-                <p className="text-sm text-ink">{actionLabel(e.action)}</p>
-                <p className="text-xs text-muted">
-                  {nameOf.get(e.actor_profile_id) ?? "Unknown"}
-                  {aggregated && branchOf.get(e.center_id) ? ` · ${branchOf.get(e.center_id)}` : ""}
-                  {/* Recorded since migration 0263. Only shown when it is
-                      actually a change of value -- most entries are an act,
-                      not an edit, and printing "— → —" against those would
-                      be noise. */}
-                  {e.previous_value !== null || e.new_value !== null
-                    ? ` · ${e.previous_value ?? "not set"} → ${e.new_value ?? "not set"}`
-                    : ""}
-                </p>
+      <div className="flex flex-col gap-[30px] px-11 py-9">
+        {(entries ?? []).length === 0 ? (
+          <div className="owner-card px-7 py-6 text-[13px]" style={{ color: "var(--owner-muted)" }}>
+            Nothing logged yet.
+          </div>
+        ) : (
+          <div className="owner-card flex flex-col">
+            {(entries ?? []).map((e, i) => (
+              <div
+                key={e.id}
+                className="wash flex items-start justify-between gap-4 px-7 py-3.5"
+                style={i > 0 ? { borderTop: "1px solid var(--owner-line)" } : undefined}
+              >
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[13px]">{actionLabel(e.action)}</p>
+                  <p className="text-[11.5px]" style={{ color: "var(--owner-muted)" }}>
+                    {nameOf.get(e.actor_profile_id) ?? "Unknown"}
+                    {aggregated && branchOf.get(e.center_id) ? ` · ${branchOf.get(e.center_id)}` : ""}
+                    {/* Recorded since migration 0263. Only shown when it is
+                        actually a change of value -- most entries are an act,
+                        not an edit, and printing "— → —" against those would
+                        be noise. */}
+                    {e.previous_value !== null || e.new_value !== null
+                      ? ` · ${e.previous_value ?? "not set"} → ${e.new_value ?? "not set"}`
+                      : ""}
+                  </p>
+                </div>
+                <span className="shrink-0 text-[11.5px] tabular-nums" style={{ color: "var(--owner-muted)" }}>
+                  {formatDateTime(e.created_at, zoneByCentre.get(e.center_id) ?? DEFAULT_TIMEZONE)}
+                </span>
               </div>
-              <span className="shrink-0 text-xs text-muted tabular-nums">
-                {formatDateTime(e.created_at, zoneByCentre.get(e.center_id) ?? DEFAULT_TIMEZONE)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
+
+      <OwnerRegisterStyles />
     </div>
   );
 }

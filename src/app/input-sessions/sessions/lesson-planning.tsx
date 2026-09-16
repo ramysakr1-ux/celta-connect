@@ -536,7 +536,7 @@ function LessonPlanDraft() {
 export default function LessonPlanningSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · day two, input 1 · 45 minutes"
+      slug="lesson-planning"
       title="Lesson planning, start to finish, in one input session."
       intro="Warm up on why a plan exists and who reads it, clear the jargon, then draft the real thing on the real TP2 point. Everything a trainee needs for this session lives on this one page."
       agenda={[

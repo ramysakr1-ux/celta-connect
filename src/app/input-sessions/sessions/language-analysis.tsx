@@ -165,7 +165,7 @@ function StagingExample() {
 export default function LanguageAnalysisSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · day five, input 1 · 45 minutes"
+      slug="language-analysis"
       title="Language analysis, start to finish, on the real sheet."
       intro="Warm up on why analysis exists, clear the jargon, then draft the analysis for your own next TP point on the real form — the one that feeds straight into your lesson plan."
       agenda={[

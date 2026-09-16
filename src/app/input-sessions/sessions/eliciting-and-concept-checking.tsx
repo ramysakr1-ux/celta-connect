@@ -325,7 +325,7 @@ function AnswerKey() {
 export default function ElicitingAndConceptCheckingSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · ~60 minutes · language awareness"
+      slug="eliciting-and-concept-checking"
       title="Eliciting and concept checking."
       intro="Two related skills: drawing language out of learners instead of just giving it to them, and checking they've actually understood it once it's there. &quot;Do you understand?&quot; tells you nothing — this session works through better tools for both."
       agenda={[

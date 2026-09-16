@@ -171,7 +171,7 @@ function ReceptiveOrderAndKey() {
 export default function ReceptiveSkillsSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · day two, input 2 · 45 minutes · loop input"
+      slug="receptive-skills"
       title="Receptive skills — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson it teaches: pre-taught vocab, a discussion of how the skill should be taught, reading the text to check those ideas, then detail questions. Do the tasks first — the debrief afterward is where it gets named."
       agenda={[

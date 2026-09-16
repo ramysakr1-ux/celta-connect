@@ -336,7 +336,7 @@ export default function SoundsSession() {
 
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · phonology, spoken aloud"
+      slug="sounds"
       title="Sounds."
       intro="Every phoneme and minimal pair on this page is spoken aloud, not just written as a symbol. Click any word or symbol to hear it."
       agenda={[

@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, TEAL } from "@/components/input-sessions/tokens";
 
 // Written 13 Sep 2026, not ported -- there was no design for it.
 //
@@ -24,8 +25,6 @@ import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/tr
 // Every candidate writes a self-evaluation after every TP, and nothing on
 // the course taught them how. It is assessed eight times.
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
 
 // Real post-TP sentences. Some are plainly one or the other; two are
@@ -137,7 +136,7 @@ const CARRY: { where: string; what: string }[] = [
 export default function EvaluatingYourPlanSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · planning · after TP2"
+      slug="evaluating-your-plan"
       title="Evaluating your plan — what changes in the next one"
       intro="You write a self-evaluation after every teaching practice, and it is assessed every time. Most of them are about how the teacher felt. This one is about whether the document was any good — which is a different question, a different criterion, and the only one that improves the next lesson."
       agenda={[

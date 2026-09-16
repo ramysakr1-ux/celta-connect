@@ -7,6 +7,7 @@ import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exer
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
 import { VideoReveal } from "@/components/input-sessions/video-reveal";
+import { GOLD, MUTED, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §4 -- "Teaching Writing Input Session",
 // the fifth of the never-ported designs; its day-12 card had nothing behind
@@ -111,15 +112,12 @@ const MOVES: ChoiceScenario[] = [
 const CORRECT_ORDER = ["Lead-in", "Preparing to write", "Useful language", "Task", "Feedback"];
 const SHUFFLED = ["Task", "Lead-in", "Feedback", "Useful language", "Preparing to write"];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
-const MUTED = "oklch(51% 0.017 70)";
 
 export default function TeachingWritingSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · loop input"
+      slug="teaching-writing"
       title="Teaching writing — product, process, and the difference it makes"
       intro="This session is staged like the lesson it teaches: prepare ideas, get useful language, do the task, get feedback. Do the stages first — the debrief afterwards is where it gets named. Along the way it builds the one distinction that shapes every writing lesson: product versus process."
       agenda={[

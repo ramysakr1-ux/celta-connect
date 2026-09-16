@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, MUTED, TEAL } from "@/components/input-sessions/tokens";
 
 // Written 13 Sep 2026, not ported -- there was no design for it.
 //
@@ -26,10 +27,7 @@ import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/tr
 // Placed after TP1 on purpose. Trainees have now heard themselves teach; the
 // TTT count lands differently when you have just done it.
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
-const MUTED = "oklch(51% 0.017 70)";
 
 // A real-shaped exchange from a pre-intermediate lesson. Every line is
 // marked T or S; the split is the point, and it is worse than anyone guesses.
@@ -145,7 +143,7 @@ const INVOLVEMENT: { move: string; why: string }[] = [
 export default function RapportAndTeacherTalkSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · classroom skills · after TP1"
+      slug="rapport-and-teacher-talk"
       title="Rapport, and how much you talk"
       intro="Two criteria that tutors write about more than almost any others, and they are the same thing from two sides: what you do with your presence, and what you do with your voice. You have now taught once — this session starts from what that sounded like."
       agenda={[

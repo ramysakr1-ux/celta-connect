@@ -85,7 +85,7 @@ function DrillCard({ n, drill }: { n: string; drill: Drill }) {
 export default function DrillingTechniquesSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · Input session · ~65 minutes · 1 of 2 — pairs with Language Practice"
+      slug="drilling-techniques"
       title="Drilling techniques — getting the mouth to say it right."
       intro="Drilling is mechanical, controlled repetition — no message to communicate, just getting a form or sound out correctly and fluently. Do this session before Language Practice: drilling is the first, most controlled step; the next session moves from there toward learners actually using the language."
       agenda={[

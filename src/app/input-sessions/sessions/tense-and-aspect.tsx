@@ -192,7 +192,7 @@ function StagingExample() {
 export default function TenseAndAspectSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · language awareness"
+      slug="tense-and-aspect"
       title="Tense and aspect."
       intro="Tense marks when. Aspect marks how the speaker views the action — complete, ongoing, or connected to another point in time. Most language-analysis errors trace back to confusing the two."
       agenda={[

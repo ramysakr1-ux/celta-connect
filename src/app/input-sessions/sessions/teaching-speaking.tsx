@@ -5,6 +5,7 @@ import { OrderExercise } from "@/components/input-sessions/order-exercise";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, MUTED, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §4 -- "Teaching Speaking Input Session",
 // one of the five finished designs that had never been ported, so its day-12
@@ -122,15 +123,12 @@ const MONITORING: ChoiceScenario[] = [
 const CORRECT_ORDER = ["Lead-in", "Preparing to speak", "Useful language", "Task", "Feedback"];
 const SHUFFLED = ["Task", "Lead-in", "Feedback", "Useful language", "Preparing to speak"];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
-const MUTED = "oklch(51% 0.017 70)";
 
 export default function TeachingSpeakingSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · loop input"
+      slug="teaching-speaking"
       title="Teaching speaking — staged the way you’ll teach it"
       intro="This session is staged exactly like the lesson it teaches: prepare ideas, get useful language, do the task, get feedback. Do the stages first — the debrief afterwards is where it gets named."
       agenda={[

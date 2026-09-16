@@ -5,6 +5,7 @@ import { SessionShell } from "@/components/input-sessions/session-shell";
 import { OrderExercise } from "@/components/input-sessions/order-exercise";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §4 -- "Giving Feedback on Tasks".
 //
@@ -103,14 +104,12 @@ const LIVE_CARDS: { task: string; watch: string }[] = [
   },
 ];
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
 
 export default function GivingFeedbackOnTasksSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 45 minutes · classroom skills"
+      slug="giving-feedback-on-tasks"
       title="Giving feedback on tasks"
       intro="Not error correction — this is feedback on whether students completed the task itself: did they get the right answer, finish the discussion, reach a decision. Skipping this stage means students never find out if the activity actually worked."
       agenda={[

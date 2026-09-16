@@ -6,6 +6,7 @@ import { MatchTermsExercise } from "@/components/input-sessions/match-terms-exer
 import { RevealCard } from "@/components/input-sessions/reveal-card";
 import { ChoiceScenarioCard, type ChoiceScenario } from "@/components/input-sessions/choice-scenario";
 import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/trainer-notes";
+import { GOLD, MUTED, TEAL } from "@/components/input-sessions/tokens";
 
 // design_handoff_input_sessions_2 §2b -- "Teaching exam classes", slug
 // teaching-exam-classes, 50 minutes, last week.
@@ -15,12 +16,9 @@ import { TrainerNotes, RunningThisSession } from "@/components/input-sessions/tr
 // every trainee gets asked one of those corridor questions in their first
 // month of work -- which is also why a pick locks on the first click.
 
-const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
 const RED = "oklch(45% 0.15 27)";
 const WARM = "oklch(30% 0.042 58)";
 const GOLD_INK = "oklch(44% 0.1 68)";
-const MUTED = "oklch(51% 0.017 70)";
 
 const CEFR: { lvl: string; name: string; hue: string; hint: string; d: string }[] = [
   {
@@ -172,7 +170,7 @@ const CLOSING = [
 export default function TeachingExamClassesSession() {
   return (
     <SessionShell
-      eyebrow="Input session · 50 minutes · the wider profession · last week"
+      slug="teaching-exam-classes"
       title="Teaching exam classes"
       intro="Young learners to C2, Cambridge, IELTS, TOEFL and PTE — what each one is, who it is for, and which you would recommend when a student asks in the corridor. Then the other side of the desk: how teachers become examiners."
       agenda={[

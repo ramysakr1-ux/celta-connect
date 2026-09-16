@@ -86,7 +86,7 @@ function StagingExample() {
 export default function TestTeachTestSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · loop input"
+      slug="test-teach-test"
       title="Test-Teach-Test — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson framework it teaches. Do the tasks first — naming what happened is what the debrief is for."
       agenda={[

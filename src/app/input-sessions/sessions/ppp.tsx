@@ -87,7 +87,7 @@ function StagingExample() {
 export default function PppSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · loop input"
+      slug="ppp"
       title="Presentation, Practice, Production — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson framework it teaches. Do the tasks first — naming what happened is what the debrief is for."
       agenda={[

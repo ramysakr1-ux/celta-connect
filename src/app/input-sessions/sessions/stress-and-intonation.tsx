@@ -357,7 +357,7 @@ export default function StressAndIntonationSession() {
 
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · phonology, spoken aloud"
+      slug="stress-and-intonation"
       title="Stress and intonation."
       intro="Word stress and sentence tune, both spoken aloud, both worth a mark on FOL and LRT. Click any word or line to hear it."
       agenda={[

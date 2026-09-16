@@ -335,7 +335,7 @@ function StageTimer() {
 export default function LessonFrameworkSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · loop input"
+      slug="lesson-framework"
       title="Lesson framework — finding your shape."
       intro="A map of the six lesson shapes trainees will meet across the course, and the one question that decides between them: is the main aim language or skills?"
       agenda={[

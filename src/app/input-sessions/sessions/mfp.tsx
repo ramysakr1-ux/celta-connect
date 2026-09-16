@@ -434,7 +434,7 @@ function StagingExample() {
 export default function MfpSession() {
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · language awareness"
+      slug="mfp"
       title="MFPA — meaning, form, pronunciation, appropriacy."
       intro="Every target item needs all four covered before it's ready to teach. This session gives each real weight — writing CCQs that isolate meaning, analysing form precisely, not skipping pronunciation, and checking when a form is actually the right choice."
       agenda={[

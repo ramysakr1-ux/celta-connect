@@ -223,7 +223,7 @@ export default function ConnectedSpeechSession() {
 
   return (
     <SessionShell
-      eyebrow="Connect · Resource Hub · 45 minutes · phonology, spoken aloud"
+      slug="connected-speech"
       title="Connected speech."
       intro="Five features, one example each: strong and weak forms, linking, intrusion, assimilation, elision."
       agenda={[
