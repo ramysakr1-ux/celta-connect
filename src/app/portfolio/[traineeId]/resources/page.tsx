@@ -28,7 +28,6 @@ import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambri
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { formatCalendarDate } from "@/lib/format-date";
 import { RoomHead } from "@/components/room-head";
-import { CATEGORY_STYLE } from "@/lib/timetable-category-style";
 
 type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 
@@ -684,25 +683,26 @@ export default async function ResourceHubPage({
                   ) : null}
                 </>
               );
-              // Trainee spec B2: a filmed observation IS a timetable event --
-              // it is tied 1:1 to a slot on the candidate's own week -- so it
-              // wears the timetable's glass like every other session, tinted
-              // `iw` (watched alone, in your own time). B3: the spine is on
-              // top, not the side; the gold left edge that used to mark a
-              // waiting task is gone, and the pill on the row still says it.
-              const filmedStyle = CATEGORY_STYLE.iw;
-              const style = {
-                background: `linear-gradient(160deg, ${filmedStyle.tintFrom}, ${filmedStyle.tintTo})`,
-                border: "1px solid oklch(100% 0 0 / 0.8)",
-                borderTop: `3px solid ${isActive ? "oklch(60% 0.11 70)" : filmedStyle.accent}`,
-              };
+              // Trainee spec B2 lists the filmed-observation session card
+              // among the things that should wear the timetable's glass, and
+              // it was built that way and looked at on 16 Sep 2026: five
+              // full-width rows, each with the tile's 3px spine, read as a
+              // ladder of dark rules rather than as tiles. The tile idiom is
+              // for a card that stands alone -- the hero, a booking page, a
+              // block on the board -- not for a stacked list. So these stay
+              // the plain card, one padding and one hover like every other
+              // list in the Hub (B7). Flagged to Ramy rather than left silent.
+              //
+              // B3 still applies: the gold left edge that used to mark a
+              // waiting task is gone, and the row's own pill says it instead.
+              const style = { background: "var(--color-card)" };
               // A session with no recording is not a link -- there is
               // nothing behind it yet, and a dead click reads as broken.
               return s.hasRecording && s.id ? (
                 <li key={s.id}>
                   <Link
                     href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
-                    className="lift hover-ring flex flex-col overflow-hidden rounded-[10px]"
+                    className="lift hover-ring flex flex-col overflow-hidden rounded-[10px] border border-border"
                     style={style}
                   >
                     {row}
