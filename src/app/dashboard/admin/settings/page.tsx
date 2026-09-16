@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ASSIGNMENT_ORDER } from "@/lib/assignment-info";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { disconnectGoogleDrive, updateAutoTagCriteria } from "@/app/dashboard/admin/settings/actions";
@@ -121,11 +122,18 @@ export default async function AdminSettingsPage({
 
   // Just the count, for the door below (remainder pass A1). The briefs
   // themselves are edited on their own page.
-  const { count: briefCount } = await admin
+  //
+  // Counted against ASSIGNMENT_ORDER rather than by rows: the table also
+  // holds the Plagiarism Reflection, which is a centre sanction and not one
+  // of Cambridge's four, so a plain row count read "5 of 4 uploaded".
+  const { data: briefRows } = await admin
     .from("assignment_templates")
-    .select("id", { count: "exact", head: true })
+    .select("assignment_type")
     // single-centre: a branch owns its own brief wording
     .eq("center_id", profile.center_id);
+  const briefCount = new Set(
+    (briefRows ?? []).map((r) => r.assignment_type).filter((t) => (ASSIGNMENT_ORDER as readonly string[]).includes(t))
+  ).size;
 
   const trainerNameById = new Map((centerTrainers ?? []).map((t) => [t.id, t.full_name]));
   const supervisorOptions = (centerTrainers ?? []).map((t) => ({ id: t.id, name: t.full_name }));
@@ -314,7 +322,7 @@ export default async function AdminSettingsPage({
               <span className="text-body font-semibold text-primary">Open</span>
             </div>
             <p className="mt-2 text-body text-muted">
-              Your centre&apos;s own wording for each of the four written assignments — {briefCount ?? 0} of 4 uploaded.
+              Your centre&apos;s own wording for each of the four written assignments — {briefCount} of {ASSIGNMENT_ORDER.length} uploaded.
               Edited on their own page, because a brief is a document rather than a setting.
             </p>
           </Link>
