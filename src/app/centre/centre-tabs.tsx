@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { RoomTabs, RoomTabLink } from "@/components/room-tabs";
+import { ROOM_PRIMARY } from "@/components/room-head";
 import { usePathname } from "next/navigation";
 import { activeRoomKey } from "@/components/room-pills";
 
@@ -63,36 +65,20 @@ export function CentreTabs({
   // after the assessor history -- you had to scroll past the whole centre to
   // find the one thing you came to do.
   return (
-    // The tab list scrolls and the New course button never shrinks, so the two
-    // stop fighting over a phone's width -- 7px of overflow was enough to make
-    // the whole page slide sideways, and the button was the piece refusing to
-    // give (it is shrink-0, rightly: an action that has already been moved once
-    // for being hard to find should not now become hard to read).
-    <nav className="flex items-center justify-between gap-4 border-b border-border pb-0.5">
-      <div className="scroll-row flex min-w-0 gap-2">
-      {tabs.map((tab) => {
-        const active = pathname.startsWith(tab.href);
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`-mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium transition-colors duration-150 ${
-              active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
-            }`}
-          >
-            {tab.label}
+    <RoomTabs
+      action={
+        canCreateCourse ? (
+          <Link href="/centre/courses/new" className={ROOM_PRIMARY}>
+            New course
           </Link>
-        );
-      })}
-      </div>
-      {canCreateCourse ? (
-        <Link
-          href="/centre/courses/new"
-          className="mb-1 shrink-0 rounded-[6px] bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
-        >
-          New course
-        </Link>
-      ) : null}
-    </nav>
+        ) : null
+      }
+    >
+      {tabs.map((tab) => (
+        <RoomTabLink key={tab.href} href={tab.href} active={pathname.startsWith(tab.href)}>
+          {tab.label}
+        </RoomTabLink>
+      ))}
+    </RoomTabs>
   );
 }

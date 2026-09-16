@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { RoomTabs, RoomTabLink } from "@/components/room-tabs";
 import { usePathname } from "next/navigation";
 
 /**
@@ -12,7 +12,8 @@ import { usePathname } from "next/navigation";
  * arrived at Referral requests and the only way onward was the browser's
  * back button.
  *
- * Same shape as Centre Management's tabs, deliberately: a room is a room.
+ * The same component as Centre Management's tabs since 16 Sep 2026 (B4),
+ * having been the same markup copied: a room is a room.
  * No "Overview" tab, because the dropped pill above already goes there.
  *
  * Email delivery is not here. Ramy, 1 Sep 2026, on six tabs being too many:
@@ -31,21 +32,12 @@ export function AdmissionsTabs() {
   const pathname = usePathname() ?? "";
 
   return (
-    <nav className="flex flex-wrap gap-2 border-b border-border pb-0.5">
-      {TABS.map((tab) => {
-        const active = pathname.startsWith(tab.href);
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`-mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium transition-colors duration-150 ${
-              active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <RoomTabs>
+      {TABS.map((tab) => (
+        <RoomTabLink key={tab.href} href={tab.href} active={pathname.startsWith(tab.href)}>
+          {tab.label}
+        </RoomTabLink>
+      ))}
+    </RoomTabs>
   );
 }

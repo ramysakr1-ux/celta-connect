@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { RoomTabs, RoomTabButton } from "@/components/room-tabs";
 
 const TABS = [
   { key: "profile", label: "Profile & Drive" },
@@ -48,22 +49,16 @@ export function SettingsTabs({
 
   return (
     <div className="flex flex-col gap-5">
-      <nav className="flex gap-2 border-b border-border pb-0.5">
+      {/* B4: the same row as the two route-based ones -- these tabs switch a
+          section of this page rather than navigating, which is the only
+          difference that survives. */}
+      <RoomTabs>
         {allTabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setSection(tab.key)}
-            className={`wash -mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
-              section === tab.key
-                ? "border-primary text-primary"
-                : "border-transparent text-muted hover:text-ink"
-            }`}
-          >
+          <RoomTabButton key={tab.key} active={section === tab.key} onClick={() => setSection(tab.key)}>
             {tab.label}
-          </button>
+          </RoomTabButton>
         ))}
-      </nav>
+      </RoomTabs>
       <div className="card p-6">{content}</div>
     </div>
   );
