@@ -444,6 +444,168 @@ export default async function TpDetailPage({
       </div>
     ) : null;
 
+  // The plan as the candidate submitted it, for a member of staff -- aims,
+  // procedure, language analysis, materials, self-evaluation. Option 1 of the
+  // feedback-writer finding (Ramy, 16 Sep 2026): while the writer is mounted
+  // its own step 1 shows the same plan with comment affordances, so for the
+  // tutor these sit folded behind one line rather than two screens above the
+  // form. An assessor, or a tutor reading submitted feedback, gets them open
+  // as before; the candidate never sees this branch at all.
+  const writerMounted = Boolean(plan) && isEditableStaff && !feedback?.submitted_at;
+  const planSheets = (
+    <>
+      {/* Decorative teal/garnet alternation down this stack of plain
+          content sheets ("Brief" above stays teal) -- no status
+          meaning of its own, same rule as everywhere else. */}
+      <div id="plan" className="sheet sheet-garnet scroll-mt-20 p-6">
+        <h2 className="font-serif text-lg text-ink">What they planned</h2>
+        {!plan ? (
+          <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
+        ) : (
+          <>
+            {!plan.submitted_at ? (
+              <p className="mt-2 text-sm text-muted">Not submitted yet -- shown here as a live draft.</p>
+            ) : null}
+            <div className="mt-4 flex flex-col gap-3">
+              <ReadOnlyField label="Main Aims" value={plan.main_aims} />
+              <ReadOnlyField label="Subsidiary Aims" value={plan.subsidiary_aims} />
+              <ReadOnlyField label="Personal Aims" value={plan.personal_aims} />
+              <ReadOnlyField label="Class Profile" value={plan.class_profile} />
+              <ReadOnlyField label="Materials description" value={plan.materials_description} />
+              {plan.anticipated_problems.length > 0 ? (
+                <div>
+                  <p className="text-sm text-muted">Anticipated problems & solutions</p>
+                  <ul className="mt-1 flex flex-col gap-1">
+                    {plan.anticipated_problems.map((p, i) =>
+                      p.problem || p.solution ? (
+                        <li key={i} className="text-ink">
+                          <b>Problem:</b> {p.problem} <b>Solution:</b> {p.solution}
+                        </li>
+                      ) : null
+                    )}
+                  </ul>
+                </div>
+              ) : null}
+              {plan.procedure.length > 0 ? (
+                <div>
+                  <p className="text-sm text-muted">Procedure</p>
+                  <div className="mt-2 overflow-x-auto">
+                    <table className="w-full border-collapse text-sm">
+                      <colgroup>
+                        <col className="w-[116px]" />
+                        <col />
+                        <col className="w-[74px]" />
+                        <col className="w-[52px]" />
+                      </colgroup>
+                      <thead>
+                        <tr>
+                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
+                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
+                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {plan.procedure.map((row, i) => (
+                          <tr key={i}>
+                            <td className="border-b border-border-faint p-2 align-top text-ink">
+                              {row.stage}
+                              {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
+                            </td>
+                            <td className="border-b border-border-faint p-2 align-top whitespace-pre-line text-ink">
+                              {row.procedure}
+                            </td>
+                            <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
+                            <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {(() => {
+                    const total = sumProcedureMinutes(plan.procedure);
+                    const overBy = total - TP_LESSON_LENGTH_MINUTES;
+                    return (
+                      <div className="mt-1.5 flex items-center justify-between gap-3">
+                        <span className="text-xs text-muted">
+                          {plan.procedure.length} stages · {total} minutes planned for a {TP_LESSON_LENGTH_MINUTES} minute lesson
+                        </span>
+                        {overBy > 0 ? (
+                          <span className="text-xs font-semibold text-status-warning-text">Over by {overBy} min</span>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : null}
+            </div>
+          </>
+        )}
+      </div>
+
+      {languageAnalysis ? (
+        <div id="analysis" className="sheet scroll-mt-20 p-6">
+          <h2 className="font-serif text-lg text-ink">Language Analysis ({languageAnalysis.type})</h2>
+          <div className="mt-3">
+            <LanguageAnalysisReadOnly analysis={languageAnalysis} />
+          </div>
+        </div>
+      ) : null}
+
+      {materials && materials.length > 0 ? (
+        <div id="materials" className="sheet sheet-garnet scroll-mt-20 p-6">
+          <h2 className="font-serif text-lg text-ink">Materials</h2>
+          <ul className="mt-2 flex flex-col gap-2 text-sm text-ink">
+            {materials.map((m) => {
+              const shared = sharedMaterialIds.has(m.id);
+              return (
+                <li key={m.id} className="flex items-center justify-between gap-3">
+                  <span>{m.file_name ?? m.slides_url}</span>
+                  {isEditableStaff ? (
+                    <form action={shared ? unshareMaterialWithStudents : shareMaterialWithStudents}>
+                      <input type="hidden" name="tp_material_id" value={m.id} />
+                      <input type="hidden" name="trainee_id" value={traineeId} />
+                      <input type="hidden" name="tp_number" value={tpNumber} />
+                      <button
+                        type="submit"
+                        className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                          shared
+                            ? "border-border bg-status-neutral-bg text-ink"
+                            : "border-border text-muted wash hover:text-primary"
+                        }`}
+                      >
+                        {shared ? "Shared with students ✓" : "Share with students"}
+                      </button>
+                    </form>
+                  ) : shared ? (
+                    <span className="rounded-full border border-border bg-status-neutral-bg px-2.5 py-1 text-xs font-medium text-ink">
+                      Shared with students ✓
+                    </span>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+
+      <div id="self" className="sheet scroll-mt-20 p-6">
+        <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
+        {selfEvaluation?.submitted_at ? (
+          <div className="mt-3 flex flex-col gap-3">
+            <ReadOnlyField label="What went to plan?" value={selfEvaluation.what_went_well} />
+            <ReadOnlyField label="What didn't go as planned, and why?" value={selfEvaluation.what_not_as_planned} />
+            <ReadOnlyField label="What evidence did you see that the learners had learnt?" value={selfEvaluation.evidence_of_learning} />
+            <ReadOnlyField label="What would you do differently if you taught it again?" value={selfEvaluation.what_differently} />
+            <ReadOnlyField label="What do you want to work on in the next TP?" value={selfEvaluation.next_tp_focus} />
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-muted">Not submitted yet.</p>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className="grid grid-cols-1 gap-6">
       <div className="flex min-w-0 flex-col gap-4">
@@ -603,155 +765,21 @@ export default async function TpDetailPage({
 
         {isStaff ? (
           <>
-            {/* Decorative teal/garnet alternation down this stack of plain
-                content sheets ("Brief" above stays teal) -- no status
-                meaning of its own, same rule as everywhere else. */}
-            <div id="plan" className="sheet sheet-garnet scroll-mt-20 p-6">
-              <h2 className="font-serif text-lg text-ink">What they planned</h2>
-              {!plan ? (
-                <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
-              ) : (
-                <>
-                  {!plan.submitted_at ? (
-                    <p className="mt-2 text-sm text-muted">Not submitted yet -- shown here as a live draft.</p>
-                  ) : null}
-                  <div className="mt-4 flex flex-col gap-3">
-                    <ReadOnlyField label="Main Aims" value={plan.main_aims} />
-                    <ReadOnlyField label="Subsidiary Aims" value={plan.subsidiary_aims} />
-                    <ReadOnlyField label="Personal Aims" value={plan.personal_aims} />
-                    <ReadOnlyField label="Class Profile" value={plan.class_profile} />
-                    <ReadOnlyField label="Materials description" value={plan.materials_description} />
-                    {plan.anticipated_problems.length > 0 ? (
-                      <div>
-                        <p className="text-sm text-muted">Anticipated problems & solutions</p>
-                        <ul className="mt-1 flex flex-col gap-1">
-                          {plan.anticipated_problems.map((p, i) =>
-                            p.problem || p.solution ? (
-                              <li key={i} className="text-ink">
-                                <b>Problem:</b> {p.problem} <b>Solution:</b> {p.solution}
-                              </li>
-                            ) : null
-                          )}
-                        </ul>
-                      </div>
-                    ) : null}
-                    {plan.procedure.length > 0 ? (
-                      <div>
-                        <p className="text-sm text-muted">Procedure</p>
-                        <div className="mt-2 overflow-x-auto">
-                          <table className="w-full border-collapse text-sm">
-                            <colgroup>
-                              <col className="w-[116px]" />
-                              <col />
-                              <col className="w-[74px]" />
-                              <col className="w-[52px]" />
-                            </colgroup>
-                            <thead>
-                              <tr>
-                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {plan.procedure.map((row, i) => (
-                                <tr key={i}>
-                                  <td className="border-b border-border-faint p-2 align-top text-ink">
-                                    {row.stage}
-                                    {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
-                                  </td>
-                                  <td className="border-b border-border-faint p-2 align-top whitespace-pre-line text-ink">
-                                    {row.procedure}
-                                  </td>
-                                  <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
-                                  <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        {(() => {
-                          const total = sumProcedureMinutes(plan.procedure);
-                          const overBy = total - TP_LESSON_LENGTH_MINUTES;
-                          return (
-                            <div className="mt-1.5 flex items-center justify-between gap-3">
-                              <span className="text-xs text-muted">
-                                {plan.procedure.length} stages · {total} minutes planned for a {TP_LESSON_LENGTH_MINUTES} minute lesson
-                              </span>
-                              {overBy > 0 ? (
-                                <span className="text-xs font-semibold text-status-warning-text">Over by {overBy} min</span>
-                              ) : null}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    ) : null}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {languageAnalysis ? (
-              <div id="analysis" className="sheet scroll-mt-20 p-6">
-                <h2 className="font-serif text-lg text-ink">Language Analysis ({languageAnalysis.type})</h2>
-                <div className="mt-3">
-                  <LanguageAnalysisReadOnly analysis={languageAnalysis} />
-                </div>
-              </div>
-            ) : null}
-
-            {materials && materials.length > 0 ? (
-              <div id="materials" className="sheet sheet-garnet scroll-mt-20 p-6">
-                <h2 className="font-serif text-lg text-ink">Materials</h2>
-                <ul className="mt-2 flex flex-col gap-2 text-sm text-ink">
-                  {materials.map((m) => {
-                    const shared = sharedMaterialIds.has(m.id);
-                    return (
-                      <li key={m.id} className="flex items-center justify-between gap-3">
-                        <span>{m.file_name ?? m.slides_url}</span>
-                        {isEditableStaff ? (
-                          <form action={shared ? unshareMaterialWithStudents : shareMaterialWithStudents}>
-                            <input type="hidden" name="tp_material_id" value={m.id} />
-                            <input type="hidden" name="trainee_id" value={traineeId} />
-                            <input type="hidden" name="tp_number" value={tpNumber} />
-                            <button
-                              type="submit"
-                              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                                shared
-                                  ? "border-border bg-status-neutral-bg text-ink"
-                                  : "border-border text-muted wash hover:text-primary"
-                              }`}
-                            >
-                              {shared ? "Shared with students ✓" : "Share with students"}
-                            </button>
-                          </form>
-                        ) : shared ? (
-                          <span className="rounded-full border border-border bg-status-neutral-bg px-2.5 py-1 text-xs font-medium text-ink">
-                            Shared with students ✓
-                          </span>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ) : null}
-
-            <div id="self" className="sheet scroll-mt-20 p-6">
-              <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
-              {selfEvaluation?.submitted_at ? (
-                <div className="mt-3 flex flex-col gap-3">
-                  <ReadOnlyField label="What went to plan?" value={selfEvaluation.what_went_well} />
-                  <ReadOnlyField label="What didn't go as planned, and why?" value={selfEvaluation.what_not_as_planned} />
-                  <ReadOnlyField label="What evidence did you see that the learners had learnt?" value={selfEvaluation.evidence_of_learning} />
-                  <ReadOnlyField label="What would you do differently if you taught it again?" value={selfEvaluation.what_differently} />
-                  <ReadOnlyField label="What do you want to work on in the next TP?" value={selfEvaluation.next_tp_focus} />
-                </div>
-              ) : (
-                <p className="mt-2 text-sm text-muted">Not submitted yet.</p>
-              )}
-            </div>
+            {writerMounted ? (
+              <details className="group">
+                <summary className="sheet wash flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3.5">
+                  <span className="text-sm font-semibold text-ink">
+                    The plan, as submitted
+                    <span className="ml-2 font-normal text-muted">aims · procedure · language analysis · materials · self-evaluation</span>
+                  </span>
+                  <span className="text-xs text-muted group-open:hidden">Also on step 1 of the writer · show</span>
+                  <span className="hidden text-xs text-muted group-open:inline">hide</span>
+                </summary>
+                <div className="mt-6 flex flex-col gap-6">{planSheets}</div>
+              </details>
+            ) : (
+              planSheets
+            )}
 
             {plan && (isEditableStaff || feedback?.submitted_at) ? (
               <FeedbackForm
