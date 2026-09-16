@@ -13,8 +13,10 @@ import { RoomHead, ROOM_BUTTON } from "@/components/room-head";
 
 
 
-// From the design file, verbatim.
-const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
+// From the design file, verbatim -- except the admin column, which the polish
+// pass §3 (16 Sep 2026) widened to the same measure as a time band: "Deadlines
+// were visually outweighing TP." The day gutter stays 64px.
+const GRID_COLUMNS = "64px minmax(118px, 1fr) repeat(9, minmax(118px, 1fr))";
 const ROW_HEIGHT = 108;
 /** The card inside a cell: 108px row less the cell's 5px padding top and
  *  bottom. "Every populated cell is one identical tile (one grid column,
@@ -245,9 +247,9 @@ export function ReadOnlyTimetableBoard({
       </div>
 
       {/* Desktop board. Columns, row height and padding are the design
-          file's own values, not approximations -- 64px gutter, 150px admin
-          column, nine bands at a 118px floor that stretch to fill. Hidden
-          below 900px, where the day list takes over. */}
+          file's own values, not approximations -- 64px gutter, then ten
+          columns (admin plus nine bands) at a 118px floor that stretch to
+          fill. Hidden below 900px, where the day list takes over. */}
       <div
         className="hidden overflow-x-auto rounded-[12px] min-[900px]:block"
         style={{
@@ -257,8 +259,8 @@ export function ReadOnlyTimetableBoard({
             "linear-gradient(135deg, oklch(97% 0.02 190 / 0.5), oklch(97.5% 0.018 85 / 0.6) 45%, oklch(96% 0.025 70 / 0.4))",
         }}
       >
-        {/* The design's own grid, not a table: 64px day gutter, 150px admin
-            column, nine bands at a 118px floor that stretch to fill. Measured
+        {/* The design's own grid, not a table: 64px day gutter, then the
+            admin column and nine bands sharing one measure. Measured
             from his file rather than approximated -- cards come out 108px
             tall, which is what a like-for-like comparison against his page
             produces. */}

@@ -83,7 +83,17 @@ export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: s
   const meta = [lesson.point.level, lesson.slotIndex ? `slot ${lesson.slotIndex}` : null, lesson.slotTime].filter(Boolean).join(" · ");
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-[6px] border border-border bg-card transition-colors" style={{ boxShadow: `inset 0 3px 0 ${edge}` }}>
+    // Polish pass §5: an owed lesson lifts on hover and keeps its coloured
+    // top edge. It lifts 2px, the app's one "this opens" motion, rather than
+    // §5's 3px -- the motion rule settled on a single value and a per-screen
+    // variant is the drift it was written to stop. The card's own Write
+    // feedback button is the door; the lift says the card is live work.
+    <div className="lift rise relative flex flex-col overflow-hidden rounded-[6px] border border-border bg-card">
+      {/* The edge is a 3px bar rather than an inset box-shadow: an inline
+          boxShadow would beat .lift's own hover shadow, so the card would
+          rise with no shadow under it. Same 3px, same place, and the lift
+          shadow now lands (§5). */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: edge }} />
       <div className="flex flex-col gap-3 px-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-2">
           <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">

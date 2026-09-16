@@ -6,7 +6,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AnnouncementComposer } from "@/app/trainer/(hub)/announcements/composer";
 import { ScheduledPanel, type ScheduledRowData } from "@/app/trainer/(hub)/announcements/scheduled-panel";
-import { formatCalendarDateObject } from "@/lib/format-date";
+import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
 
 function addDays(iso: string, days: number): string {
@@ -189,6 +189,7 @@ export default async function AnnouncementsPage() {
       keepOnDuplicate: b.keep_on_duplicate,
       anchorEventId: b.anchor_event_id ?? "",
       anchorEventTitle: anchor?.title ?? null,
+      anchorEventWeekday: anchor ? formatCalendarDate(anchor.event_date, { weekday: "short" }) : null,
       anchorOffsetDays: b.anchor_offset_days ?? 0,
       fireDate,
       heldAt: b.held_at,

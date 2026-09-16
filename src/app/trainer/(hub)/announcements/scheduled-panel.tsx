@@ -31,6 +31,8 @@ export interface ScheduledRowData {
   anchorEventId: string;
   /** null when the row isn't anchored to a timetable event at all. */
   anchorEventTitle: string | null;
+  /** The anchor's own day, for the chip's "· Mon" (polish pass §7). */
+  anchorEventWeekday: string | null;
   anchorOffsetDays: number;
   fireDate: string | null;
   heldAt: string | null;
@@ -117,12 +119,36 @@ function ReadRow({
 }) {
   const held = Boolean(row.heldAt);
   return (
-    <div className={`hover-ring mx-2.5 flex flex-col gap-1.5 rounded-[10px] px-3 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
-      <div className="flex items-center gap-2">
-        <p className="text-body font-semibold text-ink">{row.title}</p>
+    // Polish pass §7: no hover lift. These rows do not open -- Edit and Post
+    // now are their own controls below, and a row-wide lift promised a door
+    // that is not there.
+    <div className={`mx-2.5 flex flex-col gap-1.5 rounded-[10px] px-3 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
+      <div className="flex flex-wrap items-center gap-2">
+        {/* §7: the timetable anchor leads. This page's one idea is that
+            nothing here is dated and everything hangs off an event, and that
+            was buried mid-sentence in the meta line underneath. The chip
+            takes the room's own accent -- the handoff's "the message's spine
+            colour" has nothing behind it in the data, there is no per-message
+            colour on a broadcast. */}
+        <span
+          className="shrink-0 rounded-full px-2.5 py-0.5 text-label font-bold whitespace-nowrap"
+          style={
+            row.anchorEventTitle
+              ? {
+                  background: "color-mix(in oklab, var(--hub-accent) 14%, var(--color-card))",
+                  color: "var(--hub-accent-deep)",
+                }
+              : { background: "var(--color-surface-muted)", color: "var(--color-muted)" }
+          }
+        >
+          {row.anchorEventTitle
+            ? `${row.anchorEventTitle}${row.anchorEventWeekday ? ` · ${row.anchorEventWeekday}` : ""}`
+            : "Not anchored"}
+        </span>
+        <p className="min-w-0 text-body font-semibold text-ink">{row.title}</p>
         {held ? <span className="pill pill-neutral">Held</span> : null}
       </div>
-      <p className="text-label text-muted">
+      <p className="text-micro font-semibold tracking-[0.06em] text-muted uppercase">
         {/* A row with no anchor event is never fired by the cron
             (announcements-cron.ts only looks at anchored rows), so it waits
             for a person -- the case the CELTA 5 Stage 3 sign-off notice is
