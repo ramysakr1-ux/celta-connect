@@ -16,14 +16,23 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { RoomHead } from "@/components/room-head";
 
+// Remainder pass A1 and A2 (16 Sep 2026). Two faults, one list.
+//
+// A1: "Assignment briefs" sat third here with `external: true` -- it left the
+// page while the other six scrolled it, looked identical to them, and the
+// observer could never mark it active. It is a card in the page now, where a
+// door out of the room can look like one.
+//
+// A2: the page renders eight sections and this held seven. Assignment marking
+// criteria was on screen and unreachable from the rail.
 const SETTINGS_NAV_BASE = [
   { href: "#centre-profile", label: "Centre profile" },
   { href: "#auto-tagging", label: "TP feedback tagging" },
   { href: "#google-drive", label: "Google Drive" },
-  { href: "/dashboard/admin/assignment-briefs", label: "Assignment briefs", external: true },
   { href: "#feedback-style", label: "Feedback style" },
   { href: "#tutors", label: "Tutors" },
   { href: "#malpractice-outcomes", label: "Malpractice outcomes" },
+  { href: "#assignment-criteria", label: "Assignment marking criteria" },
 ] as const;
 
 const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
@@ -60,14 +69,10 @@ export default async function AdminSettingsPage({
     .maybeSingle();
 
   // Whether a Drive is actually connected, rather than whether one was just
-  // connected in this request's query string.
-  const { data: driveRow } = await admin
-    .from("center_google_connections")
-    .select("center_id")
-    // single-centre: per-centre configuration; there is no editing every branch's settings at once
-    .eq("center_id", profile.center_id)
-    .maybeSingle();
-  const driveConnected = Boolean(driveRow);
+  // connected in this request's query string. Remainder pass B1: this was a
+  // second round trip to the same table with the same filter, for a fact the
+  // row above already carries.
+  const driveConnected = Boolean(connection);
 
   const { data: styleExamples } = await admin
     .from("feedback_style_examples")
@@ -113,6 +118,14 @@ export default async function AdminSettingsPage({
     // single-centre: per-centre configuration; there is no editing every branch's settings at once
     admin.from("profiles").select("id, full_name").eq("center_id", profile.center_id).eq("role", "trainer"),
   ]);
+
+  // Just the count, for the door below (remainder pass A1). The briefs
+  // themselves are edited on their own page.
+  const { count: briefCount } = await admin
+    .from("assignment_templates")
+    .select("id", { count: "exact", head: true })
+    // single-centre: a branch owns its own brief wording
+    .eq("center_id", profile.center_id);
 
   const trainerNameById = new Map((centerTrainers ?? []).map((t) => [t.id, t.full_name]));
   const supervisorOptions = (centerTrainers ?? []).map((t) => ({ id: t.id, name: t.full_name }));
@@ -175,9 +188,9 @@ export default async function AdminSettingsPage({
         <SettingsNav items={settingsNavItems} />
 
         <div className="flex flex-col gap-5">
-          <div id="centre-profile" className="card card-gold scroll-mt-6 p-5">
+          <div id="centre-profile" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Centre profile</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               Your centre&apos;s name and Cambridge-assigned centre number -- shown on every course,
               the final report, and your own record pages.
             </p>
@@ -196,7 +209,7 @@ export default async function AdminSettingsPage({
 
           <div id="auto-tagging" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">TP feedback tagging</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               As a trainer types a feedback bullet, matching CELTA criteria codes land on it
               automatically -- no clicking through the criteria panel. On by default; the manual
               &quot;+ criteria&quot; panel always stays available either way.
@@ -212,9 +225,9 @@ export default async function AdminSettingsPage({
             </form>
           </div>
 
-          <div id="google-drive" className="card card-gold scroll-mt-6 p-5">
+          <div id="google-drive" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Google Drive</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               Connect your centre&apos;s Google Drive so CELTA5 records can be kept in sync with your
               official template document.
             </p>
@@ -258,7 +271,7 @@ export default async function AdminSettingsPage({
 
           <div id="feedback-style" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Feedback Style Examples</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               Real feedback snippets used to guide the AI tone-cleanup feature on trainer feedback
               fields. Added once, reused automatically on every rewrite.
             </p>
@@ -267,9 +280,9 @@ export default async function AdminSettingsPage({
             </div>
           </div>
 
-          <div id="tutors" className="card card-gold scroll-mt-6 p-5">
+          <div id="tutors" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               Who&apos;s teaching each course at this centre, their role, trainer-in-training status, and
               (on online or mixed-mode courses) evidence of online teaching experience.
             </p>
@@ -280,7 +293,7 @@ export default async function AdminSettingsPage({
 
           <div id="malpractice-outcomes" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Malpractice outcomes</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               Handbook 9.2.4 requires your own internal policy on plagiarism/malpractice penalties --
               Connect never invents one. Add each outcome your policy names, and whether it fails the
               assignment and/or refers the case to your own procedure. A tutor deciding a case picks
@@ -291,9 +304,24 @@ export default async function AdminSettingsPage({
             </div>
           </div>
 
-          <div id="assignment-criteria" className="card card-gold scroll-mt-6 p-5">
+          {/* Remainder pass A1: this used to be an entry in the rail with
+              `external: true`, sitting between six anchors that scroll and
+              looking exactly like them. A door out of the room belongs in the
+              page, where it can look like a door. */}
+          <Link href="/dashboard/admin/assignment-briefs" className="card lift hover-ring scroll-mt-6 p-5 no-underline">
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h2 className="font-serif text-h3 font-semibold text-ink">Assignment briefs</h2>
+              <span className="text-body font-semibold text-primary">Open</span>
+            </div>
+            <p className="mt-2 text-body text-muted">
+              Your centre&apos;s own wording for each of the four written assignments — {briefCount ?? 0} of 4 uploaded.
+              Edited on their own page, because a brief is a document rather than a setting.
+            </p>
+          </Link>
+
+          <div id="assignment-criteria" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Assignment marking criteria</h2>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-body text-muted">
               The fixed brief and word count stay as they are -- this is the grey area, where centres and tutors
               reasonably differ on what counts. Shipped with Cambridge&apos;s own defaults; add or deactivate to match
               your own standardisation. Deactivating keeps it on any record it&apos;s already part of, it just stops
