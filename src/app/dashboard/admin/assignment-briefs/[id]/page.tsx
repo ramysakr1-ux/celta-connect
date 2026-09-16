@@ -11,6 +11,7 @@ import {
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { countSubmissionsAgainstBrief } from "@/lib/assignment-brief";
 import { holdsCentre } from "@/lib/branch-scope";
+import { RoomHead } from "@/components/room-head";
 
 export default async function AdminAssignmentBriefDetailPage({
   params,
@@ -54,9 +55,16 @@ export default async function AdminAssignmentBriefDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">{ASSIGNMENT_INFO[template.assignment_type].title}</h1>
-        <p className="mt-2 text-muted">Status: {template.generation_status}</p>
+      <RoomHead
+        eyebrow="Course admin &middot; Assignment briefs"
+        title={ASSIGNMENT_INFO[template.assignment_type].title}
+        lede={`Status: ${template.generation_status}`}
+      >
+        {template.generation_status === "pending" || template.generation_status === "failed" ? (
+          <AssignmentGenerateButton templateId={template.id} />
+        ) : null}
+      </RoomHead>
+      <div>
         {pinnedSubmissions > 0 ? (
           <p
             className="mt-2 rounded-[6px] px-3 py-2 text-sm"
@@ -75,11 +83,6 @@ export default async function AdminAssignmentBriefDetailPage({
           </p>
         ) : null}
         {template.generation_error ? <p className="mt-2 text-sm text-destructive">{template.generation_error}</p> : null}
-        {template.generation_status === "pending" || template.generation_status === "failed" ? (
-          <div className="mt-4">
-            <AssignmentGenerateButton templateId={template.id} />
-          </div>
-        ) : null}
       </div>
 
       {template.generation_status === "completed" ? (

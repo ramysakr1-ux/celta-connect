@@ -1,10 +1,10 @@
-import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveBranchScope } from "@/lib/branch-scope";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatCalendarDate } from "@/lib/format-date";
+import { RoomHead } from "@/components/room-head";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI"] as const;
 
@@ -99,13 +99,12 @@ export default async function ThisWeeksInterviewsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <BackLink href="/dashboard/admissions" label="Admissions" />
-        <h1 className="mt-2 font-serif text-xl text-ink">This week&apos;s interviews</h1>
-        <p className="mt-1 text-sm text-muted">
-          {formatCalendarDate(weekStart)} &ndash; {formatCalendarDate(weekEnd, { year: "numeric" })}
-        </p>
-      </div>
+      <RoomHead
+        back={{ href: "/dashboard/admissions", label: "Admissions" }}
+        eyebrow="Admissions &middot; This week"
+        title="This week&rsquo;s interviews"
+        lede={`${formatCalendarDate(weekStart)} – ${formatCalendarDate(weekEnd, { year: "numeric" })}`}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         {days.map((d) => (

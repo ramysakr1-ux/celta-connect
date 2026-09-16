@@ -16,6 +16,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { CreateCourseForm } from "@/components/create-course-form";
+import { RoomHead } from "@/components/room-head";
 
 // The new-course wizard, on its own screen.
 //
@@ -93,16 +94,18 @@ export default async function NewCoursePage() {
             the person opening it does not hold -- the very thing the move was
             meant to stop. It says what it is now: the act of bringing a
             course into existence, which is Centre Management's. */}
-        <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">Connect · centre management</p>
-        <h1 className="font-serif text-[34px] leading-[1.15] font-semibold text-ink">
-          A new course, from dates to first tutor.
-        </h1>
-        <p className="max-w-[62ch] text-sm leading-relaxed text-muted text-pretty">
+        <RoomHead
+          eyebrow="Connect · centre management"
+          title="A new course, from dates to first tutor."
+          lede={
+            <>
           Five steps: what the course is, how teaching practice is delivered, its dates and weekly pattern, a first
           tutor, then a review before you launch. Creating a course is the centre&apos;s decision — running it is
           the course administrator&apos;s, and it passes to them the moment this is launched. Nothing here is
-          final: everything except the delivery mode can be changed afterwards.
-        </p>
+              final: everything except the delivery mode can be changed afterwards.
+            </>
+          }
+        />
       </div>
 
       {/* 1.15fr / 1fr, the design's split for the setup screen. */}

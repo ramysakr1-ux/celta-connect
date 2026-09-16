@@ -205,9 +205,6 @@ export default async function CommandCenterPage() {
         </div>
       </div>
 
-      {/* Purely decorative teal/garnet alternation across these plain stacked
-          cards below -- none carries a status of its own, same treatment as
-          the Centre Management pilot (src/app/centre/page.tsx). */}
       <div className="card">
         <div className="border-b border-border-faint px-5 py-3.5">
           <h2 className="font-serif text-lg text-ink">Accounts ({centresList.length})</h2>

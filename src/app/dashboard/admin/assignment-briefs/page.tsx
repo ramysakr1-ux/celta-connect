@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssignmentBriefUploadForm } from "@/components/assignment-templates/upload-form";
 import { adminUploadAssignmentBrief } from "@/app/dashboard/admin/assignment-briefs/actions";
+import { RoomHead } from "@/components/room-head";
 
 export default async function AdminAssignmentBriefsPage() {
   const admin = await requireRole("admin");
@@ -30,19 +30,17 @@ export default async function AdminAssignmentBriefsPage() {
       {/* Reachable from Settings' own nav, and directly from the Centre
           material panel now too (dashboard/admin/page.tsx) -- a real way
           back either way. */}
-      <BackLink href="/dashboard/admin" label={"Courses"} />
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Assignment Briefs</h1>
-        <p className="mt-2 text-muted">
-          Upload your centre&apos;s own brief for each written assignment as a PDF -- Claude splits it
-          into sections you can review and edit before publishing it to trainees.
+      <RoomHead
+        back={{ href: "/dashboard/admin", label: "Course administration" }}
+        eyebrow="Course admin &middot; Assignment briefs"
+        title="Assignment Briefs"
+        lede="Upload your centre's own brief for each written assignment as a PDF -- Claude splits it into sections you can review and edit before publishing it to trainees."
+      />
+      {formatWarning ? (
+        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-sm text-status-warning-text">
+          {formatWarning}
         </p>
-        {formatWarning ? (
-          <p className="mt-3 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-sm text-status-warning-text">
-            {formatWarning}
-          </p>
-        ) : null}
-      </div>
+      ) : null}
 
       {ASSIGNMENT_ORDER.map((type, index) => {
         const template = templateByType.get(type);

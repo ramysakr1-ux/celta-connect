@@ -1,5 +1,4 @@
 import { redirect, notFound } from "next/navigation";
-import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext, canViewAtCentre, canAtCentre } from "@/lib/auth/centre-roles";
@@ -11,6 +10,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
 import { PricingForm } from "@/app/centre/courses/[id]/pricing-form";
+import { RoomHead } from "@/components/room-head";
 
 
 // for-claude-code-course-admin-final-scope.md: "A view-only drill-in to any
@@ -82,28 +82,19 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <BackLink href="/centre" label="All courses" />
-      </div>
-
-      <div className="card p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-              {[course.course_code, course.delivery_mode].filter(Boolean).join(" · ")}
-            </p>
-            <h1 className="mt-1 font-serif text-xl text-ink">{course.name}</h1>
-            {/* Never an ISO date in front of a person -- this read
-                "2026-08-31 → 2026-09-25". */}
-            <p className="mt-1 text-sm text-muted">
-              {courseDay(course.start_date)} &rarr; {courseDay(course.end_date)}
-            </p>
-          </div>
-          {/* A3: one pill, the same three tints as both landings -- this was
-              grey whatever the course was doing. */}
-          <CourseStatePill state={state} detail={standing} />
-        </div>
-      </div>
+      {/* B1: the head is out of its card -- a head is the page speaking, not
+          a panel on it. Never an ISO date in front of a person: the dates
+          line read "2026-08-31 → 2026-09-25". */}
+      <RoomHead
+        back={{ href: "/centre", label: "All courses" }}
+        eyebrow={[course.course_code, course.delivery_mode].filter(Boolean).join(" · ")}
+        title={course.name}
+        lede={`${courseDay(course.start_date)} → ${courseDay(course.end_date)}`}
+      >
+        {/* A3: one pill, the same three tints as both landings -- this was
+            grey whatever the course was doing. */}
+        <CourseStatePill state={state} detail={standing} />
+      </RoomHead>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-6">

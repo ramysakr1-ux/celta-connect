@@ -5,6 +5,7 @@ import { GenerateButton } from "@/components/tp-library/generate-button";
 import { TpNumberTabs } from "@/components/tp-library/tp-number-tabs";
 import { updateTpPoint, setTpPointStatus } from "@/app/dashboard/admin/coursebooks/actions";
 import { holdsCentre } from "@/lib/branch-scope";
+import { RoomHead } from "@/components/room-head";
 
 export default async function AdminCoursebookDetailPage({
   params,
@@ -34,20 +35,18 @@ export default async function AdminCoursebookDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">
-          {coursebook.title} ({coursebook.level})
-        </h1>
-        <p className="mt-2 text-muted">Status: {coursebook.generation_status}</p>
-        {coursebook.generation_error ? (
-          <p className="mt-2 text-sm text-destructive">{coursebook.generation_error}</p>
-        ) : null}
+      <RoomHead
+        eyebrow="Course admin &middot; TP points library"
+        title={`${coursebook.title} (${coursebook.level})`}
+        lede={`Status: ${coursebook.generation_status}`}
+      >
         {coursebook.generation_status === "pending" || coursebook.generation_status === "failed" ? (
-          <div className="mt-4">
-            <GenerateButton coursebookId={coursebook.id} />
-          </div>
+          <GenerateButton coursebookId={coursebook.id} />
         ) : null}
-      </div>
+      </RoomHead>
+      {coursebook.generation_error ? (
+        <p className="text-sm text-destructive">{coursebook.generation_error}</p>
+      ) : null}
 
       <TpNumberTabs
         points={points ?? []}

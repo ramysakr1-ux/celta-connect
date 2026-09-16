@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveBranchScope } from "@/lib/branch-scope";
@@ -9,6 +8,7 @@ import { PipelineFunnel, type PipelinePerson } from "@/app/dashboard/admissions/
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { formatDate, formatCalendarDate } from "@/lib/format-date";
+import { RoomHead } from "@/components/room-head";
 
 // Admissions Pipeline.dc.html: "A course fills in stages, and each stage
 // leaks... this is the one screen that shows where the leak is while
@@ -40,10 +40,11 @@ export default async function AdmissionsPipelinePage({
   if (!courses || courses.length === 0) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="card p-6">
-          <h1 className="font-serif text-xl text-ink">Admissions pipeline</h1>
-          <p className="mt-2 text-sm text-muted">No course is currently accepting applications.</p>
-        </div>
+        <RoomHead
+          eyebrow="Admissions &middot; Pipeline"
+          title="Admissions pipeline"
+          lede="No course is currently accepting applications."
+        />
       </div>
     );
   }
@@ -130,23 +131,13 @@ export default async function AdmissionsPipelinePage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-xl text-ink">Admissions pipeline</h1>
-            <p className="mt-1 text-sm text-muted">
-              A course fills in stages, and each stage leaks. This is where the leak is, while there&apos;s still time to
-              do something about it.
-            </p>
-          </div>
-          <BackLink href="/dashboard/admissions" label={"Back to admissions"} />
-        </div>
-      </div>
+      <RoomHead
+        back={{ href: "/dashboard/admissions", label: "Admissions" }}
+        eyebrow="Admissions &middot; Pipeline"
+        title="Admissions pipeline"
+        lede="A course fills in stages, and each stage leaks. This is where the leak is, while there's still time to do something about it."
+      />
 
-      {/* Purely decorative teal/garnet alternation down this page's stack of
-          plain cards -- same treatment as the Centre Management pilot
-          (src/app/centre/page.tsx). None of these carry a status of their
-          own. */}
       <div className="card flex flex-col gap-4 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">

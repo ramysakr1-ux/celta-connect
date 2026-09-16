@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { CoursebookList } from "@/components/tp-library/coursebook-list";
 import { CoursebookUploadForm } from "@/components/tp-library/coursebook-upload-form";
 import { adminCreateCoursebookRecord } from "@/app/dashboard/admin/coursebooks/actions";
+import { RoomHead } from "@/components/room-head";
 
 export default async function AdminCoursebooksPage() {
   const admin = await requireRole("admin");
@@ -22,13 +22,12 @@ export default async function AdminCoursebooksPage() {
       {/* Only reached from the Centre material panel now (the persistent
           AdminTabs nav that used to link here is gone -- see dashboard/
           admin/page.tsx). A real way back, so this can't be a dead end. */}
-      <BackLink href="/dashboard/admin" label={"Courses"} />
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">TP Points Library</h1>
-        <p className="mt-2 text-muted">
-          Upload coursebook PDFs to generate a reusable bank of TP points, tiered by density band.
-        </p>
-      </div>
+      <RoomHead
+        back={{ href: "/dashboard/admin", label: "Course administration" }}
+        eyebrow="Course admin &middot; TP points library"
+        title="TP Points Library"
+        lede="Upload coursebook PDFs to generate a reusable bank of TP points, tiered by density band."
+      />
 
       <div>
         <h2 id="coursebooks" className="scroll-mt-6 font-serif text-lg text-ink">Coursebooks</h2>

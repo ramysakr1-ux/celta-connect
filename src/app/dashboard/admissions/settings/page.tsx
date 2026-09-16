@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -12,6 +11,7 @@ import {
   toggleAdmissionsAiShadowMode,
   toggleAdmissionsAiAutobook,
 } from "@/app/dashboard/admissions/actions";
+import { RoomHead } from "@/components/room-head";
 
 const COVERAGE_AREAS = [
   "motivation_suitability",
@@ -57,13 +57,13 @@ export default async function AdmissionsSettingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <BackLink href="/dashboard/admissions" label="Admissions" />
-        <h1 className="mt-2 font-serif text-xl text-ink">Admissions settings</h1>
-        <p className="mt-1 text-muted">
-          Extended writing task prompts and the fixed interview question bank. Imported once, edited any time, carried
-          into every future course.
-        </p>
+      <RoomHead
+        back={{ href: "/dashboard/admissions", label: "Admissions" }}
+        eyebrow="Admissions &middot; Settings"
+        title="Admissions settings"
+        lede="Extended writing task prompts and the fixed interview question bank. Imported once, edited any time, carried into every future course."
+      />
+      <div>
         {/* Email preview and delivery used to hang off the Admissions
             landing page as two more text links in a row of seven. They are
             things you check rather than daily work, so they sit here with
@@ -83,10 +83,6 @@ export default async function AdmissionsSettingsPage() {
         </div>
       </div>
 
-      {/* Purely decorative teal/garnet alternation down this page's stack of
-          plain cards -- same treatment as the Centre Management pilot
-          (src/app/centre/page.tsx). None of these carry a status of their
-          own. */}
       <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">AI reading of the selection task</h2>
         <p className="text-sm text-muted">

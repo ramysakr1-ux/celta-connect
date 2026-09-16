@@ -7,6 +7,7 @@ import { formatDate as fmtDateTime } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
+import { RoomHead } from "@/components/room-head";
 
 const STATUS_LABEL: Record<string, string> = {
   sent: "Sent",
@@ -64,10 +65,7 @@ export default async function EmailDeliveryPage({
 
   if (!courses || courses.length === 0) {
     return (
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Email delivery</h1>
-        <p className="mt-2 text-sm text-muted">No courses at your centre yet.</p>
-      </div>
+      <RoomHead eyebrow="Admissions &middot; Email delivery" title="Email delivery" lede="No courses at your centre yet." />
     );
   }
 
@@ -153,9 +151,6 @@ export default async function EmailDeliveryPage({
         </div>
       ) : null}
 
-      {/* Purely decorative teal/garnet alternation against the header card
-          above -- same treatment as the Centre Management pilot
-          (src/app/centre/page.tsx). Neither carries a status of its own. */}
       <div className="card overflow-hidden !p-0">
         <div className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] border-b border-border bg-surface-muted px-4 py-2.5 text-[10.5px] font-bold tracking-[0.05em] text-muted uppercase">
           <div>To</div>

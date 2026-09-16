@@ -15,6 +15,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
 import { holdsCentre } from "@/lib/branch-scope";
+import { RoomHead } from "@/components/room-head";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
@@ -103,15 +104,7 @@ export default async function CourseAdminDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card flex items-start justify-between gap-4 p-6">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-            {calendarDay(course.start_date)} &ndash; {calendarDay(course.end_date)}
-            {weekOf ? ` · ${weekOf}` : ""}
-          </p>
-          <h1 className="mt-0.5 font-serif text-xl text-ink">{course.name}</h1>
-        </div>
-        {/* Duplicate is deliberately NOT here.
+      {/* Duplicate is deliberately NOT here.
         
             Centre Management's course list states the rule -- "duplicate-
             course lives on this overview (the course list), not inside an
@@ -125,7 +118,15 @@ export default async function CourseAdminDetailPage({
             Course Admin's landing), and neither of the places you go to
             work ON one course does. Duplicating is a decision about the
             set of courses, not about the course you are standing in. */}
-      </div>
+      <RoomHead
+        eyebrow={
+          <>
+            {calendarDay(course.start_date)} &ndash; {calendarDay(course.end_date)}
+            {weekOf ? ` · ${weekOf}` : ""}
+          </>
+        }
+        title={course.name}
+      />
 
       {/* Admissions pipeline */}
       <div className={`card flex flex-col gap-4 p-6 ${belowMinimum ? "card-amber" : ""}`}>

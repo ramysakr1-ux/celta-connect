@@ -1,10 +1,10 @@
-import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveBranchScope } from "@/lib/branch-scope";
 import { ReferralRequestRow } from "@/app/dashboard/admissions/referral-requests/referral-request-row";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { RoomHead } from "@/components/room-head";
 
 // build-spec.md §14: "Where nobody spans the two, it becomes a request the
 // receiving branch accepts." This is that acceptance screen -- the
@@ -71,13 +71,12 @@ export default async function ReferralRequestsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <BackLink href="/dashboard/admissions" label="Admissions" />
-        <h1 className="mt-2 font-serif text-xl text-ink">Referral requests</h1>
-        <p className="mt-1 text-sm text-muted">
-          Candidates sibling branches are asking to refer here, and requests this branch has sent out.
-        </p>
-      </div>
+      <RoomHead
+        back={{ href: "/dashboard/admissions", label: "Admissions" }}
+        eyebrow="Admissions &middot; Referral requests"
+        title="Referral requests"
+        lede="Candidates sibling branches are asking to refer here, and requests this branch has sent out."
+      />
 
       {/* Plain cards: none of these carries a status of its own, and a card's
           edge inside a room carries the room's colour or nothing (centre

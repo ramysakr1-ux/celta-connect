@@ -10,6 +10,7 @@ import { Avatar } from "@/components/avatar";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate, formatCalendarDate } from "@/lib/format-date";
+import { RoomHead } from "@/components/room-head";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -199,22 +200,17 @@ export default async function AdmissionsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card flex items-center justify-between p-6">
-        <div>
-          <h1 className="font-serif text-xl text-ink">Admissions</h1>
-          <p className="mt-2 text-muted">The applicant pipeline for every course at your centre.</p>
-        </div>
-        {/* The five links that used to sit here are the room's tab row now
-            (admissions-tabs.tsx). They were listed on this page alone, and
-            none of the five repeated them, so every one of them was a dead
-            end. Email preview and delivery moved into Settings -- they are
-            things you check, not a daily job. */}
-      </div>
+      {/* The five links that used to sit here are the room's tab row now
+          (admissions-tabs.tsx). They were listed on this page alone, and
+          none of the five repeated them, so every one of them was a dead
+          end. Email preview and delivery moved into Settings -- they are
+          things you check, not a daily job. */}
+      <RoomHead
+        eyebrow="Course admin &middot; Admissions"
+        title="Admissions"
+        lede="The applicant pipeline for every course at your centre."
+      />
 
-      {/* Purely decorative teal/garnet alternation down this page's stack of
-          plain cards -- same treatment as the Centre Management pilot
-          (src/app/centre/page.tsx). None of these carry a status of their
-          own. */}
       <div className="card overflow-hidden !p-0">
         <table className="table-plain w-full">
           <thead>

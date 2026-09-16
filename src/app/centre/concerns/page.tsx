@@ -8,6 +8,7 @@ import { resolveBranchScope } from "@/lib/branch-scope";
 import { CentreConcernReplyForm } from "@/app/centre/concerns/reply-form";
 import { formatDate } from "@/lib/format-date";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { RoomHead } from "@/components/room-head";
 
 // The far end of the internal complaints route.
 //
@@ -70,15 +71,17 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Centre management &middot; Concerns</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Sent past the tutors</h1>
-        <p className="max-w-[68ch] text-sm text-muted">
-          Concerns a candidate chose to raise with the centre rather than with their tutors. No tutor on the course can
-          read these, reply to them, or tell that one exists &mdash; Administration Handbook &sect;16.1 asks for recourse
-          beyond the teaching team, and this is it. {open.length > 0 ? `${open.length} waiting for a reply.` : "All answered."}
-        </p>
-      </div>
+      <RoomHead
+        eyebrow="Centre management &middot; Concerns"
+        title="Sent past the tutors"
+        lede={
+          <>
+            Concerns a candidate chose to raise with the centre rather than with their tutors. No tutor on the course can
+            read these, reply to them, or tell that one exists &mdash; Administration Handbook &sect;16.1 asks for recourse
+            beyond the teaching team, and this is it. {open.length > 0 ? `${open.length} waiting for a reply.` : "All answered."}
+          </>
+        }
+      />
 
       {(concerns ?? []).length === 0 ? (
         <p className="rounded-[var(--radius-panel)] border border-border bg-card px-[22px] py-5 text-sm text-muted">

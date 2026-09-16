@@ -14,6 +14,7 @@ import { Avatar } from "@/components/avatar";
 import { formatCalendarDate, formatDateTime } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { RoomHead } from "@/components/room-head";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's
@@ -102,15 +103,11 @@ export default async function CentreRolesPage() {
 
   return (
     <div className="flex flex-col gap-[26px]">
-      <div className="max-w-[900px]">
-        <h1 className="font-serif text-[26px] leading-tight text-ink">
-          The manager wants to see the money without being able to break anything.
-        </h1>
-        <p className="mt-2 text-[13px] text-muted">
-          One person does admissions and chases payment; another wants a view of enrolment and cash and should change
-          nothing. That is two roles, not one shared login.
-        </p>
-      </div>
+      <RoomHead
+        eyebrow="Centre management · Roles"
+        title="The manager wants to see the money without being able to break anything."
+        lede="One person does admissions and chases payment; another wants a view of enrolment and cash and should change nothing. That is two roles, not one shared login."
+      />
 
       <RoleStrip holders={holders} overrides={ctx.overrides} customRoles={ctx.customRoles} customCapabilities={ctx.customCapabilities} />
 

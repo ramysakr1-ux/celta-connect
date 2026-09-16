@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
@@ -17,6 +16,7 @@ import { PlatformAccessTab, type PlatformAccessRow, type AccessLogRow } from "@/
 import { ProviderList } from "@/app/centre/payments/provider-list";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
 import { computeGrantStatus } from "@/lib/platform-support";
+import { RoomHead } from "@/components/room-head";
 
 // for-claude-code-centre-settings.md: the real Centre Settings hub,
 // replacing the old placeholder link from Centre Admin's "Open settings"
@@ -155,16 +155,15 @@ export default async function CentreSettingsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <div className="flex items-center gap-3">
-          <BackLink href="/centre" label="Centre management" />
-          <span className="rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
-            Centre settings
-          </span>
-        </div>
-        <h1 className="mt-2 font-serif text-xl text-ink">Settings</h1>
-        <p className="mt-1 text-muted">Things true of the whole centre, across every course.</p>
-      </div>
+      {/* A5, 16 Sep 2026: this carried a BackLink to Centre management AND a
+          teal "CENTRE SETTINGS" pill. The dropped room pill above already
+          says Centre management and the tab row already says Settings -- two
+          labels for where you are, both redundant with the chrome. */}
+      <RoomHead
+        eyebrow="Centre management · Settings"
+        title="Settings"
+        lede="Things true of the whole centre, across every course."
+      />
 
       <SettingsTabs
         profile={

@@ -11,6 +11,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 import { CourseStatePill, computeCourseState } from "@/components/course-state-pill";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { sumByCurrency, formatTotals, formatCurrency, isMixed } from "@/lib/money-by-currency";
+import { RoomHead, ROOM_BUTTON, ROOM_PRIMARY } from "@/components/room-head";
 
 // Centre Admin's Overview.
 //
@@ -270,36 +271,27 @@ export default async function CentreOverviewPage({
           Each is gated on the capability it actually needs, so a Centre
           manager -- read-only by design, "the absence of an edit button
           everywhere is the whole design" -- sees neither. */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-            {shown
-              ? `${shown.name}${shown.centerNumber ? ` · Cambridge centre ${shown.centerNumber}` : ""}`
-              : multiBranch
-                ? `${branches.length} branches`
-                : `${branches[0]?.name ?? ""}${branches[0]?.centerNumber ? ` · Cambridge centre ${branches[0].centerNumber}` : ""}`}
-          </p>
-          <h1 className="mt-1 font-serif text-[26px] text-ink">{heading}</h1>
-        </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          {can(ctx.roles, "payments.view", ctx.overrides) ? (
-            <a
-              href={`/centre/financials.csv${branch ? `?branch=${branch}` : ""}`}
-              className="wash rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              Export financials
-            </a>
-          ) : null}
-          {can(ctx.roles, "roles.grant", ctx.overrides) ? (
-            <Link
-              href="/centre/roles"
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              Invite people
-            </Link>
-          ) : null}
-        </div>
-      </div>
+      <RoomHead
+        eyebrow={
+          shown
+            ? `${shown.name}${shown.centerNumber ? ` · Cambridge centre ${shown.centerNumber}` : ""}`
+            : multiBranch
+              ? `${branches.length} branches`
+              : `${branches[0]?.name ?? ""}${branches[0]?.centerNumber ? ` · Cambridge centre ${branches[0].centerNumber}` : ""}`
+        }
+        title={heading}
+      >
+        {can(ctx.roles, "payments.view", ctx.overrides) ? (
+          <a href={`/centre/financials.csv${branch ? `?branch=${branch}` : ""}`} className={ROOM_BUTTON}>
+            Export financials
+          </a>
+        ) : null}
+        {can(ctx.roles, "roles.grant", ctx.overrides) ? (
+          <Link href="/centre/roles" className={ROOM_PRIMARY}>
+            Invite people
+          </Link>
+        ) : null}
+      </RoomHead>
 
       {canView(ctx.roles, "payments.view", ctx.overrides) ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

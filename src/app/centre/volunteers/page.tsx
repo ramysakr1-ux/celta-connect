@@ -10,6 +10,7 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { RoomHead, ROOM_BUTTON } from "@/components/room-head";
 
 // Dedicated screen per Volunteer Pool.dc.html (Desktop/Connect.zip handoff,
 // 2026-08-20): "reached from the 'Volunteer pool' card on the Centre Admin
@@ -165,22 +166,20 @@ export default async function CentreVolunteersPage({
         no reason to take it away. */}
 
 
-      <div className="flex flex-col gap-5 p-8">
-        <div className="flex items-end justify-between gap-4">
-          <div className="flex flex-col gap-[3px]">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre overview &middot; volunteers</p>
-            <h1 className="font-serif text-2xl text-ink">Volunteer pool</h1>
-          </div>
+      {/* C7: the inner p-8 gave this room 56px of inset where every other
+          room has 24. */}
+      <div className="flex flex-col gap-5">
+        <RoomHead eyebrow="Centre management &middot; Volunteer pool" title="Volunteer pool">
           {/* Bulk-adding volunteers is this room's job, not Centre
               Management's -- see the note on SpreadsheetImportSection. The
               importer moved here on 1 Sep 2026 and this is its only door,
               so it is gated on the same capability the page enforces. */}
           {can(ctx.roles, "volunteers.manage", ctx.overrides) ? (
-            <Link href="/centre/volunteers/import" className="text-sm font-semibold text-primary hover:underline">
+            <Link href="/centre/volunteers/import" className={ROOM_BUTTON}>
               Import from a spreadsheet
             </Link>
           ) : null}
-        </div>
+        </RoomHead>
 
         {/* The room's own object carries the room's colour (centre side A1); B3: the card radius, not 9px. */}
         <div className="card card-accent">

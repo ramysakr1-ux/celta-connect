@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
@@ -10,6 +9,7 @@ import { RefundsPanel, type RefundRow } from "@/app/centre/payments/refunds-pane
 import { PaymentNotificationsPanel } from "@/app/centre/payments/payment-notifications-panel";
 import { TransactionsPanel } from "@/app/centre/payments/transactions-panel";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { RoomHead } from "@/components/room-head";
 
 // Centre settings > payment providers (spec 2026-08-16, Payments.dc.html 1c).
 // Reached from the "payment providers" link in Centre Admin's settings bar.
@@ -94,14 +94,19 @@ export default async function PaymentProvidersPage() {
 
   return (
     <div className="flex max-w-[720px] flex-col gap-5">
-      <div>
-        <BackLink href="/centre" label="Centre management" />
-        <h1 className="mt-2 font-serif text-[26px] text-ink">Payment providers</h1>
-        <p className="mt-1 text-[13px] text-muted">
-          Connect {center?.name ?? "your centre"}&apos;s own provider account so card becomes one of the methods you
-          accept. Card is optional — bank transfer, cash and employer or sponsor invoice work without it.
-        </p>
-      </div>
+      {/* The BackLink stays until A6 gives this page a door of its own: it is
+          reached from a link inside Settings and nowhere else. */}
+      <RoomHead
+        back={{ href: "/centre", label: "Centre management" }}
+        eyebrow="Centre management &middot; Payment providers"
+        title="Payment providers"
+        lede={
+          <>
+            Connect {center?.name ?? "your centre"}&apos;s own provider account so card becomes one of the methods you
+            accept. Card is optional — bank transfer, cash and employer or sponsor invoice work without it.
+          </>
+        }
+      />
 
       <ProviderList
         connectedKey={(center?.payment_provider ?? null) as PaymentProviderKey | null}

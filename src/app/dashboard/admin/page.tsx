@@ -16,6 +16,7 @@ import { can } from "@/lib/auth/centre-permissions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { formatCalendarDate } from "@/lib/format-date";
 import { CourseStatePill, type CourseState } from "@/components/course-state-pill";
+import { RoomHead, ROOM_PRIMARY } from "@/components/room-head";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -196,23 +197,15 @@ export default async function AdminDashboardPage({
           Cambridge centre number", with "New course" as the primary action.
           It used to read "Welcome, <name>", which tells the person something
           they already know and omits the two facts that print on every report. */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        {/* The design's own hierarchy, which I had inverted: the centre and
-            its Cambridge number are the EYEBROW, and the page's title is
-            "Courses" -- because that is what the screen is. Putting the centre
-            name in the H1 made every admin screen look like the same page with
-            a different list under it. */}
-        <div className="flex flex-col gap-[5px]">
-          <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-            {center?.name ?? "Your centre"}
-            {center?.center_number ? ` · Centre ${center.center_number}` : ""}
-          </p>
-          {/* Names the job, not the noun. "Courses" was the same word Centre
-              Management uses for its own list, so the two screens rhymed at
-              the largest text on the page -- which is how Ramy came to be in
-              Course Admin believing he was in Centre Management. */}
-          <h1 className="font-serif text-[24px] font-semibold text-ink">Course administration</h1>
-        </div>
+      {/* The design's own hierarchy, which I had inverted: the centre and
+          its Cambridge number are the EYEBROW, and the page's title is
+          "Courses" -- because that is what the screen is. Putting the centre
+          name in the H1 made every admin screen look like the same page with
+          a different list under it. */}
+      <RoomHead
+        eyebrow={`${center?.name ?? "Your centre"}${center?.center_number ? ` · Centre ${center.center_number}` : ""}`}
+        title="Course administration"
+      >
         {/* Hidden for anyone who cannot create a course.
         
             The wizard itself is gated on course.create now, so a Course
@@ -220,14 +213,11 @@ export default async function AdminDashboardPage({
             primary button that refuses you is worse than no button, the same
             reasoning the comment here already gave about one that 404s. */}
         {mayCreateCourses ? (
-          <Link
-            href="/centre/courses/new"
-            className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
-          >
+          <Link href="/centre/courses/new" className={ROOM_PRIMARY}>
             New course
           </Link>
         ) : null}
-      </div>
+      </RoomHead>
 
       {center?.center_number.startsWith("PENDING-") ? (
         <div className="flex items-start gap-3 rounded-[6px] border border-destructive/30 bg-destructive/5 p-4">

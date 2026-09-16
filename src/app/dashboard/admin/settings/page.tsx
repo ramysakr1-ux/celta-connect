@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { disconnectGoogleDrive, updateAutoTagCriteria } from "@/app/dashboard/admin/settings/actions";
@@ -15,6 +14,7 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { formatDateTime } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { RoomHead } from "@/components/room-head";
 
 const SETTINGS_NAV_BASE = [
   { href: "#centre-profile", label: "Centre profile" },
@@ -164,11 +164,12 @@ export default async function AdminSettingsPage({
       {/* Only reached from the Centre material panel now (the persistent
           AdminTabs nav that used to link here is gone -- see dashboard/
           admin/page.tsx). A real way back, so this can't be a dead end. */}
-      <BackLink href="/dashboard/admin" label={"Courses"} />
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Settings</h1>
-        <p className="mt-2 text-muted">Centre-level integrations and configuration.</p>
-      </div>
+      <RoomHead
+        back={{ href: "/dashboard/admin", label: "Course administration" }}
+        eyebrow="Course admin &middot; Settings"
+        title="Settings"
+        lede="Centre-level integrations and configuration."
+      />
 
       <div className="grid grid-cols-[232px_1fr] items-start gap-5">
         <SettingsNav items={settingsNavItems} />
