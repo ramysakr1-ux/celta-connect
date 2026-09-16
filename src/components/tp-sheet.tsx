@@ -101,13 +101,13 @@ export function IdentityBand({
       style={{ background: band.fill, padding: "18px 26px 16px" }}
     >
       <div className="flex min-w-0 flex-col gap-[3px]">
-        <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.16em", color: band.eyebrow }}>
+        <p className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.16em", color: band.eyebrow }}>
           {eyebrow}
         </p>
-        <h2 className="font-serif" style={{ fontSize: 29, fontWeight: 400, color: BAND_TEXT, lineHeight: 1.15 }}>
+        <h2 className="font-serif" style={{ fontSize: "var(--text-display)", fontWeight: 400, color: BAND_TEXT, lineHeight: 1.15 }}>
           {title}
         </h2>
-        {subLine ? <p style={{ fontSize: 13, color: band.sub }}>{subLine}</p> : null}
+        {subLine ? <p style={{ fontSize: "var(--text-meta)", color: band.sub }}>{subLine}</p> : null}
       </div>
       <div className="flex flex-wrap items-center gap-2.5">
         {right}
@@ -130,7 +130,7 @@ export function SaveStatusPill({
   dot?: string;
 }) {
   return (
-    <span className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: BAND[role].status }}>
+    <span className="flex items-center gap-1.5" style={{ fontSize: "var(--text-label)", color: BAND[role].status }}>
       <span className="size-[5px] rounded-full" style={{ background: dot }} />
       {label}
     </span>
@@ -151,7 +151,7 @@ export function Strip({ children, className = "" }: { children: React.ReactNode;
 
 export function Eyebrow({ children, colour = MUTED }: { children: React.ReactNode; colour?: string }) {
   return (
-    <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: colour }}>
+    <p className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.12em", color: colour }}>
       {children}
     </p>
   );
@@ -162,7 +162,7 @@ export function MarkerLabel({ colour, label }: { colour: string; label: string }
   return (
     <div className="flex items-center gap-2">
       <span style={{ width: 3, height: 12, borderRadius: 2, background: colour, display: "inline-block" }} />
-      <span className="uppercase" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: colour }}>
+      <span className="uppercase" style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", color: colour }}>
         {label}
       </span>
     </div>
@@ -189,7 +189,7 @@ export function NumberedDot({
         border: `2px solid ${hue}`,
         background: done ? hue : SHEET,
         color: done ? SHEET : MUTED,
-        fontSize: 11,
+        fontSize: "var(--text-label)",
         fontWeight: 700,
       }}
     >
@@ -225,7 +225,7 @@ export function BottomBar({
     >
       <div className="flex items-center gap-2">
         <span className="size-[5px] shrink-0 rounded-full" style={{ background: GOLD_INK }} />
-        <p style={{ fontSize: 11.5, color: GOLD_INK }}>{warning}</p>
+        <p style={{ fontSize: "var(--text-label)", color: GOLD_INK }}>{warning}</p>
       </div>
       <div className="flex items-center gap-2">
         <span className="mr-2">
@@ -247,7 +247,7 @@ export function SaveDraftButton({ pending, disabled }: { pending: boolean; disab
         border: `1px solid ${BAR_BORDER}`,
         background: SHEET,
         padding: "8px 15px",
-        fontSize: 13.5,
+        fontSize: "var(--text-body)",
         color: INK,
       }}
     >
@@ -279,7 +279,7 @@ export function SubmitButton({
         background: BAND[role].submit,
         padding: "8px 17px",
         fontWeight: 600,
-        fontSize: 13.5,
+        fontSize: "var(--text-body)",
         color: BAND_TEXT,
       }}
     >

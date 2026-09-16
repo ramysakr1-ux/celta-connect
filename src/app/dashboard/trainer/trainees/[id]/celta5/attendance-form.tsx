@@ -31,10 +31,10 @@ export function AttendanceForm({
 
   return (
     <div className="sheet flex flex-col gap-4 p-6">
-      <h2 className="font-serif text-lg text-ink">Attendance</h2>
+      <h2 className="font-serif text-h3 text-ink">Attendance</h2>
 
       <div>
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           {hoursAttended} of {totalHours} hrs
         </p>
         <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-accent">
@@ -45,7 +45,7 @@ export function AttendanceForm({
       <form action={hoursAction} className="flex items-end gap-3">
         <input type="hidden" name="trainee_id" value={record.trainee_id} />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Hours attended (of {totalHours})</label>
+          <label className="text-body text-muted">Hours attended (of {totalHours})</label>
           <input
             name="hours_attended"
             type="number"
@@ -57,24 +57,24 @@ export function AttendanceForm({
         <button
           type="submit"
           disabled={hoursPending}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
         >
           {hoursPending ? "Saving..." : "Save"}
         </button>
       </form>
-      {hoursState.error ? <p className="text-sm text-destructive">{hoursState.error}</p> : null}
+      {hoursState.error ? <p className="text-body text-destructive">{hoursState.error}</p> : null}
 
       {absences.length > 0 ? (
         <div className="overflow-hidden rounded-[6px] border border-border">
           <table className="table-plain w-full">
             <thead>
               <tr>
-                <th className="text-sm text-muted">Date</th>
-                <th className="text-sm text-muted">Category</th>
-                <th className="text-sm text-muted">Session missed</th>
-                <th className="text-sm text-muted">Reason</th>
-                <th className="text-sm text-muted">Made up</th>
-                <th className="text-sm text-muted">Signed</th>
+                <th className="text-body text-muted">Date</th>
+                <th className="text-body text-muted">Category</th>
+                <th className="text-body text-muted">Session missed</th>
+                <th className="text-body text-muted">Reason</th>
+                <th className="text-body text-muted">Made up</th>
+                <th className="text-body text-muted">Signed</th>
               </tr>
             </thead>
             <tbody>
@@ -95,22 +95,22 @@ export function AttendanceForm({
 
       <form action={absenceAction} className="flex flex-col gap-3 border-t border-border pt-4">
         <input type="hidden" name="trainee_id" value={record.trainee_id} />
-        <h3 className="text-sm font-medium text-ink">Log an absence</h3>
+        <h3 className="text-body font-medium text-ink">Log an absence</h3>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Session date</label>
+            <label className="text-body text-muted">Session date</label>
             <input
               name="session_date"
               type="date"
-              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Category</label>
+            <label className="text-body text-muted">Category</label>
             <select
               name="category"
               defaultValue="unavoidable"
-              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
             >
               <option value="unavoidable">Unavoidable</option>
               <option value="other">Other / unexplained</option>
@@ -121,19 +121,19 @@ export function AttendanceForm({
           name="reason"
           type="text"
           placeholder="Reason"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         <input
           name="session_missed"
           type="text"
           placeholder="Session missed (e.g. Input: teaching receptive skills)"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         <input
           name="work_made_up"
           type="text"
           placeholder="How work was made up"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         {/* Cambridge asks the two tables for different things: unavoidable
             absences take a tutor signature only, other absences take a
@@ -144,27 +144,27 @@ export function AttendanceForm({
           name="candidate_comment"
           type="text"
           placeholder="Candidate comment (other absences/late arrivals only)"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         <input
           name="tutor_comment"
           type="text"
           placeholder="Tutor comment (other absences/late arrivals only)"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         <input
           name="tutor_signature_name"
           type="text"
           placeholder="Tutor signature -- type your name to sign this row"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         {absenceState.error ? (
-          <p className="text-sm text-destructive">{absenceState.error}</p>
+          <p className="text-body text-destructive">{absenceState.error}</p>
         ) : null}
         <button
           type="submit"
           disabled={absencePending}
-          className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+          className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
         >
           {absencePending ? "Saving..." : "Add absence"}
         </button>

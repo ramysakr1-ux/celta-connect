@@ -10,7 +10,18 @@ import path from "node:path";
 
 const ROOTS = ["src/app", "src/components"];
 const EXEMPT = [
-  /\/celta5\//, /c5-/, /notebook/i, /\/api\//, /pdf/i, /email-layout/, /-email\.ts$/, /\/emails?\//,
+  // The CELTA 5 booklet is a Cambridge document with its own typography --
+  // the c5-* sections, not the forms around them.
+  /\/celta5\/booklet\//,
+  /booklet-sections\.tsx$/,
+  // The Notebook keeps its own paper register.
+  /trainee-notebook/,
+  // PDF routes and email templates: inline styles for renderers and mail
+  // clients that never see this stylesheet.
+  /^src\/app\/api\//,
+  /\/lib\/email-layout/,
+  /-email\.ts$/,
+  /admissions-email\.ts$/,
 ];
 const BAD = [
   { re: /text-\[[0-9.]+px\]/g, what: "text-[Npx]" },

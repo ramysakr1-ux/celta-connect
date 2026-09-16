@@ -69,11 +69,11 @@ export default async function AssessorDoubleMarkingPage() {
       <AssessorReadOnlyBanner subject="the course" />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
+          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
             Assessor access — read-only · double-marking record
           </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6, color: INK }}>Double-marking record</h1>
-          <p style={{ fontSize: 13, color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
+          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>Double-marking record</h1>
+          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
             Which written assignments on {course.name} a second tutor has checked, and when. Handbook §9.2.3 asks for{" "}
             {quota ? `${quota} of each assignment on a course of ${active.length}` : "a sample of each assignment"}, the sample to include
             any fails, and both tutors&apos; initials on the work — here, the first marker&apos;s decision and the second marker&apos;s
@@ -81,7 +81,7 @@ export default async function AssessorDoubleMarkingPage() {
           </p>
 
           {!anyRecorded ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: 13, color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
               No second marking has been recorded on this course yet. A centre that keeps its record on paper uploads it under
               centre documents.
             </p>
@@ -99,27 +99,27 @@ export default async function AssessorDoubleMarkingPage() {
             return (
               <div key={type} className="card" style={{ marginTop: i === 0 ? 26 : 14, padding: "18px 20px" }}>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <h2 style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 600, color: INK }}>{ASSIGNMENT_INFO[type].title}</h2>
-                  <span style={{ fontSize: 11.5, fontWeight: 600, color: met ? TEAL : marked.length === 0 ? MUTED : AMBER }}>
+                  <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{ASSIGNMENT_INFO[type].title}</h2>
+                  <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: met ? TEAL : marked.length === 0 ? MUTED : AMBER }}>
                     {doubleMarked.length} double-marked
                     {quota ? ` of ${quota} needed` : ""} · {marked.length} of {ofType.length} marked
                   </span>
                 </div>
                 {failsNotChecked.length > 0 ? (
-                  <p style={{ fontSize: 12, color: AMBER, marginTop: 6, fontWeight: 500 }}>
+                  <p style={{ fontSize: "var(--text-meta)", color: AMBER, marginTop: 6, fontWeight: 500 }}>
                     {failsNotChecked.length === 1 ? "A fail is" : `${failsNotChecked.length} fails are`} not in the double-marked sample —
                     §9.2.3 says the sample must include any fails.
                   </p>
                 ) : null}
                 {doubleMarked.length === 0 ? (
-                  <p style={{ fontSize: 12.5, color: FAINT, marginTop: 10 }}>
+                  <p style={{ fontSize: "var(--text-meta)", color: FAINT, marginTop: 10 }}>
                     {marked.length === 0 ? "Nothing marked yet." : "None double-marked yet."}
                   </p>
                 ) : (
                   <div style={{ marginTop: 10, overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--text-meta)" }}>
                       <thead>
-                        <tr style={{ color: MUTED, fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <tr style={{ color: MUTED, fontSize: "var(--text-micro)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                           <th style={{ textAlign: "left", padding: "6px 8px 6px 0", fontWeight: 700 }}>Candidate</th>
                           <th style={{ textAlign: "left", padding: "6px 8px", fontWeight: 700 }}>Result</th>
                           <th style={{ textAlign: "left", padding: "6px 8px", fontWeight: 700 }}>First marker</th>

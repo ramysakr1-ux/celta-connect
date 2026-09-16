@@ -80,7 +80,7 @@ export function PlanReview({
   if (!plan) {
     return (
       <div style={{ padding: "28px 26px" }}>
-        <p style={{ fontSize: 13, color: MUTED }}>
+        <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>
           There is no lesson plan to review yet. Step 2 is still open — the lesson happened whether or not the plan was
           handed in.
         </p>
@@ -184,12 +184,12 @@ export function PlanReview({
         className="flex flex-wrap items-center justify-between gap-3"
         style={{ background: CARD, borderBottom: `1px solid ${FAINT}`, padding: "11px 26px" }}
       >
-        <p style={{ fontSize: 12.5, color: INK_WARM }}>
+        <p style={{ fontSize: "var(--text-meta)", color: INK_WARM }}>
           Read the plan as the trainee submitted it. Click <b>Comment</b> on any part to attach a note to it — every note
           becomes a Planning point in the feedback and prints beside that part of the plan.
         </p>
-        <p className="whitespace-nowrap" style={{ fontSize: 12.5, color: MUTED }}>
-          <span className="font-serif" style={{ fontSize: 17, color: INK }}>
+        <p className="whitespace-nowrap" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
+          <span className="font-serif" style={{ fontSize: "var(--text-h3)", color: INK }}>
             {strengthCount + actionCount}
           </span>{" "}
           {strengthCount + actionCount === 1 ? "note" : "notes"} ·{" "}
@@ -213,14 +213,14 @@ export function PlanReview({
             className="flex flex-wrap items-center justify-between gap-3"
             style={{ borderBottom: `1px solid ${FAINT}`, padding: "10px 26px" }}
           >
-            <span style={{ fontSize: 12.5, color: MUTED }}>
+            <span style={{ fontSize: "var(--text-meta)", color: MUTED }}>
               Lesson sequence:{" "}
               <span style={{ fontWeight: 600, color: plan.framework_used ? TEAL : MUTED }}>
                 {plan.framework_used || "none chosen"}
               </span>
             </span>
-            <span style={{ fontSize: 12.5, color: MUTED }}>
-              <span className="font-serif" style={{ fontSize: 16, color: INK }}>
+            <span style={{ fontSize: "var(--text-meta)", color: MUTED }}>
+              <span className="font-serif" style={{ fontSize: "var(--text-h3)", color: INK }}>
                 {totalMinutes}
               </span>{" "}
               of {TP_LESSON_LENGTH_MINUTES} min ·{" "}
@@ -237,7 +237,7 @@ export function PlanReview({
               notes={notesOn("aims")}
               onComment={() => addNote("aims")}
             />
-            <div style={{ marginLeft: 12, marginTop: 6, fontSize: 13.5, lineHeight: 1.55, color: INK }}>
+            <div style={{ marginLeft: 12, marginTop: 6, fontSize: "var(--text-body)", lineHeight: 1.55, color: INK }}>
               <AimLine label="Main" value={plan.main_aims} />
               <AimLine label="Subsidiary" value={plan.subsidiary_aims} />
               <AimLine label="Personal" value={plan.personal_aims} />
@@ -253,15 +253,15 @@ export function PlanReview({
                   <div className="flex min-w-0 items-start gap-2.5">
                     <span
                       className="flex shrink-0 items-center justify-center rounded-full"
-                      style={{ width: 22, height: 22, background: hue, color: SHEET, fontSize: 10.5, fontWeight: 700 }}
+                      style={{ width: 22, height: 22, background: hue, color: SHEET, fontSize: "var(--text-micro)", fontWeight: 700 }}
                     >
                       {i + 1}
                     </span>
                     <div className="min-w-0">
-                      <h4 className="font-serif" style={{ fontSize: 16, fontWeight: 600, color: hue }}>
+                      <h4 className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, color: hue }}>
                         {row.stage || `Stage ${i + 1}`}
                       </h4>
-                      <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+                      <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                         {[row.aim, row.time ? `${row.time}′` : null].filter(Boolean).join(" · ")}
                       </p>
                     </div>
@@ -269,7 +269,7 @@ export function PlanReview({
                   <CommentButton notes={notesOn(anchor)} onClick={() => addNote(anchor)} />
                 </div>
                 {row.procedure ? (
-                  <p style={{ marginLeft: 31, marginTop: 6, fontSize: 13, lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
+                  <p style={{ marginLeft: 31, marginTop: 6, fontSize: "var(--text-meta)", lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
                     {row.procedure}
                   </p>
                 ) : null}
@@ -282,7 +282,7 @@ export function PlanReview({
                       .map((code) => (
                         <span
                           key={code}
-                          style={{ borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, padding: "1px 8px", fontSize: 11.5, fontWeight: 600, color: INK_WARM }}
+                          style={{ borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, padding: "1px 8px", fontSize: "var(--text-label)", fontWeight: 600, color: INK_WARM }}
                         >
                           {code}
                         </span>
@@ -298,7 +298,7 @@ export function PlanReview({
               <PartHead label="Anticipated problems & solutions" colour={GARNET} notes={notesOn("problems")} onComment={() => addNote("problems")} />
               <div style={{ marginLeft: 12, marginTop: 6 }}>
                 {problems.map((p, i) => (
-                  <p key={i} style={{ fontSize: 13, lineHeight: 1.6, color: INK }}>
+                  <p key={i} style={{ fontSize: "var(--text-meta)", lineHeight: 1.6, color: INK }}>
                     <span style={{ fontWeight: 700, color: GARNET }}>{i + 1} </span>
                     {p.problem} <span style={{ color: TEAL }}>→</span>{" "}
                     <span style={{ color: INK_WARM }}>{p.solution}</span>
@@ -310,7 +310,7 @@ export function PlanReview({
 
           <div {...partProps("room")} style={{ ...partProps("room").style, background: flashed === "room" ? ZEBRA : CARD }}>
             <PartHead label="Class profile & materials" colour={TEAL} notes={notesOn("room")} onComment={() => addNote("room")} />
-            <div style={{ marginLeft: 12, marginTop: 6, fontSize: 13, lineHeight: 1.55, color: INK }}>
+            <div style={{ marginLeft: 12, marginTop: 6, fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK }}>
               {plan.class_profile ? <p style={{ whiteSpace: "pre-line" }}>{plan.class_profile}</p> : null}
               {plan.materials_description ? (
                 <p style={{ marginTop: 6, whiteSpace: "pre-line", color: INK_WARM }}>{plan.materials_description}</p>
@@ -332,7 +332,7 @@ export function PlanReview({
                   notes={notesOn("la")}
                   onComment={() => addNote("la")}
                 />
-                <p style={{ marginLeft: 12, marginTop: 4, fontSize: 11.5, color: MUTED }}>
+                <p style={{ marginLeft: 12, marginTop: 4, fontSize: "var(--text-label)", color: MUTED }}>
                   {vocabRows.length > 0
                     ? `${vocabRows.length} items${languageAnalysis.vocab_reference ? ` · ${languageAnalysis.vocab_reference}` : ""}`
                     : `${laBlocks.length} ${laBlocks.length === 1 ? "structure" : "structures"}`}
@@ -341,14 +341,14 @@ export function PlanReview({
 
               {vocabRows.length > 0 ? (
                 <div style={{ padding: "0 26px 20px", overflowX: "auto" }}>
-                  <table className="w-full border-collapse" style={{ minWidth: 760, fontSize: 12.5 }}>
+                  <table className="w-full border-collapse" style={{ minWidth: 760, fontSize: "var(--text-meta)" }}>
                     <thead>
                       <tr>
                         {["Item", "Definition", "Convey", "Clarification", "Form", "Problems & solutions"].map((h) => (
                           <th
                             key={h}
                             className="text-left"
-                            style={{ padding: "8px 8px", fontSize: 11, fontWeight: 700, color: INK_WARM, borderBottom: `1.5px solid ${GOLD_INK}` }}
+                            style={{ padding: "8px 8px", fontSize: "var(--text-label)", fontWeight: 700, color: INK_WARM, borderBottom: `1.5px solid ${GOLD_INK}` }}
                           >
                             {h}
                           </th>
@@ -417,9 +417,9 @@ export function PlanReview({
                           if (real.length === 0) return null;
                           return (
                             <div key={String(field.key)}>
-                              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED }}>{field.label}</p>
+                              <p style={{ fontSize: "var(--text-label)", fontWeight: 600, color: MUTED }}>{field.label}</p>
                               {real.map((pair, pi) => (
-                                <p key={pi} style={{ fontSize: 12.5, lineHeight: 1.5, color: INK }}>
+                                <p key={pi} style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK }}>
                                   {pair.problem} <span style={{ color: TEAL }}>→</span>{" "}
                                   <span style={{ color: INK_WARM }}>{pair.solution}</span>
                                 </p>
@@ -431,8 +431,8 @@ export function PlanReview({
                         if (!text || field.key === "item") return null;
                         return (
                           <div key={String(field.key)}>
-                            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED }}>{field.label}</p>
-                            <p style={{ fontSize: 12.5, lineHeight: 1.5, color: INK, whiteSpace: "pre-line" }}>{text}</p>
+                            <p style={{ fontSize: "var(--text-label)", fontWeight: 600, color: MUTED }}>{field.label}</p>
+                            <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK, whiteSpace: "pre-line" }}>{text}</p>
                           </div>
                         );
                       })}
@@ -452,13 +452,13 @@ export function PlanReview({
           >
             <div className="flex items-center justify-between gap-2">
               <MarkerLabel colour={INK_WARM} label="Your notes on the plan" />
-              <span style={{ fontSize: 11, color: MUTED }}>Planning column</span>
+              <span style={{ fontSize: "var(--text-label)", color: MUTED }}>Planning column</span>
             </div>
 
             {rail.length === 0 ? (
               <div
                 className="text-center"
-                style={{ borderRadius: 10, border: `1px dashed ${BORDER}`, padding: "18px 16px", fontSize: 12.5, color: MUTED }}
+                style={{ borderRadius: 10, border: `1px dashed ${BORDER}`, padding: "18px 16px", fontSize: "var(--text-meta)", color: MUTED }}
               >
                 Nothing yet. Click Comment on an aim, a stage, the problems or a vocabulary item.
               </div>
@@ -482,7 +482,7 @@ export function PlanReview({
               ))
             )}
 
-            <p style={{ marginTop: "auto", borderTop: `1px solid ${BORDER}`, paddingTop: 12, fontSize: 11.5, lineHeight: 1.5, color: MUTED }}>
+            <p style={{ marginTop: "auto", borderTop: `1px solid ${BORDER}`, paddingTop: 12, fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED }}>
               These notes appear in three places: the <b>Planning</b> column of step 2, the feedback cover of the
               assembled document, and beside the part of the plan they refer to.
             </p>
@@ -628,7 +628,7 @@ function NoteCard({
           <span className="rounded-full" style={{ width: 8, height: 8, background: anchorHue, display: "inline-block" }} />
           <span
             className="truncate uppercase"
-            style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: anchorHue }}
+            style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.06em", color: anchorHue }}
           >
             {anchorLabel}
           </span>
@@ -638,7 +638,7 @@ function NoteCard({
           onClick={onRemove}
           title="Remove"
           className="shrink-0 opacity-50 transition-opacity hover:opacity-100"
-          style={{ color: DESTRUCTIVE, fontSize: 12 }}
+          style={{ color: DESTRUCTIVE, fontSize: "var(--text-meta)" }}
         >
           ✕
         </button>
@@ -655,7 +655,7 @@ function NoteCard({
               className="rounded-full"
               style={{
                 padding: "3px 10px",
-                fontSize: 11,
+                fontSize: "var(--text-label)",
                 fontWeight: 700,
                 background: on ? (kind === "strength" ? TEAL : GOLD_INK) : "transparent",
                 color: on ? SHEET : MUTED,
@@ -692,7 +692,7 @@ function NoteCard({
               type="button"
               onClick={() => onChange({ criteria_codes: note.point.criteria_codes.filter((c) => c !== code) })}
               title={`${CRITERIA_LABELS[code] ?? code} — click to remove`}
-              style={{ borderRadius: 4, background: kindHue, padding: "1px 6px", fontSize: 10.5, fontWeight: 700, color: SHEET }}
+              style={{ borderRadius: 4, background: kindHue, padding: "1px 6px", fontSize: "var(--text-micro)", fontWeight: 700, color: SHEET }}
             >
               {code}
             </button>
@@ -711,7 +711,7 @@ function NoteCard({
                     borderRadius: 4,
                     border: `1px dashed ${BORDER}`,
                     padding: "0 6px",
-                    fontSize: 10.5,
+                    fontSize: "var(--text-micro)",
                     fontWeight: 700,
                     color: MUTED,
                   }}
@@ -723,11 +723,11 @@ function NoteCard({
                 type="button"
                 onClick={() => setDismissed(true)}
                 title="Hide these suggestions for this note"
-                style={{ fontSize: 10.5, color: MUTED, padding: "0 2px" }}
+                style={{ fontSize: "var(--text-micro)", color: MUTED, padding: "0 2px" }}
               >
                 ✕
               </button>
-              <span className="italic" style={{ fontSize: 10.5, color: MUTED }}>
+              <span className="italic" style={{ fontSize: "var(--text-micro)", color: MUTED }}>
                 usual for this part — tap to add
               </span>
             </>
@@ -745,7 +745,7 @@ function NoteCard({
               border: `1px solid ${note.point.starred ? GOLD_INK : FAINT}`,
               background: note.point.starred ? GOLD : "transparent",
               color: note.point.starred ? INK : MUTED,
-              fontSize: 12,
+              fontSize: "var(--text-meta)",
             }}
           >
             ★

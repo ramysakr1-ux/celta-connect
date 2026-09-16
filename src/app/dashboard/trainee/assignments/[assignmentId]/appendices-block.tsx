@@ -160,7 +160,7 @@ export function AppendicesBlock({
 
   return (
     <div className="flex flex-col gap-2" style={{ marginLeft: 12 }}>
-      <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+      <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
         {hint}
       </p>
 
@@ -177,8 +177,8 @@ export function AppendicesBlock({
                 onClick={() => handleOpen(row)}
                 className="flex min-w-0 flex-1 flex-col items-start text-left"
               >
-                <span style={{ fontSize: 12, fontWeight: 700, color: TEAL }}>{row.label ?? "Appendix"}</span>
-                <span className="w-full truncate" style={{ fontSize: 11.5, color: INK }}>
+                <span style={{ fontSize: "var(--text-meta)", fontWeight: 700, color: TEAL }}>{row.label ?? "Appendix"}</span>
+                <span className="w-full truncate" style={{ fontSize: "var(--text-label)", color: INK }}>
                   {row.file_name}
                   {row.link_url ? " · link" : row.size_bytes ? ` · ${sizeLabel(row.size_bytes)}` : ""}
                 </span>
@@ -189,7 +189,7 @@ export function AppendicesBlock({
                   disabled={busy}
                   onClick={() => handleRemove(row)}
                   aria-label={`Remove ${row.label ?? row.file_name}`}
-                  style={{ fontSize: 13, color: MUTED, padding: "0 4px" }}
+                  style={{ fontSize: "var(--text-meta)", color: MUTED, padding: "0 4px" }}
                 >
                   ✕
                 </button>
@@ -201,7 +201,7 @@ export function AppendicesBlock({
 
       {readOnly ? (
         appendices.length === 0 ? (
-          <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+          <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
             Nothing attached.
           </p>
         ) : null
@@ -216,7 +216,7 @@ export function AppendicesBlock({
               border: `1px solid ${BORDER}`,
               background: SHEET,
               padding: "6px 10px",
-              fontSize: 12,
+              fontSize: "var(--text-meta)",
               color: INK,
               outline: "none",
             }}
@@ -241,7 +241,7 @@ export function AppendicesBlock({
                 border: `1px solid ${TEAL}`,
                 background: "transparent",
                 padding: "6px 12px",
-                fontSize: 12,
+                fontSize: "var(--text-meta)",
                 fontWeight: 600,
                 color: TEAL,
               }}
@@ -252,7 +252,7 @@ export function AppendicesBlock({
               type="button"
               disabled={busy}
               onClick={() => setAddingLink((v) => !v)}
-              style={{ fontSize: 12, color: MUTED, textDecoration: "underline", textUnderlineOffset: 2 }}
+              style={{ fontSize: "var(--text-meta)", color: MUTED, textDecoration: "underline", textUnderlineOffset: 2 }}
             >
               or a link
             </button>
@@ -269,7 +269,7 @@ export function AppendicesBlock({
                   border: `1px solid ${BORDER}`,
                   background: SHEET,
                   padding: "6px 10px",
-                  fontSize: 12,
+                  fontSize: "var(--text-meta)",
                   color: INK,
                   outline: "none",
                 }}
@@ -278,19 +278,19 @@ export function AppendicesBlock({
                 type="button"
                 disabled={busy}
                 onClick={() => void handleLink()}
-                style={{ borderRadius: 7, background: TEAL, padding: "6px 12px", fontSize: 12, fontWeight: 600, color: SHEET }}
+                style={{ borderRadius: 7, background: TEAL, padding: "6px 12px", fontSize: "var(--text-meta)", fontWeight: 600, color: SHEET }}
               >
                 Add
               </button>
             </div>
           ) : null}
-          <p className="italic" style={{ fontSize: 11, color: MUTED }}>
+          <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
             PDF, image, Word, PowerPoint or audio, up to 25 MB. Not counted in the word count.
           </p>
         </div>
       )}
 
-      {error ? <p style={{ fontSize: 11.5, color: GOLD_INK }}>{error}</p> : null}
+      {error ? <p style={{ fontSize: "var(--text-label)", color: GOLD_INK }}>{error}</p> : null}
     </div>
   );
 }

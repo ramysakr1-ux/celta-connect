@@ -19,10 +19,10 @@ export function GradeReviewCommentsForm({ record }: { record: Celta5Record }) {
     <form action={action} className="sheet flex flex-col gap-3 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <div>
-        <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">
+        <p className="text-label font-semibold tracking-[0.06em] text-muted uppercase">
           Information for the CELTA grade review
         </p>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           Tutor comments on action points detailed in the Stage Three progress record. This box
           is completed for all candidates whose portfolios are submitted to Cambridge English.
           State whether the candidate did or did not demonstrate effectiveness in the areas
@@ -38,12 +38,12 @@ export function GradeReviewCommentsForm({ record }: { record: Celta5Record }) {
         className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
       />
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

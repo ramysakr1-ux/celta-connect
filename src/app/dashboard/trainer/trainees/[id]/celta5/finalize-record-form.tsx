@@ -31,13 +31,13 @@ export function FinalizeRecordForm({
 
     <form action={action} className="contents">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Final sign-off</h2>
-      <p className="text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Final sign-off</h2>
+      <p className="text-body text-muted">
         Reveals Stage Three (if applicable), the final grade, and your overall notes to the
         trainee, and lets them add their own final sign-off.
       </p>
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="finalized"
@@ -47,22 +47,22 @@ export function FinalizeRecordForm({
       </label>
 
       {record.trainer_signoff_final_at ? (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Finalized by {record.final_tutor_signature_name} on {formatDateTime(record.trainer_signoff_final_at, timeZone)}.
         </p>
       ) : null}
       {record.trainee_signoff_final_at ? (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Trainee signed off {formatDateTime(record.trainee_signoff_final_at, timeZone)}.
         </p>
       ) : null}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

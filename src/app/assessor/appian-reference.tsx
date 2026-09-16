@@ -52,10 +52,10 @@ export function AppianReference({
           border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
         }}
       >
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
+        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
           No Appian reference yet
         </span>
-        <span style={{ fontSize: 12, color: "var(--color-ink)", flex: "1 1 240px", minWidth: 220 }}>
+        <span style={{ fontSize: "var(--text-meta)", color: "var(--color-ink)", flex: "1 1 240px", minWidth: 220 }}>
           The centre has not recorded the course notification reference number. You will need it from them to open your Assessor
           Report &mdash; Administration Handbook 15.2.
         </span>
@@ -71,13 +71,13 @@ export function AppianReference({
         border: `1px solid color-mix(in oklab, ${GOLD} 32%, transparent)`,
       }}
     >
-      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(43% 0.09 70)" }}>
+      <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(43% 0.09 70)" }}>
         Appian course reference
       </span>
 
       <code
         style={{
-          fontSize: 15, fontWeight: 700, letterSpacing: "0.02em", color: "var(--color-ink)",
+          fontSize: "var(--text-lede)", fontWeight: 700, letterSpacing: "0.02em", color: "var(--color-ink)",
           fontVariantNumeric: "tabular-nums", userSelect: "all",
         }}
       >
@@ -99,14 +99,14 @@ export function AppianReference({
           height: 28, padding: "0 12px", borderRadius: 999, cursor: "pointer",
           border: `1px solid color-mix(in oklab, ${GOLD} 45%, transparent)`,
           background: copied ? `color-mix(in oklab, ${GOLD} 26%, transparent)` : "var(--color-card)",
-          color: "var(--color-ink)", fontSize: 11.5, fontWeight: 600,
+          color: "var(--color-ink)", fontSize: "var(--text-label)", fontWeight: 600,
         }}
       >
         {copied ? "Copied" : "Copy"}
       </button>
 
 
-      <span style={{ fontSize: 12, color: "var(--color-muted)", flex: "1 1 240px", minWidth: 220 }}>
+      <span style={{ fontSize: "var(--text-meta)", color: "var(--color-muted)", flex: "1 1 240px", minWidth: 220 }}>
         Paste this into Appian to reach your Assessor Report for this course. It opens once the centre has submitted the Centre
         Grade form.
         {gradeFormNote ? <> {gradeFormNote}</> : null}

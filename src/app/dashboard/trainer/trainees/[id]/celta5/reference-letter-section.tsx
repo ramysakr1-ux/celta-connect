@@ -27,9 +27,9 @@ export function ReferenceLetterSection({
 
   return (
     <div className="card p-6">
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Optional</p>
-      <h2 className="mt-1 font-serif text-lg text-ink">Reference letter</h2>
-      <p className="mt-1 text-sm text-muted">
+      <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Optional</p>
+      <h2 className="mt-1 font-serif text-h3 text-ink">Reference letter</h2>
+      <p className="mt-1 text-body text-muted">
         A drafted reference from this candidate&apos;s real course record -- grade, TP feedback strengths, and
         attendance. Review and edit it before issuing; nothing is sent automatically.
       </p>
@@ -38,10 +38,10 @@ export function ReferenceLetterSection({
         <div className="mt-3 flex flex-col gap-2">
           {existingLetters.map((l) => (
             <div key={l.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint p-2.5">
-              <p className="text-sm text-ink">
+              <p className="text-body text-ink">
                 Issued {formatDate(l.issued_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}
               </p>
-              <a href={`/api/formal-letter/${l.id}`} className="text-xs font-semibold text-primary hover:underline">
+              <a href={`/api/formal-letter/${l.id}`} className="text-label font-semibold text-primary hover:underline">
                 Download
               </a>
             </div>
@@ -50,11 +50,11 @@ export function ReferenceLetterSection({
       ) : null}
 
       {!draft ? (
-        <p className="mt-3 text-sm text-muted">Available once this candidate has a finalized grade.</p>
+        <p className="mt-3 text-body text-muted">Available once this candidate has a finalized grade.</p>
       ) : !canGenerate ? (
-        <p className="mt-3 text-sm text-muted">Only the main course tutor or a centre admin can issue this.</p>
+        <p className="mt-3 text-body text-muted">Only the main course tutor or a centre admin can issue this.</p>
       ) : !showForm ? (
-        <button type="button" onClick={() => setShowForm(true)} className="mt-3 self-start text-sm text-primary hover:underline">
+        <button type="button" onClick={() => setShowForm(true)} className="mt-3 self-start text-body text-primary hover:underline">
           {existingLetters.length > 0 ? "Generate another" : "Generate reference letter"}
         </button>
       ) : (

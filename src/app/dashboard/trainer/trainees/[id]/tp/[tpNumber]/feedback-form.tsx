@@ -154,7 +154,7 @@ export function FeedbackForm({
     return (
       <div className="card p-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: TEAL }}>
+          <h2 className="font-serif" style={{ fontSize: "var(--text-h2)", fontWeight: 600, color: TEAL }}>
             Tutor feedback
           </h2>
           <span className="status-pill status-pill-on-track">Submitted</span>
@@ -235,7 +235,7 @@ export function FeedbackForm({
                 <div style={{ padding: "16px 26px 18px", borderBottom: `1px solid ${FAINT}` }}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <MarkerLabel colour={GOLD_INK} label="Captured during the lesson" />
-                    <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+                    <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                       Pulling one in removes it from here and drops it, already tagged, into the section you choose.
                     </p>
                   </div>
@@ -250,20 +250,20 @@ export function FeedbackForm({
                         style={{ borderRadius: 9, border: `1px dashed ${BAR_BORDER}`, background: ZEBRA, padding: "11px 13px" }}
                       >
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="tabular-nums" style={{ fontSize: 11, color: MUTED }}>
+                          <span className="tabular-nums" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                             {formatTime(note.captured_at, timeZone)}
                           </span>
                           {note.criteria_codes.map((code) => (
                             <span
                               key={code}
                               title={CRITERIA_LABELS[code] ?? ""}
-                              style={{ borderRadius: 4, background: TEAL, padding: "1px 6px", fontSize: 10.5, fontWeight: 700, color: SHEET }}
+                              style={{ borderRadius: 4, background: TEAL, padding: "1px 6px", fontSize: "var(--text-micro)", fontWeight: 700, color: SHEET }}
                             >
                               {code}
                             </span>
                           ))}
                         </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.5, color: INK }}>{note.text}</p>
+                        <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK }}>{note.text}</p>
                         <div className="flex flex-wrap gap-1.5">
                           <PullButton colour={TEAL} label="+ Strength (teaching)" onClick={() => pullInNote(note, setStrengthsTeaching, strengthsTeaching)} />
                           <PullButton colour={GOLD_INK} label="+ Action point (teaching)" onClick={() => pullInNote(note, setActionPointsTeaching, actionPointsTeaching)} />
@@ -358,7 +358,7 @@ export function FeedbackForm({
                           background: on ? TEAL : SHEET,
                           padding: "7px 15px",
                           fontWeight: 600,
-                          fontSize: 13,
+                          fontSize: "var(--text-meta)",
                           color: on ? SHEET : INK,
                         }}
                       >
@@ -391,7 +391,7 @@ export function FeedbackForm({
 
                 <div className="flex flex-col gap-2" style={{ borderLeft: `1px solid ${FAINT}`, padding: "18px 26px 24px" }}>
                   <MarkerLabel colour={GARNET} label="Your comment on their self-evaluation" />
-                  <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+                  <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                     Appears at the end of the assembled document. Leave empty if you have nothing to add.
                   </p>
                   {selfEvaluation ? (
@@ -406,13 +406,13 @@ export function FeedbackForm({
                           <div key={String(field.key)}>
                             <p
                               className="uppercase"
-                              style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: MUTED }}
+                              style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: MUTED }}
                             >
                               {field.label}
                             </p>
                             <p
                               className="font-serif italic"
-                              style={{ fontSize: 13.5, lineHeight: 1.5, color: INK_WARM, whiteSpace: "pre-line" }}
+                              style={{ fontSize: "var(--text-body)", lineHeight: 1.5, color: INK_WARM, whiteSpace: "pre-line" }}
                             >
                               {value}
                             </p>
@@ -423,13 +423,13 @@ export function FeedbackForm({
                         <div style={{ borderTop: `1px solid ${FAINT}`, paddingTop: 8 }}>
                           <p
                             className="uppercase"
-                            style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: MUTED }}
+                            style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: MUTED }}
                           >
                             What they did about your last action points
                           </p>
                           {(selfEvaluation.action_points ?? []).map((a, i) =>
                             a.previous_point || a.what_i_did ? (
-                              <p key={i} style={{ fontSize: 12.5, lineHeight: 1.5, color: INK_WARM, marginTop: 3 }}>
+                              <p key={i} style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK_WARM, marginTop: 3 }}>
                                 {a.carried ? <span style={{ color: GOLD_INK }}>★ </span> : null}
                                 {a.previous_point}
                                 {a.what_i_did ? (
@@ -448,7 +448,7 @@ export function FeedbackForm({
                       ) : null}
                     </div>
                   ) : (
-                    <p className="italic" style={{ fontSize: 12, color: MUTED, marginLeft: 12 }}>
+                    <p className="italic" style={{ fontSize: "var(--text-meta)", color: MUTED, marginLeft: 12 }}>
                       They haven&apos;t written their self-evaluation yet.
                     </p>
                   )}
@@ -490,7 +490,7 @@ export function FeedbackForm({
                 background: TEAL,
                 padding: "8px 17px",
                 fontWeight: 600,
-                fontSize: 13.5,
+                fontSize: "var(--text-body)",
                 color: "oklch(98.5% 0.006 90)",
               }}
             >
@@ -529,7 +529,7 @@ function StepSwitcher({ step, onChange }: { step: Step; onChange: (s: Step) => v
             className="rounded-full"
             style={{
               padding: "5px 14px",
-              fontSize: 12.5,
+              fontSize: "var(--text-meta)",
               fontWeight: on ? 700 : 600,
               background: on ? "oklch(98.5% 0.006 90)" : "transparent",
               color: on ? TEAL : "oklch(86% 0.04 195)",
@@ -548,14 +548,14 @@ function ColumnHead({ glyph, title, hue, scopeNote }: { glyph: string; title: st
     <div className="flex items-center gap-2.5" style={{ padding: "16px 26px 0" }}>
       <span
         className="flex shrink-0 items-center justify-center rounded-full"
-        style={{ width: 24, height: 24, background: hue, color: SHEET, fontSize: 11, fontWeight: 700 }}
+        style={{ width: 24, height: 24, background: hue, color: SHEET, fontSize: "var(--text-label)", fontWeight: 700 }}
       >
         {glyph}
       </span>
-      <h3 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: hue }}>
+      <h3 className="font-serif" style={{ fontSize: "var(--text-h2)", fontWeight: 600, color: hue }}>
         {title}
       </h3>
-      <span style={{ fontSize: 11.5, color: MUTED }}>{scopeNote}</span>
+      <span style={{ fontSize: "var(--text-label)", color: MUTED }}>{scopeNote}</span>
     </div>
   );
 }
@@ -566,7 +566,7 @@ function PullButton({ colour, label, onClick }: { colour: string; label: string;
       type="button"
       onClick={onClick}
       className="rounded-full transition-colors hover:bg-card-inset"
-      style={{ border: `1px solid ${BORDER}`, padding: "2px 9px", fontWeight: 600, fontSize: 11, color: colour }}
+      style={{ border: `1px solid ${BORDER}`, padding: "2px 9px", fontWeight: 600, fontSize: "var(--text-label)", color: colour }}
     >
       {label}
     </button>

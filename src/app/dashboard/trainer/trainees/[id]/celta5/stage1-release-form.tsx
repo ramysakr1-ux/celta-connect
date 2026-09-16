@@ -33,8 +33,8 @@ export function Stage1ReleaseForm({
     <div className="sheet flex flex-col gap-2">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-serif text-lg text-ink">Release Stage One to the candidate</h3>
-          <p className="mt-0.5 text-sm text-muted">
+          <h3 className="font-serif text-h3 text-ink">Release Stage One to the candidate</h3>
+          <p className="mt-0.5 text-body text-muted">
             {!completedAt
               ? "Finish and sign Stage One above first — there is nothing to release yet."
               : released
@@ -49,13 +49,13 @@ export function Stage1ReleaseForm({
           already given, because it attested to the text as it was. Said
           before they press it, not after. */}
       {released && candidateSignedAt ? (
-        <p className="rounded-[6px] border border-border bg-surface-muted px-3 py-2 text-xs text-ink">
+        <p className="rounded-[6px] border border-border bg-surface-muted px-3 py-2 text-label text-ink">
           They signed this on {formatDate(candidateSignedAt, timeZone, { year: "numeric" })}. If you un-release and release a revised
           version, that signature is cleared and they will be asked to sign again.
         </p>
       ) : null}
 
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
 
       <form action={formAction}>
         <input type="hidden" name="trainee_id" value={traineeId} />
@@ -63,7 +63,7 @@ export function Stage1ReleaseForm({
         <button
           type="submit"
           disabled={pending || (!completedAt && !released)}
-          className={`rounded-[6px] px-4 py-2 text-sm font-semibold disabled:opacity-50 ${
+          className={`rounded-[6px] px-4 py-2 text-body font-semibold disabled:opacity-50 ${
             released ? "border border-border text-ink wash" : "bg-primary text-primary-foreground"
           }`}
         >

@@ -188,9 +188,9 @@ export default async function Celta5RecordPage({
           is Connect's own chrome, and an assessor reading over a tutor's
           shoulder should be able to tell the document from the tools. */}
       <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">{trainee.full_name}</h1>
+        <h1 className="font-serif text-h2 text-ink">{trainee.full_name}</h1>
         <p className="mt-1 text-muted">{trainee.email}</p>
-        <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+        <div className="mt-4 grid grid-cols-2 gap-4 text-body sm:grid-cols-3">
           <div>
             <p className="text-muted">Centre</p>
             <p className="text-ink">{center?.name ?? "--"}</p>
@@ -211,15 +211,15 @@ export default async function Celta5RecordPage({
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href={`/trainer/grade-query-reply/${id}`}
-            className="inline-flex rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
+            className="inline-flex rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink hover:border-primary"
           >
             Grade query reply
           </Link>
         </div>
-        <p className="mt-4 text-sm text-muted">
+        <p className="mt-4 text-body text-muted">
           Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)
         </p>
-        <p className="mt-1 font-serif text-xl text-ink">{TRAJECTORY_LABEL[trajectory]}</p>
+        <p className="mt-1 font-serif text-h2 text-ink">{TRAJECTORY_LABEL[trajectory]}</p>
       </div>
 
       <AssignmentsSummary traineeId={id} assignments={assignments ?? []} />
@@ -254,7 +254,7 @@ export default async function Celta5RecordPage({
               kind: o.filmed ? "Filmed" : "Experienced teacher",
             }))}
           />
-          <p className="mt-2 text-[10px] text-muted">
+          <p className="mt-2 text-micro text-muted">
             Self-reported by the candidate. Nothing here is editable by a tutor -- the hours count toward the six-hour
             requirement as logged.
           </p>
@@ -324,7 +324,7 @@ export default async function Celta5RecordPage({
         </BookletSection>
 
         <BookletSection id="c5-stage3" num="Section 11" title="Stage Three progress record">
-          <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+          <p className="text-micro leading-relaxed text-muted" style={{ marginBottom: 10 }}>
             This record must be completed by tutors in the final third of the course for all candidates who: a) were
             not to standard at Stage 2; b) were at standard at Stage 2 but are not making the expected progress in the
             second half of the course; c) were above standard at Stage 2 but are not making the expected progress in
@@ -352,13 +352,13 @@ export default async function Celta5RecordPage({
           {stage3MixedModeLock ? (
             <div className={`card mt-4 p-4 ${stage3MixedModeLock.mismatched ? "card-red" : "card-amber"}`}>
               <p
-                className={`text-sm font-semibold ${
+                className={`text-body font-semibold ${
                   stage3MixedModeLock.mismatched ? "text-destructive" : "text-status-warning-text"
                 }`}
               >
                 Handbook 10.2 -- borderline Pass/Fail on a mixed-mode course
               </p>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-body text-muted">
                 The final two assessed lessons (TP{stage3MixedModeLock.lastTwoTpNumbers[0]} and TP
                 {stage3MixedModeLock.lastTwoTpNumbers[1]}) must both be in the same mode.{" "}
                 {stage3MixedModeLock.mismatched

@@ -21,13 +21,13 @@ export function SelfAssessmentForm() {
     <form action={action} className="card flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: self-assessment</h2>
-          <p className="mt-1 text-sm text-muted">
+          <h2 className="font-serif text-h3 text-ink">Progress Record — Stage 2: self-assessment</h2>
+          <p className="mt-1 text-body text-muted">
             Rate yourself on each criterion before your tutorial. Your tutor&apos;s ratings
             stay hidden until you submit this.
           </p>
         </div>
-        <span className="shrink-0 rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+        <span className="shrink-0 rounded-[6px] bg-accent px-2.5 py-1 text-label font-medium text-ink">
           You: {ratedCount} of {TOTAL_CODES}
         </span>
       </div>
@@ -39,7 +39,7 @@ export function SelfAssessmentForm() {
           </h3>
           {codes.map((code) => (
             <div key={code} className="flex items-center justify-between gap-4 border-b border-border-faint pb-3 last:border-none">
-              <span className="text-sm text-ink">
+              <span className="text-body text-ink">
                 {code}
                 {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
               </span>
@@ -56,7 +56,7 @@ export function SelfAssessmentForm() {
       ))}
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Your overall progress</label>
+        <label className="text-body text-muted">Your overall progress</label>
         <select
           name="overall"
           required
@@ -75,7 +75,7 @@ export function SelfAssessmentForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Areas you think you need to work on</label>
+        <label className="text-body text-muted">Areas you think you need to work on</label>
         <VoiceTextarea
           name="notes"
           rows={3}
@@ -84,7 +84,7 @@ export function SelfAssessmentForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Written assignments -- anything to raise?</label>
+        <label className="text-body text-muted">Written assignments -- anything to raise?</label>
         <VoiceTextarea
           name="written_assignments_notes"
           rows={2}
@@ -93,7 +93,7 @@ export function SelfAssessmentForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Other -- attendance, workload, support needs</label>
+        <label className="text-body text-muted">Other -- attendance, workload, support needs</label>
         <VoiceTextarea
           name="other_notes"
           rows={2}
@@ -101,7 +101,7 @@ export function SelfAssessmentForm() {
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"

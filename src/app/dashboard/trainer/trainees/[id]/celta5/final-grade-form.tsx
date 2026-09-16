@@ -22,9 +22,9 @@ export function FinalGradeForm({
   return (
     <form action={action} className="sheet flex flex-col gap-4 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Final recommended grade</h2>
+      <h2 className="font-serif text-h3 text-ink">Final recommended grade</h2>
 
-      <details className="rounded-[6px] border border-border p-3 text-sm text-muted">
+      <details className="rounded-[6px] border border-border p-3 text-body text-muted">
         <summary className="cursor-pointer text-ink">
           Performance descriptors (reference)
         </summary>
@@ -62,7 +62,7 @@ export function FinalGradeForm({
           the labels would not survive at a narrower column. */}
       <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Preparing, planning and practising teaching</label>
+          <label className="text-body text-muted">Preparing, planning and practising teaching</label>
           <select
             name="final_teaching_grade"
             defaultValue={record.final_teaching_grade ?? ""}
@@ -76,7 +76,7 @@ export function FinalGradeForm({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Written assignments</label>
+          <label className="text-body text-muted">Written assignments</label>
           <select
             name="final_assignments_grade"
             defaultValue={record.final_assignments_grade ?? ""}
@@ -90,7 +90,7 @@ export function FinalGradeForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Overall recommended grade</label>
+        <label className="text-body text-muted">Overall recommended grade</label>
         <select
           name="final_recommended_grade"
           defaultValue={record.final_recommended_grade ?? ""}
@@ -119,7 +119,7 @@ export function FinalGradeForm({
           assessor. */}
       {showOverallNotes ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={`fg-notes-${record.trainee_id}`} className="text-sm text-muted">
+          <label htmlFor={`fg-notes-${record.trainee_id}`} className="text-body text-muted">
             Overall notes
           </label>
           <textarea
@@ -137,18 +137,18 @@ export function FinalGradeForm({
       )}
 
       {record.final_recommended_grade === "Fail" && !record.trainee_signoff_final_at ? (
-        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-xs text-status-warning-text">
+        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-label text-status-warning-text">
           Handbook 11.4.1: an unsuccessful candidate who attends to the end and hands in a portfolio is a Fail. One who
           does not attend the final day and has not signed the declaration at the end of the CELTA 5 is Withdrawn, not
           Fail. This candidate has not signed yet.
         </p>
       ) : null}
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

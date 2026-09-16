@@ -509,17 +509,17 @@ export default async function AssessorPage({
           alignItems: "center", justifyContent: "space-between", gap: 16,
         }}
       >
-        <span style={{ fontSize: 12.5, fontWeight: 500 }}>
+        <span style={{ fontSize: "var(--text-meta)", fontWeight: 500 }}>
           {preview
             ? "Preview — this is the pack exactly as the assessor's link opens it. Nothing you do here is recorded."
             : "Assessor access — read-only. Nothing you open here can be edited, and no action you take is recorded against a candidate."}
         </span>
         {preview ? (
-          <a href="/assessor/exit" style={{ fontSize: 12, fontWeight: 700, color: GOLD, flex: "none", textDecoration: "underline" }}>
+          <a href="/assessor/exit" style={{ fontSize: "var(--text-meta)", fontWeight: 700, color: GOLD, flex: "none", textDecoration: "underline" }}>
             Exit preview
           </a>
         ) : accessToken ? (
-          <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)", flex: "none" }}>
+          <span style={{ fontSize: "var(--text-label)", color: "oklch(76% 0.02 80)", flex: "none" }}>
             Link expires {formatDate(accessToken.expires_at, timeZone, { year: "numeric" })}
           </span>
         ) : null}
@@ -543,7 +543,7 @@ export default async function AssessorPage({
         style={{
           margin: 0, padding: "10px 16px", background: "oklch(96% 0.02 85)",
           borderBottom: "1px solid oklch(88% 0.02 85)", color: "oklch(40% 0.03 70)",
-          fontSize: 12.5, textAlign: "center",
+          fontSize: "var(--text-meta)", textAlign: "center",
         }}
       >
         This pack is laid out for a larger screen &mdash; open it on a laptop or tablet for the full width.
@@ -566,13 +566,13 @@ export default async function AssessorPage({
               <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" strokeWidth={15} strokeLinecap="round" />
             </svg>
           </span>
-          <span style={{ fontFamily: "var(--font-instrument-serif), Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 18, color: "oklch(70% 0.12 72)" }}>
+          <span style={{ fontFamily: "var(--font-instrument-serif), Newsreader, Georgia, serif", fontStyle: "italic", fontSize: "var(--text-h3)", color: "oklch(70% 0.12 72)" }}>
             Connect
           </span>
           <span style={{ width: 1, height: 16, background: "color-mix(in oklab, oklch(97% 0.008 88) 25%, transparent)" }} aria-hidden />
           <span
             style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+              fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
               color: "oklch(97% 0.008 88)", background: "color-mix(in oklab, oklch(97% 0.008 88) 14%, transparent)",
               border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
               borderRadius: 5, padding: "4px 10px",
@@ -611,7 +611,7 @@ export default async function AssessorPage({
               height: 34, padding: "0 15px", borderRadius: 6,
               border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 55%, transparent)",
               background: "color-mix(in oklab, oklch(60% 0.11 70) 16%, transparent)",
-              color: "oklch(94% 0.02 82)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+              color: "oklch(94% 0.02 82)", fontSize: "var(--text-meta)", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
               textDecoration: "none",
             }}
           >
@@ -628,7 +628,7 @@ export default async function AssessorPage({
               height: 34, padding: "0 15px", borderRadius: 6,
               border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
               background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
-              color: "oklch(97% 0.008 88)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+              color: "oklch(97% 0.008 88)", fontSize: "var(--text-meta)", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
               textDecoration: "none",
             }}
           >
@@ -648,11 +648,11 @@ export default async function AssessorPage({
         <div>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
+              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
                 {center?.name ?? "Centre"} · {center?.center_number ?? ""} · {course.name}
                 {courseDates ? ` · ${courseDates}` : ""}
               </p>
-              <h1 style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 28, fontWeight: 600, color: INK, marginTop: 6 }}>
+              <h1 style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, color: INK, marginTop: 6 }}>
                 Assessor visit{course.assessor_visit_date ? ` — ${longDate(course.assessor_visit_date)}` : ""}
               </h1>
             </div>
@@ -706,7 +706,7 @@ export default async function AssessorPage({
               border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: AMBER }}>
+            <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: AMBER }}>
               {sendByDate
                 ? `Provisional grades ${course.assessor_visit_date && course.assessor_visit_date < today ? "were due" : "due"}: ${longDate(sendByDate)} EOD`
                 : "No provisional grades deadline set"}
@@ -722,7 +722,7 @@ export default async function AssessorPage({
                     ? " · due today"
                     : ` · ${-daysOut} day${daysOut === -1 ? "" : "s"} overdue`}
             </span>
-            <span style={{ fontSize: 12, color: INK }}>
+            <span style={{ fontSize: "var(--text-meta)", color: INK }}>
               {sendByDate
                 ? "Each TP tutor proposes for their own group, the MCT proposes for theirs, then the MCT approves all before it's sent and recorded here."
                 : "The MCT hasn't set a provisional grades deadline for this course yet."}
@@ -752,7 +752,7 @@ export default async function AssessorPage({
                 exists so a line can be checked, and it can't be checked if
                 you don't know what to open. */}
             <div style={{ padding: "10px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)" }}>
-              <p style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.5 }}>
+              <p style={{ fontSize: "var(--text-label)", color: MUTED, lineHeight: 1.5 }}>
                 Section numbers are the CELTA Administration Handbook, June 2025 &mdash; so any line here can be checked
                 against it rather than taken on trust.
               </p>
@@ -780,14 +780,14 @@ export default async function AssessorPage({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                  <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{r.label}</p>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                  <p style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>{r.label}</p>
+                  <span style={{ fontSize: "var(--text-micro)", fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>
                     §{r.cite}
                   </span>
                 </div>
-                <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>{r.detail}</p>
+                <p style={{ fontSize: "var(--text-label)", color: MUTED, marginTop: 3, lineHeight: 1.5 }}>{r.detail}</p>
                 {r.emphasis ? (
-                  <p style={{ fontSize: 11.5, color: AMBER, marginTop: 4, lineHeight: 1.5, fontWeight: 500 }}>{r.emphasis}</p>
+                  <p style={{ fontSize: "var(--text-label)", color: AMBER, marginTop: 4, lineHeight: 1.5, fontWeight: 500 }}>{r.emphasis}</p>
                 ) : null}
               </div>
             ))}
@@ -801,10 +801,10 @@ export default async function AssessorPage({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                  <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>The centre&apos;s double-marking, for reference</p>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§9.2.3</span>
+                  <p style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>The centre&apos;s double-marking, for reference</p>
+                  <span style={{ fontSize: "var(--text-micro)", fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§9.2.3</span>
                 </div>
-                <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>
+                <p style={{ fontSize: "var(--text-label)", color: MUTED, marginTop: 3, lineHeight: 1.5 }}>
                   {doubleMarkPerAssignment} of each assignment on a course of {activeCandidateCount}. Not the assessor&apos;s task, but
                   the record may be asked for -- and this is the count that scales with cohort size, unlike anything above it.
                 </p>
@@ -820,12 +820,12 @@ export default async function AssessorPage({
               // Not an error, and not empty: the pack still shows everyone. It
               // just says so, rather than implying the centre picked a cohort
               // of fifteen to moderate.
-              <span style={{ fontSize: 11.5, color: MUTED }}>
+              <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                 Showing all {candidates.length} candidates -- the centre has not selected a sample for this visit.
               </span>
             ) : isNarrowed ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                <span style={{ fontSize: 11.5, color: MUTED }}>
+                <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                   {/* Explicit {" "} -- the plain source space after the
                       expression was being dropped, rendering "12candidates". */}
                   Showing {visibleCandidates.length} of {candidates.length}{" "}
@@ -833,7 +833,7 @@ export default async function AssessorPage({
                 </span>
                 <Link
                   href={wantsFullCohort ? "/assessor" : "/assessor?cohort=full"}
-                  style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
+                  style={{ fontSize: "var(--text-label)", fontWeight: 600, color: TEAL, textDecoration: "none" }}
                 >
                   {wantsFullCohort ? "Back to selected" : `View full cohort (${candidates.length})`}
                 </Link>
@@ -857,11 +857,11 @@ export default async function AssessorPage({
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                    <span style={{ fontSize: 13.5, fontWeight: 600, color: INK }}>{c.name}</span>
+                    <span style={{ fontSize: "var(--text-body)", fontWeight: 600, color: INK }}>{c.name}</span>
                     {c.provisionalLabel ? (
                       <span
                         style={{
-                          fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 99,
+                          fontSize: "var(--text-micro)", fontWeight: 700, padding: "3px 9px", borderRadius: 99,
                           background: (GRADE[c.provisionalLabel] ?? GRADE.Pass).bg,
                           color: (GRADE[c.provisionalLabel] ?? GRADE.Pass).ink,
                           flex: "none", whiteSpace: "nowrap",
@@ -871,7 +871,7 @@ export default async function AssessorPage({
                       </span>
                     ) : null}
                   </div>
-                  <span style={{ fontSize: 11, color: MUTED }}>
+                  <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                     {c.tpsTaught}/8 TPs · {c.hoursAssessed.toFixed(1)} hrs{c.levels.length > 0 ? ` · ${c.levels.join(", ")}` : ""}
                   </span>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -882,7 +882,7 @@ export default async function AssessorPage({
                   {c.flaggedIssue ? (
                     <span
                       style={{
-                        fontSize: 11, lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
+                        fontSize: "var(--text-label)", lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
                         background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, var(--color-card))",
                       }}
                     >
@@ -897,7 +897,7 @@ export default async function AssessorPage({
                   {c.assignmentFailNote ? (
                     <span
                       style={{
-                        fontSize: 11, lineHeight: 1.45, color: MUTED, borderRadius: 5, padding: "6px 9px",
+                        fontSize: "var(--text-label)", lineHeight: 1.45, color: MUTED, borderRadius: 5, padding: "6px 9px",
                         background: "var(--color-frame)",
                         border: `1px solid ${BORDER}`,
                       }}
@@ -907,7 +907,7 @@ export default async function AssessorPage({
                   ) : null}
                 </Link>
               ))}
-              {visibleCandidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
+              {visibleCandidates.length === 0 ? <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>No candidates on this course.</p> : null}
             </div>
             </>
 
@@ -918,7 +918,7 @@ export default async function AssessorPage({
                     is the "Assessment timetable", so that is what it is called
                     here rather than a phrasing of our own. */}
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
+                  <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
                     Assessment timetable
                   </p>
                   {/* Ramy, 30 Aug 2026: "this arrow in the full timetable is
@@ -931,7 +931,7 @@ export default async function AssessorPage({
                     href="/trainer/timetable"
                     className="transition-[filter] duration-150 hover:brightness-110"
                     style={{
-                      fontSize: 11,
+                      fontSize: "var(--text-label)",
                       fontWeight: 600,
                       color: "oklch(98.5% 0.006 90)",
                       background: TEAL,
@@ -954,18 +954,18 @@ export default async function AssessorPage({
                   }}
                 >
                   {visitDayEvents.length === 0 ? (
-                    <span style={{ fontSize: 12, color: MUTED }}>
+                    <span style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                       {course.assessor_visit_date ? "No timetable events on the visit date yet." : "No assessor visit date set yet."}
                     </span>
                   ) : (
                     visitDayEvents.map((e, i) => (
                       <div key={e.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
                         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                          <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
                             {e.event_time?.slice(0, 5) ?? ""}
                           </span>
                           <span>
-                            <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>
+                            <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK, display: "block" }}>
                               {/* Named, not lettered: "TP7 · A" tells an assessor
                                   nothing about who they are about to watch. The
                                   nth TP slot of the day belongs to the nth
@@ -981,7 +981,7 @@ export default async function AssessorPage({
                                 it." Same zoom_url students/tutors use -- the
                                 real join window is Zoom's own waiting room, not
                                 something this page enforces. */}
-                            <span style={{ fontSize: 11, color: MUTED }}>
+                            <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                               {e.type === "tp" ? `${e.title} · ` : ""}
                               {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
                             </span>
@@ -992,7 +992,7 @@ export default async function AssessorPage({
                             href={e.zoom_url}
                             target="_blank"
                             rel="noreferrer"
-                            style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
+                            style={{ fontSize: "var(--text-label)", fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
                           >
                             Join
                           </a>
@@ -1016,10 +1016,10 @@ export default async function AssessorPage({
                       cohort's. Said out loud below rather than left as a gap an
                       assessor might read as an omission. */}
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                    <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
                     <span>
-                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Grading meeting</span>
-                      <span style={{ fontSize: 11, color: MUTED }}>
+                      <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK, display: "block" }}>Grading meeting</span>
+                      <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                         With all tutors, time agreed with the main course tutor. Not on the candidates&apos; timetable --
                         it isn&apos;t theirs to attend.
                       </span>
@@ -1031,10 +1031,10 @@ export default async function AssessorPage({
                       from the timetable above and once from here. */}
                   {!hasTimetabledCandidateMeeting ? (
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
                       <span>
-                        <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
-                        <span style={{ fontSize: 11, color: MUTED }}>
+                        <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
+                        <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                           Private, without tutors present. Not yet on the timetable for the day.
                         </span>
                       </span>
@@ -1047,7 +1047,7 @@ export default async function AssessorPage({
                       lesson plan for exactly that reason -- but the panel should not
                       read as three observations. */}
                   {teachingOrderNames.length > 2 ? (
-                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
+                    <span style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
                       You co-observe <strong style={{ color: INK }}>two</strong> of the {teachingOrderNames.length} lessons above
                       (Handbook 14.2), agreed with the centre.{" "}
                       {visitPlansIn >= teachingOrderNames.length
@@ -1057,7 +1057,7 @@ export default async function AssessorPage({
                   ) : null}
 
                   {centreProposal ? (
-                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
+                    <span style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
                       The centre proposes <strong style={{ color: INK }}>{centreProposal.names.join(" and ")}</strong> for observation
                       {" "}&mdash; {centreProposal.by}, {centreProposal.at}
                       {centreProposal.ownChoice
@@ -1067,7 +1067,7 @@ export default async function AssessorPage({
                     </span>
                   ) : null}
 
-                  <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
+                  <span style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
                     {concernsCount && concernsCount > 0
                       ? `${concernsCount} candidate${concernsCount === 1 ? " has" : "s have"} asked to speak with you. Names are not shown before the meeting.`
                       : "No candidate has asked to speak with you."}
@@ -1108,7 +1108,7 @@ export default async function AssessorPage({
 
             {moodleSchedule.length > 0 ? (
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
+                <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
                   Moodle schedule
                 </p>
                 <div
@@ -1120,15 +1120,15 @@ export default async function AssessorPage({
                     padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
                   }}
                 >
-                  <p style={{ fontSize: 11.5, color: MUTED }}>
+                  <p style={{ fontSize: "var(--text-label)", color: MUTED }}>
                     Which Moodle sections candidates were asked to complete, and the centre-delivered input that
                     augmented each one (Handbook 3.4).
                   </p>
                   {moodleSchedule.map((s) => (
-                    <div key={s.id} style={{ fontSize: 12.5 }}>
+                    <div key={s.id} style={{ fontSize: "var(--text-meta)" }}>
                       <span style={{ fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{s.title}</span>
                       <span style={{ color: MUTED }}> -- {s.date}</span>
-                      <div style={{ fontSize: 11, color: s.liveFollowUp ? MUTED : "oklch(52% 0.11 75)" }}>
+                      <div style={{ fontSize: "var(--text-label)", color: s.liveFollowUp ? MUTED : "oklch(52% 0.11 75)" }}>
                         {s.liveFollowUp
                           ? `Augmented by "${s.liveFollowUp.title}" -- ${s.liveFollowUp.event_date}`
                           : "No live follow-up linked yet"}
@@ -1211,13 +1211,13 @@ export default async function AssessorPage({
                 const body = (
                   <>
                     <span>
-                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{doc.name}</span>
-                      <span style={{ fontSize: 10.5, color: MUTED }}>{meta}</span>
+                      <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK, display: "block" }}>{doc.name}</span>
+                      <span style={{ fontSize: "var(--text-micro)", color: MUTED }}>{meta}</span>
                     </span>
                     {present && href ? (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
+                      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
                     ) : (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: AMBER, flex: "none" }}>
+                      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: AMBER, flex: "none" }}>
                         {isMarkingGuidance ? "Not written yet" : "Not uploaded"}
                       </span>
                     )}
@@ -1258,10 +1258,10 @@ export default async function AssessorPage({
                   }}
                 >
                   <span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{d.title}</span>
-                    <span style={{ fontSize: 10.5, color: MUTED }}>Added by the centre</span>
+                    <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK, display: "block" }}>{d.title}</span>
+                    <span style={{ fontSize: "var(--text-micro)", color: MUTED }}>Added by the centre</span>
                   </span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
+                  <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
                 </a>
               ))}
               {/* "Tutor list and roles doesn't take you there" -- it did jump,
@@ -1272,11 +1272,11 @@ export default async function AssessorPage({
                   lands somewhere the eye can follow. */}
               {tutorNameById.size > 0 ? (
                 <div id="tutor-list" className="assessor-anchor" style={{ padding: "11px 15px" }}>
-                  <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Tutor list</p>
+                  <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Tutor list</p>
                   {(tutorRows ?? []).map((t) => {
                     const groups = groupsByTutorId.get(t.profile_id) ?? [];
                     return (
-                      <p key={t.profile_id} style={{ fontSize: 12, color: INK }}>
+                      <p key={t.profile_id} style={{ fontSize: "var(--text-meta)", color: INK }}>
                         {tutorNameById.get(t.profile_id) ?? "Unknown"}
                         {t.tutor_role ? <span style={{ color: MUTED }}> · {t.tutor_role.replace(/_/g, " ")}</span> : null}
                         {groups.length > 0 ? <span style={{ color: MUTED }}> · {groups.join(", ")}</span> : null}
@@ -1288,7 +1288,7 @@ export default async function AssessorPage({
             </Panel>
 
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
+              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
                 Malpractice cases
               </p>
               <div
@@ -1296,7 +1296,7 @@ export default async function AssessorPage({
                 style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}
               >
                 {(malpracticeCases ?? []).length === 0 ? (
-                  <p style={{ fontSize: 12, color: MUTED }}>No plagiarism or malpractice cases have been raised on this course.</p>
+                  <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>No plagiarism or malpractice cases have been raised on this course.</p>
                 ) : (
                   (malpracticeCases ?? []).map((c) => (
                     <div
@@ -1304,22 +1304,22 @@ export default async function AssessorPage({
                       style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 14, borderBottom: "1px solid oklch(88% 0.016 82)" }}
                     >
                       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                        <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>
+                        <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>
                           {malpracticeTraineeNameById.get(c.trainee_id) ?? "Candidate"} ·{" "}
                           {malpracticeAssignmentTypeById.get(c.assignment_id) ?? "Assignment"}
                         </span>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: c.status === "open" ? AMBER : MUTED }}>
+                        <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: c.status === "open" ? AMBER : MUTED }}>
                           {c.status === "open" ? "Open" : `Closed · ${c.outcome ?? "decided"}`}
                         </span>
                       </div>
                       {c.flagged_for_referral ? (
-                        <span style={{ fontSize: 11, fontWeight: 600, color: "oklch(45% 0.15 27)" }}>Referred to the centre&apos;s malpractice procedure</span>
+                        <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: "oklch(45% 0.15 27)" }}>Referred to the centre&apos;s malpractice procedure</span>
                       ) : null}
                       {/* en-GB in the centre's zone, like every other date in
                           this pack. Bare toLocaleDateString() rendered in the
                           SERVER's locale -- "9/6/2026", which a British
                           assessor reads as 9 June, not 6 September. */}
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 11.5, color: MUTED }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: "var(--text-label)", color: MUTED }}>
                         <span>Opened {fmtCaseDate(c.opened_at)}</span>
                         {c.candidate_account_recorded_at ? (
                           <span>Candidate&apos;s account recorded {fmtCaseDate(c.candidate_account_recorded_at)}</span>
@@ -1328,18 +1328,18 @@ export default async function AssessorPage({
                       </div>
                       {c.candidate_account ? (
                         <div>
-                          <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>
+                          <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>
                             Candidate&apos;s account
                           </p>
-                          <p style={{ fontSize: 12, color: INK, whiteSpace: "pre-wrap" }}>{c.candidate_account}</p>
+                          <p style={{ fontSize: "var(--text-meta)", color: INK, whiteSpace: "pre-wrap" }}>{c.candidate_account}</p>
                         </div>
                       ) : null}
                       {c.decision_notes ? (
                         <div>
-                          <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>
+                          <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>
                             Decision notes
                           </p>
-                          <p style={{ fontSize: 12, color: INK, whiteSpace: "pre-wrap" }}>{c.decision_notes}</p>
+                          <p style={{ fontSize: "var(--text-meta)", color: INK, whiteSpace: "pre-wrap" }}>{c.decision_notes}</p>
                         </div>
                       ) : null}
                     </div>
@@ -1349,7 +1349,7 @@ export default async function AssessorPage({
             </div>
 
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
+              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
                 Not in this pack
               </p>
               <div
@@ -1365,8 +1365,8 @@ export default async function AssessorPage({
                   { title: "Trainee-only chat", why: "A deliberate privacy boundary." },
                 ].map((x) => (
                   <div key={x.title}>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: INK }}>{x.title}</p>
-                    <p style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED }}>{x.why}</p>
+                    <p style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>{x.title}</p>
+                    <p style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED }}>{x.why}</p>
                   </div>
                 ))}
               </div>
@@ -1387,13 +1387,13 @@ export default async function AssessorPage({
               href="/assessor/tour"
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                background: GOLD, color: "oklch(23.5% 0.017 65)", fontSize: 13, fontWeight: 700,
+                background: GOLD, color: "oklch(23.5% 0.017 65)", fontSize: "var(--text-meta)", fontWeight: 700,
                 borderRadius: 999, padding: "12px 20px", textDecoration: "none",
               }}
             >
               Take a tour of the platform
             </a>
-            <p style={{ fontSize: 11, lineHeight: 1.5, color: MUTED, marginTop: -4 }}>
+            <p style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED, marginTop: -4 }}>
               Browse the wider platform read-only -- the trainer dashboard, a candidate&apos;s full portfolio, the
               timetable, the resource hub. Nothing here is required reading; it&apos;s just here if you&apos;re
               curious how the platform works day to day.
@@ -1439,10 +1439,10 @@ function COHORT_DOC_HREF(name: string): string {
 function Figure({ label, value, ink }: { label: string; value: string; ink?: string }) {
   return (
     <div>
-      <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
+      <p style={{ fontSize: "var(--text-micro)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
         {label}
       </p>
-      <p style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 21, lineHeight: 1, color: ink ?? "oklch(23.5% 0.017 65)", marginTop: 5 }}>
+      <p style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: "var(--text-h2)", lineHeight: 1, color: ink ?? "oklch(23.5% 0.017 65)", marginTop: 5 }}>
         {value}
       </p>
     </div>
@@ -1453,7 +1453,7 @@ function Dot({ ok, label }: { ok: boolean; label: string }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: ok ? TEAL : AMBER }} />
-      <span style={{ fontSize: 10.5, color: "oklch(51% 0.017 70)" }}>{label}</span>
+      <span style={{ fontSize: "var(--text-micro)", color: "oklch(51% 0.017 70)" }}>{label}</span>
     </span>
   );
 }
@@ -1476,7 +1476,7 @@ function Panel({
 }) {
   return (
     <div>
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
+      <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
         {title}
       </p>
       <div
@@ -1510,10 +1510,10 @@ function DocRow({ label, href, status }: { label: string; href: string; status: 
       }}
     >
       <span>
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(23.5% 0.017 65)", display: "block" }}>{label}</span>
-        <span style={{ fontSize: 10.5, color: TEAL }}>{status}</span>
+        <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: "oklch(23.5% 0.017 65)", display: "block" }}>{label}</span>
+        <span style={{ fontSize: "var(--text-micro)", color: TEAL }}>{status}</span>
       </span>
-      <span style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none" }}>
+      <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none" }}>
         Open
       </span>
     </Link>

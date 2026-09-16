@@ -99,25 +99,25 @@ export default async function AssessorLessonPlansPage() {
       <AssessorReadOnlyBanner subject="the course" />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
+          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
             Assessor access — read-only · lesson plans for the day
           </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6, color: INK }}>
+          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>
             {visitDate ? longDate(visitDate) : "Lesson plans for the visit"}
           </h1>
-          <p style={{ fontSize: 13, color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
+          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
             {visitDate && tpNumber > 0
               ? `The plans for the teaching practice you will observe on ${course.name} — TP ${tpNumber}, in teaching order.`
               : "The plans for the teaching practice you will observe, in teaching order."}
           </p>
 
           {!visitDate ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: 13, color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
               No assessor visit date has been set for this course yet, so there is no day to draw plans from. The main
               course tutor sets the date; the plans appear here once they do.
             </p>
           ) : tpNumber === 0 || teaching.length === 0 ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: 13, color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
               No teaching practice is timetabled for {longDate(visitDate)}, so there are no lesson plans for that day.
               The full course timetable is in the pack.
             </p>
@@ -128,29 +128,29 @@ export default async function AssessorLessonPlansPage() {
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                     <span
                       style={{
-                        fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                        fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
                         color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums",
                       }}
                     >
                       {t.order}
                     </span>
-                    <h2 style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 600, color: INK }}>{t.name}</h2>
+                    <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{t.name}</h2>
                   </div>
                   <Link
                     href={`/portfolio/${t.traineeId}/tp/${tpNumber}`}
                     className="hover:underline"
-                    style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
+                    style={{ fontSize: "var(--text-label)", fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
                   >
                     Open the full plan
                   </Link>
                 </div>
 
                 {!t.plan ? (
-                  <p style={{ fontSize: 12, color: FAINT, marginTop: 10 }}>No plan started for TP {tpNumber} yet.</p>
+                  <p style={{ fontSize: "var(--text-meta)", color: FAINT, marginTop: 10 }}>No plan started for TP {tpNumber} yet.</p>
                 ) : (
                   <>
                     {!t.plan.submitted_at ? (
-                      <p style={{ fontSize: 11, color: FAINT, marginTop: 8 }}>Draft — not submitted yet.</p>
+                      <p style={{ fontSize: "var(--text-label)", color: FAINT, marginTop: 8 }}>Draft — not submitted yet.</p>
                     ) : null}
                     <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
                       <PlanField label="Main aims" text={t.plan.main_aims} />
@@ -160,7 +160,7 @@ export default async function AssessorLessonPlansPage() {
                       <PlanField label="Framework" text={t.plan.framework_used} />
                     </div>
                     {Array.isArray(t.plan.procedure) && t.plan.procedure.length > 0 ? (
-                      <p style={{ fontSize: 11, color: FAINT, marginTop: 10 }}>
+                      <p style={{ fontSize: "var(--text-label)", color: FAINT, marginTop: 10 }}>
                         {t.plan.procedure.length} stages in the procedure — in the full plan.
                       </p>
                     ) : null}
@@ -179,8 +179,8 @@ function PlanField({ label, text }: { label: string; text: string | null | undef
   if (!text) return null;
   return (
     <div>
-      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>{label}</p>
-      <p style={{ fontSize: 12.5, color: INK, marginTop: 3, lineHeight: 1.55, whiteSpace: "pre-line" }}>{text}</p>
+      <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>{label}</p>
+      <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 3, lineHeight: 1.55, whiteSpace: "pre-line" }}>{text}</p>
     </div>
   );
 }

@@ -33,11 +33,11 @@ export function Stage1Form({
 
     <form action={action} className="contents">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">
+      <h2 className="font-serif text-h3 text-ink">
         Progress Record — Stage 1: first third of the course
       </h2>
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage1_tutorial_given"
@@ -47,7 +47,7 @@ export function Stage1Form({
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Hours taught so far</label>
+        <label className="text-body text-muted">Hours taught so far</label>
         <input
           name="stage1_hours_taught"
           type="number"
@@ -58,7 +58,7 @@ export function Stage1Form({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Strengths</label>
+        <label className="text-body text-muted">Strengths</label>
         <TrainerFeedbackTextarea
           name="stage1_strengths"
           rows={3}
@@ -68,7 +68,7 @@ export function Stage1Form({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Action plan for the next stage</label>
+        <label className="text-body text-muted">Action plan for the next stage</label>
         <TrainerFeedbackTextarea
           name="stage1_action_plan"
           rows={3}
@@ -78,12 +78,12 @@ export function Stage1Form({
       </div>
 
       {record.stage1_tutor_signature_name && record.stage1_completed_at ? (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Signed by {record.stage1_tutor_signature_name} on {formatDate(record.stage1_completed_at, timeZone, { year: "numeric" })}.
         </p>
       ) : null}
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage1_completed"
@@ -92,12 +92,12 @@ export function Stage1Form({
         Progress Record — Stage 1 complete
       </label>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

@@ -40,26 +40,26 @@ export function Stage3OverallForm({
 
     <form action={action} className="contents">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Progress Record — Stage 3 / Tutorial: final third (conditional)</h2>
-      <p className="text-xs text-muted">
+      <h2 className="font-serif text-h3 text-ink">Progress Record — Stage 3 / Tutorial: final third (conditional)</h2>
+      <p className="text-label text-muted">
         A Stage Three <strong>tutorial</strong> is required if the candidate was not to standard at Stage 2, stalled
         after being on/above standard, or is showing signs of a higher grade (Pass B/A) but not maintaining progress.
         Not every candidate needs the tutorial.
       </p>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Whether a Stage Three <strong>record</strong> is expected is decided by those same triggers and by your
         centre&rsquo;s own setting &mdash; Handbook 10.2 lets a centre give Stage Three to every candidate. You
         don&rsquo;t set that here.
       </p>
 
       {mandatoryReason ? (
-        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-sm text-status-warning-text">
+        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-body text-status-warning-text">
           <span className="font-semibold">Stage 3 is required for this candidate:</span> {mandatoryReason.toLowerCase()} (Handbook 10.2).
           The tutorial and the whole record must be completed in the final third; a centre may add candidates to Stage 3 but
           may not take a triggered one out.
         </p>
       ) : null}
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage3_tutorial_required"
@@ -70,7 +70,7 @@ export function Stage3OverallForm({
         This candidate needs a Stage 3 tutorial
       </label>
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage3_tutorial_given"
@@ -80,7 +80,7 @@ export function Stage3OverallForm({
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Hours taught so far</label>
+        <label className="text-body text-muted">Hours taught so far</label>
         <input
           name="stage3_hours_taught"
           type="number"
@@ -91,7 +91,7 @@ export function Stage3OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Tutor&apos;s overall progress assessment</label>
+        <label className="text-body text-muted">Tutor&apos;s overall progress assessment</label>
         <select
           name="stage3_tutor_overall"
           defaultValue={record.stage3_tutor_overall ?? ""}
@@ -107,7 +107,7 @@ export function Stage3OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Summary of tutorial and action points</label>
+        <label className="text-body text-muted">Summary of tutorial and action points</label>
         <TrainerFeedbackTextarea
           name="stage3_tutor_notes"
           rows={3}
@@ -117,7 +117,7 @@ export function Stage3OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Written assignments notes</label>
+        <label className="text-body text-muted">Written assignments notes</label>
         <TrainerFeedbackTextarea
           name="stage3_tutor_written_assignments_notes"
           rows={2}
@@ -127,7 +127,7 @@ export function Stage3OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Other notes</label>
+        <label className="text-body text-muted">Other notes</label>
         <TrainerFeedbackTextarea
           name="stage3_tutor_other_notes"
           rows={2}
@@ -137,12 +137,12 @@ export function Stage3OverallForm({
       </div>
 
       {record.stage3_tutor_signature_name && record.stage3_finalized_at ? (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Signed by {record.stage3_tutor_signature_name} on {formatDate(record.stage3_finalized_at, timeZone, { year: "numeric" })}.
         </p>
       ) : null}
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage3_finalized"
@@ -151,12 +151,12 @@ export function Stage3OverallForm({
         Finalize Progress Record — Stage 3 (reveals these ratings to the candidate)
       </label>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

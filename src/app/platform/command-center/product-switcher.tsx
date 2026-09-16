@@ -47,7 +47,7 @@ export function ProductSwitcher({ connectHref }: { connectHref: string }) {
       </div>
       {open ? (
         <div style={{ position: "absolute", top: 42, right: 0, width: 210, background: CARD, borderRadius: 8, boxShadow: "0 4px 20px -4px rgba(0,0,0,0.35)", overflow: "hidden", zIndex: 30 }}>
-          <div style={{ padding: "8px 14px", background: HOVER, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Your products</div>
+          <div style={{ padding: "8px 14px", background: HOVER, fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Your products</div>
           {products.map((p) => (
             <a
               key={p.name}
@@ -57,10 +57,10 @@ export function ProductSwitcher({ connectHref }: { connectHref: string }) {
               className="wash"
               style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", textDecoration: "none" }}
             >
-              <span style={{ width: 22, height: 22, borderRadius: 6, background: p.color, color: CARD, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>
+              <span style={{ width: 22, height: 22, borderRadius: 6, background: p.color, color: CARD, fontSize: "var(--text-label)", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>
                 {p.initial}
               </span>
-              <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{p.name}</span>
+              <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>{p.name}</span>
             </a>
           ))}
         </div>

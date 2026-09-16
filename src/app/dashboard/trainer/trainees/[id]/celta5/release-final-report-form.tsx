@@ -18,28 +18,28 @@ export function ReleaseFinalReportForm({ record, timeZone }: { record: Celta5Rec
   return (
     <form action={action} className="sheet flex flex-col gap-3 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Release final report to trainee</h2>
-      <p className="text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Release final report to trainee</h2>
+      <p className="text-body text-muted">
         The trainee never sees this during the course. Release it once Cambridge has actually
         confirmed the result -- typically about a week after the course ends, not the moment
         this record is finalized above.
       </p>
 
       {record.final_report_released_at ? (
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           Released {formatDateTime(record.final_report_released_at, timeZone)}.
         </p>
       ) : (
         <button
           type="submit"
           disabled={pending}
-          className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
         >
           {pending ? "Releasing..." : "Release final report to trainee"}
         </button>
       )}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

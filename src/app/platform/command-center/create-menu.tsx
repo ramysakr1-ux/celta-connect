@@ -72,7 +72,7 @@ export function CreateMenu() {
       <div
         onClick={() => setOpen((v) => !v)}
         className="wash"
-        style={{ height: 34, padding: "0 15px", borderRadius: 6, background: GOLD, color: DARK, fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}
+        style={{ height: 34, padding: "0 15px", borderRadius: 6, background: GOLD, color: DARK, fontSize: "var(--text-meta)", fontWeight: 700, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M12 5v14M5 12h14" />
@@ -89,7 +89,7 @@ export function CreateMenu() {
                 onClick={() => setOpen(false)}
                 className="wash"
                 style={{
-                  display: "block", padding: "11px 14px", fontSize: 12.5, fontWeight: 500, color: INK, textDecoration: "none",
+                  display: "block", padding: "11px 14px", fontSize: "var(--text-meta)", fontWeight: 500, color: INK, textDecoration: "none",
                   borderBottom: i < ACTIONS.length - 1 ? `1px solid ${BORDER}` : "none",
                 }}
               >
@@ -100,7 +100,7 @@ export function CreateMenu() {
                 key={a.label}
                 title="Not built yet"
                 style={{
-                  padding: "11px 14px", fontSize: 12.5, fontWeight: 500, color: MUTED, cursor: "not-allowed",
+                  padding: "11px 14px", fontSize: "var(--text-meta)", fontWeight: 500, color: MUTED, cursor: "not-allowed",
                   borderBottom: i < ACTIONS.length - 1 ? `1px solid ${BORDER}` : "none",
                 }}
               >

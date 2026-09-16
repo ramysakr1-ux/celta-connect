@@ -155,10 +155,10 @@ export function SelfEvaluationForm({
           <div className="flex items-start gap-3">
             <NumberedDot n={5} hue={GOLD_INK} done={answered[4]} />
             <div className="min-w-0">
-              <h3 className="font-serif" style={{ fontSize: 17, fontWeight: 600, color: GOLD_INK }}>
+              <h3 className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, color: GOLD_INK }}>
                 Action points from the last TP
               </h3>
-              <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+              <p className="italic" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                 Brought in automatically from your tutor&apos;s starred points — say what you actually did about each
                 one.
               </p>
@@ -192,8 +192,8 @@ export function SelfEvaluationForm({
                       padding: "9px 11px",
                     }}
                   >
-                    <span style={{ fontSize: 11, color: GOLD_INK }}>★ </span>
-                    <span style={{ fontSize: 13, lineHeight: 1.5, color: INK }}>{point.previous_point}</span>
+                    <span style={{ fontSize: "var(--text-label)", color: GOLD_INK }}>★ </span>
+                    <span style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK }}>{point.previous_point}</span>
                   </div>
                 ) : (
                   <input
@@ -228,7 +228,7 @@ export function SelfEvaluationForm({
               type="button"
               onClick={() => setActionPoints([...actionPoints, { previous_point: "", what_i_did: "" }])}
               className="mt-2"
-              style={{ fontSize: 12.5, color: TEAL }}
+              style={{ fontSize: "var(--text-meta)", color: TEAL }}
             >
               + Add another
             </button>
@@ -244,10 +244,10 @@ export function SelfEvaluationForm({
           <div className="flex items-start gap-3">
             <NumberedDot n={6} hue={TEAL} done={answered[5]} />
             <div className="min-w-0">
-              <h3 className="font-serif" style={{ fontSize: 17, fontWeight: 600, color: TEAL }}>
+              <h3 className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, color: TEAL }}>
                 What do you want to work on in the next TP?
               </h3>
-              <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+              <p className="italic" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                 Your own priorities, before you read your tutor&apos;s.
               </p>
             </div>
@@ -310,8 +310,8 @@ export function SelfEvaluationForm({
                   />
                 ))}
               </div>
-              <p className="flex-none whitespace-nowrap" style={{ fontSize: 12, color: MUTED }}>
-                <span className="font-serif" style={{ fontSize: 17, color: INK }}>
+              <p className="flex-none whitespace-nowrap" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
+                <span className="font-serif" style={{ fontSize: "var(--text-h3)", color: INK }}>
                   {answeredCount}
                 </span>{" "}
                 of 6 answered
@@ -375,11 +375,11 @@ function Question({
       <div className="flex items-start gap-3">
         <NumberedDot n={n} hue={hue} done={answered} />
         <div className="min-w-0">
-          <h3 className="font-serif" style={{ fontSize: 17, fontWeight: 600, color: hue }}>
+          <h3 className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, color: hue }}>
             {label}
           </h3>
           {hint ? (
-            <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+            <p className="italic" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
               {hint}
             </p>
           ) : null}

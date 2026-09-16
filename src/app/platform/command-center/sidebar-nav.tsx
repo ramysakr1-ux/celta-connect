@@ -29,7 +29,7 @@ export function SidebarNav() {
             className="wash"
             style={{
               display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 7,
-              fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none",
+              fontSize: "var(--text-meta)", fontWeight: 600, cursor: "pointer", textDecoration: "none",
               color: active ? INK_DARK : INACTIVE_TEXT,
               background: active ? GOLD : "transparent",
             }}

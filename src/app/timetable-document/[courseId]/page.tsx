@@ -126,10 +126,10 @@ export default async function TimetableDocumentPage({ params }: { params: Promis
           style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "16px 20px" }}
         >
           <div>
-            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: MUTED }}>
+            <p style={{ margin: 0, fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: MUTED }}>
               Timetable
             </p>
-            <p style={{ margin: 0, fontSize: 18 }}>{course.name}</p>
+            <p style={{ margin: 0, fontSize: "var(--text-h3)" }}>{course.name}</p>
           </div>
           <PrintButton />
         </div>

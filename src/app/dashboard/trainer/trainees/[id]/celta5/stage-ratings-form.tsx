@@ -101,14 +101,14 @@ export function StageRatingsForm({
       <input type="hidden" name="trainee_id" value={traineeId} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+        <span className="rounded-[6px] bg-accent px-2.5 py-1 text-label font-medium text-ink">
           Tutor: {ratedCount} of {TOTAL_CODES}
         </span>
         {unacceptedSuggestions.length > 0 ? (
           <button
             type="button"
             onClick={acceptAllSuggestions}
-            className="rounded-[6px] border border-dashed border-status-warning-text px-3 py-1.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg"
+            className="rounded-[6px] border border-dashed border-status-warning-text px-3 py-1.5 text-label font-medium text-status-warning-text hover:bg-status-warning-bg"
           >
             Accept all suggestions ({unacceptedSuggestions.length})
           </button>
@@ -137,13 +137,13 @@ export function StageRatingsForm({
                     {code}
                     {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
                     {disagrees ? (
-                      <span className="ml-2 text-sm font-semibold text-status-warning-text" title="Candidate and tutor ratings differ">
+                      <span className="ml-2 text-body font-semibold text-status-warning-text" title="Candidate and tutor ratings differ">
                         &ne;
                       </span>
                     ) : null}
                     {notYetTaught ? (
                       <span
-                        className="ml-2 rounded-[5px] border border-border px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.04em] text-muted uppercase"
+                        className="ml-2 rounded-[5px] border border-border px-1.5 py-0.5 text-micro font-semibold tracking-[0.04em] text-muted uppercase"
                         title="Not yet formally in scope for this course's progress -- a blank rating here isn't a gap. Any rating given still counts as early evidence."
                       >
                         Not yet taught
@@ -160,14 +160,14 @@ export function StageRatingsForm({
                     ) : null}
                   </span>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs text-muted">Candidate:</span>
+                    <span className="text-label text-muted">Candidate:</span>
                     <CriteriaRatingPill rating={candidateStatus} />
                   </div>
                 </div>
                 {expandedFlags.has(code) && flags.length > 0 ? (
                   <div className="mt-2 flex flex-col gap-1.5 rounded-[6px] border border-dashed border-status-warning-text bg-status-warning-bg p-2.5">
                     {flags.map((flag, i) => (
-                      <p key={i} className="text-xs leading-relaxed text-ink">
+                      <p key={i} className="text-label leading-relaxed text-ink">
                         <span className="font-semibold text-status-warning-text">{FLAG_LABEL[flag.kind]}:</span> {flag.detail}
                       </p>
                     ))}
@@ -175,13 +175,13 @@ export function StageRatingsForm({
                 ) : null}
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <input type="hidden" name={`status__${code}`} value={value} />
-                  <span className="text-xs text-muted">Your rating:</span>
+                  <span className="text-label text-muted">Your rating:</span>
                   <CriteriaRatingPills value={value} onChange={(v) => setRatings((prev) => ({ ...prev, [code]: v }))} />
                   {showSuggestion ? (
                     <button
                       type="button"
                       onClick={() => setRatings((prev) => ({ ...prev, [code]: suggestion }))}
-                      className="rounded-[6px] border border-dashed border-status-warning-text px-2 py-1 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg"
+                      className="rounded-[6px] border border-dashed border-status-warning-text px-2 py-1 text-label font-medium text-status-warning-text hover:bg-status-warning-bg"
                       title="Suggested from TP notes -- click to accept as your rating"
                     >
                       Suggested: {suggestion}
@@ -190,8 +190,8 @@ export function StageRatingsForm({
                 </div>
                 {CRITERIA_GUIDANCE[code] ? (
                   <details className="mt-2">
-                    <summary className="cursor-pointer text-xs text-muted hover:text-primary">Guidance</summary>
-                    <ul className="mt-1 flex flex-col gap-0.5 pl-4 text-xs text-muted">
+                    <summary className="cursor-pointer text-label text-muted hover:text-primary">Guidance</summary>
+                    <ul className="mt-1 flex flex-col gap-0.5 pl-4 text-label text-muted">
                       {CRITERIA_GUIDANCE[code].map((bullet, i) => (
                         <li key={i} className="list-disc">
                           {bullet}
@@ -206,12 +206,12 @@ export function StageRatingsForm({
         </div>
       ))}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save criteria"}
       </button>

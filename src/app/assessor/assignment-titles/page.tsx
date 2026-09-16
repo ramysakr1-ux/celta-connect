@@ -49,13 +49,13 @@ export default async function AssessorAssignmentTitlesPage() {
       <AssessorReadOnlyBanner subject="the course" />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
+          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
             Assessor access — read-only · assignment titles
           </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6, color: INK }}>
+          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>
             The four written assignments
           </h1>
-          <p style={{ fontSize: 13, color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
+          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
             The same four titles for every candidate on {course.name}, each {ASSIGNMENT_WORD_COUNT}. Where this centre
             has published its own brief, its wording is shown beneath the title; the marks against these are in each
             candidate&apos;s portfolio.
@@ -70,32 +70,32 @@ export default async function AssessorAssignmentTitlesPage() {
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                   <span
                     style={{
-                      fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                      fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
                       color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums",
                     }}
                   >
                     {i + 1}
                   </span>
-                  <h2 style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 600, color: INK }}>{info.title}</h2>
+                  <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{info.title}</h2>
                 </div>
-                <p style={{ fontSize: 12.5, color: MUTED, marginTop: 6, lineHeight: 1.6 }}>{info.description}</p>
+                <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 6, lineHeight: 1.6 }}>{info.description}</p>
 
                 {sections.length > 0 ? (
                   <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 11 }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>
+                    <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>
                       This centre&apos;s brief
                     </p>
                     {sections.map((s) => (
                       <div key={s.key}>
-                        <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{s.title}</p>
-                        <p style={{ fontSize: 12, color: MUTED, marginTop: 3, lineHeight: 1.55, whiteSpace: "pre-line" }}>
+                        <p style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>{s.title}</p>
+                        <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 3, lineHeight: 1.55, whiteSpace: "pre-line" }}>
                           {s.instruction}
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p style={{ fontSize: 11.5, color: "oklch(63% 0.012 82)", marginTop: 12 }}>
+                  <p style={{ fontSize: "var(--text-label)", color: "oklch(63% 0.012 82)", marginTop: 12 }}>
                     This centre has not published its own brief for this assignment.
                   </p>
                 )}

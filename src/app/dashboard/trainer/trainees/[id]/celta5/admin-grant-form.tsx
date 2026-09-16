@@ -16,23 +16,23 @@ export function AdminGrantForm({ record, timeZone }: { record: Celta5Record; tim
   return (
     <form action={action} className="sheet flex flex-col gap-3 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Admin access</h2>
-      <p className="text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Admin access</h2>
+      <p className="text-body text-muted">
         Admin (centre business/admissions staff) has no access to this record by default.
         Grant it here only if there&apos;s a specific business reason to.
       </p>
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input type="checkbox" name="granted" defaultChecked={granted} />
         Grant admin access to this record
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Access level</label>
+        <label className="text-body text-muted">Access level</label>
         <select
           name="access_level"
           defaultValue={record.admin_access_level ?? "read"}
-          className="w-40 appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+          className="w-40 appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
         >
           <option value="read">Read-only</option>
           <option value="edit">Read and edit</option>
@@ -40,17 +40,17 @@ export function AdminGrantForm({ record, timeZone }: { record: Celta5Record; tim
       </div>
 
       {granted && record.admin_access_granted_at ? (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Granted {formatDateTime(record.admin_access_granted_at, timeZone)}.
         </p>
       ) : null}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

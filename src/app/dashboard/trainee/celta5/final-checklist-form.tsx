@@ -34,10 +34,10 @@ export function FinalChecklistForm({ signatureName, fullName }: { signatureName:
   return (
     <form action={action} className="flex flex-col gap-4">
       <div>
-        <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">
+        <p className="text-label font-semibold tracking-[0.06em] text-muted uppercase">
           To be completed on the final day of the course
         </p>
-        <p className="mt-1 text-sm text-ink">
+        <p className="mt-1 text-body text-ink">
           Please tick the appropriate boxes and sign. In handing in this portfolio for
           assessment purposes, I confirm that:
         </p>
@@ -46,7 +46,7 @@ export function FinalChecklistForm({ signatureName, fullName }: { signatureName:
       <ul className="flex flex-col gap-2.5">
         {CHECKLIST_ITEMS.map((item) => (
           <li key={item.key}>
-            <label className="flex items-start gap-2.5 text-sm text-ink">
+            <label className="flex items-start gap-2.5 text-body text-ink">
               <input
                 type="checkbox"
                 name={item.key}
@@ -60,12 +60,12 @@ export function FinalChecklistForm({ signatureName, fullName }: { signatureName:
         ))}
       </ul>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={!allChecked || pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Signing..." : `Sign as ${signatureName}`}
       </button>

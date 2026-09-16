@@ -85,7 +85,7 @@ function AppendixBand({ appendices }: { appendices: MarkingAppendix[] }) {
     <div className="flex flex-col gap-2" style={{ borderTop: `1px solid ${FAINT}`, padding: "14px 26px 16px" }}>
       <MarkerLabel colour={TEAL} label="What they attached" />
       {appendices.length === 0 ? (
-        <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+        <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
           Nothing attached. If the brief asked for an appendix, that is a return, not a fail.
         </p>
       ) : (
@@ -100,7 +100,7 @@ function AppendixBand({ appendices }: { appendices: MarkingAppendix[] }) {
                   border: `1px solid ${BORDER}`,
                   background: SHEET,
                   padding: "7px 11px",
-                  fontSize: 12,
+                  fontSize: "var(--text-meta)",
                   color: INK,
                   textAlign: "left",
                 }}
@@ -113,7 +113,7 @@ function AppendixBand({ appendices }: { appendices: MarkingAppendix[] }) {
           ))}
         </ul>
       )}
-      {error ? <p style={{ fontSize: 11.5, color: GOLD_INK, marginLeft: 12 }}>{error}</p> : null}
+      {error ? <p style={{ fontSize: "var(--text-label)", color: GOLD_INK, marginLeft: 12 }}>{error}</p> : null}
     </div>
   );
 }
@@ -358,7 +358,7 @@ export function AssignmentMarkingForm({
               {title} <i style={{ opacity: 0.75 }}>for</i> {candidateName}
             </>
           }
-          status={<span style={{ fontSize: 11.5, color: "oklch(86% 0.04 195)" }}>{stagePill}</span>}
+          status={<span style={{ fontSize: "var(--text-label)", color: "oklch(86% 0.04 195)" }}>{stagePill}</span>}
           showDictate={!closed}
         />
 
@@ -366,8 +366,8 @@ export function AssignmentMarkingForm({
         <Strip>
           <div className="flex flex-col gap-0.5" style={{ minWidth: 240 }}>
             <Eyebrow>Word count</Eyebrow>
-            <p style={{ fontSize: 12, color: MUTED }}>
-              <span className="font-serif tabular-nums" style={{ fontSize: 18, color: INK }}>
+            <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>
+              <span className="font-serif tabular-nums" style={{ fontSize: "var(--text-h3)", color: INK }}>
                 {totalWords}
               </span>{" "}
               of {wordMin}–{wordMax.toLocaleString()} ·{" "}
@@ -385,7 +385,7 @@ export function AssignmentMarkingForm({
                 placeholder={needsSecond ? "to be assigned" : "—"}
               />
               {inSample ? (
-                <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, border: `1px solid ${TEAL}`, borderRadius: 999, padding: "2px 8px" }}>
+                <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: TEAL, border: `1px solid ${TEAL}`, borderRadius: 999, padding: "2px 8px" }}>
                   In the sample
                 </span>
               ) : null}
@@ -426,30 +426,30 @@ export function AssignmentMarkingForm({
           <div className="flex flex-col gap-2.5" style={{ padding: "16px 22px 18px 26px" }}>
             {intro ? (
               <details>
-                <summary className="cursor-pointer italic" style={{ fontSize: 11.5, color: MUTED }}>
+                <summary className="cursor-pointer italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                   The brief the candidate read · show
                 </summary>
-                <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, marginTop: 6 }}>{intro}</p>
+                <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK, marginTop: 6 }}>{intro}</p>
               </details>
             ) : null}
 
             {priorOverallComment ? (
               <div style={{ borderRadius: 7, borderLeft: `3px solid ${TEAL}`, background: `color-mix(in oklab, ${TEAL} 9%, transparent)`, padding: "8px 11px" }}>
-                <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                <p className="uppercase" style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
                   Overall comment, round 1 · the candidate saw this
                 </p>
-                <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{priorOverallComment}</p>
+                <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{priorOverallComment}</p>
               </div>
             ) : null}
 
             <MarkerLabel colour={TEAL} label={blind ? "Your overall comment · for the record" : "Your overall comment"} />
-            <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+            <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
               {blind
                 ? "Yours is part of the double-marking record; the candidate reads the first marker's."
                 : "Appears under “Before you start” on the candidate's page."}
             </p>
             {closed ? (
-              <p style={{ fontSize: 14, lineHeight: 1.6, color: INK, whiteSpace: "pre-line", marginLeft: 12 }}>
+              <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: INK, whiteSpace: "pre-line", marginLeft: 12 }}>
                 {overall || <span className="italic" style={{ color: MUTED }}>Nothing written.</span>}
               </p>
             ) : (
@@ -475,7 +475,7 @@ export function AssignmentMarkingForm({
           <div className="flex flex-col gap-2" style={{ borderLeft: `1px solid ${FAINT}`, padding: "16px 26px 18px 22px" }}>
             <MarkerLabel colour={TEAL} label="Marked against" />
             {criteria.length === 0 ? (
-              <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+              <p className="italic" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                 Your centre has not set the criteria for this assignment yet.
               </p>
             ) : (
@@ -488,9 +488,9 @@ export function AssignmentMarkingForm({
                   return (
                     <li key={c.key} style={{ borderTop: i === 0 ? undefined : `1px dashed ${FAINT}`, paddingTop: i === 0 ? 0 : 8 }}>
                       <div className="grid gap-2" style={{ gridTemplateColumns: "16px minmax(0,1fr)" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: TEAL, paddingTop: 2 }}>{i + 1}</span>
-                        <span style={{ fontSize: 12.5, lineHeight: 1.5, color: INK }}>
-                          {c.text} <span className="italic" style={{ fontSize: 11, color: MUTED }}>— whole assignment</span>
+                        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, color: TEAL, paddingTop: 2 }}>{i + 1}</span>
+                        <span style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK }}>
+                          {c.text} <span className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>— whole assignment</span>
                         </span>
                       </div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-2" style={{ marginLeft: 22 }}>
@@ -515,7 +515,7 @@ export function AssignmentMarkingForm({
                         ) : null}
                       </div>
                       {disputed ? (
-                        <p style={{ fontSize: 11, color: GARNET, marginLeft: 22, marginTop: 3 }}>
+                        <p style={{ fontSize: "var(--text-label)", color: GARNET, marginLeft: 22, marginTop: 3 }}>
                           Markers disagree — the mark above is the one that goes to the candidate.
                         </p>
                       ) : null}
@@ -535,10 +535,10 @@ export function AssignmentMarkingForm({
               }}
             >
               <Eyebrow colour={MUTED}>{closed ? "Outcome" : settling ? "Agreed outcome" : "Outcome if released now"}</Eyebrow>
-              <p className="font-serif" style={{ fontSize: 18, fontWeight: 600, color: !outcome ? MUTED : failType ? GOLD_INK : TEAL }}>
+              <p className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, color: !outcome ? MUTED : failType ? GOLD_INK : TEAL }}>
                 {outcome ?? "Mark every criterion"}
               </p>
-              <p style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, marginTop: 2 }}>{outcomeNote(outcome, sanction, needsSecond && !secondRecorded)}</p>
+              <p style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED, marginTop: 2 }}>{outcomeNote(outcome, sanction, needsSecond && !secondRecorded)}</p>
             </div>
           </div>
         </div>
@@ -548,10 +548,10 @@ export function AssignmentMarkingForm({
         {/* ---------- §2e the sections ---------- */}
         <div style={{ padding: "20px 26px 22px" }}>
           <div className="flex flex-wrap items-baseline gap-3">
-            <h3 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: sanction ? GARNET : TEAL }}>
+            <h3 className="font-serif" style={{ fontSize: "var(--text-h2)", fontWeight: 600, color: sanction ? GARNET : TEAL }}>
               {format === "structured" ? "The tasks" : "The essay"}
             </h3>
-            <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+            <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
               {blind
                 ? "Read the script and mark it. Your reading goes in the overall comment above — the per-section comments are the first marker's."
                 : format === "structured"
@@ -590,11 +590,11 @@ export function AssignmentMarkingForm({
                   </div>
 
                   <div className="flex flex-col gap-[7px]" style={{ padding: "14px 18px 18px 0" }}>
-                    <p className="font-serif" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.25, color: INK }}>
+                    <p className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, lineHeight: 1.25, color: INK }}>
                       {s.title}
                     </p>
                     {s.instruction ? (
-                      <p className="italic" style={{ fontSize: 12.5, lineHeight: 1.5, color: MUTED }}>
+                      <p className="italic" style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: MUTED }}>
                         {s.instruction}
                       </p>
                     ) : null}
@@ -603,7 +603,7 @@ export function AssignmentMarkingForm({
                       style={{
                         borderRadius: 6,
                         padding: "3px 8px",
-                        fontSize: 12.5,
+                        fontSize: "var(--text-meta)",
                         fontWeight: 700,
                         background: words > 0 ? `color-mix(in oklab, ${hue} 13%, transparent)` : CARD,
                         color: words > 0 ? hue : MUTED,
@@ -616,21 +616,21 @@ export function AssignmentMarkingForm({
                   <div className="flex flex-col gap-3" style={{ borderLeft: `1px solid ${FAINT}`, padding: "14px 0 18px 20px" }}>
                     {prior ? (
                       <div style={{ borderRadius: 7, borderLeft: `3px solid ${TEAL}`, background: `color-mix(in oklab, ${TEAL} 9%, transparent)`, padding: "8px 11px" }}>
-                        <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                        <p className="uppercase" style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
                           Your comment, round 1 · the candidate saw this
                         </p>
-                        <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{prior}</p>
+                        <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{prior}</p>
                       </div>
                     ) : null}
 
-                    <p style={{ fontSize: 14, lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
+                    <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
                       {text || <span className="italic" style={{ color: MUTED }}>Nothing written.</span>}
                     </p>
 
                     {blind ? null : closed ? (
                       commentValue ? (
                         <div style={{ borderRadius: 7, borderLeft: `3px solid ${TEAL}`, background: `color-mix(in oklab, ${TEAL} 9%, transparent)`, padding: "8px 11px" }}>
-                          <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{commentValue}</p>
+                          <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{commentValue}</p>
                         </div>
                       ) : null
                     ) : (
@@ -643,10 +643,10 @@ export function AssignmentMarkingForm({
                           padding: "8px 11px",
                         }}
                       >
-                        <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                        <p className="uppercase" style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
                           Your comment on this section{isResub ? " · round 2" : ""}
                         </p>
-                        <p className="italic" style={{ fontSize: 11, color: wantComment && !commentValue.trim() ? GOLD_INK : MUTED, marginBottom: 4 }}>
+                        <p className="italic" style={{ fontSize: "var(--text-label)", color: wantComment && !commentValue.trim() ? GOLD_INK : MUTED, marginBottom: 4 }}>
                           {wantComment && !commentValue.trim()
                             ? "Required when something is Not met — this is what they rewrite from."
                             : "Shown at the top of this section on their page."}
@@ -673,7 +673,7 @@ export function AssignmentMarkingForm({
         <div className="grid grid-cols-1 rounded-b-[14px] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]" style={{ borderTop: `1px solid ${FAINT}`, background: CARD }}>
           <div className="flex flex-col gap-3" style={{ padding: "18px 22px 22px 26px" }}>
             <MarkerLabel colour={sanction ? GARNET : TEAL} label="Double-marking record" />
-            <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+            <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
               Handbook 9.2.3 — both tutors initial what they have checked, and the centre keeps the record.
             </p>
             <div className="flex flex-col gap-1.5" style={{ marginLeft: 12 }}>
@@ -686,7 +686,7 @@ export function AssignmentMarkingForm({
                 <button
                   type="submit"
                   disabled={pending}
-                  style={{ borderRadius: 8, background: accent, padding: "7px 15px", fontSize: 13, fontWeight: 600, color: SHEET }}
+                  style={{ borderRadius: 8, background: accent, padding: "7px 15px", fontSize: "var(--text-meta)", fontWeight: 600, color: SHEET }}
                 >
                   {viewerIsSecondMarker ? "Settle and initial as second marker" : "Settle and initial as first marker"}
                 </button>
@@ -694,11 +694,11 @@ export function AssignmentMarkingForm({
             ) : null}
             {needsSecond && !secondRecorded && !closed && !blind && !awaitingSecond ? (
               <div className="flex flex-col gap-1.5" style={{ marginLeft: 12 }}>
-                <label style={{ fontSize: 12, color: MUTED }}>Send for a blind second mark</label>
+                <label style={{ fontSize: "var(--text-meta)", color: MUTED }}>Send for a blind second mark</label>
                 <select
                   value={secondMarkerId}
                   onChange={(e) => setSecondMarkerId(e.target.value)}
-                  style={{ borderRadius: 8, border: `1px solid ${BORDER}`, background: SHEET, padding: "7px 10px", fontSize: 13, color: INK }}
+                  style={{ borderRadius: 8, border: `1px solid ${BORDER}`, background: SHEET, padding: "7px 10px", fontSize: "var(--text-meta)", color: INK }}
                 >
                   <option value="">— choose a tutor —</option>
                   {secondMarkerOptions.map((o) => (
@@ -717,7 +717,7 @@ export function AssignmentMarkingForm({
               <form action={returnAction} className="flex flex-col gap-2" style={{ marginLeft: 12 }}>
                 <input type="hidden" name="assignment_id" value={assignmentId} />
                 <input type="hidden" name="round" value={round} />
-                <p style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED }}>
+                <p style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED }}>
                   For a wrong file, a missing appendix, or a declaration problem — not for the quality of the work. It goes
                   back with your reason on it and does not spend the resubmission. Nothing you have marked here is sent.
                 </p>
@@ -735,17 +735,17 @@ export function AssignmentMarkingForm({
                   <button
                     type="submit"
                     disabled={pending || !reason.trim()}
-                    style={{ borderRadius: 8, background: reason.trim() ? GARNET : BORDER, padding: "7px 14px", fontSize: 13, fontWeight: 600, color: reason.trim() ? SHEET : MUTED }}
+                    style={{ borderRadius: 8, background: reason.trim() ? GARNET : BORDER, padding: "7px 14px", fontSize: "var(--text-meta)", fontWeight: 600, color: reason.trim() ? SHEET : MUTED }}
                   >
                     Return to candidate unmarked
                   </button>
-                  <button type="button" onClick={() => setReturning(false)} style={{ fontSize: 13, color: MUTED }}>
+                  <button type="button" onClick={() => setReturning(false)} style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                     Cancel
                   </button>
                 </div>
               </form>
             ) : (
-              <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+              <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
                 {closed ? "Closed." : "A wrong file or a missing appendix goes back without a decision, and without spending the resubmission."}
               </p>
             )}
@@ -766,7 +766,7 @@ export function AssignmentMarkingForm({
       >
         <div className="flex items-center gap-2">
           <span className="size-[5px] shrink-0 rounded-full" style={{ background: blockers.length ? GOLD_INK : TEAL }} />
-          <p style={{ fontSize: 11.5, color: blockers.length ? GOLD_INK : TEAL }}>
+          <p style={{ fontSize: "var(--text-label)", color: blockers.length ? GOLD_INK : TEAL }}>
             {closed
               ? "Closed. Both rounds and both sets of comments are on the record."
               : awaitingSecond
@@ -784,7 +784,7 @@ export function AssignmentMarkingForm({
             <>
               <DictateButton variant="bar" hue={accent} />
               {!blind ? (
-                <button type="button" onClick={() => setReturning((v) => !v)} style={{ fontSize: 13, color: GARNET }}>
+                <button type="button" onClick={() => setReturning((v) => !v)} style={{ fontSize: "var(--text-meta)", color: GARNET }}>
                   Return unmarked…
                 </button>
               ) : null}
@@ -793,7 +793,7 @@ export function AssignmentMarkingForm({
                 <button
                   type="submit"
                   disabled={pending}
-                  style={{ borderRadius: 8, border: `1px solid ${BAR_BORDER}`, background: SHEET, padding: "8px 15px", fontSize: 13.5, color: INK }}
+                  style={{ borderRadius: 8, border: `1px solid ${BAR_BORDER}`, background: SHEET, padding: "8px 15px", fontSize: "var(--text-body)", color: INK }}
                 >
                   Save draft
                 </button>
@@ -809,7 +809,7 @@ export function AssignmentMarkingForm({
                     background: blockers.length ? "oklch(88% 0.016 82)" : accent,
                     padding: "8px 17px",
                     fontWeight: 600,
-                    fontSize: 13.5,
+                    fontSize: "var(--text-body)",
                     color: blockers.length ? MUTED : SHEET,
                     cursor: blockers.length ? "not-allowed" : undefined,
                   }}
@@ -851,7 +851,7 @@ function Banner({ hue, children }: { hue: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2" style={{ background: `color-mix(in oklab, ${hue} 9%, transparent)`, padding: "12px 26px", borderBottom: `1px solid ${FAINT}` }}>
       <span className="mt-1.5 size-[6px] shrink-0 rounded-full" style={{ background: hue }} />
-      <p style={{ fontSize: 12.5, lineHeight: 1.5, color: INK }}>{children}</p>
+      <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK }}>{children}</p>
     </div>
   );
 }
@@ -863,7 +863,7 @@ function MarkerChip({ label, name, dashed, placeholder }: { label: string; name:
         borderRadius: 999,
         border: `1px ${dashed ? "dashed" : "solid"} ${dashed ? GOLD_INK : BORDER}`,
         padding: "2px 9px",
-        fontSize: 11,
+        fontSize: "var(--text-label)",
         fontWeight: 600,
         color: dashed ? GOLD_INK : INK,
       }}
@@ -888,7 +888,7 @@ function Segmented({ value, onChange, disabled }: { value: boolean | undefined; 
             style={{
               borderRadius: 999,
               padding: "4px 12px",
-              fontSize: 11.5,
+              fontSize: "var(--text-label)",
               fontWeight: 700,
               background: on ? (v ? TEAL : GOLD_INK) : "transparent",
               color: on ? SHEET : MUTED,
@@ -927,10 +927,10 @@ function InitialRow({ name, role, at, timeZone }: { name: string | null; role: s
     .map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
   return (
-    <p style={{ fontSize: 12.5, color: at ? INK : MUTED }}>
+    <p style={{ fontSize: "var(--text-meta)", color: at ? INK : MUTED }}>
       <span
         className="mr-2 inline-flex items-center justify-center"
-        style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${at ? TEAL : BORDER}`, background: at ? TEAL : "transparent", color: SHEET, fontSize: 10 }}
+        style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${at ? TEAL : BORDER}`, background: at ? TEAL : "transparent", color: SHEET, fontSize: "var(--text-micro)" }}
       >
         {at ? "✓" : ""}
       </span>

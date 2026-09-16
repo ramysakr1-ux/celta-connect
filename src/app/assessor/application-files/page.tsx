@@ -118,20 +118,20 @@ export default async function AssessorApplicationFilesPage() {
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
           {/* The banner above carries the one door back to the pack. */}
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
+          <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
             Assessor access — read-only · application files
           </p>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6, color: INK }}>
+          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h1)", fontWeight: 600, marginTop: 6, color: INK }}>
             Application files
           </h1>
-          <p style={{ fontSize: 13, color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
+          <p style={{ fontSize: "var(--text-meta)", color: MUTED, marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
             Selection on {course.name}: the written task, the language awareness answer, the marks against the scheme
             and the interview record for every applicant the centre decided on — {accepted.length} accepted,{" "}
             {others.length} not. Names only, as §12.2 asks; nothing else that identifies them is shown here.
           </p>
 
           {files.length === 0 ? (
-            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: 13, color: FAINT }}>
+            <p className="card" style={{ marginTop: 26, padding: "18px 20px", fontSize: "var(--text-meta)", color: FAINT }}>
               No selection decisions for this course went through Connect, so there are no files to draw on here.
               A centre that selected on paper uploads its application files under centre documents.
             </p>
@@ -152,7 +152,7 @@ export default async function AssessorApplicationFilesPage() {
     if (files.length === 0) return null;
     return (
       <>
-        <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginTop: first ? 26 : 30 }}>
+        <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginTop: first ? 26 : 30 }}>
           {title} · {files.length}
         </p>
         {files.map((a) => {
@@ -167,15 +167,15 @@ export default async function AssessorApplicationFilesPage() {
           return (
             <div key={a.id} className="card" style={{ marginTop: 14, padding: "18px 20px" }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                <h2 style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 600, color: INK }}>{a.full_name}</h2>
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: a.stage === "accepted" || a.stage === "offer_sent" ? TEAL : MUTED }}>
+                <h2 style={{ fontFamily: "Georgia, serif", fontSize: "var(--text-h3)", fontWeight: 600, color: INK }}>{a.full_name}</h2>
+                <span style={{ fontSize: "var(--text-label)", fontWeight: 600, color: a.stage === "accepted" || a.stage === "offer_sent" ? TEAL : MUTED }}>
                   {DECISION_LABEL[a.stage] ?? a.stage}
                   {a.stage === "waiting_list" && a.waiting_list_position ? ` · position ${a.waiting_list_position}` : ""}
                   {decisionDate ? ` · ${formatDate(decisionDate, timeZone, { year: "numeric" })}` : ""}
                 </span>
               </div>
               {a.rejection_reason ? (
-                <p style={{ fontSize: 12.5, color: INK, marginTop: 6, lineHeight: 1.55 }}>
+                <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 6, lineHeight: 1.55 }}>
                   <span style={{ color: MUTED }}>Reason given: </span>
                   {a.rejection_reason}
                 </p>
@@ -186,23 +186,23 @@ export default async function AssessorApplicationFilesPage() {
                   <SectionLabel text="Written task" />
                   {a.writing_task_submission ? (
                     <details>
-                      <summary style={{ fontSize: 12.5, color: TEAL, cursor: "pointer", fontWeight: 600 }}>
+                      <summary style={{ fontSize: "var(--text-meta)", color: TEAL, cursor: "pointer", fontWeight: 600 }}>
                         {prompt ? `${prompt.prompt_type[0].toUpperCase()}${prompt.prompt_type.slice(1)} — read the task` : "Read the task"}
                       </summary>
-                      {prompt ? <p style={{ fontSize: 11.5, color: MUTED, marginTop: 6, fontStyle: "italic" }}>{prompt.prompt_text}</p> : null}
-                      <p style={{ fontSize: 12.5, color: INK, marginTop: 6, lineHeight: 1.6, whiteSpace: "pre-line" }}>{a.writing_task_submission}</p>
+                      {prompt ? <p style={{ fontSize: "var(--text-label)", color: MUTED, marginTop: 6, fontStyle: "italic" }}>{prompt.prompt_text}</p> : null}
+                      <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 6, lineHeight: 1.6, whiteSpace: "pre-line" }}>{a.writing_task_submission}</p>
                     </details>
                   ) : (
-                    <p style={{ fontSize: 12, color: AMBER }}>No written task on file.</p>
+                    <p style={{ fontSize: "var(--text-meta)", color: AMBER }}>No written task on file.</p>
                   )}
 
                   {languageAwareness.length > 0 ? (
                     <details style={{ marginTop: 8 }}>
-                      <summary style={{ fontSize: 12.5, color: TEAL, cursor: "pointer", fontWeight: 600 }}>Language awareness answer</summary>
+                      <summary style={{ fontSize: "var(--text-meta)", color: TEAL, cursor: "pointer", fontWeight: 600 }}>Language awareness answer</summary>
                       {languageAwareness.map((qa, i) => (
                         <div key={i} style={{ marginTop: 6 }}>
-                          <p style={{ fontSize: 11.5, color: MUTED, fontStyle: "italic" }}>{qa.question}</p>
-                          <p style={{ fontSize: 12.5, color: INK, marginTop: 3, lineHeight: 1.55, whiteSpace: "pre-line" }}>{qa.answer}</p>
+                          <p style={{ fontSize: "var(--text-label)", color: MUTED, fontStyle: "italic" }}>{qa.question}</p>
+                          <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 3, lineHeight: 1.55, whiteSpace: "pre-line" }}>{qa.answer}</p>
                         </div>
                       ))}
                     </details>
@@ -211,7 +211,7 @@ export default async function AssessorApplicationFilesPage() {
                   <SectionLabel text="Marks against the scheme" top={14} />
                   {marked ? (
                     <>
-                      <table style={{ fontSize: 12.5, color: INK, borderCollapse: "collapse", width: "100%" }}>
+                      <table style={{ fontSize: "var(--text-meta)", color: INK, borderCollapse: "collapse", width: "100%" }}>
                         <tbody>
                           {MARK_ROWS.map(([key, label]) => {
                             const value = a[`marking_${key}` as keyof typeof a] as string | null;
@@ -229,56 +229,56 @@ export default async function AssessorApplicationFilesPage() {
                         </tbody>
                       </table>
                       {a.task_feedback ? (
-                        <p style={{ fontSize: 12.5, color: INK, marginTop: 6, lineHeight: 1.55, whiteSpace: "pre-line" }}>
+                        <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 6, lineHeight: 1.55, whiteSpace: "pre-line" }}>
                           <span style={{ color: MUTED }}>Tutor feedback: </span>
                           {a.task_feedback}
                         </p>
                       ) : null}
-                      <p style={{ fontSize: 11, color: FAINT, marginTop: 4 }}>
+                      <p style={{ fontSize: "var(--text-label)", color: FAINT, marginTop: 4 }}>
                         Marked {formatDate(a.marked_at, timeZone, { year: "numeric" })}
                         {a.marked_by && markerName.get(a.marked_by) ? ` by ${markerName.get(a.marked_by)}` : ""}
                       </p>
                     </>
                   ) : (
-                    <p style={{ fontSize: 12, color: AMBER }}>Not marked.</p>
+                    <p style={{ fontSize: "var(--text-meta)", color: AMBER }}>Not marked.</p>
                   )}
                 </div>
 
                 <div>
                   <SectionLabel text="Interview record" />
                   {!record ? (
-                    <p style={{ fontSize: 12, color: a.stage === "rejected_before_interview" ? FAINT : AMBER }}>
+                    <p style={{ fontSize: "var(--text-meta)", color: a.stage === "rejected_before_interview" ? FAINT : AMBER }}>
                       {a.stage === "rejected_before_interview" ? "Not interviewed — turned down on the task." : "No interview record saved."}
                     </p>
                   ) : (
                     <>
-                      <p style={{ fontSize: 12, color: record.identity_checked_at ? MUTED : AMBER, lineHeight: 1.5 }}>
+                      <p style={{ fontSize: "var(--text-meta)", color: record.identity_checked_at ? MUTED : AMBER, lineHeight: 1.5 }}>
                         {record.identity_checked_at
                           ? `Identity checked — ${IDENTITY_DOCUMENT_LABEL[record.identity_document_type ?? ""] ?? "a document"} seen, ${formatDate(record.identity_checked_at, timeZone, { year: "numeric" })}.`
                           : "Identity not recorded as checked (Handbook §7.2)."}
                       </p>
                       {record.fixed_questions.map((q, i) => (
                         <div key={`f${i}`} style={{ marginTop: 8 }}>
-                          <p style={{ fontSize: 11.5, color: MUTED, fontStyle: "italic" }}>{q.question_text}</p>
-                          <p style={{ fontSize: 12.5, color: INK, marginTop: 2, lineHeight: 1.55, whiteSpace: "pre-line" }}>{q.answer_text || "—"}</p>
+                          <p style={{ fontSize: "var(--text-label)", color: MUTED, fontStyle: "italic" }}>{q.question_text}</p>
+                          <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 2, lineHeight: 1.55, whiteSpace: "pre-line" }}>{q.answer_text || "—"}</p>
                         </div>
                       ))}
                       {record.drawn_questions.map((q, i) => (
                         <div key={`d${i}`} style={{ marginTop: 8 }}>
-                          <p style={{ fontSize: 11.5, color: MUTED, fontStyle: "italic" }}>
+                          <p style={{ fontSize: "var(--text-label)", color: MUTED, fontStyle: "italic" }}>
                             {q.question_text}
                             {q.drawn_reason ? <span style={{ fontStyle: "normal" }}> · drawn because: {q.drawn_reason}</span> : null}
                           </p>
-                          <p style={{ fontSize: 12.5, color: INK, marginTop: 2, lineHeight: 1.55, whiteSpace: "pre-line" }}>{q.answer_text || "—"}</p>
+                          <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 2, lineHeight: 1.55, whiteSpace: "pre-line" }}>{q.answer_text || "—"}</p>
                         </div>
                       ))}
                       {record.overall_notes ? (
-                        <p style={{ fontSize: 12.5, color: INK, marginTop: 10, lineHeight: 1.55, whiteSpace: "pre-line" }}>
+                        <p style={{ fontSize: "var(--text-meta)", color: INK, marginTop: 10, lineHeight: 1.55, whiteSpace: "pre-line" }}>
                           <span style={{ color: MUTED }}>Overall: </span>
                           {record.overall_notes}
                         </p>
                       ) : null}
-                      <p style={{ fontSize: 11, color: FAINT, marginTop: 6 }}>
+                      <p style={{ fontSize: "var(--text-label)", color: FAINT, marginTop: 6 }}>
                         {record.interviewer_signature_name ? `Signed ${record.interviewer_signature_name}` : "Unsigned"}
                         {record.interviewer_signed_at ? `, ${formatDate(record.interviewer_signed_at, timeZone, { year: "numeric" })}` : ""}
                         {record.applicant_signature_name ? ` · countersigned by the applicant` : ""}
@@ -297,7 +297,7 @@ export default async function AssessorApplicationFilesPage() {
 
 function SectionLabel({ text, top = 0 }: { text: string; top?: number }) {
   return (
-    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginTop: top, marginBottom: 4 }}>
+    <p style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginTop: top, marginBottom: 4 }}>
       {text}
     </p>
   );

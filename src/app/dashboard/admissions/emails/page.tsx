@@ -96,9 +96,9 @@ export default async function EmailDeliveryPage({
     <div className="flex flex-col gap-5">
       <div className="card flex items-center justify-between p-5">
         <div>
-          <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Connect · Admissions</p>
-          <h1 className="mt-1 font-serif text-xl text-ink">Delivery, not just sent</h1>
-          <p className="mt-1 text-sm text-muted">A copy in your inbox proves it left. It doesn&apos;t prove it arrived.</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Connect · Admissions</p>
+          <h1 className="mt-1 font-serif text-h2 text-ink">Delivery, not just sent</h1>
+          <p className="mt-1 text-body text-muted">A copy in your inbox proves it left. It doesn&apos;t prove it arrived.</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Plain GET form -- keeps this a server component like its
@@ -107,7 +107,7 @@ export default async function EmailDeliveryPage({
             <select
               name="course"
               defaultValue={courseId}
-              className="h-9 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink"
+              className="h-9 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink"
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -117,7 +117,7 @@ export default async function EmailDeliveryPage({
             </select>
             <button
               type="submit"
-              className="h-9 rounded-[6px] border border-border bg-card px-3 text-sm font-medium text-ink hover:border-primary wash"
+              className="h-9 rounded-[6px] border border-border bg-card px-3 text-body font-medium text-ink hover:border-primary wash"
             >
               Go
             </button>
@@ -134,14 +134,14 @@ export default async function EmailDeliveryPage({
               className="flex items-start gap-3 rounded-[8px] border border-destructive/25 bg-destructive/5 px-4 py-3.5 lift"
             >
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-destructive" />
-              <p className="flex-1 text-[13px] leading-relaxed text-ink">
+              <p className="flex-1 text-meta leading-relaxed text-ink">
                 <strong>{b.email_address} — couldn&apos;t be delivered.</strong> &quot;{b.reason ?? "Unknown reason"}&quot;
                 {b.consecutive_bounces >= 2 ? " Connect has stopped trying after two failed attempts." : ""}
               </p>
               {b.applicant_id ? (
                 <Link
                   href={`/dashboard/admissions/${b.applicant_id}`}
-                  className="shrink-0 text-xs font-bold text-primary hover:underline"
+                  className="shrink-0 text-label font-bold text-primary hover:underline"
                 >
                   Fix address
                 </Link>
@@ -152,7 +152,7 @@ export default async function EmailDeliveryPage({
       ) : null}
 
       <div className="card overflow-hidden !p-0">
-        <div className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] border-b border-border bg-surface-muted px-4 py-2.5 text-[10.5px] font-bold tracking-[0.05em] text-muted uppercase">
+        <div className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] border-b border-border bg-surface-muted px-4 py-2.5 text-micro font-bold tracking-[0.05em] text-muted uppercase">
           <div>To</div>
           <div>Email</div>
           <div>Sent</div>
@@ -160,7 +160,7 @@ export default async function EmailDeliveryPage({
           <div>Status</div>
         </div>
         {(emails ?? []).length === 0 ? (
-          <p className="px-4 py-6 text-sm text-muted">No emails sent for {course.course_code ?? course.name} yet.</p>
+          <p className="px-4 py-6 text-body text-muted">No emails sent for {course.course_code ?? course.name} yet.</p>
         ) : (
           (emails ?? []).map((email) => {
             const tone = STATUS_TONE[email.status] ?? STATUS_TONE.sent;
@@ -169,13 +169,13 @@ export default async function EmailDeliveryPage({
                 key={email.id}
                 className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] items-center border-b border-border-faint px-4 py-3 last:border-none hover-ring"
               >
-                <div className="text-[12.5px] font-semibold text-ink">{email.recipient_name ?? "—"}</div>
-                <div className="text-xs text-muted">{humanizeType(email.type)}</div>
-                <div className="text-[11.5px] text-muted">{formatDate(email.created_at, timeZone)}</div>
-                <div className="text-[11.5px] text-muted">{formatDate(email.delivered_at, timeZone)}</div>
+                <div className="text-meta font-semibold text-ink">{email.recipient_name ?? "—"}</div>
+                <div className="text-label text-muted">{humanizeType(email.type)}</div>
+                <div className="text-label text-muted">{formatDate(email.created_at, timeZone)}</div>
+                <div className="text-label text-muted">{formatDate(email.delivered_at, timeZone)}</div>
                 <div className="flex items-center gap-1.5">
                   <span className={`size-1.5 shrink-0 rounded-full ${tone.dot}`} />
-                  <span className={`text-xs ${tone.weight} ${tone.ink}`}>
+                  <span className={`text-label ${tone.weight} ${tone.ink}`}>
                     {STATUS_LABEL[email.status] ?? email.status}
                     {email.status === "bounced" ? " — 2nd attempt" : ""}
                   </span>
@@ -186,7 +186,7 @@ export default async function EmailDeliveryPage({
         )}
       </div>
 
-      <p className="max-w-[52rem] text-xs leading-relaxed text-muted">
+      <p className="max-w-[52rem] text-label leading-relaxed text-muted">
         After two failed attempts to the same address, Connect stops trying and asks for a new one. Correcting it
         resends automatically — both attempts stay on the record. Nobody is BCC&apos;d on anything; this table is the
         answer BCC can&apos;t give.

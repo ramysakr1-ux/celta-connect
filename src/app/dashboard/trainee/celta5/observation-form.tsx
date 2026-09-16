@@ -26,29 +26,29 @@ export function ObservationForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Date</label>
+          <label className="text-body text-muted">Date</label>
           <input
             name="observation_date"
             type="date"
             defaultValue={observation?.observation_date ?? ""}
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Length (minutes)</label>
+          <label className="text-body text-muted">Length (minutes)</label>
           <input
             name="length_minutes"
             type="number"
             defaultValue={observation?.length_minutes ?? ""}
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Level</label>
+          <label className="text-body text-muted">Level</label>
           <select
             name="level"
             defaultValue={observation?.level ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Select a level</option>
             {CEFR_LEVELS.map((l) => (
@@ -59,39 +59,39 @@ export function ObservationForm({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Learners present</label>
+          <label className="text-body text-muted">Learners present</label>
           <input
             name="learners_present"
             type="number"
             defaultValue={observation?.learners_present ?? ""}
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Lesson focus</label>
+        <label className="text-body text-muted">Lesson focus</label>
         <input
           name="lesson_focus"
           type="text"
           defaultValue={observation?.lesson_focus ?? ""}
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input type="checkbox" name="filmed" defaultChecked={observation?.filmed} />
         Filmed lesson
       </label>
 
       {deliveryMode === "mixed" ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Mode observed</label>
+          <label className="text-body text-muted">Mode observed</label>
           <select
             name="mode"
             required
             defaultValue={observation?.mode ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           >
             <option value="" disabled>
               Select a mode
@@ -102,12 +102,12 @@ export function ObservationForm({
         </div>
       ) : null}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : observation ? "Save" : "Add observation"}
       </button>

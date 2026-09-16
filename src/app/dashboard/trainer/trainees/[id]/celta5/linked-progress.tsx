@@ -21,11 +21,11 @@ export function AssessedTpStatsBadge({ stats, byMode }: { stats: AssessedTpStats
   const levelsOk = stats.levels.length >= MIN_LEVELS_REQUIRED;
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+      <span className="rounded-[6px] bg-accent px-2.5 py-1 text-label font-medium text-ink">
         {stats.tpsTaught} TP{stats.tpsTaught === 1 ? "" : "s"} taught · {stats.hoursAssessed.toFixed(1)} hrs assessed
       </span>
       <span
-        className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
+        className={`rounded-[6px] px-2.5 py-1 text-label font-medium ${
           levelsOk ? "bg-accent text-ink" : "border border-dashed border-status-warning-text text-status-warning-text"
         }`}
       >
@@ -36,7 +36,7 @@ export function AssessedTpStatsBadge({ stats, byMode }: { stats: AssessedTpStats
         // course-modes.md §2 (Handbook 9.1.2): "at least two of the six
         // assessed hours in each mode" -- mixed-mode courses only.
         <span
-          className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
+          className={`rounded-[6px] px-2.5 py-1 text-label font-medium ${
             byMode.meetsFloor ? "bg-accent text-ink" : "border border-dashed border-status-warning-text text-status-warning-text"
           }`}
         >
@@ -76,15 +76,15 @@ export function AssignmentsSummary({
 
   return (
     <div>
-      <h3 className="font-serif text-lg text-ink">Written assignments (auto-pulled)</h3>
+      <h3 className="font-serif text-h3 text-ink">Written assignments (auto-pulled)</h3>
       <div className="sheet mt-3 overflow-hidden !p-0">
         <table className="table-plain w-full">
           <thead>
             <tr>
-              <th className="text-sm text-muted">Assignment</th>
-              <th className="text-sm text-muted">Status</th>
-              <th className="text-sm text-muted">Own work</th>
-              <th className="text-sm text-muted">Final grade</th>
+              <th className="text-body text-muted">Assignment</th>
+              <th className="text-body text-muted">Status</th>
+              <th className="text-body text-muted">Own work</th>
+              <th className="text-body text-muted">Final grade</th>
             </tr>
           </thead>
           <tbody>
@@ -136,7 +136,7 @@ export function TpFeedbackSummary({
 
   return (
     <div>
-      <h3 className="font-serif text-lg text-ink">TP feedback so far (auto-pulled)</h3>
+      <h3 className="font-serif text-h3 text-ink">TP feedback so far (auto-pulled)</h3>
       <div className="sheet mt-3 flex flex-col gap-3 !p-0">
         {submitted.map((f) => {
           const starred = [...(f.action_points_planning ?? []), ...(f.action_points_teaching ?? [])].filter(
@@ -147,17 +147,17 @@ export function TpFeedbackSummary({
               <div className="flex items-center justify-between gap-3">
                 <Link
                   href={`/portfolio/${traineeId}/tp/${f.tp_number}`}
-                  className="text-sm font-medium text-ink hover:text-primary"
+                  className="text-body font-medium text-ink hover:text-primary"
                 >
                   TP {f.tp_number}
                 </Link>
                 <StandardRatingPill rating={f.grade} />
               </div>
-              {f.overall_comment ? <p className="mt-2 text-sm text-ink">{f.overall_comment}</p> : null}
+              {f.overall_comment ? <p className="mt-2 text-body text-ink">{f.overall_comment}</p> : null}
               {starred.length > 0 ? (
                 <ul className="mt-2 flex flex-col gap-1">
                   {starred.map((p, i) => (
-                    <li key={i} className="text-xs text-muted">
+                    <li key={i} className="text-label text-muted">
                       ★ {p.text}
                     </li>
                   ))}

@@ -233,10 +233,10 @@ export default async function TrainerAssignmentsBoardPage() {
                 opacity: open ? 1 : 0.75,
               }}
             >
-              <p className="font-serif" style={{ fontSize: 16, fontWeight: 600, color: INK, lineHeight: 1.2 }}>
+              <p className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, color: INK, lineHeight: 1.2 }}>
                 {ASSIGNMENT_INFO[type]?.title ?? type}
               </p>
-              <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.1em", color: open ? TEAL : MUTED, marginTop: 3 }}>
+              <p className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.1em", color: open ? TEAL : MUTED, marginTop: 3 }}>
                 {!open
                   ? `Opens D${release?.day ?? "—"}`
                   : closed === ofType.length && ofType.length > 0
@@ -250,7 +250,7 @@ export default async function TrainerAssignmentsBoardPage() {
                 {withTutors > 0 ? <span style={{ flex: withTutors, borderRadius: 3, background: GOLD_INK }} /> : null}
                 {writing > 0 ? <span style={{ flex: writing, borderRadius: 3, background: FAINT }} /> : null}
               </div>
-              <p style={{ fontSize: 11, color: MUTED, marginTop: 6 }}>
+              <p style={{ fontSize: "var(--text-label)", color: MUTED, marginTop: 6 }}>
                 {closed} closed · {withTutors} with tutors · {writing} writing
               </p>
             </div>
@@ -267,7 +267,7 @@ export default async function TrainerAssignmentsBoardPage() {
               read off CHIP above so the key can never drift from the chips
               it explains. */}
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2">
-            <h2 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: INK_WARM, lineHeight: 1.2 }}>
+            <h2 className="font-serif" style={{ fontSize: "var(--text-h2)", fontWeight: 600, color: INK_WARM, lineHeight: 1.2 }}>
               Every candidate, every assignment
             </h2>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -287,7 +287,7 @@ export default async function TrainerAssignmentsBoardPage() {
                   paddingBottom: 6,
                 }}
               >
-                <span className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.1em", color: MUTED }}>
+                <span className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.1em", color: MUTED }}>
                   Candidate
                 </span>
                 {columns.map((type) => (
@@ -295,7 +295,7 @@ export default async function TrainerAssignmentsBoardPage() {
                     key={type}
                     className="font-bold uppercase"
                     style={{
-                      fontSize: 10.5,
+                      fontSize: "var(--text-micro)",
                       letterSpacing: "0.1em",
                       color: type === "Plagiarism Reflection" ? GARNET : MUTED,
                       paddingRight: 8,
@@ -304,7 +304,7 @@ export default async function TrainerAssignmentsBoardPage() {
                     {SHORT[type] ?? type}
                   </span>
                 ))}
-                <span className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.1em", color: MUTED, textAlign: "right" }}>
+                <span className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.1em", color: MUTED, textAlign: "right" }}>
                   Passed
                 </span>
               </div>
@@ -327,16 +327,16 @@ export default async function TrainerAssignmentsBoardPage() {
                     }}
                   >
                     <div className="min-w-0 pr-3">
-                      <p style={{ fontSize: 13.5, fontWeight: 600, color: INK }}>{t.full_name}</p>
+                      <p style={{ fontSize: "var(--text-body)", fontWeight: 600, color: INK }}>{t.full_name}</p>
                       {reflection ? (
-                        <p style={{ fontSize: 10.5, color: GARNET }}>Reflection set</p>
+                        <p style={{ fontSize: "var(--text-micro)", color: GARNET }}>Reflection set</p>
                       ) : null}
                     </div>
                     {columns.map((type) => {
                       const entry = forTrainee?.get(type);
                       if (!entry) {
                         return (
-                          <span key={type} style={{ fontSize: 12, color: FAINT, paddingRight: 8 }}>
+                          <span key={type} style={{ fontSize: "var(--text-meta)", color: FAINT, paddingRight: 8 }}>
                             —
                           </span>
                         );
@@ -364,7 +364,7 @@ export default async function TrainerAssignmentsBoardPage() {
                             background: sanction ? `color-mix(in oklab, ${GARNET} 7%, transparent)` : look.fill,
                             color: sanction ? GARNET : look.text,
                             padding: "4px 9px",
-                            fontSize: 11.5,
+                            fontSize: "var(--text-label)",
                             fontWeight: 700,
                             whiteSpace: "nowrap",
                           }}
@@ -390,7 +390,7 @@ export default async function TrainerAssignmentsBoardPage() {
                     })}
                     <span
                       className="font-serif tabular-nums"
-                      style={{ fontSize: 16, color: passed >= 3 ? TEAL : MUTED, textAlign: "right" }}
+                      style={{ fontSize: "var(--text-h3)", color: passed >= 3 ? TEAL : MUTED, textAlign: "right" }}
                     >
                       {passed} of 4
                     </span>
@@ -407,12 +407,12 @@ export default async function TrainerAssignmentsBoardPage() {
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between gap-2">
               <Marker colour={GOLD_INK} label="Your queue" />
-              <span className="italic" style={{ fontSize: 11, color: MUTED }}>
+              <span className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                 oldest first
               </span>
             </div>
             {queue.length === 0 ? (
-              <p style={{ fontSize: 12.5, color: MUTED }}>Nothing is waiting on you.</p>
+              <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>Nothing is waiting on you.</p>
             ) : (
               queue.map((q) => {
                 const hue = q.hue === "teal" ? TEAL : q.hue === "garnet" ? GARNET : GOLD_INK;
@@ -424,14 +424,14 @@ export default async function TrainerAssignmentsBoardPage() {
                     style={{ borderRadius: 10, border: `1px solid ${FAINT}`, borderLeft: `4px solid ${hue}`, background: SHEET, padding: "9px 12px" }}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate" style={{ fontSize: 13, fontWeight: 600, color: INK }}>
+                      <span className="block truncate" style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>
                         {q.traineeName} · {q.assignmentTitle}
                       </span>
-                      <span className="block" style={{ fontSize: 11, fontWeight: 600, color: hue }}>
+                      <span className="block" style={{ fontSize: "var(--text-label)", fontWeight: 600, color: hue }}>
                         {q.reason}
                       </span>
                     </span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: hue, whiteSpace: "nowrap" }}>{q.action}</span>
+                    <span style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: hue, whiteSpace: "nowrap" }}>{q.action}</span>
                   </Link>
                 );
               })
@@ -441,7 +441,7 @@ export default async function TrainerAssignmentsBoardPage() {
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between gap-2">
               <Marker colour={TEAL} label="Double marking" />
-              <span style={{ fontSize: 11, color: MUTED }}>
+              <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                 {sample[0]?.required ? `${sample[0].required} of each · ${active.length} candidates` : `${active.length} candidates`}
               </span>
             </div>
@@ -450,7 +450,7 @@ export default async function TrainerAssignmentsBoardPage() {
               const full = required > 0 && s.settled >= required;
               return (
                 <div key={s.assignmentType} style={{ borderRadius: 10, border: `1px solid ${FAINT}`, background: SHEET, padding: "9px 12px" }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: INK }}>{s.title}</p>
+                  <p style={{ fontSize: "var(--text-meta)", fontWeight: 600, color: INK }}>{s.title}</p>
                   <div className="mt-1.5 flex gap-[3px]">
                     {Array.from({ length: Math.max(required, 1) }).map((_, i) => {
                       const settled = i < s.settled;
@@ -469,11 +469,11 @@ export default async function TrainerAssignmentsBoardPage() {
                       );
                     })}
                   </div>
-                  <p style={{ fontSize: 11, color: full ? TEAL : GOLD_INK, marginTop: 5, fontWeight: 600 }}>
+                  <p style={{ fontSize: "var(--text-label)", color: full ? TEAL : GOLD_INK, marginTop: 5, fontWeight: 600 }}>
                     {required > 0 ? `${s.settled} of ${required} settled` : `${s.settled} settled`}
                     {s.inProgress > 0 ? ` · ${s.inProgress} in progress` : ""}
                   </p>
-                  <p style={{ fontSize: 11, color: s.failsOutsideSample > 0 ? GARNET : MUTED, marginTop: 2 }}>
+                  <p style={{ fontSize: "var(--text-label)", color: s.failsOutsideSample > 0 ? GARNET : MUTED, marginTop: 2 }}>
                     {!s.anyFails
                       ? "No Not met yet"
                       : s.failsOutsideSample > 0
@@ -483,7 +483,7 @@ export default async function TrainerAssignmentsBoardPage() {
                 </div>
               );
             })}
-            <p style={{ fontSize: 11, lineHeight: 1.5, color: MUTED }}>
+            <p style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED }}>
               Handbook 9.2.3: a proportion of each assignment must be double-marked — three of each up to nine candidates,
               four up to sixteen, five up to twenty-four — and the sample must include any fail assignments. Both tutors
               initial what they have checked, and the centre keeps the record. The sample above is that record.
@@ -518,7 +518,7 @@ function HeadPill({ label, on, settle = false }: { label: string; on: boolean; s
         border: `1px solid ${on ? `color-mix(in oklab, ${hue} 35%, transparent)` : BORDER}`,
         color: on ? hue : MUTED,
         padding: "0 11px",
-        fontSize: 11.5,
+        fontSize: "var(--text-label)",
         fontWeight: 600,
       }}
     >
@@ -538,7 +538,7 @@ function LegendChip({ label, look }: { label: string; look: ChipLook }) {
         background: look.fill,
         color: look.text,
         padding: "0 9px",
-        fontSize: 11,
+        fontSize: "var(--text-label)",
         fontWeight: 700,
       }}
     >
@@ -551,7 +551,7 @@ function Marker({ colour, label }: { colour: string; label: string }) {
   return (
     <span className="flex items-center gap-2">
       <span style={{ width: 3, height: 13, borderRadius: 2, background: colour }} />
-      <span className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: colour }}>
+      <span className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.12em", color: colour }}>
         {label}
       </span>
     </span>

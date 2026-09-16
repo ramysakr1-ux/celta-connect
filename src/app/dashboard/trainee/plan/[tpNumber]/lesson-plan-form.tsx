@@ -290,11 +290,11 @@ export function LessonPlanForm({
               <div className="flex min-w-0 flex-col gap-[3px]">
                 <p
                   className="font-bold uppercase"
-                  style={{ fontSize: 10.5, letterSpacing: "0.16em", color: BAND_GOLD_EYEBROW }}
+                  style={{ fontSize: "var(--text-micro)", letterSpacing: "0.16em", color: BAND_GOLD_EYEBROW }}
                 >
                   {eyebrow}
                 </p>
-                <h2 className="font-serif" style={{ fontSize: 29, fontWeight: 400, color: BAND_TEXT, lineHeight: 1.15 }}>
+                <h2 className="font-serif" style={{ fontSize: "var(--text-display)", fontWeight: 400, color: BAND_TEXT, lineHeight: 1.15 }}>
                   {lessonTitle || "Your lesson plan"}
                 </h2>
               </div>
@@ -316,10 +316,10 @@ export function LessonPlanForm({
                 // 13 Sep 2026 -- "only one to six". Still one click away,
                 // because nothing the system decides is final.
                 <div className="flex flex-col gap-1">
-                  <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
+                  <p className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.12em", color: MUTED }}>
                     Lesson sequence
                   </p>
-                  <button type="button" onClick={() => setShowSequences(true)} className="text-left" style={{ fontSize: 13, color: MUTED }}>
+                  <button type="button" onClick={() => setShowSequences(true)} className="text-left" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                     Yours to decide and to name —{" "}
                     <span style={{ color: TEAL, fontWeight: 600 }}>show the sequences anyway</span>
                   </button>
@@ -369,8 +369,8 @@ export function LessonPlanForm({
                       padding: "8px 10px",
                     }}
                   >
-                    <span style={{ fontSize: 11, color: GOLD_INK }}>★ </span>
-                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: INK }}>
+                    <span style={{ fontSize: "var(--text-label)", color: GOLD_INK }}>★ </span>
+                    <span style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: INK }}>
                       {previousPlanningActionPoint} <span style={{ fontWeight: 700, color: TEAL }}>Tap to use it.</span>
                     </span>
                   </button>
@@ -381,10 +381,10 @@ export function LessonPlanForm({
             {/* ---------- 4. Procedure ---------- */}
             <div style={{ padding: "20px 26px 22px" }}>
               <div className="flex flex-wrap items-baseline gap-3">
-                <h3 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: INK_WARM }}>
+                <h3 className="font-serif" style={{ fontSize: "var(--text-h2)", fontWeight: 600, color: INK_WARM }}>
                   Procedure
                 </h3>
-                <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+                <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                   {frameworkName
                     ? "One action per line. Tap a stage name to rename it."
                     : "No sequence chosen — the stages are yours to name."}
@@ -419,7 +419,7 @@ export function LessonPlanForm({
                     setAimHints([...aimHints, ""]);
                   }}
                   className="rounded-full"
-                  style={{ border: `1px dashed ${BORDER}`, padding: "7px 16px", fontSize: 13, color: MUTED }}
+                  style={{ border: `1px dashed ${BORDER}`, padding: "7px 16px", fontSize: "var(--text-meta)", color: MUTED }}
                 >
                   + Add stage
                 </button>
@@ -433,7 +433,7 @@ export function LessonPlanForm({
             >
               <div className="flex flex-col gap-3" style={{ padding: "18px 22px 22px 26px" }}>
                 <MarkerLabel colour={GARNET} label="Anticipated problems & solutions" />
-                <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+                <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
                   Tasks and materials, technology, classroom management, interaction patterns — not language.
                 </p>
                 <div className="flex flex-col">
@@ -448,7 +448,7 @@ export function LessonPlanForm({
                         marginTop: i > 0 ? 10 : 0,
                       }}
                     >
-                      <span style={{ fontSize: 11, fontWeight: 700, color: GARNET, paddingTop: 4 }}>{i + 1}</span>
+                      <span style={{ fontSize: "var(--text-label)", fontWeight: 700, color: GARNET, paddingTop: 4 }}>{i + 1}</span>
                       <textarea
                         ref={autosize}
                         rows={1}
@@ -460,7 +460,7 @@ export function LessonPlanForm({
                         {...bulletListProps}
                         style={fieldStyle(13, INK)}
                       />
-                      <span style={{ fontSize: 12, color: TEAL, paddingTop: 3 }}>→</span>
+                      <span style={{ fontSize: "var(--text-meta)", color: TEAL, paddingTop: 3 }}>→</span>
                       <textarea
                         ref={autosize}
                         rows={1}
@@ -480,7 +480,7 @@ export function LessonPlanForm({
                     type="button"
                     onClick={() => setProblems([...problems, { problem: "", solution: "" }])}
                     className="self-start"
-                    style={{ fontSize: 12.5, color: TEAL }}
+                    style={{ fontSize: "var(--text-meta)", color: TEAL }}
                   >
                     + Add another
                   </button>
@@ -576,7 +576,7 @@ export function LessonPlanForm({
         >
           <div className="flex items-center gap-2">
             <span className="size-[5px] shrink-0 rounded-full" style={{ background: GOLD_INK }} />
-            <p style={{ fontSize: 11.5, color: GOLD_INK }}>
+            <p style={{ fontSize: "var(--text-label)", color: GOLD_INK }}>
               Submitting locks this lesson plan — you won&apos;t be able to edit it afterwards.
             </p>
           </div>
@@ -599,7 +599,7 @@ export function LessonPlanForm({
                 border: "1px solid oklch(83% 0.028 78)",
                 background: SHEET,
                 padding: "8px 15px",
-                fontSize: 13.5,
+                fontSize: "var(--text-body)",
                 color: INK,
               }}
             >
@@ -614,7 +614,7 @@ export function LessonPlanForm({
                 background: TEAL,
                 padding: "8px 17px",
                 fontWeight: 600,
-                fontSize: 13.5,
+                fontSize: "var(--text-body)",
                 color: BAND_TEXT,
               }}
             >
@@ -650,7 +650,7 @@ function MarkerLabel({ colour, label }: { colour: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
       <span style={{ width: 3, height: 12, borderRadius: 2, background: colour, display: "inline-block" }} />
-      <span className="uppercase" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: colour }}>
+      <span className="uppercase" style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", color: colour }}>
         {label}
       </span>
     </div>
@@ -679,7 +679,7 @@ function SaveStatus({ pending, savedAt }: { pending: boolean; savedAt: string | 
   }, [savedAt]);
 
   return (
-    <span className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: "oklch(82% 0.03 78)" }}>
+    <span className="flex items-center gap-1.5" style={{ fontSize: "var(--text-label)", color: "oklch(82% 0.03 78)" }}>
       <span className="size-[5px] rounded-full" style={{ background: "oklch(75% 0.13 80)" }} />
       {pending ? "Saving…" : label}
     </span>
@@ -715,7 +715,7 @@ function LessonSequencePicker({
   const chosen = Boolean(value);
   return (
     <div ref={wrap} className="relative flex flex-col gap-1">
-      <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
+      <p className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.12em", color: MUTED }}>
         Lesson sequence
       </p>
       <button
@@ -726,14 +726,14 @@ function LessonSequencePicker({
           borderRadius: 8,
           padding: "7px 14px",
           fontWeight: 600,
-          fontSize: 13.5,
+          fontSize: "var(--text-body)",
           border: chosen ? `1px solid color-mix(in oklab, ${TEAL} 35%, transparent)` : `1px solid ${BORDER}`,
           background: chosen ? `color-mix(in oklab, ${TEAL} 9%, transparent)` : SHEET,
           color: chosen ? TEAL : MUTED,
         }}
       >
         {value || "Choose a lesson sequence"}
-        <span style={{ fontSize: 9, opacity: 0.65 }}>▼</span>
+        <span style={{ fontSize: "var(--text-micro)", opacity: 0.65 }}>▼</span>
       </button>
 
       {open ? (
@@ -789,14 +789,14 @@ function SequenceItem({
       style={{
         borderRadius: 8,
         padding: "9px 11px",
-        fontSize: 13,
+        fontSize: "var(--text-meta)",
         fontWeight: selected ? 700 : 500,
         color: selected ? TEAL : INK,
         background: selected ? `color-mix(in oklab, ${TEAL} 10%, transparent)` : undefined,
       }}
     >
       <span>{label}</span>
-      <span style={{ fontSize: 11, color: MUTED }}>{meta}</span>
+      <span style={{ fontSize: "var(--text-label)", color: MUTED }}>{meta}</span>
     </button>
   );
 }
@@ -816,11 +816,11 @@ function TimeBudget({
   return (
     <div className="flex flex-col gap-1.5" style={{ flex: 1, minWidth: 280 }}>
       <div className="flex items-baseline justify-between gap-3">
-        <p className="font-bold uppercase" style={{ fontSize: 10.5, letterSpacing: "0.12em", color: MUTED }}>
+        <p className="font-bold uppercase" style={{ fontSize: "var(--text-micro)", letterSpacing: "0.12em", color: MUTED }}>
           Time budget
         </p>
-        <p className="flex-none whitespace-nowrap" style={{ fontSize: 12, color: MUTED }}>
-          <span className="font-serif tabular-nums" style={{ fontSize: 18, color: INK }}>
+        <p className="flex-none whitespace-nowrap" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
+          <span className="font-serif tabular-nums" style={{ fontSize: "var(--text-h3)", color: INK }}>
             {total}
           </span>{" "}
           of {TP_LESSON_LENGTH_MINUTES} min ·{" "}
@@ -954,7 +954,7 @@ function StageRow({
             border: `2px solid ${hue}`,
             background: written ? hue : SHEET,
             color: written ? SHEET : MUTED,
-            fontSize: 11,
+            fontSize: "var(--text-label)",
             fontWeight: 700,
           }}
         >
@@ -1007,18 +1007,18 @@ function StageRow({
             <button
               type="button"
               onClick={() => onChange({ time: String(Math.max(0, minutes - 1)) })}
-              style={{ fontSize: 13, opacity: 0.55, padding: "0 3px" }}
+              style={{ fontSize: "var(--text-meta)", opacity: 0.55, padding: "0 3px" }}
               aria-label="One minute less"
             >
               −
             </button>
-            <span className="text-center tabular-nums" style={{ fontSize: 12.5, fontWeight: 700, minWidth: 30 }}>
+            <span className="text-center tabular-nums" style={{ fontSize: "var(--text-meta)", fontWeight: 700, minWidth: 30 }}>
               {row.time ? `${minutes}′` : "—′"}
             </span>
             <button
               type="button"
               onClick={() => onChange({ time: String(Math.min(60, minutes + 1)) })}
-              style={{ fontSize: 13, opacity: 0.55, padding: "0 3px" }}
+              style={{ fontSize: "var(--text-meta)", opacity: 0.55, padding: "0 3px" }}
               aria-label="One minute more"
             >
               ＋
@@ -1034,7 +1034,7 @@ function StageRow({
                 background: CARD,
                 padding: "2px 8px",
                 fontWeight: 600,
-                fontSize: 11.5,
+                fontSize: "var(--text-label)",
                 color: INK_WARM,
               }}
             >
@@ -1050,7 +1050,7 @@ function StageRow({
               border: `1px dashed ${BORDER}`,
               padding: "2px 8px",
               fontWeight: 600,
-              fontSize: 11.5,
+              fontSize: "var(--text-label)",
               color: MUTED,
             }}
           >
@@ -1062,7 +1062,7 @@ function StageRow({
             onClick={onRemove}
             title="Delete this stage"
             className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-            style={{ fontSize: 12, color: "var(--color-destructive)", marginLeft: 2 }}
+            style={{ fontSize: "var(--text-meta)", color: "var(--color-destructive)", marginLeft: 2 }}
           >
             ✕
           </button>
@@ -1132,7 +1132,7 @@ function InteractionMenu({
     >
       <p
         className="uppercase"
-        style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", color: TEAL, padding: "2px 9px 5px" }}
+        style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.1em", color: TEAL, padding: "2px 9px 5px" }}
       >
         Tap to add or remove
       </p>
@@ -1147,13 +1147,13 @@ function InteractionMenu({
             style={{
               borderRadius: 7,
               padding: "7px 9px",
-              fontSize: 12.5,
+              fontSize: "var(--text-meta)",
               fontWeight: on ? 700 : 400,
               color: on ? INK : INK_WARM,
               background: on ? `color-mix(in oklab, ${TEAL} 12%, transparent)` : undefined,
             }}
           >
-            <span style={{ width: 14, fontSize: 12, color: TEAL }}>{on ? "✓" : ""}</span>
+            <span style={{ width: 14, fontSize: "var(--text-meta)", color: TEAL }}>{on ? "✓" : ""}</span>
             {p.label}
           </button>
         );
@@ -1163,7 +1163,7 @@ function InteractionMenu({
           type="button"
           onClick={onClose}
           className="w-full text-left"
-          style={{ fontSize: 12, color: MUTED, padding: "4px 9px" }}
+          style={{ fontSize: "var(--text-meta)", color: MUTED, padding: "4px 9px" }}
         >
           Done
         </button>

@@ -68,9 +68,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
               <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(99% 0.004 85)" strokeWidth="12" strokeLinecap="round" />
             </svg>
           </div>
-          <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 19, color: INK }}>Connect</div>
+          <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: "var(--text-h3)", color: INK }}>Connect</div>
           <div style={{ width: 1, height: 18, background: BORDER }} />
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
+          <div style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
           <HeaderCredit onDark />
         </div>
         <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
@@ -82,7 +82,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
               className="cc-pulse-dot"
               style={{ width: 7, height: 7, borderRadius: "50%", background: health.status === "normal" ? GREEN : health.status === "degraded" ? GOLD : RED }}
             />
-            <span style={{ fontSize: 12, color: MUTED }}>{health.label}</span>
+            <span style={{ fontSize: "var(--text-meta)", color: MUTED }}>{health.label}</span>
           </div>
           <ProductSwitcher connectHref={connectHref} />
           <CreateMenu />
@@ -100,10 +100,10 @@ export default async function CommandCenterLayout({ children }: { children: Reac
         {/* The greeting was the sidebar's only other job, so it becomes the
             page's own heading rather than disappearing with it. */}
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontFamily: "Newsreader, serif", fontSize: 23, fontWeight: 600, color: INK }}>
+          <div style={{ fontFamily: "Newsreader, serif", fontSize: "var(--text-h2)", fontWeight: 600, color: INK }}>
             Welcome back, {greeting.firstName}
           </div>
-          <div style={{ fontSize: 12, color: MUTED }}>{greeting.dateEyebrow}</div>
+          <div style={{ fontSize: "var(--text-meta)", color: MUTED }}>{greeting.dateEyebrow}</div>
         </div>
 
         <PulseStrip stats={pulseStats} />
@@ -114,7 +114,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           command center. I built it. At least put it at the bottom or
           something. Doesn't have to be in my face." */}
       <div style={{ borderTop: `1px solid ${BORDER}`, padding: "12px 40px", display: "flex", justifyContent: "flex-end" }}>
-        <span style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 11.5, color: "oklch(64% 0.014 72)" }}>
+        <span style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: "var(--text-label)", color: "oklch(64% 0.014 72)" }}>
           designed and built by Ramy
         </span>
       </div>

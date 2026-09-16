@@ -70,11 +70,11 @@ export function FeedbackPointEditor({
     <div className="flex flex-col gap-2.5" style={{ padding: "16px 26px 20px", borderBottom: `1px solid ${FAINT}` }}>
       <div className="flex items-center gap-2">
         <span style={{ width: 3, height: 12, borderRadius: 2, background: sectionHue, display: "inline-block" }} />
-        <span className="uppercase" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: sectionHue }}>
+        <span className="uppercase" style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", color: sectionHue }}>
           {label}
         </span>
       </div>
-      <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+      <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
         {guide}
       </p>
       <div className="flex flex-col">
@@ -98,7 +98,7 @@ export function FeedbackPointEditor({
         type="button"
         onClick={() => onChange([...points, emptyFeedbackPoint()])}
         className="self-start rounded-full"
-        style={{ border: `1px dashed ${BORDER}`, padding: "5px 13px", fontSize: 12.5, color: MUTED }}
+        style={{ border: `1px dashed ${BORDER}`, padding: "5px 13px", fontSize: "var(--text-meta)", color: MUTED }}
       >
         + Add point
       </button>
@@ -236,7 +236,7 @@ function PointRow({
           {...bulletListProps}
           style={plainField(13.5)}
         />
-        {toneError ? <p style={{ fontSize: 11, color: DESTRUCTIVE }}>{toneError}</p> : null}
+        {toneError ? <p style={{ fontSize: "var(--text-label)", color: DESTRUCTIVE }}>{toneError}</p> : null}
 
         <div className="flex flex-wrap items-center gap-1">
           {point.criteria_codes.map((code) => (
@@ -249,7 +249,7 @@ function PointRow({
                 borderRadius: 4,
                 background: sectionHue,
                 padding: "1px 7px",
-                fontSize: 10.5,
+                fontSize: "var(--text-micro)",
                 fontWeight: 700,
                 color: SHEET,
               }}
@@ -264,7 +264,7 @@ function PointRow({
               borderRadius: 4,
               border: `1px dashed ${BORDER}`,
               padding: "1px 7px",
-              fontSize: 10.5,
+              fontSize: "var(--text-micro)",
               fontWeight: 700,
               color: MUTED,
             }}
@@ -272,7 +272,7 @@ function PointRow({
             {point.criteria_codes.length === 0 ? "+ tag criteria" : "+ criteria"}
           </button>
           {autoTagged ? (
-            <span className="italic" style={{ fontSize: 10.5, color: MUTED }}>
+            <span className="italic" style={{ fontSize: "var(--text-micro)", color: MUTED }}>
               auto-tagged
             </span>
           ) : null}
@@ -281,7 +281,7 @@ function PointRow({
               type="button"
               onClick={toggleTone}
               disabled={isRewriting}
-              style={{ fontSize: 10.5, color: MUTED, marginLeft: 4 }}
+              style={{ fontSize: "var(--text-micro)", color: MUTED, marginLeft: 4 }}
             >
               {isRewriting ? "Rewriting…" : tone === "supportive" ? "Encouraging" : tone === "direct" ? "Direct" : "Tone"}
             </button>
@@ -307,7 +307,7 @@ function PointRow({
               <div key={section.section} className="mb-1.5 last:mb-0">
                 <p
                   className="uppercase"
-                  style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", color: TEAL, padding: "2px 8px 4px" }}
+                  style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.1em", color: TEAL, padding: "2px 8px 4px" }}
                 >
                   {section.title}
                 </p>
@@ -323,13 +323,13 @@ function PointRow({
                         gridTemplateColumns: "14px 26px 1fr",
                         borderRadius: 6,
                         padding: "5px 8px",
-                        fontSize: 12,
+                        fontSize: "var(--text-meta)",
                         lineHeight: 1.4,
                         color: on ? INK : INK_WARM,
                         background: on ? `color-mix(in oklab, ${TEAL} 12%, transparent)` : undefined,
                       }}
                     >
-                      <span style={{ fontSize: 11, color: TEAL }}>{on ? "✓" : ""}</span>
+                      <span style={{ fontSize: "var(--text-label)", color: TEAL }}>{on ? "✓" : ""}</span>
                       <span style={{ fontWeight: 700, color: TEAL }}>{code}</span>
                       <span>{CRITERIA_LABELS[code]}</span>
                     </button>
@@ -342,7 +342,7 @@ function PointRow({
                 type="button"
                 onClick={() => setPanelOpen(false)}
                 className="w-full text-left"
-                style={{ fontSize: 12, color: MUTED, padding: "4px 8px" }}
+                style={{ fontSize: "var(--text-meta)", color: MUTED, padding: "4px 8px" }}
               >
                 Done
               </button>
@@ -364,7 +364,7 @@ function PointRow({
               border: `1px solid ${point.starred ? GOLD_INK : FAINT}`,
               background: point.starred ? GOLD : "transparent",
               color: point.starred ? INK : MUTED,
-              fontSize: 13,
+              fontSize: "var(--text-meta)",
             }}
           >
             ★
@@ -375,7 +375,7 @@ function PointRow({
           onClick={onRemove}
           title="Remove"
           className="flex items-center justify-center opacity-50 transition-opacity hover:opacity-100"
-          style={{ width: 26, height: 26, color: DESTRUCTIVE, fontSize: 13 }}
+          style={{ width: 26, height: 26, color: DESTRUCTIVE, fontSize: "var(--text-meta)" }}
         >
           ✕
         </button>

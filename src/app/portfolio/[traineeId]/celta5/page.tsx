@@ -70,7 +70,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
   if (!value) return null;
   return (
     <div className="mt-2">
-      <p className="text-sm text-muted">{label}</p>
+      <p className="text-body text-muted">{label}</p>
       <p className="text-ink">{value}</p>
     </div>
   );
@@ -118,7 +118,7 @@ export default async function PortfolioCelta5Page({
   // simulation.
   if (isStaff && preview === "trainee") {
     return (
-      <div className="sheet p-6 text-sm text-muted">
+      <div className="sheet p-6 text-body text-muted">
         CELTA 5 preview isn&apos;t available here -- the trainee&apos;s grade fields are masked at the database
         level for their own session specifically, not just hidden in this page&apos;s markup, so staff can&apos;t
         safely simulate that exact view. To verify what a trainee sees on this record, check with their real
@@ -208,7 +208,7 @@ export default async function PortfolioCelta5Page({
     const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
 
     if (!record) {
-      return <div className="sheet p-6 text-sm text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
+      return <div className="sheet p-6 text-body text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
     }
 
     const taughtAssignments = (plans ?? []).filter((p) => p.taught_at);
@@ -582,8 +582,8 @@ export default async function PortfolioCelta5Page({
               <div className="flex flex-col">
                 <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2">
                   <div>
-                    <p className="text-[11px] font-semibold text-ink">Stage 1 report</p>
-                    <p className="mt-0.5 text-[10px] text-muted">
+                    <p className="text-label font-semibold text-ink">Stage 1 report</p>
+                    <p className="mt-0.5 text-micro text-muted">
                       {record.stage1_released_at
                         ? `Filed by your tutor · the tutorial itself is optional, not held up on this${
                             record.stage1_candidate_signed_at ? ", signed by you" : " -- sign it below"
@@ -603,8 +603,8 @@ export default async function PortfolioCelta5Page({
                 </div>
                 <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2">
                   <div>
-                    <p className="text-[11px] font-semibold text-ink">Stage 2 tutorial</p>
-                    <p className="mt-0.5 text-[10px] text-muted">
+                    <p className="text-label font-semibold text-ink">Stage 2 tutorial</p>
+                    <p className="mt-0.5 text-micro text-muted">
                       {record.stage2_completed_at
                         ? `Given · record filed ${formatCalendarDate(record.stage2_completed_at.slice(0, 10))}${record.trainee_signoff_stage2_at ? ", signed by you" : " -- sign it below"}`
                         : myStage2Slot
@@ -620,8 +620,8 @@ export default async function PortfolioCelta5Page({
                 </div>
                 <div className="flex items-start justify-between gap-3 py-2">
                   <div>
-                    <p className="text-[11px] font-semibold text-ink">Stage 3 report</p>
-                    <p className="mt-0.5 text-[10px] text-muted">
+                    <p className="text-label font-semibold text-ink">Stage 3 report</p>
+                    <p className="mt-0.5 text-micro text-muted">
                       {stage3IsExpected
                         ? record.stage3_finalized_at
                           ? `Filed by your tutor${
@@ -650,7 +650,7 @@ export default async function PortfolioCelta5Page({
 
             <div className="c5-box" style={{ marginTop: 12 }}>
               <span className="lab">CELTA 5 self-assessment</span>
-              <p className="text-[11px] text-ink">
+              <p className="text-label text-ink">
                 {bothSigned
                   ? "Signed off — you and your tutor have both signed."
                   : stage2Submitted
@@ -710,16 +710,16 @@ export default async function PortfolioCelta5Page({
             <ObservationsRecord rows={observationRows} />
             {(obsTasks ?? []).length > 0 ? (
               <div className="mt-4">
-                <p className="text-[11px] font-bold text-ink">Observation tasks</p>
+                <p className="text-label font-bold text-ink">Observation tasks</p>
                 <div className="mt-2 flex flex-col gap-3">
                   {(obsTasks ?? []).map((task) => {
                     const submission = submissionByTaskId.get(task.id);
                     return (
                       <div key={task.id} className="c5-box">
-                        <p className="text-[11px] font-bold text-ink">{task.title}</p>
-                        {task.instructions ? <p className="mt-1 text-[10px] text-muted">{task.instructions}</p> : null}
+                        <p className="text-label font-bold text-ink">{task.title}</p>
+                        {task.instructions ? <p className="mt-1 text-micro text-muted">{task.instructions}</p> : null}
                         {submission?.submitted_at ? (
-                          <p className="mt-2 text-[10px] text-muted">
+                          <p className="mt-2 text-micro text-muted">
                             Submitted {formatDate(submission.submitted_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}.
                           </p>
                         ) : (
@@ -734,7 +734,7 @@ export default async function PortfolioCelta5Page({
               </div>
             ) : null}
             <div className="mt-4">
-              <p className="text-[11px] font-bold text-ink">Log an observation</p>
+              <p className="text-label font-bold text-ink">Log an observation</p>
               <div className="mt-2 flex flex-col gap-3">
                 {observations?.map((o) => (
                   <ObservationForm key={`${o.id}-${o.updated_at}`} observation={o} deliveryMode={course?.delivery_mode ?? undefined} />
@@ -753,7 +753,7 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">
-            <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+            <p className="text-micro leading-relaxed text-muted" style={{ marginBottom: 10 }}>
               This form will be completed by your tutor in the first third of the course. Some centres may hold a
               tutorial with you at the same time, but this is not obligatory. Having read and agreed with the summary,
               sign and date the report.
@@ -762,19 +762,19 @@ export default async function PortfolioCelta5Page({
               <>
                 <div className="c5-box" style={{ marginBottom: 10 }}>
                   <span className="lab">Strengths</span>
-                  <p className="text-[11px] leading-relaxed text-ink">{record.stage1_strengths || "—"}</p>
+                  <p className="text-label leading-relaxed text-ink">{record.stage1_strengths || "—"}</p>
                 </div>
                 <div className="c5-box" style={{ marginBottom: 10 }}>
                   <span className="lab">Action plan for next stage of the course</span>
-                  <p className="text-[11px] leading-relaxed text-ink">{record.stage1_action_plan || "—"}</p>
+                  <p className="text-label leading-relaxed text-ink">{record.stage1_action_plan || "—"}</p>
                 </div>
-                <p className="text-[11px]">
+                <p className="text-label">
                   <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
                   <strong className="text-ink">{record.stage1_tutor_signature_name ?? "—"}</strong>
                 </p>
                 <div className="mt-3 border-t border-border-faint pt-3">
                   {record.stage1_candidate_signed_at ? (
-                    <p className="text-[11px] text-muted">
+                    <p className="text-label text-muted">
                       Signed by {record.stage1_candidate_signature_name} on{" "}
                       {formatDate(record.stage1_candidate_signed_at, center?.time_zone ?? DEFAULT_TIMEZONE, { month: "long", year: "numeric" })}.
                     </p>
@@ -782,7 +782,7 @@ export default async function PortfolioCelta5Page({
                     <SetSignatureForm fullName={viewer?.full_name ?? ""} />
                   ) : (
                     <form action={signOffStage1}>
-                      <p className="mb-2 text-[11px] text-ink">I have read and agree with the summarising comments above.</p>
+                      <p className="mb-2 text-label text-ink">I have read and agree with the summarising comments above.</p>
                       <button type="submit" className="c5-btn">Sign as {viewer.signature_name}</button>
                     </form>
                   )}
@@ -801,7 +801,7 @@ export default async function PortfolioCelta5Page({
             num={`Section 10${record.stage2_hours_taught != null ? ` · Hours taught: ${record.stage2_hours_taught}` : ""}`}
             title="Stage Two progress record"
           >
-            <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+            <p className="text-micro leading-relaxed text-muted" style={{ marginBottom: 10 }}>
               With this record, a tutor will conduct a one-to-one tutorial with you. In the column marked
               &lsquo;You&rsquo;, indicate the extent to which you feel you have demonstrated each of the criteria at
               this stage: &lsquo;S+&rsquo; above the standard, &lsquo;S&rsquo; meets the standard, &lsquo;N&rsquo; not
@@ -836,26 +836,26 @@ export default async function PortfolioCelta5Page({
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="c5-box">
                 <span className="lab">Written assignments &mdash; you</span>
-                <p className="text-[11px] leading-relaxed text-ink">{record.stage2_candidate_written_assignments_notes || "—"}</p>
+                <p className="text-label leading-relaxed text-ink">{record.stage2_candidate_written_assignments_notes || "—"}</p>
               </div>
               <div className="c5-box">
                 <span className="lab">Written assignments &mdash; tutor</span>
                 {stage2Submitted ? (
-                  <p className="text-[11px] leading-relaxed text-ink">{record.stage2_tutor_written_assignments_notes || "—"}</p>
+                  <p className="text-label leading-relaxed text-ink">{record.stage2_tutor_written_assignments_notes || "—"}</p>
                 ) : (
-                  <p className="text-[10px] italic text-muted">Hidden until you submit your self-assessment.</p>
+                  <p className="text-micro italic text-muted">Hidden until you submit your self-assessment.</p>
                 )}
               </div>
               <div className="c5-box">
                 <span className="lab">Other issues &mdash; you</span>
-                <p className="text-[11px] leading-relaxed text-ink">{record.stage2_candidate_other_notes || "—"}</p>
+                <p className="text-label leading-relaxed text-ink">{record.stage2_candidate_other_notes || "—"}</p>
               </div>
               <div className="c5-box">
                 <span className="lab">Other issues &mdash; tutor</span>
                 {stage2Submitted ? (
-                  <p className="text-[11px] leading-relaxed text-ink">{record.stage2_tutor_other_notes || "—"}</p>
+                  <p className="text-label leading-relaxed text-ink">{record.stage2_tutor_other_notes || "—"}</p>
                 ) : (
-                  <p className="text-[10px] italic text-muted">Hidden until you submit your self-assessment.</p>
+                  <p className="text-micro italic text-muted">Hidden until you submit your self-assessment.</p>
                 )}
               </div>
             </div>
@@ -863,37 +863,37 @@ export default async function PortfolioCelta5Page({
             <div className="mt-3 flex flex-col gap-3">
               <div className="c5-box">
                 <span className="lab">Overall progress &mdash; candidate&rsquo;s assessment</span>
-                <p className="text-[11px] text-ink">{overallLabel(record.stage2_candidate_overall)}</p>
+                <p className="text-label text-ink">{overallLabel(record.stage2_candidate_overall)}</p>
                 {record.stage2_candidate_notes ? (
-                  <p className="mt-1 text-[11px] leading-relaxed text-muted">{record.stage2_candidate_notes}</p>
+                  <p className="mt-1 text-label leading-relaxed text-muted">{record.stage2_candidate_notes}</p>
                 ) : null}
               </div>
               <div className="c5-box">
                 <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
                 {stage1And2Released ? (
-                  <p className="text-[11px] text-ink">{overallLabel(record.stage2_tutor_overall)}</p>
+                  <p className="text-label text-ink">{overallLabel(record.stage2_tutor_overall)}</p>
                 ) : (
-                  <p className="text-[10px] italic text-muted">Released after your tutorial.</p>
+                  <p className="text-micro italic text-muted">Released after your tutorial.</p>
                 )}
               </div>
               <div className="c5-box">
                 <span className="lab">Summary of tutorial and action points</span>
                 {stage1And2Released ? (
-                  <p className="text-[11px] leading-relaxed text-ink">{record.stage2_tutor_notes || "—"}</p>
+                  <p className="text-label leading-relaxed text-ink">{record.stage2_tutor_notes || "—"}</p>
                 ) : (
-                  <p className="text-[10px] italic text-muted">Released after your tutorial.</p>
+                  <p className="text-micro italic text-muted">Released after your tutorial.</p>
                 )}
               </div>
             </div>
 
             {stage1And2Released ? (
               <div className="mt-3 border-t border-border-faint pt-3">
-                <p className="mb-2 text-[11px] text-ink">
+                <p className="mb-2 text-label text-ink">
                   <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
                   <strong>{record.stage2_tutor_signature_name ?? "—"}</strong>
                 </p>
                 {record.trainee_signoff_stage2_at ? (
-                  <p className="text-[11px] text-muted">
+                  <p className="text-label text-muted">
                     Signed by {record.stage2_candidate_signature_name ?? "you"} on{" "}
                     {formatDate(record.trainee_signoff_stage2_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}.
                   </p>
@@ -901,7 +901,7 @@ export default async function PortfolioCelta5Page({
                   <SetSignatureForm fullName={viewer?.full_name ?? ""} />
                 ) : (
                   <form action={signOffStage2}>
-                    <p className="mb-2 text-[11px] text-ink">
+                    <p className="mb-2 text-label text-ink">
                       This is an accurate record of the tutorial discussion and my progress to date. I have read and
                       agree with the summarising comments.
                     </p>
@@ -913,7 +913,7 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-stage3" num="Section 11" title="Stage Three progress record">
-            <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+            <p className="text-micro leading-relaxed text-muted" style={{ marginBottom: 10 }}>
               This record must be completed by tutors in the final third of the course for all candidates who: a) were
               not to standard at Stage 2; b) were at standard at Stage 2 but are not making the expected progress in
               the second half of the course; c) were above standard at Stage 2 but are not making the expected
@@ -926,24 +926,24 @@ export default async function PortfolioCelta5Page({
                   <div className="mt-3 flex flex-col gap-3">
                     <div className="c5-box">
                       <span className="lab">Written assignments &mdash; tutor&rsquo;s comments</span>
-                      <p className="text-[11px] leading-relaxed text-ink">{record.stage3_tutor_notes || "—"}</p>
+                      <p className="text-label leading-relaxed text-ink">{record.stage3_tutor_notes || "—"}</p>
                     </div>
                     <div className="c5-box">
                       <span className="lab">Other issues &mdash; tutor&rsquo;s comments</span>
-                      <p className="text-[11px] leading-relaxed text-ink">{record.stage3_tutor_other_notes || "—"}</p>
+                      <p className="text-label leading-relaxed text-ink">{record.stage3_tutor_other_notes || "—"}</p>
                     </div>
                     <div className="c5-box">
                       <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
-                      <p className="text-[11px] text-ink">{overallLabel(record.stage3_tutor_overall)}</p>
+                      <p className="text-label text-ink">{overallLabel(record.stage3_tutor_overall)}</p>
                     </div>
                   </div>
                   <div className="mt-3 border-t border-border-faint pt-3">
-                    <p className="mb-2 text-[11px] text-ink">
+                    <p className="mb-2 text-label text-ink">
                       <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
                       <strong>{record.stage3_tutor_signature_name ?? "—"}</strong>
                     </p>
                     {record.stage3_candidate_signed_at ? (
-                      <p className="text-[11px] text-muted">
+                      <p className="text-label text-muted">
                         Signed by {record.stage3_candidate_signature_name} on{" "}
                         {formatDate(record.stage3_candidate_signed_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}.
                       </p>
@@ -951,7 +951,7 @@ export default async function PortfolioCelta5Page({
                       <SetSignatureForm fullName={viewer?.full_name ?? ""} />
                     ) : (
                       <form action={signOffStage3}>
-                        <p className="mb-2 text-[11px] text-ink">I have read and agree with the summarising comments above.</p>
+                        <p className="mb-2 text-label text-ink">I have read and agree with the summarising comments above.</p>
                         <button type="submit" className="c5-btn">Sign as {viewer.signature_name}</button>
                       </form>
                     )}
@@ -973,10 +973,10 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
-            <p className="text-[10px] italic text-muted" style={{ marginBottom: 4 }}>
+            <p className="text-micro italic text-muted" style={{ marginBottom: 4 }}>
               Please tick the appropriate boxes and sign.
             </p>
-            <p className="text-[11px] text-ink" style={{ marginBottom: 10 }}>
+            <p className="text-label text-ink" style={{ marginBottom: 10 }}>
               In handing in this portfolio for assessment purposes, I confirm that:
             </p>
             <FinalDayChecks checks={finalChecks} />
@@ -984,7 +984,7 @@ export default async function PortfolioCelta5Page({
               <FinalChecklistForm signatureName={viewer?.signature_name ?? null} fullName={viewer?.full_name ?? ""} />
             </div>
 
-            <p className="text-[11px]" style={{ marginTop: 16 }}>
+            <p className="text-label" style={{ marginTop: 16 }}>
               <span className="text-muted">Accepted by Tutor:</span>{" "}
               <strong className="text-ink">{record.final_tutor_signature_name ?? "\u2014"}</strong>
               {record.trainer_signoff_final_at ? (
@@ -1006,7 +1006,7 @@ export default async function PortfolioCelta5Page({
                 Information for the CELTA grade review &mdash; tutor comments on action points detailed in Stage Three
                 progress record
               </span>
-              <p className="text-[10px] leading-relaxed text-muted">
+              <p className="text-micro leading-relaxed text-muted">
                 This box is to be completed for all candidates whose portfolios are submitted to Cambridge English.
                 (See CELTA Administration Handbook for details of portfolios to be submitted.)
               </p>
@@ -1014,12 +1014,12 @@ export default async function PortfolioCelta5Page({
                   one that tells a tutor WHAT to write, so a box carrying only
                   the first paragraph says who must fill it in and not what
                   belongs in it. */}
-              <p className="mt-2 text-[10px] leading-relaxed italic text-muted">
+              <p className="mt-2 text-micro leading-relaxed italic text-muted">
                 Please state whether the candidate did or did not demonstrate effectiveness in the areas identified,
                 making reference to feedback to the candidate in final lessons and/or written assignments, as
                 appropriate.
               </p>
-              <p className="mt-2 text-[11px] leading-relaxed text-ink">{record.grade_review_tutor_comments || "—"}</p>
+              <p className="mt-2 text-label leading-relaxed text-ink">{record.grade_review_tutor_comments || "—"}</p>
             </div>
 
           {/* His file keeps both appendices inside the final-day page rather
@@ -1168,7 +1168,7 @@ export default async function PortfolioCelta5Page({
 
   if (!record) {
     return (
-      <div className="sheet p-6 text-sm text-muted">
+      <div className="sheet p-6 text-body text-muted">
         No CELTA 5 record exists for this trainee yet. It&apos;s created automatically when they&apos;re invited -- if this
         trainee predates that, an admin will need to add it manually.
       </div>
@@ -1193,8 +1193,8 @@ export default async function PortfolioCelta5Page({
 
   const headerBlock = (
     <div>
-      <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
-      <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+      <h2 className="font-serif text-h2 text-ink">CELTA 5 record</h2>
+      <div className="mt-3 grid grid-cols-2 gap-4 text-body sm:grid-cols-3">
         <div>
           <p className="text-muted">Candidate</p>
           <p className="text-ink">{trainee.full_name}</p>
@@ -1240,7 +1240,7 @@ export default async function PortfolioCelta5Page({
   const tasksBlock =
     (obsTasks ?? []).length > 0 ? (
       <div>
-        <h3 className="font-serif text-lg text-ink">Observation tasks</h3>
+        <h3 className="font-serif text-h3 text-ink">Observation tasks</h3>
         <div className="sheet mt-2 flex flex-col gap-3">
           {(obsTasks ?? []).map((task) => {
             const submission = staffSubmissionByTaskId.get(task.id);
@@ -1254,8 +1254,8 @@ export default async function PortfolioCelta5Page({
                 </div>
                 {submission ? (
                   <>
-                    <p className="mt-1 text-xs text-muted">{formatDateTime(submission.submitted_at, timeZone)}</p>
-                    <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
+                    <p className="mt-1 text-label text-muted">{formatDateTime(submission.submitted_at, timeZone)}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-body text-ink">{submission.response}</p>
                   </>
                 ) : null}
               </div>
@@ -1267,9 +1267,9 @@ export default async function PortfolioCelta5Page({
 
   const observationsBlock = (
     <div>
-      <h3 className="font-serif text-lg text-ink">Observations of experienced teachers (self-reported)</h3>
+      <h3 className="font-serif text-h3 text-ink">Observations of experienced teachers (self-reported)</h3>
       <div className="mt-2">
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           {observationHoursCounted.toFixed(1)} of {OBSERVATION_HOURS_REQUIRED} hrs counted · {liveHours.toFixed(1)} hrs live
           {filmedHours > 0 ? ` · ${filmedHours.toFixed(1)} hrs filmed (capped at 3)` : ""}
         </p>
@@ -1290,11 +1290,11 @@ export default async function PortfolioCelta5Page({
           <table className="table-plain w-full">
             <thead>
               <tr>
-                <th className="text-sm text-muted">Date</th>
-                <th className="text-sm text-muted">Length</th>
-                <th className="text-sm text-muted">Level</th>
-                <th className="text-sm text-muted">Focus</th>
-                <th className="text-sm text-muted">Filmed</th>
+                <th className="text-body text-muted">Date</th>
+                <th className="text-body text-muted">Length</th>
+                <th className="text-body text-muted">Level</th>
+                <th className="text-body text-muted">Focus</th>
+                <th className="text-body text-muted">Filmed</th>
               </tr>
             </thead>
             <tbody>
@@ -1499,17 +1499,17 @@ export default async function PortfolioCelta5Page({
               <>
                 <div className="c5-box" style={{ marginBottom: 10 }}>
                   <span className="lab">Strengths</span>
-                  <p className="text-[11px] leading-relaxed whitespace-pre-wrap text-ink">{record.stage1_strengths || "—"}</p>
+                  <p className="text-label leading-relaxed whitespace-pre-wrap text-ink">{record.stage1_strengths || "—"}</p>
                 </div>
                 <div className="c5-box" style={{ marginBottom: 10 }}>
                   <span className="lab">Action plan for next stage of the course</span>
-                  <p className="text-[11px] leading-relaxed whitespace-pre-wrap text-ink">{record.stage1_action_plan || "—"}</p>
+                  <p className="text-label leading-relaxed whitespace-pre-wrap text-ink">{record.stage1_action_plan || "—"}</p>
                 </div>
-                <p className="text-[11px]">
+                <p className="text-label">
                   <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
                   <strong className="text-ink">{sigLine(record.stage1_tutor_signature_name, record.stage1_completed_at)}</strong>
                 </p>
-                <p className="text-[11px]">
+                <p className="text-label">
                   <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
                   <strong className="text-ink">{sigLine(record.stage1_candidate_signature_name, record.stage1_candidate_signed_at)}</strong>
                 </p>
@@ -1534,43 +1534,43 @@ export default async function PortfolioCelta5Page({
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="c5-box">
                 <span className="lab">Written assignments &mdash; candidate</span>
-                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_candidate_written_assignments_notes || "—"}</p>
+                <p className="text-label whitespace-pre-wrap text-ink">{record.stage2_candidate_written_assignments_notes || "—"}</p>
               </div>
               <div className="c5-box">
                 <span className="lab">Written assignments &mdash; tutor</span>
-                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_tutor_written_assignments_notes || "—"}</p>
+                <p className="text-label whitespace-pre-wrap text-ink">{record.stage2_tutor_written_assignments_notes || "—"}</p>
               </div>
               <div className="c5-box">
                 <span className="lab">Other issues &mdash; candidate</span>
-                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_candidate_other_notes || "—"}</p>
+                <p className="text-label whitespace-pre-wrap text-ink">{record.stage2_candidate_other_notes || "—"}</p>
               </div>
               <div className="c5-box">
                 <span className="lab">Other issues &mdash; tutor</span>
-                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_tutor_other_notes || "—"}</p>
+                <p className="text-label whitespace-pre-wrap text-ink">{record.stage2_tutor_other_notes || "—"}</p>
               </div>
             </div>
             <div className="mt-3 flex flex-col gap-3">
               <div className="c5-box">
                 <span className="lab">Overall progress &mdash; candidate&rsquo;s assessment</span>
-                <p className="text-[11px] text-ink">{assessorOverall(record.stage2_candidate_overall)}</p>
+                <p className="text-label text-ink">{assessorOverall(record.stage2_candidate_overall)}</p>
                 {record.stage2_candidate_notes ? (
-                  <p className="mt-1 text-[11px] whitespace-pre-wrap text-muted">{record.stage2_candidate_notes}</p>
+                  <p className="mt-1 text-label whitespace-pre-wrap text-muted">{record.stage2_candidate_notes}</p>
                 ) : null}
               </div>
               <div className="c5-box">
                 <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
-                <p className="text-[11px] text-ink">{assessorOverall(record.stage2_tutor_overall)}</p>
+                <p className="text-label text-ink">{assessorOverall(record.stage2_tutor_overall)}</p>
               </div>
               <div className="c5-box">
                 <span className="lab">Summary of tutorial and action points</span>
-                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_tutor_notes || "—"}</p>
+                <p className="text-label whitespace-pre-wrap text-ink">{record.stage2_tutor_notes || "—"}</p>
               </div>
             </div>
-            <p className="mt-3 text-[11px]">
+            <p className="mt-3 text-label">
               <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
               <strong className="text-ink">{sigLine(record.stage2_tutor_signature_name, record.stage2_completed_at)}</strong>
             </p>
-            <p className="text-[11px]">
+            <p className="text-label">
               <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
               <strong className="text-ink">{sigLine(record.stage2_candidate_signature_name, record.trainee_signoff_stage2_at)}</strong>
             </p>
@@ -1583,22 +1583,22 @@ export default async function PortfolioCelta5Page({
                 <div className="mt-3 flex flex-col gap-3">
                   <div className="c5-box">
                     <span className="lab">Written assignments &mdash; tutor&rsquo;s comments</span>
-                    <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage3_tutor_notes || "—"}</p>
+                    <p className="text-label whitespace-pre-wrap text-ink">{record.stage3_tutor_notes || "—"}</p>
                   </div>
                   <div className="c5-box">
                     <span className="lab">Other issues &mdash; tutor&rsquo;s comments</span>
-                    <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage3_tutor_other_notes || "—"}</p>
+                    <p className="text-label whitespace-pre-wrap text-ink">{record.stage3_tutor_other_notes || "—"}</p>
                   </div>
                   <div className="c5-box">
                     <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
-                    <p className="text-[11px] text-ink">{assessorOverall(record.stage3_tutor_overall)}</p>
+                    <p className="text-label text-ink">{assessorOverall(record.stage3_tutor_overall)}</p>
                   </div>
                 </div>
-                <p className="mt-3 text-[11px]">
+                <p className="mt-3 text-label">
                   <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
                   <strong className="text-ink">{sigLine(record.stage3_tutor_signature_name, record.stage3_finalized_at)}</strong>
                 </p>
-                <p className="text-[11px]">
+                <p className="text-label">
                   <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
                   <strong className="text-ink">{sigLine(record.stage3_candidate_signature_name, record.stage3_candidate_signed_at)}</strong>
                 </p>
@@ -1613,10 +1613,10 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
-            <p className="text-[10px] italic text-muted" style={{ marginBottom: 4 }}>
+            <p className="text-micro italic text-muted" style={{ marginBottom: 4 }}>
               Please tick the appropriate boxes and sign.
             </p>
-            <p className="text-[11px] text-ink" style={{ marginBottom: 10 }}>
+            <p className="text-label text-ink" style={{ marginBottom: 10 }}>
               In handing in this portfolio for assessment purposes, I confirm that:
             </p>
             <FinalDayChecks
@@ -1628,11 +1628,11 @@ export default async function PortfolioCelta5Page({
                 { label: "I have completed all records.", met: record.final_checklist_all_records },
               ]}
             />
-            <p className="mt-3 text-[11px]">
+            <p className="mt-3 text-label">
               <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
               <strong className="text-ink">{sigLine(record.final_candidate_signature_name, record.trainee_signoff_final_at)}</strong>
             </p>
-            <p className="text-[11px]">
+            <p className="text-label">
               <span className="text-muted">Accepted by Tutor:</span>{" "}
               <strong className="text-ink">{sigLine(record.final_tutor_signature_name, record.trainer_signoff_final_at)}</strong>
             </p>
@@ -1642,16 +1642,16 @@ export default async function PortfolioCelta5Page({
                 Information for the CELTA grade review &mdash; tutor comments on action points detailed in Stage Three
                 progress record
               </span>
-              <p className="text-[10px] leading-relaxed text-muted">
+              <p className="text-micro leading-relaxed text-muted">
                 This box is to be completed for all candidates whose portfolios are submitted to Cambridge English.
                 (See CELTA Administration Handbook for details of portfolios to be submitted.)
               </p>
-              <p className="mt-2 text-[10px] leading-relaxed italic text-muted">
+              <p className="mt-2 text-micro leading-relaxed italic text-muted">
                 Please state whether the candidate did or did not demonstrate effectiveness in the areas identified,
                 making reference to feedback to the candidate in final lessons and/or written assignments, as
                 appropriate.
               </p>
-              <p className="mt-2 text-[11px] whitespace-pre-wrap text-ink">{record.grade_review_tutor_comments || "—"}</p>
+              <p className="mt-2 text-label whitespace-pre-wrap text-ink">{record.grade_review_tutor_comments || "—"}</p>
             </div>
 
             <div id="c5-appendix1" className="scroll-mt-6" style={{ marginTop: 28 }}>
@@ -1672,7 +1672,7 @@ export default async function PortfolioCelta5Page({
             Connect's own working aids, not part of Cambridge's document,
             and an assessor should never mistake one for the other. */}
         <div className="sheet">
-          <p className="text-sm text-muted">Trajectory (estimated, informal -- not part of the CELTA 5)</p>
+          <p className="text-body text-muted">Trajectory (estimated, informal -- not part of the CELTA 5)</p>
           <div className="mt-3">
             <TrajectoryGradientBars byDimension={trajectoryByDimension} />
           </div>
@@ -1681,16 +1681,16 @@ export default async function PortfolioCelta5Page({
         <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
 
         <div className="sheet">
-          <p className="text-sm text-muted">Final recommended grade</p>
+          <p className="text-body text-muted">Final recommended grade</p>
           {record.final_recommended_grade ? (
             <>
-              <span className="mt-1 inline-flex rounded-[6px] bg-primary px-3 py-1 font-serif text-2xl text-primary-foreground">
+              <span className="mt-1 inline-flex rounded-[6px] bg-primary px-3 py-1 font-serif text-h1 text-primary-foreground">
                 {record.final_recommended_grade}
               </span>
               {record.overall_notes ? <p className="mt-3 text-ink">{record.overall_notes}</p> : null}
             </>
           ) : (
-            <p className="mt-2 text-sm text-muted">Not yet decided.</p>
+            <p className="mt-2 text-body text-muted">Not yet decided.</p>
           )}
         </div>
 
@@ -1704,7 +1704,7 @@ export default async function PortfolioCelta5Page({
       {headerBlock}
 
       <div className="sheet">
-        <p className="text-sm text-muted">Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)</p>
+        <p className="text-body text-muted">Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)</p>
         <div className="mt-3">
           <TrajectoryGradientBars byDimension={trajectoryByDimension} />
         </div>
@@ -1723,13 +1723,13 @@ export default async function PortfolioCelta5Page({
 
       {stageFlagSuggestions.length > 0 && (!record.stage1_completed_at || !record.stage3_tutorial_required) ? (
         <div className="sheet-accent-alert flex flex-col gap-1.5">
-          <p className="text-sm font-semibold text-ink">Worth a look for Stage 1 or Stage 3</p>
-          <p className="text-xs text-muted">
+          <p className="text-body font-semibold text-ink">Worth a look for Stage 1 or Stage 3</p>
+          <p className="text-label text-muted">
             A pattern in the ratings so far, not a decision -- criteria tallies never trigger anything on their own.
           </p>
           <ul className="mt-1 flex flex-col gap-0.5">
             {stageFlagSuggestions.map((s) => (
-              <li key={s.section} className="text-sm text-ink">
+              <li key={s.section} className="text-body text-ink">
                 {s.nCount} of {CELTA_CRITERIA_SECTIONS.find((sec) => sec.section === s.section)?.codes.length} criteria rated N in
                 Topic {s.section} -- {s.title}
               </li>
@@ -1741,7 +1741,7 @@ export default async function PortfolioCelta5Page({
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={timeZone} />
 
       <div>
-        <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
+        <h3 className="font-serif text-h3 text-ink">Progress Record — Stage 2: criteria ratings</h3>
         <div className="mt-3">
           <StageRatingsForm
             key={`s2-${matrixKey}`}
@@ -1765,7 +1765,7 @@ export default async function PortfolioCelta5Page({
       />
 
       <div>
-        <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
+        <h3 className="font-serif text-h3 text-ink">Stage Three -- criteria ratings</h3>
         <div className="mt-3">
           <StageRatingsForm
             key={`s3-${matrixKey}`}
@@ -1797,7 +1797,7 @@ export default async function PortfolioCelta5Page({
           <p className="text-ink">Final report ready to download.</p>
           <a
             href={`/api/celta5/${traineeId}/final-report`}
-            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
           >
             Download final report
           </a>

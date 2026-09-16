@@ -69,7 +69,7 @@ export function SectionPills() {
                 // border-only rather than tinted. The three-rule frame and
                 // the four colours are untouched.
                 style={{
-                  fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                  fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
                   padding: "5px 11px", borderRadius: 5, textDecoration: "none", whiteSpace: "nowrap",
                   border: `1px solid ${on ? s.colour : `color-mix(in oklab, ${s.colour} 30%, transparent)`}`,
                   color: on ? "oklch(99% 0.004 85)" : s.colour,

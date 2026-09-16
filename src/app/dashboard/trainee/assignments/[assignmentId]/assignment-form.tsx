@@ -331,7 +331,7 @@ export function AssignmentAuthoringForm({
                 style={{ minWidth: 300, border: `1px dashed ${CLOSED_BORDER}`, borderRadius: 8, padding: "8px 14px" }}
               >
                 <Eyebrow colour={GOLD_INK}>Not yet open</Eyebrow>
-                <p style={{ fontSize: 12, lineHeight: 1.5, color: MUTED }}>
+                <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: MUTED }}>
                   Writing opens on {opensLabel}
                   {opensDate ? ` · ${opensDate}` : ""}
                   {dueLabel ? `; due ${dueLabel}${dueDate ? ` · ${dueDate}` : ""}` : ""}. You can read the brief and
@@ -342,8 +342,8 @@ export function AssignmentAuthoringForm({
             <div className="flex flex-1 flex-col gap-1.5" style={{ minWidth: 300 }}>
               <div className="flex items-baseline justify-between gap-3">
                 <Eyebrow>Word count</Eyebrow>
-                <p className="flex-none whitespace-nowrap" style={{ fontSize: 12, color: MUTED }}>
-                  <span className="font-serif tabular-nums" style={{ fontSize: 18, color: INK }}>
+                <p className="flex-none whitespace-nowrap" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
+                  <span className="font-serif tabular-nums" style={{ fontSize: "var(--text-h3)", color: INK }}>
                     {totalWords}
                   </span>{" "}
                   of {wordMin}–{wordMax.toLocaleString()} words ·{" "}
@@ -372,10 +372,10 @@ export function AssignmentAuthoringForm({
             <div className="flex flex-col gap-2" style={{ padding: "16px 22px 18px 26px" }}>
               <MarkerLabel colour={sanction ? GARNET : INK_WARM} label="Before you start" />
               {intro ? (
-                <p style={{ fontSize: 13.5, lineHeight: 1.55, color: INK, textWrap: "pretty" }}>{intro}</p>
+                <p style={{ fontSize: "var(--text-body)", lineHeight: 1.55, color: INK, textWrap: "pretty" }}>{intro}</p>
               ) : null}
               {scopeNote ? (
-                <p style={{ fontSize: 12.5, lineHeight: 1.55, color: GARNET, textWrap: "pretty" }}>{scopeNote}</p>
+                <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: GARNET, textWrap: "pretty" }}>{scopeNote}</p>
               ) : null}
               {[
                 { label: `Your tutor, on the whole assignment${isResubmission ? " · round 1" : ""}`, text: priorOverall },
@@ -393,10 +393,10 @@ export function AssignmentAuthoringForm({
                       padding: "9px 12px",
                     }}
                   >
-                    <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                    <p className="uppercase" style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
                       {c.label}
                     </p>
-                    <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{c.text}</p>
+                    <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{c.text}</p>
                   </div>
                 ))}
             </div>
@@ -404,7 +404,7 @@ export function AssignmentAuthoringForm({
             <div className="flex flex-col gap-2" style={{ borderLeft: `1px solid ${FAINT}`, padding: "16px 26px 18px 22px" }}>
               <MarkerLabel colour={TEAL} label="Marked against" />
               {criteria.length === 0 ? (
-                <p className="italic" style={{ fontSize: 12, color: MUTED }}>
+                <p className="italic" style={{ fontSize: "var(--text-meta)", color: MUTED }}>
                   Your centre has not set the criteria for this assignment yet.
                 </p>
               ) : (
@@ -413,17 +413,17 @@ export function AssignmentAuthoringForm({
                     const tied = sections.find((s) => s.key === c.sectionKey);
                     return (
                       <li key={c.key} className="grid gap-2" style={{ gridTemplateColumns: "16px minmax(0,1fr)" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: TEAL, paddingTop: 2 }}>{i + 1}</span>
+                        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, color: TEAL, paddingTop: 2 }}>{i + 1}</span>
                         <span>
-                          <span style={{ fontSize: 12.5, lineHeight: 1.5, color: INK }}>{c.text}</span>{" "}
-                          <span className="italic" style={{ fontSize: 11, color: MUTED }}>
+                          <span style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: INK }}>{c.text}</span>{" "}
+                          <span className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                             — {tied ? tied.title : "whole assignment"}
                           </span>
                           {c.mark ? (
                             <span
                               className="ml-1.5 inline-block rounded-[4px] px-1.5"
                               style={{
-                                fontSize: 10.5,
+                                fontSize: "var(--text-micro)",
                                 fontWeight: 700,
                                 background: c.mark === "met" ? `color-mix(in oklab, ${TEAL} 12%, transparent)` : `color-mix(in oklab, ${GOLD_INK} 14%, transparent)`,
                                 color: c.mark === "met" ? TEAL : GOLD_INK,
@@ -438,7 +438,7 @@ export function AssignmentAuthoringForm({
                   })}
                 </ol>
               )}
-              <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+              <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                 Every criterion must be met to pass. One resubmission if any isn&apos;t.
               </p>
             </div>
@@ -447,10 +447,10 @@ export function AssignmentAuthoringForm({
           {/* ---------- §4 the sections ---------- */}
           <div id="assignment-sections" className="scroll-mt-24" style={{ padding: "20px 26px 22px" }}>
             <div className="flex flex-wrap items-baseline gap-3">
-              <h3 className="font-serif" style={{ fontSize: 21, fontWeight: 600, color: sanction ? GARNET : INK_WARM }}>
+              <h3 className="font-serif" style={{ fontSize: "var(--text-h2)", fontWeight: 600, color: sanction ? GARNET : INK_WARM }}>
                 {format === "structured" ? "The tasks" : "The essay"}
               </h3>
-              <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+              <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                 {format === "structured"
                   ? "One point per line. Each step is marked where it says so."
                   : "Continuous prose. Sections are for reading, not for marks — the whole essay is judged together."}
@@ -504,11 +504,11 @@ export function AssignmentAuthoringForm({
                     </div>
 
                     <div className="flex flex-col gap-[7px]" style={{ padding: "14px 18px 18px 0" }}>
-                      <p className="font-serif" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.25, color: INK }}>
+                      <p className="font-serif" style={{ fontSize: "var(--text-h3)", fontWeight: 600, lineHeight: 1.25, color: INK }}>
                         {s.title}
                       </p>
                       {s.instruction ? (
-                        <p className="italic" style={{ fontSize: 12.5, lineHeight: 1.5, color: MUTED, textWrap: "pretty" }}>
+                        <p className="italic" style={{ fontSize: "var(--text-meta)", lineHeight: 1.5, color: MUTED, textWrap: "pretty" }}>
                           {s.instruction}
                         </p>
                       ) : null}
@@ -518,7 +518,7 @@ export function AssignmentAuthoringForm({
                           style={{
                             borderRadius: 6,
                             padding: "3px 8px",
-                            fontSize: 12.5,
+                            fontSize: "var(--text-meta)",
                             fontWeight: 700,
                             background: written ? `color-mix(in oklab, ${hue} 13%, transparent)` : CARD,
                             color: written ? hue : MUTED,
@@ -539,10 +539,10 @@ export function AssignmentAuthoringForm({
                             padding: "7px 10px",
                           }}
                         >
-                          <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                          <p className="uppercase" style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
                             Marked here
                           </p>
-                          <p style={{ fontSize: 11.5, lineHeight: 1.45, color: INK }}>{c.text}</p>
+                          <p style={{ fontSize: "var(--text-label)", lineHeight: 1.45, color: INK }}>{c.text}</p>
                         </div>
                       ))}
                     </div>
@@ -558,19 +558,19 @@ export function AssignmentAuthoringForm({
                               padding: "8px 11px",
                             }}
                           >
-                            <p className="uppercase" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
+                            <p className="uppercase" style={{ fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", color: TEAL }}>
                               {c.label}
                             </p>
-                            <p style={{ fontSize: 13, lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{c.text}</p>
+                            <p style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: INK, whiteSpace: "pre-line" }}>{c.text}</p>
                           </div>
                         ))}
 
                       {notYetOpen ? (
-                        <p className="italic" style={{ fontSize: 13, lineHeight: 1.55, color: CLOSED_INK }}>
+                        <p className="italic" style={{ fontSize: "var(--text-meta)", lineHeight: 1.55, color: CLOSED_INK }}>
                           Opens with the assignment.
                         </p>
                       ) : locked ? (
-                        <p style={{ fontSize: 14, lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
+                        <p style={{ fontSize: "var(--text-body)", lineHeight: 1.6, color: INK, whiteSpace: "pre-line" }}>
                           {value || <span className="italic" style={{ color: MUTED }}>Nothing written.</span>}
                         </p>
                       ) : (
@@ -604,7 +604,7 @@ export function AssignmentAuthoringForm({
               style={{ borderTop: `1px solid ${FAINT}`, background: CARD, padding: "16px 26px" }}
             >
               <Eyebrow>Declaration · References · Appendices</Eyebrow>
-              <p className="italic" style={{ fontSize: 11.5, color: MUTED }}>
+              <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED }}>
                 Available once the assignment opens. The declaration is taken fresh on every submission.
               </p>
             </div>
@@ -616,7 +616,7 @@ export function AssignmentAuthoringForm({
           >
             <div className="flex flex-col gap-3" style={{ padding: "18px 22px 22px 26px" }}>
               <MarkerLabel colour={sanction ? GARNET : INK_WARM} label="Declaration" />
-              <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+              <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
                 Taken fresh on every submission, including a resubmission.
               </p>
               <div className="flex flex-col gap-2" style={{ marginLeft: 12 }}>
@@ -633,7 +633,7 @@ export function AssignmentAuthoringForm({
                   label="All sources are referenced, in the format (Author, Year, p. ##)."
                 />
                 <div className="mt-1 flex flex-wrap items-center gap-3">
-                  <span style={{ fontSize: 12.5, color: INK }}>Did you use AI tools for any part of this?</span>
+                  <span style={{ fontSize: "var(--text-meta)", color: INK }}>Did you use AI tools for any part of this?</span>
                   <RadioRow label="Yes" checked={aiAnswered === true} disabled={locked} onSelect={() => setAiAnswered(true)} />
                   <RadioRow label="No" checked={aiAnswered === false} disabled={locked} onSelect={() => setAiAnswered(false)} />
                 </div>
@@ -654,7 +654,7 @@ export function AssignmentAuthoringForm({
                       border: `1px solid ${BORDER}`,
                       background: SHEET,
                       padding: "9px 12px",
-                      fontSize: 13,
+                      fontSize: "var(--text-meta)",
                       lineHeight: 1.5,
                       color: INK,
                       outline: "none",
@@ -695,7 +695,7 @@ export function AssignmentAuthoringForm({
                     hint={appendixHint ?? "Anything the brief asks you to attach sits here. Not counted in the word count."}
                   />
                 ) : (
-                  <p className="italic" style={{ fontSize: 11.5, color: MUTED, marginLeft: 12 }}>
+                  <p className="italic" style={{ fontSize: "var(--text-label)", color: MUTED, marginLeft: 12 }}>
                     {appendixHint ?? "Anything you attach sits here. Not counted in the word count."}
                   </p>
                 )}
@@ -728,7 +728,7 @@ export function AssignmentAuthoringForm({
                 <button
                   type="button"
                   className="text-left underline decoration-dotted underline-offset-2"
-                  style={{ fontSize: 11.5, fontWeight: 600, color: GOLD_INK }}
+                  style={{ fontSize: "var(--text-label)", fontWeight: 600, color: GOLD_INK }}
                   onClick={() =>
                     document.getElementById(blocker.target)?.scrollIntoView({ behavior: "smooth", block: "start" })
                   }
@@ -736,7 +736,7 @@ export function AssignmentAuthoringForm({
                   {blocker.label} — take me there
                 </button>
               ) : null}
-              <p style={{ fontSize: 11.5, color: notYetOpen ? MUTED : GOLD_INK }}>
+              <p style={{ fontSize: "var(--text-label)", color: notYetOpen ? MUTED : GOLD_INK }}>
                 {notYetOpen
                   ? `This assignment opens on ${opensLabel}${opensDate ? ` · ${opensDate}` : ""}. Read the brief now; writing starts then.`
                   : locked
@@ -749,7 +749,7 @@ export function AssignmentAuthoringForm({
                   is a warning and never a bar -- the tutor decides, not the
                   form. It just must not be a silent one. */}
               {!notYetOpen && !locked && totalWords > 0 && (under > 0 || over > 0) ? (
-                <p style={{ fontSize: 11.5, color: MUTED }}>
+                <p style={{ fontSize: "var(--text-label)", color: MUTED }}>
                   {under > 0
                     ? `${under} words short of the ${wordMin} minimum`
                     : `${over} words over the ${wordMax.toLocaleString()} maximum`}
@@ -770,7 +770,7 @@ export function AssignmentAuthoringForm({
                   background: "oklch(88% 0.016 82)",
                   padding: "8px 17px",
                   fontWeight: 600,
-                  fontSize: 13.5,
+                  fontSize: "var(--text-body)",
                   color: MUTED,
                   cursor: "not-allowed",
                 }}
@@ -796,7 +796,7 @@ export function AssignmentAuthoringForm({
                     border: `1px solid ${BAR_BORDER}`,
                     background: SHEET,
                     padding: "8px 15px",
-                    fontSize: 13.5,
+                    fontSize: "var(--text-body)",
                     color: INK,
                   }}
                 >
@@ -818,7 +818,7 @@ export function AssignmentAuthoringForm({
                     background: blocker ? "oklch(88% 0.016 82)" : accent,
                     padding: "8px 17px",
                     fontWeight: 600,
-                    fontSize: 13.5,
+                    fontSize: "var(--text-body)",
                     color: blocker ? MUTED : "oklch(98.5% 0.006 90)",
                     cursor: blocker ? "not-allowed" : undefined,
                   }}
@@ -880,12 +880,12 @@ function CheckRow({
           border: `1.5px solid ${checked ? TEAL : BORDER}`,
           background: checked ? TEAL : "transparent",
           color: SHEET,
-          fontSize: 10,
+          fontSize: "var(--text-micro)",
         }}
       >
         {checked ? "✓" : ""}
       </span>
-      <span style={{ fontSize: 12.5, lineHeight: 1.45, color: INK }}>{label}</span>
+      <span style={{ fontSize: "var(--text-meta)", lineHeight: 1.45, color: INK }}>{label}</span>
     </button>
   );
 }
@@ -909,7 +909,7 @@ function RadioRow({
       >
         {checked ? <span className="rounded-full" style={{ width: 6, height: 6, background: TEAL }} /> : null}
       </span>
-      <span style={{ fontSize: 12.5, color: INK }}>{label}</span>
+      <span style={{ fontSize: "var(--text-meta)", color: INK }}>{label}</span>
     </button>
   );
 }

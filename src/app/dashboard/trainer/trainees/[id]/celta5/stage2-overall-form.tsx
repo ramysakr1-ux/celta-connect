@@ -40,30 +40,30 @@ export function Stage2OverallForm({
 
     <form action={action} className="contents">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: mid-course tutorial</h2>
+      <h2 className="font-serif text-h3 text-ink">Progress Record — Stage 2: mid-course tutorial</h2>
 
       {record.stage2_candidate_submitted_at ? (
         <div className="rounded-[6px] border border-border p-3">
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             Candidate self-assessment submitted{" "}
             {formatDateTime(record.stage2_candidate_submitted_at, timeZone)}.
           </p>
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-sm text-muted">Candidate&apos;s overall:</span>
+            <span className="text-body text-muted">Candidate&apos;s overall:</span>
             <StandardRatingPill rating={record.stage2_candidate_overall} />
           </div>
           {record.stage2_candidate_notes ? (
-            <p className="mt-2 text-sm text-ink">{record.stage2_candidate_notes}</p>
+            <p className="mt-2 text-body text-ink">{record.stage2_candidate_notes}</p>
           ) : null}
         </div>
       ) : (
-        <p className="rounded-[6px] border border-border p-3 text-sm text-muted">
+        <p className="rounded-[6px] border border-border p-3 text-body text-muted">
           The candidate hasn&apos;t submitted their self-assessment yet. Your ratings below
           are saved either way, but stay hidden from them until they do.
         </p>
       )}
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage2_tutorial_given"
@@ -73,7 +73,7 @@ export function Stage2OverallForm({
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Hours taught so far</label>
+        <label className="text-body text-muted">Hours taught so far</label>
         <input
           name="stage2_hours_taught"
           type="number"
@@ -82,7 +82,7 @@ export function Stage2OverallForm({
           className="w-32 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
         {record.stage2_hours_taught === null && assessedHoursSoFar !== null ? (
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Read from the assessed lessons taught so far ({assessedHoursSoFar.toFixed(1)} h). Stage 2 ordinarily follows three hours&apos; TP
             (Handbook 10.2) -- correct it if a lesson ran to a different length.
           </p>
@@ -90,7 +90,7 @@ export function Stage2OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Tutor&apos;s overall progress assessment</label>
+        <label className="text-body text-muted">Tutor&apos;s overall progress assessment</label>
         <select
           name="stage2_tutor_overall"
           defaultValue={record.stage2_tutor_overall ?? ""}
@@ -106,7 +106,7 @@ export function Stage2OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Summary of tutorial and action points</label>
+        <label className="text-body text-muted">Summary of tutorial and action points</label>
         <TrainerFeedbackTextarea
           name="stage2_tutor_notes"
           rows={3}
@@ -116,7 +116,7 @@ export function Stage2OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Written assignments notes</label>
+        <label className="text-body text-muted">Written assignments notes</label>
         <TrainerFeedbackTextarea
           name="stage2_tutor_written_assignments_notes"
           rows={2}
@@ -126,7 +126,7 @@ export function Stage2OverallForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Other notes</label>
+        <label className="text-body text-muted">Other notes</label>
         <TrainerFeedbackTextarea
           name="stage2_tutor_other_notes"
           rows={2}
@@ -136,12 +136,12 @@ export function Stage2OverallForm({
       </div>
 
       {record.stage2_tutor_signature_name && record.stage2_completed_at ? (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Signed by {record.stage2_tutor_signature_name} on {formatDate(record.stage2_completed_at, timeZone, { year: "numeric" })}.
         </p>
       ) : null}
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           name="stage2_completed"
@@ -149,18 +149,18 @@ export function Stage2OverallForm({
         />
         Progress Record — Stages 1 and 2 complete — reveal to trainee
       </label>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Checking this is what makes Progress Record Stages 1 and 2 (including your ratings above) visible
         to the trainee for the first time, so they can review and sign off. Nothing is shown
         to them before this, however far along you&apos;ve gotten.
       </p>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>
