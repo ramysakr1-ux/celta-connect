@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export interface WizardStep {
   key: string;
@@ -26,11 +26,35 @@ export interface WizardStep {
 export function MobileFormWizard({ steps }: { steps: WizardStep[] }) {
   const [current, setCurrent] = useState(0);
   const clamped = Math.min(current, steps.length - 1);
+  const wrappers = useRef<(HTMLDivElement | null)[]>([]);
+
+  // A `required` field left empty on a step that is now hidden would make
+  // the browser refuse the final submit with nothing to show for it -- an
+  // invalid control inside display:none is not focusable, so no message ever
+  // appears. Each step is checked on its way out instead, while its fields
+  // are on screen and can say what is missing (application form, 16 Sep
+  // 2026). Desktop shows every step at once and keeps native validation.
+  const next = () => {
+    const wrapper = wrappers.current[clamped];
+    const fields = wrapper ? Array.from(wrapper.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea")) : [];
+    const invalid = fields.find((f) => !f.checkValidity());
+    if (invalid) {
+      invalid.reportValidity();
+      return;
+    }
+    setCurrent((c) => Math.min(steps.length - 1, c + 1));
+  };
 
   return (
     <>
       {steps.map((step, i) => (
-        <div key={step.key} className={`${i === clamped ? "block" : "hidden md:block"} ${step.className ?? ""}`}>
+        <div
+          key={step.key}
+          ref={(el) => {
+            wrappers.current[i] = el;
+          }}
+          className={`${i === clamped ? "block" : "hidden md:block"} ${step.className ?? ""}`}
+        >
           {step.content}
         </div>
       ))}
@@ -49,7 +73,7 @@ export function MobileFormWizard({ steps }: { steps: WizardStep[] }) {
           </p>
           <button
             type="button"
-            onClick={() => setCurrent((c) => Math.min(steps.length - 1, c + 1))}
+            onClick={next}
             disabled={clamped === steps.length - 1}
             className="rounded-[6px] border border-primary px-4 py-2 text-sm font-medium text-primary disabled:opacity-40"
           >

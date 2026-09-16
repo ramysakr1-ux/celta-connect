@@ -13,6 +13,7 @@ import { DELIVERY_MODE_LABEL } from "@/lib/delivery-mode";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 import { Wordmark } from "@/components/wordmark";
 import { formatCalendarDate } from "@/lib/format-date";
+import { MobileFormWizard } from "@/components/mobile-form-wizard";
 
 interface Intake {
   id: string;
@@ -151,6 +152,18 @@ export function ApplicationForm({
         <form action={action} className="flex flex-col gap-4">
           <input type="hidden" name="center_id" value={centerId} />
 
+          {/* Application form A4, high-traffic audit 16 Sep 2026: twenty fields in
+              one column was a wall on a phone. Four steps below md, one per
+              screen with Back / Next; the same four as sections with sticky
+              heads on a laptop. One render tree either way, so every field's
+              name appears once in the FormData. */}
+          <MobileFormWizard
+            steps={[
+              {
+                key: "about",
+                content: (
+                  <div className="flex flex-col gap-4">
+                    <SectionHead n={1} title="About you" />
           <div className="flex flex-col gap-1.5">
             <label htmlFor="intake_course_id" className="text-sm text-muted">
               Which course are you applying for?
@@ -293,7 +306,14 @@ export function ApplicationForm({
               />
             ) : null}
           </div>
-
+                  </div>
+                ),
+              },
+              {
+                key: "background",
+                content: (
+                  <div className="flex flex-col gap-4">
+                    <SectionHead n={2} title="Your background" />
           <div className="flex flex-col gap-1.5">
             <label htmlFor="education_summary" className="text-sm text-muted">
               Your education (equivalent to entry into higher education)
@@ -362,7 +382,14 @@ export function ApplicationForm({
               className={inputClass}
             />
           </div>
-
+                  </div>
+                ),
+              },
+              {
+                key: "tasks",
+                content: (
+                  <div className="flex flex-col gap-4">
+                    <SectionHead n={3} title="Tasks" />
           {prompts.length > 0 ? (
             <div className="flex flex-col gap-3 border-t border-border pt-4">
               <p className="text-sm font-semibold text-ink">
@@ -463,7 +490,14 @@ export function ApplicationForm({
               className={inputClass}
             />
           </div>
-
+                  </div>
+                ),
+              },
+              {
+                key: "agree",
+                content: (
+                  <div className="flex flex-col gap-4">
+                    <SectionHead n={4} title="Agree and send" />
           {commitments ? (
             <div className="flex flex-col gap-2 border-t border-border pt-4">
               <p className="text-sm font-semibold text-ink">
@@ -571,6 +605,12 @@ export function ApplicationForm({
           >
             {pending ? "Submitting..." : "Submit application"}
           </button>
+                  </div>
+                ),
+              },
+            ]}
+          />
+
         </form>
       )}
 
@@ -581,5 +621,17 @@ export function ApplicationForm({
         </Link>
       </div>
     </div>
+  );
+}
+
+// The step's name, once per step: the serif card-heading size (B5). Sticky
+// on a laptop, where all four sections are on one page; on a phone the
+// wizard shows one step at a time and the head is simply its title.
+function SectionHead({ n, title }: { n: number; title: string }) {
+  return (
+    <h2 className="z-[1] -mx-1 bg-card px-1 pt-1 pb-1 font-serif text-[17px] leading-snug font-semibold text-ink md:sticky md:top-0">
+      <span className="mr-2 text-muted">{n}</span>
+      {title}
+    </h2>
   );
 }
