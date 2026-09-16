@@ -37,6 +37,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
 import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-only";
 import { levelKey } from "@/lib/volunteer-class-session";
+import { RoomHead } from "@/components/room-head";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 
@@ -156,11 +157,13 @@ export default async function TpDetailPage({
 
     return (
       <div className="flex flex-col gap-4">
-        <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
-        <div className="sheet p-6">
-          <h1 className="font-serif text-h2 text-ink">{trainee.full_name} — TP{tpNumber}</h1>
-          <p className="mt-1 text-body text-muted">Peer observation</p>
-        </div>
+        {/* One head for every room (trainee spec B1), and no .sheet around
+            it (B2): a head is the page speaking, not a panel on it. */}
+        <RoomHead
+          back={{ href: `/portfolio/${traineeId}/tp`, label: "All teaching practices" }}
+          eyebrow="Peer observation"
+          title={`${trainee.full_name} — TP${tpNumber}`}
+        />
         {/* Decorative teal/garnet alternation against the header sheet
             above -- no status meaning of its own, same rule as elsewhere. */}
         <div className="sheet p-6">
@@ -277,13 +280,11 @@ export default async function TpDetailPage({
   if (!assignment) {
     return (
       <div className="flex flex-col gap-4">
-        <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
-        <div className="sheet p-6">
-          <h1 className="font-serif text-h1 text-ink">TP{tpNumber}</h1>
-          <p className="mt-2 text-body text-muted">
-            Not yet assigned{isStaff ? "." : " -- your trainer will unlock this closer to the time."}
-          </p>
-        </div>
+        <RoomHead
+          back={{ href: `/portfolio/${traineeId}/tp`, label: "All teaching practices" }}
+          title={`TP${tpNumber}`}
+          lede={`Not yet assigned${isStaff ? "." : " -- your trainer will unlock this closer to the time."}`}
+        />
       </div>
     );
   }
@@ -609,23 +610,18 @@ export default async function TpDetailPage({
   return (
     <div className="grid grid-cols-1 gap-6">
       <div className="flex min-w-0 flex-col gap-4">
-        <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
-
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-h1 text-ink">
-              TP{tpNumber} — {assignment.main_lesson_aim}
-            </h1>
-            <p className="mt-1 text-body text-muted">
-              {densityLabel.name}
-              {volunteerAttendance
-                ? volunteerAttendance.expected === 0
-                  ? ` · ${volunteerAttendance.total} volunteer${volunteerAttendance.total === 1 ? "" : "s"} · nobody has replied yet`
-                  : ` · ${volunteerAttendance.expected} of ${volunteerAttendance.total} volunteers coming`
-                : ""}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
+        <RoomHead
+          back={{ href: `/portfolio/${traineeId}/tp`, label: "All teaching practices" }}
+          title={`TP${tpNumber} — ${assignment.main_lesson_aim}`}
+          lede={`${densityLabel.name}${
+            volunteerAttendance
+              ? volunteerAttendance.expected === 0
+                ? ` · ${volunteerAttendance.total} volunteer${volunteerAttendance.total === 1 ? "" : "s"} · nobody has replied yet`
+                : ` · ${volunteerAttendance.expected} of ${volunteerAttendance.total} volunteers coming`
+              : ""
+          }`}
+        >
+          <>
             {(() => {
               const exportReady = Boolean(plan?.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at);
               return exportReady ? (
@@ -657,8 +653,8 @@ export default async function TpDetailPage({
               );
             })()}
             <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
-          </div>
-        </div>
+          </>
+        </RoomHead>
 
         {!isStaff && bannerMessage ? (
           <div className="sheet flex items-center gap-2 border-primary/20 bg-accent/30 text-body text-ink">

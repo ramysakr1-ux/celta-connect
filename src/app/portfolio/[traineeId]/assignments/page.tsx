@@ -18,6 +18,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { getCourseReleaseClock, type AssignmentRelease } from "@/lib/assignment-release";
 import { formatCalendarDate, formatDate } from "@/lib/format-date";
 import type { Database } from "@/lib/supabase/types";
+import { RoomHead, ROOM_PRIMARY } from "@/components/room-head";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 
@@ -122,25 +123,20 @@ export default async function AssignmentsPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="font-serif text-h2 text-ink">Written Assignments</h2>
-          {dueTodayAssignment ? <p className="mt-0.5 text-label font-medium text-status-warning-text">1 due today</p> : null}
-        </div>
-        <div className="flex items-center gap-3">
-          {dueTodayAssignment ? (
-            <Link
-              href={`/portfolio/${traineeId}/assignments/${dueTodayAssignment.id}`}
-              className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-body font-semibold text-primary-foreground"
-            >
-              Open Assignment {ASSIGNMENT_ORDER.indexOf(dueTodayAssignment.assignment_type) + 1}
-            </Link>
-          ) : null}
-          <p className="text-label text-muted">
-            {passedCount} of {standardAssignments.length} passed
-          </p>
-        </div>
-      </div>
+      {/* One head for every room (trainee spec B1). The count is the eyebrow
+          and the due-today line the meta, so the room says the same two
+          things it always did in the shape every other room uses. */}
+      <RoomHead
+        eyebrow={`${passedCount} of ${standardAssignments.length} passed`}
+        title="Written Assignments"
+        lede={dueTodayAssignment ? <span className="font-medium text-status-warning-text">1 due today</span> : undefined}
+      >
+        {dueTodayAssignment ? (
+          <Link href={`/portfolio/${traineeId}/assignments/${dueTodayAssignment.id}`} className={ROOM_PRIMARY}>
+            Open Assignment {ASSIGNMENT_ORDER.indexOf(dueTodayAssignment.assignment_type) + 1}
+          </Link>
+        ) : null}
+      </RoomHead>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
         {standardAssignments.length > 0 ? (

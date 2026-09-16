@@ -236,18 +236,8 @@ export default async function TraineeTimetablePage({
     <div className="flex flex-col gap-5">
       {/* The candidate's own subscribe action, not the assessor's -- see the
           note in portfolio/[traineeId]/page.tsx on `!isStaff` quietly
-          including a sessionless assessor. */}
-      {!isStaff && !assessorCourseId ? (
-        <div className="flex justify-end">
-          <a
-            href={`/api/portfolio/${traineeId}/timetable.ics`}
-            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-body font-medium text-ink wash"
-          >
-            Add to my calendar
-          </a>
-        </div>
-      ) : null}
-
+          including a sessionless assessor. It rides in the board's head now
+          (trainee spec B1), not on a row of its own above the board. */}
       {allEvents.length === 0 ? (
         <div className="sheet text-body text-muted">No events yet.</div>
       ) : (
@@ -260,6 +250,7 @@ export default async function TraineeTimetablePage({
           today={today}
           nowIso={new Date().toISOString()}
           timeZone={timeZone}
+          icsHref={!isStaff && !assessorCourseId ? `/api/portfolio/${traineeId}/timetable.ics` : null}
         />
       )}
 

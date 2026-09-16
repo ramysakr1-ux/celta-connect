@@ -55,6 +55,7 @@ import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
 import { computeStage3Status } from "@/lib/stage3-status";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
+import { RoomHead } from "@/components/room-head";
 
 // CELTA 5's own wording for the overall-progress options (p.19, p.24).
 // The booklet prints the sentence, not the enum, and "not recorded" is a
@@ -1193,7 +1194,9 @@ export default async function PortfolioCelta5Page({
 
   const headerBlock = (
     <div>
-      <h2 className="font-serif text-h2 text-ink">CELTA 5 record</h2>
+      {/* One head for every room (trainee spec B1). The booklet itself keeps
+          its own Cambridge typography -- this is the room around it. */}
+      <RoomHead eyebrow="Cambridge CELTA 5" title="CELTA 5 record" />
       <div className="mt-3 grid grid-cols-2 gap-4 text-body sm:grid-cols-3">
         <div>
           <p className="text-muted">Candidate</p>

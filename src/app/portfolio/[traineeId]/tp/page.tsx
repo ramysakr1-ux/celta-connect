@@ -9,6 +9,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
 import type { Database } from "@/lib/supabase/types";
 import { formatCalendarDate } from "@/lib/format-date";
+import { RoomHead, ROOM_BUTTON, ROOM_PRIMARY } from "@/components/room-head";
 
 type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
 
@@ -247,32 +248,22 @@ export default async function TpHubPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Teaching practice record</p>
-          <h2 className="font-serif text-h1 text-ink">
-            {tpsTaught} of 8 taught · {assessedHours.toFixed(1)} hrs assessed
-          </h2>
-        </div>
+      {/* One head for every room (trainee spec B1) -- the same RoomHead the
+          centre side uses, so a candidate and a tutor read the same shape. */}
+      <RoomHead eyebrow="Teaching practice record" title={`${tpsTaught} of 8 taught · ${assessedHours.toFixed(1)} hrs assessed`}>
         {isOwnWorkspace ? (
-          <div className="flex shrink-0 items-center gap-2">
-            <Link
-              href={`/portfolio/${traineeId}/celta5`}
-              className="wash rounded-[6px] border border-border bg-card px-3.5 py-2 text-body font-medium text-ink"
-            >
+          <>
+            <Link href={`/portfolio/${traineeId}/celta5`} className={ROOM_BUTTON}>
               Log an observation
             </Link>
             {nextTpNeedingPlan ? (
-              <Link
-                href={`/portfolio/${traineeId}/tp/${nextTpNeedingPlan}`}
-                className="rounded-[6px] bg-primary px-3.5 py-2 text-body font-semibold text-primary-foreground"
-              >
+              <Link href={`/portfolio/${traineeId}/tp/${nextTpNeedingPlan}`} className={ROOM_PRIMARY}>
                 Open TP{nextTpNeedingPlan} plan
               </Link>
             ) : null}
-          </div>
+          </>
         ) : null}
-      </div>
+      </RoomHead>
 
       <div className={`grid grid-cols-1 gap-4 ${!isStaff && carriedForward.length > 0 ? "lg:grid-cols-[1.5fr_1fr]" : ""}`}>
         <div className="sheet flex flex-col gap-1 border-t-[3px] border-t-primary">

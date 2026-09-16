@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { buildDayRows, bandIndexFor, categorize, isEventLive, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
 import { CATEGORY_STYLE, toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
+import { RoomHead, ROOM_BUTTON } from "@/components/room-head";
 
 // for-claude-code-timetable-view.md -- read-only 4-week glass-card board,
 // shared by trainee and staff-preview viewers of a trainee's portfolio
@@ -90,6 +91,8 @@ export interface ReadOnlyBoardProps {
   today: string;
   nowIso: string;
   timeZone: string;
+  /** The candidate's own .ics subscription, when they have one. */
+  icsHref?: string | null;
 }
 
 const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null, groupName: null };
@@ -106,6 +109,7 @@ export function ReadOnlyTimetableBoard({
   today,
   nowIso,
   timeZone,
+  icsHref,
 }: ReadOnlyBoardProps) {
   const now = useMemo(() => new Date(nowIso), [nowIso]);
   const dayRows = useMemo(() => buildDayRows(events, timeBands), [events, timeBands]);
@@ -156,20 +160,24 @@ export function ReadOnlyTimetableBoard({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · Timetable</p>
-          <h1 className="font-serif text-h1 text-ink">{week ? `Week ${weekIndex + 1} · ${week.label}` : "Nothing scheduled yet"}</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+      {/* One head for every room (trainee spec B1). The eyebrow names the
+          week and the reader's group; the title is the week's dates, which
+          is what the board is actually showing. */}
+      <RoomHead
+        eyebrow={
+          week
+            ? `Week ${weekIndex + 1} of ${weeks.length}${viewerGroupLabel ? ` · ${viewerGroupLabel}` : ""}`
+            : "Timetable"
+        }
+        title={week ? week.label : "Nothing scheduled yet"}
+      >
+        <>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
             <span className="flex size-7 items-center justify-center rounded-full bg-primary text-label font-semibold text-primary-foreground">
               {initials || "?"}
             </span>
-            <span className="text-body text-ink">
-              {viewerName}
-              {viewerGroupLabel ? <span className="text-muted"> · {viewerGroupLabel}</span> : null}
-            </span>
+            <span className="text-body text-ink">{viewerName}</span>
           </div>
           <div className="flex rounded-full border border-border p-0.5 text-label">
             <button
@@ -186,9 +194,18 @@ export function ReadOnlyTimetableBoard({
             >
               Mine
             </button>
+            </div>
           </div>
-        </div>
-      </div>
+          {/* The candidate's own subscription, moved out of the page above
+              into the head's action row where every other room keeps its
+              controls. */}
+          {icsHref ? (
+            <a href={icsHref} className={ROOM_BUTTON}>
+              Add to my calendar
+            </a>
+          ) : null}
+        </>
+      </RoomHead>
 
       {liveEvent ? (
         <div className="flex items-center justify-between gap-3 rounded-[10px] px-4 py-3 text-primary-foreground" style={{ background: "oklch(38% 0.072 195)" }}>

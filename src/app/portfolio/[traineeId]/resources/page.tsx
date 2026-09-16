@@ -27,6 +27,7 @@ import { getCambridgeDocuments } from "@/lib/cambridge-documents";
 import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { formatCalendarDate } from "@/lib/format-date";
+import { RoomHead } from "@/components/room-head";
 
 type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 
@@ -509,39 +510,21 @@ export default async function ResourceHubPage({
     <div className="flex flex-col gap-[22px]">
       {/* Ramy, 29 Aug 2026: "once you click, you're jumping inside a
           different room -- the entire page is a resource hub, nothing else
-          there." The rail is dropped for this route in focus-row.tsx; this
-          masthead is what tells you you have arrived somewhere, rather than
-          a heading that reads like one more section of the portfolio. */}
-      <div
-        className="flex flex-wrap items-center justify-between gap-5 rounded-[12px] p-[22px_26px]"
-        style={{ background: "oklch(30% 0.042 58)" }}
+          there." That arrival used to be a dark ink band with a 34px white
+          title, borrowed from the trainer's assignments board. Trainee spec
+          B1: the band goes, and the room takes the same head as every other
+          room -- the dropped rail and the "Course stream" pill already say
+          you have left the stream. The search box is the head's action. */}
+      <RoomHead
+        title="Resource Hub"
+        lede="Everything the course gives you, in one place — your filmed observations, and the library of sessions, books and forms behind them."
       >
-        <div className="min-w-0">
-          {/* Ramy, 29 Aug 2026: "can we put that arrow back inside some kind
-              of colourful pill? It's just hard to see." It was plain text at
-              80% opacity on a dark masthead -- the one control on the page
-              that gets you out of the room, and the lowest-contrast thing on
-              it. Now a filled pill, which also makes it read as a button
-              rather than a caption. */}
-          {/* The pill comes from PortfolioFocusRow now -- every room gets one,
-              rather than only the page that happened to have been given one. */}
-          <h1 className="mt-1.5 font-serif text-display font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>
-            Resource Hub
-          </h1>
-          <p className="mt-1 max-w-[52ch] text-meta" style={{ color: "oklch(99.2% 0.005 90 / 0.72)" }}>
-            Everything the course gives you, in one place — your filmed observations, and the library of sessions, books
-            and forms behind them.
-          </p>
-        </div>
-        <div
-          className="flex h-10 min-w-[260px] flex-1 items-center gap-3 rounded-[8px] px-[14px] sm:max-w-[360px]"
-          style={{ background: "oklch(99.2% 0.005 90 / 0.12)", border: "1px solid oklch(99.2% 0.005 90 / 0.22)" }}
-        >
+        <div className="flex h-[38px] min-w-[240px] items-center gap-3 rounded-[6px] border border-border bg-card px-[14px] sm:max-w-[360px]">
           <div className="flex-1">
             <ResourceHubSearch items={searchItems} />
           </div>
         </div>
-      </div>
+      </RoomHead>
 
       {/* Ramy, 28 Aug 2026: "this will just sit on its own. It doesn't
           really need to be part of the Resource Hub -- there will be a tab
