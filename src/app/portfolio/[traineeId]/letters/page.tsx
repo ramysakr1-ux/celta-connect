@@ -70,15 +70,15 @@ export default async function CandidateLettersPage({ params }: { params: Promise
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-serif text-2xl text-ink">{trainee.full_name} — letters and cases</h1>
-        <p className="mt-1 text-sm text-muted">
+        <h1 className="font-serif text-h1 text-ink">{trainee.full_name} — letters and cases</h1>
+        <p className="mt-1 text-body text-muted">
           Formal letters and any malpractice case raised about this candidate. Handbook §12.1.1 Section A keeps the fail
           warning and withdrawal letters in the portfolio &ldquo;where appropriate&rdquo;.
         </p>
       </div>
 
       {nothing ? (
-        <div className="card p-5 text-sm text-muted">
+        <div className="card p-5 text-body text-muted">
           Nothing formal has been issued or raised about this candidate &mdash; no fail warning, no withdrawal letter, no
           malpractice case. That is the ordinary state for most candidates, and it is recorded here rather than left
           blank so the absence is visibly checked rather than merely unseen.

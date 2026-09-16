@@ -69,8 +69,8 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
   if (!applicant) {
     return (
       <div className="flex flex-col gap-3">
-        <h1 className="font-serif text-2xl text-ink">{trainee.full_name}&apos;s application</h1>
-        <div className="card p-5 text-sm text-muted">
+        <h1 className="font-serif text-h1 text-ink">{trainee.full_name}&apos;s application</h1>
+        <div className="card p-5 text-body text-muted">
           No application is on file for this candidate in Connect. That is normal for anyone enrolled before the centre
           started taking applications through the platform &mdash; the centre keeps those records itself, and Handbook
           &sect;12.2 requires them to be available to you on request.
@@ -92,8 +92,8 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-serif text-2xl text-ink">{trainee.full_name}&apos;s application</h1>
-        <p className="mt-1 text-sm text-muted">
+        <h1 className="font-serif text-h1 text-ink">{trainee.full_name}&apos;s application</h1>
+        <p className="mt-1 text-body text-muted">
           The selection task and interview record this candidate was accepted on &mdash; Handbook &sect;12.2. Only their
           name is shown; the centre holds the rest.
         </p>
@@ -172,7 +172,7 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
         {interview?.overall_notes ? <Field label="Interviewer's overall notes" value={interview.overall_notes} /> : null}
       </Section>
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Read-only. Handbook &sect;12.2 also requires the selection tasks of <em>rejected</em> applicants to be available
         to you &mdash; those are in the centre documents panel of the pack, not here, since they belong to no candidate
         portfolio.

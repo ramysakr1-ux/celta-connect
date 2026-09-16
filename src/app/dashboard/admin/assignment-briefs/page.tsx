@@ -37,7 +37,7 @@ export default async function AdminAssignmentBriefsPage() {
         lede="Upload your centre's own brief for each written assignment as a PDF -- Claude splits it into sections you can review and edit before publishing it to trainees."
       />
       {formatWarning ? (
-        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-sm text-status-warning-text">
+        <p className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-body text-status-warning-text">
           {formatWarning}
         </p>
       ) : null}
@@ -49,15 +49,15 @@ export default async function AdminAssignmentBriefsPage() {
             <div className="flex items-center justify-between">
               <h2 className="font-serif text-h3 font-semibold text-ink">{ASSIGNMENT_INFO[type].title}</h2>
               {template ? (
-                <span className="text-sm text-muted">{template.published_at ? "Published" : "Draft"}</span>
+                <span className="text-body text-muted">{template.published_at ? "Published" : "Draft"}</span>
               ) : null}
             </div>
-            <p className="mt-1 text-sm text-muted">{ASSIGNMENT_INFO[type].description}</p>
+            <p className="mt-1 text-body text-muted">{ASSIGNMENT_INFO[type].description}</p>
 
             {template ? (
               <Link
                 href={`/dashboard/admin/assignment-briefs/${template.id}`}
-                className="wash mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+                className="wash mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
               >
                 Review brief
               </Link>

@@ -134,7 +134,7 @@ export default async function TodayPage() {
 
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
   // Reads go through the service role: the tutor is on this course by
   // construction (courseId is their own profile's), an assessor session is

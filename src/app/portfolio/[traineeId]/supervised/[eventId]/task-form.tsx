@@ -107,31 +107,31 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
       return (
         <div className="sheet flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-ink">Submitted</p>
-            <p className="text-xs text-muted">Time spent: {formatDuration(completion!.time_spent_seconds)}</p>
+            <p className="text-body font-semibold text-ink">Submitted</p>
+            <p className="text-label text-muted">Time spent: {formatDuration(completion!.time_spent_seconds)}</p>
           </div>
-          {completion?.response ? <p className="whitespace-pre-wrap text-sm text-ink">{completion.response}</p> : null}
+          {completion?.response ? <p className="whitespace-pre-wrap text-body text-ink">{completion.response}</p> : null}
           {completion?.checked_at ? (
-            <p className="text-xs text-primary">Checked by your trainer.</p>
+            <p className="text-label text-primary">Checked by your trainer.</p>
           ) : (
-            <p className="text-xs text-muted">Waiting on your trainer to check this.</p>
+            <p className="text-label text-muted">Waiting on your trainer to check this.</p>
           )}
         </div>
       );
     }
     return (
       <div className="sheet flex flex-col items-center gap-2 py-2 text-center">
-        <p className="font-serif text-2xl text-ink">
+        <p className="font-serif text-h1 text-ink">
           {completion.score} / {completion.question_count}
         </p>
-        <p className="text-sm text-muted">{resultNote(completion.score, completion.question_count)}</p>
-        <p className="mt-1.5 text-xs text-muted">
+        <p className="text-body text-muted">{resultNote(completion.score, completion.question_count)}</p>
+        <p className="mt-1.5 text-label text-muted">
           Submitted · time spent {formatDuration(completion.time_spent_seconds)} · your tutor can see this
         </p>
         {completion.checked_at ? (
-          <p className="mt-2 text-xs text-primary">Checked by your trainer.</p>
+          <p className="mt-2 text-label text-primary">Checked by your trainer.</p>
         ) : (
-          <p className="mt-2 text-xs text-muted">Waiting on your trainer to check this.</p>
+          <p className="mt-2 text-label text-muted">Waiting on your trainer to check this.</p>
         )}
       </div>
     );
@@ -140,14 +140,14 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
   if (stage === "result" && result) {
     return (
       <div className="sheet flex flex-col items-center gap-2 py-2 text-center">
-        <p className="font-serif text-2xl text-ink">
+        <p className="font-serif text-h1 text-ink">
           {result.score} / {result.questionCount}
         </p>
-        <p className="text-sm text-muted">{resultNote(result.score, result.questionCount)}</p>
-        <p className="mt-1.5 text-xs text-muted">
+        <p className="text-body text-muted">{resultNote(result.score, result.questionCount)}</p>
+        <p className="mt-1.5 text-label text-muted">
           Submitted · time spent {formatDuration(liveSeconds)} · your tutor can see this
         </p>
-        <p className="mt-2 text-xs text-muted">Waiting on your trainer to check this.</p>
+        <p className="mt-2 text-label text-muted">Waiting on your trainer to check this.</p>
       </div>
     );
   }
@@ -159,16 +159,16 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
     return (
       <div className="sheet flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-serif text-lg text-ink">{topic.title} quiz</h2>
-          <span className={`text-sm font-bold tabular-nums ${secondsLeft < 60 ? "text-destructive" : "text-muted"}`}>
+          <h2 className="font-serif text-h3 text-ink">{topic.title} quiz</h2>
+          <span className={`text-body font-bold tabular-nums ${secondsLeft < 60 ? "text-destructive" : "text-muted"}`}>
             {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:{String(secondsLeft % 60).padStart(2, "0")}
           </span>
         </div>
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Question {qIndex + 1} of {topic.questions.length}
         </p>
         <div className="flex flex-col gap-3.5 rounded-[8px] border border-border bg-card p-5">
-          <p className="text-sm font-semibold leading-snug text-ink">{question.text}</p>
+          <p className="text-body font-semibold leading-snug text-ink">{question.text}</p>
           <div className="flex flex-col gap-2">
             {question.opts.map((opt, i) => {
               const isAnswered = answered !== null && answered !== undefined;
@@ -190,7 +190,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
                       return next;
                     })
                   }
-                  className={`rounded-[6px] border px-3.5 py-2.5 text-left text-sm ${cls}`}
+                  className={`rounded-[6px] border px-3.5 py-2.5 text-left text-body ${cls}`}
                 >
                   {opt}
                 </button>
@@ -198,13 +198,13 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
             })}
           </div>
         </div>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="text-body text-destructive">{error}</p> : null}
         <div className="flex justify-end">
           <button
             type="button"
             disabled={answered === null || answered === undefined || submitting}
             onClick={() => (isLast ? doSubmit(answers) : setQIndex((i) => i + 1))}
-            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
+            className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-40"
           >
             {isLast ? (submitting ? "Submitting…" : "Submit") : "Next question"}
           </button>
@@ -218,13 +218,13 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
       <div className="sheet flex flex-col gap-4">
         <div>
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{topic.title} · review notes</p>
-          <h2 className="mt-1 font-serif text-lg text-ink">Recap before the quiz</h2>
+          <h2 className="mt-1 font-serif text-h3 text-ink">Recap before the quiz</h2>
         </div>
         <div className="flex flex-col gap-2.5">
           {topic.notes.map((n, i) => (
             <div key={i} className="rounded-[8px] border border-border bg-card px-3.5 py-3">
-              <p className="text-sm font-semibold text-ink">{n.h}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted">{n.b}</p>
+              <p className="text-body font-semibold text-ink">{n.h}</p>
+              <p className="mt-0.5 text-label leading-relaxed text-muted">{n.b}</p>
             </div>
           ))}
         </div>
@@ -236,7 +236,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
             setSecondsLeft(QUIZ_SECONDS);
             setStage("quiz");
           }}
-          className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+          className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground"
         >
           Start the quiz — {QUIZ_SECONDS / 60} min
         </button>
@@ -246,10 +246,10 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
 
   return (
     <div className="sheet flex flex-col gap-4">
-      <p className="text-xs text-muted">Time on this task: {formatDuration(liveSeconds)}</p>
+      <p className="text-label text-muted">Time on this task: {formatDuration(liveSeconds)}</p>
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Supervised review</p>
-        <h2 className="mt-1 font-serif text-xl text-ink">Pick this session&apos;s topic</h2>
+        <h2 className="mt-1 font-serif text-h2 text-ink">Pick this session&apos;s topic</h2>
       </div>
       <div className="flex flex-col gap-2.5">
         {SUPERVISED_QUIZ_TOPIC_LIST.map((t) => (
@@ -262,8 +262,8 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
             }}
             className={`flex flex-col gap-1 rounded-[8px] border border-border ${t.spineClass} border-l-[3px] bg-card px-4 py-3.5 text-left wash`}
           >
-            <span className="text-sm font-semibold text-ink">{t.title}</span>
-            <span className="text-xs text-muted">{t.covers}</span>
+            <span className="text-body font-semibold text-ink">{t.title}</span>
+            <span className="text-label text-muted">{t.covers}</span>
           </button>
         ))}
       </div>

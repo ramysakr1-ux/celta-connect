@@ -19,19 +19,19 @@ export function UpgradeConditionsForm({ traineeId, record }: { traineeId: string
   return (
     <form action={action} className="flex flex-col gap-2 rounded-[6px] border border-border-faint p-3">
       <input type="hidden" name="trainee_id" value={traineeId} />
-      <label className="text-xs text-muted">In order to achieve a pass or a higher grade, they need to (one per line)</label>
+      <label className="text-label text-muted">In order to achieve a pass or a higher grade, they need to (one per line)</label>
       <TrainerFeedbackTextarea
         name="provisional_upgrade_conditions"
         rows={3}
         defaultValue={record?.provisional_upgrade_conditions ?? ""}
-        className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
-      <p className="text-xs italic text-muted">Shown to the candidate only after the final report is released.</p>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      <p className="text-label italic text-muted">Shown to the candidate only after the final report is released.</p>
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

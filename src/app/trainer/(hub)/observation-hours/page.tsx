@@ -22,7 +22,7 @@ import { ObservationHoursRoster, type CandidateObservationRow, type ObservationL
 export default async function ObservationHoursPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
   const courseId = trainer.course_id;
   const supabase = await createClient();
@@ -144,7 +144,7 @@ export default async function ObservationHoursPage() {
       <div>
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Observation hours</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">{rows.length} candidates</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           Every observation source in one place -- self-logged, directed tasks, and filmed cohort sessions all feed
           the same {OBSERVATION_HOURS_REQUIRED}-hour requirement (filmed capped at 3 of those hours). Peer
           observation is required but never counts toward the six.

@@ -8,13 +8,13 @@ export function WhatChangedPanel({ changes, timeZone }: { changes: RecentChange[
     // (src/app/dashboard/admin/page.tsx) -- this panel currently has no
     // other caller, so the pairing is the only place its color is seen.
     <div className="card p-4">
-      <h2 className="font-serif text-sm text-ink">What changed</h2>
+      <h2 className="font-serif text-body text-ink">What changed</h2>
       {changes.length === 0 ? (
-        <p className="mt-2 text-xs text-muted">Nothing recent.</p>
+        <p className="mt-2 text-label text-muted">Nothing recent.</p>
       ) : (
         <ul className="mt-2 flex flex-col gap-1.5">
           {changes.map((c, i) => (
-            <li key={i} className="text-xs text-muted">
+            <li key={i} className="text-label text-muted">
               <span className="text-ink">{c.label}</span> &middot; {formatDate(c.createdAt, timeZone)}
             </li>
           ))}

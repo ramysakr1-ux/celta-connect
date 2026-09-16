@@ -24,7 +24,7 @@ function addDays(iso: string, days: number): string {
 export default async function AnnouncementsPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
   const courseId = trainer.course_id;
   const supabase = hubReadClient(trainer, courseId);
@@ -236,7 +236,7 @@ export default async function AnnouncementsPage() {
             <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
               <h2 className="font-serif text-h2 font-semibold text-ink-warm">Write an announcement</h2>
             </div>
-            <p className="px-[18px] text-sm text-muted">
+            <p className="px-[18px] text-body text-muted">
               Whole-cohort announcements are sent by the main course tutor. You can post to a TP group once you are named
               its tutor on Rotation; until then, the chat pill reaches your candidates informally.
             </p>

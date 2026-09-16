@@ -368,7 +368,7 @@ export function StaffChatDrawer({
           <div className="h-6 w-px shrink-0 bg-border" />
 
           {readOnly ? (
-            <span className="min-w-0 flex-1 truncate text-xs text-muted">
+            <span className="min-w-0 flex-1 truncate text-label text-muted">
               {selected ? `Previewing "${selected.name}" -- read-only` : "No channels yet"}
             </span>
           ) : (
@@ -394,7 +394,7 @@ export function StaffChatDrawer({
                     : "Pick who to message"
               }
               disabled={!selected}
-              className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70 disabled:opacity-60"
+              className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-body text-ink outline-none placeholder:text-muted/70 disabled:opacity-60"
             />
           )}
 
@@ -420,7 +420,7 @@ export function StaffChatDrawer({
             type="button"
             onClick={toggleThread}
             aria-expanded={threadOpen}
-            className="wash flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
+            className="wash flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-label font-semibold hover:bg-accent/60 sm:px-3"
           >
             {threadOpen ? "Hide" : "Thread"}
             {!threadOpen && unreadCount > 0 ? (

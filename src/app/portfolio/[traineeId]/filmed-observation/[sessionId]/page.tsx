@@ -87,9 +87,9 @@ export default async function FilmedObservationWatchPage({
 
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · filmed observation · group session</p>
-        <h1 className="mt-0.5 font-serif text-2xl text-ink">{fSession.lesson_title ?? "Filmed lesson — focus set by the trainer per session"}</h1>
+        <h1 className="mt-0.5 font-serif text-h1 text-ink">{fSession.lesson_title ?? "Filmed lesson — focus set by the trainer per session"}</h1>
         {event?.event_date ? (
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-body text-muted">
             Scheduled {formatCalendarDate(event.event_date, { day: "numeric", month: "long" })}
             {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""} — missed it? Watch the same recording here any time.
           </p>

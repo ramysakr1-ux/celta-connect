@@ -14,12 +14,12 @@ export default async function AssessorGatePage() {
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center gap-6 px-6 py-16">
       <div className="flex flex-col gap-2">
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Cambridge assessor · read-only access</p>
-        <h1 className="font-serif text-2xl text-ink">Before you open the pack</h1>
+        <h1 className="font-serif text-h1 text-ink">Before you open the pack</h1>
       </div>
       <div className="sheet">
         <AssessorTermsForm />
       </div>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Acceptance is remembered against this link, so a second visit goes straight in. A newly issued link asks again.
       </p>
     </div>

@@ -43,7 +43,7 @@ export function DeliveryModePicker({
                   selected in the design -- the ring and the fill carry that. */}
               <span className="flex flex-1 flex-col gap-[3px]">
                 <span className="text-meta font-semibold text-ink">{option.label}</span>
-                <span className="text-xs text-muted">{option.description}</span>
+                <span className="text-label text-muted">{option.description}</span>
               </span>
             </button>
           );
@@ -62,7 +62,7 @@ export function DeliveryModePicker({
           {impact.rows.map((row) => (
             <div key={row.what} className="flex items-start gap-2.5">
               <span className={`w-[110px] shrink-0 text-label font-semibold ${TONE_CLASS[row.tone]}`}>{row.what}</span>
-              <span className="text-xs leading-relaxed text-ink">{row.text}</span>
+              <span className="text-label leading-relaxed text-ink">{row.text}</span>
             </div>
           ))}
         </div>

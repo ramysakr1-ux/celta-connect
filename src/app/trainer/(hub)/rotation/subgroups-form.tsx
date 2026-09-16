@@ -18,7 +18,7 @@ export function CreateSubgroupForm({ courseId }: { courseId: string }) {
     <form action={action} className="flex items-end gap-3">
       <input type="hidden" name="course_id" value={courseId} />
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-sm text-muted">
+        <label htmlFor="name" className="text-body text-muted">
           New subgroup name
         </label>
         <input
@@ -33,11 +33,11 @@ export function CreateSubgroupForm({ courseId }: { courseId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Creating..." : "Create subgroup"}
       </button>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -58,11 +58,11 @@ export function PairSubgroupsForm({
 
   return (
     <form action={action} className="flex flex-col gap-3 border-t border-border-faint pt-4">
-      <p className="text-sm font-semibold text-ink">Pair two subgroups into a TP group</p>
+      <p className="text-body font-semibold text-ink">Pair two subgroups into a TP group</p>
       <input type="hidden" name="course_id" value={courseId} />
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tp_group_name" className="text-sm text-muted">
+          <label htmlFor="tp_group_name" className="text-body text-muted">
             TP group name
           </label>
           <input
@@ -75,14 +75,14 @@ export function PairSubgroupsForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="first_subgroup_id" className="text-sm text-muted">
+          <label htmlFor="first_subgroup_id" className="text-body text-muted">
             Day A
           </label>
           <select
             id="first_subgroup_id"
             name="first_subgroup_id"
             required
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Choose...</option>
             {unpairedSubgroups.map((g) => (
@@ -93,14 +93,14 @@ export function PairSubgroupsForm({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="second_subgroup_id" className="text-sm text-muted">
+          <label htmlFor="second_subgroup_id" className="text-body text-muted">
             Day B
           </label>
           <select
             id="second_subgroup_id"
             name="second_subgroup_id"
             required
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Choose...</option>
             {unpairedSubgroups.map((g) => (
@@ -113,15 +113,15 @@ export function PairSubgroupsForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
         >
           {pending ? "Pairing..." : "Pair as TP group"}
         </button>
       </div>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         The two halves will alternate which real TP day (from the course timetable) they teach on.
       </p>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -131,7 +131,7 @@ export function UnpairButton({ courseId, tpGroupId }: { courseId: string; tpGrou
     <form action={unpairTpGroup}>
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="tp_group_id" value={tpGroupId} />
-      <button type="submit" className="text-xs text-muted hover:text-destructive">
+      <button type="submit" className="text-label text-muted hover:text-destructive">
         Unpair
       </button>
     </form>
@@ -150,7 +150,7 @@ export function AddMemberForm({
   const [state, action, pending] = useActionState(addSubgroupMember, initialState);
 
   if (availableTrainees.length === 0) {
-    return <p className="text-sm text-muted">No unassigned trainees left to add.</p>;
+    return <p className="text-body text-muted">No unassigned trainees left to add.</p>;
   }
 
   return (
@@ -158,14 +158,14 @@ export function AddMemberForm({
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="subgroup_id" value={subgroupId} />
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={`trainee_id__${subgroupId}`} className="text-sm text-muted">
+        <label htmlFor={`trainee_id__${subgroupId}`} className="text-body text-muted">
           Add trainee
         </label>
         <select
           id={`trainee_id__${subgroupId}`}
           name="trainee_id"
           required
-          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
         >
           <option value="">Choose...</option>
           {availableTrainees.map((t) => (
@@ -178,11 +178,11 @@ export function AddMemberForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Adding..." : "Add"}
       </button>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

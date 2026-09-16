@@ -24,8 +24,8 @@ export function OrderExercise({
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-1">
-        <p className="font-serif text-lg font-semibold text-ink">{title}</p>
-        <p className="text-xs text-muted">
+        <p className="font-serif text-h3 font-semibold text-ink">{title}</p>
+        <p className="text-label text-muted">
           {intro ?? (
             <>
               Click each stage in the order you just experienced it. This is a{" "}

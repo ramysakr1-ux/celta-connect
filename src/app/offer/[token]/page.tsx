@@ -58,7 +58,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>
-        <p className="mt-1 text-sm text-ink">
+        <p className="mt-1 text-body text-ink">
           {applicant.full_name}, you&apos;re offered a place on <strong>{course?.name}</strong>
           {course ? ` (${longDate(course.start_date)} – ${longDate(course.end_date)})` : ""} at {center?.name}.
         </p>
@@ -66,16 +66,16 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
             recorded without a fee showed no deadline at all -- on the page
             whose whole purpose is the deadline. They are two facts now. */}
         {applicant.fee_amount ? (
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-body text-muted">
             Fee: {applicant.fee_amount}
             {applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.
           </p>
         ) : null}
         {applicant.offer_accept_by ? (
-          <p className="mt-2 text-sm text-muted">Accept by {longDate(applicant.offer_accept_by)}.</p>
+          <p className="mt-2 text-body text-muted">Accept by {longDate(applicant.offer_accept_by)}.</p>
         ) : null}
         {applicant.place_offer_expires_at ? (
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-body text-muted">
             This place is available until {formatDateTime(applicant.place_offer_expires_at, timeZone)}
             {centreCity ? ` in ${centreCity}` : ""}. After that, it goes to the next person on the waiting list.
           </p>
@@ -88,7 +88,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
             fullName={applicant.full_name}
           />
         ) : (
-          <p className="mt-4 text-sm text-muted">
+          <p className="mt-4 text-body text-muted">
             Once your deposit is recorded, you&apos;ll get an email with the same link, ready to set up your
             account. Nothing to do here yet.
           </p>

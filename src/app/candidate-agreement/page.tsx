@@ -30,14 +30,14 @@ function Section({ n, title, children }: { n: number; title: string; children: R
       <h2 className="font-semibold text-ink">
         {n}. {title}
       </h2>
-      <div className="mt-1.5 flex flex-col gap-2 text-sm text-muted">{children}</div>
+      <div className="mt-1.5 flex flex-col gap-2 text-body text-muted">{children}</div>
     </section>
   );
 }
 
 function ToComplete({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-[6px] border border-dashed border-border bg-surface-muted px-3 py-2 text-sm">
+    <p className="rounded-[6px] border border-dashed border-border bg-surface-muted px-3 py-2 text-body">
       <span className="font-semibold text-ink">[Centre to complete]</span> {children}
     </p>
   );
@@ -57,14 +57,14 @@ function ToCompleteList() {
   // policy something the centre has not decided and the app would not
   // enforce.
   return (
-    <div className="rounded-[6px] border border-dashed border-border bg-surface-muted px-3 py-2 text-sm">
+    <div className="rounded-[6px] border border-dashed border-border bg-surface-muted px-3 py-2 text-body">
       <p>
         <span className="font-semibold text-ink">[Centre to complete]</span> Set out the actual consequence for each
         case, so a candidate can read it before they are ever in one. For example: whether a first upheld case fails
         that assignment outright or allows a resubmission; whether a resubmission is still available afterwards or is
         forfeited; and what a second upheld case means for finishing the course.
       </p>
-      <p className="mt-1.5 text-xs">
+      <p className="mt-1.5 text-label">
         These must match the outcomes configured for this centre in Connect, so what a candidate is told here and what
         a tutor can actually record are the same list.
       </p>
@@ -79,13 +79,13 @@ export default function CandidateAgreementPage() {
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="header" />
         </Link>
-        <h1 className="mt-6 font-serif text-2xl text-ink">Candidate Agreement</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="mt-6 font-serif text-h1 text-ink">Candidate Agreement</h1>
+        <p className="mt-2 text-body text-muted">
           What you can expect from us, and what we expect from you, for the length of your CELTA course. Cambridge
           requires every centre to give candidates this before the course begins ({HANDBOOK}, section 6.3). It stays
           here for the whole course — you can come back to it at any time.
         </p>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-body text-muted">
           This is separate from the{" "}
           <Link href="/terms" className="text-primary hover:underline">
             platform terms
@@ -259,7 +259,7 @@ export default function CandidateAgreementPage() {
           </Section>
         </div>
 
-        <p className="mt-8 border-t border-border-faint pt-4 text-xs text-muted">
+        <p className="mt-8 border-t border-border-faint pt-4 text-label text-muted">
           Issued under the {HANDBOOK}, sections 6.2 and 6.3. Any section marked{" "}
           <span className="font-semibold text-ink">[Centre to complete]</span> is centre policy and must be filled in
           before this is given to candidates.

@@ -21,7 +21,7 @@ export function ClassMaterialsLink({ materials }: { materials: Material[] }) {
 
   if (materials.length === 1) {
     return (
-      <a href={materials[0].url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary hover:underline">
+      <a href={materials[0].url} target="_blank" rel="noopener noreferrer" className="text-label font-semibold text-primary hover:underline">
         1 handout
       </a>
     );
@@ -29,7 +29,7 @@ export function ClassMaterialsLink({ materials }: { materials: Material[] }) {
 
   return (
     <div className="relative">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="text-xs font-semibold text-primary hover:underline">
+      <button type="button" onClick={() => setOpen((v) => !v)} className="text-label font-semibold text-primary hover:underline">
         {materials.length} handouts
       </button>
       {open ? (
@@ -40,7 +40,7 @@ export function ClassMaterialsLink({ materials }: { materials: Material[] }) {
               href={m.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink wash"
+              className="truncate rounded-[6px] px-2 py-1.5 text-left text-label text-ink wash"
             >
               {m.name}
             </a>

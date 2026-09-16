@@ -29,7 +29,7 @@ export function TpPointReviewForm({
   return (
     <div className="card flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted">
+        <span className="text-body text-muted">
           TP{point.tp_number} &middot; slot {point.sequence_index} &middot; {point.density_tier}
         </span>
         <div className="flex items-center gap-2">
@@ -54,11 +54,11 @@ export function TpPointReviewForm({
         <input type="hidden" name="coursebook_id" value={coursebookId} />
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Aim type</label>
+          <label className="text-body text-muted">Aim type</label>
           <select
             name="aim_type"
             defaultValue={point.aim_type ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Not set</option>
             {AIM_TYPE_OPTIONS.map((opt) => (
@@ -69,55 +69,55 @@ export function TpPointReviewForm({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Main aim</label>
+          <label className="text-body text-muted">Main aim</label>
           <VoiceTextarea
             name="main_lesson_aim"
             defaultValue={point.main_lesson_aim}
             rows={2}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Sub aim</label>
+          <label className="text-body text-muted">Sub aim</label>
           <input
             name="sub_aim"
             defaultValue={point.sub_aim ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Materials</label>
+          <label className="text-body text-muted">Materials</label>
           <VoiceTextarea
             name="materials_description"
             defaultValue={point.materials_description ?? ""}
             rows={2}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Page references</label>
+          <label className="text-body text-muted">Page references</label>
           <input
             name="page_references"
             defaultValue={point.page_references ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
 
         {point.procedure ? (
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Procedure (generated)</label>
+            <label className="text-body text-muted">Procedure (generated)</label>
             <div className="rounded-[6px] border border-border bg-card px-3 py-3">
               <ProcedureDisplay tier={point.density_tier} procedure={point.procedure} />
             </div>
           </div>
         ) : null}
 
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
         <button
           type="submit"
           disabled={pending}
-          className="self-start rounded-[6px] border border-primary px-3 py-1.5 text-sm font-medium text-primary disabled:opacity-60"
+          className="self-start rounded-[6px] border border-primary px-3 py-1.5 text-body font-medium text-primary disabled:opacity-60"
         >
           {pending ? "Saving..." : "Save edits"}
         </button>
@@ -133,7 +133,7 @@ export function TpPointReviewForm({
               type="submit"
               disabled={!point.aim_type}
               title={point.aim_type ? undefined : "Set an aim type and save before publishing"}
-              className="rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-3 py-1.5 text-body font-medium text-card disabled:cursor-not-allowed disabled:opacity-50"
             >
               Publish
             </button>
@@ -144,7 +144,7 @@ export function TpPointReviewForm({
             <input type="hidden" name="point_id" value={point.id} />
             <input type="hidden" name="coursebook_id" value={coursebookId} />
             <input type="hidden" name="status" value="archived" />
-            <button type="submit" className="text-sm text-destructive underline">
+            <button type="submit" className="text-body text-destructive underline">
               Archive
             </button>
           </form>

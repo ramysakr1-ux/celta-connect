@@ -33,7 +33,7 @@ export function ReferForm({
     <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-h3 font-semibold text-ink">Refer to another branch</h2>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Everything they&apos;ve done moves with them -- application, marked task, interview notes, and their place
         in the pipeline. This record stays here, marked referred out. A paid deposit stays at this branch.
       </p>
@@ -41,7 +41,7 @@ export function ReferForm({
         name="destination"
         required
         defaultValue=""
-        className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
       >
         <option value="" disabled>
           Choose a branch and intake
@@ -52,11 +52,11 @@ export function ReferForm({
           </option>
         ))}
       </select>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:border-primary disabled:opacity-60 wash"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-body font-semibold text-ink hover:border-primary disabled:opacity-60 wash"
       >
         {pending ? "Referring..." : "Refer this candidate"}
       </button>

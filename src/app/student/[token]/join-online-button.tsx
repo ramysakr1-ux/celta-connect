@@ -99,7 +99,7 @@ export function JoinOnlineButton({ zoomUrl, activationIso, className, timeZone }
         Join in {mounted ? formatCountdown(activationMs! - now) : "--:--"}
       </button>
       {showMessage ? (
-        <div className="absolute top-full left-0 z-10 mt-1.5 w-56 rounded-[8px] border border-border bg-card p-2.5 text-xs text-ink shadow-lg">
+        <div className="absolute top-full left-0 z-10 mt-1.5 w-56 rounded-[8px] border border-border bg-card p-2.5 text-label text-ink shadow-lg">
           The link opens {activationLabel ? `at ${activationLabel}` : "shortly"} — 10 minutes before class starts.
         </div>
       ) : null}

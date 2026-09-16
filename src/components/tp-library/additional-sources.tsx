@@ -80,8 +80,8 @@ export function AdditionalSources({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-semibold text-ink">Additional sources</h3>
-      <p className="text-xs text-muted">
+      <h3 className="text-body font-semibold text-ink">Additional sources</h3>
+      <p className="text-label text-muted">
         Add the Workbook, Teacher&apos;s Book, or other companion PDFs so generation can draw on all of them
         together, alongside the Student&apos;s Book uploaded above.
       </p>
@@ -91,7 +91,7 @@ export function AdditionalSources({
           {sources.map((s) => (
             <li
               key={s.id}
-              className="flex items-center justify-between rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink"
+              className="flex items-center justify-between rounded-[6px] border border-border bg-card px-3 py-1.5 text-body text-ink"
             >
               <span>
                 {s.label || s.original_filename || "Additional source"}
@@ -102,7 +102,7 @@ export function AdditionalSources({
               <form action={removeAction}>
                 <input type="hidden" name="source_id" value={s.id} />
                 <input type="hidden" name="coursebook_id" value={coursebookId} />
-                <button type="submit" className="text-xs text-destructive hover:underline">
+                <button type="submit" className="text-label text-destructive hover:underline">
                   Remove
                 </button>
               </form>
@@ -113,7 +113,7 @@ export function AdditionalSources({
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="source_label" className="text-xs text-muted">
+          <label htmlFor="source_label" className="text-label text-muted">
             Label
           </label>
           <input
@@ -122,24 +122,24 @@ export function AdditionalSources({
             onChange={(e) => setLabel(e.target.value)}
             type="text"
             placeholder="e.g. Workbook"
-            className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="source_file" className="text-xs text-muted">
+          <label htmlFor="source_file" className="text-label text-muted">
             PDF
           </label>
-          <input id="source_file" name="file" type="file" accept="application/pdf" className="text-sm text-ink" />
+          <input id="source_file" name="file" type="file" accept="application/pdf" className="text-body text-ink" />
         </div>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-sm font-medium text-ink disabled:opacity-60"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-body font-medium text-ink disabled:opacity-60"
         >
           {pending ? "Uploading..." : "Add source"}
         </button>
       </form>
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
     </div>
   );
 }

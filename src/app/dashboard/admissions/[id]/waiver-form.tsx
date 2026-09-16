@@ -3,7 +3,7 @@ import type { Database } from "@/lib/supabase/types";
 
 type Applicant = Database["public"]["Tables"]["applicants"]["Row"];
 
-const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-body text-ink outline-none focus:border-primary";
 
 // Split out of the old FeeTrackingForm when that was replaced by
 // PaymentsPanel -- a waiver/discount is a separate concept from payment
@@ -14,25 +14,25 @@ export function WaiverForm({ applicant }: { applicant: Applicant }) {
     <div className="card flex flex-col gap-3 p-5">
       <h2 className="font-serif text-h3 font-semibold text-ink">Waiver / discount</h2>
       {applicant.waiver_note ? (
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           {applicant.waiver_note} -- agreed by {applicant.waiver_agreed_role ?? "staff"}
         </p>
       ) : (
         <form action={recordWaiver} className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="applicant_id" value={applicant.id} />
           <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="waiver_note" className="text-xs text-muted">
+            <label htmlFor="waiver_note" className="text-label text-muted">
               What was agreed
             </label>
             <input id="waiver_note" name="waiver_note" type="text" className={inputClass} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="waiver_agreed_role" className="text-xs text-muted">
+            <label htmlFor="waiver_agreed_role" className="text-label text-muted">
               Your role in agreeing it
             </label>
             <input id="waiver_agreed_role" name="waiver_agreed_role" type="text" placeholder="e.g. Centre Director" className={inputClass} />
           </div>
-          <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary wash">
+          <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-label text-ink hover:border-primary wash">
             Record
           </button>
         </form>

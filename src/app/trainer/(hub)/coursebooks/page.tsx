@@ -29,7 +29,7 @@ export default async function TrainerCoursebooksPage() {
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Coursebooks</h2>
+        <h2 className="font-serif text-h3 text-ink">Coursebooks</h2>
         <div className="mt-3">
           <CoursebookList
             coursebooks={coursebooks ?? []}

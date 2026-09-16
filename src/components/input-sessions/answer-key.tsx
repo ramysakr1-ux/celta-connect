@@ -24,7 +24,7 @@ export function AnswerKey({ terms, details }: { terms: AnswerKeyTermRow[]; detai
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-ink"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-card px-4 text-label font-semibold text-ink"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -59,7 +59,7 @@ export function AnswerKey({ terms, details }: { terms: AnswerKeyTermRow[]; detai
           <p className="font-serif text-h3 font-semibold text-ink">Terms</p>
           {terms.map((row, i) => (
             <div key={i} className="grid grid-cols-[150px_1fr] gap-2.5 border-b border-border-faint py-1">
-              <p className="font-serif text-xs font-semibold text-ink">{row.term}</p>
+              <p className="font-serif text-label font-semibold text-ink">{row.term}</p>
               <p className="text-label leading-snug text-muted">{row.def}</p>
             </div>
           ))}

@@ -37,7 +37,7 @@ const initialState: GenerateLinkState = { error: null };
 // the universal layering rule ("frame -> card -> innermost element" goes
 // light again at the innermost level, same as the form wrapper itself going
 // to bg-card-inset one level up).
-const selectClass = "h-8 flex-1 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary";
+const selectClass = "h-8 flex-1 rounded-[6px] border border-input bg-card px-2 text-label text-ink outline-none focus:border-primary";
 
 // Migrated onto the shared .card design system 27 Aug 2026 -- was hand-built
 // inline styles (CARD/GOLD/TEAL/RED literals) copied straight from
@@ -101,7 +101,7 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
         <button
           type="submit"
           disabled={pending}
-          className="flex h-8 items-center justify-center rounded-[6px] bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-70"
+          className="flex h-8 items-center justify-center rounded-[6px] bg-primary text-label font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-70"
         >
           {pending ? "Generating…" : "Generate link"}
         </button>

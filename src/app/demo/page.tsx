@@ -62,8 +62,8 @@ export default function DemoLandingPage() {
           <Link href="/" className="hover:opacity-80">
             <Wordmark size="hero" />
           </Link>
-          <h1 className="font-serif text-2xl text-ink">Try Connect as any role</h1>
-          <p className="max-w-md text-sm text-muted">
+          <h1 className="font-serif text-h1 text-ink">Try Connect as any role</h1>
+          <p className="max-w-md text-body text-muted">
             Every link below drops you straight into a seeded, isolated demo centre with real-looking mid-course
             data. Nothing you do here touches a real centre, and every link is safe to share and revisit.
           </p>
@@ -72,20 +72,20 @@ export default function DemoLandingPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {ENTRIES.map((entry) => (
             <a key={entry.href} href={entry.href} className="card lift flex flex-col gap-1.5 p-5">
-              <span className="font-serif text-lg text-ink">{entry.role}</span>
-              <span className="text-sm text-muted">{entry.blurb}</span>
-              <span className="mt-2 text-sm font-semibold text-primary">Enter demo &rarr;</span>
+              <span className="font-serif text-h3 text-ink">{entry.role}</span>
+              <span className="text-body text-muted">{entry.blurb}</span>
+              <span className="mt-2 text-body font-semibold text-primary">Enter demo &rarr;</span>
             </a>
           ))}
         </div>
 
         <a href="/demo/journey" className="card lift flex flex-col gap-1.5 p-5 text-center">
-          <span className="font-serif text-lg text-ink">The application journey</span>
-          <span className="text-sm text-muted">
+          <span className="font-serif text-h3 text-ink">The application journey</span>
+          <span className="text-body text-muted">
             Step by step: how a trainee applies, interviews, and gets an offer -- and how a volunteer student signs
             up. Every form and every email, in order.
           </span>
-          <span className="mt-2 text-sm font-semibold text-primary">See the journey &rarr;</span>
+          <span className="mt-2 text-body font-semibold text-primary">See the journey &rarr;</span>
         </a>
       </div>
     </div>

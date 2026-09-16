@@ -27,7 +27,7 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
   if (!profile || (profile.role !== "trainer" && profile.role !== "admin" && profile.role !== "platform_owner")) redirect("/login");
   const courseId = profile.course_id;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   const supabase = await createClient();
@@ -64,8 +64,8 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
 
       <form method="get" className="sheet flex flex-wrap items-end gap-3">
         <div className="flex flex-1 flex-col gap-1.5">
-          <label className="text-sm text-muted">Session</label>
-          <select name="event" defaultValue={eventId ?? ""} className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary">
+          <label className="text-body text-muted">Session</label>
+          <select name="event" defaultValue={eventId ?? ""} className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary">
             <option value="">Choose a session…</option>
             {(events ?? []).map((e) => (
               <option key={e.id} value={e.id}>
@@ -76,15 +76,15 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
             ))}
           </select>
         </div>
-        <button type="submit" className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground">
+        <button type="submit" className="h-10 rounded-[6px] bg-primary px-4 text-body font-semibold text-primary-foreground">
           Open
         </button>
       </form>
 
       {(events ?? []).length === 0 ? (
-        <p className="text-sm text-muted">Nothing on the timetable yet apart from TP. Add sessions on the Timetable tab first.</p>
+        <p className="text-body text-muted">Nothing on the timetable yet apart from TP. Add sessions on the Timetable tab first.</p>
       ) : (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           {sharedCount === 0
             ? "No session is shared with volunteer students yet -- pick one and switch sharing on."
             : `${sharedCount} session${sharedCount === 1 ? "" : "s"} currently shared with volunteer students (marked "shared" in the list).`}
@@ -94,8 +94,8 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
       {selectedEvent ? (
         <div className="sheet flex flex-col gap-4 p-6">
           <div>
-            <h2 className="font-serif text-lg text-ink">{selectedEvent.title}</h2>
-            <p className="mt-1 text-sm text-muted">
+            <h2 className="font-serif text-h3 text-ink">{selectedEvent.title}</h2>
+            <p className="mt-1 text-body text-muted">
               {dateLabel(selectedEvent.event_date)}
               {timeLabel(selectedEvent.event_time)}
             </p>

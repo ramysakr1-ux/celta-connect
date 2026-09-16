@@ -297,13 +297,13 @@ export default async function CourseStreamPage({
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[1fr_300px] lg:grid-rows-[auto_1fr]">
       <div className="flex items-center justify-between lg:col-start-1 lg:row-start-1">
-        <h2 className="font-serif text-xl text-ink">Course Stream</h2>
-        <p className="text-xs text-muted">{(broadcasts ?? []).length} broadcasts</p>
+        <h2 className="font-serif text-h2 text-ink">Course Stream</h2>
+        <p className="text-label text-muted">{(broadcasts ?? []).length} broadcasts</p>
       </div>
 
       <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-2">
         {(broadcasts ?? []).length === 0 ? (
-          <p className="sheet text-sm text-muted">No broadcasts yet.</p>
+          <p className="sheet text-body text-muted">No broadcasts yet.</p>
         ) : (
           (broadcasts ?? []).map((b, i) => {
             const author = b.profiles as unknown as { full_name: string; role: string } | null;
@@ -349,11 +349,11 @@ export default async function CourseStreamPage({
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted">
-                      <span className="text-xs font-semibold text-muted">{initials}</span>
+                      <span className="text-label font-semibold text-muted">{initials}</span>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-ink">{author?.full_name ?? "Unknown"}</p>
-                      <p className="text-xs text-muted">
+                      <p className="text-body font-semibold text-ink">{author?.full_name ?? "Unknown"}</p>
+                      <p className="text-label text-muted">
                         {[author?.role, formatDateTime(b.created_at, timeZone)].filter(Boolean).join(" · ")}
                       </p>
                     </div>
@@ -363,8 +363,8 @@ export default async function CourseStreamPage({
                   ) : null}
                 </div>
 
-                <p className="mt-2 font-serif text-xl font-semibold text-ink">{b.title}</p>
-                {b.body ? <p className="mt-1 text-base whitespace-pre-wrap text-muted">{b.body}</p> : null}
+                <p className="mt-2 font-serif text-h2 font-semibold text-ink">{b.title}</p>
+                {b.body ? <p className="mt-1 text-lede whitespace-pre-wrap text-muted">{b.body}</p> : null}
 
                 {zoomUrl ? (
                   <a
@@ -376,16 +376,16 @@ export default async function CourseStreamPage({
                     <Video className="size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-semibold text-ink">Join Zoom session</span>
+                        <span className="text-body font-semibold text-ink">Join Zoom session</span>
                         {zoomStatus === "live" ? (
                           <span className="pill pill-danger pill-live">Live now</span>
                         ) : zoomStatus === "upcoming" ? (
                           <span className="pill pill-info">Upcoming</span>
                         ) : null}
                       </span>
-                      {zoomWhen ? <span className="block text-xs text-muted">{zoomWhen}</span> : null}
+                      {zoomWhen ? <span className="block text-label text-muted">{zoomWhen}</span> : null}
                     </span>
-                    <span className="text-sm font-medium text-primary">Open</span>
+                    <span className="text-body font-medium text-primary">Open</span>
                   </a>
                 ) : null}
 
@@ -394,7 +394,7 @@ export default async function CourseStreamPage({
                     href={b.attachment_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="sheet-interactive mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink"
+                    className="sheet-interactive mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-label font-medium text-ink"
                   >
                     <Paperclip className="size-3.5 shrink-0" aria-hidden="true" />
                     {b.attachment_name ?? "Attachment"}
@@ -404,7 +404,7 @@ export default async function CourseStreamPage({
                 {isStaff ? (
                   <form action={deleteBroadcast} className="mt-3">
                     <input type="hidden" name="broadcast_id" value={b.id} />
-                    <button type="submit" className="text-xs text-destructive hover:underline">
+                    <button type="submit" className="text-label text-destructive hover:underline">
                       Remove
                     </button>
                   </form>
@@ -433,14 +433,14 @@ export default async function CourseStreamPage({
                       {assignmentId ? (
                         <Link
                           href={`/portfolio/${traineeId}/assignments/${assignmentId}`}
-                          className="text-sm font-semibold text-ink hover:text-primary hover:underline"
+                          className="text-body font-semibold text-ink hover:text-primary hover:underline"
                         >
                           {event.title}
                         </Link>
                       ) : (
-                        <p className="text-sm font-semibold text-ink">{event.title}</p>
+                        <p className="text-body font-semibold text-ink">{event.title}</p>
                       )}
-                      <p className="mt-0.5 text-xs text-muted">
+                      <p className="mt-0.5 text-label text-muted">
                         {[EVENT_TYPE_LABELS[event.type], event.event_date, event.event_time].filter(Boolean).join(" · ")}
                       </p>
                     </li>
@@ -448,17 +448,17 @@ export default async function CourseStreamPage({
                 })}
               </ul>
             ) : (
-              <p className="mt-3 text-sm text-muted">Nothing scheduled yet.</p>
+              <p className="mt-3 text-body text-muted">Nothing scheduled yet.</p>
             )}
           </div>
 
           {isRegisteredTutor ? (
             <div className={`sheet-accent h-fit ${garnetAt(outsideConnectIndex) ? "sheet-garnet" : ""}`}>
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-1 text-label text-muted">
                 Everything else belongs in the app, where it&apos;s on the record and the whole group sees it.
               </p>
-              <div className="mt-2 flex flex-col gap-1 text-sm">
+              <div className="mt-2 flex flex-col gap-1 text-body">
                 <a
                   href={`mailto:${trainee.email}?subject=${encodeURIComponent(contactCourseCode)}`}
                   className="font-medium text-primary hover:underline"
@@ -470,7 +470,7 @@ export default async function CourseStreamPage({
                     Call {trainee.phone}
                   </a>
                 ) : (
-                  <span className="text-xs text-muted">No phone on file.</span>
+                  <span className="text-label text-muted">No phone on file.</span>
                 )}
               </div>
             </div>
@@ -481,16 +481,16 @@ export default async function CourseStreamPage({
             {(tutors ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col gap-2">
                 {(tutors ?? []).map((tutor, i) => (
-                  <li key={i} className="text-sm text-ink">
+                  <li key={i} className="text-body text-ink">
                     {tutor.full_name}
-                    <span className="ml-1 text-xs text-muted">
+                    <span className="ml-1 text-label text-muted">
                       {(tutor.tutor_role && TUTOR_ROLE_LABELS[tutor.tutor_role as TutorRole]) || "Trainer"}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-3 text-sm text-muted">No tutors assigned yet.</p>
+              <p className="mt-3 text-body text-muted">No tutors assigned yet.</p>
             )}
           </div>
 
@@ -517,26 +517,26 @@ export default async function CourseStreamPage({
           ) : isStaff && trainee.course_status !== "active" ? (
             <div className={`sheet-accent h-fit ${garnetAt(statusIndex) ? "sheet-garnet" : ""}`}>
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
-              <p className="mt-2 text-sm font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
+              <p className="mt-2 text-body font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
               {trainee.course_status_set_at ? (
-                <p className="mt-0.5 text-xs text-muted">
+                <p className="mt-0.5 text-label text-muted">
                   Set {formatDate(trainee.course_status_set_at, timeZone, { year: "numeric" })}
                 </p>
               ) : null}
               {trainee.course_status === "withdrawn" ? (
-                <p className="mt-1 text-xs text-muted">
+                <p className="mt-1 text-label text-muted">
                   {trainee.withdrawal_reportable
                     ? "Reportable -- entry form was already sent."
                     : "Internal only -- withdrawn before the entry form was sent."}
                 </p>
               ) : null}
               {trainee.course_status === "extension" ? (
-                <p className="mt-1 text-xs text-muted">
+                <p className="mt-1 text-label text-muted">
                   Portfolio stays active. {trainee.extension_completes_by ? `Expected completion: ${trainee.extension_completes_by}.` : ""} Close-out should wait for them.
                 </p>
               ) : null}
               {trainee.course_status === "deferred" && deferralTransfer ? (
-                <div className="mt-1 flex flex-col gap-1 text-xs text-muted">
+                <div className="mt-1 flex flex-col gap-1 text-label text-muted">
                   <p>&ldquo;{deferralTransfer.reasons}&rdquo;</p>
                   <p>{deferralTransfer.hours_carried.toFixed(1)} hours carried.</p>
                   {deferralTransfer.reintegration_deadline ? <p>Re-integrate by {formatCalendarDate(deferralTransfer.reintegration_deadline, { day: "numeric", month: "short", year: "numeric" })}.</p> : null}
@@ -546,17 +546,17 @@ export default async function CourseStreamPage({
                 </div>
               ) : null}
               {trainee.course_status === "restarting" ? (
-                <p className="mt-1 text-xs text-muted">Not yet linked to a destination course &mdash; link it from that course&apos;s admin page once they join.</p>
+                <p className="mt-1 text-label text-muted">Not yet linked to a destination course &mdash; link it from that course&apos;s admin page once they join.</p>
               ) : null}
               {trainee.course_status_note ? (
-                <p className="mt-2 text-xs text-muted italic">&ldquo;{trainee.course_status_note}&rdquo;</p>
+                <p className="mt-2 text-label text-muted italic">&ldquo;{trainee.course_status_note}&rdquo;</p>
               ) : null}
               {trainee.course_status === "withdrawn" ? (
                 <a
                   href={`/api/withdrawal-letter/${traineeId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
+                  className="mt-3 inline-block text-label font-semibold text-primary hover:underline"
                 >
                   Download withdrawal letter
                 </a>

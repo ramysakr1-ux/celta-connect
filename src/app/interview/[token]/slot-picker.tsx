@@ -47,16 +47,16 @@ export function SlotPicker({
             disabled={!option.bookable || pending}
             className={
               option.bookable
-                ? "flex w-full items-center justify-between rounded-[6px] border border-border bg-card px-4 py-3 text-left text-sm text-ink hover:border-primary disabled:opacity-60"
-                : "flex w-full items-center justify-between rounded-[6px] border border-border-faint bg-surface-muted/40 px-4 py-3 text-left text-sm text-muted"
+                ? "flex w-full items-center justify-between rounded-[6px] border border-border bg-card px-4 py-3 text-left text-body text-ink hover:border-primary disabled:opacity-60"
+                : "flex w-full items-center justify-between rounded-[6px] border border-border-faint bg-surface-muted/40 px-4 py-3 text-left text-body text-muted"
             }
           >
             <span>{formatWhen(option)}</span>
-            {!option.bookable ? <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Booked</span> : null}
+            {!option.bookable ? <span className="text-label font-semibold uppercase tracking-[0.06em] text-muted">Booked</span> : null}
           </button>
         </form>
       ))}
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </div>
   );
 }

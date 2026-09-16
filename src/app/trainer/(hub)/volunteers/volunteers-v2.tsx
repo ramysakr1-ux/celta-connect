@@ -403,7 +403,7 @@ export function VolunteersV2({
 
       <div className="grid grid-cols-1 items-start gap-[18px] xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="flex flex-col gap-4">
-          {byClass.length === 0 ? <div className="sheet p-6 text-sm text-muted">No volunteer students added yet.</div> : null}
+          {byClass.length === 0 ? <div className="sheet p-6 text-body text-muted">No volunteer students added yet.</div> : null}
           {byClass.map((c) => {
             const drifting = c.members.filter((r) => r.oneLessonCount >= 2 || r.absentCount >= 2).length;
             // A student with no token has no link to open. Counting them as

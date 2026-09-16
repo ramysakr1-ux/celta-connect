@@ -59,12 +59,12 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
 
       <div className="sheet flex flex-col gap-3">
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{snapshot.kicker ?? "Formal letter"}</p>
-        <h1 className="font-serif text-xl text-ink">{LETTER_TITLE[letter.letter_type] ?? snapshot.docTitle}</h1>
-        <p className="text-sm text-muted">Issued {formatLetterDate(letter.issued_at)}</p>
+        <h1 className="font-serif text-h2 text-ink">{LETTER_TITLE[letter.letter_type] ?? snapshot.docTitle}</h1>
+        <p className="text-body text-muted">Issued {formatLetterDate(letter.issued_at)}</p>
 
         <div className="flex flex-col gap-3 border-t border-border-faint pt-3">
           {snapshot.body.map((para, i) => (
-            <p key={i} className="text-sm leading-relaxed text-ink">
+            <p key={i} className="text-body leading-relaxed text-ink">
               {para}
             </p>
           ))}
@@ -73,23 +73,23 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{snapshot.list.title}</p>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {snapshot.list.items.map((item, i) => (
-                  <li key={i} className="text-sm text-ink">
+                  <li key={i} className="text-body text-ink">
                     · {item}
                   </li>
                 ))}
               </ul>
             </div>
           ) : null}
-          {snapshot.closing ? <p className="text-sm leading-relaxed text-ink">{snapshot.closing}</p> : null}
+          {snapshot.closing ? <p className="text-body leading-relaxed text-ink">{snapshot.closing}</p> : null}
         </div>
 
-        <a href={`/api/formal-letter/${letterId}`} className="self-start text-sm font-medium text-primary hover:underline">
+        <a href={`/api/formal-letter/${letterId}`} className="self-start text-body font-medium text-primary hover:underline">
           Download PDF
         </a>
 
         <div className="border-t border-border-faint pt-3">
           {letter.acknowledged_at ? (
-            <p className="text-sm font-semibold text-primary">
+            <p className="text-body font-semibold text-primary">
               {letter.letter_type === "deferral" && letter.candidate_signature_name
                 ? `Signed by ${letter.candidate_signature_name} on `
                 : "Acknowledged "}
@@ -99,7 +99,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
             /* Acknowledging and signing are the candidate's own acts. An
                assessor reads the letter and whether it was acknowledged; they
                must never be handed the button that does it. */
-            <p className="text-sm text-muted">Not yet acknowledged by the candidate.</p>
+            <p className="text-body text-muted">Not yet acknowledged by the candidate.</p>
           ) : letter.letter_type === "deferral" ? (
             <SignDeferralButton letterId={letterId} signatureName={session.profile.signature_name} fullName={session.profile.full_name} />
           ) : (

@@ -35,18 +35,18 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
         <h3 className="font-serif text-ink">{assignment.assignment_type}</h3>
         <Link
           href={`/trainer/assignments/${assignment.id}`}
-          className="text-sm text-primary hover:underline"
+          className="text-body text-primary hover:underline"
         >
           Review responses
         </Link>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">First submission status</label>
+        <label className="text-body text-muted">First submission status</label>
         <select
           name="first_status"
           defaultValue={assignment.first_status}
-          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -56,16 +56,16 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
         </select>
       </div>
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Must pass both content and standard of English to pass the assignment overall.
       </p>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Content grade</label>
+          <label className="text-body text-muted">Content grade</label>
           <select
             name="first_content_grade"
             defaultValue={assignment.first_content_grade ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             {GRADE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -75,11 +75,11 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">English grade</label>
+          <label className="text-body text-muted">English grade</label>
           <select
             name="first_english_grade"
             defaultValue={assignment.first_english_grade ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             {GRADE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -92,11 +92,11 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
 
       <div className="border-t border-border-faint pt-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Resubmission status</label>
+          <label className="text-body text-muted">Resubmission status</label>
           <select
             name="resubmission_status"
             defaultValue={assignment.resubmission_status}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -108,11 +108,11 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
 
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Resubmission content</label>
+            <label className="text-body text-muted">Resubmission content</label>
             <select
               name="resubmission_content_grade"
               defaultValue={assignment.resubmission_content_grade ?? ""}
-              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
             >
               {GRADE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -122,11 +122,11 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Resubmission English</label>
+            <label className="text-body text-muted">Resubmission English</label>
             <select
               name="resubmission_english_grade"
               defaultValue={assignment.resubmission_english_grade ?? ""}
-              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
             >
               {GRADE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -139,22 +139,22 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Final grade note</label>
+        <label className="text-body text-muted">Final grade note</label>
         <input
           name="final_grade"
           type="text"
           defaultValue={assignment.final_grade ?? ""}
           placeholder="e.g. Pass (on resubmission)"
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

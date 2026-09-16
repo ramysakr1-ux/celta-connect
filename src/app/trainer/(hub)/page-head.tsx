@@ -30,7 +30,7 @@ export function PageHead({
       <div className="flex min-w-0 flex-col gap-1">
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">{eyebrow}</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">{title}</h1>
-        {lede ? <p className="mt-1 max-w-[70ch] text-sm text-muted">{lede}</p> : null}
+        {lede ? <p className="mt-1 max-w-[70ch] text-body text-muted">{lede}</p> : null}
       </div>
       {/* A phone reads; the actions are the laptop's (build-spec §7, A7). */}
       {children ? <div className="hidden flex-wrap items-center gap-2 md:flex">{children}</div> : null}

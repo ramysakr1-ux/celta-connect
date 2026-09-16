@@ -113,7 +113,7 @@ export function AnnouncementComposer({
             setTemplateOn(true);
           }}
           aria-pressed={templateOn}
-          className="self-start rounded-full border px-3 py-1 text-xs font-semibold transition-colors hover:brightness-95"
+          className="self-start rounded-full border px-3 py-1 text-label font-semibold transition-colors hover:brightness-95"
           style={
             templateOn
               ? { background: "var(--color-gold)", borderColor: "var(--color-gold)", color: "var(--color-ink)" }
@@ -126,17 +126,17 @@ export function AnnouncementComposer({
 
       {!cohortAllowed && groups.length === 1 ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-muted">Send to</label>
-          <p className="text-sm font-semibold text-ink">{groups[0].name} only</p>
+          <label className="text-label text-muted">Send to</label>
+          <p className="text-body font-semibold text-ink">{groups[0].name} only</p>
           <input type="hidden" name="visible_to_tp_group_id" value={groups[0].id} />
         </div>
       ) : groups.length > 0 ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-muted">Send to</label>
+          <label className="text-label text-muted">Send to</label>
           <select
             value={groupScopeId}
             onChange={(e) => setGroupScopeId(e.target.value)}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             {cohortAllowed ? <option value="">Whole cohort</option> : null}
             {groups.map((g) => (
@@ -156,7 +156,7 @@ export function AnnouncementComposer({
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
         required
-        className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
       />
       <textarea
         name="body"
@@ -164,12 +164,12 @@ export function AnnouncementComposer({
         onChange={(e) => setBody(e.target.value)}
         placeholder="Write your announcement…"
         rows={3}
-        className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
 
       {timetableEvents.length > 0 ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-muted">
+          <label className="text-label text-muted">
             Link a timetable event (optional) — its date/time shows automatically, and it's what a
             scheduled send below anchors to
           </label>
@@ -177,7 +177,7 @@ export function AnnouncementComposer({
             name="linked_timetable_event_id"
             value={linkedEventId}
             onChange={(e) => setLinkedEventId(e.target.value)}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">None — ad-hoc Zoom link below</option>
             {timetableEvents.map((event) => (
@@ -190,12 +190,12 @@ export function AnnouncementComposer({
       ) : null}
 
       <div className="flex flex-col gap-1.5 rounded-[6px] border border-border-faint p-2.5">
-        <p className="text-xs font-semibold text-ink">When to send</p>
-        <label className="flex items-center gap-2 text-sm text-ink">
+        <p className="text-label font-semibold text-ink">When to send</p>
+        <label className="flex items-center gap-2 text-body text-ink">
           <input type="radio" checked={timing === "now"} onChange={() => setTiming("now")} />
           Now
         </label>
-        <label className={`flex items-center gap-2 text-sm ${linkedEventId ? "text-ink" : "text-muted"}`}>
+        <label className={`flex items-center gap-2 text-body ${linkedEventId ? "text-ink" : "text-muted"}`}>
           <input
             type="radio"
             checked={timing === "anchored"}
@@ -210,13 +210,13 @@ export function AnnouncementComposer({
                   value={Math.abs(Number(offsetDays) || 0)}
                   min={0}
                   onChange={(e) => setOffsetDays(`${Number(offsetDays) < 0 ? "-" : ""}${e.target.value.replace(/^-/, "")}`)}
-                  className="mx-1 h-7 w-14 rounded-[4px] border border-input bg-card px-1.5 text-center text-sm outline-none focus:border-primary"
+                  className="mx-1 h-7 w-14 rounded-[4px] border border-input bg-card px-1.5 text-center text-body outline-none focus:border-primary"
                 />
                 day{Math.abs(Number(offsetDays)) === 1 ? "" : "s"}{" "}
                 <select
                   value={Number(offsetDays) < 0 ? "before" : "after"}
                   onChange={(e) => setOffsetDays(`${e.target.value === "before" ? "-" : ""}${Math.abs(Number(offsetDays) || 0)}`)}
-                  className="mx-1 h-7 rounded-[4px] border border-input bg-card px-1.5 text-sm outline-none focus:border-primary"
+                  className="mx-1 h-7 rounded-[4px] border border-input bg-card px-1.5 text-body outline-none focus:border-primary"
                 >
                   <option value="before">before</option>
                   <option value="after">after</option>
@@ -244,28 +244,28 @@ export function AnnouncementComposer({
           type="url"
           placeholder="Zoom link (optional)"
           disabled={Boolean(linkedEventId)}
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary disabled:opacity-50"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary disabled:opacity-50"
         />
         <input
           name="zoom_time"
           type="datetime-local"
           disabled={Boolean(linkedEventId)}
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary disabled:opacity-50"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary disabled:opacity-50"
         />
         <input
           name="attachment_name"
           type="text"
           placeholder="Attachment name (optional)"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         />
         <input
           name="attachment_url"
           type="url"
           placeholder="Attachment link (optional)"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         />
       </div>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         {selectedGroup
           ? `This goes to ${selectedGroup.memberCount} candidate${selectedGroup.memberCount === 1 ? "" : "s"} in ${selectedGroup.name}`
           : `This goes to ${traineeCount} candidate${traineeCount === 1 ? "" : "s"} and ${trainerCount} tutor${trainerCount === 1 ? "" : "s"}`}{" "}
@@ -273,16 +273,16 @@ export function AnnouncementComposer({
       </p>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-muted">
+          <label className="flex items-center gap-2 text-body text-muted">
             <input type="checkbox" name="pinned" />
             Pin to top
           </label>
-          <label className="flex items-center gap-2 text-sm text-muted">
+          <label className="flex items-center gap-2 text-body text-muted">
             <input type="checkbox" name="keep_on_duplicate" />
             Keep when the course duplicates
           </label>
         </div>
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
         <button
           type="submit"
           disabled={pending}

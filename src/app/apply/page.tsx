@@ -32,7 +32,7 @@ export default async function ApplyPage({
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
           <div className="sheet-accent p-8 text-center">
-            <p className="text-sm text-muted">
+            <p className="text-body text-muted">
               Applications aren&apos;t open right now.
             </p>
           </div>

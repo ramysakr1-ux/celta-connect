@@ -123,8 +123,8 @@ export default function ClassroomArrangementsSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Match the layout to the activity · 14 minutes</h2>
-          <p className="text-xs text-muted">Click a layout for what it is actually good for, and where it breaks down.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Match the layout to the activity · 14 minutes</h2>
+          <p className="text-label text-muted">Click a layout for what it is actually good for, and where it breaks down.</p>
         </div>
         <div className="flex flex-col gap-2">
           {LAYOUTS.map((l) => (
@@ -135,8 +135,8 @@ export default function ClassroomArrangementsSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Plan the switch — one lesson, three stages · 12 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Plan the switch — one lesson, three stages · 12 minutes</h2>
+          <p className="text-label text-muted">
             Same lesson throughout. Pick the arrangement for each stage, then check the reasoning — the answer changes
             twice, and that is the point.
           </p>
@@ -153,8 +153,8 @@ export default function ClassroomArrangementsSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Materials — what is the aid actually doing? · 12 minutes</h2>
-          <p className="text-xs text-muted">Every material choice has a job, and a cost. Click each for both.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Materials — what is the aid actually doing? · 12 minutes</h2>
+          <p className="text-label text-muted">Every material choice has a job, and a cost. Click each for both.</p>
         </div>
         <div className="flex flex-col gap-2">
           {MATERIALS.map((m) => (
@@ -164,7 +164,7 @@ export default function ClassroomArrangementsSession() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Online equivalent · 7 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Online equivalent · 7 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           Breakout rooms replace physical rearranging — pair, small-group and whole-class “layouts” are just different
           room configurations. The planning question is the same: does this activity need everyone seeing everyone (main

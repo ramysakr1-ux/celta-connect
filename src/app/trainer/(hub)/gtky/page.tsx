@@ -19,7 +19,7 @@ const BAND_LABELS: Record<string, string> = {
 export default async function GtkyPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   const supabase = await createClient();
@@ -49,7 +49,7 @@ export default async function GtkyPage() {
       <div>
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Getting to know you</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           {gtkyEvent?.event_date
             ? `Timetabled ${formatCalendarDate(gtkyEvent.event_date, { weekday: "long", month: "long" })}${gtkyEvent.event_time ? ` at ${gtkyEvent.event_time.slice(0, 5)}` : ""} ("${gtkyEvent.title}"). `
             : "Not on the timetable yet -- add a session titled \"Getting to know you\" or \"GTKY\" and this page, and the candidates' materials, follow it. "}
@@ -61,11 +61,11 @@ export default async function GtkyPage() {
 
       <div className="sheet flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             {assignedCount} of {trainees?.length ?? 0} candidates assigned · {chosenCount} have chosen
           </p>
           {unassignedCount > 0 ? (
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-label text-muted">
               {unassignedCount} still waiting -- typically because their TP1 coursebook level isn&apos;t set yet.
             </p>
           ) : null}
@@ -73,7 +73,7 @@ export default async function GtkyPage() {
         <form action={assignGtkyActivities}>
           <button
             type="submit"
-            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground"
           >
             Assign GTKY activities
           </button>
@@ -85,11 +85,11 @@ export default async function GtkyPage() {
           <table className="table-plain w-full">
             <thead>
               <tr>
-                <th className="text-sm text-muted">Candidate</th>
-                <th className="text-sm text-muted">Level</th>
-                <th className="text-sm text-muted">Offered</th>
-                <th className="text-sm text-muted">Chosen</th>
-                <th className="text-sm text-muted"></th>
+                <th className="text-body text-muted">Candidate</th>
+                <th className="text-body text-muted">Level</th>
+                <th className="text-body text-muted">Offered</th>
+                <th className="text-body text-muted">Chosen</th>
+                <th className="text-body text-muted"></th>
               </tr>
             </thead>
             <tbody>
@@ -107,7 +107,7 @@ export default async function GtkyPage() {
                     {!a.chosen_slug ? (
                       <form action={pickGtkyActivityForTrainee}>
                         <input type="hidden" name="trainee_id" value={a.trainee_id} />
-                        <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+                        <button type="submit" className="text-label font-semibold text-primary hover:underline">
                           Pick for them
                         </button>
                       </form>

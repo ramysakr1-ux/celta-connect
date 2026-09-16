@@ -64,18 +64,18 @@ export function MobileFormWizard({ steps }: { steps: WizardStep[] }) {
             type="button"
             onClick={() => setCurrent((c) => Math.max(0, c - 1))}
             disabled={clamped === 0}
-            className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink disabled:opacity-40"
+            className="rounded-[6px] border border-border px-4 py-2 text-body font-medium text-ink disabled:opacity-40"
           >
             Back
           </button>
-          <p className="text-xs font-medium text-muted">
+          <p className="text-label font-medium text-muted">
             {clamped + 1} of {steps.length}
           </p>
           <button
             type="button"
             onClick={next}
             disabled={clamped === steps.length - 1}
-            className="rounded-[6px] border border-primary px-4 py-2 text-sm font-medium text-primary disabled:opacity-40"
+            className="rounded-[6px] border border-primary px-4 py-2 text-body font-medium text-primary disabled:opacity-40"
           >
             Next
           </button>

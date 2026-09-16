@@ -53,15 +53,15 @@ export function SecondMarkingPanel({
         <span className="text-micro font-semibold text-muted tabular-nums">§9.2.3</span>
       </div>
       {done ? (
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           Second-marked by <span className="font-semibold">{secondMarkerName ?? "a second tutor"}</span>
           {secondMarkerRecordedAt ? ` on ${formatDate(secondMarkerRecordedAt, timeZone, { year: "numeric" })}` : ""}
           {markerName ? `, first marked by ${markerName}` : ""}. Both initials are on the record the assessor may ask for.
         </p>
       ) : !decided ? (
-        <p className="text-sm text-muted">Nothing to check yet -- double-marking follows the first marker&apos;s decision.</p>
+        <p className="text-body text-muted">Nothing to check yet -- double-marking follows the first marker&apos;s decision.</p>
       ) : isFirstMarker ? (
-        <p className="text-sm text-muted">
+        <p className="text-body text-muted">
           Not double-marked yet. {failed ? "A fail must be in the double-marked sample -- " : ""}
           A second tutor opens this assignment, checks your grading and comments, and signs it as themselves.
         </p>
@@ -69,11 +69,11 @@ export function SecondMarkingPanel({
         <form action={recordSecondMarking} className="flex flex-wrap items-center justify-between gap-3">
           <input type="hidden" name="assignment_id" value={assignmentId} />
           <input type="hidden" name="trainee_id" value={traineeId} />
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             {failed ? "A fail must be in the double-marked sample. " : ""}
             {markerName ? `${markerName} marked this.` : "Marked."} Check the grading and the comments, then sign here as the second marker.
           </p>
-          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink wash">
+          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-body font-medium text-ink wash">
             Record my second marking
           </button>
         </form>

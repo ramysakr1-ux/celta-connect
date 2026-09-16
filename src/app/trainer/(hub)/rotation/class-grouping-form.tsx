@@ -21,11 +21,11 @@ export function ClassGroupingForm({ trainees }: { trainees: { id: string; full_n
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Trainee</label>
+          <label className="text-body text-muted">Trainee</label>
           <select
             value={traineeId}
             onChange={(e) => setTraineeId(e.target.value)}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">— choose —</option>
             {trainees.map((t) => (
@@ -37,11 +37,11 @@ export function ClassGroupingForm({ trainees }: { trainees: { id: string; full_n
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">TP number</label>
+          <label className="text-body text-muted">TP number</label>
           <select
             value={tpNumber}
             onChange={(e) => setTpNumber(e.target.value ? Number(e.target.value) : "")}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">— choose —</option>
             {TP_NUMBERS.map((n) => (
@@ -53,11 +53,11 @@ export function ClassGroupingForm({ trainees }: { trainees: { id: string; full_n
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Grouping</label>
+          <label className="text-body text-muted">Grouping</label>
           <select
             value={classGrouping}
             onChange={(e) => setClassGroupingValue(e.target.value as typeof classGrouping)}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="one_to_one_or_small_group">1-to-1 / small group</option>
             <option value="whole_class">Whole class</option>
@@ -65,17 +65,17 @@ export function ClassGroupingForm({ trainees }: { trainees: { id: string; full_n
         </div>
       </div>
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Handbook: at most one of the six assessed TP lessons may be 1-to-1 or small group, and it must be planned
         that way in advance -- never the final two (TP7/TP8), and only for a round that&apos;s already assigned but
         not yet taught.
       </p>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending || !traineeId || tpNumber === ""}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink wash disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-body font-medium text-ink wash disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save grouping"}
       </button>

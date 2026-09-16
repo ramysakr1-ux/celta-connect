@@ -160,7 +160,7 @@ export function CapabilityCustomizer({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {roleCols.map((rc) => (
             <div key={rc.key} className="rounded-lg px-4 py-[15px]" style={{ border: "1px solid var(--owner-line)", background: "var(--owner-parchment)" }}>
-              <p className="mb-1.5 text-xs font-bold" style={{ color: rc.color }}>
+              <p className="mb-1.5 text-label font-bold" style={{ color: rc.color }}>
                 {rc.label}
               </p>
               <p className="text-label leading-relaxed">{describeRoleCapabilities(rc.key, overrides, customCapabilitiesOnly)}</p>

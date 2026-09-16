@@ -69,8 +69,8 @@ export async function TitWorkspace({
   if (!courseTutor.verified_at) {
     return (
       <div className="sheet">
-        <h2 className="font-serif text-lg text-ink">{tutorProfile?.full_name ?? "Trainer-in-training"}</h2>
-        <p className="mt-2 text-sm text-destructive">
+        <h2 className="font-serif text-h3 text-ink">{tutorProfile?.full_name ?? "Trainer-in-training"}</h2>
+        <p className="mt-2 text-body text-destructive">
           No Cambridge verification date is on file yet -- training done without prior verification is never
           acknowledged, so this workspace stays closed until one is set on the Tutors panel in Centre settings.
         </p>
@@ -82,7 +82,7 @@ export async function TitWorkspace({
   if (!titRecordId) {
     return (
       <div className="sheet">
-        <p className="text-sm text-destructive">Could not open this workspace. Try refreshing.</p>
+        <p className="text-body text-destructive">Could not open this workspace. Try refreshing.</p>
       </div>
     );
   }
@@ -157,8 +157,8 @@ export async function TitWorkspace({
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-4">
         <div>
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Trainer-in-Training</p>
-          <h2 className="font-serif text-xl text-ink">{tutorProfile?.full_name ?? "Unknown"}</h2>
-          <p className="mt-1 text-sm text-muted">
+          <h2 className="font-serif text-h2 text-ink">{tutorProfile?.full_name ?? "Unknown"}</h2>
+          <p className="mt-1 text-body text-muted">
             {titRecord.scheme === "external" ? "External scheme" : "Internal scheme"} · verified{" "}
             {formatDate(courseTutor.verified_at, timeZone)}
             {supervisorProfile ? ` · supervised by ${supervisorProfile.full_name}` : " · no supervisor set"}
@@ -189,8 +189,8 @@ export async function TitWorkspace({
         <StatCard label="TP / feedback observed" pct={stats.tpObservedPct} detail={`${stats.tpObservedCount} of ${stats.tpTotalCount}`} />
         <div className="rounded-[6px] border border-border p-3">
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Sessions delivered</p>
-          <p className="mt-1 font-serif text-2xl text-ink">
-            {(deliveredSessions ?? []).length} <span className="text-sm text-muted">/ {MIN_DELIVERED_SESSIONS} min</span>
+          <p className="mt-1 font-serif text-h1 text-ink">
+            {(deliveredSessions ?? []).length} <span className="text-body text-muted">/ {MIN_DELIVERED_SESSIONS} min</span>
           </p>
         </div>
       </div>
@@ -214,7 +214,7 @@ export async function TitWorkspace({
         <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Input sessions observed (min {HEADLINE_MIN_PCT}%)</h3>
         <div className="mt-2 divide-y divide-border-faint">
           {inputEvents.length === 0 ? (
-            <p className="text-sm text-muted">No input sessions on the timetable yet.</p>
+            <p className="text-body text-muted">No input sessions on the timetable yet.</p>
           ) : (
             inputEvents.map((e) => {
               const obs = observedByEventId.get(e.id);
@@ -235,7 +235,7 @@ export async function TitWorkspace({
         <h3 className="mt-4 text-label font-semibold tracking-[0.08em] text-muted uppercase">TP and feedback observed (min {HEADLINE_MIN_PCT}%, never asynchronous)</h3>
         <div className="mt-2 divide-y divide-border-faint">
           {tpEvents.length === 0 ? (
-            <p className="text-sm text-muted">No TP on the timetable yet.</p>
+            <p className="text-body text-muted">No TP on the timetable yet.</p>
           ) : (
             tpEvents.map((e) => {
               const obs = observedByEventId.get(e.id);
@@ -259,7 +259,7 @@ export async function TitWorkspace({
         <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Task Twelve, Stage 1 -- pre-session handouts ({(task12Stage1 ?? []).length} of {TASK12_STAGE1_REQUIRED})
         </h3>
-        <p className="mt-1 text-xs text-muted">For two existing sessions taught by other tutors -- you design the prep material, never the session.</p>
+        <p className="mt-1 text-label text-muted">For two existing sessions taught by other tutors -- you design the prep material, never the session.</p>
         <div className="mt-2">
           <Task12Stage1Form titRecordId={titRecord.id} events={inputEvents} />
         </div>
@@ -279,13 +279,13 @@ export async function TitWorkspace({
         <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Task Twelve, Stage 2 -- sessions you delivered ({(deliveredSessions ?? []).length} of {MIN_DELIVERED_SESSIONS} min)
         </h3>
-        <p className="mt-1 text-xs text-muted">Fully self-designed, never reused from the centre&apos;s own Resource Hub library.</p>
+        <p className="mt-1 text-label text-muted">Fully self-designed, never reused from the centre&apos;s own Resource Hub library.</p>
         <div className="mt-2">
           <AddDeliveredSessionForm titRecordId={titRecord.id} />
         </div>
         <div className="mt-3 flex flex-col gap-2">
           {(deliveredSessions ?? []).length === 0 ? (
-            <p className="text-sm text-muted">None delivered yet.</p>
+            <p className="text-body text-muted">None delivered yet.</p>
           ) : (
             (deliveredSessions ?? []).map((r) => (
               <DeliveredSessionCard
@@ -308,13 +308,13 @@ export async function TitWorkspace({
       {/* Task Thirteen */}
       <section>
         <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Task Thirteen -- TP feedback you gave</h3>
-        <p className="mt-1 text-xs text-muted">A private working copy for each -- your own draft, then discussion, then feedback on how you delivered it. None of this ever reaches a candidate.</p>
+        <p className="mt-1 text-label text-muted">A private working copy for each -- your own draft, then discussion, then feedback on how you delivered it. None of this ever reaches a candidate.</p>
         <div className="mt-2">
           <AddFeedbackSessionForm titRecordId={titRecord.id} trainees={(courseTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }))} />
         </div>
         <div className="mt-3 flex flex-col gap-2">
           {(feedbackSessions ?? []).length === 0 ? (
-            <p className="text-sm text-muted">No feedback sessions recorded yet.</p>
+            <p className="text-body text-muted">No feedback sessions recorded yet.</p>
           ) : (
             (feedbackSessions ?? []).map((r) => (
               <FeedbackSessionCard
@@ -430,7 +430,7 @@ export async function TitWorkspace({
           </div>
         </section>
       ) : (
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Internal scheme, trains at the nominating centre: no extra assessor day -- your supervisor alone assesses
           your work and e-portfolio, and sends their own moderation report straight to the JCA.
         </p>
@@ -452,12 +452,12 @@ function StatCard({ label, pct, detail, warning }: { label: string; pct: number;
   return (
     <div className="rounded-[6px] border border-border p-3">
       <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{label}</p>
-      <p className={`mt-1 font-serif text-2xl ${met ? "text-primary" : "text-ink"}`}>{pct}%</p>
-      <p className="text-xs text-muted">{detail}</p>
+      <p className={`mt-1 font-serif text-h1 ${met ? "text-primary" : "text-ink"}`}>{pct}%</p>
+      <p className="text-label text-muted">{detail}</p>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-muted">
         <div className={`h-full rounded-full ${met ? "bg-primary" : "bg-status-warning-text"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
       </div>
-      {warning ? <p className="mt-1.5 text-xs font-medium text-destructive">{warning}</p> : null}
+      {warning ? <p className="mt-1.5 text-label font-medium text-destructive">{warning}</p> : null}
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function FindingsBand({
     <div className="flex flex-col gap-3">
       {unreviewed.map((f) => (
         <div key={f.id} className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg p-4">
-          <p className="text-sm font-semibold text-ink">
+          <p className="text-body font-semibold text-ink">
             Scanner match in &quot;{f.sectionKey}&quot; -- {f.matchLength} words,{" "}
             {f.sourceType === "same_course"
               ? "another submission on this course"
@@ -44,7 +44,7 @@ export function FindingsBand({
                 : "another source"}
             .
           </p>
-          <p className="mt-2 whitespace-pre-wrap rounded-[6px] bg-card p-3 text-sm text-ink">&quot;{f.matchedText}&quot;</p>
+          <p className="mt-2 whitespace-pre-wrap rounded-[6px] bg-card p-3 text-body text-ink">&quot;{f.matchedText}&quot;</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <form action={markFindingReviewed}>
               <input type="hidden" name="finding_id" value={f.id} />
@@ -52,7 +52,7 @@ export function FindingsBand({
               <input type="hidden" name="trainee_id" value={traineeId} />
               <button
                 type="submit"
-                className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink wash"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink wash"
               >
                 Mark reviewed -- not a concern
               </button>

@@ -7,7 +7,7 @@ export function PrintButton() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="rounded-[8px] px-4 py-2 text-sm font-semibold"
+      className="rounded-[8px] px-4 py-2 text-body font-semibold"
       style={{ background: "oklch(37.5% 0.058 195)", color: "oklch(98.5% 0.006 90)" }}
     >
       Print or save as PDF

@@ -58,17 +58,17 @@ export function SupervisedSessionsPanel({
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-ink">{event.title}</p>
-                  <p className="text-xs text-muted">{formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</p>
+                  <p className="text-body font-semibold text-ink">{event.title}</p>
+                  <p className="text-label text-muted">{formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {submitted && completion?.score != null && completion?.question_count != null ? (
-                    <span className="text-xs font-semibold text-ink">
+                    <span className="text-label font-semibold text-ink">
                       {SUPERVISED_QUIZ_TOPICS[completion.quiz_topic!]?.title ?? "Quiz"} — {completion.score}/{completion.question_count}
                     </span>
                   ) : null}
                   {submitted ? (
-                    <span className="text-xs text-muted">{formatDuration(completion!.time_spent_seconds)} spent</span>
+                    <span className="text-label text-muted">{formatDuration(completion!.time_spent_seconds)} spent</span>
                   ) : null}
                   <span className={`pill ${submitted ? "pill-success" : "pill-warning"}`}>
                     {submitted ? "Submitted" : "Not submitted"}
@@ -78,17 +78,17 @@ export function SupervisedSessionsPanel({
               {submitted ? (
                 <>
                   {completion?.response ? (
-                    <p className="whitespace-pre-wrap rounded-[6px] bg-accent/40 p-2.5 text-sm text-ink">{completion.response}</p>
+                    <p className="whitespace-pre-wrap rounded-[6px] bg-accent/40 p-2.5 text-body text-ink">{completion.response}</p>
                   ) : null}
                   {checked ? (
-                    <p className="text-xs text-primary">Checked</p>
+                    <p className="text-label text-primary">Checked</p>
                   ) : (
                     <form action={checkSupervisedSession}>
                       <input type="hidden" name="timetable_event_id" value={event.id} />
                       <input type="hidden" name="trainee_id" value={traineeId} />
                       <button
                         type="submit"
-                        className="self-start rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-xs font-medium text-ink wash"
+                        className="self-start rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-label font-medium text-ink wash"
                       >
                         Mark checked
                       </button>

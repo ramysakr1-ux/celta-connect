@@ -164,12 +164,12 @@ export default function RapportAndTeacherTalkSession() {
       </RunningThisSession>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">1 · The teacher you remember · 5 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">1 · The teacher you remember · 5 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           Think of one teacher — any subject, any language — whose classes you actually wanted to be in. In pairs: what
           did they <em>do</em>? Not what they were like. What did they do.
         </p>
-        <p className="text-xs italic text-muted">
+        <p className="text-label italic text-muted">
           Two minutes in pairs, three answers to the room. Write them on the board; you will come back to them at the end.
         </p>
       </section>
@@ -178,8 +178,8 @@ export default function RapportAndTeacherTalkSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">3 · Grading, not dumbing down · 10 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">3 · Grading, not dumbing down · 10 minutes</h2>
+          <p className="text-label text-muted">
             Cambridge 2a: “use comprehensible language… <strong className="text-ink">keep your simplified language
             natural</strong>.” Both halves matter, and the second is the one trainees drop.
           </p>
@@ -193,8 +193,8 @@ export default function RapportAndTeacherTalkSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">4 · Rapport, or being liked? · 9 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">4 · Rapport, or being liked? · 9 minutes</h2>
+          <p className="text-label text-muted">
             Five things a teacher does. Rapport is not the same as being liked — the test is whether it hands the floor
             over.
           </p>
@@ -208,8 +208,8 @@ export default function RapportAndTeacherTalkSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">5 · Involved at the front · 7 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">5 · Involved at the front · 7 minutes</h2>
+          <p className="text-label text-muted">
             1d asks for learners “fully involved… during teacher-fronted <em>and</em> learner-centred stages”. Pairwork is
             the easy half. Five moves for the other one.
           </p>
@@ -222,7 +222,7 @@ export default function RapportAndTeacherTalkSession() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 2 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Wrap-up · 2 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           Back to the board. Which of the things your remembered teacher <em>did</em> are on this page? And one sentence
           each: the one thing you will do differently in your next TP — a rapport move, or a place you will stop talking.
@@ -286,8 +286,8 @@ function TalkCount() {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-serif text-lg font-semibold text-ink">2 · Count the talk · 12 minutes</h2>
-        <p className="text-xs text-muted">
+        <h2 className="font-serif text-h3 font-semibold text-ink">2 · Count the talk · 12 minutes</h2>
+        <p className="text-label text-muted">
           Three minutes of a pre-intermediate lesson. Mark each line — teacher or student — then guess the split by
           number of words before you check.
         </p>
@@ -343,7 +343,7 @@ function TalkCount() {
 
       {checked ? (
         <div className="flex flex-col gap-2 rounded-[8px] border p-4" style={{ borderColor: RED }}>
-          <p className="font-serif text-lg font-semibold text-ink">
+          <p className="font-serif text-h3 font-semibold text-ink">
             {teacherPct}% of the words in that exchange are the teacher’s.
           </p>
           <div className="flex h-3 overflow-hidden rounded-full">

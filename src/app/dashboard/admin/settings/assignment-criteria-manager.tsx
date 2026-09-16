@@ -34,7 +34,7 @@ export function AssignmentCriteriaManager({ criteria }: { criteria: Criterion[] 
     <div className="flex flex-col gap-5">
       {ASSIGNMENT_TYPES.map((type) => (
         <div key={type} className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold text-ink">{ASSIGNMENT_INFO[type]?.title ?? type}</h3>
+          <h3 className="text-body font-semibold text-ink">{ASSIGNMENT_INFO[type]?.title ?? type}</h3>
           <ul className="flex flex-col gap-1.5">
             {(byType.get(type) ?? []).map((c) => (
               <CriterionRow key={c.id} criterion={c} />
@@ -54,11 +54,11 @@ function CriterionRow({ criterion }: { criterion: Criterion }) {
         criterion.active ? "border-border" : "border-border-faint opacity-60"
       }`}
     >
-      <p className="min-w-0 text-sm text-ink">{criterion.criterion_text}</p>
+      <p className="min-w-0 text-body text-ink">{criterion.criterion_text}</p>
       <form action={toggleAssignmentCriterionActive}>
         <input type="hidden" name="id" value={criterion.id} />
         <input type="hidden" name="active" value={String(criterion.active)} />
-        <button type="submit" className="shrink-0 text-xs text-muted hover:text-ink">
+        <button type="submit" className="shrink-0 text-label text-muted hover:text-ink">
           {criterion.active ? "Deactivate" : "Reactivate"}
         </button>
       </form>
@@ -83,16 +83,16 @@ function AddCriterionForm({ assignmentType }: { assignmentType: string }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Add a criterion"
-        className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink outline-none focus:border-primary"
       />
       <button
         type="submit"
         disabled={pending}
-        className="wash h-9 shrink-0 rounded-[6px] border border-border px-3 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
+        className="wash h-9 shrink-0 rounded-[6px] border border-border px-3 text-label font-medium text-ink hover:border-primary disabled:opacity-60"
       >
         {pending ? "Adding…" : "Add"}
       </button>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }

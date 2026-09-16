@@ -75,7 +75,7 @@ export function FilmedObservationChat({
       <p className="border-b border-border px-3.5 py-2.5 text-label font-semibold tracking-[0.08em] text-muted uppercase">Group chat</p>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-2.5" role="log" aria-live="polite">
         {messages.length === 0 ? (
-          <p className="text-sm text-muted">No messages yet.</p>
+          <p className="text-body text-muted">No messages yet.</p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {messages.map((m) => {

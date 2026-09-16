@@ -12,17 +12,17 @@ export function VideoLibrarySection({ videos }: { videos: VideoRow[] }) {
   return (
     <div>
       <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Video Library</h3>
-      <p className="mt-1 text-xs text-muted">
+      <p className="mt-1 text-label text-muted">
         Some of these run well over 45 minutes. Skim ahead and fast-forward to the parts your task asks about — you
         don&apos;t need to watch start to finish.
       </p>
       <ul className="mt-3 flex flex-col gap-2">
         {videos.map((v) => (
           <li key={v.id} className="hover-ring rounded-[6px] border border-border-faint px-3 py-2">
-            <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline">
+            <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="text-body font-medium text-primary hover:underline">
               {v.title}
             </a>
-            {v.description ? <p className="mt-1 text-xs text-muted">{v.description}</p> : null}
+            {v.description ? <p className="mt-1 text-label text-muted">{v.description}</p> : null}
           </li>
         ))}
       </ul>

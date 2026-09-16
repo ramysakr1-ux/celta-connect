@@ -36,7 +36,7 @@ export function TrainerFeedbackTextarea(props: VoiceTextareaProps) {
           type="button"
           disabled={isPending}
           onClick={() => handleCleanup("direct")}
-          className="text-xs text-muted hover:text-ink disabled:opacity-60"
+          className="text-label text-muted hover:text-ink disabled:opacity-60"
         >
           {isPending && activeTone === "direct" ? "Rewriting…" : "Direct tone"}
         </button>
@@ -44,13 +44,13 @@ export function TrainerFeedbackTextarea(props: VoiceTextareaProps) {
           type="button"
           disabled={isPending}
           onClick={() => handleCleanup("supportive")}
-          className="text-xs text-muted hover:text-ink disabled:opacity-60"
+          className="text-label text-muted hover:text-ink disabled:opacity-60"
         >
           {isPending && activeTone === "supportive" ? "Rewriting…" : "Supportive tone"}
         </button>
       </div>
       <VoiceTextarea ref={textareaRef} {...props} />
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
     </div>
   );
 }

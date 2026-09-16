@@ -60,7 +60,7 @@ export function MatchTermsExercise({ terms }: { terms: MatchTerm[] }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Match each term to its meaning</p>
+        <p className="text-label font-bold text-ink">Match each term to its meaning</p>
         <p className="text-label text-muted">
           {matched.size} of {terms.length} matched
         </p>
@@ -72,7 +72,7 @@ export function MatchTermsExercise({ terms }: { terms: MatchTerm[] }) {
               key={i}
               type="button"
               onClick={() => pickLeft(i)}
-              className={`flex min-h-[38px] items-center rounded-[6px] px-3 font-serif text-sm font-semibold ${styleFor(i, selLeft)}`}
+              className={`flex min-h-[38px] items-center rounded-[6px] px-3 font-serif text-body font-semibold ${styleFor(i, selLeft)}`}
             >
               {t.term}
             </button>

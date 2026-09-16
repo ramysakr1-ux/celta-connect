@@ -29,7 +29,7 @@ export function LaptopOnlyGate({
       <div className="hidden md:block">{children}</div>
       <div className="flex flex-col items-center gap-3 py-16 text-center md:hidden">
         <Laptop className="size-8 text-muted" aria-hidden="true" />
-        <p className="max-w-[280px] text-sm text-muted">
+        <p className="max-w-[280px] text-body text-muted">
           {task} needs more room than a phone screen – open this on a laptop.
         </p>
       </div>

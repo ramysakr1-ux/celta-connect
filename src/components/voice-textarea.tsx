@@ -62,11 +62,11 @@ export const VoiceTextarea = forwardRef<HTMLTextAreaElement, VoiceTextareaProps>
             <button
               type="button"
               onClick={listening ? handleStop : handleStart}
-              className="self-start text-xs text-muted hover:text-ink"
+              className="self-start text-label text-muted hover:text-ink"
             >
               {listening ? "■ Stop — listening…" : "🎙 Dictate"}
             </button>
-            {error ? <p className="text-xs text-destructive">{error}</p> : null}
+            {error ? <p className="text-label text-destructive">{error}</p> : null}
           </div>
         ) : null}
       </div>

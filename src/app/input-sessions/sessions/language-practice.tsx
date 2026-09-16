@@ -60,14 +60,14 @@ function StageCard({ stage }: { stage: Stage }) {
       style={{ borderLeft: `4px solid ${stage.accent}` }}
     >
       <div className="flex items-baseline justify-between">
-        <p className="text-sm font-bold text-ink">{stage.name}</p>
+        <p className="text-body font-bold text-ink">{stage.name}</p>
         <p className="text-micro font-semibold" style={{ color: stage.accent }}>{stage.control}</p>
       </div>
       <p className="text-label leading-relaxed text-muted">{stage.desc}</p>
       {open ? (
         <div className="flex flex-col gap-1.5 rounded-[6px] bg-accent px-3.5 py-2.5">
           <p className="text-micro font-bold" style={{ color: stage.accent }}>Worked example</p>
-          <p className="text-xs leading-relaxed text-ink">{stage.example}</p>
+          <p className="text-label leading-relaxed text-ink">{stage.example}</p>
         </div>
       ) : null}
     </button>
@@ -133,7 +133,7 @@ export default function LanguagePracticeSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 5 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 5 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             A learner can drill &quot;Why don&apos;t we go for coffee?&quot; perfectly. Does that mean they can actually use it — to
@@ -143,7 +143,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">The three stages, one target structure each way · 25 minutes</p>
+        <p className="text-label font-bold text-ink">The three stages, one target structure each way · 25 minutes</p>
         <p className="text-label text-muted">Same language throughout: offering and suggesting. Click each stage to see it worked, then try it yourselves.</p>
         {STAGES.map((s) => (
           <StageCard key={s.name} stage={s} />
@@ -159,7 +159,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">More worked examples, same three stages · 8 minutes</p>
+        <p className="text-label font-bold text-ink">More worked examples, same three stages · 8 minutes</p>
         <p className="text-label text-muted">A second target structure (&quot;going to&quot; — future plans), so the framework generalises rather than sticking to one example. Click to reveal.</p>
         {MORE_EXAMPLES.map((m) => (
           <CompactExampleCard key={m.name} stage={m} />
@@ -167,7 +167,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">Loop task — do all three stages back to back · 12 minutes</p>
+        <p className="text-label font-bold text-ink">Loop task — do all three stages back to back · 12 minutes</p>
         <p className="text-label text-muted">One target structure (&quot;used to&quot; — past habits), one quick task per stage, three to four minutes each. Click a loop to see it and run it live before moving to the next.</p>
         {LOOPS.map((l) => (
           <LoopCard key={l.name} loop={l} />
@@ -175,7 +175,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Spot the mismatch · 6 minutes</p>
+        <p className="text-label font-bold text-ink">Spot the mismatch · 6 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             A trainee labels their pairwork activity &quot;free practice&quot; because learners are talking in pairs — but every
@@ -186,7 +186,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Design your own · 5 minutes</p>
+        <p className="text-label font-bold text-ink">Design your own · 5 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             In pairs: take the target language &quot;wish + past simple&quot; (present regrets). Design one activity for each
@@ -196,7 +196,7 @@ export default function LanguagePracticeSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Wrap-up · 3 minutes</p>
+        <p className="text-label font-bold text-ink">Wrap-up · 3 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             A lesson doesn&apos;t need all three stages every time — but if you only ever drill and never free-practice,

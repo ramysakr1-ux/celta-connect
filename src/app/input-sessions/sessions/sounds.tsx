@@ -101,7 +101,7 @@ function MatchTerms() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Terminology — match it up</p>
+        <p className="text-label font-bold text-ink">Terminology — match it up</p>
         <p className="text-label text-muted">{solved.size ? `${solved.size} of ${MATCH_PAIRS.length} matched` : ""}</p>
       </div>
       <p className="text-label text-muted">Click a term, then click the definition you think it goes with.</p>
@@ -179,7 +179,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Now try it yourself — clap for what you heard</p>
+        <p className="text-label font-bold text-ink">Now try it yourself — clap for what you heard</p>
         <p className="text-label text-muted">{answered ? `${correctCount} of ${answered} correct` : ""}</p>
       </div>
       <p className="text-label text-muted">
@@ -214,7 +214,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
                       if (picked) return;
                       setPicks((s) => ({ ...s, [i]: isRight ? "correct" : "wrong" }));
                     }}
-                    className={`flex-1 rounded-full border-2 px-2.5 py-3 text-center font-serif text-sm font-bold ${
+                    className={`flex-1 rounded-full border-2 px-2.5 py-3 text-center font-serif text-body font-bold ${
                       show && isRight
                         ? "border-primary bg-primary/10 text-primary"
                         : show && isPicked
@@ -241,7 +241,7 @@ function Dictation({ voiceIdx }: { voiceIdx: number }) {
   const [picks, setPicks] = useState<Record<number, string>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-bold text-ink">Dictation — sound to spelling</p>
+      <p className="text-label font-bold text-ink">Dictation — sound to spelling</p>
       <p className="text-label text-muted">English spelling doesn&apos;t reliably show pronunciation. Listen and pick the word that matches the sound, not the sound that matches the usual spelling.</p>
       {DICTATION.map((d, di) => {
         const picked = picks[di];
@@ -295,7 +295,7 @@ function TrainerScript() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -322,8 +322,8 @@ function TrainerScript() {
         <div key={t.step} className="flex gap-2.5">
           <p className="w-14 flex-none pt-px text-micro font-bold text-destructive">{t.time}</p>
           <div className="flex flex-col gap-0.5">
-            <p className="text-xs font-semibold text-ink">{t.step}</p>
-            <p className="text-xs leading-relaxed text-ink">{t.note}</p>
+            <p className="text-label font-semibold text-ink">{t.step}</p>
+            <p className="text-label leading-relaxed text-ink">{t.note}</p>
           </div>
         </div>
       ))}
@@ -359,7 +359,7 @@ export default function SoundsSession() {
       <VoicePicker voiceIdx={voiceIdx} setVoiceIdx={setVoiceIdx} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="flex items-center gap-3 rounded-[8px] border border-border bg-card p-4">
           <button
             type="button"
@@ -384,10 +384,10 @@ export default function SoundsSession() {
       <MatchTerms />
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">Where the sound is made</p>
+        <p className="text-label font-bold text-ink">Where the sound is made</p>
         <p className="text-label text-muted">Click each sound to hear it, then say it back yourself and notice where your own tongue, lips or teeth move.</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="text-xs leading-relaxed text-ink">
+          <p className="text-label leading-relaxed text-ink">
             Consonants are formed when airflow from the lungs is obstructed by the moveable parts of the mouth —
             tongue, teeth, lips, palate. Click a sound to hear it and see where it&apos;s obstructed.
           </p>
@@ -411,7 +411,7 @@ export default function SoundsSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">The phonemic chart, spoken</p>
+        <p className="text-label font-bold text-ink">The phonemic chart, spoken</p>
         <p className="text-label text-muted">Click any symbol to hear the sound in isolation, then in a real word.</p>
         <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
           {CHART.map((c) => (
@@ -433,14 +433,14 @@ export default function SoundsSession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">Articulation — how to physically produce it</p>
+        <p className="text-label font-bold text-ink">Articulation — how to physically produce it</p>
         <p className="text-label text-muted">
           A learner can&apos;t copy a written symbol — they need to see the mouth move. On the site below, click each
           of these four sounds on the real IPA chart and watch the video, then write down what you actually see —
           tongue, lips, teeth — before checking it against the summary underneath.
         </p>
         <div className="flex items-center gap-2.5 rounded-[8px] border border-muted/25 bg-muted/10 px-3.5 py-2.5">
-          <p className="flex-1 text-xs leading-relaxed text-ink">
+          <p className="flex-1 text-label leading-relaxed text-ink">
             Show the real thing rather than a diagram — <strong className="font-semibold">Seeing Speech</strong> is a
             clickable IPA chart with real ultrasound, MRI and animated vocal-tract video for every sound, free.
           </p>
@@ -448,7 +448,7 @@ export default function SoundsSession() {
             href="https://www.seeingspeech.ac.uk/ipa-charts/"
             target="_blank"
             rel="noreferrer"
-            className="flex h-8 flex-none items-center rounded-[6px] bg-muted px-3.5 text-xs font-bold text-ink"
+            className="flex h-8 flex-none items-center rounded-[6px] bg-muted px-3.5 text-label font-bold text-ink"
           >
             seeingspeech.ac.uk
           </a>
@@ -466,21 +466,21 @@ export default function SoundsSession() {
               </svg>
             </span>
             <span className="w-12 flex-none font-serif text-h3 font-semibold text-ink">/{a.symbol}/</span>
-            <span className="flex-1 text-xs leading-relaxed text-muted">{a.how}</span>
+            <span className="flex-1 text-label leading-relaxed text-muted">{a.how}</span>
           </button>
         ))}
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">Where learners typically struggle</p>
+        <p className="text-label font-bold text-ink">Where learners typically struggle</p>
         <p className="text-label text-muted">The same four pairs from the clap game — each is a known trouble spot for a common set of L1 backgrounds.</p>
         {STRUGGLES.map((s) => (
           <div key={s.pair} className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
             <div className="flex items-baseline gap-2.5">
-              <p className="font-serif text-sm font-semibold text-ink">{s.pair}</p>
+              <p className="font-serif text-body font-semibold text-ink">{s.pair}</p>
               <p className="text-micro font-bold uppercase tracking-[0.04em] text-muted">{s.who}</p>
             </div>
-            <p className="text-xs leading-relaxed text-muted">{s.note}</p>
+            <p className="text-label leading-relaxed text-muted">{s.note}</p>
           </div>
         ))}
       </div>

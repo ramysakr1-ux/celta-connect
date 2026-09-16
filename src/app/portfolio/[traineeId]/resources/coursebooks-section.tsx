@@ -44,8 +44,8 @@ function CoursebookCard({
 
   return (
     <li className={`sheet hover-ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
-      <p className="text-sm font-semibold text-ink">{book.title}</p>
-      <p className="text-xs text-muted">{book.level}</p>
+      <p className="text-body font-semibold text-ink">{book.title}</p>
+      <p className="text-label text-muted">{book.level}</p>
       {isEditableStaff ? (
         <form action={action} className="mt-1 flex flex-col gap-1.5">
           <input type="hidden" name="coursebook_id" value={book.id} />
@@ -54,19 +54,19 @@ function CoursebookCard({
             rows={2}
             defaultValue={book.access_notes ?? ""}
             placeholder="How candidates access this book (e.g. provided in the welcome pack, a Drive link)"
-            className="rounded-[6px] border border-input bg-card-inset px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-input bg-card-inset px-2 py-1.5 text-label text-ink outline-none focus:border-primary"
           />
-          {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
           <button
             type="submit"
             disabled={pending}
-            className="self-start rounded-[6px] border border-border px-2 py-1 text-xs text-ink wash disabled:opacity-60"
+            className="self-start rounded-[6px] border border-border px-2 py-1 text-label text-ink wash disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
         </form>
       ) : book.access_notes ? (
-        <p className="mt-1 whitespace-pre-line text-xs text-ink">{book.access_notes}</p>
+        <p className="mt-1 whitespace-pre-line text-label text-ink">{book.access_notes}</p>
       ) : null}
     </li>
   );

@@ -22,35 +22,35 @@ export function CreateCentreForm() {
     <form action={action} className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-3">
         <label className="flex flex-1 min-w-[12rem] flex-col gap-1.5">
-          <span className="text-sm text-muted">Centre name</span>
+          <span className="text-body text-muted">Centre name</span>
           <input
             name="name"
             required
-            className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
           />
         </label>
         <label className="flex flex-1 min-w-[10rem] flex-col gap-1.5">
-          <span className="text-sm text-muted">Centre number</span>
+          <span className="text-body text-muted">Centre number</span>
           <input
             name="center_number"
             required
             placeholder="Cambridge-assigned"
-            className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
           />
         </label>
       </div>
       <button
         type="submit"
         disabled={pending}
-        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 self-start rounded-[6px] bg-primary px-4 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Creating..." : "Create centre + owner invite"}
       </button>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       {link ? (
         <div className="flex flex-wrap items-center gap-2 rounded-[6px] border border-primary/30 bg-primary/5 px-3 py-2">
-          <span className="text-xs text-muted">{state.centerName} is ready. Send this to its first centre owner:</span>
-          <code className="min-w-0 flex-1 truncate text-xs text-ink">{link}</code>
+          <span className="text-label text-muted">{state.centerName} is ready. Send this to its first centre owner:</span>
+          <code className="min-w-0 flex-1 truncate text-label text-ink">{link}</code>
           <button
             type="button"
             onClick={() => {
@@ -58,7 +58,7 @@ export function CreateCentreForm() {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
-            className="shrink-0 text-xs font-semibold text-primary hover:underline wash"
+            className="shrink-0 text-label font-semibold text-primary hover:underline wash"
           >
             {copied ? "Copied" : "Copy link"}
           </button>
@@ -82,20 +82,20 @@ export function ChangeRoleForm() {
   return (
     <form action={action} className="flex flex-wrap items-end gap-3">
       <label className="flex flex-1 min-w-[14rem] flex-col gap-1.5">
-        <span className="text-sm text-muted">Email</span>
+        <span className="text-body text-muted">Email</span>
         <input
           type="email"
           name="email"
           required
-          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
         />
       </label>
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm text-muted">New role</span>
+        <span className="text-body text-muted">New role</span>
         <select
           name="role"
           defaultValue="admin"
-          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
         >
           {ROLE_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>
@@ -107,12 +107,12 @@ export function ChangeRoleForm() {
       <button
         type="submit"
         disabled={pending}
-        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-primary px-4 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Changing..." : "Change role"}
       </button>
-      {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
-      {state.notice ? <p className="w-full text-sm text-primary">{state.notice}</p> : null}
+      {state.error ? <p className="w-full text-body text-destructive">{state.error}</p> : null}
+      {state.notice ? <p className="w-full text-body text-primary">{state.notice}</p> : null}
     </form>
   );
 }

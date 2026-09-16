@@ -24,9 +24,9 @@ export function ProcedureDisplay({
     return (
       <ul className="list-disc space-y-3 pl-5">
         {(stages ?? []).map((stage, i) => (
-          <li key={i} className="text-sm">
+          <li key={i} className="text-body">
             <span className="font-medium text-ink">{stage.name}</span>
-            {stage.timing ? <span className="ml-2 text-xs text-muted">{stage.timing}</span> : null}
+            {stage.timing ? <span className="ml-2 text-label text-muted">{stage.timing}</span> : null}
             <p className="mt-1 text-muted">{stage.instructions}</p>
           </li>
         ))}
@@ -39,20 +39,20 @@ export function ProcedureDisplay({
       procedure as FrameworkProcedure;
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           <span className="text-muted">Framework: </span>
           {framework_name}
         </p>
         <ul className="list-disc space-y-2 pl-5">
           {(stages ?? []).map((stage, i) => (
-            <li key={i} className="text-sm">
+            <li key={i} className="text-body">
               <span className="font-medium text-ink">{stage.name}</span>
               <p className="mt-0.5 text-muted">{stage.reference}</p>
             </li>
           ))}
         </ul>
         {analysis_label ? (
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             <span className="text-muted">{analysis_label}: </span>
             {analysis_prompt}
           </p>
@@ -66,7 +66,7 @@ export function ProcedureDisplay({
   return (
     <ul className="list-disc space-y-2 pl-5">
       {(guidance_paragraphs ?? []).map((paragraph, i) => (
-        <li key={i} className="text-sm text-muted">
+        <li key={i} className="text-body text-muted">
           {paragraph}
         </li>
       ))}

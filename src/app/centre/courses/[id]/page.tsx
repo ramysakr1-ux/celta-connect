@@ -100,16 +100,16 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
         <div className="card p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
           {tutors.length === 0 ? (
-            <p className="mt-2 text-sm text-muted">No tutors have joined yet.</p>
+            <p className="mt-2 text-body text-muted">No tutors have joined yet.</p>
           ) : (
             <div className="mt-3 flex flex-col gap-2">
               {tutors.map((t) => (
                 <div key={t.email} className="hover-ring flex items-center justify-between gap-3 border-t border-border-faint pt-2 first:border-none first:pt-0">
                   <div>
-                    <p className="text-sm text-ink">{t.name}</p>
-                    <p className="text-xs text-muted">{t.email}</p>
+                    <p className="text-body text-ink">{t.name}</p>
+                    <p className="text-label text-muted">{t.email}</p>
                   </div>
-                  <span className="shrink-0 text-xs text-muted">
+                  <span className="shrink-0 text-label text-muted">
                     {tutorRoleLabel(t.role)}
                     {!t.joined ? " · invited" : ""}
                   </span>
@@ -121,11 +121,11 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
 
         <div className="card p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">Cohort</h2>
-          <p className="mt-2 text-sm text-ink">
+          <p className="mt-2 text-body text-ink">
             {traineeCount ?? 0} trainee{(traineeCount ?? 0) === 1 ? "" : "s"}
             {course.cohort_size ? ` of ${course.cohort_size} max` : ""}
           </p>
-          <p className="mt-3 text-xs text-muted">
+          <p className="mt-3 text-label text-muted">
             This is a health check, not a management view -- roster, subgroups, and everything operational live
             inside the course itself, with the MCT.
           </p>

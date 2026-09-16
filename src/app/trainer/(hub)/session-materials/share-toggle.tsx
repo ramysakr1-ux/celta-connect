@@ -15,7 +15,7 @@ export function ShareToggle({ eventId, shares }: { eventId: string; shares: bool
     <form ref={formRef} action={action} className="flex flex-col gap-1">
       <input type="hidden" name="event_id" value={eventId} />
       <input type="hidden" name="shares_materials" value={shares ? "false" : "true"} />
-      <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+      <label className="flex cursor-pointer items-center gap-2 text-body text-ink">
         <input
           type="checkbox"
           checked={shares}
@@ -26,12 +26,12 @@ export function ShareToggle({ eventId, shares }: { eventId: string; shares: bool
         />
         Volunteer students can see materials shared for this session
       </label>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         {shares
           ? "Shown on the volunteer view under this session's title, with whatever you attach below."
           : "Off -- volunteer students do not see this session's materials. Leave it off for logistics like Lunch."}
       </p>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }

@@ -23,8 +23,8 @@ export function AssignmentWarningLetterSection({
   return (
     <div className="card border-status-warning-text p-6">
       <p className="text-label font-semibold tracking-[0.1em] text-status-warning-text uppercase">Formal notice · written assignments</p>
-      <h2 className="mt-1 font-serif text-lg text-ink">Assignment warning letter</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="mt-1 font-serif text-h3 text-ink">Assignment warning letter</h2>
+      <p className="mt-1 text-body text-muted">
         A candidate must pass three of the four written assignments. Failing this one after its one resubmission
         means they cannot fail another.
       </p>
@@ -34,16 +34,16 @@ export function AssignmentWarningLetterSection({
           {existingLetters.map((l) => (
             <div key={l.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint p-2.5">
               <div>
-                <p className="text-sm text-ink">Issued {formatDate(l.issued_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}</p>
-                <p className="text-xs text-muted">{l.acknowledged_at ? `Acknowledged ${formatDate(l.acknowledged_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}` : "Awaiting acknowledgement"}</p>
+                <p className="text-body text-ink">Issued {formatDate(l.issued_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}</p>
+                <p className="text-label text-muted">{l.acknowledged_at ? `Acknowledged ${formatDate(l.acknowledged_at, timeZone, { day: "numeric", month: "short", year: "numeric" })}` : "Awaiting acknowledgement"}</p>
               </div>
-              <a href={`/api/formal-letter/${l.id}`} className="text-xs font-semibold text-primary hover:underline">
+              <a href={`/api/formal-letter/${l.id}`} className="text-label font-semibold text-primary hover:underline">
                 Download
               </a>
             </div>
           ))}
           {!showForm ? (
-            <button type="button" onClick={() => setShowForm(true)} className="self-start text-xs text-primary hover:underline">
+            <button type="button" onClick={() => setShowForm(true)} className="self-start text-label text-primary hover:underline">
               Issue another
             </button>
           ) : null}

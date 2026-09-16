@@ -87,8 +87,8 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
     <div className="flex flex-col gap-5">
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
-        <h2 className="font-serif text-2xl text-ink">Cambridge&apos;s Pre-Course Task, plus your centre&apos;s supplement</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h1 text-ink">Cambridge&apos;s Pre-Course Task, plus your centre&apos;s supplement</h2>
+        <p className="mt-1 text-body text-muted">
           {demoReadOnly ? "On a real course you answer it here and it saves as you go. " : "You answer it here and it saves as you go. "}It is not graded and not counted as coursework, but your tutor
           reads it before day one. Work through it in several sittings rather than one; that is Cambridge&apos;s own
           advice, and the grammar section rewards it.
@@ -96,7 +96,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
       </div>
 
       {demoReadOnly ? (
-        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-3 text-sm text-ink">
+        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-3 text-body text-ink">
           <span className="font-semibold">Demo: read-only.</span> This is a shared sample account, so answers cannot be saved here. You can read
           every task and, once the course starts, the answer key.
         </p>

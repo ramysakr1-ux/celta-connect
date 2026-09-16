@@ -106,10 +106,10 @@ export function SessionMaterialsSection({
       {materials.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {materials.map((m) => (
-            <li key={m.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2 text-sm">
+            <li key={m.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2 text-body">
               <button type="button" onClick={() => handleOpenMaterial(m)} disabled={opening === m.id} className="text-left text-ink hover:underline disabled:opacity-60">
                 {opening === m.id ? "Opening…" : (m.file_name ?? m.slides_url)}
-                {m.file_type ? <span className="ml-2 text-xs text-muted">({m.file_type})</span> : null}
+                {m.file_type ? <span className="ml-2 text-label text-muted">({m.file_type})</span> : null}
               </button>
               {m.uploaded_by === viewerId ? (
                 <form action={deleteSessionMaterial}>
@@ -124,20 +124,20 @@ export function SessionMaterialsSection({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted">Nothing shared yet.</p>
+        <p className="text-body text-muted">Nothing shared yet.</p>
       )}
 
       <div className="flex flex-col gap-1.5 border-t border-border-faint pt-3">
-        <label className="text-sm text-muted">Attach materials</label>
+        <label className="text-body text-muted">Attach materials</label>
         <input
           type="file"
           accept="application/pdf,image/*,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
           disabled={uploading}
           onChange={handleFileChange}
-          className="text-sm text-ink"
+          className="text-body text-ink"
         />
-        {uploading ? <p className="text-sm text-muted">Uploading…</p> : null}
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {uploading ? <p className="text-body text-muted">Uploading…</p> : null}
+        {error ? <p className="text-body text-destructive">{error}</p> : null}
       </div>
     </div>
   );

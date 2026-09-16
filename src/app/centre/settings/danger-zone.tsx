@@ -30,8 +30,8 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
     <div className="rounded-[10px] border border-destructive/40 bg-card px-[22px] py-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="font-serif text-base text-ink">Transfer centre ownership</h3>
-          <p className="mt-1 text-sm text-muted">
+          <h3 className="font-serif text-h3 text-ink">Transfer centre ownership</h3>
+          <p className="mt-1 text-body text-muted">
             Hands the centre-owner role to someone else — they take on everything that role can do, including
             restoring deleted courses and appointing administrators. They must already have an account at this
             centre (invite them from Admin roster first).
@@ -40,7 +40,7 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
       </div>
       <form action={action} className="mt-4 flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="new_owner_email" className="text-sm text-muted">
+          <label htmlFor="new_owner_email" className="text-body text-muted">
             New owner&apos;s email
           </label>
           <input
@@ -48,11 +48,11 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
             name="new_owner_email"
             type="email"
             required
-            className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="confirm_name_transfer" className="text-sm text-muted">
+          <label htmlFor="confirm_name_transfer" className="text-body text-muted">
             Type <span className="font-semibold text-ink">{centreName}</span> to confirm
           </label>
           <input
@@ -61,14 +61,14 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
             type="text"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
-            className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
         <button
           type="submit"
           disabled={!unlocked || pending}
-          className="wash self-start rounded-[6px] border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
+          className="wash self-start rounded-[6px] border border-destructive px-4 py-2 text-body font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {pending ? "Transferring…" : "Transfer ownership"}
         </button>
@@ -95,8 +95,8 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
   return (
     <div className="rounded-[10px] border border-destructive/40 bg-card px-[22px] py-5">
       <div>
-        <h3 className="font-serif text-base text-ink">Delete this centre</h3>
-        <p className="mt-1 text-sm text-muted">
+        <h3 className="font-serif text-h3 text-ink">Delete this centre</h3>
+        <p className="mt-1 text-body text-muted">
           Permanent. Every course, candidate record, and CELTA 5 in the centre becomes inaccessible in Connect
           immediately — there is no grace period and no way to undo this. Any course not already archived is
           exported to your centre&apos;s Drive first, the same archive a normal close-out produces, so nothing
@@ -106,22 +106,22 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
 
       {!requestState.sent ? (
         <form action={requestAction} className="mt-4">
-          {requestState.error ? <p className="mb-3 text-sm text-destructive">{requestState.error}</p> : null}
+          {requestState.error ? <p className="mb-3 text-body text-destructive">{requestState.error}</p> : null}
           <button
             type="submit"
             disabled={requestPending}
-            className="wash self-start rounded-[6px] border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
+            className="wash self-start rounded-[6px] border border-destructive px-4 py-2 text-body font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {requestPending ? "Sending code…" : "Send me a confirmation code"}
           </button>
         </form>
       ) : (
         <form action={deleteActionFn} className="mt-4 flex flex-col gap-3">
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             A confirmation code was emailed to you. It expires in 15 minutes.
           </p>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="confirm_name_delete" className="text-sm text-muted">
+            <label htmlFor="confirm_name_delete" className="text-body text-muted">
               Type <span className="font-semibold text-ink">{centreName}</span> to confirm
             </label>
             <input
@@ -130,11 +130,11 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
-              className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="delete_code" className="text-sm text-muted">
+            <label htmlFor="delete_code" className="text-body text-muted">
               Confirmation code
             </label>
             <input
@@ -144,14 +144,14 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
               inputMode="numeric"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="max-w-[160px] rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="max-w-[160px] rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
-          {deleteState.error ? <p className="text-sm text-destructive">{deleteState.error}</p> : null}
+          {deleteState.error ? <p className="text-body text-destructive">{deleteState.error}</p> : null}
           <button
             type="submit"
             disabled={!unlocked || deletePending}
-            className="self-start rounded-[6px] bg-destructive px-4 py-2 text-sm font-semibold text-white hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="self-start rounded-[6px] bg-destructive px-4 py-2 text-body font-semibold text-white hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {deletePending ? "Deleting…" : "Permanently delete this centre"}
           </button>

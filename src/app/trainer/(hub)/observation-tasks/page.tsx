@@ -17,7 +17,7 @@ export default async function ObservationTasksPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   if (!trainer.course_id) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   const supabase = await createClient();
@@ -44,14 +44,14 @@ export default async function ObservationTasksPage() {
       <div>
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Observation tasks</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">{(tasks ?? []).length} assigned</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           Directed observation tasks for the whole cohort. A submission counts toward each candidate&apos;s 6-hour
           requirement the same way a self-logged observation does.
         </p>
       </div>
 
       <div className="sheet">
-        <h2 className="font-serif text-lg text-ink">Assign a new task</h2>
+        <h2 className="font-serif text-h3 text-ink">Assign a new task</h2>
         <div className="mt-3">
           <CreateTaskForm />
         </div>
@@ -59,7 +59,7 @@ export default async function ObservationTasksPage() {
 
       <div className="flex flex-col gap-4">
         {(tasks ?? []).length === 0 ? (
-          <div className="sheet text-sm text-muted">No observation tasks assigned yet.</div>
+          <div className="sheet text-body text-muted">No observation tasks assigned yet.</div>
         ) : (
           (tasks ?? []).map((task) => {
             const taskSubmissions = (submissions ?? []).filter((s) => s.task_id === task.id);
@@ -68,12 +68,12 @@ export default async function ObservationTasksPage() {
               <div key={task.id} className="sheet flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-serif text-lg text-ink">{task.title}</h3>
-                    <p className="mt-1 text-sm text-muted">{task.instructions}</p>
+                    <h3 className="font-serif text-h3 text-ink">{task.title}</h3>
+                    <p className="mt-1 text-body text-muted">{task.instructions}</p>
                   </div>
                   <form action={deleteObservationTask}>
                     <input type="hidden" name="task_id" value={task.id} />
-                    <button type="submit" className="shrink-0 text-xs text-muted hover:text-destructive">
+                    <button type="submit" className="shrink-0 text-label text-muted hover:text-destructive">
                       Delete
                     </button>
                   </form>
@@ -84,15 +84,15 @@ export default async function ObservationTasksPage() {
                     return (
                       <details key={trainee.id} className="py-2">
                         <summary className="flex cursor-pointer items-center justify-between gap-3">
-                          <span className="text-sm text-ink">{trainee.full_name}</span>
+                          <span className="text-body text-ink">{trainee.full_name}</span>
                           <span className={`pill ${submission ? "pill-success" : "pill-neutral"}`}>
                             {submission ? "Submitted" : "Not yet"}
                           </span>
                         </summary>
                         {submission ? (
                           <div className="mt-2 pl-1">
-                            <p className="text-xs text-muted">{formatDateTime(submission.submitted_at, timeZone)}</p>
-                            <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
+                            <p className="text-label text-muted">{formatDateTime(submission.submitted_at, timeZone)}</p>
+                            <p className="mt-1 whitespace-pre-wrap text-body text-ink">{submission.response}</p>
                           </div>
                         ) : null}
                       </details>

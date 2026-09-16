@@ -12,7 +12,7 @@ export type SerializedGuidance = Record<string, Record<string, GuidanceRow>>;
 
 const initialState: FormState = { error: null };
 const textareaClass =
-  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary";
 
 export function MarkingGuidanceTabs({
   assignments,
@@ -36,7 +36,7 @@ export function MarkingGuidanceTabs({
             key={a.type}
             type="button"
             onClick={() => setActive(a.type)}
-            className={`rounded-[6px] border px-3.5 py-2 text-sm font-medium ${
+            className={`rounded-[6px] border px-3.5 py-2 text-body font-medium ${
               active === a.type
                 ? "border-primary bg-primary/10 text-primary"
                 : "border-border text-muted hover:border-primary/50 hover:text-ink"
@@ -87,8 +87,8 @@ function CriterionCard({
       <input type="hidden" name="criterion_key" value={criterion.key} />
 
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 shrink-0 text-xs font-semibold text-primary">{romanNumeral(index + 1)}</span>
-        <p className="text-sm font-semibold text-ink">{criterion.text}</p>
+        <span className="mt-0.5 shrink-0 text-label font-semibold text-primary">{romanNumeral(index + 1)}</span>
+        <p className="text-body font-semibold text-ink">{criterion.text}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-3.5 md:grid-cols-3">
@@ -98,7 +98,7 @@ function CriterionCard({
       </div>
 
       <div className="flex flex-col gap-1.5 border-t border-border-faint pt-3.5">
-        <label className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Agreed</label>
+        <label className="text-label font-semibold tracking-[0.06em] text-muted uppercase">Agreed</label>
         <textarea
           name="agreed_text"
           rows={2}
@@ -109,15 +109,15 @@ function CriterionCard({
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           {row?.updated_at ? `Last updated ${updatedByName ? `by ${updatedByName} ` : ""}${formatDate(row.updated_at, timeZone, { year: "numeric" })}` : "Not written yet"}
         </p>
         <div className="flex items-center gap-2">
-          {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] border border-border px-3.5 py-1.5 text-sm text-ink hover:border-primary disabled:opacity-60"
+            className="rounded-[6px] border border-border px-3.5 py-1.5 text-body text-ink hover:border-primary disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
@@ -130,7 +130,7 @@ function CriterionCard({
 function Field({ label, name, defaultValue, accent }: { label: string; name: string; defaultValue: string; accent: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className={`text-xs font-semibold tracking-[0.06em] uppercase ${accent}`}>{label}</label>
+      <label className={`text-label font-semibold tracking-[0.06em] uppercase ${accent}`}>{label}</label>
       <textarea name={name} rows={4} defaultValue={defaultValue} placeholder="One per line" className={textareaClass} />
     </div>
   );

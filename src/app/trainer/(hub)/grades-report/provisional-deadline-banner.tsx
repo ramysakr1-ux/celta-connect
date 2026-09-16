@@ -52,12 +52,12 @@ export function ProvisionalDeadlineBanner({
           </span>
         ) : null}
         {isMct ? (
-          <button type="button" onClick={() => setEditing((v) => !v)} className="text-xs font-medium text-primary hover:underline">
+          <button type="button" onClick={() => setEditing((v) => !v)} className="text-label font-medium text-primary hover:underline">
             {editing ? "Cancel" : dueAt ? "Change date" : "Set date"}
           </button>
         ) : null}
       </div>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         {derived && dueAt
           ? "Two working days before the assessor visit — nobody has set a date, so this is the working assumption until someone does. "
           : ""}
@@ -73,11 +73,11 @@ export function ProvisionalDeadlineBanner({
           did the day before. Past is said as overdue, until everything is
           confirmed; then it says what comes next. */}
       {overdueDays > 0 && !allConfirmed ? (
-        <p className="text-xs font-semibold text-destructive">
+        <p className="text-label font-semibold text-destructive">
           Overdue by {overdueDays} day{overdueDays === 1 ? "" : "s"} &mdash; {totalCount - approvedCount} still to confirm.
         </p>
       ) : allConfirmed ? (
-        <p className="text-xs font-semibold text-ink">
+        <p className="text-label font-semibold text-ink">
           All {totalCount} confirmed &mdash; the Centre Grade form can go into Appian (Handbook 14.1, two to three days before the visit).
         </p>
       ) : null}
@@ -87,18 +87,18 @@ export function ProvisionalDeadlineBanner({
             type="date"
             name="due_date"
             defaultValue={dueAt ? dueAt.slice(0, 10) : ""}
-            className="h-8 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-8 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           />
           <button
             type="submit"
             disabled={pending}
-            className="h-8 rounded-[6px] bg-primary px-3 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            className="h-8 rounded-[6px] bg-primary px-3 text-label font-semibold text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
         </form>
       ) : null}
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </div>
   );
 }

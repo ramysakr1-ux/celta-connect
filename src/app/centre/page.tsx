@@ -303,7 +303,7 @@ export default async function CentreOverviewPage({
             >
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
               <p className={`mt-1 font-serif text-h1 ${m.tone === "owed" ? "text-status-warning-text" : "text-ink"}`}>{m.value}</p>
-              <p className="mt-0.5 text-xs text-muted">{m.note}</p>
+              <p className="mt-0.5 text-label text-muted">{m.note}</p>
             </div>
           ))}
         </div>
@@ -318,14 +318,14 @@ export default async function CentreOverviewPage({
       <div className="card card-accent !p-0">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4">
           <h2 className="font-serif text-h3 font-semibold text-ink">All courses</h2>
-          <span className="text-xs text-muted">
+          <span className="text-label text-muted">
             {/* for-claude-code-course-admin-final-scope.md: "how many, their
                 status." A per-status breakdown, not just a flat total. */}
             {courseStateCounts.running} running · {courseStateCounts.upcoming} upcoming · {courseStateCounts.closed} closed
           </span>
         </div>
         {(courses ?? []).length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted">No courses yet.</p>
+          <p className="px-5 py-4 text-body text-muted">No courses yet.</p>
         ) : (
           (courses ?? []).map((c, i) => {
             const state = stateOf(c.start_date, c.end_date);
@@ -333,19 +333,19 @@ export default async function CentreOverviewPage({
             return (
               <div key={c.id} className={`lift flex flex-wrap items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <Link href={`/centre/courses/${c.id}`} className="min-w-[13rem] flex-1 hover:text-primary">
-                  <p className="text-sm font-semibold text-ink">
+                  <p className="text-body font-semibold text-ink">
                     {c.name}
                     {/* "The branch always travels with the course code" -- a code
                         is ambiguous across two cities, so it never appears alone. */}
                     {multiBranch ? <BranchChip name={branchName.get(c.center_id)} className="ml-2" /> : null}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-label text-muted">
                     {dateRange(c.start_date, c.end_date)}
                     {c.delivery_mode ? ` · ${c.delivery_mode}` : ""}
                   </p>
                 </Link>
                 {canView(ctx.roles, "payments.view", ctx.overrides) ? (
-                  <span className={`w-28 shrink-0 text-sm ${owed > 0 ? (missedByCourse.has(c.id) ? "text-destructive" : "text-status-warning-text") : "text-muted"}`}>
+                  <span className={`w-28 shrink-0 text-body ${owed > 0 ? (missedByCourse.has(c.id) ? "text-destructive" : "text-status-warning-text") : "text-muted"}`}>
                     {owed > 0 ? `${formatTotals(sumByCurrency(owedRowsByCourse.get(c.id) ?? [], currencyCode), currencyCode)} due` : "Fully paid"}
                   </span>
                 ) : null}
@@ -369,24 +369,24 @@ export default async function CentreOverviewPage({
         <div className="card card-red !p-0 bg-destructive/5">
           <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-4">
             <h2 className="font-serif text-h3 font-semibold text-ink">Email couldn&apos;t be delivered</h2>
-            <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
+            <span className="text-label text-muted">{(bounces ?? []).length} to fix</span>
           </div>
           {(bounces ?? []).map((b, i) => (
             <div key={b.id} className={`lift px-5 py-4 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
               <div className="flex items-center justify-between gap-3">
                 {b.applicant_id ? (
-                  <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-sm text-ink hover:underline">
+                  <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-body text-ink hover:underline">
                     {b.email_address}
                   </Link>
                 ) : (
-                  <span className="text-sm text-ink">{b.email_address}</span>
+                  <span className="text-body text-ink">{b.email_address}</span>
                 )}
-                <span className="shrink-0 text-xs font-semibold text-destructive">
+                <span className="shrink-0 text-label font-semibold text-destructive">
                   {b.consecutive_bounces >= 2 ? "Sending stopped" : "Bounced"}
                 </span>
               </div>
               {/* The provider's own words, never a status code. */}
-              <p className="text-xs text-muted">{b.reason}</p>
+              <p className="text-label text-muted">{b.reason}</p>
             </div>
           ))}
         </div>
@@ -402,12 +402,12 @@ export default async function CentreOverviewPage({
                 <h2 className="font-serif text-h3 font-semibold text-ink">Admissions pipeline</h2>
                 <AdmissionsChangeIndicator centerIds={scope} initialUnread={(unreadAdmissionsCount ?? 0) > 0} />
               </div>
-              <Link href="/dashboard/admissions" className="text-xs font-medium text-primary hover:underline">
+              <Link href="/dashboard/admissions" className="text-label font-medium text-primary hover:underline">
                 Open
               </Link>
             </div>
             {stageCounts.size === 0 ? (
-              <p className="px-5 py-4 text-sm text-muted">
+              <p className="px-5 py-4 text-body text-muted">
                 Nobody in the pipeline yet. That is the ordinary state before a course opens for applications &mdash;
                 the pipeline fills from the application form.
               </p>
@@ -415,8 +415,8 @@ export default async function CentreOverviewPage({
               [...stageCounts.entries()].map(([stage, count], i) => (
                 <div key={stage} className={`hover-ring px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted capitalize">{stage.replace(/_/g, " ")}</span>
-                    <span className="text-sm text-ink tabular-nums">{count}</span>
+                    <span className="text-body text-muted capitalize">{stage.replace(/_/g, " ")}</span>
+                    <span className="text-body text-ink tabular-nums">{count}</span>
                   </div>
                   {/* The per-branch split sits beneath the total, per §13. */}
                   {multiBranch && !branch ? (
@@ -442,15 +442,15 @@ export default async function CentreOverviewPage({
                 <h2 className="font-serif text-h3 font-semibold text-ink">Payments needing attention</h2>
               </div>
               {missed.length === 0 ? (
-                <p className="px-5 py-4 text-sm text-muted">Nothing missed.</p>
+                <p className="px-5 py-4 text-body text-muted">Nothing missed.</p>
               ) : (
                 missed.map((p, i) => (
                   <div key={i} className={`hover-ring flex items-center justify-between px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                    <span className="flex items-center gap-2 text-sm text-destructive">
+                    <span className="flex items-center gap-2 text-body text-destructive">
                       Missed instalment
                       {multiBranch ? <BranchChip name={branchName.get(p.center_id)} /> : null}
                     </span>
-                    <span className="text-sm text-muted tabular-nums">
+                    <span className="text-body text-muted tabular-nums">
                       {/* Each row in its own currency, and a date written
                           the way a person says it -- this printed the page's
                           currency over whatever the instalment was actually
@@ -471,12 +471,12 @@ export default async function CentreOverviewPage({
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-h3 font-semibold text-ink">Volunteer pool</h2>
-                <span className="text-xs text-muted">
+                <span className="text-label text-muted">
                   {volunteerPersonCount} {volunteerPersonCount === 1 ? "person" : "people"} &middot;{" "}
                   {(volunteers ?? []).length} registrations
                 </span>
               </div>
-              <span className="text-xs font-semibold text-primary">See all</span>
+              <span className="text-label font-semibold text-primary">See all</span>
             </Link>
           ) : null}
 
@@ -490,11 +490,11 @@ export default async function CentreOverviewPage({
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-h3 font-semibold text-ink">Criteria glossary</h2>
-                <span className="text-xs text-muted">
+                <span className="text-label text-muted">
                   The words that tag a CELTA 5 criterion as a tutor writes feedback
                 </span>
               </div>
-              <span className="text-xs font-semibold text-primary">Open</span>
+              <span className="text-label font-semibold text-primary">Open</span>
             </Link>
           ) : null}
 
@@ -505,14 +505,14 @@ export default async function CentreOverviewPage({
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-h3 font-semibold text-ink">Assessor history</h2>
-                <span className="text-xs text-muted">
+                <span className="text-label text-muted">
                   {assessorHistory.length} {assessorHistory.length === 1 ? "assessor" : "assessors"}
                   {assessorHistory.some((a) => a.flag)
                     ? ` · ${assessorHistory.filter((a) => a.flag).length} at or over a Handbook limit`
                     : ""}
                 </span>
               </div>
-              <span className="text-xs font-semibold text-primary">See all</span>
+              <span className="text-label font-semibold text-primary">See all</span>
             </Link>
           ) : null}
         </div>

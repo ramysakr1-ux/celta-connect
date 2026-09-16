@@ -21,7 +21,7 @@ export function RevealPeerNotesForm({ subgroups }: { subgroups: { id: string; na
         name="subgroup_id"
         required
         defaultValue=""
-        className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 rounded-[6px] border border-input bg-card px-2 text-body text-ink outline-none focus:border-primary"
       >
         <option value="" disabled>
           — half / subgroup —
@@ -36,7 +36,7 @@ export function RevealPeerNotesForm({ subgroups }: { subgroups: { id: string; na
         name="tp_number"
         required
         defaultValue=""
-        className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 rounded-[6px] border border-input bg-card px-2 text-body text-ink outline-none focus:border-primary"
       >
         <option value="" disabled>
           — TP —
@@ -47,7 +47,7 @@ export function RevealPeerNotesForm({ subgroups }: { subgroups: { id: string; na
           </option>
         ))}
       </select>
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-card disabled:opacity-60">
         {pending ? "Revealing…" : "Reveal notes"}
       </button>
     </form>

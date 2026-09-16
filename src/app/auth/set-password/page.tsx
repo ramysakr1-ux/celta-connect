@@ -13,7 +13,7 @@ export default async function SetPasswordPage() {
   return (
     <div className="flex flex-1 items-center justify-center p-8">
       <div className="card w-full max-w-sm p-8">
-        <h1 className="font-serif text-2xl text-ink">Set your password</h1>
+        <h1 className="font-serif text-h1 text-ink">Set your password</h1>
         <p className="mt-1 text-muted">Choose a new password for your account.</p>
         <SetPasswordForm />
       </div>

@@ -22,8 +22,8 @@ export default async function SupportScopedViewPage({ params }: { params: Promis
       <div className="entry-ground flex min-h-screen items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-entry p-8 text-center">
-          <h1 className="font-serif text-xl text-ink">This link is not valid</h1>
-          <p className="mt-2 text-sm text-muted">The grant has expired, been revoked, or never existed.</p>
+          <h1 className="font-serif text-h2 text-ink">This link is not valid</h1>
+          <p className="mt-2 text-body text-muted">The grant has expired, been revoked, or never existed.</p>
         </div>
         </div>
       </div>
@@ -41,8 +41,8 @@ export default async function SupportScopedViewPage({ params }: { params: Promis
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">
             {grant.scope === "course" ? "Course access" : "Billing access"} · {center?.name ?? "Centre"}
           </p>
-          <p className="mt-1 text-sm text-ink">{grant.reason}</p>
-          {grant.chat_included ? <p className="mt-1 text-xs text-muted">Course chat is included in this grant.</p> : null}
+          <p className="mt-1 text-body text-ink">{grant.reason}</p>
+          {grant.chat_included ? <p className="mt-1 text-label text-muted">Course chat is included in this grant.</p> : null}
         </div>
         <CountdownBadge expiresAt={grant.expires_at} />
       </div>
@@ -90,35 +90,35 @@ async function CourseScopedView({ admin, courseId }: { admin: ReturnType<typeof 
   return (
     <>
       <div className="sheet">
-        <h2 className="font-serif text-lg text-ink">{course?.name ?? "Course"}</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">{course?.name ?? "Course"}</h2>
+        <p className="mt-1 text-body text-muted">
           {course?.start_date} → {course?.end_date} · {course?.delivery_mode ?? "delivery mode not set"}
         </p>
       </div>
 
       <div>
-        <h3 className="font-serif text-base text-ink">Grades and marking</h3>
+        <h3 className="font-serif text-h3 text-ink">Grades and marking</h3>
         <div className="sheet mt-2 overflow-hidden !p-0">
           {(trainees ?? []).length === 0 ? (
-            <p className="p-6 text-sm text-muted">No candidates on this course.</p>
+            <p className="p-6 text-body text-muted">No candidates on this course.</p>
           ) : (
             <table className="table-plain w-full">
               <thead>
                 <tr>
-                  <th className="text-sm text-muted">Candidate</th>
-                  <th className="text-right text-sm text-muted">Criteria</th>
-                  <th className="text-right text-sm text-muted">TP feedback filed</th>
+                  <th className="text-body text-muted">Candidate</th>
+                  <th className="text-right text-body text-muted">Criteria</th>
+                  <th className="text-right text-body text-muted">TP feedback filed</th>
                 </tr>
               </thead>
               <tbody>
                 {(trainees ?? []).map((t) => (
                   <tr key={t.id}>
-                    <td className="text-sm text-ink">
+                    <td className="text-body text-ink">
                       {t.full_name}
-                      {t.course_status && t.course_status !== "active" ? <span className="ml-2 text-xs text-muted">({t.course_status})</span> : null}
+                      {t.course_status && t.course_status !== "active" ? <span className="ml-2 text-label text-muted">({t.course_status})</span> : null}
                     </td>
-                    <td className="text-right text-sm tabular-nums text-ink">{computeCriteriaPct(matrixByTrainee.get(t.id) ?? new Map())}%</td>
-                    <td className="text-right text-sm tabular-nums text-ink">{feedbackCountByTrainee.get(t.id) ?? 0}</td>
+                    <td className="text-right text-body tabular-nums text-ink">{computeCriteriaPct(matrixByTrainee.get(t.id) ?? new Map())}%</td>
+                    <td className="text-right text-body tabular-nums text-ink">{feedbackCountByTrainee.get(t.id) ?? 0}</td>
                   </tr>
                 ))}
               </tbody>
@@ -128,16 +128,16 @@ async function CourseScopedView({ admin, courseId }: { admin: ReturnType<typeof 
       </div>
 
       <div>
-        <h3 className="font-serif text-base text-ink">Timetable</h3>
+        <h3 className="font-serif text-h3 text-ink">Timetable</h3>
         <div className="sheet mt-2 overflow-hidden !p-0">
           {(timetable ?? []).length === 0 ? (
-            <p className="p-6 text-sm text-muted">No timetable events yet.</p>
+            <p className="p-6 text-body text-muted">No timetable events yet.</p>
           ) : (
             <ul>
               {(timetable ?? []).map((e, i) => (
                 <li key={i} className="list-row flex items-center justify-between gap-4">
-                  <span className="text-sm text-ink">{e.title ?? e.type}</span>
-                  <span className="text-xs text-muted">
+                  <span className="text-body text-ink">{e.title ?? e.type}</span>
+                  <span className="text-label text-muted">
                     {formatCalendarDate(e.event_date, { day: "numeric", month: "short", year: "numeric" })} {e.event_time?.slice(0, 5) ?? ""}
                   </span>
                 </li>
@@ -169,18 +169,18 @@ async function BillingScopedView({ admin, centerId }: { admin: ReturnType<typeof
 
   return (
     <div>
-      <h3 className="font-serif text-base text-ink">Payments</h3>
+      <h3 className="font-serif text-h3 text-ink">Payments</h3>
       <div className="sheet mt-2 overflow-hidden !p-0">
         {(payments ?? []).length === 0 ? (
-          <p className="p-6 text-sm text-muted">No payments recorded for this centre.</p>
+          <p className="p-6 text-body text-muted">No payments recorded for this centre.</p>
         ) : (
           <table className="table-plain w-full">
             <thead>
               <tr>
-                <th className="text-sm text-muted">Candidate</th>
-                <th className="text-right text-sm text-muted">Amount</th>
-                <th className="text-right text-sm text-muted">Due</th>
-                <th className="text-right text-sm text-muted">Status</th>
+                <th className="text-body text-muted">Candidate</th>
+                <th className="text-right text-body text-muted">Amount</th>
+                <th className="text-right text-body text-muted">Due</th>
+                <th className="text-right text-body text-muted">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -188,11 +188,11 @@ async function BillingScopedView({ admin, centerId }: { admin: ReturnType<typeof
                 const applicantId = applicantIdByPlan.get(p.payment_plan_id);
                 return (
                   <tr key={p.id}>
-                    <td className="text-sm text-ink">{applicantId ? (nameByApplicant.get(applicantId) ?? "Unknown") : "Unknown"}</td>
-                    <td className="text-right text-sm tabular-nums text-ink">
+                    <td className="text-body text-ink">{applicantId ? (nameByApplicant.get(applicantId) ?? "Unknown") : "Unknown"}</td>
+                    <td className="text-right text-body tabular-nums text-ink">
                       {p.amount} {p.currency}
                     </td>
-                    <td className="text-right text-sm text-muted">{p.due_date ?? "--"}</td>
+                    <td className="text-right text-body text-muted">{p.due_date ?? "--"}</td>
                     <td className="text-right">
                       <span className={`pill ${STATUS_PILL[p.status] ?? "pill-neutral"}`}>{p.status}</span>
                     </td>

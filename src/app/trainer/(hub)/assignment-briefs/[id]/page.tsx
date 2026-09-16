@@ -43,7 +43,7 @@ export default async function TrainerAssignmentBriefDetailPage({
         <p className="mt-2 text-muted">Status: {template.generation_status}</p>
         {pinnedSubmissions > 0 ? (
           <p
-            className="mt-2 rounded-[6px] px-3 py-2 text-sm"
+            className="mt-2 rounded-[6px] px-3 py-2 text-body"
             style={{ background: "color-mix(in oklab, oklch(44% 0.095 68) 10%, transparent)", color: "oklch(44% 0.095 68)" }}
           >
             {pinnedSubmissions === 1 ? "One candidate has" : `${pinnedSubmissions} candidates have`} already submitted
@@ -53,12 +53,12 @@ export default async function TrainerAssignmentBriefDetailPage({
         ) : null}
 
         {publish_error === "format_count" ? (
-          <p className="mt-2 rounded-[6px] border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="mt-2 rounded-[6px] border border-destructive bg-destructive/10 px-3 py-2 text-body text-destructive">
             Can&apos;t publish -- the centre&apos;s four briefs need at least two in continuous prose. Adjust a
             brief&apos;s format before publishing this one.
           </p>
         ) : null}
-        {template.generation_error ? <p className="mt-2 text-sm text-destructive">{template.generation_error}</p> : null}
+        {template.generation_error ? <p className="mt-2 text-body text-destructive">{template.generation_error}</p> : null}
         {template.generation_status === "pending" || template.generation_status === "failed" ? (
           <div className="mt-4">
             <AssignmentGenerateButton templateId={template.id} />
@@ -68,8 +68,8 @@ export default async function TrainerAssignmentBriefDetailPage({
 
       {template.generation_status === "completed" ? (
         <div className="card p-6">
-          <h2 className="font-serif text-lg text-ink">Sections</h2>
-          <p className="mt-1 text-sm text-muted">
+          <h2 className="font-serif text-h3 text-ink">Sections</h2>
+          <p className="mt-1 text-body text-muted">
             Edit the titles and instruction text as needed, then publish -- trainees only see the
             published version.
           </p>

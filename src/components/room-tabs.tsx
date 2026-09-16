@@ -12,7 +12,7 @@ import Link from "next/link";
 // The row scrolls rather than wraps -- Ramy, 2 Sep 2026, on a phone: 7px of
 // overflow was enough to slide the whole page sideways.
 function tabClass(active: boolean): string {
-  return `-mb-[3px] shrink-0 border-b-2 px-3 pb-2 text-sm font-medium whitespace-nowrap transition-colors duration-150 ${
+  return `-mb-[3px] shrink-0 border-b-2 px-3 pb-2 text-body font-medium whitespace-nowrap transition-colors duration-150 ${
     active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
   }`;
 }

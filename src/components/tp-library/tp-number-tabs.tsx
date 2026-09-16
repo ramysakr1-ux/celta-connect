@@ -66,7 +66,7 @@ export function TpNumberTabs({
               n === selected ? "border-primary bg-card" : "border-border bg-transparent hover:bg-accent/40"
             }`}
           >
-            <span className={`text-xs font-bold ${n === selected ? "text-primary" : "text-ink"}`}>TP{n}</span>
+            <span className={`text-label font-bold ${n === selected ? "text-primary" : "text-ink"}`}>TP{n}</span>
             <span className="text-micro text-muted">{DENSITY_TIER_LABELS[getDensityTier(n)].name}</span>
           </button>
         ))}
@@ -74,7 +74,7 @@ export function TpNumberTabs({
 
       {publishedCount > 0 ? (
         <div
-          className={`flex items-center justify-between gap-4 rounded-[6px] border p-3.5 text-sm ${
+          className={`flex items-center justify-between gap-4 rounded-[6px] border p-3.5 text-body ${
             !fullyClassified ? "border-border bg-card" : spreadOk ? "border-border bg-card" : "border-destructive/40 bg-destructive/5"
           }`}
         >
@@ -92,7 +92,7 @@ export function TpNumberTabs({
                   : `${repeatedLabel || "One aim type"} repeats among TP${selected}'s published points — two candidates would teach the same kind of lesson this round.`}
             </span>
           </div>
-          <span className="shrink-0 text-xs text-muted">Checked before publishing, not after</span>
+          <span className="shrink-0 text-label text-muted">Checked before publishing, not after</span>
         </div>
       ) : null}
 

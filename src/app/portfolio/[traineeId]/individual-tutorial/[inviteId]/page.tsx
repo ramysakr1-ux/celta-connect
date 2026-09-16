@@ -42,15 +42,15 @@ export default async function TraineeIndividualTutorialPage({
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
       <div className="sheet flex flex-col gap-3">
-        <p className="text-xs text-muted">{label} tutorial</p>
-        <h1 className="font-serif text-xl text-ink">
+        <p className="text-label text-muted">{label} tutorial</p>
+        <h1 className="font-serif text-h2 text-ink">
           {event?.event_date}
           {event?.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
         </h1>
-        <p className="text-sm text-muted">Your tutor has set this time individually for you. Confirm below.</p>
+        <p className="text-body text-muted">Your tutor has set this time individually for you. Confirm below.</p>
 
         {invite.confirmed_at ? (
-          <p className="text-sm font-semibold text-primary">Confirmed</p>
+          <p className="text-body font-semibold text-primary">Confirmed</p>
         ) : (
           <ConfirmButton inviteId={invite.id} />
         )}

@@ -170,8 +170,8 @@ export default function PhonologySoundsSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">2 · Terminology · 7 minutes</h2>
-          <p className="text-xs text-muted">Six terms. Match each to its definition, then close the screen and say them back from memory.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">2 · Terminology · 7 minutes</h2>
+          <p className="text-label text-muted">Six terms. Match each to its definition, then close the screen and say them back from memory.</p>
         </div>
         <MatchTermsExercise terms={TERMS} />
       </section>
@@ -272,8 +272,8 @@ function LeadIn({ say }: { say: (t: string) => void }) {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">1 · Sounds vs letters · 8 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">1 · Sounds vs letters · 8 minutes</h2>
+          <p className="text-label text-muted">
             Listen, write the word, then count its letters and its sounds. They are not the same number.
           </p>
         </div>
@@ -335,8 +335,8 @@ function Obstruction({ say }: { say: (t: string) => void }) {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">3 · Where is the obstruction? · 10 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">3 · Where is the obstruction? · 10 minutes</h2>
+          <p className="text-label text-muted">
             Play the sound, then the word. Say it yourself with a hand on your lips — where is the airflow actually
             stopped?
           </p>
@@ -346,7 +346,7 @@ function Obstruction({ say }: { say: (t: string) => void }) {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {OBSTRUCTION.map((o, i) => (
           <div key={o.sound} className={`flex flex-wrap items-center gap-2 rounded-[8px] border px-3 py-2 ${markClass(checked, picks[i] === o.answer)}`}>
-            <span className="font-serif text-base font-semibold text-ink">/{o.sound}/</span>
+            <span className="font-serif text-h3 font-semibold text-ink">/{o.sound}/</span>
             <PlayButton onClick={() => say(o.sound)} label={`Play the sound ${o.sound}`} />
             <PlayButton onClick={() => say(o.word)} label={`Play the word ${o.word}`} />
             <select
@@ -400,8 +400,8 @@ function Voicing({ say }: { say: (t: string) => void }) {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">4 · Voiced or unvoiced? · 8 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">4 · Voiced or unvoiced? · 8 minutes</h2>
+          <p className="text-label text-muted">
             A finger on your throat. Write the word from the script, then say whether its first and last sounds are
             voiced.
           </p>
@@ -482,8 +482,8 @@ function Chart({ say }: { say: (t: string) => void }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-serif text-lg font-semibold text-ink">5 · The phonemic chart, spoken · 7 minutes</h2>
-        <p className="text-xs text-muted">
+        <h2 className="font-serif text-h3 font-semibold text-ink">5 · The phonemic chart, spoken · 7 minutes</h2>
+        <p className="text-label text-muted">
           Forty-four phonemes. Click any cell for the sound, then the word. The chart is arranged by where the sound is
           made, not by the alphabet.
         </p>
@@ -520,8 +520,8 @@ function ScriptWriting() {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">6 · Write it in phonemic script · 10 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">6 · Write it in phonemic script · 10 minutes</h2>
+          <p className="text-label text-muted">
             Nobody memorises symbols today — look them up on the chart above. Click a box, then tap the keys.
           </p>
         </div>
@@ -596,8 +596,8 @@ function FilmRace() {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">7 · Film titles · 10 minutes</h2>
-          <p className="text-xs text-muted">In pairs, against the clock. First to eight. A leading “the” doesn’t matter.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">7 · Film titles · 10 minutes</h2>
+          <p className="text-label text-muted">In pairs, against the clock. First to eight. A leading “the” doesn’t matter.</p>
         </div>
         {checked ? <Score right={right} total={FILMS.length} /> : null}
       </div>

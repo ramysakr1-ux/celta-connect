@@ -24,11 +24,11 @@ export function OpenCaseButton({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] border border-destructive/40 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-60"
+        className="rounded-[6px] border border-destructive/40 px-3 py-1.5 text-label font-medium text-destructive hover:bg-destructive/10 disabled:opacity-60"
       >
         {pending ? "Opening…" : "Open a plagiarism case"}
       </button>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }

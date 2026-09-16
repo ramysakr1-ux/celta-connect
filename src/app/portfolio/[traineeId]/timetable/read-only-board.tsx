@@ -159,19 +159,19 @@ export function ReadOnlyTimetableBoard({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · Timetable</p>
-          <h1 className="font-serif text-2xl text-ink">{week ? `Week ${weekIndex + 1} · ${week.label}` : "Nothing scheduled yet"}</h1>
+          <h1 className="font-serif text-h1 text-ink">{week ? `Week ${weekIndex + 1} · ${week.label}` : "Nothing scheduled yet"}</h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="flex size-7 items-center justify-center rounded-full bg-primary text-label font-semibold text-primary-foreground">
               {initials || "?"}
             </span>
-            <span className="text-sm text-ink">
+            <span className="text-body text-ink">
               {viewerName}
               {viewerGroupLabel ? <span className="text-muted"> · {viewerGroupLabel}</span> : null}
             </span>
           </div>
-          <div className="flex rounded-full border border-border p-0.5 text-xs">
+          <div className="flex rounded-full border border-border p-0.5 text-label">
             <button
               type="button"
               onClick={() => setMineOnly(false)}
@@ -195,9 +195,9 @@ export function ReadOnlyTimetableBoard({
           <div className="flex items-center gap-3">
             <span className="size-2 shrink-0 animate-pulse rounded-full" style={{ background: "oklch(63% 0.096 72)" }} />
             <span className="text-label font-semibold tracking-[0.08em] uppercase">Live now</span>
-            <span className="text-sm font-medium">{liveEvent.title}</span>
+            <span className="text-body font-medium">{liveEvent.title}</span>
             {liveEvent.event_time ? (
-              <span className="text-xs opacity-80">
+              <span className="text-label opacity-80">
                 {liveEvent.event_time.slice(0, 5)}
                 {liveEventTimes?.end ? ` – ${liveEventTimes.end}` : ""}
                 {liveEventTimes?.opened ? ` · opened ${liveEventTimes.opened}` : ""}
@@ -209,7 +209,7 @@ export function ReadOnlyTimetableBoard({
               href={liveEvent.zoom_url}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-ink"
+              className="shrink-0 rounded-full px-3 py-1 text-label font-semibold text-ink"
               style={{ background: "oklch(63% 0.096 72)" }}
             >
               Join
@@ -335,7 +335,7 @@ export function ReadOnlyTimetableBoard({
               style={isToday ? { boxShadow: "inset 3px 0 0 oklch(38% 0.072 195)" } : undefined}
             >
               <div className="flex items-baseline gap-2 border-b border-border-faint px-3.5 py-2.5">
-                <span className={`font-serif text-lg ${isToday ? "text-primary" : "text-ink"}`}>{row.date.split(" ")[1]}</span>
+                <span className={`font-serif text-h3 ${isToday ? "text-primary" : "text-ink"}`}>{row.date.split(" ")[1]}</span>
                 <span className="text-micro font-semibold tracking-[0.12em] text-muted uppercase">{row.weekday}</span>
                 {isToday ? (
                   <span className="text-micro font-semibold tracking-[0.1em] text-primary uppercase">Today</span>
@@ -406,7 +406,7 @@ export function ReadOnlyTimetableBoard({
             key={i}
             type="button"
             onClick={() => setWeekIndex(i)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold ${
+            className={`rounded-full px-4 py-1.5 text-label font-semibold ${
               i === weekIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted wash"
             }`}
           >
@@ -696,23 +696,23 @@ function DetailPanel({
     <div className="sheet flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="font-serif text-lg text-ink">{event.title}</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 text-ink">{event.title}</h2>
+          <p className="text-label text-muted">
             {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" })}
             {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
           </p>
         </div>
-        <button type="button" onClick={onClose} className="text-lg text-muted hover:text-ink" aria-label="Close">
+        <button type="button" onClick={onClose} className="text-h3 text-muted hover:text-ink" aria-label="Close">
           ×
         </button>
       </div>
       {meta.sheetHref ? (
-        <a href={meta.sheetHref} className="inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm font-medium text-ink wash">
+        <a href={meta.sheetHref} className="inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3 py-1.5 text-body font-medium text-ink wash">
           {meta.sheetLabel ?? "Open the booking sheet"}
         </a>
       ) : null}
       {rows.length > 0 ? (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-body">
           {rows.map((r) => (
             <div key={r.label} className="contents">
               <span className="text-muted">{r.label}</span>
@@ -721,7 +721,7 @@ function DetailPanel({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted">No further details recorded for this session.</p>
+        <p className="text-body text-muted">No further details recorded for this session.</p>
       )}
     </div>
   );

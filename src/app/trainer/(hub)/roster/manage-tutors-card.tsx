@@ -65,9 +65,9 @@ function AssignChip({ courseId, trainer }: { courseId: string; trainer: Assignab
           {pending ? "Adding…" : "Add to course"}
         </button>
       </div>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
-      {!state.error && state.warning ? <p className="text-xs text-status-warning-text">{state.warning}</p> : null}
-      {!state.error && !state.warning && state.assigned ? <p className="text-xs text-primary">{state.assigned} added to this course.</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
+      {!state.error && state.warning ? <p className="text-label text-status-warning-text">{state.warning}</p> : null}
+      {!state.error && !state.warning && state.assigned ? <p className="text-label text-primary">{state.assigned} added to this course.</p> : null}
     </form>
   );
 }
@@ -153,13 +153,13 @@ export function ManageTutorsCard({
         >
           {inviting ? "Inviting…" : "Invite"}
         </button>
-        {inviteState.error ? <p className="w-full text-xs text-destructive">{inviteState.error}</p> : null}
+        {inviteState.error ? <p className="w-full text-label text-destructive">{inviteState.error}</p> : null}
       </form>
 
       {pendingInvites.length > 0 ? (
         <div className={`${RULE} flex flex-col gap-1.5`}>
           <p className={EYEBROW}>Invited, not yet joined</p>
-          {revokeState.error ? <p className="text-xs text-destructive">{revokeState.error}</p> : null}
+          {revokeState.error ? <p className="text-label text-destructive">{revokeState.error}</p> : null}
           {pendingInvites.map((inv) => (
             <div key={inv.id} className="flex flex-wrap items-center justify-between gap-2 text-meta">
               <span className="text-ink">

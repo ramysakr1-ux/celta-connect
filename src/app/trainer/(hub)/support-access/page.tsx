@@ -14,14 +14,14 @@ export default async function TrainerSupportAccessPage() {
   const session = await getCurrentProfile();
   const profile = session?.profile;
   if (!profile || !profile.course_id) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
 
   const admin = createAdminClient();
   const isMct = await isCourseMct(admin, profile.id, profile.course_id);
   if (!isMct) {
     return (
-      <div className="sheet p-6 text-sm text-muted">
+      <div className="sheet p-6 text-body text-muted">
         Only this course&apos;s main tutor can grant platform support access to it.
       </div>
     );

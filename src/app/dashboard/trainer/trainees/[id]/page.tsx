@@ -74,19 +74,19 @@ export default async function TraineeDetailPage({
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
         <div>
-          <h1 className="font-serif text-xl text-ink">{trainee.full_name}</h1>
+          <h1 className="font-serif text-h2 text-ink">{trainee.full_name}</h1>
           <p className="mt-1 text-muted">{trainee.email}</p>
         </div>
         <Link
           href={`/dashboard/trainer/trainees/${id}/celta5`}
-          className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
         >
           CELTA 5 record
         </Link>
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Assignments</h2>
+        <h2 className="font-serif text-h3 text-ink">Assignments</h2>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {assignments?.map((assignment) => (
             <AssignmentForm
@@ -98,13 +98,13 @@ export default async function TraineeDetailPage({
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">TP cards</h2>
-        <p className="mt-1 text-sm text-muted">Lesson plan, language analysis, materials, self-evaluation and feedback for each TP.</p>
+        <h2 className="font-serif text-h3 text-ink">TP cards</h2>
+        <p className="mt-1 text-body text-muted">Lesson plan, language analysis, materials, self-evaluation and feedback for each TP.</p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
             if (!assignedTpNumbers.has(n)) {
               return (
-                <div key={n} className="card p-4 text-sm text-muted">
+                <div key={n} className="card p-4 text-body text-muted">
                   TP{n} -- not assigned
                 </div>
               );
@@ -124,7 +124,7 @@ export default async function TraineeDetailPage({
                   {feedback?.submitted_at && feedback.grade ? <StandardRatingPill rating={feedback.grade} /> : null}
                 </div>
                 <p
-                  className={`text-sm ${
+                  className={`text-body ${
                     status.tone === "on-track"
                       ? "text-primary"
                       : status.tone === "at-risk"
@@ -141,8 +141,8 @@ export default async function TraineeDetailPage({
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Teaching Practice</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Teaching Practice</h2>
+        <p className="mt-1 text-body text-muted">
           {(totalMinutes / 60).toFixed(1)} hours taught across {levels.size} level
           {levels.size === 1 ? "" : "s"} (6 hours across 2+ levels required).
         </p>

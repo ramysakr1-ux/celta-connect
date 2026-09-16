@@ -432,7 +432,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
             <div>Stage 3</div>
             <div>Consultations</div>
           </div>
-          {data.rows.length === 0 ? <p className="px-5 py-4 text-sm text-muted">No candidates on this course yet.</p> : null}
+          {data.rows.length === 0 ? <p className="px-5 py-4 text-body text-muted">No candidates on this course yet.</p> : null}
           {data.rows.map((r) => (
             <div
               key={r.id}

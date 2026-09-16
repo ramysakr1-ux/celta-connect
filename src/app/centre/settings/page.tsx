@@ -200,13 +200,13 @@ export default async function CentreSettingsPage({
               paymentProviderConnectedAt={center.payment_provider_connected_at}
             />
           ) : (
-            <p className="text-sm text-muted">You don&apos;t hold a role that can edit centre settings.</p>
+            <p className="text-body text-muted">You don&apos;t hold a role that can edit centre settings.</p>
           )
         }
         payments={
           canEdit ? (
             <div className="flex flex-col gap-4">
-              <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-ink">
+              <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-body text-ink">
                 Connect never holds or moves money. It stores a reference to a payment made through the centre&apos;s
                 own provider — balances shown everywhere else in Connect are read from that reference, not moved by
                 Connect.
@@ -223,14 +223,14 @@ export default async function CentreSettingsPage({
             </div>
           ) : canReadSettings ? (
             <div className="flex flex-col gap-4">
-              <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-ink">
+              <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-body text-ink">
                 Connect never holds or moves money. It stores a reference to a payment made through the centre&apos;s
                 own provider — balances shown everywhere else in Connect are read from that reference, not moved by
                 Connect.
               </div>
               {/* Which provider, and since when. No connect, disconnect or
                   key anywhere near a role that changes nothing. */}
-              <p className="text-sm text-ink">
+              <p className="text-body text-ink">
                 {center.payment_provider
                   ? `${center.payment_provider.replace(/^./, (c) => c.toUpperCase())} is the connected provider${
                       center.payment_provider_connected_at
@@ -241,7 +241,7 @@ export default async function CentreSettingsPage({
               </p>
             </div>
           ) : (
-            <p className="text-sm text-muted">You don&apos;t hold a role that can manage payment providers.</p>
+            <p className="text-body text-muted">You don&apos;t hold a role that can manage payment providers.</p>
           )
         }
         people={

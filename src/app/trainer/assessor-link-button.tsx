@@ -61,7 +61,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
           type="button"
           onClick={() => handleClick()}
           disabled={state === "loading"}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash disabled:opacity-60"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash disabled:opacity-60"
         >
           {state === "loading"
             ? "Checking readiness…"
@@ -78,7 +78,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
                       : "Share assessor link"}
         </button>
         {state === "manual" && link ? (
-          <div className="absolute right-0 top-full z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
+          <div className="absolute right-0 top-full z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-label shadow-sm">
             <p className="font-semibold text-ink">The link is ready, but the clipboard refused it.</p>
             <input
               readOnly
@@ -94,7 +94,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
           </div>
         ) : null}
         {state === "warn" ? (
-          <div className="absolute top-full right-0 z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
+          <div className="absolute top-full right-0 z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-label shadow-sm">
             <p className="font-semibold text-ink">
               {outstanding.length} thing{outstanding.length === 1 ? "" : "s"} on the Handbook&apos;s §14.1 list {outstanding.length === 1 ? "is" : "are"} not
               ready yet:
@@ -125,7 +125,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
           </div>
         ) : null}
         {state === "not_ready" ? (
-          <div className="absolute right-0 top-full z-10 mt-1.5 w-72 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
+          <div className="absolute right-0 top-full z-10 mt-1.5 w-72 rounded-[6px] border border-border bg-card p-3 text-label shadow-sm">
             <p className="font-semibold text-ink">Portfolios aren&apos;t complete yet:</p>
             <ul className="mt-1.5 flex flex-col gap-1 text-muted">
               {issues.map((issue, i) => (
@@ -143,7 +143,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
         <button
           type="button"
           onClick={() => setEmailOpen((v) => !v)}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
         >
           Email the assessor
         </button>
@@ -154,31 +154,31 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
           >
             {emailState.sent ? (
               <>
-                <p className="text-sm font-semibold text-primary">Sent.</p>
-                <button type="button" onClick={() => setEmailOpen(false)} className="mt-2 text-xs text-primary hover:underline">
+                <p className="text-body font-semibold text-primary">Sent.</p>
+                <button type="button" onClick={() => setEmailOpen(false)} className="mt-2 text-label text-primary hover:underline">
                   Close
                 </button>
               </>
             ) : (
               <>
-                <label className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Assessor&apos;s email</label>
+                <label className="text-label font-semibold tracking-[0.06em] text-muted uppercase">Assessor&apos;s email</label>
                 <input
                   type="email"
                   name="email"
                   required
                   placeholder="assessor@cambridge.org"
-                  className="mt-1.5 h-9 w-full rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+                  className="mt-1.5 h-9 w-full rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
                 />
-                {emailState.error ? <p className="mt-1.5 text-xs text-destructive">{emailState.error}</p> : null}
+                {emailState.error ? <p className="mt-1.5 text-label text-destructive">{emailState.error}</p> : null}
                 <div className="mt-2 flex items-center gap-2">
                   <button
                     type="submit"
                     disabled={emailPending}
-                    className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                    className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60"
                   >
                     {emailPending ? "Sending…" : "Send"}
                   </button>
-                  <button type="button" onClick={() => setEmailOpen(false)} className="text-xs text-muted hover:text-ink">
+                  <button type="button" onClick={() => setEmailOpen(false)} className="text-label text-muted hover:text-ink">
                     Cancel
                   </button>
                 </div>

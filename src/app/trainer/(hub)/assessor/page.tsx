@@ -50,7 +50,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   if (!trainer) redirect("/login");
   const courseId = trainer.course_id;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   // Same live source Today uses: course_tutors for the course actually
@@ -379,7 +379,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           {course?.name ?? "Course"} &middot; Assessor visit
         </p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Assessor</h1>
-        <p className="max-w-[62ch] text-sm text-muted">
+        <p className="max-w-[62ch] text-body text-muted">
           Who is coming, which candidates they will see, and what the centre owes them before they arrive. Administration Handbook §14.
         </p>
       </div>
@@ -513,7 +513,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           here, just after the answer instead of in front of it. */}
       <div className="flex flex-col gap-1 pt-2">
         <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Before they arrive</p>
-        <p className="max-w-[70ch] text-sm text-muted">
+        <p className="max-w-[70ch] text-body text-muted">
           Setting the visit up, handing the pack over, and the Handbook&apos;s own list of what the centre owes them.
           {prep.outstanding.length > 0 ? (
             <>
@@ -545,7 +545,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         <section className="flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
             <div className="flex flex-col gap-[3px]">
               <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Hand over the pack</p>
-              <p className="text-sm text-muted">
+              <p className="text-body text-muted">
                 {/* "every portfolio on the course", not "every selected portfolio":
                     computeAssessorReadiness gates on every active candidate, and
                     rightly -- the selection is only the default view, and "View
@@ -565,19 +565,19 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
               {packOpens ? (
                 <a
                   href="/trainer/assessor/preview"
-                  className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12]"
+                  className="rounded-[6px] px-3 py-1.5 text-body font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12]"
                   style={{ background: "var(--hub-accent)" }}
                 >
                   Preview as the assessor
                 </a>
               ) : (
-                <span className="rounded-[6px] border border-dashed border-border px-3 py-1.5 text-sm text-muted" title="Complete the portfolios first">
+                <span className="rounded-[6px] border border-dashed border-border px-3 py-1.5 text-body text-muted" title="Complete the portfolios first">
                   Preview not ready
                 </span>
               )}
             </div>
             {packEmail ? (
-              <p className={`text-xs ${packEmail.status === "bounced" || packEmail.status === "failed" ? "font-medium text-destructive" : "text-muted"}`}>
+              <p className={`text-label ${packEmail.status === "bounced" || packEmail.status === "failed" ? "font-medium text-destructive" : "text-muted"}`}>
                 {packEmail.status === "bounced"
                   ? `The pack email to ${packEmail.to_email} bounced, ${formatDateTime(packEmail.bounced_at ?? packEmail.created_at, packEmailTz)}${
                       packEmail.bounce_reason ? `: ${packEmail.bounce_reason}` : "."
@@ -594,7 +594,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
               </p>
             ) : null}
             {!packOpens ? (
-              <div className={`rounded-[10px] px-4 py-3 text-xs ${preview === "not-ready" ? "bg-card-inset text-ink" : "text-muted"}`}>
+              <div className={`rounded-[10px] px-4 py-3 text-label ${preview === "not-ready" ? "bg-card-inset text-ink" : "text-muted"}`}>
                 <p className="font-semibold">The pack cannot open yet -- the link, the email and the preview all wait for this:</p>
                 <ul className="mt-1.5 flex flex-col gap-1">
                   {groupedIssues.map((g) => (
@@ -606,7 +606,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
                 </ul>
               </div>
             ) : (
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 {liveToken && !readiness.ready
                   ? `The link is already issued, so it, the email and the preview all open -- but ${readiness.issues.length} portfolio item${readiness.issues.length === 1 ? " is" : "s are"} still incomplete: ${groupedIssues.map((g) => `${g.reason} (${g.label})`).join("; ")}. `
                   : ""}

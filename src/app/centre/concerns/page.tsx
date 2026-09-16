@@ -84,7 +84,7 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
       />
 
       {(concerns ?? []).length === 0 ? (
-        <p className="rounded-[var(--radius-panel)] border border-border bg-card px-[22px] py-5 text-sm text-muted">
+        <p className="rounded-[var(--radius-panel)] border border-border bg-card px-[22px] py-5 text-body text-muted">
           Nobody has taken this route. That is the ordinary state &mdash; the tutors&apos; own inbox is where most concerns
           land.
         </p>
@@ -92,7 +92,7 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
         (concerns ?? []).map((c) => (
           <section key={c.id} className="flex flex-col gap-3 rounded-[var(--radius-panel)] border border-border bg-card px-[22px] py-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-sm font-semibold text-ink">
+              <span className="text-body font-semibold text-ink">
                 {c.anonymous ? "Anonymous" : (nameById.get(c.trainee_id) ?? "Candidate")}
                 <span className="font-normal text-muted"> &middot; {courseNameById.get(c.course_id) ?? "Course"}</span>
               </span>
@@ -104,11 +104,11 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
                 })}
               </span>
             </div>
-            <p className="text-sm leading-[1.6] whitespace-pre-wrap text-ink">{c.body}</p>
+            <p className="text-body leading-[1.6] whitespace-pre-wrap text-ink">{c.body}</p>
             {c.response ? (
               <div className="rounded-[10px] bg-card-inset px-4 py-3">
                 <p className="text-label font-bold tracking-[0.08em] text-muted uppercase">The centre replied</p>
-                <p className="mt-1 text-sm leading-[1.55] whitespace-pre-wrap text-ink">{c.response}</p>
+                <p className="mt-1 text-body leading-[1.55] whitespace-pre-wrap text-ink">{c.response}</p>
               </div>
             ) : (
               <CentreConcernReplyForm concernId={c.id} />

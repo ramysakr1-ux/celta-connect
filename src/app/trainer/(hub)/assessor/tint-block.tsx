@@ -80,7 +80,7 @@ function TintEmpty() {
           <span className="hidden group-open:inline">Hide</span>
         </summary>
       <div className="mt-4 flex flex-col gap-4">
-        <p className="max-w-[76ch] text-sm text-pretty text-muted">
+        <p className="max-w-[76ch] text-body text-pretty text-muted">
           Nobody on this course is a trainer-in-training, so none of this applies today. It is here so you know what
           changes when one is added &mdash; on the Tutors panel in Centre settings &mdash; because the answer is more than
           a line on a form.
@@ -124,7 +124,7 @@ function TintEmpty() {
           {TINT_ASSESSOR_DUTIES.map((d) => (
             <li key={d.label} className="hub-hairline flex flex-col gap-[2px] border-t py-2.5 first:border-t-0 first:pt-0">
               <p className="text-meta font-semibold text-ink">{d.label}</p>
-              {d.detail ? <p className="text-xs leading-[1.5] text-muted">{d.detail}</p> : null}
+              {d.detail ? <p className="text-label leading-[1.5] text-muted">{d.detail}</p> : null}
             </li>
           ))}
         </ul>
@@ -167,7 +167,7 @@ function TintPresent({
         </summary>
       <div className="mt-4 flex flex-col gap-4">
       <div className="flex flex-col gap-[3px]">
-        <p className="max-w-[76ch] text-sm text-pretty text-muted">
+        <p className="max-w-[76ch] text-body text-pretty text-muted">
           <b className="text-ink">{name}</b>
           {supervisorName ? <>, supervised by <b className="text-ink">{supervisorName}</b></> : null}. This is not a candidate
           matter, so it sits apart from the reading and the observation above.
@@ -217,7 +217,7 @@ function TintPresent({
             {TINT_ASSESSOR_DUTIES.map((d) => (
               <li key={d.label} className="flex flex-col gap-[2px] border-t hub-hairline py-2.5 first:border-t-0 first:pt-0">
                 <p className="text-meta font-semibold text-ink">{d.label}</p>
-                {d.detail ? <p className="text-xs leading-[1.5] text-muted">{d.detail}</p> : null}
+                {d.detail ? <p className="text-label leading-[1.5] text-muted">{d.detail}</p> : null}
               </li>
             ))}
           </ul>

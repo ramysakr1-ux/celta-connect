@@ -81,7 +81,7 @@ function LiveDraft() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <p className="text-xs font-bold text-ink">Live draft — your next TP point, on the real sheet</p>
+        <p className="text-label font-bold text-ink">Live draft — your next TP point, on the real sheet</p>
         <div className="flex items-center gap-0.5 rounded-[7px] border border-border bg-accent p-0.5">
           {LA_TYPES.map((t) => (
             <button
@@ -135,7 +135,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -147,7 +147,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2.5">
-          <p className="font-serif text-lg font-semibold text-ink">Example — a completed grammar analysis</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example — a completed grammar analysis</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[190px_1fr] border-b border-border-faint last:border-b-0">
@@ -183,7 +183,7 @@ export default function LanguageAnalysisSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone ever been asked a grammar question mid-lesson they couldn&apos;t answer?
@@ -193,7 +193,7 @@ export default function LanguageAnalysisSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">Why analyse it first?</p>
+        <p className="text-label font-bold text-ink">Why analyse it first?</p>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {DISCUSS.map((d) => (
             <RevealCard key={d.question} variant="hero" question={d.question} answer={d.answer} />

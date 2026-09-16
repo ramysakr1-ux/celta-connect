@@ -99,7 +99,7 @@ export function PreviewBanner({ traineeId, traineeName }: { traineeId: string; t
   if (!isPreviewingAsTrainee(searchParams)) return null;
   return (
     <div className="bg-primary">
-      <div className="container flex h-9 items-center justify-between text-xs text-primary-foreground">
+      <div className="container flex h-9 items-center justify-between text-label text-primary-foreground">
         <span>Previewing as {traineeName} -- staff-only controls are hidden.</span>
         <Link href={`/portfolio/${traineeId}`} className="font-semibold underline underline-offset-2">
           Exit preview

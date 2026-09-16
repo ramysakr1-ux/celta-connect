@@ -134,7 +134,7 @@ function QuestionCard({ question, answers }: { question: string; answers: string
         <>
           <div className="flex items-center gap-2 border-b border-border pb-2.5">
             <span className="size-1.5 flex-none rounded-full bg-primary" />
-            <p className="font-serif text-sm font-semibold text-ink">{question}</p>
+            <p className="font-serif text-body font-semibold text-ink">{question}</p>
           </div>
           <div className="flex flex-col gap-1.5">
             {answers.map((a) => (
@@ -148,7 +148,7 @@ function QuestionCard({ question, answers }: { question: string; answers: string
       ) : (
         <>
           <div className="flex flex-1 items-center justify-center px-1 py-1.5 text-center">
-            <p className="font-serif text-lg font-semibold leading-tight text-ink">{question}</p>
+            <p className="font-serif text-h3 font-semibold leading-tight text-ink">{question}</p>
           </div>
           <p className="text-center text-micro font-semibold text-primary">Click to reveal ▾</p>
         </>
@@ -171,15 +171,15 @@ function AfterCard({ question, answer, note }: { question: string; answer: strin
         <>
           <div className="flex items-center gap-2 border-b border-border pb-2.5">
             <span className="size-1.5 flex-none rounded-full bg-muted" />
-            <p className="font-serif text-sm font-semibold text-ink">{question}</p>
+            <p className="font-serif text-body font-semibold text-ink">{question}</p>
           </div>
-          <p className="font-serif text-xl font-semibold text-muted">{answer}</p>
+          <p className="font-serif text-h2 font-semibold text-muted">{answer}</p>
           <p className="text-label leading-relaxed text-muted">{note}</p>
         </>
       ) : (
         <>
           <div className="flex flex-1 items-center justify-center px-1 py-1.5 text-center">
-            <p className="font-serif text-lg font-semibold leading-tight text-ink">{question}</p>
+            <p className="font-serif text-h3 font-semibold leading-tight text-ink">{question}</p>
           </div>
           <p className="text-center text-micro font-semibold text-muted">Click to reveal ▾</p>
         </>
@@ -234,7 +234,7 @@ function JargonMatch() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <p className="font-serif text-lg font-semibold text-ink">Now, the jargon</p>
+        <p className="font-serif text-h3 font-semibold text-ink">Now, the jargon</p>
         <p className="text-meta text-muted">A plan is only clear to someone else if it uses shared terms correctly. Click a term, then its meaning.</p>
       </div>
       <div className="flex items-center gap-2">
@@ -268,7 +268,7 @@ function JargonMatch() {
                   setSelL(i);
                   tryMatch(i, selR);
                 }}
-                className={`flex min-h-[42px] items-center rounded-[6px] border-[1.5px] px-3.5 font-serif text-sm font-semibold ${
+                className={`flex min-h-[42px] items-center rounded-[6px] border-[1.5px] px-3.5 font-serif text-body font-semibold ${
                   isMatched
                     ? "border-primary bg-primary/10 text-primary cursor-default"
                     : isSel
@@ -297,7 +297,7 @@ function JargonMatch() {
                   setSelR(idx);
                   tryMatch(selL, idx);
                 }}
-                className={`flex min-h-[42px] items-center rounded-[6px] border-[1.5px] px-3.5 text-left text-xs leading-snug ${
+                className={`flex min-h-[42px] items-center rounded-[6px] border-[1.5px] px-3.5 text-left text-label leading-snug ${
                   isMatched
                     ? "border-primary bg-primary/10 text-primary cursor-default"
                     : isSel
@@ -317,7 +317,7 @@ function JargonMatch() {
         <button
           type="button"
           onClick={() => setBatch((b) => Math.max(0, b - 1))}
-          className="flex h-[30px] items-center rounded-[6px] border border-border px-3.5 text-xs font-semibold text-ink"
+          className="flex h-[30px] items-center rounded-[6px] border border-border px-3.5 text-label font-semibold text-ink"
         >
           ← Previous
         </button>
@@ -325,7 +325,7 @@ function JargonMatch() {
         <button
           type="button"
           onClick={() => setBatch((b) => Math.min(batches.length - 1, b + 1))}
-          className="flex h-[30px] items-center rounded-[6px] bg-primary px-3.5 text-xs font-semibold text-white"
+          className="flex h-[30px] items-center rounded-[6px] bg-primary px-3.5 text-label font-semibold text-white"
         >
           Next →
         </button>
@@ -336,7 +336,7 @@ function JargonMatch() {
           type="button"
           data-print-hide
           onClick={() => setRevealed(true)}
-          className="self-start mt-1 flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+          className="self-start mt-1 flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="7.5" cy="15.5" r="5.5" />
@@ -368,7 +368,7 @@ function JargonMatch() {
                 <p className="font-serif text-h3 font-semibold text-ink">{h.title}</p>
                 {h.rows.map((row) => (
                   <div key={row.term} className="grid grid-cols-[96px_1fr] gap-2.5 border-b border-border-faint py-1">
-                    <p className="font-serif text-xs font-semibold text-ink">{row.term}</p>
+                    <p className="font-serif text-label font-semibold text-ink">{row.term}</p>
                     <p className="text-label leading-snug text-muted">{row.def}</p>
                   </div>
                 ))}
@@ -399,7 +399,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -411,7 +411,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2">
-          <p className="font-serif text-lg font-semibold text-ink">Example — a completed procedure section</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example — a completed procedure section</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             <div className="grid grid-cols-[130px_90px_55px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
@@ -444,10 +444,10 @@ function LessonPlanDraft() {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[400px_1fr]">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-4">
-          <p className="text-xs font-bold text-ink">Front page — draft it live, on the real document</p>
+          <p className="text-label font-bold text-ink">Front page — draft it live, on the real document</p>
           {AIM_FIELDS.map((f, i) => (
             <div key={f.label} className="flex flex-col gap-1">
-              <p className="text-xs text-muted">{f.label}</p>
+              <p className="text-label text-muted">{f.label}</p>
               <p className="text-label italic leading-snug text-muted">{f.hint}</p>
               <textarea
                 placeholder={f.prompt}
@@ -461,7 +461,7 @@ function LessonPlanDraft() {
         </div>
 
         <div className="flex flex-col gap-2.5 rounded-[6px] border border-border bg-card p-4">
-          <p className="text-xs font-bold text-ink">Anticipated Problems &amp; Solutions</p>
+          <p className="text-label font-bold text-ink">Anticipated Problems &amp; Solutions</p>
           <p className="text-label italic leading-snug text-muted">Think classroom management, not language — that&apos;s tomorrow&apos;s session.</p>
           {[0, 1].map((i) => (
             <div key={i} className="flex flex-col gap-1.5 border-b border-dashed border-border-faint pb-2.5 last:border-b-0">
@@ -487,10 +487,10 @@ function LessonPlanDraft() {
       <div className="flex flex-col gap-2.5 rounded-[6px] border border-border bg-card p-4">
         <div className="flex items-end justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <p className="font-serif text-base font-semibold text-ink">Procedure — stages come from your framework</p>
+            <p className="font-serif text-h3 font-semibold text-ink">Procedure — stages come from your framework</p>
             <p className="text-label italic text-muted">TP2 is Full script: stage names are set, you write timing and instructions.</p>
           </div>
-          <div className="flex h-8 w-[180px] flex-none items-center justify-between rounded-[6px] border border-border bg-accent px-2.5 text-xs text-ink">
+          <div className="flex h-8 w-[180px] flex-none items-center justify-between rounded-[6px] border border-border bg-accent px-2.5 text-label text-ink">
             <span>Full script</span>
             <span className="text-micro text-muted">▾</span>
           </div>
@@ -556,7 +556,7 @@ export default function LessonPlanningSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone here ever taught, or tried to teach, without writing anything down first?
@@ -566,7 +566,7 @@ export default function LessonPlanningSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">Open with these two questions</p>
+        <p className="text-label font-bold text-ink">Open with these two questions</p>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {QUESTION_CARDS.map((q) => (
             <QuestionCard key={q.question} question={q.question} answers={q.answers} />
@@ -579,7 +579,7 @@ export default function LessonPlanningSession() {
       <StagingExample />
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">TP2 · three points per teaching group, however many groups the cohort needs</p>
+        <p className="text-label font-bold text-ink">TP2 · three points per teaching group, however many groups the cohort needs</p>
         <p className="max-w-[1000px] text-label leading-relaxed text-muted">
           A shared input session, not a per-group one. Each group runs ABC on Thursday and DEF on Friday from its own
           three points, at its own level and coursebook. The cards below are stand-ins to show the shape only — every
@@ -596,8 +596,8 @@ export default function LessonPlanningSession() {
                       {p.who} · {p.aim}
                     </p>
                   </div>
-                  <p className="font-serif text-base font-semibold leading-tight text-ink">{p.title}</p>
-                  <p className="text-xs leading-relaxed text-muted">{p.materials}</p>
+                  <p className="font-serif text-h3 font-semibold leading-tight text-ink">{p.title}</p>
+                  <p className="text-label leading-relaxed text-muted">{p.materials}</p>
                 </div>
               ))}
             </div>
@@ -609,7 +609,7 @@ export default function LessonPlanningSession() {
 
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <p className="font-serif text-lg font-semibold text-ink">What comes after</p>
+          <p className="font-serif text-h3 font-semibold text-ink">What comes after</p>
           <p className="text-meta text-muted">Two more questions before they leave — elicit first, then reveal.</p>
         </div>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
@@ -626,8 +626,8 @@ export default function LessonPlanningSession() {
         </p>
         {TRAINER_NOTES.map((n) => (
           <div key={n.title} className="flex flex-col gap-0.5">
-            <p className="text-xs font-semibold text-ink">{n.title}</p>
-            <p className="text-xs leading-relaxed text-ink">{n.text}</p>
+            <p className="text-label font-semibold text-ink">{n.title}</p>
+            <p className="text-label leading-relaxed text-ink">{n.text}</p>
           </div>
         ))}
       </div>

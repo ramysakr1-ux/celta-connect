@@ -18,13 +18,13 @@ export function AssessorSelectionButton({ candidates }: { candidates: { id: stri
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink wash"
+        className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-label font-semibold text-ink wash"
       >
         Select for assessor visit
       </button>
       {open ? (
         <div className="absolute right-0 z-10 mt-2 w-72 rounded-[8px] border border-border bg-card p-3 shadow-lg">
-          <p className="mb-2 text-xs text-muted">
+          <p className="mb-2 text-label text-muted">
             Who the assessor sees by default. Everyone stays reachable either way — this only sets what&apos;s
             featured on their landing page.
           </p>
@@ -50,7 +50,7 @@ function CandidateToggle({ id, name, initialSelected }: { id: string; name: stri
     >
       <input type="hidden" name="trainee_id" value={id} />
       <input type="hidden" name="selected" value={selected ? "false" : "true"} />
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input type="checkbox" checked={selected} onChange={() => setSelected((v) => !v)} />
         {name}
       </label>

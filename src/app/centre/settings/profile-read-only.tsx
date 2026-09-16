@@ -20,8 +20,8 @@ function Row({ label, value, note }: { label: string; value: string; note?: stri
     <div className="flex flex-col gap-1 border-t border-border-faint py-3 first:border-none first:pt-0 sm:flex-row sm:items-baseline sm:gap-4">
       <span className="w-[210px] shrink-0 text-label font-bold tracking-[0.08em] text-muted uppercase">{label}</span>
       <div className="flex flex-col gap-0.5">
-        <span className="text-sm text-ink">{value}</span>
-        {note ? <span className="text-xs text-muted">{note}</span> : null}
+        <span className="text-body text-ink">{value}</span>
+        {note ? <span className="text-label text-muted">{note}</span> : null}
       </div>
     </div>
   );
@@ -30,9 +30,9 @@ function Row({ label, value, note }: { label: string; value: string; note?: stri
 function Connection({ title, blurb, status }: { title: string; blurb: string; status: string }) {
   return (
     <div className="card p-5">
-      <h3 className="font-serif text-base text-ink">{title}</h3>
-      <p className="mt-1 text-sm text-muted">{blurb}</p>
-      <p className="mt-3 text-sm text-ink">{status}</p>
+      <h3 className="font-serif text-h3 text-ink">{title}</h3>
+      <p className="mt-1 text-body text-muted">{blurb}</p>
+      <p className="mt-3 text-body text-ink">{status}</p>
     </div>
   );
 }
@@ -71,7 +71,7 @@ export function CentreProfileReadOnly({
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm text-muted">
+      <p className="text-body text-muted">
         Your role reads the centre and changes nothing, so this is the record rather than the form. A Centre manager or
         the Centre owner edits it.
       </p>

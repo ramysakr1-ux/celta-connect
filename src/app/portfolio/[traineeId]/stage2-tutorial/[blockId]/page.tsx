@@ -44,11 +44,11 @@ export default async function TraineeStage2TutorialPage({
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
       <div className="sheet">
-        <p className="text-xs text-muted">Stage 2 tutorials</p>
-        <h1 className="font-serif text-xl text-ink">
+        <p className="text-label text-muted">Stage 2 tutorials</p>
+        <h1 className="font-serif text-h2 text-ink">
           {event ? `${formatCalendarDate(event.event_date, { weekday: "long" })} · ${event.event_time?.slice(0, 5) ?? ""}` : "Stage 2 tutorials"}
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-body text-muted">
           Around 15–20 min each, starting from {event?.event_time?.slice(0, 5)}. Running a few minutes over is
           normal -- check with your group before you assume you&apos;re late. One booking each -- pick a position
           below, or release it if your plans change.
@@ -63,29 +63,29 @@ export default async function TraineeStage2TutorialPage({
             const isMine = s.trainee_id === myProfileId;
             return (
               <div key={s.id} className={`flex items-center justify-between py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                <span className="text-sm text-ink">{ordinal(s.position)}</span>
+                <span className="text-body text-ink">{ordinal(s.position)}</span>
                 {s.trainee_id ? (
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm ${isMine ? "font-semibold text-primary" : "text-muted"}`}>
+                    <span className={`text-body ${isMine ? "font-semibold text-primary" : "text-muted"}`}>
                       {isMine ? "You" : (nameById.get(s.trainee_id) ?? "Unknown")}
                     </span>
                     {isMine ? (
                       <form action={releaseStage2Slot}>
                         <input type="hidden" name="slot_id" value={s.id} />
                         <input type="hidden" name="block_id" value={blockId} />
-                        <button type="submit" className="text-xs text-destructive hover:underline">
+                        <button type="submit" className="text-label text-destructive hover:underline">
                           Release
                         </button>
                       </form>
                     ) : null}
                   </div>
                 ) : (
-                  <span className="text-sm text-muted">Open</span>
+                  <span className="text-body text-muted">Open</span>
                 )}
               </div>
             );
           })}
-          {(slots ?? []).length === 0 ? <p className="py-2 text-sm text-muted">No positions yet.</p> : null}
+          {(slots ?? []).length === 0 ? <p className="py-2 text-body text-muted">No positions yet.</p> : null}
         </div>
       </div>
 

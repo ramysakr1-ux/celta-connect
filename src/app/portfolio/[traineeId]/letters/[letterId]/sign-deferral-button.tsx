@@ -18,12 +18,12 @@ export function SignDeferralButton({ letterId, signatureName, fullName }: { lett
   return (
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="letter_id" value={letterId} />
-      <p className="text-sm text-muted">I agree to defer, on the terms set out above.</p>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      <p className="text-body text-muted">I agree to defer, on the terms set out above.</p>
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Saving…" : `Sign as ${signatureName}`}
       </button>

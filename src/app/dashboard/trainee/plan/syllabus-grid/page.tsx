@@ -27,7 +27,7 @@ export default async function SyllabusPlanningGridPage() {
     return (
       <div className="flex flex-col gap-6">
         <div className="card p-6">
-          <h1 className="font-serif text-xl text-ink">Syllabus planning grid</h1>
+          <h1 className="font-serif text-h2 text-ink">Syllabus planning grid</h1>
           <p className="mt-2 text-muted">
             You haven&apos;t been placed in a teaching-practice subgroup yet -- ask your trainer.
           </p>
@@ -105,7 +105,7 @@ export default async function SyllabusPlanningGridPage() {
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
         <div>
-          <h1 className="font-serif text-xl text-ink">Syllabus planning grid</h1>
+          <h1 className="font-serif text-h2 text-ink">Syllabus planning grid</h1>
           <p className="mt-2 text-muted">
             For TP7 and TP8 you choose your own aim and material -- everyone in your subgroup can see the
             whole grid so you don&apos;t land on the same material as someone else.
@@ -113,7 +113,7 @@ export default async function SyllabusPlanningGridPage() {
         </div>
         <Link
           href={`/portfolio/${trainee.id}/tp`}
-          className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink wash"
+          className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-body text-ink wash"
         >
           Lesson plans
         </Link>
@@ -126,7 +126,7 @@ export default async function SyllabusPlanningGridPage() {
 
           return (
             <div key={member.trainee_id} className="card p-4">
-              <h2 className="font-serif text-lg text-ink">{name}</h2>
+              <h2 className="font-serif text-h3 text-ink">{name}</h2>
               <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {TP_NUMBERS.map((tpNumber) => {
                   const entry = entryByKey.get(`${member.trainee_id}-${tpNumber}`);
@@ -136,14 +136,14 @@ export default async function SyllabusPlanningGridPage() {
                   return (
                     <div key={tpNumber} className="rounded-[6px] border border-border-faint p-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-ink">TP{tpNumber}</p>
-                        <span className="text-xs text-muted">Teaches {turn}{turn === 1 ? "st" : turn === 2 ? "nd" : turn === 3 ? "rd" : "th"}</span>
+                        <p className="text-body font-medium text-ink">TP{tpNumber}</p>
+                        <span className="text-label text-muted">Teaches {turn}{turn === 1 ? "st" : turn === 2 ? "nd" : turn === 3 ? "rd" : "th"}</span>
                       </div>
 
                       {isMe ? (
                         <div className="mt-2">
                           {!entry?.aim_type && suggestionByTp.get(tpNumber) ? (
-                            <p className="mb-2 text-xs text-status-pending-text">
+                            <p className="mb-2 text-label text-status-pending-text">
                               {suggestionByTp.get(tpNumber)!.reason === "remediation"
                                 ? `Worth another go at ${AIM_TYPE_LABELS[suggestionByTp.get(tpNumber)!.aimType]} -- that's where TP4-6 didn't go to standard.`
                                 : `You haven't taught ${AIM_TYPE_LABELS[suggestionByTp.get(tpNumber)!.aimType]} yet -- worth covering it here.`}
@@ -160,20 +160,20 @@ export default async function SyllabusPlanningGridPage() {
                           />
                         </div>
                       ) : entry ? (
-                        <div className="mt-2 flex flex-col gap-1 text-sm">
+                        <div className="mt-2 flex flex-col gap-1 text-body">
                           <p className="text-ink">
                             {entry.main_aim}
-                            {entry.aim_type ? <span className="ml-1.5 text-xs text-muted">({AIM_TYPE_LABELS[entry.aim_type]})</span> : null}
+                            {entry.aim_type ? <span className="ml-1.5 text-label text-muted">({AIM_TYPE_LABELS[entry.aim_type]})</span> : null}
                           </p>
                           {entry.sub_aim ? <p className="text-muted">{entry.sub_aim}</p> : null}
                           <p className="text-muted">Material: {entry.material}</p>
                         </div>
                       ) : (
-                        <p className="mt-2 text-sm text-muted">Not picked yet.</p>
+                        <p className="mt-2 text-body text-muted">Not picked yet.</p>
                       )}
 
                       {clash ? (
-                        <p className="mt-2 text-xs text-status-pending-text">
+                        <p className="mt-2 text-label text-status-pending-text">
                           Same material as someone else in your group -- worth checking with them.
                         </p>
                       ) : null}

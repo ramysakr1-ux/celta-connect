@@ -34,7 +34,7 @@ export default async function TrainerRosterPage() {
 
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
   const supabase = trainer ? hubReadClient(trainer, courseId) : createAdminClient();
 

@@ -46,8 +46,8 @@ export default async function JoinPage({
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>
-          <h1 className="mt-4 font-serif text-xl text-ink">The course has closed</h1>
-          <p className="mt-2 text-sm text-muted">
+          <h1 className="mt-4 font-serif text-h2 text-ink">The course has closed</h1>
+          <p className="mt-2 text-body text-muted">
             {course.name} at {center?.name ?? "your centre"} has finished, and the course material was returned to the
             centre -- your workspace is no longer available.
           </p>
@@ -57,12 +57,12 @@ export default async function JoinPage({
           {center?.admissions_email ? (
             <a
               href={`mailto:${center.admissions_email}`}
-              className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90"
             >
               Email {center.name}
             </a>
           ) : (
-            <p className="mt-4 text-xs text-muted">
+            <p className="mt-4 text-label text-muted">
               If you need a copy of your records, contact {center?.name ?? "your centre"} directly.
             </p>
           )}
@@ -86,7 +86,7 @@ export default async function JoinPage({
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>. Your workspace lift as
           soon as you accept.
         </p>

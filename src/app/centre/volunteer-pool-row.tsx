@@ -37,7 +37,7 @@ export function VolunteerPoolRow({
       <div className="flex items-center justify-between gap-3">
         <Avatar name={name} size="sm" className="self-start" />
         <div className="flex flex-1 flex-col gap-[3px]">
-          <span className="text-sm text-ink">{name}</span>
+          <span className="text-body text-ink">{name}</span>
           <div className="flex items-center gap-2">
             <LevelTag level={primary.level} courseName={primary.courseName} />
             <NextClassStatusTag status={primary.nextClassStatus} />
@@ -50,7 +50,7 @@ export function VolunteerPoolRow({
         </div>
         <div className="flex shrink-0 items-center gap-3.5">
           <span
-            className="text-xs font-semibold tabular-nums"
+            className="text-label font-semibold tabular-nums"
             style={{ color: active ? "oklch(35% 0.075 155)" : "var(--color-muted)" }}
           >
             {hours.toFixed(1)} hrs

@@ -32,12 +32,12 @@ export function SessionShell({
       <div className="flex flex-col gap-3">
         <span aria-hidden className="h-[3px] w-10 rounded-full bg-primary" />
         <p className="text-label font-bold uppercase tracking-[0.14em] text-muted">{eyebrow}</p>
-        <h1 className="font-serif text-3xl font-semibold leading-tight text-ink">{title}</h1>
-        <p className="text-sm leading-relaxed text-muted">{intro}</p>
+        <h1 className="font-serif text-display font-semibold leading-tight text-ink">{title}</h1>
+        <p className="text-body leading-relaxed text-muted">{intro}</p>
       </div>
       {agenda ? (
         <div className="flex flex-col gap-2.5">
-          <p className="flex items-center gap-1.5 text-xs font-bold text-primary">
+          <p className="flex items-center gap-1.5 text-label font-bold text-primary">
             <span aria-hidden className="size-1.5 rounded-full bg-current" />
             The session
           </p>

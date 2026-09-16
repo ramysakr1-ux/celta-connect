@@ -149,8 +149,8 @@ export default function TeachingWritingSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 1 · Lead-in</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 1 · Lead-in</h2>
+          <p className="text-label text-muted">
             Probably the most universally recognisable attitude to writing there is.
           </p>
         </div>
@@ -158,29 +158,29 @@ export default function TeachingWritingSession() {
         <p className="text-meta leading-relaxed text-ink">
           What was his attitude to writing? Have you ever felt exactly like that?
         </p>
-        <p className="text-xs italic text-muted">Quick discussion, a minute.</p>
+        <p className="text-label italic text-muted">Quick discussion, a minute.</p>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Stage 2 · Preparing to write</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Stage 2 · Preparing to write</h2>
         <p className="text-meta leading-relaxed text-ink">
           Think of the last piece of writing you did that actually mattered — a job application, a difficult email, a
           complaint. Did you write it once, or several times, changing it along the way?
         </p>
-        <p className="text-xs italic text-muted">A minute alone, then compare with a partner.</p>
+        <p className="text-label italic text-muted">A minute alone, then compare with a partner.</p>
       </section>
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 3 · Match each term to a real example</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 3 · Match each term to a real example</h2>
         </div>
         <MatchTermsExercise terms={TERM_PAIRS} />
       </section>
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 4 · Now do it — pick the right task type</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 4 · Now do it — pick the right task type</h2>
+          <p className="text-label text-muted">
             Using the piece of writing from Stage 2: which task type below would suit teaching that kind of writing? Click
             each to see what it’s for, then tell your partner which you’d pick and why.
           </p>
@@ -193,11 +193,11 @@ export default function TeachingWritingSession() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-serif text-lg font-semibold text-ink">
+        <h2 className="font-serif text-h3 font-semibold text-ink">
           Stage 4, continued · Read the text and check whether your ideas were right
         </h2>
         <article className="flex flex-col gap-3 rounded-[8px] border border-border bg-card p-5">
-          <h3 className="font-serif text-base font-semibold text-ink">Product versus process</h3>
+          <h3 className="font-serif text-h3 font-semibold text-ink">Product versus process</h3>
           <p className="text-meta leading-relaxed text-ink">
             A product approach treats writing as the end result. Learners study a model text, notice its features and
             organisation, then produce their own version closely following that model — the focus is on the finished piece
@@ -224,7 +224,7 @@ export default function TeachingWritingSession() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-serif text-lg font-semibold text-ink">Stage 5 · Look again, then check with your partner</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Stage 5 · Look again, then check with your partner</h2>
         <div className="flex flex-col gap-2">
           {DETAILS.map((d) => (
             <RevealCard key={d.q} question={d.q} answer={d.a} />
@@ -234,8 +234,8 @@ export default function TeachingWritingSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 5, continued · Product move, or process move?</h2>
-          <p className="text-xs text-muted">Four things a teacher might do in a writing lesson. Choose for each.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 5, continued · Product move, or process move?</h2>
+          <p className="text-label text-muted">Four things a teacher might do in a writing lesson. Choose for each.</p>
         </div>
         <div className="flex flex-col gap-2">
           {MOVES.map((m) => (

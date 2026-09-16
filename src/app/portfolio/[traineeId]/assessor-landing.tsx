@@ -152,8 +152,8 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-serif text-2xl text-ink">{traineeName}&apos;s portfolio</h1>
-        <p className="mt-1 text-sm text-muted">
+        <h1 className="font-serif text-h1 text-ink">{traineeName}&apos;s portfolio</h1>
+        <p className="mt-1 text-body text-muted">
           Everything the centre holds for this candidate. Each line opens the record itself.
         </p>
       </div>
@@ -318,7 +318,7 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
         </a>
       ) : null}
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Read-only. Nothing here can be edited, and nothing you open is recorded against the candidate.
       </p>
     </div>

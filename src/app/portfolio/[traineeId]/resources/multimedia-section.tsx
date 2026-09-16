@@ -32,16 +32,16 @@ function TrackRow({ row }: { row: AudioRow }) {
     <li className="hover-ring flex flex-col gap-2 rounded-[6px] border border-border-faint px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm text-ink">{row.file_name}</p>
-          {row.unit_label ? <p className="text-xs text-muted">{row.unit_label}</p> : null}
+          <p className="truncate text-body text-ink">{row.file_name}</p>
+          {row.unit_label ? <p className="text-label text-muted">{row.unit_label}</p> : null}
         </div>
         {!signedUrl ? (
-          <button type="button" onClick={handlePlay} disabled={loading} className="shrink-0 text-sm text-primary hover:underline disabled:opacity-60">
+          <button type="button" onClick={handlePlay} disabled={loading} className="shrink-0 text-body text-primary hover:underline disabled:opacity-60">
             {loading ? "Loading…" : "Play"}
           </button>
         ) : null}
       </div>
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
       {signedUrl ? <audio controls autoPlay src={signedUrl} className="w-full" /> : null}
     </li>
   );
@@ -61,7 +61,7 @@ export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
     return (
       <div>
         <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
-        <p className="sheet mt-3 border-dashed text-sm text-muted">
+        <p className="sheet mt-3 border-dashed text-body text-muted">
           Coursebook audio your tutors add for teaching practice — nothing here yet.
         </p>
       </div>
@@ -81,7 +81,7 @@ export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
       <div className="mt-3 flex flex-col gap-4">
         {[...byBook.entries()].map(([book, rows]) => (
           <div key={book}>
-            <h4 className="text-sm font-medium text-ink">{book}</h4>
+            <h4 className="text-body font-medium text-ink">{book}</h4>
             <ul className="mt-2 flex flex-col gap-2">
               {rows.map((row) => (
                 <TrackRow key={row.id} row={row} />

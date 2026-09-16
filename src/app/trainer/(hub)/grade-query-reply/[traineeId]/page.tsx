@@ -45,7 +45,7 @@ export default async function GradeQueryReplyListPage({
       <div className="sheet flex flex-col gap-2 p-6">
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Grade query reply -- {trainee.full_name}</h1>
-        <p className="text-sm text-muted">
+        <p className="text-body text-muted">
           Generated but never sent automatically. Draws entirely from the record -- grade descriptors, TP
           outcomes, criteria met, assignment rounds, tutorial dates, and the provisional slash justification if
           there is one. A trainer edits and files it; it quotes the record rather than re-arguing the grade.
@@ -56,7 +56,7 @@ export default async function GradeQueryReplyListPage({
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="font-serif text-lg text-ink">Filed with this course</h2>
+        <h2 className="font-serif text-h3 text-ink">Filed with this course</h2>
         {replies && replies.length > 0 ? (
           <div className="sheet flex flex-col divide-y divide-border p-0">
             {replies.map((r) => (
@@ -65,7 +65,7 @@ export default async function GradeQueryReplyListPage({
                 href={`/trainer/grade-query-reply/${traineeId}/${r.id}`}
                 className="flex items-center justify-between gap-3 px-6 py-3 hover:bg-accent/40"
               >
-                <span className="text-sm text-ink">
+                <span className="text-body text-ink">
                   Generated {formatDateTime(r.generated_at, timeZone)}
                 </span>
                 <span className={`pill ${r.filed_at ? "pill-success" : "pill-neutral"}`}>
@@ -75,7 +75,7 @@ export default async function GradeQueryReplyListPage({
             ))}
           </div>
         ) : (
-          <p className="sheet p-6 text-sm text-muted">No grade query reply has been generated yet.</p>
+          <p className="sheet p-6 text-body text-muted">No grade query reply has been generated yet.</p>
         )}
       </div>
     </div>

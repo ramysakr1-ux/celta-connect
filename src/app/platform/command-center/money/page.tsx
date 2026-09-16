@@ -93,13 +93,13 @@ export default async function CommandCenterMoneyPage() {
       <div className="grid grid-cols-2 gap-2.5">
         <div className="flex flex-col gap-0.5 rounded-[6px] bg-card-inset px-3.5 py-3">
           <div className="text-micro font-bold uppercase tracking-[0.06em] text-muted">Collected this month</div>
-          <div className="font-serif text-xl font-semibold text-ink">
+          <div className="font-serif text-h2 font-semibold text-ink">
             {collectedThisMonth.size === 0 ? "—" : [...collectedThisMonth.entries()].map(([c, a]) => money(a, c)).join(" · ")}
           </div>
         </div>
         <div className="callout-gold flex flex-col gap-0.5 rounded-[6px] border border-gold/25 px-3.5 py-3">
           <div className="text-micro font-bold uppercase tracking-[0.06em] text-gold">Outstanding</div>
-          <div className="font-serif text-xl font-semibold text-ink">
+          <div className="font-serif text-h2 font-semibold text-ink">
             {outstanding.size === 0 ? "—" : [...outstanding.entries()].map(([c, a]) => money(a, c)).join(" · ")}
           </div>
         </div>
@@ -137,7 +137,7 @@ export default async function CommandCenterMoneyPage() {
         type="button"
         disabled
         title="Not built yet"
-        className="h-10 rounded-[6px] border border-input bg-card-inset px-4 text-sm font-semibold text-muted opacity-60"
+        className="h-10 rounded-[6px] border border-input bg-card-inset px-4 text-body font-semibold text-muted opacity-60"
       >
         Connect to Stripe
       </button>

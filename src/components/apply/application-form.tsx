@@ -39,7 +39,7 @@ interface SpeakingPrompt {
 const initialState: ApplyFormState = { error: null, submitted: false };
 
 const inputClass =
-  "rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary";
 
 export function ApplicationForm({
   centerId,
@@ -130,22 +130,22 @@ export function ApplicationForm({
           className="mb-4 h-12 object-contain"
         />
       ) : (
-        <p className="mb-1 font-serif text-lg text-ink">{centerName}</p>
+        <p className="mb-1 font-serif text-h3 text-ink">{centerName}</p>
       )}
-      <p className="mb-4 text-sm text-muted">
+      <p className="mb-4 text-body text-muted">
         Apply for a Cambridge CELTA course
       </p>
 
       {state.submitted ? (
         <div className="py-8 text-center">
-          <p className="font-serif text-lg text-ink">Thank you for applying.</p>
-          <p className="mt-2 text-sm text-muted">
+          <p className="font-serif text-h3 text-ink">Thank you for applying.</p>
+          <p className="mt-2 text-body text-muted">
             We&apos;ve received your application. We&apos;ll be in touch by
             email with next steps.
           </p>
         </div>
       ) : intakes.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted">
+        <p className="py-8 text-center text-body text-muted">
           There are no open intakes accepting applications right now.
         </p>
       ) : (
@@ -165,7 +165,7 @@ export function ApplicationForm({
                   <div className="flex flex-col gap-4">
                     <SectionHead n={1} title="About you" />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="intake_course_id" className="text-sm text-muted">
+            <label htmlFor="intake_course_id" className="text-body text-muted">
               Which course are you applying for?
             </label>
             <select
@@ -189,7 +189,7 @@ export function ApplicationForm({
               ))}
             </select>
             {selectedIntake?.full ? (
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 This intake is full. You can still apply – you&apos;ll be added
                 to the waiting list.
               </p>
@@ -198,7 +198,7 @@ export function ApplicationForm({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="full_name" className="text-sm text-muted">
+              <label htmlFor="full_name" className="text-body text-muted">
                 Full name – as on your passport
               </label>
               <input
@@ -210,7 +210,7 @@ export function ApplicationForm({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-sm text-muted">
+              <label htmlFor="email" className="text-body text-muted">
                 Email
               </label>
               <input
@@ -222,7 +222,7 @@ export function ApplicationForm({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="phone" className="text-sm text-muted">
+              <label htmlFor="phone" className="text-body text-muted">
                 Phone (optional)
               </label>
               <input
@@ -233,7 +233,7 @@ export function ApplicationForm({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="date_of_birth" className="text-sm text-muted">
+              <label htmlFor="date_of_birth" className="text-body text-muted">
                 Date of birth
               </label>
               <input
@@ -249,7 +249,7 @@ export function ApplicationForm({
           {/* Asked here rather than at interview stage, because the interview
               invitation is the first thing that needs it. */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="time_zone" className="text-sm text-muted">
+            <label htmlFor="time_zone" className="text-body text-muted">
               Your time zone
             </label>
             <select
@@ -269,14 +269,14 @@ export function ApplicationForm({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               We have guessed this from your device. Interview times will be sent in your time zone as well as the
               centre&apos;s, so it is worth correcting if it is wrong.
             </p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="marketing_source" className="text-sm text-muted">
+            <label htmlFor="marketing_source" className="text-body text-muted">
               How did you hear about us?
             </label>
             <select
@@ -315,7 +315,7 @@ export function ApplicationForm({
                   <div className="flex flex-col gap-4">
                     <SectionHead n={2} title="Your background" />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="education_summary" className="text-sm text-muted">
+            <label htmlFor="education_summary" className="text-body text-muted">
               Your education (equivalent to entry into higher education)
             </label>
             <textarea
@@ -330,7 +330,7 @@ export function ApplicationForm({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="elt_experience_summary"
-              className="text-sm text-muted"
+              className="text-body text-muted"
             >
               Any English language teaching experience? (little or none is fine
               – CELTA is an introductory course)
@@ -346,7 +346,7 @@ export function ApplicationForm({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="special_requirements"
-              className="text-sm text-muted"
+              className="text-body text-muted"
             >
               Any special requirements we should arrange for? (optional)
             </label>
@@ -359,7 +359,7 @@ export function ApplicationForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="cannot_attend_note" className="text-sm text-muted">
+            <label htmlFor="cannot_attend_note" className="text-body text-muted">
               Is there any part of the course you would not be able to attend?
               (optional)
             </label>
@@ -372,7 +372,7 @@ export function ApplicationForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="anything_else" className="text-sm text-muted">
+            <label htmlFor="anything_else" className="text-body text-muted">
               Anything else we should know? (optional)
             </label>
             <textarea
@@ -392,13 +392,13 @@ export function ApplicationForm({
                     <SectionHead n={3} title="Tasks" />
           {prompts.length > 0 ? (
             <div className="flex flex-col gap-3 border-t border-border pt-4">
-              <p className="text-sm font-semibold text-ink">
+              <p className="text-body font-semibold text-ink">
                 Extended writing task
               </p>
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="writing_task_prompt_id"
-                  className="text-sm text-muted"
+                  className="text-body text-muted"
                 >
                   Choose one prompt
                 </label>
@@ -421,7 +421,7 @@ export function ApplicationForm({
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="writing_task_submission"
-                  className="text-sm text-muted"
+                  className="text-body text-muted"
                 >
                   Your response
                 </label>
@@ -438,8 +438,8 @@ export function ApplicationForm({
 
           {speakingPrompts.length > 0 ? (
             <div className="flex flex-col gap-3 border-t border-border pt-4">
-              <p className="text-sm font-semibold text-ink">Speaking task</p>
-              <p className="text-xs text-muted">
+              <p className="text-body font-semibold text-ink">Speaking task</p>
+              <p className="text-label text-muted">
                 This isn&apos;t an interview – there&apos;s no follow-up, no
                 conversation. Pick a prompt, record your response, and submit.
                 It&apos;s reviewed by a person ahead of your real interview.
@@ -449,7 +449,7 @@ export function ApplicationForm({
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="speaking_task_prompt_id"
-                  className="text-sm text-muted"
+                  className="text-body text-muted"
                 >
                   Choose one prompt
                 </label>
@@ -473,10 +473,10 @@ export function ApplicationForm({
           ) : null}
 
           <div className="flex flex-col gap-1.5 border-t border-border pt-4">
-            <p className="text-sm font-semibold text-ink">Language awareness</p>
+            <p className="text-body font-semibold text-ink">Language awareness</p>
             <label
               htmlFor="language_awareness_answer"
-              className="text-sm text-muted"
+              className="text-body text-muted"
             >
               Identify and correct any language errors you notice in this
               passage: &ldquo;She has been living here since three years and she
@@ -500,10 +500,10 @@ export function ApplicationForm({
                     <SectionHead n={4} title="Agree and send" />
           {commitments ? (
             <div className="flex flex-col gap-2 border-t border-border pt-4">
-              <p className="text-sm font-semibold text-ink">
+              <p className="text-body font-semibold text-ink">
                 Course commitments and code of conduct
               </p>
-              <div className="max-h-56 overflow-y-auto rounded-[6px] border border-border bg-card p-3 text-xs leading-relaxed text-muted">
+              <div className="max-h-56 overflow-y-auto rounded-[6px] border border-border bg-card p-3 text-label leading-relaxed text-muted">
                 <p className="mb-2 text-ink">{commitments.intro}</p>
                 {commitments.sections.map((section) => (
                   <div key={section.heading} className="mb-3">
@@ -527,7 +527,7 @@ export function ApplicationForm({
                   </div>
                 ))}
               </div>
-              <label className="flex items-start gap-2 text-sm text-ink">
+              <label className="flex items-start gap-2 text-body text-ink">
                 <input
                   type="checkbox"
                   name="ack_commitments"
@@ -540,7 +540,7 @@ export function ApplicationForm({
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-2 border-t border-border pt-4 text-sm text-ink">
+          <div className="flex flex-col gap-2 border-t border-border pt-4 text-body text-ink">
             <label className="flex items-start gap-2">
               <input
                 type="checkbox"
@@ -595,13 +595,13 @@ export function ApplicationForm({
           </div>
 
           {state.error ? (
-            <p className="text-sm text-destructive">{state.error}</p>
+            <p className="text-body text-destructive">{state.error}</p>
           ) : null}
 
           <button
             type="submit"
             disabled={pending}
-            className="self-start rounded-[6px] bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+            className="self-start rounded-[6px] bg-primary px-6 py-2.5 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {pending ? "Submitting..." : "Submit application"}
           </button>

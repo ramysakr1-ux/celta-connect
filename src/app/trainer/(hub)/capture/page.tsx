@@ -45,7 +45,7 @@ export default async function CapturePage() {
       <div className="sheet">
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Today</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Capture a point</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-body text-muted">
           Quick, typed or dictated, tagged and timestamped -- pull it into the real feedback form later, on your
           laptop.
         </p>
@@ -58,8 +58,8 @@ export default async function CapturePage() {
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Captured just now</p>
           <ul className="mt-3 flex flex-col gap-3">
             {recentNotes.map((note) => (
-              <li key={note.id} className="border-b border-border-faint pb-3 text-sm last:border-none">
-                <p className="text-xs font-medium text-muted">
+              <li key={note.id} className="border-b border-border-faint pb-3 text-body last:border-none">
+                <p className="text-label font-medium text-muted">
                   {nameByTraineeId.get(note.trainee_id) ?? "Unknown"} -- TP{note.tp_number} ·{" "}
                   {formatTime(note.captured_at, timeZone)}
                 </p>

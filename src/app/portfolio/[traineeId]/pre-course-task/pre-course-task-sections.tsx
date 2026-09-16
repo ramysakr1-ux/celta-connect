@@ -30,7 +30,7 @@ function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item
         {item.task_number ? <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Task {item.task_number}</p> : null}
         {answered ? <span className="text-label font-semibold text-primary">Answered</span> : null}
       </div>
-      <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
+      <p className="whitespace-pre-wrap text-body text-ink">{item.prompt}</p>
       <TaskAnswerBox itemId={item.id} initialResponse={response} readOnly={!isEditable} shape={parseTaskShape(item.shape)} />
       {/* Ramy, 28 Aug 2026: the cohort-wide date unlock alone used to be
           enough, because the task was answered on paper -- the key coming
@@ -42,15 +42,15 @@ function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item
           -- they see everything, as they did before. */}
       {answerKeyUnlocked && (!isEditable || answered) ? (
         item.answer ? (
-          <p className="mt-1 whitespace-pre-wrap rounded-[6px] border border-border-faint bg-accent/20 px-3 py-2 text-sm text-ink">
+          <p className="mt-1 whitespace-pre-wrap rounded-[6px] border border-border-faint bg-accent/20 px-3 py-2 text-body text-ink">
             <span className="font-semibold text-primary">Answer — </span>
             {item.answer}
           </p>
         ) : (
-          <p className="mt-1 text-xs text-muted">No fixed answer for this one -- it&apos;s a reflection task.</p>
+          <p className="mt-1 text-label text-muted">No fixed answer for this one -- it&apos;s a reflection task.</p>
         )
       ) : answerKeyUnlocked && item.answer ? (
-        <p className="mt-1 text-xs text-muted">Answer your version first -- Cambridge&apos;s appears here once you do.</p>
+        <p className="mt-1 text-label text-muted">Answer your version first -- Cambridge&apos;s appears here once you do.</p>
       ) : null}
     </div>
   );
@@ -76,12 +76,12 @@ function SectionBlock({
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{section.title}</p>
         {items.length > 0 ? (
-          <span className="shrink-0 text-xs tabular-nums text-muted">
+          <span className="shrink-0 text-label tabular-nums text-muted">
             {answered} of {items.length}
           </span>
         ) : null}
       </div>
-      {section.prompt ? <p className="whitespace-pre-wrap text-sm text-muted">{section.prompt}</p> : null}
+      {section.prompt ? <p className="whitespace-pre-wrap text-body text-muted">{section.prompt}</p> : null}
       {items.length > 0 ? (
         <div className="flex flex-col divide-y divide-border-faint">
           {items.map((item) => (
@@ -120,8 +120,8 @@ function SectionGroup({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h3 className="font-serif text-lg text-ink">{title}</h3>
-        <p className="mt-0.5 text-xs text-muted">{note}</p>
+        <h3 className="font-serif text-h3 text-ink">{title}</h3>
+        <p className="mt-0.5 text-label text-muted">{note}</p>
       </div>
       {sections.map((section) => (
         <SectionBlock
@@ -160,7 +160,7 @@ export function PreCourseTaskSections({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between text-xs text-muted">
+        <div className="flex items-center justify-between text-label text-muted">
           <span>
             {done} of {total} answered
           </span>

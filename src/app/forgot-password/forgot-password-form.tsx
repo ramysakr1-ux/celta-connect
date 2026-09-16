@@ -28,10 +28,10 @@ export function ForgotPasswordForm() {
   if (confirmed) {
     return (
       <div className="sheet-accent-alert mt-4">
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           If an account exists for that address, a reset link is on its way. It expires in 15 minutes and works once.
         </p>
-        <button type="button" onClick={() => setDismissed(true)} className="mt-2 text-xs text-primary hover:underline">
+        <button type="button" onClick={() => setDismissed(true)} className="mt-2 text-label text-primary hover:underline">
           Send again
         </button>
       </div>
@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm text-muted">
+        <label htmlFor="email" className="text-body text-muted">
           Email
         </label>
         <input
@@ -54,12 +54,12 @@ export function ForgotPasswordForm() {
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {pending ? "Sending..." : "Send reset link"}
       </button>

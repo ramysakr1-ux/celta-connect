@@ -76,14 +76,14 @@ export function PortfolioTabs({
           <Link
             key={tab.href}
             href={`${href}${previewSuffix}`}
-            className={`flex items-center justify-between gap-2.5 rounded-[6px] border-l-[3px] px-3 py-2.5 text-sm ${
+            className={`flex items-center justify-between gap-2.5 rounded-[6px] border-l-[3px] px-3 py-2.5 text-body ${
               active
                 ? "border-primary bg-accent/40 font-semibold text-ink"
                 : "border-transparent text-muted hover:bg-accent/20"
             }`}
           >
             <span>{tab.href === "" && firstTabLabel ? firstTabLabel : tab.label}</span>
-            {metaValue ? <span className="text-xs tabular-nums text-muted">{metaValue}</span> : null}
+            {metaValue ? <span className="text-label tabular-nums text-muted">{metaValue}</span> : null}
           </Link>
         );
       })}

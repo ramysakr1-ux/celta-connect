@@ -101,8 +101,8 @@ export function MaterialsSection({
 
   return (
     <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-      <h2 className="font-serif text-lg text-ink">Materials</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Materials</h2>
+      <p className="mt-1 text-body text-muted">
         Handouts, worksheets or slides -- anything you or the learners will need. Share one with the students and it
         appears on their own page before the lesson.
       </p>
@@ -110,7 +110,7 @@ export function MaterialsSection({
       {materials.length > 0 ? (
         <ul className="mt-4 flex flex-col gap-2">
           {materials.map((m) => (
-            <li key={m.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2 text-sm">
+            <li key={m.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2 text-body">
               <button
                 type="button"
                 onClick={() => handleOpenMaterial(m)}
@@ -118,7 +118,7 @@ export function MaterialsSection({
                 className="text-left text-ink hover:underline disabled:opacity-60"
               >
                 {opening === m.id ? "Opening…" : (m.file_name ?? m.slides_url)}
-                {m.file_type ? <span className="ml-2 text-xs text-muted">({m.file_type})</span> : null}
+                {m.file_type ? <span className="ml-2 text-label text-muted">({m.file_type})</span> : null}
               </button>
               <span className="flex shrink-0 items-center gap-3">
                 {/* The candidate shares their own handout with the students
@@ -133,7 +133,7 @@ export function MaterialsSection({
                   <input type="hidden" name="tp_number" value={tpNumber ?? ""} />
                   <button
                     type="submit"
-                    className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                    className={`rounded-full border px-2.5 py-1 text-label font-medium ${
                       sharedMaterialIds.includes(m.id)
                         ? "border-border bg-status-neutral-bg text-ink"
                         : "border-border text-muted wash hover:text-primary"
@@ -155,7 +155,7 @@ export function MaterialsSection({
           ))}
         </ul>
       ) : (
-        <p className="mt-4 text-sm text-muted">No materials attached yet.</p>
+        <p className="mt-4 text-body text-muted">No materials attached yet.</p>
       )}
 
       {!locked ? (
@@ -167,7 +167,7 @@ export function MaterialsSection({
             onFile={handleFile}
             onError={setError}
           />
-          {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+          {error ? <p className="mt-2 text-body text-destructive">{error}</p> : null}
         </div>
       ) : null}
     </div>

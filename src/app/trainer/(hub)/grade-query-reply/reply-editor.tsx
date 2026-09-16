@@ -41,27 +41,27 @@ export function ReplyEditor({
 
   return (
     <div className="sheet flex flex-col gap-4 p-6">
-      <h2 className="font-serif text-lg text-ink">Write yourself: the two sentences the record can&apos;t give you</h2>
+      <h2 className="font-serif text-h3 text-ink">Write yourself: the two sentences the record can&apos;t give you</h2>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">What would have made the difference</label>
+        <label className="text-body text-muted">What would have made the difference</label>
         <textarea
           value={whatWould}
           onChange={(e) => setWhatWould(e.target.value)}
           rows={4}
           placeholder="e.g. Consistent S+ across TP6-8 rather than TP7-8 only would have supported Pass B..."
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">What happens next if they&apos;re still unsatisfied</label>
+        <label className="text-body text-muted">What happens next if they&apos;re still unsatisfied</label>
         <textarea
           value={whatNext}
           onChange={(e) => setWhatNext(e.target.value)}
           rows={4}
           placeholder="e.g. The centre's Internal Complaints Procedure (Handbook 16), and then Cambridge Appeal Stage One..."
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -74,7 +74,7 @@ export function ReplyEditor({
           <button
             type="submit"
             disabled={draftPending}
-            className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink wash disabled:opacity-60"
+            className="rounded-[6px] border border-border px-4 py-2 text-body font-medium text-ink wash disabled:opacity-60"
           >
             {draftPending ? "Saving..." : "Save draft"}
           </button>
@@ -88,17 +88,17 @@ export function ReplyEditor({
           <button
             type="submit"
             disabled={filePending}
-            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+            className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
           >
             {filePending ? "Filing..." : "File this reply"}
           </button>
         </form>
       </div>
 
-      {draftState.error ? <p className="text-sm text-destructive">{draftState.error}</p> : null}
-      {fileState.error ? <p className="text-sm text-destructive">{fileState.error}</p> : null}
+      {draftState.error ? <p className="text-body text-destructive">{draftState.error}</p> : null}
+      {fileState.error ? <p className="text-body text-destructive">{fileState.error}</p> : null}
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Filing does not send anything -- Connect never emails the candidate automatically. Filing marks this as
         the record of what you sent, once you&apos;ve copied it out yourself.
       </p>

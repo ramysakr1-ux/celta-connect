@@ -77,7 +77,7 @@ export default async function AssessorHistoryPage({
         <div className="flex max-w-[820px] flex-col gap-[13px]">
           <p className="text-label font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
           <h1 className="font-serif text-display leading-[1.14] font-semibold text-ink">Assessor history</h1>
-          <p className="text-sm leading-[1.6] text-muted text-pretty">
+          <p className="text-body leading-[1.6] text-muted text-pretty">
             Handbook 13.3: the same assessor must not be used for more than two consecutive courses. Handbook 13.8: an assessor must not assess
             more than two concurrent courses at a centre. A centre does not choose its assessor and repeat visits are common, so this is not
             enforced — it is kept visible so a centre administrator can see the pattern.
@@ -88,7 +88,7 @@ export default async function AssessorHistoryPage({
 
       {history.length === 0 ? (
         <div className="card px-5 py-4">
-          <p className="text-sm text-muted">No assessor has been linked to a course at this centre yet.</p>
+          <p className="text-body text-muted">No assessor has been linked to a course at this centre yet.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-8">
@@ -97,20 +97,20 @@ export default async function AssessorHistoryPage({
               <div className="flex flex-wrap items-baseline justify-between gap-3.5">
                 <div className="flex flex-col gap-[3px]">
                   <p className="font-serif text-h3 font-semibold text-ink">{a.name}</p>
-                  <p className="text-xs text-muted">
+                  <p className="text-label text-muted">
                     {a.courses.length} {a.courses.length === 1 ? "course" : "courses"} assessed at this centre
                     {assessorEmailById.get(a.profileId) ? ` · ${assessorEmailById.get(a.profileId)}` : ""}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-5">
                   <div className="flex flex-col items-end gap-0.5">
-                    <p className="font-serif text-xl font-semibold" style={{ color: SEVERITY_COLOR[a.currentStreakSeverity] }}>
+                    <p className="font-serif text-h2 font-semibold" style={{ color: SEVERITY_COLOR[a.currentStreakSeverity] }}>
                       {a.currentStreak}
                     </p>
                     <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Consecutive streak</p>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <p className="font-serif text-xl font-semibold" style={{ color: SEVERITY_COLOR[a.peakConcurrentSeverity] }}>
+                    <p className="font-serif text-h2 font-semibold" style={{ color: SEVERITY_COLOR[a.peakConcurrentSeverity] }}>
                       {a.peakConcurrent}
                     </p>
                     <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Peak concurrent</p>
@@ -127,7 +127,7 @@ export default async function AssessorHistoryPage({
                   }}
                 >
                   <span className="mt-1.5 size-[5px] shrink-0 rounded-full" style={{ background: "var(--color-status-warning-text)" }} />
-                  <p className="text-xs leading-[1.5] text-ink">{a.flagText}</p>
+                  <p className="text-label leading-[1.5] text-ink">{a.flagText}</p>
                 </div>
               ) : null}
 
@@ -143,9 +143,9 @@ export default async function AssessorHistoryPage({
                     key={c.id}
                     className={`hover-ring grid grid-cols-[96px_1fr_minmax(0,160px)_96px] items-center gap-2 px-3 py-2.5 text-meta text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
                   >
-                    <span className="text-xs text-muted">{dateRange(c.start_date, c.end_date)}</span>
+                    <span className="text-label text-muted">{dateRange(c.start_date, c.end_date)}</span>
                     <span className="font-semibold">{c.label}</span>
-                    <span className="text-xs text-muted">{c.overlap}</span>
+                    <span className="text-label text-muted">{c.overlap}</span>
                     <span>
                       <span
                         className="inline-flex items-center rounded-full px-2.5 py-[3px] text-label font-semibold"

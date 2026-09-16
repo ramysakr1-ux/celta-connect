@@ -44,7 +44,7 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Cambridge English Teaching Qualifications</p>
-        <p className="text-lg font-serif text-ink">Disclaimer for AI use</p>
+        <p className="text-h3 font-serif text-ink">Disclaimer for AI use</p>
       </div>
 
       {SECTIONS.map((s, i) => (
@@ -55,17 +55,17 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
             >
               {s.letter}
             </span>
-            <p className="text-sm font-semibold text-ink">{s.lead}</p>
+            <p className="text-body font-semibold text-ink">{s.lead}</p>
           </div>
           <ul className="flex flex-col gap-1.5 pl-[30px]">
             {s.items.map((item, j) => (
-              <li key={j} className="flex items-start gap-2 text-xs text-ink">
+              <li key={j} className="flex items-start gap-2 text-label text-ink">
                 <span className="mt-1.5 size-1 shrink-0 rounded-full bg-current" />
                 {item}
               </li>
             ))}
           </ul>
-          <label className="flex items-center gap-2 pl-[30px] text-xs font-semibold text-ink">
+          <label className="flex items-center gap-2 pl-[30px] text-label font-semibold text-ink">
             <input
               type="checkbox"
               checked={ticked[i]}
@@ -78,7 +78,7 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
       ))}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="ai_disclaimer_signed_name" className="text-xs text-muted">
+        <label htmlFor="ai_disclaimer_signed_name" className="text-label text-muted">
           Type your full name to sign
         </label>
         <input
@@ -88,13 +88,13 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
           required
           value={signedName}
           onChange={(e) => setSignedName(e.target.value)}
-          className="h-11 rounded-[6px] border border-input bg-card px-3 font-serif text-base text-ink outline-none focus:border-primary"
+          className="h-11 rounded-[6px] border border-input bg-card px-3 font-serif text-h3 text-ink outline-none focus:border-primary"
         />
         <p className="text-label text-muted">Name, date and time are recorded. A copy is filed in your portfolio.</p>
       </div>
 
       <input type="hidden" name="ai_disclaimer_ticked" value={allTicked ? "1" : ""} />
-      {!signed ? <p className="text-xs text-muted">Tick all three sections and type your name to sign the disclaimer.</p> : null}
+      {!signed ? <p className="text-label text-muted">Tick all three sections and type your name to sign the disclaimer.</p> : null}
     </div>
   );
 }

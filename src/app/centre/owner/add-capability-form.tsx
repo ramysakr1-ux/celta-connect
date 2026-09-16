@@ -39,7 +39,7 @@ export function AddCapabilityForm({ roleCols }: { roleCols: { key: string; label
         {pending ? "Adding…" : "Add capability"}
       </button>
       {state.error ? (
-        <p className="w-full text-xs" style={{ color: "var(--owner-garnet)" }}>
+        <p className="w-full text-label" style={{ color: "var(--owner-garnet)" }}>
           {state.error}
         </p>
       ) : null}

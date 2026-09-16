@@ -24,19 +24,19 @@ export function CheckoutLinkButton({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary disabled:opacity-60 wash"
+          className="rounded-[6px] border border-border px-3 py-1.5 text-label text-ink hover:border-primary disabled:opacity-60 wash"
         >
           {pending ? "Creating link..." : existingUrl ? "Regenerate payment link" : "Send payment link"}
         </button>
       </div>
       {existingUrl ? (
-        <p className="max-w-full truncate text-xs text-muted">
+        <p className="max-w-full truncate text-label text-muted">
           <a href={existingUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
             {existingUrl}
           </a>
         </p>
       ) : null}
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }

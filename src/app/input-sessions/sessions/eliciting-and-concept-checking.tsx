@@ -71,7 +71,7 @@ function ElicitingTechniques() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-bold text-ink">Eliciting — drawing it out instead of giving it</p>
+        <p className="text-label font-bold text-ink">Eliciting — drawing it out instead of giving it</p>
         <p className="text-label text-muted">Get learners to produce or work out language themselves before you supply it. Click each technique for a real example.</p>
       </div>
       {ELICIT_TECHNIQUES.map((e, i) => (
@@ -136,7 +136,7 @@ function SpotBadCcq() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Spot the bad CCQ</p>
+        <p className="text-label font-bold text-ink">Spot the bad CCQ</p>
         <p className="text-label text-muted">{picked !== null ? "1 of 5 examined" : "0 of 5 examined"}</p>
       </div>
       <p className="text-label text-muted">
@@ -164,7 +164,7 @@ function SpotBadCcq() {
       })}
       {picked !== null ? (
         <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/10 px-3.5 py-2.5">
-          <p className="text-xs leading-relaxed text-ink">
+          <p className="text-label leading-relaxed text-ink">
             {CCQ_ITEMS[picked].why || "This one is a genuinely good CCQ — simple, doesn't contain the target language, and checks meaning directly."}
           </p>
         </div>
@@ -178,12 +178,12 @@ function WriteYourOwn() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-bold text-ink">Write your own CCQs</p>
+        <p className="text-label font-bold text-ink">Write your own CCQs</p>
         <p className="text-label text-muted">For each target item, write two CCQs. Compare with a model once you&apos;ve tried.</p>
       </div>
       {WRITE_ITEMS.map((w, i) => (
         <div key={w.item} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-sm font-semibold text-ink">{w.item}</p>
+          <p className="font-serif text-body font-semibold text-ink">{w.item}</p>
           <button
             type="button"
             data-print-hide
@@ -194,7 +194,7 @@ function WriteYourOwn() {
           </button>
           {open[i] ? (
             <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/5 px-3.5 py-2.5">
-              <p className="text-xs leading-relaxed text-ink">{w.model}</p>
+              <p className="text-label leading-relaxed text-ink">{w.model}</p>
             </div>
           ) : null}
         </div>
@@ -208,7 +208,7 @@ function BeyondCcqs() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-bold text-ink">Beyond CCQs — match the technique</p>
+        <p className="text-label font-bold text-ink">Beyond CCQs — match the technique</p>
         <p className="text-label text-muted">CCQs aren&apos;t the only tool. Match each technique to when you&apos;d actually use it.</p>
       </div>
       {TECHNIQUES.map((t, i) => (
@@ -220,7 +220,7 @@ function BeyondCcqs() {
             open[i] ? "border-primary/40 bg-primary/10" : "border-border bg-card"
           }`}
         >
-          <p className="text-xs font-semibold text-ink">{t.technique}</p>
+          <p className="text-label font-semibold text-ink">{t.technique}</p>
           {open[i] ? (
             <p className="text-label text-primary">{t.use}</p>
           ) : (
@@ -240,7 +240,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -252,7 +252,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2.5">
-          <p className="font-serif text-lg font-semibold text-ink">Example — checking &quot;used to&quot; for past habits</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example — checking &quot;used to&quot; for past habits</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[130px_1fr] border-b border-border-faint last:border-b-0">
@@ -275,7 +275,7 @@ function AnswerKey() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-ink"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-card px-4 text-label font-semibold text-ink"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -344,7 +344,7 @@ export default function ElicitingAndConceptCheckingSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone ever said &quot;yes, I understand&quot; in a foreign language class, and not
@@ -365,7 +365,7 @@ export default function ElicitingAndConceptCheckingSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Discuss: near misses</p>
+          <p className="text-label font-bold text-ink">Discuss: near misses</p>
           <p className="text-label text-muted">These sound like CCQs but aren&apos;t quite. Click each to see why, then discuss: what would fix it?</p>
         </div>
         {NEAR_MISSES.map((n) => (

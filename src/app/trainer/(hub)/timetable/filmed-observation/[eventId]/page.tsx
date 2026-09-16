@@ -50,18 +50,18 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
       <BackLink href="/trainer/timetable" label={"Timetable"} />
 
       <div className="sheet">
-        <p className="text-xs text-muted">Filmed observation · group watch session</p>
+        <p className="text-label text-muted">Filmed observation · group watch session</p>
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Timetable</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">{event.title}</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           {formatCalendarDate(event.event_date, { day: "numeric", month: "long", weekday: "long" })}
           {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
         </p>
       </div>
 
       <div className="sheet">
-        <h2 className="font-serif text-lg text-ink">Recording &amp; details</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Recording &amp; details</h2>
+        <p className="mt-1 text-body text-muted">
           The whole cohort watches together, in-app, at this scheduled time. Anyone who misses it can watch the same
           recording solo afterward — the observation hour isn&apos;t gated on live attendance.
         </p>
@@ -83,8 +83,8 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
       {session ? (
         <>
           <div className="sheet">
-            <h2 className="font-serif text-lg text-ink">Discussion breaks</h2>
-            <p className="mt-1 text-sm text-muted">
+            <h2 className="font-serif text-h3 text-ink">Discussion breaks</h2>
+            <p className="mt-1 text-body text-muted">
               Playback auto-pauses at each timestamp with a discussion prompt and a countdown. Anyone can resume early.
             </p>
             <div className="mt-3">
@@ -93,8 +93,8 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
           </div>
 
           <div className="sheet">
-            <h2 className="font-serif text-lg text-ink">Observation task</h2>
-            <p className="mt-1 text-sm text-muted">
+            <h2 className="font-serif text-h3 text-ink">Observation task</h2>
+            <p className="mt-1 text-body text-muted">
               Two prompts tied to the criterion this session covers, one general prompt, and a quick rating.
             </p>
             <div className="mt-3">
@@ -103,7 +103,7 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
           </div>
         </>
       ) : (
-        <p className="text-sm text-muted">Save the recording details above to add discussion breaks and the observation task.</p>
+        <p className="text-body text-muted">Save the recording details above to add discussion breaks and the observation task.</p>
       )}
     </div>
   );

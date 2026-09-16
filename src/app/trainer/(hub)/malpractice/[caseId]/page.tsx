@@ -56,7 +56,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
             {caseRow.status === "open" ? "Open — marking paused" : `Decided — ${caseRow.outcome}`}
           </span>
         </div>
-        <p className="text-sm text-muted">
+        <p className="text-body text-muted">
           {trainee?.full_name} · {assignment ? ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type : "Assignment"}{" "}
           ({caseRow.assignment_round === "first" ? "1st submission" : "resubmission"}) · opened by {openedBy?.full_name ?? "—"} on{" "}
           {formatDate(caseRow.opened_at, timeZone)}
@@ -109,10 +109,10 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         ) : null}
         {reflection ? (
           <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-            <span className="text-xs text-muted">Plagiarism Reflection assignment created</span>
+            <span className="text-label text-muted">Plagiarism Reflection assignment created</span>
             <Link
               href={`/portfolio/${caseRow.trainee_id}/assignments/${reflection.id}`}
-              className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink wash"
+              className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink wash"
             >
               Open it
             </Link>
@@ -133,12 +133,12 @@ function TimelineRow({ date, step, text, who, last, timeZone }: { date: string; 
     <div
       className={`grid grid-cols-[110px_150px_1fr_130px] items-start gap-4 px-5 py-3.5 ${last ? "" : "border-b border-border-faint"}`}
     >
-      <span className="text-xs text-muted" style={{ fontVariantNumeric: "tabular-nums" }}>
+      <span className="text-label text-muted" style={{ fontVariantNumeric: "tabular-nums" }}>
         {formatDate(date, timeZone)}
       </span>
-      <span className="text-xs font-semibold text-ink">{step}</span>
-      <span className="whitespace-pre-wrap text-sm text-ink">{text}</span>
-      <span className="text-right text-xs text-muted">{who}</span>
+      <span className="text-label font-semibold text-ink">{step}</span>
+      <span className="whitespace-pre-wrap text-body text-ink">{text}</span>
+      <span className="text-right text-label text-muted">{who}</span>
     </div>
   );
 }

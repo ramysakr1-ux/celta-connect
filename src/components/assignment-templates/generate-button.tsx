@@ -33,7 +33,7 @@ export function AssignmentGenerateButton({ templateId }: { templateId: string })
         type="button"
         onClick={handleClick}
         disabled={isLoading}
-        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {isLoading ? (
           <>
@@ -47,7 +47,7 @@ export function AssignmentGenerateButton({ templateId }: { templateId: string })
           "Split into sections"
         )}
       </button>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-body text-destructive">{error}</p> : null}
     </div>
   );
 }

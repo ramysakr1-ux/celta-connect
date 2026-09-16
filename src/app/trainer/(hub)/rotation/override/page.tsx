@@ -18,7 +18,7 @@ export default async function TpPointOverridePage() {
   // course, so "No trainees yet" was the wrong answer to why this is empty.
   const courseId = trainer.course_id;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
 
   const [{ data: trainees }, { data: schedule }] = await Promise.all([

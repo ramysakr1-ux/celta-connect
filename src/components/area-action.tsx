@@ -48,7 +48,7 @@ export function AreaAction({
 
   const area = verdict.holder.area;
   return (
-    <p className="text-sm text-muted">
+    <p className="text-body text-muted">
       <Link href={adminRoomHref} className="font-medium text-primary hover:underline">
         {verdict.holder.name}
       </Link>{" "}

@@ -25,13 +25,13 @@ export function GroupFeedbackForm({
         rows={3}
         defaultValue={initialFeedback}
         placeholder="What the three of you agreed, reading the notes together"
-        className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-card disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save group feedback"}
       </button>

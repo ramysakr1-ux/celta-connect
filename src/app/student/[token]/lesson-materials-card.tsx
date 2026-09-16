@@ -48,7 +48,7 @@ export function LessonMaterialsCard({
               href={m.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between gap-2 truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink wash"
+              className="flex items-center justify-between gap-2 truncate rounded-[6px] px-2 py-1.5 text-left text-label text-ink wash"
             >
               <span className="truncate">{m.name}</span>
               {m.sizeLabel ? <span className="shrink-0 text-label text-muted">{m.sizeLabel}</span> : null}

@@ -69,8 +69,8 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
             : "not on the timetable yet"}{" "}
           · unassessed · nobody is watching
         </p>
-        <h1 className="mt-1 font-serif text-2xl text-ink">Getting to know your class</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">
+        <h1 className="mt-1 font-serif text-h1 text-ink">Getting to know your class</h1>
+        <p className="mt-2 max-w-2xl text-body text-muted">
           {assignment.chosen_slug
             ? "Twenty minutes, unassessed, and the tutor is not in the room. Your pick is marked below; the other two stay for reference."
             : "Twenty minutes, unassessed, and the tutor is not in the room. Three options below, matched to the level you will teach -- choose whichever appeals. If you do not pick, your tutor picks for you -- that is completely fine."}
@@ -78,7 +78,7 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
       </div>
 
       {isDemo && !assignment.chosen_slug ? (
-        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-3 text-sm text-ink">
+        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-3 text-body text-ink">
           <span className="font-semibold">Demo: read-only.</span> On a real course you would choose one of these three here. This is a shared
           sample account, so the choice cannot be saved.
         </p>
@@ -86,8 +86,8 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
       <GtkyPickForm activities={activities} chosenSlug={assignment.chosen_slug} readOnly={isDemo} />
 
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-        <h2 className="font-serif text-lg text-ink">Materials</h2>
-        <p className="mt-1 mb-4 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Materials</h2>
+        <p className="mt-1 mb-4 text-body text-muted">
           Anything you&apos;d like the volunteer students to see beforehand -- a handout, a slide, whatever you&apos;re using.
         </p>
         {gtkyEvent ? (
@@ -99,7 +99,7 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
             revalidatePath={`/portfolio/${traineeId}/gtky`}
           />
         ) : (
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             Ask your tutor to add &quot;Getting to know you&quot; to the course timetable first -- materials share against that.
           </p>
         )}

@@ -36,11 +36,11 @@ export function CaptureForm({
     <form id="capture-point" ref={formRef} action={formAction} className="sheet flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-muted">Who</span>
+          <span className="text-label font-medium text-muted">Who</span>
           <select
             name="trainee_id"
             required
-            className="h-11 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-11 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Choose...</option>
             {roster.map((r) => (
@@ -51,11 +51,11 @@ export function CaptureForm({
           </select>
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-muted">Which TP</span>
+          <span className="text-label font-medium text-muted">Which TP</span>
           <select
             name="tp_number"
             required
-            className="h-11 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-11 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Choose...</option>
             {tpNumbers.map((n) => (
@@ -73,7 +73,7 @@ export function CaptureForm({
         data-dictate-label="the point you are capturing"
         placeholder="Type, dictate, or say “Hey Connect” -- a strength, an action point, anything to remember for the feedback form later."
         onInput={autosizeOnInput}
-        className="w-full rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="w-full rounded-[6px] border border-input bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
 
       {/* This screen is the one being used mid-lesson, hands on nothing, which
@@ -83,13 +83,13 @@ export function CaptureForm({
         <WakeWordToggle />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-      {justSaved ? <p className="text-sm text-primary">Captured.</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
+      {justSaved ? <p className="text-body text-primary">Captured.</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-4 py-2.5 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Capturing…" : "Capture point"}
       </button>

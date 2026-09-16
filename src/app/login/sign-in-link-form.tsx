@@ -34,11 +34,11 @@ export function SignInLinkForm({ next }: { next?: string }) {
   if (confirmed) {
     return (
       <div className="sheet-accent-alert">
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           We&apos;ve sent a sign-in link to {email}. Click it to sign in -- no password needed. The link expires in 15
           minutes and works once.
         </p>
-        <button type="button" onClick={() => setDismissed(true)} className="mt-2 text-xs text-primary hover:underline">
+        <button type="button" onClick={() => setDismissed(true)} className="mt-2 text-label text-primary hover:underline">
           Send again
         </button>
       </div>
@@ -52,7 +52,7 @@ export function SignInLinkForm({ next }: { next?: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full rounded-[6px] border border-border bg-card px-4 py-2 text-sm font-semibold text-ink hover:border-primary"
+        className="w-full rounded-[6px] border border-border bg-card px-4 py-2 text-body font-semibold text-ink hover:border-primary"
       >
         Email me a sign-in link
       </button>
@@ -70,13 +70,13 @@ export function SignInLinkForm({ next }: { next?: string }) {
         autoComplete="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
       />
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {pending ? "Sending..." : "Send sign-in link"}
       </button>

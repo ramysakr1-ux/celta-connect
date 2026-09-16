@@ -62,9 +62,9 @@ export function RunningOrderPanel({
                 {formatCalendarDate(nextDate, { weekday: "long", day: "numeric", month: "long" })} · half{" "}
                 {halfLabel}
               </p>
-              <h4 className="font-serif text-lg text-ink">Running order</h4>
+              <h4 className="font-serif text-h3 text-ink">Running order</h4>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-3 py-1 text-xs font-semibold text-status-warning-text">
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-3 py-1 text-label font-semibold text-status-warning-text">
               <span className="size-1.5 rounded-full bg-current" />
               Next TP day
             </span>
@@ -97,11 +97,11 @@ export function RunningOrderPanel({
                     {position}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-ink">
+                    <p className="truncate text-body text-ink">
                       {m.fullName}
                       {m.courseStatus === "extension" ? <span className="pill pill-info ml-2">Extension</span> : null}
                     </p>
-                    {plan?.mainLessonAim ? <p className="truncate text-xs text-muted">{plan.mainLessonAim}</p> : null}
+                    {plan?.mainLessonAim ? <p className="truncate text-label text-muted">{plan.mainLessonAim}</p> : null}
                   </div>
                   {plan?.aimType ? (
                     <span
@@ -114,21 +114,21 @@ export function RunningOrderPanel({
                   {plan?.classGrouping === "one_to_one_or_small_group" ? (
                     <span className="pill pill-info shrink-0 text-micro">1-to-1 / small group</span>
                   ) : null}
-                  <span className={`shrink-0 text-xs font-semibold ${status.cls}`}>{status.label}</span>
+                  <span className={`shrink-0 text-label font-semibold ${status.cls}`}>{status.label}</span>
                   {!plan && hasSchedule && !withdrawn ? <AssignButton subgroupId={subgroupId} tpNumber={tpNumber} /> : null}
                 </div>
               );
             })}
           </div>
 
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Positions come from the base order, rotated once for every day this half has taught.
           </p>
         </div>
 
         <div className="sheet flex flex-col gap-3 p-5">
-          <h4 className="font-serif text-base text-ink">Base order — half {halfLabel}</h4>
-          <p className="text-xs text-muted">
+          <h4 className="font-serif text-h3 text-ink">Base order — half {halfLabel}</h4>
+          <p className="text-label text-muted">
             Move a name and every later day recalculates. Days already taught keep the order they ran in.
           </p>
           <ReorderForm subgroupId={subgroupId} members={members.map((m) => ({ traineeId: m.traineeId, fullName: m.fullName, baseSlot: m.baseSlot }))} />
@@ -172,7 +172,7 @@ function FairnessCheck({ members, allPlans }: { members: RunningOrderMember[]; a
           const spread = counts.map((c, p) => `${ordinal[p] ?? `${p + 1}th`} ×${c}`).join(" · ");
           return (
             <div key={m.traineeId} className={`flex items-center justify-between gap-3 py-1.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-              <span className="truncate text-xs text-ink">{m.fullName}</span>
+              <span className="truncate text-label text-ink">{m.fullName}</span>
               <span className="shrink-0 text-label tabular-nums text-muted">{spread}</span>
             </div>
           );

@@ -18,8 +18,8 @@ export function ConcernForm({ traineeId }: { traineeId: string }) {
   if (state.sent) {
     return (
       <div className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-4">
-        <p className="text-sm font-semibold text-primary">Sent.</p>
-        <p className="mt-1 text-sm text-muted">The centre replies to every concern.</p>
+        <p className="text-body font-semibold text-primary">Sent.</p>
+        <p className="mt-1 text-body text-muted">The centre replies to every concern.</p>
       </div>
     );
   }
@@ -30,7 +30,7 @@ export function ConcernForm({ traineeId }: { traineeId: string }) {
       <input type="hidden" name="route" value={route} />
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-muted">Who should see this?</p>
+        <p className="text-label text-muted">Who should see this?</p>
         {ROUTES.map((r) => (
           <label
             key={r.value}
@@ -40,15 +40,15 @@ export function ConcernForm({ traineeId }: { traineeId: string }) {
           >
             <input type="radio" name="route_radio" checked={route === r.value} onChange={() => setRoute(r.value)} className="mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-ink">{r.label}</p>
-              <p className="text-xs text-muted">{r.note}</p>
+              <p className="text-body font-semibold text-ink">{r.label}</p>
+              <p className="text-label text-muted">{r.note}</p>
             </div>
           </label>
         ))}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="body" className="text-xs text-muted">
+        <label htmlFor="body" className="text-label text-muted">
           What has happened
         </label>
         <textarea
@@ -57,21 +57,21 @@ export function ConcernForm({ traineeId }: { traineeId: string }) {
           required
           rows={4}
           placeholder="Write or dictate…"
-          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
-      <label className="flex items-start gap-2 text-sm text-ink">
+      <label className="flex items-start gap-2 text-body text-ink">
         <input type="checkbox" name="anonymous" className="mt-0.5" />
         Send this anonymously — the centre manager sees the concern but not my name
       </label>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Sending…" : `Send to ${ROUTES.find((r) => r.value === route)?.label}`}
       </button>

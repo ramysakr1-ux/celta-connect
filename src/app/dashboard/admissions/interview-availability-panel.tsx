@@ -12,7 +12,7 @@ import {
 } from "@/app/dashboard/admissions/actions";
 
 const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const inputClass = "h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary";
 
 export interface PatternRow {
   id: string;
@@ -60,22 +60,22 @@ export function InterviewAvailabilityPanel({
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">The rule that makes the slots</p>
         <form action={updateInterviewGenerationSettings} className="mt-2 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-muted">Interview length (min)</span>
+            <span className="text-label text-muted">Interview length (min)</span>
             <input name="interview_slot_minutes" type="number" min={5} defaultValue={settings.slotMinutes} className={`${inputClass} w-24`} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-muted">Gap after (min)</span>
+            <span className="text-label text-muted">Gap after (min)</span>
             <input name="interview_gap_minutes" type="number" min={0} defaultValue={settings.gapMinutes} className={`${inputClass} w-24`} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-muted">Weeks ahead</span>
+            <span className="text-label text-muted">Weeks ahead</span>
             <input name="interview_weeks_ahead" type="number" min={1} max={8} defaultValue={settings.weeksAhead} className={`${inputClass} w-20`} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-muted">Booking cut-off (hrs)</span>
+            <span className="text-label text-muted">Booking cut-off (hrs)</span>
             <input name="interview_cutoff_hours" type="number" min={0} defaultValue={settings.cutoffHours} className={`${inputClass} w-24`} />
           </label>
-          <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-xs font-semibold text-ink hover:border-primary wash">
+          <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-label font-semibold text-ink hover:border-primary wash">
             Save
           </button>
         </form>
@@ -86,17 +86,17 @@ export function InterviewAvailabilityPanel({
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Weekly pattern -- who interviews when</p>
         <div className="mt-2 flex flex-col gap-1.5">
           {patterns.length === 0 ? (
-            <p className="text-sm text-muted">No pattern set yet.</p>
+            <p className="text-body text-muted">No pattern set yet.</p>
           ) : (
             patterns.map((p) => (
-              <div key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm hover-ring">
+              <div key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-body hover-ring">
                 <span className="text-ink">
                   {p.interviewerName} -- {WEEKDAY_LABELS[p.weekday]}, {p.startTime.slice(0, 5)}-{p.endTime.slice(0, 5)} (
                   {p.mode === "online" ? "online" : "face to face"})
                 </span>
                 <form action={removeAvailabilityPattern}>
                   <input type="hidden" name="id" value={p.id} />
-                  <button type="submit" className="text-xs text-muted hover:text-destructive">
+                  <button type="submit" className="text-label text-muted hover:text-destructive">
                     Remove
                   </button>
                 </form>
@@ -121,13 +121,13 @@ export function InterviewAvailabilityPanel({
             ))}
           </select>
           <input name="start_time" type="time" required className={inputClass} />
-          <span className="text-xs text-muted">to</span>
+          <span className="text-label text-muted">to</span>
           <input name="end_time" type="time" required className={inputClass} />
           <select name="mode" defaultValue="face_to_face" className={inputClass}>
             <option value="face_to_face">Face to face</option>
             <option value="online">Online</option>
           </select>
-          <button type="submit" className="h-9 rounded-[6px] bg-primary px-3 text-xs font-semibold text-primary-foreground">
+          <button type="submit" className="h-9 rounded-[6px] bg-primary px-3 text-label font-semibold text-primary-foreground">
             Add window
           </button>
         </form>
@@ -136,15 +136,15 @@ export function InterviewAvailabilityPanel({
       {/* Blocking */}
       <div className="border-t border-border pt-4">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Block a day out</p>
-        <p className="mt-1 text-xs text-muted">
+        <p className="mt-1 text-label text-muted">
           Leave interviewer blank for a centre-wide closure -- set once for everybody, not by each interviewer separately.
         </p>
         <div className="mt-2 flex flex-col gap-1.5">
           {blocks.length === 0 ? (
-            <p className="text-sm text-muted">No blocks set.</p>
+            <p className="text-body text-muted">No blocks set.</p>
           ) : (
             blocks.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm hover-ring">
+              <div key={b.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-body hover-ring">
                 <span className="text-ink">
                   {b.interviewerName ?? "Centre-wide"} -- {b.startDate}
                   {b.endDate !== b.startDate ? ` to ${b.endDate}` : ""}
@@ -153,7 +153,7 @@ export function InterviewAvailabilityPanel({
                 </span>
                 <form action={removeInterviewBlock}>
                   <input type="hidden" name="id" value={b.id} />
-                  <button type="submit" className="text-xs text-muted hover:text-destructive">
+                  <button type="submit" className="text-label text-muted hover:text-destructive">
                     Remove
                   </button>
                 </form>
@@ -171,17 +171,17 @@ export function InterviewAvailabilityPanel({
             ))}
           </select>
           <input name="start_date" type="date" required className={inputClass} />
-          <span className="text-xs text-muted">to</span>
+          <span className="text-label text-muted">to</span>
           <input name="end_date" type="date" className={inputClass} />
           <input name="start_time" type="time" className={inputClass} placeholder="All day" />
-          <span className="text-xs text-muted">to</span>
+          <span className="text-label text-muted">to</span>
           <input name="end_time" type="time" className={inputClass} />
           <input name="reason" placeholder="Reason (optional)" className={`${inputClass} min-w-[160px]`} />
-          <button type="submit" disabled={blockPending} className="h-9 rounded-[6px] border border-border px-3 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60 wash">
+          <button type="submit" disabled={blockPending} className="h-9 rounded-[6px] border border-border px-3 text-label font-semibold text-ink hover:border-primary disabled:opacity-60 wash">
             {blockPending ? "Saving…" : "Block"}
           </button>
         </form>
-        {blockState.error ? <p className="mt-1 text-xs text-destructive">{blockState.error}</p> : null}
+        {blockState.error ? <p className="mt-1 text-label text-destructive">{blockState.error}</p> : null}
       </div>
 
       {/* Regenerate */}
@@ -195,15 +195,15 @@ export function InterviewAvailabilityPanel({
               </option>
             ))}
           </select>
-          <button type="submit" disabled={regenPending} className="h-9 rounded-[6px] bg-ink-warm px-4 text-xs font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60">
+          <button type="submit" disabled={regenPending} className="h-9 rounded-[6px] bg-ink-warm px-4 text-label font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60">
             {regenPending ? "Generating…" : "Generate slots from pattern"}
           </button>
           {regenState.created !== undefined ? (
-            <span className="text-xs text-primary">{regenState.created} slot{regenState.created === 1 ? "" : "s"} created.</span>
+            <span className="text-label text-primary">{regenState.created} slot{regenState.created === 1 ? "" : "s"} created.</span>
           ) : null}
-          {regenState.error ? <span className="text-xs text-destructive">{regenState.error}</span> : null}
+          {regenState.error ? <span className="text-label text-destructive">{regenState.error}</span> : null}
         </form>
-        <p className="mt-1.5 text-xs text-muted">
+        <p className="mt-1.5 text-label text-muted">
           Nobody maintains a calendar. Regenerating replaces every unbooked slot with a fresh set from the current
           pattern -- booked slots stay exactly where they are.
         </p>

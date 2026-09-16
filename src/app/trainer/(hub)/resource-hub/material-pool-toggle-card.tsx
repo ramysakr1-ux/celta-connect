@@ -16,8 +16,8 @@ export function MaterialPoolToggleCard({ courseId, enabled }: { courseId: string
       className="card flex items-center justify-between gap-4 p-6"
     >
       <div>
-        <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">TP7/8 material pool</h2>
+        <p className="mt-1 text-body text-muted">
           {enabled
             ? "On -- TP7 and TP8 draw from the separate material pool instead of the main coursebook."
             : "Off -- candidates keep using the main coursebook for TP7 and TP8, same as every other round."}
@@ -28,7 +28,7 @@ export function MaterialPoolToggleCard({ courseId, enabled }: { courseId: string
       <button
         type="submit"
         disabled={pending}
-        className="wash shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+        className="wash shrink-0 rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
       >
         {pending ? "Saving…" : enabled ? "Turn off" : "Turn on"}
       </button>

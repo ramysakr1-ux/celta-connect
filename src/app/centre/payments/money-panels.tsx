@@ -93,7 +93,7 @@ export async function MoneyPanels({ centerId, canEdit }: { centerId: string; can
           receivedAt: t.received_at,
         }))}
       />
-      <p className="text-xs leading-relaxed text-muted">
+      <p className="text-label leading-relaxed text-muted">
         One currency per course, set by the centre. Card is one of four accepted methods and is never required. Card
         payments show as <span className="text-ink">Confirmed</span> because the provider verified them; every other
         method shows <span className="text-ink">Marked by</span> whoever recorded it.

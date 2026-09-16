@@ -34,8 +34,8 @@ export function LetterIssueForm({
     onIssued?.(state.letterId);
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-primary">Issued.</p>
-        <a href={`/api/formal-letter/${state.letterId}`} className="text-sm text-primary hover:underline">
+        <p className="text-body font-semibold text-primary">Issued.</p>
+        <a href={`/api/formal-letter/${state.letterId}`} className="text-body text-primary hover:underline">
           Download the letter
         </a>
       </div>
@@ -63,7 +63,7 @@ export function LetterIssueForm({
 
       <div className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-3">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{draft.docTitle}</p>
-        <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+        <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label">
           {draft.facts.map((f) => (
             <div key={f.label} className="contents">
               <dt className="text-muted">{f.label}</dt>
@@ -74,43 +74,43 @@ export function LetterIssueForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-muted">Letter body -- one blank line between paragraphs</label>
+        <label className="text-label text-muted">Letter body -- one blank line between paragraphs</label>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
-          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
       {draft.list ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-muted">{draft.list.title}</label>
+          <label className="text-label text-muted">{draft.list.title}</label>
           <textarea
             value={listItems}
             onChange={(e) => setListItems(e.target.value)}
             rows={4}
             placeholder="One point per line"
-            className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-muted">Closing</label>
+        <label className="text-label text-muted">Closing</label>
         <textarea
           value={closing}
           onChange={(e) => setClosing(e.target.value)}
           rows={3}
-          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Issuing…" : "Issue the letter"}
       </button>

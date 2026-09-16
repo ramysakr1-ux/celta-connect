@@ -97,8 +97,8 @@ export function AudioUploadForm({
   return (
     <form onSubmit={handleSubmit} className="card flex flex-col gap-4 p-6">
       <div>
-        <h2 className="font-serif text-lg text-ink">Add a track</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Add a track</h2>
+        <p className="mt-1 text-body text-muted">
           Name the file to match how the TP points already refer to it in their procedure text (e.g. a procedure
           that says &ldquo;Recording 4.03&rdquo; should be named <code>Recording_4.03.mp3</code>) -- that&rsquo;s
           what will let a future pass auto-link mentions to tracks without retagging anything by hand.
@@ -106,7 +106,7 @@ export function AudioUploadForm({
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="level" className="text-sm text-muted">
+          <label htmlFor="level" className="text-body text-muted">
             Level
           </label>
           <input
@@ -119,7 +119,7 @@ export function AudioUploadForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="coursebook_title" className="text-sm text-muted">
+          <label htmlFor="coursebook_title" className="text-body text-muted">
             Coursebook
           </label>
           <input
@@ -140,7 +140,7 @@ export function AudioUploadForm({
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="unit_label" className="text-sm text-muted">
+          <label htmlFor="unit_label" className="text-body text-muted">
             Unit (optional)
           </label>
           <input
@@ -152,7 +152,7 @@ export function AudioUploadForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="file_name" className="text-sm text-muted">
+          <label htmlFor="file_name" className="text-body text-muted">
             Display name (optional, defaults to the filename)
           </label>
           <input
@@ -165,7 +165,7 @@ export function AudioUploadForm({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="file" className="text-sm text-muted">
+        <label htmlFor="file" className="text-body text-muted">
           Audio file
         </label>
         <input
@@ -175,21 +175,21 @@ export function AudioUploadForm({
           accept="audio/*"
           required
           onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-          className="text-sm text-ink"
+          className="text-body text-ink"
         />
         {selectedFile ? (
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
           </p>
         ) : null}
       </div>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-body text-destructive">{error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? (
           <>

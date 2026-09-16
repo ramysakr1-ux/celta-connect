@@ -285,14 +285,14 @@ export default async function TpHubPage({
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Teaching practice record</p>
-          <h2 className="font-serif text-2xl text-ink">
+          <h2 className="font-serif text-h1 text-ink">
             {tpsTaught} of 8 taught · {assessedHours.toFixed(1)} hrs assessed
           </h2>
         </div>
         {isStaff && nextTpNeedingFeedback ? (
           <Link
             href={`/portfolio/${traineeId}/tp/${nextTpNeedingFeedback}`}
-            className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+            className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-body font-semibold text-primary-foreground"
           >
             Write TP feedback
           </Link>
@@ -301,14 +301,14 @@ export default async function TpHubPage({
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href={`/portfolio/${traineeId}/celta5`}
-              className="wash rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink"
+              className="wash rounded-[6px] border border-border bg-card px-3.5 py-2 text-body font-medium text-ink"
             >
               Log an observation
             </Link>
             {nextTpNeedingPlan ? (
               <Link
                 href={`/portfolio/${traineeId}/tp/${nextTpNeedingPlan}`}
-                className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+                className="rounded-[6px] bg-primary px-3.5 py-2 text-body font-semibold text-primary-foreground"
               >
                 Open TP{nextTpNeedingPlan} plan
               </Link>
@@ -329,9 +329,9 @@ export default async function TpHubPage({
                 const href = selfSelect ? "/dashboard/trainee/plan/syllabus-grid" : null;
                 const row = (
                   <div className="flex items-start gap-3 border-t border-border-faint py-2.5 first:border-t-0">
-                    <span className="font-serif text-lg text-muted">TP{tpNumber}</span>
+                    <span className="font-serif text-h3 text-muted">TP{tpNumber}</span>
                     <div className="flex flex-1 flex-col gap-0.5">
-                      <p className="text-sm text-muted">{selfSelect ? "Choose your own topic in the syllabus planning grid" : "Not yet assigned"}</p>
+                      <p className="text-body text-muted">{selfSelect ? "Choose your own topic in the syllabus planning grid" : "Not yet assigned"}</p>
                     </div>
                     <span className="pill pill-neutral shrink-0">{selfSelect ? "Self-select" : "Not yet assigned"}</span>
                   </div>
@@ -369,10 +369,10 @@ export default async function TpHubPage({
                   className="lift -mx-2 flex items-start gap-3 rounded-[6px] border-t border-border-faint px-2 py-2.5 first:border-t-0"
                   style={{ borderLeft: `3px solid ${isToday ? "var(--color-primary)" : "var(--color-muted)"}`, marginLeft: 0, paddingLeft: 10 }}
                 >
-                  <span className="font-serif text-lg text-ink">TP{tpNumber}</span>
+                  <span className="font-serif text-h3 text-ink">TP{tpNumber}</span>
                   <div className="flex flex-1 flex-col gap-0.5">
-                    <p className="text-sm text-ink">{plan.short_title ?? shortenAim(plan.main_lesson_aim)}</p>
-                    <p className="text-xs text-muted">
+                    <p className="text-body text-ink">{plan.short_title ?? shortenAim(plan.main_lesson_aim)}</p>
+                    <p className="text-label text-muted">
                       {/* taught_at is the real record of when it happened;
                           the timetable is the answer for one still ahead.
                           Level and length are dropped rather than shown
@@ -409,13 +409,13 @@ export default async function TpHubPage({
           // text inside is untouched).
           <div className="sheet sheet-garnet flex flex-col gap-2.5">
             <p className="text-label font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan
               as personal aims.
             </p>
             <ul className="flex flex-col gap-1.5">
               {carriedForward.map((point, i) => (
-                <li key={i} className="border-l-2 border-status-warning-text pl-2.5 text-sm text-ink">
+                <li key={i} className="border-l-2 border-status-warning-text pl-2.5 text-body text-ink">
                   {point}
                 </li>
               ))}
@@ -431,7 +431,7 @@ export default async function TpHubPage({
             <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
             <div className="flex items-baseline gap-2.5">
               <span className="font-serif text-display leading-none text-ink">{criteriaPct}%</span>
-              <span className="text-xs text-muted">{achievedCount} of {CELTA_CRITERIA_CODES.length} met</span>
+              <span className="text-label text-muted">{achievedCount} of {CELTA_CRITERIA_CODES.length} met</span>
             </div>
             <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
               <div className="h-1 rounded-full bg-primary" style={{ width: `${criteriaPct}%` }} />

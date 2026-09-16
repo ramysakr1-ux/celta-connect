@@ -44,7 +44,7 @@ export default async function SupervisedSessionPage({
           {formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "long" })}
           {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
         </p>
-        <h1 className="mt-1 font-serif text-xl text-ink">{event.title}</h1>
+        <h1 className="mt-1 font-serif text-h2 text-ink">{event.title}</h1>
       </div>
 
       <SupervisedTaskForm eventId={eventId} completion={completion ?? null} />

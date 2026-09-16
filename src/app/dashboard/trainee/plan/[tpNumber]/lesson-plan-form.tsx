@@ -581,7 +581,7 @@ export function LessonPlanForm({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+            {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
             <span className="mr-2 flex flex-wrap items-center gap-2">
               <DictateButton variant="bar" />
               {/* Candidates get it too, Ramy 13 Sep 2026. The limits that
@@ -1191,10 +1191,10 @@ function LockedPlan({
   return (
     <div className="card rounded-[9px] p-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
+        <h2 className="font-serif text-h3 text-ink">Your lesson plan</h2>
         <span className="status-pill status-pill-on-track">Submitted — locked</span>
       </div>
-      <p className="mt-1 text-sm text-muted">
+      <p className="mt-1 text-body text-muted">
         Submitted {plan.submitted_at ? formatSubmittedAt(plan.submitted_at) : ""}. This is now your record of the
         lesson — ask your trainer if it needs reopening.
       </p>
@@ -1204,11 +1204,11 @@ function LockedPlan({
         <ReadOnlyField label="Personal Aims" value={plan.personal_aims} />
         {(plan.anticipated_problems ?? []).some((p) => p.problem || p.solution) ? (
           <div>
-            <p className="text-sm text-muted">Anticipated Problems &amp; Solutions</p>
+            <p className="text-body text-muted">Anticipated Problems &amp; Solutions</p>
             <ul className="mt-1 flex flex-col gap-1.5">
               {(plan.anticipated_problems ?? []).map((p, i) =>
                 p.problem || p.solution ? (
-                  <li key={i} className="text-sm text-ink">
+                  <li key={i} className="text-body text-ink">
                     <span className="whitespace-pre-line">{p.problem}</span>
                     {p.solution ? <span className="mt-0.5 block whitespace-pre-line text-muted">{p.solution}</span> : null}
                   </li>
@@ -1220,9 +1220,9 @@ function LockedPlan({
         <ReadOnlyField label="Class Profile" value={plan.class_profile} />
         <ReadOnlyField label="Materials" value={plan.materials_description} />
         <div>
-          <p className="text-sm text-muted">Procedure</p>
+          <p className="text-body text-muted">Procedure</p>
           <div className="mt-2 overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full border-collapse text-body">
               <colgroup>
                 <col className="w-[200px]" />
                 <col className="w-[92px]" />
@@ -1231,10 +1231,10 @@ function LockedPlan({
               </colgroup>
               <thead>
                 <tr>
-                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                  <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                  <th className="border-b border-border-faint p-2 text-left text-label text-muted">Stage / Aim</th>
+                  <th className="border-b border-border-faint p-2 text-left text-label text-muted">Interaction</th>
+                  <th className="border-b border-border-faint p-2 text-left text-label text-muted">Time</th>
+                  <th className="border-b border-border-faint p-2 text-left text-label text-muted">Procedure</th>
                 </tr>
               </thead>
               <tbody>
@@ -1242,7 +1242,7 @@ function LockedPlan({
                   <tr key={i} className="even:bg-background">
                     <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
                       {row.stage}
-                      {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
+                      {row.aim ? <p className="mt-1 text-label italic text-muted">{row.aim}</p> : null}
                     </td>
                     <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
                     <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
@@ -1254,16 +1254,16 @@ function LockedPlan({
               </tbody>
             </table>
           </div>
-          <p className="mt-1.5 text-xs text-muted">
+          <p className="mt-1.5 text-label text-muted">
             {totalMinutes} of {TP_LESSON_LENGTH_MINUTES} min{overBy > 0 ? ` · Over by ${overBy} min` : ""}
           </p>
         </div>
         {languageAnalysis ? (
           <div className="border-t border-border-faint pt-4">
-            <p className="text-sm text-muted">Language Analysis ({languageAnalysis.type})</p>
+            <p className="text-body text-muted">Language Analysis ({languageAnalysis.type})</p>
             {languageAnalysis.context ? <p className="mt-1 text-ink">{languageAnalysis.context}</p> : null}
             {languageAnalysis.type === "vocab" ? (
-              <ul className="mt-2 flex flex-col gap-2 text-sm">
+              <ul className="mt-2 flex flex-col gap-2 text-body">
                 {languageAnalysis.vocab_rows.map((row, i) => (
                   <li key={i} className="text-ink">
                     <b>{row.item}</b> — {row.definition}
@@ -1273,7 +1273,7 @@ function LockedPlan({
             ) : (
               <div className="mt-2 flex flex-col gap-3">
                 {languageAnalysis.blocks.map((block, i) => (
-                  <div key={i} className="text-sm text-ink">
+                  <div key={i} className="text-body text-ink">
                     <p className="font-medium">{block.item}</p>
                     {block.meaning ? <p className="text-muted">{block.meaning}</p> : null}
                   </div>
@@ -1291,7 +1291,7 @@ function ReadOnlyField({ label, value }: { label: string; value?: string | null 
   if (!value) return null;
   return (
     <div>
-      <p className="text-sm text-muted">{label}</p>
+      <p className="text-body text-muted">{label}</p>
       <p className="whitespace-pre-line text-ink">{value}</p>
     </div>
   );

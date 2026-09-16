@@ -23,11 +23,11 @@ export function ApplicationSettingsForm({
       className="flex flex-wrap items-center gap-4 border-t border-border-faint pt-3"
     >
       <input type="hidden" name="course_id" value={courseId} />
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input type="checkbox" name="accepting_applications" defaultChecked={accepting} />
         Accepting applications
       </label>
-      <label className="flex items-center gap-2 text-sm text-muted">
+      <label className="flex items-center gap-2 text-body text-muted">
         Cap
         <input
           name="application_cap"
@@ -35,10 +35,10 @@ export function ApplicationSettingsForm({
           min={1}
           defaultValue={applicationCap ?? ""}
           placeholder="No limit"
-          className="h-8 w-20 rounded-[6px] border border-border bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+          className="h-8 w-20 rounded-[6px] border border-border bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
         />
       </label>
-      <button type="submit" className="wash rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
+      <button type="submit" className="wash rounded-[6px] border border-border px-3 py-1.5 text-label text-ink hover:border-primary">
         Save
       </button>
     </form>

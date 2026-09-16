@@ -29,7 +29,7 @@ export function EntryFormSentCheckbox({
     >
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name={fieldName} value={sent ? "" : new Date().toISOString().slice(0, 10)} />
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input type="checkbox" defaultChecked={sent} />
         {label}
       </label>

@@ -130,8 +130,8 @@ export default function ErrorCorrectionSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Video lead-in · 6 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Video lead-in · 6 minutes</h2>
+          <p className="text-label text-muted">
             Watch once, then one question: <strong className="text-ink">who did the correcting?</strong>
           </p>
         </div>
@@ -158,8 +158,8 @@ export default function ErrorCorrectionSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">How to correct: twelve techniques · 6 minutes</h2>
-          <p className="text-xs text-muted">Read them fast. The practice below is where they get used.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">How to correct: twelve techniques · 6 minutes</h2>
+          <p className="text-label text-muted">Read them fast. The practice below is where they get used.</p>
         </div>
         <ol className="flex flex-col gap-1.5">
           {TECHNIQUES.map((t, i) => (
@@ -177,8 +177,8 @@ export default function ErrorCorrectionSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Practice — choose a technique · 12 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Practice — choose a technique · 12 minutes</h2>
+          <p className="text-label text-muted">
             For each error, pick the technique you would use, <strong className="text-ink">try it on your partner out loud</strong>,
             then reveal a suggestion. The suggestion is one answer, not the answer.
           </p>
@@ -191,7 +191,7 @@ export default function ErrorCorrectionSession() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 3 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Wrap-up · 3 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           Which two techniques will you try in your next TP — and which one error type from your own learners will you try
           them on? Say it to your partner; write it in your plan tonight.

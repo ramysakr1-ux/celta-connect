@@ -27,36 +27,36 @@ export function PeerNoteForm({
       <input type="hidden" name="trainee_id" value={traineeId} />
       <input type="hidden" name="tp_number" value={tpNumber} />
       <div className="flex flex-col gap-1">
-        <label className="text-sm text-muted">{prompt1}</label>
+        <label className="text-body text-muted">{prompt1}</label>
         <input
           name="note_1"
           type="text"
           maxLength={140}
           defaultValue={initialNote1}
           placeholder="One line -- a jotting, not an essay"
-          className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-sm text-muted">{prompt2}</label>
+        <label className="text-body text-muted">{prompt2}</label>
         <input
           name="note_2"
           type="text"
           maxLength={140}
           defaultValue={initialNote2}
           placeholder="One line"
-          className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save note"}
       </button>
-      <p className="text-xs text-muted">Private until your trainer reveals it -- you can change it anytime before then.</p>
+      <p className="text-label text-muted">Private until your trainer reveals it -- you can change it anytime before then.</p>
     </form>
   );
 }

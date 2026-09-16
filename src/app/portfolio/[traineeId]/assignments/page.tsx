@@ -110,19 +110,19 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-serif text-xl text-ink">Written Assignments</h2>
-          {dueTodayAssignment ? <p className="mt-0.5 text-xs font-medium text-status-warning-text">1 due today</p> : null}
+          <h2 className="font-serif text-h2 text-ink">Written Assignments</h2>
+          {dueTodayAssignment ? <p className="mt-0.5 text-label font-medium text-status-warning-text">1 due today</p> : null}
         </div>
         <div className="flex items-center gap-3">
           {dueTodayAssignment ? (
             <Link
               href={`/portfolio/${traineeId}/assignments/${dueTodayAssignment.id}`}
-              className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+              className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-body font-semibold text-primary-foreground"
             >
               Open Assignment {ASSIGNMENT_ORDER.indexOf(dueTodayAssignment.assignment_type) + 1}
             </Link>
           ) : null}
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             {passedCount} of {standardAssignments.length} passed
           </p>
         </div>
@@ -144,7 +144,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
             />
           ))
         ) : (
-          <p className="sheet text-sm text-muted">No assignments yet.</p>
+          <p className="sheet text-body text-muted">No assignments yet.</p>
         )}
       </div>
 
@@ -207,7 +207,7 @@ function AssignmentCard({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
-          <h3 className="font-serif text-lg text-ink">{info.title}</h3>
+          <h3 className="font-serif text-h3 text-ink">{info.title}</h3>
         </div>
         {notYetOpen ? (
           <span className="pill pill-neutral">Not yet open</span>
@@ -218,9 +218,9 @@ function AssignmentCard({
         )}
       </div>
 
-      <p className="mt-2 line-clamp-2 text-sm text-muted">{info.description}</p>
+      <p className="mt-2 line-clamp-2 text-body text-muted">{info.description}</p>
 
-      <p className="mt-3 text-xs text-muted">
+      <p className="mt-3 text-label text-muted">
         {[
           opensOn ? (
             <span key="opens" className="font-medium text-ink">
@@ -242,18 +242,18 @@ function AssignmentCard({
 
       {a.first_status === "resubmission_required" && result !== "fail" ? (
         <div className="mt-3 flex items-center justify-between border-t border-border-faint pt-3">
-          <span className="text-xs text-muted">Resubmission</span>
+          <span className="text-label text-muted">Resubmission</span>
           <span className={`pill ${STATUS_PILL_CLASS[a.resubmission_status]}`}>{STATUS_LABEL[a.resubmission_status]}</span>
         </div>
       ) : null}
 
       <div className="mt-3 border-t border-border-faint pt-3">
         {notYetOpen ? (
-          <p className="text-sm text-muted">Read the brief and the criteria now; writing starts on the day above.</p>
+          <p className="text-body text-muted">Read the brief and the criteria now; writing starts on the day above.</p>
         ) : (
           <>
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
-            <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
+            <p className="mt-1 line-clamp-2 text-body text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
           </>
         )}
       </div>

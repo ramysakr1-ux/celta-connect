@@ -32,7 +32,7 @@ export function EmailHistoryPanel({ emails, timeZone }: { emails: EmailRow[]; ti
     return (
       <div className="card flex flex-col gap-1 p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Email history</h2>
-        <p className="text-sm text-muted">No emails sent yet.</p>
+        <p className="text-body text-muted">No emails sent yet.</p>
       </div>
     );
   }
@@ -44,8 +44,8 @@ export function EmailHistoryPanel({ emails, timeZone }: { emails: EmailRow[]; ti
         {emails.map((email) => (
           <li key={email.id} className="flex items-start justify-between gap-3 border-b border-border-faint pb-2.5 last:border-none last:pb-0 hover-ring">
             <div className="min-w-0">
-              <p className="truncate text-sm text-ink">{email.subject}</p>
-              <p className="text-xs text-muted">
+              <p className="truncate text-body text-ink">{email.subject}</p>
+              <p className="text-label text-muted">
                 {formatDate(email.created_at, timeZone)}
                 {email.status === "bounced" && email.bounce_reason ? ` -- ${email.bounce_reason}` : ""}
                 {email.status === "failed" && email.error ? ` -- ${email.error}` : ""}

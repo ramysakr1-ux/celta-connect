@@ -48,10 +48,10 @@ export default async function TrainerTpCardPage({
     return (
       <div className="flex flex-col gap-6">
         <div className="card p-6">
-          <h1 className="font-serif text-xl text-ink">
+          <h1 className="font-serif text-h2 text-ink">
             {trainee.full_name} -- TP{tpNumber}
           </h1>
-          <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
+          <p className="mt-2 text-body text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
           <div className="mt-4">
             <BackLink href={`/dashboard/trainer/trainees/${id}`} label={trainee.full_name} />
           </div>
@@ -133,7 +133,7 @@ export default async function TrainerTpCardPage({
       {plan.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at ? (
         <a
           href={`/api/tp-plans/${plan.id}/pdf`}
-          className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
         >
           Download PDF record
         </a>

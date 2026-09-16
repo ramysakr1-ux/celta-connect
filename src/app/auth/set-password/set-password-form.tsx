@@ -11,7 +11,7 @@ export function SetPasswordForm() {
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm text-muted">
+        <label htmlFor="password" className="text-body text-muted">
           New password
         </label>
         <input
@@ -24,7 +24,7 @@ export function SetPasswordForm() {
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="confirm_password" className="text-sm text-muted">
+        <label htmlFor="confirm_password" className="text-body text-muted">
           Confirm password
         </label>
         <input
@@ -37,7 +37,7 @@ export function SetPasswordForm() {
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"

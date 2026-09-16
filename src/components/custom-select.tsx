@@ -29,7 +29,7 @@ export function CustomSelect({
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
         onBlur={() => setOpen(false)}
-        className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none hover:border-primary disabled:opacity-60"
+        className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-center text-body text-ink outline-none hover:border-primary disabled:opacity-60"
       >
         {selected ? selected.label : placeholder}
       </button>
@@ -44,7 +44,7 @@ export function CustomSelect({
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className="block w-full rounded px-2 py-1.5 text-center text-sm text-ink hover:bg-background"
+              className="block w-full rounded px-2 py-1.5 text-center text-body text-ink hover:bg-background"
             >
               {opt.label}
             </button>

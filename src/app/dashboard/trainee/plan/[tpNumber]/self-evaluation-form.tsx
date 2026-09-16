@@ -326,7 +326,7 @@ export function SelfEvaluationForm({
         </TpSheet>
 
         <BottomBar role="garnet" warning="Submitting locks your self-evaluation — you won't be able to edit it afterwards.">
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
           <WakeWordToggle />
           <SaveDraftButton pending={draftPending} disabled={draftPending || submitPending} />
           <SubmitButton

@@ -37,7 +37,7 @@ import { formatDate } from "@/lib/format-date";
 import { formatCalendarDate } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
-const inputClass = "rounded-[6px] border border-input bg-card px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "rounded-[6px] border border-input bg-card px-2.5 py-1.5 text-body text-ink outline-none focus:border-primary";
 const textareaClass = `${inputClass} w-full`;
 
 // Screen 1a's pre-course checklist -- 8 fixed items, ticked as done.
@@ -49,7 +49,7 @@ export function PreCourseChecklist({ tasks }: { tasks: { id: string; label: stri
           <form action={togglePreCourseTask}>
             <input type="hidden" name="id" value={t.id} />
             <input type="hidden" name="checked" value={String(!t.completedAt)} />
-            <button type="submit" className="flex w-full items-center gap-2.5 rounded-[6px] px-2 py-1.5 text-left text-sm hover:bg-surface-muted">
+            <button type="submit" className="flex w-full items-center gap-2.5 rounded-[6px] px-2 py-1.5 text-left text-body hover:bg-surface-muted">
               <span
                 className={`flex size-4 shrink-0 items-center justify-center rounded border ${t.completedAt ? "border-primary bg-primary text-primary-foreground" : "border-input"}`}
               >
@@ -79,7 +79,7 @@ export function SchemeAndModesForm({
     <div className="flex flex-wrap items-center gap-4">
       <form action={updateScheme} className="flex items-center gap-2">
         <input type="hidden" name="tit_record_id" value={titRecordId} />
-        <label className="text-xs text-muted">Scheme</label>
+        <label className="text-label text-muted">Scheme</label>
         <select name="scheme" defaultValue={scheme} onChange={(e) => e.currentTarget.form?.requestSubmit()} className={inputClass}>
           <option value="internal">Internal</option>
           <option value="external">External</option>
@@ -88,7 +88,7 @@ export function SchemeAndModesForm({
       {scheme === "internal" ? (
         <form action={updateTrainsAtNominatingCentre} className="flex items-center gap-1.5">
           <input type="hidden" name="tit_record_id" value={titRecordId} />
-          <label className="flex items-center gap-1.5 text-sm text-ink">
+          <label className="flex items-center gap-1.5 text-body text-ink">
             <input
               type="checkbox"
               name="trains_at_nominating_centre"
@@ -101,9 +101,9 @@ export function SchemeAndModesForm({
       ) : null}
       <form action={updateModesTrained} className="flex items-center gap-3">
         <input type="hidden" name="tit_record_id" value={titRecordId} />
-        <label className="text-xs text-muted">Modes trained in</label>
+        <label className="text-label text-muted">Modes trained in</label>
         {(["f2f", "online"] as const).map((m) => (
-          <label key={m} className="flex items-center gap-1.5 text-sm text-ink">
+          <label key={m} className="flex items-center gap-1.5 text-body text-ink">
             <input
               type="checkbox"
               name="modes"
@@ -136,8 +136,8 @@ export function ObservedSessionRow({
   return (
     <div className="flex items-center justify-between gap-3 py-1.5">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-ink">{event.title}</p>
-        <p className="text-xs text-muted">{formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</p>
+        <p className="truncate text-body text-ink">{event.title}</p>
+        <p className="text-label text-muted">{formatCalendarDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</p>
       </div>
       {observedId ? (
         <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export function ObservedSessionRow({
           <span className="pill pill-success">Observed</span>
           <form action={unmarkObservedSession}>
             <input type="hidden" name="id" value={observedId} />
-            <button type="submit" className="text-xs text-muted hover:text-destructive">
+            <button type="submit" className="text-label text-muted hover:text-destructive">
               Undo
             </button>
           </form>
@@ -155,16 +155,16 @@ export function ObservedSessionRow({
           <input type="hidden" name="tit_record_id" value={titRecordId} />
           <input type="hidden" name="timetable_event_id" value={event.id} />
           {showAsync ? (
-            <label className="flex items-center gap-1 text-xs text-muted">
+            <label className="flex items-center gap-1 text-label text-muted">
               <input type="checkbox" name="asynchronous" /> Async
             </label>
           ) : null}
-          <button type="submit" disabled={pending} className="text-xs font-semibold text-primary hover:underline disabled:opacity-60">
+          <button type="submit" disabled={pending} className="text-label font-semibold text-primary hover:underline disabled:opacity-60">
             Mark observed
           </button>
         </form>
       )}
-      {state.error ? <span className="text-xs text-destructive">{state.error}</span> : null}
+      {state.error ? <span className="text-label text-destructive">{state.error}</span> : null}
     </div>
   );
 }
@@ -183,28 +183,28 @@ export function Task12Stage1Form({ titRecordId, events }: { titRecordId: string;
         ))}
       </select>
       <input name="handout_description" placeholder="What did you prepare?" className={`${inputClass} min-w-[220px] flex-1`} />
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Saving…" : "File it"}
       </button>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
 
 export function Task12Stage1List({ rows }: { rows: { id: string; eventTitle: string | null; handoutDescription: string; filedAt: string }[] }) {
   const timeZone = useCentreTimeZone();
-  if (rows.length === 0) return <p className="text-sm text-muted">Nothing filed yet.</p>;
+  if (rows.length === 0) return <p className="text-body text-muted">Nothing filed yet.</p>;
   return (
     <ul className="flex flex-col gap-1.5">
       {rows.map((r) => (
         <li key={r.id} className="flex items-start justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2">
           <div>
-            <p className="text-sm text-ink">{r.handoutDescription}</p>
-            <p className="text-xs text-muted">{r.eventTitle ? `${r.eventTitle} · ` : ""}{formatDate(r.filedAt, timeZone)}</p>
+            <p className="text-body text-ink">{r.handoutDescription}</p>
+            <p className="text-label text-muted">{r.eventTitle ? `${r.eventTitle} · ` : ""}{formatDate(r.filedAt, timeZone)}</p>
           </div>
           <form action={removeTask12Stage1}>
             <input type="hidden" name="id" value={r.id} />
-            <button type="submit" className="text-xs text-muted hover:text-destructive">
+            <button type="submit" className="text-label text-muted hover:text-destructive">
               Remove
             </button>
           </form>
@@ -221,17 +221,17 @@ export function AddDeliveredSessionForm({ titRecordId }: { titRecordId: string }
       <input type="hidden" name="tit_record_id" value={titRecordId} />
       <input name="title" placeholder="Session title -- your own design" className={`${inputClass} min-w-[220px] flex-1`} required />
       <input name="delivered_at" type="date" className={inputClass} required />
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Adding…" : "Add"}
       </button>
       {/* Task Twelve Stage 2: "fully self-designed... never reused from
           the centre's own Resource Hub library" -- required, not optional,
           so a session can't be logged without attesting to this. */}
-      <label className="flex w-full items-center gap-1.5 text-xs text-muted">
+      <label className="flex w-full items-center gap-1.5 text-label text-muted">
         <input type="checkbox" name="self_designed" required />
         I designed this session myself -- not adapted from the Resource Hub library
       </label>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -253,36 +253,36 @@ export function DeliveredSessionCard({
   const [fbState, fbAction, fbPending] = useActionState(updateDeliveredSessionSupervisorFeedback, initial);
   return (
     <div className="rounded-[6px] border border-border p-3">
-      <p className="text-sm font-semibold text-ink">{row.title}</p>
-      <p className="text-xs text-muted">{row.deliveredAt}</p>
+      <p className="text-body font-semibold text-ink">{row.title}</p>
+      <p className="text-label text-muted">{row.deliveredAt}</p>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Your self-evaluation</p>
           {row.selfEvaluation ? (
-            <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.selfEvaluation}</p>
+            <p className="mt-1 text-label whitespace-pre-wrap text-ink">{row.selfEvaluation}</p>
           ) : (
             <form action={selfAction} className="mt-1 flex flex-col gap-1.5">
               <input type="hidden" name="id" value={row.id} />
               <textarea name="self_evaluation" rows={3} placeholder="Strengths, and what to develop" className={textareaClass} />
-              <button type="submit" disabled={selfPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink wash disabled:opacity-60">
+              <button type="submit" disabled={selfPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-label font-semibold text-ink wash disabled:opacity-60">
                 {selfPending ? "Saving…" : "Save"}
               </button>
-              {selfState.error ? <p className="text-xs text-destructive">{selfState.error}</p> : null}
+              {selfState.error ? <p className="text-label text-destructive">{selfState.error}</p> : null}
             </form>
           )}
         </div>
         <div>
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Supervisor&apos;s feedback</p>
           {row.supervisorFeedback ? (
-            <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.supervisorFeedback}</p>
+            <p className="mt-1 text-label whitespace-pre-wrap text-ink">{row.supervisorFeedback}</p>
           ) : (
             <form action={fbAction} className="mt-1 flex flex-col gap-1.5">
               <input type="hidden" name="id" value={row.id} />
               <textarea name="supervisor_feedback" rows={3} placeholder="Written feedback on this specific session" className={textareaClass} />
-              <button type="submit" disabled={fbPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink wash disabled:opacity-60">
+              <button type="submit" disabled={fbPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-label font-semibold text-ink wash disabled:opacity-60">
                 {fbPending ? "Saving…" : "Save"}
               </button>
-              {fbState.error ? <p className="text-xs text-destructive">{fbState.error}</p> : null}
+              {fbState.error ? <p className="text-label text-destructive">{fbState.error}</p> : null}
             </form>
           )}
         </div>
@@ -307,13 +307,13 @@ export function AddFeedbackSessionForm({ titRecordId, trainees }: { titRecordId:
       </select>
       <input name="tp_number" type="number" min={1} max={8} placeholder="TP #" className={`${inputClass} w-20`} />
       <input name="conducted_at" type="date" className={inputClass} required />
-      <label className="flex items-center gap-1.5 text-xs text-muted">
+      <label className="flex items-center gap-1.5 text-label text-muted">
         <input type="checkbox" name="observed_by_supervisor" /> Supervisor observed
       </label>
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Adding…" : "Add"}
       </button>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -341,26 +341,26 @@ export function FeedbackSessionCard({
   return (
     <div className="rounded-[6px] border border-border p-3">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink">
+        <p className="text-body font-semibold text-ink">
           {row.traineeName ?? "Unnamed candidate"}
           {row.tpNumber ? ` · TP${row.tpNumber}` : ""}
         </p>
-        <span className="text-xs text-muted">{row.conductedAt}{row.observedBySupervisor ? " · supervisor observed" : ""}</span>
+        <span className="text-label text-muted">{row.conductedAt}{row.observedBySupervisor ? " · supervisor observed" : ""}</span>
       </div>
 
       <div className="mt-2">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Your private draft assessment (Task 13)</p>
         <p className="text-label text-muted">Written before seeing the supervisor&apos;s own view. Never reaches the candidate.</p>
         {row.privateDraft ? (
-          <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.privateDraft}</p>
+          <p className="mt-1 text-label whitespace-pre-wrap text-ink">{row.privateDraft}</p>
         ) : (
           <form action={draftAction} className="mt-1 flex flex-col gap-1.5">
             <input type="hidden" name="id" value={row.id} />
             <textarea name="private_draft" rows={3} className={textareaClass} />
-            <button type="submit" disabled={draftPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink wash disabled:opacity-60">
+            <button type="submit" disabled={draftPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-label font-semibold text-ink wash disabled:opacity-60">
               {draftPending ? "Saving…" : "Save draft"}
             </button>
-            {draftState.error ? <p className="text-xs text-destructive">{draftState.error}</p> : null}
+            {draftState.error ? <p className="text-label text-destructive">{draftState.error}</p> : null}
           </form>
         )}
       </div>
@@ -370,15 +370,15 @@ export function FeedbackSessionCard({
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Discuss with your supervisor</p>
           <input type="hidden" name="id" value={row.id} />
           <textarea name="supervisor_discussion_notes" rows={2} placeholder="What the discussion covered" className={textareaClass} />
-          <button type="submit" disabled={finalPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink wash disabled:opacity-60">
+          <button type="submit" disabled={finalPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-label font-semibold text-ink wash disabled:opacity-60">
             {finalPending ? "Saving…" : "Mark discussed"}
           </button>
-          {finalState.error ? <p className="text-xs text-destructive">{finalState.error}</p> : null}
+          {finalState.error ? <p className="text-label text-destructive">{finalState.error}</p> : null}
         </form>
       ) : row.finalizedAt ? (
         <div className="mt-2 border-t border-border-faint pt-2">
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Discussion</p>
-          <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.supervisorDiscussionNotes}</p>
+          <p className="mt-1 text-label whitespace-pre-wrap text-ink">{row.supervisorDiscussionNotes}</p>
         </div>
       ) : null}
 
@@ -386,15 +386,15 @@ export function FeedbackSessionCard({
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Feedback on how you gave feedback</p>
         <p className="text-label text-muted">Not what it said -- how you delivered it. Private, discussed straight after.</p>
         {row.feedbackOnFeedbackNotes ? (
-          <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.feedbackOnFeedbackNotes}</p>
+          <p className="mt-1 text-label whitespace-pre-wrap text-ink">{row.feedbackOnFeedbackNotes}</p>
         ) : (
           <form action={fofAction} className="mt-1 flex flex-col gap-1.5">
             <input type="hidden" name="id" value={row.id} />
             <textarea name="feedback_on_feedback_notes" rows={2} className={textareaClass} />
-            <button type="submit" disabled={fofPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink wash disabled:opacity-60">
+            <button type="submit" disabled={fofPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-label font-semibold text-ink wash disabled:opacity-60">
               {fofPending ? "Saving…" : "Save"}
             </button>
-            {fofState.error ? <p className="text-xs text-destructive">{fofState.error}</p> : null}
+            {fofState.error ? <p className="text-label text-destructive">{fofState.error}</p> : null}
           </form>
         )}
       </div>
@@ -417,10 +417,10 @@ export function AddCandidateFollowedForm({ titRecordId, trainees }: { titRecordI
           </option>
         ))}
       </select>
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Adding…" : "Follow"}
       </button>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -433,10 +433,10 @@ function CandidateNoteField({ id, stage, label, value }: { id: string; stage: "b
       <input type="hidden" name="stage" value={stage} />
       <label className="text-label font-semibold tracking-[0.05em] text-muted uppercase">{label}</label>
       <textarea name="notes" defaultValue={value ?? ""} rows={2} className={textareaClass} />
-      <button type="submit" disabled={pending} className="self-start text-xs font-semibold text-primary hover:underline disabled:opacity-60">
+      <button type="submit" disabled={pending} className="self-start text-label font-semibold text-primary hover:underline disabled:opacity-60">
         {pending ? "Saving…" : "Save"}
       </button>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -448,7 +448,7 @@ export function CandidateFollowedCard({
 }) {
   return (
     <div className="rounded-[6px] border border-border p-3">
-      <p className="text-sm font-semibold text-ink">{row.traineeName}</p>
+      <p className="text-body font-semibold text-ink">{row.traineeName}</p>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <CandidateNoteField id={row.id} stage="beginning" label="Beginning" value={row.notesBeginning} />
         <CandidateNoteField id={row.id} stage="middle" label="Middle" value={row.notesMiddle} />
@@ -473,13 +473,13 @@ export function AddShadowMarkingForm({ titRecordId, assignments }: { titRecordId
       </select>
       <input name="tit_grade" placeholder="Your grade" className={`${inputClass} w-28`} />
       <input name="supervisor_grade" placeholder="Supervisor's grade" className={`${inputClass} w-32`} />
-      <label className="flex items-center gap-1.5 text-xs text-muted">
+      <label className="flex items-center gap-1.5 text-label text-muted">
         <input type="checkbox" name="agreed" /> Agreed
       </label>
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Adding…" : "Add"}
       </button>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -489,13 +489,13 @@ export function ShadowMarkingList({
 }: {
   rows: { id: string; assignmentLabel: string | null; titGrade: string | null; supervisorGrade: string | null; agreed: boolean | null; markedAt: string }[];
 }) {
-  if (rows.length === 0) return <p className="text-sm text-muted">No shadow marking recorded yet.</p>;
+  if (rows.length === 0) return <p className="text-body text-muted">No shadow marking recorded yet.</p>;
   return (
     <ul className="flex flex-col gap-1.5">
       {rows.map((r) => (
-        <li key={r.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-sm">
+        <li key={r.id} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2 text-body">
           <span className="text-ink">{r.assignmentLabel ?? "Assignment"}</span>
-          <span className="text-xs text-muted">
+          <span className="text-label text-muted">
             You: {r.titGrade ?? "--"} · Supervisor: {r.supervisorGrade ?? "--"}
           </span>
           <span className={`pill ${r.agreed ? "pill-success" : "pill-neutral"}`}>{r.agreed ? "Agreed" : "Not recorded"}</span>
@@ -524,10 +524,10 @@ export function AddShadowDayForm({ titRecordId, untrainedModes }: { titRecordId:
       </select>
       <input name="shadowed_at" type="date" className={inputClass} required />
       <input name="note" placeholder="Which course/session (optional)" className={`${inputClass} min-w-[180px] flex-1`} />
-      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Adding…" : "Log day"}
       </button>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -540,7 +540,7 @@ export function ShadowDaysProgress({
   countByMode: Record<string, number>;
 }) {
   if (untrainedModes.length === 0) {
-    return <p className="text-sm text-muted">Trained in both modes -- no shadowing required.</p>;
+    return <p className="text-body text-muted">Trained in both modes -- no shadowing required.</p>;
   }
   return (
     <div className="flex flex-col gap-1.5">
@@ -548,7 +548,7 @@ export function ShadowDaysProgress({
         const count = countByMode[m] ?? 0;
         const met = count >= SHADOW_DAYS_REQUIRED;
         return (
-          <p key={m} className="text-sm">
+          <p key={m} className="text-body">
             <span className="text-ink">{TIT_MODE_LABEL[m]}</span>{" "}
             <span className={met ? "text-primary" : "text-status-warning-text"}>
               {count} of {SHADOW_DAYS_REQUIRED} shadow days{met ? " -- cleared to tutor" : ""}
@@ -568,14 +568,14 @@ export function TaskRecordItemRow({
   const [state, action, pending] = useActionState(updateTaskRecordItem, initial);
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-border-faint py-1.5 last:border-none">
-      <span className="w-6 shrink-0 text-xs tabular-nums text-muted">{row.itemNumber}</span>
+      <span className="w-6 shrink-0 text-label tabular-nums text-muted">{row.itemNumber}</span>
       {row.label ? (
-        <span className="min-w-[160px] flex-1 text-sm text-ink">{row.label}</span>
+        <span className="min-w-[160px] flex-1 text-body text-ink">{row.label}</span>
       ) : (
         <form action={action} className="flex min-w-[220px] flex-1 items-center gap-1.5">
           <input type="hidden" name="id" value={row.id} />
           <input name="label" placeholder="Name this task" className={`${inputClass} flex-1`} />
-          <button type="submit" disabled={pending} className="text-xs font-semibold text-primary hover:underline disabled:opacity-60">
+          <button type="submit" disabled={pending} className="text-label font-semibold text-primary hover:underline disabled:opacity-60">
             Save
           </button>
         </form>
@@ -587,7 +587,7 @@ export function TaskRecordItemRow({
           <form action={signTaskRecordItem}>
             <input type="hidden" name="id" value={row.id} />
             <input type="hidden" name="who" value="tit" />
-            <button type="submit" className="text-xs text-primary hover:underline">
+            <button type="submit" className="text-label text-primary hover:underline">
               Sign (you)
             </button>
           </form>
@@ -598,13 +598,13 @@ export function TaskRecordItemRow({
           <form action={signTaskRecordItem}>
             <input type="hidden" name="id" value={row.id} />
             <input type="hidden" name="who" value="supervisor" />
-            <button type="submit" className="text-xs text-primary hover:underline">
+            <button type="submit" className="text-label text-primary hover:underline">
               Sign (supervisor)
             </button>
           </form>
         )}
       </div>
-      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-label text-destructive">{state.error}</p> : null}
     </div>
   );
 }
@@ -618,15 +618,15 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
   if (submittedAt) {
     return (
       <div>
-        <p className="text-sm text-ink">Submitted {formatDate(submittedAt, timeZone)}.</p>
-        <p className="mt-2 text-sm whitespace-pre-wrap text-ink">{essay}</p>
+        <p className="text-body text-ink">Submitted {formatDate(submittedAt, timeZone)}.</p>
+        <p className="mt-2 text-body whitespace-pre-wrap text-ink">{essay}</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs text-muted">1,500-2,000 words -- the one compulsory task in the whole programme.</p>
+      <p className="text-label text-muted">1,500-2,000 words -- the one compulsory task in the whole programme.</p>
       {/* One form, two submit buttons -- each button's own formAction
           overrides which server action reads this same FormData, so
           "submit" always sees whatever is currently in the textarea
@@ -639,7 +639,7 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
             type="submit"
             formAction={saveAction}
             disabled={savePending}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash disabled:opacity-60"
+            className="rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink wash disabled:opacity-60"
           >
             {savePending ? "Saving…" : "Save draft"}
           </button>
@@ -647,14 +647,14 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
             type="submit"
             formAction={submitAction}
             disabled={submitPending}
-            className="rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60"
+            className="rounded-[6px] bg-ink-warm px-3 py-1.5 text-label font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60"
           >
             {submitPending ? "Submitting…" : "Submit final essay"}
           </button>
-          <span className="text-xs tabular-nums text-muted">{wordCount} words</span>
+          <span className="text-label tabular-nums text-muted">{wordCount} words</span>
         </div>
-        {saveState.error ? <p className="text-xs text-destructive">{saveState.error}</p> : null}
-        {submitState.error ? <p className="text-xs text-destructive">{submitState.error}</p> : null}
+        {saveState.error ? <p className="text-label text-destructive">{saveState.error}</p> : null}
+        {submitState.error ? <p className="text-label text-destructive">{submitState.error}</p> : null}
       </form>
     </div>
   );
@@ -664,7 +664,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
   const timeZone = useCentreTimeZone();
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Book this when the course assessment itself is booked, not discovered afterwards. Connect prepares the day and the
         portfolio; it never produces or holds the Assessor Moderation Report.
       </p>
@@ -674,7 +674,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
         ) : (
           <form action={bookAssessorDay}>
             <input type="hidden" name="tit_record_id" value={titRecordId} />
-            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash">
+            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink wash">
               Mark booked
             </button>
           </form>
@@ -682,7 +682,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
         {bookedAt && !completedAt ? (
           <form action={completeAssessorDay}>
             <input type="hidden" name="tit_record_id" value={titRecordId} />
-            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash">
+            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink wash">
               Mark completed
             </button>
           </form>
@@ -700,18 +700,18 @@ export function OutcomeForm({ titRecordId, outcome, note }: { titRecordId: strin
     const label = outcome === "confirmed_act" ? "Confirmed as Assistant Course Tutor" : outcome === "extended" ? "Training extended" : "Not verified";
     return (
       <div>
-        <p className="text-sm font-semibold text-ink">{label}</p>
+        <p className="text-body font-semibold text-ink">{label}</p>
         {outcome === "confirmed_act" ? (
-          <p className="mt-1 text-xs text-muted">Not yet Main Course Tutor -- that needs two further courses as ACT plus shadowing an MCT.</p>
+          <p className="mt-1 text-label text-muted">Not yet Main Course Tutor -- that needs two further courses as ACT plus shadowing an MCT.</p>
         ) : null}
-        {note ? <p className="mt-1 text-xs whitespace-pre-wrap text-muted">{note}</p> : null}
+        {note ? <p className="mt-1 text-label whitespace-pre-wrap text-muted">{note}</p> : null}
       </div>
     );
   }
   return (
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="tit_record_id" value={titRecordId} />
-      <p className="text-xs text-muted">Always discussed with the TinT and supervisor first -- this just records what was decided.</p>
+      <p className="text-label text-muted">Always discussed with the TinT and supervisor first -- this just records what was decided.</p>
       <select name="outcome" defaultValue="" required className={inputClass}>
         <option value="" disabled>
           Choose an outcome
@@ -721,10 +721,10 @@ export function OutcomeForm({ titRecordId, outcome, note }: { titRecordId: strin
         <option value="not_verified">Not verified</option>
       </select>
       <textarea name="outcome_note" rows={2} placeholder="Note (optional)" className={textareaClass} />
-      <button type="submit" disabled={pending} className="self-start rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60">
+      <button type="submit" disabled={pending} className="self-start rounded-[6px] bg-ink-warm px-3 py-1.5 text-label font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60">
         {pending ? "Saving…" : "Record outcome"}
       </button>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -737,7 +737,7 @@ export function SubmitPortfolioButton({ titRecordId, submittedAt }: { titRecordI
   return (
     <form action={submitPortfolio}>
       <input type="hidden" name="tit_record_id" value={titRecordId} />
-      <button type="submit" className="rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card hover:bg-ink-warm/90">
+      <button type="submit" className="rounded-[6px] bg-ink-warm px-4 py-2 text-body font-semibold text-card hover:bg-ink-warm/90">
         Submit portfolio and journal
       </button>
     </form>

@@ -99,7 +99,7 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
               </span>
             </div>
           ))}
-          {total === 0 ? <p className="py-2 text-sm text-muted">No positions yet.</p> : null}
+          {total === 0 ? <p className="py-2 text-body text-muted">No positions yet.</p> : null}
         </div>
       </div>
 

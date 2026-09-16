@@ -28,14 +28,14 @@ export function CenterProfileForm({
   return (
     <form action={action} className="flex flex-col gap-4">
       {isPlaceholder ? (
-        <p className="rounded-[6px] border border-primary bg-primary/10 px-3 py-2 text-sm text-ink">
+        <p className="rounded-[6px] border border-primary bg-primary/10 px-3 py-2 text-body text-ink">
           This centre number is still a placeholder, auto-generated when the centre was set up.
           Replace it with the real Cambridge-assigned number below.
         </p>
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="center_name" className="text-sm text-muted">
+        <label htmlFor="center_name" className="text-body text-muted">
           Centre name
         </label>
         <input
@@ -49,7 +49,7 @@ export function CenterProfileForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="center_number" className="text-sm text-muted">
+        <label htmlFor="center_number" className="text-body text-muted">
           Centre number
         </label>
         <input
@@ -61,23 +61,23 @@ export function CenterProfileForm({
           placeholder="e.g. UK123"
           className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Every course this centre runs shares this number -- it&apos;s set once here, not per
           course.
         </p>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-ink">
+      <label className="flex items-center gap-2 text-body text-ink">
         <input type="checkbox" name="is_uk_centre" defaultChecked={isUkCentre} />
         This centre is based in the UK
       </label>
-      <p className="-mt-2 text-xs text-muted">
+      <p className="-mt-2 text-label text-muted">
         Shows a Unique Learner Number field on the trainee join form -- required for UK education
         and training records, not used elsewhere.
       </p>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="admissions_email" className="text-sm text-muted">
+        <label htmlFor="admissions_email" className="text-body text-muted">
           Admissions reply-to address
         </label>
         <input
@@ -88,14 +88,14 @@ export function CenterProfileForm({
           placeholder="admissions@yourcentre.example"
           className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Where replies to applicant emails (offers, rejections) land. Every email is sent from your
           centre&apos;s name, never Connect&apos;s.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="application_response_hours" className="text-sm text-muted">
+        <label htmlFor="application_response_hours" className="text-body text-muted">
           Applicant response time (hours)
         </label>
         <input
@@ -107,14 +107,14 @@ export function CenterProfileForm({
           defaultValue={applicationResponseHours}
           className="w-24 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           How many hours you aim to send a decision (interview or rejection) in, once the written tasks have
           arrived. Your own internal target -- not currently quoted to the applicant.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="volunteer_certificate_hours_threshold" className="text-sm text-muted">
+        <label htmlFor="volunteer_certificate_hours_threshold" className="text-body text-muted">
           Volunteer certificate threshold (hours)
         </label>
         <input
@@ -126,14 +126,14 @@ export function CenterProfileForm({
           defaultValue={volunteerCertificateHoursThreshold}
           className="w-24 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Hours of credited attendance a volunteer needs before they&apos;ve earned a certificate. Shown on the
           Volunteers register and on a volunteer&apos;s own class link.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="feedback_same_day_hours" className="text-sm text-muted">
+        <label htmlFor="feedback_same_day_hours" className="text-body text-muted">
           Written feedback due within (hours)
         </label>
         <input
@@ -146,18 +146,18 @@ export function CenterProfileForm({
           defaultValue={feedbackSameDayHours}
           className="w-24 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           How long after a lesson ends a tutor&apos;s written feedback still counts as same-day. Past this, the
           lesson is flagged red on the Teaching Practice tab.
         </p>
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

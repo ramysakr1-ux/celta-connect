@@ -14,11 +14,11 @@ export function GenerateReplyButton({ traineeId }: { traineeId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Assembling evidence..." : "Generate a new reply"}
       </button>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

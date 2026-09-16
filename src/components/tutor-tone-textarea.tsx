@@ -68,7 +68,7 @@ export function TutorToneTextarea({ enabled, ...props }: VoiceTextareaProps & { 
         </button>
       </div>
       <textarea ref={attach} onInput={autosizeOnInput} {...props} />
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
     </div>
   );
 }

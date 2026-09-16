@@ -28,7 +28,7 @@ export default async function VolunteersPage() {
 
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   const supabase = trainer ? hubReadClient(trainer, courseId) : createAdminClient();

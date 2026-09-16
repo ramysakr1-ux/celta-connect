@@ -17,15 +17,15 @@ export function RescheduleButton({ token }: { token: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="wash w-fit rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink disabled:opacity-60"
+        className="wash w-fit rounded-[6px] border border-border bg-card px-3.5 py-2 text-body font-medium text-ink disabled:opacity-60"
       >
         {pending ? "Releasing your slot…" : "I need a different time"}
       </button>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         You can move your interview once, up to 24 hours before it. Your current time is released straight away and
         you choose a new one.
       </p>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }

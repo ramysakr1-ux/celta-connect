@@ -46,8 +46,8 @@ export function ProviderList({
             >
               <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: p.dot }} aria-hidden="true" />
               <span className="flex-1">
-                <span className="block text-sm font-semibold text-ink">{p.name}</span>
-                <span className="block text-xs text-muted">
+                <span className="block text-body font-semibold text-ink">{p.name}</span>
+                <span className="block text-label text-muted">
                   {p.region} — {p.note}
                 </span>
               </span>
@@ -76,13 +76,13 @@ export function ProviderList({
 
       <div className="mt-4 border-t border-border-faint pt-4">
         {connectedKey && !(connectedAt && credentialsPresent) ? (
-          <p className="mb-3 rounded-[6px] border border-destructive/25 bg-destructive/5 px-3 py-2 text-xs text-ink">
+          <p className="mb-3 rounded-[6px] border border-destructive/25 bg-destructive/5 px-3 py-2 text-label text-ink">
             {providerByKey(connectedKey)?.name} is selected but not working
             {connectedAt ? ", because Connect holds no credentials for it on the server" : ", because onboarding was never completed"}
             . Card payment is unavailable; bank transfer, cash and invoice are unaffected.
           </p>
         ) : null}
-        <p className="text-xs leading-relaxed text-muted">
+        <p className="text-label leading-relaxed text-muted">
           Connecting redirects you to {chosen.name}&apos;s own onboarding, including their identity checks. This screen
           only wires the acceptance email&apos;s Pay link to that account — Connect never processes a payment, holds
           money, or sees a card number.
@@ -93,7 +93,7 @@ export function ProviderList({
             <button
               type="submit"
               disabled={disconnecting}
-              className="wash h-10 w-full rounded-[6px] border border-border bg-card text-sm font-semibold text-ink hover:border-destructive hover:text-destructive disabled:opacity-60"
+              className="wash h-10 w-full rounded-[6px] border border-border bg-card text-body font-semibold text-ink hover:border-destructive hover:text-destructive disabled:opacity-60"
             >
               {disconnecting ? "Disconnecting..." : `Disconnect ${chosen.name}`}
             </button>
@@ -104,16 +104,16 @@ export function ProviderList({
             <button
               type="submit"
               disabled={pending}
-              className="h-10 w-full rounded-[6px] bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="h-10 w-full rounded-[6px] bg-primary text-body font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Connecting..." : `Connect ${chosen.name}`}
             </button>
           </form>
         )}
 
-        {state.error ? <p className="mt-2 text-sm text-destructive">{state.error}</p> : null}
-        {state.notice ? <p className="mt-2 text-sm text-ink">{state.notice}</p> : null}
-        {disconnectState.notice ? <p className="mt-2 text-sm text-ink">{disconnectState.notice}</p> : null}
+        {state.error ? <p className="mt-2 text-body text-destructive">{state.error}</p> : null}
+        {state.notice ? <p className="mt-2 text-body text-ink">{state.notice}</p> : null}
+        {disconnectState.notice ? <p className="mt-2 text-body text-ink">{disconnectState.notice}</p> : null}
       </div>
     </div>
   );

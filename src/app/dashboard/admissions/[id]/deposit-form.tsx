@@ -38,7 +38,7 @@ export function DepositForm({
   if (depositPaidAt) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-sm text-ink">
+        <p className="text-body text-ink">
           Deposit of{" "}
           <span className="font-semibold">
             {depositCurrency ?? ""}
@@ -47,15 +47,15 @@ export function DepositForm({
           recorded {formatDate(depositPaidAt, timeZone, { year: "numeric" })}
           {markedByName ? ` by ${markedByName}` : ""}.
         </p>
-        {note ? <p className="text-xs text-muted">{note}</p> : null}
+        {note ? <p className="text-label text-muted">{note}</p> : null}
         <form action={action}>
           <input type="hidden" name="applicant_id" value={applicantId} />
           <input type="hidden" name="clear" value="1" />
-          <button type="submit" disabled={pending} className="text-xs text-muted hover:text-destructive disabled:opacity-60">
+          <button type="submit" disabled={pending} className="text-label text-muted hover:text-destructive disabled:opacity-60">
             {pending ? "Clearing..." : "Clear this record"}
           </button>
         </form>
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       </div>
     );
   }
@@ -63,49 +63,49 @@ export function DepositForm({
   return (
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Record a deposit you&apos;ve received. Connect never handles the money -- this is your record that it arrived.
       </p>
       <div className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-muted">Amount</span>
+          <span className="text-label text-muted">Amount</span>
           <input
             name="deposit_amount"
             type="number"
             min="1"
             step="0.01"
             required
-            className="h-9 w-28 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-28 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-muted">Currency</span>
+          <span className="text-label text-muted">Currency</span>
           <input
             name="deposit_currency"
             type="text"
             maxLength={3}
             placeholder="GBP"
-            className="h-9 w-20 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink uppercase outline-none focus:border-primary"
+            className="h-9 w-20 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink uppercase outline-none focus:border-primary"
           />
         </label>
         <label className="flex flex-1 flex-col gap-1">
-          <span className="text-xs text-muted">Note (optional)</span>
+          <span className="text-label text-muted">Note (optional)</span>
           <input
             name="deposit_note"
             type="text"
             placeholder="Bank transfer, ref 4471"
-            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
           />
         </label>
         <button
           type="submit"
           disabled={pending}
-          className="h-9 rounded-[6px] bg-primary px-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="h-9 rounded-[6px] bg-primary px-3 text-body font-semibold text-primary-foreground disabled:opacity-60"
         >
           {pending ? "Recording..." : "Record deposit"}
         </button>
       </div>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

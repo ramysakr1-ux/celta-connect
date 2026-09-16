@@ -13,12 +13,12 @@ export function AddVolunteerForm({ token }: { token: string }) {
     <form action={formAction} className="flex items-end gap-3">
       <input type="hidden" name="token" value={token} />
       <div className="flex flex-1 flex-col gap-1.5">
-        <label className="text-sm text-muted">Name</label>
+        <label className="text-body text-muted">Name</label>
         <input
           name="name"
           type="text"
           required
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       {/*
@@ -27,19 +27,19 @@ export function AddVolunteerForm({ token }: { token: string }) {
         volunteer emails; there's still no account behind it.
       */}
       <div className="flex flex-1 flex-col gap-1.5">
-        <label className="text-sm text-muted">Email (optional)</label>
+        <label className="text-body text-muted">Email (optional)</label>
         <input
           name="email"
           type="email"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Class level</label>
+        <label className="text-body text-muted">Class level</label>
         <select
           name="level"
           defaultValue=""
-          className="h-10 appearance-none rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 appearance-none rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         >
           <option value="">Not set</option>
           {LEVEL_OPTIONS.map((l) => (
@@ -49,11 +49,11 @@ export function AddVolunteerForm({ token }: { token: string }) {
           ))}
         </select>
       </div>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="h-10 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-ink-warm px-4 text-body font-semibold text-card disabled:opacity-60"
       >
         {pending ? "Adding…" : "Add student"}
       </button>

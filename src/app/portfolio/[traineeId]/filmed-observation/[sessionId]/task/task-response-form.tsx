@@ -68,37 +68,37 @@ export function TaskResponseForm({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-ink">{prompt1}</label>
+        <label className="text-body font-medium text-ink">{prompt1}</label>
         <textarea
           value={r1}
           onChange={(e) => setR1(e.target.value)}
           disabled={isLocked}
           rows={3}
-          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary disabled:opacity-70"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-ink">{prompt2}</label>
+        <label className="text-body font-medium text-ink">{prompt2}</label>
         <textarea
           value={r2}
           onChange={(e) => setR2(e.target.value)}
           disabled={isLocked}
           rows={3}
-          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary disabled:opacity-70"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-ink">{generalPrompt}</label>
+        <label className="text-body font-medium text-ink">{generalPrompt}</label>
         <textarea
           value={rGeneral}
           onChange={(e) => setRGeneral(e.target.value)}
           disabled={isLocked}
           rows={3}
-          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-body text-ink outline-none focus:border-primary disabled:opacity-70"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-ink">{ratingLabel}</span>
+        <span className="text-body font-medium text-ink">{ratingLabel}</span>
         <div className="flex flex-wrap gap-2">
           {ratingOptions.map((opt) => (
             <button
@@ -107,7 +107,7 @@ export function TaskResponseForm({
               disabled={isLocked}
               aria-pressed={rRating === opt}
               onClick={() => setRRating(opt)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-70 ${
+              className={`rounded-full border px-3 py-1 text-label font-medium transition-colors disabled:opacity-70 ${
                 rRating === opt ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash hover:text-ink"
               }`}
             >
@@ -118,7 +118,7 @@ export function TaskResponseForm({
       </div>
 
       <div className="flex items-center justify-between border-t border-border-faint pt-3">
-        <p className="text-xs text-muted">{isLocked ? "Completed — responses are locked." : "Saved automatically as you type."}</p>
+        <p className="text-label text-muted">{isLocked ? "Completed — responses are locked." : "Saved automatically as you type."}</p>
         {!isLocked ? (
           <form action={completeAction}>
             <input type="hidden" name="task_id" value={taskId} />
@@ -126,14 +126,14 @@ export function TaskResponseForm({
             <button
               type="submit"
               disabled={completePending}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
             >
               {completePending ? "Saving…" : "Mark as complete"}
             </button>
           </form>
         ) : null}
       </div>
-      {completeState.error ? <p className="text-sm text-destructive">{completeState.error}</p> : null}
+      {completeState.error ? <p className="text-body text-destructive">{completeState.error}</p> : null}
     </div>
   );
 }

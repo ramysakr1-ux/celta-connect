@@ -26,7 +26,7 @@ export function ScheduleForm({
       <select
         name="tp_coursebook_id"
         defaultValue={currentCoursebookId ?? ""}
-        className="flex-1 appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
+        className="flex-1 appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-body text-ink outline-none focus:border-primary"
       >
         <option value="">No coursebook scheduled</option>
         {coursebooks.map((cb) => (
@@ -38,11 +38,11 @@ export function ScheduleForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-3 py-1 text-sm font-medium text-card disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-3 py-1 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>
-      {state.error ? <span className="text-sm text-destructive">{state.error}</span> : null}
+      {state.error ? <span className="text-body text-destructive">{state.error}</span> : null}
     </form>
   );
 }

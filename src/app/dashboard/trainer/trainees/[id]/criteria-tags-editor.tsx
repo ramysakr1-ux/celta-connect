@@ -39,7 +39,7 @@ export function CriteriaTagsEditor({
 
   return (
     <div className="border-t border-border-faint pt-3">
-      <p className="text-xs text-muted">Criteria tags</p>
+      <p className="text-label text-muted">Criteria tags</p>
       {tags.length > 0 ? (
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {tags.map((t) => (
@@ -63,7 +63,7 @@ export function CriteriaTagsEditor({
           name="criteria_code"
           required
           defaultValue=""
-          className="appearance-none rounded-[6px] border border-border bg-card-inset px-2 py-1 text-center text-xs text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-2 py-1 text-center text-label text-ink outline-none focus:border-primary"
         >
           <option value="" disabled>
             Criterion
@@ -77,7 +77,7 @@ export function CriteriaTagsEditor({
         <select
           name="tag_type"
           defaultValue="strength"
-          className="appearance-none rounded-[6px] border border-border bg-card-inset px-2 py-1 text-center text-xs text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-2 py-1 text-center text-label text-ink outline-none focus:border-primary"
         >
           <option value="strength">Strength</option>
           <option value="action_point">Action point</option>
@@ -85,12 +85,12 @@ export function CriteriaTagsEditor({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] border border-border px-2 py-1 text-xs text-ink hover:border-primary disabled:opacity-60"
+          className="rounded-[6px] border border-border px-2 py-1 text-label text-ink hover:border-primary disabled:opacity-60"
         >
           {pending ? "Adding..." : "Add tag"}
         </button>
       </form>
-      {state.error ? <p className="mt-1 text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="mt-1 text-label text-destructive">{state.error}</p> : null}
     </div>
   );
 }

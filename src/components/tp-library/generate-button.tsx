@@ -51,12 +51,12 @@ export function GenerateButton({
     <div className="flex flex-col gap-3">
       {siblingCoursebooks.length > 0 ? (
         <div className="flex flex-col gap-1.5">
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Avoid repeating material from these other sets (unchecking generates a fresh set that may overlap):
           </p>
           <ul className="flex flex-col gap-1">
             {siblingCoursebooks.map((s) => (
-              <li key={s.id} className="flex items-center gap-2 text-sm text-ink">
+              <li key={s.id} className="flex items-center gap-2 text-body text-ink">
                 <input
                   type="checkbox"
                   id={`avoid-${s.id}`}
@@ -73,7 +73,7 @@ export function GenerateButton({
         type="button"
         onClick={handleClick}
         disabled={isLoading}
-        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {isLoading ? (
           <>
@@ -87,7 +87,7 @@ export function GenerateButton({
           "Generate TP points"
         )}
       </button>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-body text-destructive">{error}</p> : null}
     </div>
   );
 }

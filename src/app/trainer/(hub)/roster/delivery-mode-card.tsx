@@ -62,7 +62,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
               {impact.rows.map((row) => (
                 <div key={row.what} className="flex items-start gap-2.5">
                   <span className={`w-[100px] shrink-0 text-label font-semibold ${TONE_CLASS[row.tone]}`}>{row.what}</span>
-                  <span className="text-xs leading-relaxed text-ink">{row.text}</span>
+                  <span className="text-label leading-relaxed text-ink">{row.text}</span>
                 </div>
               ))}
             </div>

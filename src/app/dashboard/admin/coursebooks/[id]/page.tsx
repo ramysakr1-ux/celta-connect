@@ -45,7 +45,7 @@ export default async function AdminCoursebookDetailPage({
         ) : null}
       </RoomHead>
       {coursebook.generation_error ? (
-        <p className="text-sm text-destructive">{coursebook.generation_error}</p>
+        <p className="text-body text-destructive">{coursebook.generation_error}</p>
       ) : null}
 
       <TpNumberTabs

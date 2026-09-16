@@ -45,7 +45,7 @@ export function AccessPanel({
     <section className="flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
       <div className="flex flex-col gap-[3px]">
         <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Who can see this</p>
-        <p className="text-sm text-muted">
+        <p className="text-body text-muted">
           Everything on this page is visible to the people below and to nobody else. The assessor sees it read-only on their visit day.
         </p>
       </div>
@@ -53,16 +53,16 @@ export function AccessPanel({
       <ul className="flex flex-col gap-2 text-meta">
         <li className="flex items-baseline justify-between gap-3 border-b border-border-faint pb-2">
           <span className="font-semibold text-ink">{tintName}</span>
-          <span className="text-xs text-muted">Trainer-in-training</span>
+          <span className="text-label text-muted">Trainer-in-training</span>
         </li>
         <li className="flex items-baseline justify-between gap-3 border-b border-border-faint pb-2">
           <span className="font-semibold text-ink">{supervisorName ?? "No supervisor set"}</span>
-          <span className="text-xs text-muted">Supervisor</span>
+          <span className="text-label text-muted">Supervisor</span>
         </li>
         {mctNames.map((n) => (
           <li key={n} className="flex items-baseline justify-between gap-3 border-b border-border-faint pb-2">
             <span className="font-semibold text-ink">{n}</span>
-            <span className="text-xs text-muted">Main course tutor</span>
+            <span className="text-label text-muted">Main course tutor</span>
           </li>
         ))}
         {live.map((g) => (
@@ -70,7 +70,7 @@ export function AccessPanel({
             <div className="flex items-baseline justify-between gap-3">
               <span className="font-semibold text-ink">{g.granteeName}</span>
               <span className="flex items-center gap-3">
-                <span className="text-xs text-muted">Granted by {g.grantedByName} · {formatDate(g.grantedAt, timeZone, { year: "numeric" })}</span>
+                <span className="text-label text-muted">Granted by {g.grantedByName} · {formatDate(g.grantedAt, timeZone, { year: "numeric" })}</span>
                 {canManage ? (
                   <form action={revokeTitAccess}>
                     <input type="hidden" name="id" value={g.id} />
@@ -81,10 +81,10 @@ export function AccessPanel({
                 ) : null}
               </span>
             </div>
-            <span className="text-xs text-muted">{g.reason}</span>
+            <span className="text-label text-muted">{g.reason}</span>
           </li>
         ))}
-        {live.length === 0 ? <li className="text-xs text-muted">Nobody else has been granted access.</li> : null}
+        {live.length === 0 ? <li className="text-label text-muted">Nobody else has been granted access.</li> : null}
       </ul>
 
       {canManage ? (
@@ -93,7 +93,7 @@ export function AccessPanel({
             <input type="hidden" name="course_tutors_id" value={courseTutorsId} />
             <label className="flex flex-col gap-1 text-label font-semibold tracking-[0.06em] text-muted uppercase">
               Grant access to
-              <select name="grantee_profile_id" required className="h-9 rounded-[6px] border border-border bg-card px-2 text-sm font-normal tracking-normal text-ink normal-case">
+              <select name="grantee_profile_id" required className="h-9 rounded-[6px] border border-border bg-card px-2 text-body font-normal tracking-normal text-ink normal-case">
                 {grantable.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.name}
@@ -107,20 +107,20 @@ export function AccessPanel({
                 name="reason"
                 required
                 placeholder="e.g. ACT the trainer-in-training shadows"
-                className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm font-normal tracking-normal text-ink normal-case outline-none focus:border-primary"
+                className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body font-normal tracking-normal text-ink normal-case outline-none focus:border-primary"
               />
             </label>
-            <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-sm font-semibold text-ink wash">
+            <button type="submit" className="h-9 rounded-[6px] border border-border px-3 text-body font-semibold text-ink wash">
               Grant
             </button>
           </form>
         ) : (
-          <p className="border-t border-border-faint pt-3 text-xs text-muted">Every other tutor on the course already has access.</p>
+          <p className="border-t border-border-faint pt-3 text-label text-muted">Every other tutor on the course already has access.</p>
         )
       ) : null}
 
       {past.length > 0 ? (
-        <details className="text-xs text-muted">
+        <details className="text-label text-muted">
           <summary className="cursor-pointer">Revoked ({past.length})</summary>
           <ul className="mt-2 flex flex-col gap-1.5">
             {past.map((g) => (

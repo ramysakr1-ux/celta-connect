@@ -197,9 +197,9 @@ export function DragBoard({
   return (
     <div className="flex flex-col gap-4">
       {moveError ? (
-        <div className="flex items-center justify-between rounded-[6px] border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="flex items-center justify-between rounded-[6px] border border-destructive/30 bg-destructive/10 px-3 py-2 text-body text-destructive">
           {moveError}
-          <button type="button" onClick={() => setMoveError(null)} className="text-xs underline">
+          <button type="button" onClick={() => setMoveError(null)} className="text-label underline">
             Dismiss
           </button>
         </div>
@@ -208,7 +208,7 @@ export function DragBoard({
       <div className="flex flex-col gap-6">
         {weeks.map((week) => (
           <div key={week.label}>
-            <p className="mb-2 font-serif text-base text-muted">{week.label}</p>
+            <p className="mb-2 font-serif text-h3 text-muted">{week.label}</p>
             <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${week.days.length}, minmax(0, 1fr))` }}>
               {week.days.map((day) => {
                 const isOrigin = draggingOriginDate === day.isoDate;
@@ -330,7 +330,7 @@ export function DragBoard({
         />
       ) : null}
 
-      {isPending ? <p className="text-xs text-muted">Saving...</p> : null}
+      {isPending ? <p className="text-label text-muted">Saving...</p> : null}
     </div>
   );
 }
@@ -375,13 +375,13 @@ function DetailPanel({
   return (
     <div className="sheet flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
-        <h2 className="font-serif text-lg text-ink">{event.title}</h2>
-        <button type="button" onClick={onClose} className="text-lg text-muted hover:text-ink" aria-label="Close">
+        <h2 className="font-serif text-h3 text-ink">{event.title}</h2>
+        <button type="button" onClick={onClose} className="text-h3 text-muted hover:text-ink" aria-label="Close">
           &times;
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body">
         {rows.map((r) => (
           <div key={r.label} className="contents">
             <span className="text-muted capitalize">{r.label}</span>
@@ -406,18 +406,18 @@ function DetailPanel({
             href={event.zoom_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 self-start rounded-full bg-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] text-primary-foreground"
+            className="inline-flex items-center gap-1.5 self-start rounded-full bg-primary px-3 py-1.5 text-label font-semibold uppercase tracking-[0.06em] text-primary-foreground"
           >
             <span className="size-[5px] shrink-0 rounded-full bg-primary-foreground" />
             Join now
           </a>
         ) : (
-          <p className="text-xs text-muted">Opens 10 minutes before the session.</p>
+          <p className="text-label text-muted">Opens 10 minutes before the session.</p>
         )
       ) : null}
 
       {event.type === "milestone" && event.title.startsWith("Filmed observation") ? (
-        <Link href={`/trainer/timetable/filmed-observation/${event.id}`} className="text-sm font-medium text-primary hover:underline">
+        <Link href={`/trainer/timetable/filmed-observation/${event.id}`} className="text-body font-medium text-primary hover:underline">
           Set up this session
         </Link>
       ) : null}
@@ -440,10 +440,10 @@ function DetailPanel({
               type="text"
               defaultValue={event.detail ?? ""}
               placeholder="Room 2 · B1+, Supervised, Observation task…"
-              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
             />
             <div className="flex items-center gap-2">
-              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-label wash">
                 Save
               </button>
               <span className="text-label text-muted">Leave it empty to remove the subtitle.</span>
@@ -467,9 +467,9 @@ function DetailPanel({
                 type="text"
                 defaultValue={event.input_session_criteria.join(", ")}
                 placeholder="4c, 5f"
-                className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
               />
-              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-label wash">
                 Save
               </button>
             </form>
@@ -504,7 +504,7 @@ function DetailPanel({
                 <select
                   name="registry_slug"
                   defaultValue={event.registry_slug ?? ""}
-                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
                 >
                   <option value="">
                     {matched
@@ -521,7 +521,7 @@ function DetailPanel({
                   What this slot opens on a candidate&apos;s Resources tab. Leave it on the first option to keep
                   matching by title.
                 </p>
-                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
+                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-label wash">
                   Save
                 </button>
               </form>
@@ -541,13 +541,13 @@ function DetailPanel({
               <select
                 name="mode"
                 defaultValue={event.mode ?? ""}
-                className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
               >
                 <option value="">Not set</option>
                 <option value="f2f">Face-to-face</option>
                 <option value="online">Online</option>
               </select>
-              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-label wash">
                 Save
               </button>
             </form>
@@ -567,7 +567,7 @@ function DetailPanel({
           <form action={setAttendance} className="mt-2 flex flex-col gap-1.5">
             <input type="hidden" name="event_id" value={event.id} />
             {volunteers.map((v) => (
-              <label key={v.id} className="flex items-center gap-1.5 text-sm">
+              <label key={v.id} className="flex items-center gap-1.5 text-body">
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attendedIds.has(v.id)} />
                 {v.name}
                 {attendanceSource.get(v.id) === "zoom" ? (
@@ -575,7 +575,7 @@ function DetailPanel({
                 ) : null}
               </label>
             ))}
-            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
+            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-label wash">
               Save
             </button>
           </form>
@@ -587,7 +587,7 @@ function DetailPanel({
           <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-status-warning-text hover:text-ink">
             Needs review {unmatched.length}
           </summary>
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-label text-muted">
             Zoom saw these join but couldn&apos;t match them to anyone on the register -- pick who each one was, or
             leave as &quot;not one of ours&quot; to dismiss.
           </p>
@@ -595,14 +595,14 @@ function DetailPanel({
             {unmatched.map((u) => (
               <form key={u.id} action={resolveZoomParticipant} className="flex flex-col gap-1 rounded-[6px] border border-border-faint p-2">
                 <input type="hidden" name="unmatched_id" value={u.id} />
-                <p className="text-sm text-ink">
+                <p className="text-body text-ink">
                   {u.zoom_display_name}
                   {u.zoom_email ? <span className="text-muted"> · {u.zoom_email}</span> : null}
                 </p>
                 <select
                   name="volunteer_student_id"
                   defaultValue={u.suggested_volunteer_student_id ?? ""}
-                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
                 >
                   <option value="">Not one of ours</option>
                   {volunteers.map((v) => (
@@ -611,7 +611,7 @@ function DetailPanel({
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
+                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-label wash">
                   Confirm
                 </button>
               </form>

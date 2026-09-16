@@ -51,7 +51,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -63,7 +63,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2">
-          <p className="font-serif text-lg font-semibold text-ink">Example lesson — comparative adjectives</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example lesson — comparative adjectives</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
@@ -107,7 +107,7 @@ export default function PppSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: who learned a language mostly by being told the rule first, then practising it? Did that
@@ -125,7 +125,7 @@ export default function PppSession() {
       <MatchTermsExercise terms={TERMS} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Stage 2</p>
+        <p className="text-label font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">How do you think a PPP lesson should be staged?</p>
           <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
@@ -133,9 +133,9 @@ export default function PppSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
+        <p className="text-label font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-sm font-semibold text-ink">Staging a PPP lesson</p>
+          <p className="font-serif text-body font-semibold text-ink">Staging a PPP lesson</p>
           <p className="text-meta leading-relaxed text-ink">
             A PPP lesson opens with the target language given directly, not discovered. The teacher sets up a clear
             context, models the form once or twice, and checks meaning with CCQs — all before students produce
@@ -152,7 +152,7 @@ export default function PppSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Stage 4</p>
+          <p className="text-label font-bold text-ink">Stage 4</p>
           <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
@@ -161,7 +161,7 @@ export default function PppSession() {
       </div>
 
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-        <p className="font-serif text-sm font-semibold text-ink">Presentation and practice, kept brief</p>
+        <p className="font-serif text-body font-semibold text-ink">Presentation and practice, kept brief</p>
         <p className="text-meta leading-relaxed text-ink">
           Present the form directly — a short board example and a quick CCQ check, not an extended explanation. Then
           move to controlled practice (drilling, a gap-fill, or a matching task using the same form) before freer

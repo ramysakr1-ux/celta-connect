@@ -20,7 +20,7 @@ export function DuplicateCourseForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+        className="wash rounded-[6px] border border-border px-3 py-1.5 text-body text-ink hover:border-primary"
       >
         Duplicate this course
       </button>
@@ -31,7 +31,7 @@ export function DuplicateCourseForm({
     <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="source_course_id" value={courseId} />
       <h2 className="font-serif text-h3 font-semibold text-ink">Duplicate this course</h2>
-      <p className="text-sm text-muted">
+      <p className="text-body text-muted">
         Copies the timetable and any course-specific Resource Hub files onto a new course with
         new dates -- fully editable afterward. Your centre-wide TP Points Library and assignment
         briefs are already shared automatically, nothing to copy there. Trainees, records,
@@ -39,7 +39,7 @@ export function DuplicateCourseForm({
       </p>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="dup_name" className="text-sm text-muted">
+        <label htmlFor="dup_name" className="text-body text-muted">
           New course name
         </label>
         <input
@@ -54,7 +54,7 @@ export function DuplicateCourseForm({
 
       <div className="flex gap-4">
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="dup_start" className="text-sm text-muted">
+          <label htmlFor="dup_start" className="text-body text-muted">
             Start date
           </label>
           <input
@@ -66,7 +66,7 @@ export function DuplicateCourseForm({
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="dup_end" className="text-sm text-muted">
+          <label htmlFor="dup_end" className="text-body text-muted">
             End date
           </label>
           <input
@@ -79,20 +79,20 @@ export function DuplicateCourseForm({
         </div>
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <div className="flex gap-3">
         <button
           type="submit"
           disabled={pending}
-          className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
         >
           {pending ? "Duplicating..." : "Duplicate"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="wash self-start rounded-[6px] px-4 py-2 text-sm text-muted hover:text-ink"
+          className="wash self-start rounded-[6px] px-4 py-2 text-body text-muted hover:text-ink"
         >
           Cancel
         </button>

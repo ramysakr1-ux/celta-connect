@@ -116,7 +116,7 @@ function MilestoneTile({ hours, hoursCredited, isLast, isNext }: { hours: number
       : { background: "transparent", borderColor: "transparent", color: "var(--color-muted)" };
   return (
     <div className="flex flex-1 flex-col items-center gap-0.5 rounded-[6px] border px-1 py-1.5 text-center" style={style}>
-      <span className="text-xs font-bold">{hours}h</span>
+      <span className="text-label font-bold">{hours}h</span>
       <span className="text-micro font-semibold tracking-[0.06em] uppercase">{label}</span>
     </div>
   );
@@ -244,9 +244,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         <div className="container pb-16">
           <div className="frame mx-auto flex max-w-xl flex-col gap-6 p-6">
             <div>
-              <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
-              <h1 className="mt-1 font-serif text-3xl text-ink">Welcome, {volunteer.name}!</h1>
-              <p className="mt-2 text-sm text-muted">
+              <p className="text-body font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
+              <h1 className="mt-1 font-serif text-display text-ink">Welcome, {volunteer.name}!</h1>
+              <p className="mt-2 text-body text-muted">
                 Before your first class, tell us a bit about yourself -- this helps your teachers get to know you.
               </p>
             </div>
@@ -787,7 +787,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               <Link href="/" className="hover:opacity-80">
                 <Wordmark size="header-compact" />
               </Link>
-              <Greeting name={firstName} className="text-xs text-muted" />
+              <Greeting name={firstName} className="text-label text-muted" />
             </header>
 
             <div className="flex flex-col gap-4 px-4 pt-[18px] pb-[26px]">
@@ -930,7 +930,7 @@ function NextClassCard({
             timeZone={courseTimeZone}
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
-            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
+            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-body font-semibold text-primary-foreground"
           />
         ) : null}
         <a
@@ -1115,12 +1115,12 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
         <p className="text-label text-muted">{attendedCount} attended</p>
       </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted">No classes scheduled yet.</p>
+        <p className="text-body text-muted">No classes scheduled yet.</p>
       ) : (
         rows.map((c) => (
           <div key={c.eventId} className="flex flex-col gap-2 rounded-[10px] border border-border bg-card px-[14px] py-[13px]">
             <div className="flex items-start justify-between gap-2">
-              <p className="text-sm font-semibold text-ink">{c.topic ?? c.courseName}</p>
+              <p className="text-body font-semibold text-ink">{c.topic ?? c.courseName}</p>
               <p className="shrink-0 text-label text-muted">
                 {formatShortDate(c.eventDate)}
                 {c.eventTime ? <span className="tabular-nums"> · {c.eventTime.slice(0, 5)}</span> : null}
@@ -1154,12 +1154,12 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
         <div>Materials</div>
       </div>
       {rows.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-muted">No classes scheduled yet.</p>
+        <p className="px-4 py-6 text-body text-muted">No classes scheduled yet.</p>
       ) : (
         rows.map((c, i) => (
           <div
             key={c.eventId}
-            className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""} ${i === rows.length - 1 ? "rounded-b-[6px]" : ""}`}
+            className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-label text-ink ${i > 0 ? "border-t border-border-faint" : ""} ${i === rows.length - 1 ? "rounded-b-[6px]" : ""}`}
           >
             {/* Date alone could not tell one lesson from another: a single
                 day runs several TP rounds -- the demo course teaches TP6 at
@@ -1252,7 +1252,7 @@ function HoursCard({
           <span className="text-label font-semibold text-primary/70">hrs</span>
         </p>
       </div>
-      <p className="mt-1 text-xs text-muted">
+      <p className="mt-1 text-label text-muted">
         {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."}
       </p>
       <div className="mt-2.5 h-2 overflow-hidden rounded-full" style={{ background: "color-mix(in oklab, var(--color-primary) 14%, transparent)" }}>
@@ -1363,7 +1363,7 @@ function Footer({ endDateLabel, materials, token }: { endDateLabel: string | nul
         before then.
       </p>
       {materials.length > 0 ? (
-        <a href={`/student/${token}/materials`} className="text-xs font-semibold text-primary hover:underline">
+        <a href={`/student/${token}/materials`} className="text-label font-semibold text-primary hover:underline">
           Download all my materials
         </a>
       ) : null}

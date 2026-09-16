@@ -58,7 +58,7 @@ export function FeedbackAssistCard({
       <div className="flex items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Feedback assist — yours</p>
-          <p className="text-xs leading-[1.5] text-muted text-pretty">
+          <p className="text-label leading-[1.5] text-muted text-pretty">
             Starts from the course default the MCT set, then it&apos;s yours — edit it or turn it off, on your own
             feedback only.
           </p>
@@ -97,8 +97,8 @@ export function FeedbackAssistCard({
 
       {enabled ? (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-bold text-ink">Tone examples</p>
-          <p className="text-xs leading-[1.5] text-muted">
+          <p className="text-label font-bold text-ink">Tone examples</p>
+          <p className="text-label leading-[1.5] text-muted">
             Shown when you click the tone icon while writing feedback — rewrites the sentence direct or encouraging.
           </p>
 
@@ -110,7 +110,7 @@ export function FeedbackAssistCard({
               {supportive.map((text, i) => (
                 <ExampleRow key={`supportive-${i}`} label="Encouraging" ink={ENCOURAGING_INK} name="supportive" value={text} onChange={(v) => setSupportive((prev) => prev.map((t, x) => (x === i ? v : t)))} />
               ))}
-              {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+              {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
               <div className="mt-1 flex justify-end">
                 <button
                   type="submit"

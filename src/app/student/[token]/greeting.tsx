@@ -18,7 +18,7 @@ function greetingForHour(hour: number): string {
 // paint (same reason initial-render randomization is avoided elsewhere in
 // this app -- picking a real greeting before the client's own Date is
 // available would just be guessing) and swaps in the real one on mount.
-export function Greeting({ name, suffix, className = "text-sm font-medium text-ink" }: { name: string; suffix?: string; className?: string }) {
+export function Greeting({ name, suffix, className = "text-body font-medium text-ink" }: { name: string; suffix?: string; className?: string }) {
   const [greeting, setGreeting] = useState("Hello");
   useEffect(() => {
     // Deliberate: this only ever needs to run once, after mount, to read

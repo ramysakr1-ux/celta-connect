@@ -13,7 +13,7 @@ import { PhonemicPopup } from "@/components/phonemic-popup";
 import { CustomSelect } from "@/components/custom-select";
 
 const inputClass =
-  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary";
 
 export function LanguageAnalysisEditor({
   open,
@@ -62,15 +62,15 @@ export function LanguageAnalysisEditor({
         onClick={onToggle}
         className="flex w-full items-center justify-between text-left"
       >
-        <h2 className="font-serif text-lg text-ink">Language Analysis</h2>
-        <span className="text-sm text-primary">{open ? "▾ Hide" : "▸ Optional -- click to add"}</span>
+        <h2 className="font-serif text-h3 text-ink">Language Analysis</h2>
+        <span className="text-body text-primary">{open ? "▾ Hide" : "▸ Optional -- click to add"}</span>
       </button>
 
       {open ? (
         <div className="mt-4 flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm text-muted">What are you analysing?</label>
+              <label className="text-body text-muted">What are you analysing?</label>
               <div className="inline-flex w-fit rounded-[6px] border border-border p-0.5">
                 {([
                   { value: "grammar", label: "Grammar" },
@@ -82,7 +82,7 @@ export function LanguageAnalysisEditor({
                     type="button"
                     disabled={locked}
                     onClick={() => onTypeChange(opt.value)}
-                    className={`rounded-[4px] px-3 py-1.5 text-sm font-medium transition-colors ${
+                    className={`rounded-[4px] px-3 py-1.5 text-body font-medium transition-colors ${
                       type === opt.value ? "bg-primary text-card" : "text-muted hover:text-ink"
                     }`}
                   >
@@ -91,7 +91,7 @@ export function LanguageAnalysisEditor({
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-3 text-sm text-ink">
+            <div className="flex items-center gap-3 text-body text-ink">
               <span>
                 Is {type === "vocab" ? "vocabulary" : type === "function" ? "functional language" : "grammar"} the
                 main aim of your lesson?
@@ -118,7 +118,7 @@ export function LanguageAnalysisEditor({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Overall context of the lesson</label>
+            <label className="text-body text-muted">Overall context of the lesson</label>
             <input
               type="text"
               value={context}
@@ -133,8 +133,8 @@ export function LanguageAnalysisEditor({
             <div className="flex flex-col gap-3">
               <VocabTable rows={vocabRows} onChange={onVocabRowsChange} locked={locked} />
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm text-muted">Reference material</label>
-                <p className="text-xs italic text-muted">
+                <label className="text-body text-muted">Reference material</label>
+                <p className="text-label italic text-muted">
                   Which dictionary or reference you used -- Cambridge, Oxford Learner&apos;s, Longman.
                 </p>
                 <textarea
@@ -148,7 +148,7 @@ export function LanguageAnalysisEditor({
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              <p className="text-sm text-muted">{sheet!.guide}</p>
+              <p className="text-body text-muted">{sheet!.guide}</p>
               {blocks.map((block, i) => (
                 <div key={i} className="rounded-[6px] border border-border-faint p-4">
                   <div className="mb-3 flex items-center justify-between">
@@ -159,7 +159,7 @@ export function LanguageAnalysisEditor({
                       <button
                         type="button"
                         onClick={() => onBlocksChange(blocks.filter((_, bi) => bi !== i))}
-                        className="text-sm text-destructive hover:underline"
+                        className="text-body text-destructive hover:underline"
                       >
                         Remove
                       </button>
@@ -174,7 +174,7 @@ export function LanguageAnalysisEditor({
                           key={key}
                           className="grid grid-cols-1 gap-1.5 border-t border-border-faint py-3 first:border-t-0 first:pt-0 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-4"
                         >
-                          <label className="text-sm text-muted">{field.label}</label>
+                          <label className="text-body text-muted">{field.label}</label>
                           <div className="flex flex-col gap-2">
                             {pairs.map((pair, pi) => (
                               <div key={pi} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -215,7 +215,7 @@ export function LanguageAnalysisEditor({
                                   [key]: [...pairs, { problem: "", solution: "" }],
                                 } as Partial<AnalysisBlock>)
                               }
-                              className="mt-2 text-sm text-primary hover:underline"
+                              className="mt-2 text-body text-primary hover:underline"
                             >
                               + Add another problem
                             </button>
@@ -231,8 +231,8 @@ export function LanguageAnalysisEditor({
                         className="grid grid-cols-1 gap-1 border-t border-border-faint py-3 first:border-t-0 first:pt-0 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-4"
                       >
                         <div>
-                          <label className="text-sm text-muted">{field.label}</label>
-                          {field.hint ? <p className="text-xs italic text-muted">{field.hint}</p> : null}
+                          <label className="text-body text-muted">{field.label}</label>
+                          {field.hint ? <p className="text-label italic text-muted">{field.hint}</p> : null}
                         </div>
                         {field.type === "select" ? (
                           <CustomSelect
@@ -283,7 +283,7 @@ export function LanguageAnalysisEditor({
                 <button
                   type="button"
                   onClick={() => onBlocksChange([...blocks, emptyAnalysisBlock()])}
-                  className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+                  className="self-start rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
                 >
                   + Add another {sheet!.blockName.toLowerCase()}
                 </button>
@@ -317,11 +317,11 @@ function VocabTable({
   return (
     <div className="flex flex-col gap-3">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-sm">
+        <table className="w-full min-w-[900px] border-collapse text-body">
           <thead>
             <tr>
               {columns.map((col) => (
-                <th key={col.key} className="border-b border-border-faint p-2 text-left text-xs text-muted">
+                <th key={col.key} className="border-b border-border-faint p-2 text-left text-label text-muted">
                   {col.label}
                   <span className="block font-normal italic">{col.hint}</span>
                 </th>
@@ -379,7 +379,7 @@ function VocabTable({
           <button
             type="button"
             onClick={() => onChange([...rows, emptyVocabRow()])}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+            className="rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
           >
             + Add item
           </button>

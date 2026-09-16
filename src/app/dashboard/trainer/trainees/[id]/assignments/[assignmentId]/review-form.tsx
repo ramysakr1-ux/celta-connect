@@ -13,7 +13,7 @@ import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-temp
 
 const initialState: FormState = { error: null };
 const inputClass =
-  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary";
 
 type Outcome = "pass" | "resub" | "fail";
 
@@ -94,10 +94,10 @@ export function AssignmentReviewForm({
           const existingComment = (isResubmission ? existing?.resubmission_comments : existing?.first_comments) ?? "";
           return (
             <div key={s.key} className="card p-6">
-              <h3 className="font-serif text-lg text-ink">{s.title}</h3>
+              <h3 className="font-serif text-h3 text-ink">{s.title}</h3>
               <p className="mt-3 whitespace-pre-line text-ink">{responseText || "(no response)"}</p>
               <div className="mt-4 flex flex-col gap-1.5 border-t border-border-faint pt-4">
-                <label className="text-sm text-muted">Comment on this section</label>
+                <label className="text-body text-muted">Comment on this section</label>
                 <TrainerFeedbackTextarea
                   name={`comment_${s.key}`}
                   rows={3}
@@ -134,7 +134,7 @@ export function AssignmentReviewForm({
               const met = marks[c.key] === true;
               return (
                 <div key={c.key} className="flex items-center justify-between gap-3 border-b border-border-faint py-2 last:border-none">
-                  <span className="text-xs text-ink">{c.text}</span>
+                  <span className="text-label text-ink">{c.text}</span>
                   <button
                     type="button"
                     onClick={() => setMarks((m) => ({ ...m, [c.key]: !met }))}
@@ -152,12 +152,12 @@ export function AssignmentReviewForm({
             Any criterion Not met on the first submission means Resubmission Needed. These are what the cover sheet prints.
           </p>
         </div>
-        <div className="card p-5 text-sm text-muted md:hidden">
+        <div className="card p-5 text-body text-muted md:hidden">
           Assessment criteria needs more room than a phone screen -- open this assignment on a laptop or tablet to mark it.
         </div>
 
         <div className="card flex flex-col gap-3 p-5">
-          <h3 className="font-serif text-lg text-ink">Return this assignment</h3>
+          <h3 className="font-serif text-h3 text-ink">Return this assignment</h3>
           <div className="flex flex-col gap-2">
             <OutcomeOption
               label="Return with a pass"
@@ -190,7 +190,7 @@ export function AssignmentReviewForm({
 
           {isResubmission ? (
             <div className="flex flex-col gap-1.5 border-t border-border-faint pt-3">
-              <label className="text-sm text-muted">Second marker</label>
+              <label className="text-body text-muted">Second marker</label>
               <select
                 value={secondMarkerId}
                 onChange={(e) => setSecondMarkerId(e.target.value)}
@@ -208,7 +208,7 @@ export function AssignmentReviewForm({
           ) : null}
 
           {outcome === "pass" ? (
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               Recorded on the record of written work as{" "}
               <span className="font-semibold text-ink">{isResubmission ? "Pass (on resubmission)" : "Pass"}</span> -- Cambridge&apos;s
               wording (Handbook 9.2.3), not a note.
@@ -216,18 +216,18 @@ export function AssignmentReviewForm({
           ) : null}
 
           <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
-            {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+            {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
             <button
               type="submit"
               formAction={submitAction}
               disabled={pending || submitDisabled}
-              className={`rounded-[6px] px-4 py-2 text-sm font-medium text-card disabled:opacity-60 ${
+              className={`rounded-[6px] px-4 py-2 text-body font-medium text-card disabled:opacity-60 ${
                 outcome === "fail" ? "bg-destructive" : "bg-primary"
               }`}
             >
               {pending ? "Returning…" : cta}
             </button>
-            <p className="text-xs text-muted">{ctaNote}</p>
+            <p className="text-label text-muted">{ctaNote}</p>
           </div>
         </div>
       </div>
@@ -259,9 +259,9 @@ function OutcomeOption({
     >
       <span className="flex items-center gap-2">
         <span className={`size-3 shrink-0 rounded-full border ${selected ? "border-primary bg-primary" : "border-border"}`} />
-        <span className="text-sm font-semibold text-ink">{label}</span>
+        <span className="text-body font-semibold text-ink">{label}</span>
       </span>
-      <span className="pl-5 text-xs text-muted">{note}</span>
+      <span className="pl-5 text-label text-muted">{note}</span>
     </button>
   );
 }

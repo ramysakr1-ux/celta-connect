@@ -52,7 +52,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -64,7 +64,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2">
-          <p className="font-serif text-lg font-semibold text-ink">Example lesson — past continuous for interrupted actions</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example lesson — past continuous for interrupted actions</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
@@ -93,7 +93,7 @@ function DebriefWithTrainerNotes() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -126,8 +126,8 @@ function DebriefWithTrainerNotes() {
         </p>
         {NOTES.map((n) => (
           <div key={n.label} className="flex flex-col gap-0.5">
-            <p className="text-xs font-semibold text-ink">{n.label}</p>
-            <p className="text-xs leading-relaxed text-ink">{n.text}</p>
+            <p className="text-label font-semibold text-ink">{n.label}</p>
+            <p className="text-label leading-relaxed text-ink">{n.text}</p>
           </div>
         ))}
       </div>
@@ -159,7 +159,7 @@ export default function GuidedDiscoverySession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: who worked out a grammar rule for themselves at school, rather than being told it?
@@ -177,7 +177,7 @@ export default function GuidedDiscoverySession() {
       <MatchTermsExercise terms={TERMS} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Stage 2</p>
+        <p className="text-label font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">How do you think a guided discovery lesson should be staged?</p>
           <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
@@ -185,9 +185,9 @@ export default function GuidedDiscoverySession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
+        <p className="text-label font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-sm font-semibold text-ink">Staging a guided discovery lesson</p>
+          <p className="font-serif text-body font-semibold text-ink">Staging a guided discovery lesson</p>
           <p className="text-meta leading-relaxed text-ink">
             A guided discovery lesson starts with the target language already sitting inside a context — a short
             text, a story, a listening — never on the board in isolation. From that context the teacher lifts one or
@@ -207,7 +207,7 @@ export default function GuidedDiscoverySession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Stage 4</p>
+          <p className="text-label font-bold text-ink">Stage 4</p>
           <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (

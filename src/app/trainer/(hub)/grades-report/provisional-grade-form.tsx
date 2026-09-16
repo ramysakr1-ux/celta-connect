@@ -115,7 +115,7 @@ export function ProvisionalGradeForm({
             paired option is dimmed so "Pass B/Pass A" reads as one token
             rather than two grades sitting next to each other. */}
         <div className="flex items-center justify-between gap-3">
-          <span className="text-xs text-muted">Provisional grade</span>
+          <span className="text-label text-muted">Provisional grade</span>
           <button
             type="submit"
             disabled={pending}
@@ -154,12 +154,12 @@ export function ProvisionalGradeForm({
         {isMct && (eligibility?.reason || overrideReason) ? (
           <AssignmentFailOverride traineeId={traineeId} overrideReason={overrideReason ?? null} overriddenByName={overriddenByName ?? null} />
         ) : null}
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       </form>
 
       {record?.provisional_grade ? (
         <div className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint bg-surface-muted/40 px-3 py-2">
-          <span className="text-xs text-ink">
+          <span className="text-label text-ink">
             {proposedByName ? `Proposed by ${proposedByName}` : "Proposed"}
             {proposedByMeta ? ` · ${proposedByMeta}` : ""}
           </span>
@@ -174,7 +174,7 @@ export function ProvisionalGradeForm({
                   await approveProvisionalGrade(fd);
                 });
               }}
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold disabled:cursor-default ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold disabled:cursor-default ${
                 approved ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text hover:bg-status-warning-bg/80"
               }`}
             >
@@ -183,7 +183,7 @@ export function ProvisionalGradeForm({
             </button>
           ) : (
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold ${
                 approved ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text"
               }`}
             >

@@ -52,16 +52,16 @@ export function FormSubmitBar({
         {leading}
         <div className="flex items-center gap-2">
           <span className="size-1.5 shrink-0 rounded-full bg-status-warning-text" />
-          <p className="text-xs text-muted">{warning}</p>
+          <p className="text-label text-muted">{warning}</p>
         </div>
       </div>
       <div className="flex items-center gap-3">
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="text-body text-destructive">{error}</p> : null}
         {hideDraftButton ? null : (
           <button
             type="submit"
             disabled={draftPending || submitPending}
-            className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink hover:border-primary disabled:opacity-60"
+            className="rounded-[6px] border border-border px-4 py-2 text-body font-medium text-ink hover:border-primary disabled:opacity-60"
           >
             {draftPending ? "Saving…" : "Save draft"}
           </button>
@@ -70,7 +70,7 @@ export function FormSubmitBar({
           type="submit"
           formAction={onSubmitAction}
           disabled={draftPending || submitPending || submitDisabled}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
         >
           {submitPending ? "Submitting…" : submitLabel}
         </button>

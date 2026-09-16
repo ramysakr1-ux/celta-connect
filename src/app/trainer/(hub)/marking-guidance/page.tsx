@@ -50,7 +50,7 @@ export default async function MarkingGuidancePage({
       <div className="card flex flex-col gap-2 p-6">
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Marking guidance</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">There is no answer key. There is a line.</h1>
-        <p className="max-w-2xl text-sm text-muted">
+        <p className="max-w-2xl text-body text-muted">
           An assignment has many right answers, which is why two tutors can mark the same script differently. This
           page is where this centre writes down where the line sits for each criterion — agreed at standardisation,
           kept beside the criterion while marking. Not from Cambridge, not from Connect: every line here is this

@@ -54,14 +54,14 @@ export function AssignmentBriefUploadForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Brief (PDF)</label>
-        <input type="file" name="file" accept="application/pdf" required className="text-sm text-ink" />
+        <label className="text-body text-muted">Brief (PDF)</label>
+        <input type="file" name="file" accept="application/pdf" required className="text-body text-ink" />
       </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-body text-destructive">{error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Uploading..." : "Upload brief"}
       </button>

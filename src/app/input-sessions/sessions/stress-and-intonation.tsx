@@ -100,7 +100,7 @@ function IntonationSection({ voiceIdx }: { voiceIdx: number }) {
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-bold text-ink">Intonation — question or statement?</p>
+      <p className="text-label font-bold text-ink">Intonation — question or statement?</p>
       <p className="text-label text-muted">
         The words don&apos;t change, only the tune does. &quot;You&apos;re coming.&quot; falling means a statement;
         rising means a question — click each line to hear the tune, then guess before revealing.
@@ -135,7 +135,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-bold text-ink">Marking stress for LRT</p>
+      <p className="text-label font-bold text-ink">Marking stress for LRT</p>
       <p className="text-label text-muted">
         The convention: a bold syllable, or a small mark before it — <strong className="font-semibold">re</strong>
         cord vs re<strong className="font-semibold">cord</strong>. Click a word to hear it, then click the syllable
@@ -168,7 +168,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
                       if (show) return;
                       setPicks((p) => ({ ...p, [wi]: si }));
                     }}
-                    className={`rounded-[6px] border-[1.5px] px-3 py-1.5 font-serif text-sm ${isStressed ? "font-bold" : "font-normal"} ${
+                    className={`rounded-[6px] border-[1.5px] px-3 py-1.5 font-serif text-body ${isStressed ? "font-bold" : "font-normal"} ${
                       show && isStressed
                         ? "border-primary bg-primary/10 text-primary"
                         : show && isPicked
@@ -199,7 +199,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-bold text-ink">Primary and secondary stress</p>
+      <p className="text-label font-bold text-ink">Primary and secondary stress</p>
       <p className="text-label text-muted">
         Longer words often carry two stresses, not one — a strong primary stress and a weaker secondary stress. Click
         the speaker to hear the word said naturally (the synthesised voice can&apos;t fake syllable-level stress
@@ -223,7 +223,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
                 <path d="M8 5v14l11-7z" />
               </svg>
             </button>
-            <p className="w-[130px] flex-none font-serif text-sm font-semibold text-ink">{w.word}</p>
+            <p className="w-[130px] flex-none font-serif text-body font-semibold text-ink">{w.word}</p>
             <div className="flex flex-1 items-end gap-2">
               {w.syllables.map((_, si) => (
                 <button
@@ -265,7 +265,7 @@ function ContrastiveStress() {
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-bold text-ink">Extension, if there&apos;s time — stress carries attitude</p>
+      <p className="text-label font-bold text-ink">Extension, if there&apos;s time — stress carries attitude</p>
       <p className="text-label text-muted">Same sentence, same words — the stressed word changes what&apos;s actually meant. Read the context, then click the word you&apos;d stress in the reply.</p>
       {CONTRASTIVE.map((c, ci) => {
         const words = c.reply.split(" ");
@@ -273,7 +273,7 @@ function ContrastiveStress() {
         const isRevealed = !!revealed[ci];
         return (
           <div key={c.context} className="flex flex-col gap-2.5 rounded-[8px] border border-border bg-card p-4">
-            <p className="text-xs italic text-muted">{c.context}</p>
+            <p className="text-label italic text-muted">{c.context}</p>
             <div className="flex items-center justify-between gap-2.5">
               <div className="flex flex-wrap items-center gap-1.5">
                 {words.map((w, wi) => (
@@ -281,7 +281,7 @@ function ContrastiveStress() {
                     key={wi}
                     type="button"
                     onClick={() => setPicks((p) => ({ ...p, [ci]: wi }))}
-                    className={`rounded-[4px] px-1.5 py-0.5 text-sm ${pick === wi ? "bg-primary/10 font-extrabold text-primary" : "font-medium text-ink"}`}
+                    className={`rounded-[4px] px-1.5 py-0.5 text-body ${pick === wi ? "bg-primary/10 font-extrabold text-primary" : "font-medium text-ink"}`}
                   >
                     {w}
                   </button>
@@ -316,7 +316,7 @@ function TrainerScript() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -343,8 +343,8 @@ function TrainerScript() {
         <div key={t.step} className="flex gap-2.5">
           <p className="w-14 flex-none pt-px text-micro font-bold text-destructive">{t.time}</p>
           <div className="flex flex-col gap-0.5">
-            <p className="text-xs font-semibold text-ink">{t.step}</p>
-            <p className="text-xs leading-relaxed text-ink">{t.note}</p>
+            <p className="text-label font-semibold text-ink">{t.step}</p>
+            <p className="text-label leading-relaxed text-ink">{t.note}</p>
           </div>
         </div>
       ))}

@@ -12,7 +12,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 const initialState: FormState = { error: null };
 
 const field =
-  "h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary";
+  "h-10 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
@@ -119,7 +119,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
   );
 
   const back = (prev: 1 | 2 | 3 | 4) => (
-    <button type="button" onClick={() => setStep(prev)} className="text-sm text-muted underline">
+    <button type="button" onClick={() => setStep(prev)} className="text-body text-muted underline">
       Back
     </button>
   );
@@ -144,7 +144,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
               name="center_id"
               value={centreId}
               onChange={(e) => setCentreId(e.target.value)}
-              className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink"
+              className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-body text-ink"
             >
               {centres.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -153,7 +153,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
                 </option>
               ))}
             </select>
-            <p className="text-xs text-muted">The course, its trainees and everything it generates belong to this centre.</p>
+            <p className="text-label text-muted">The course, its trainees and everything it generates belong to this centre.</p>
           </div>
         ) : (
           <input type="hidden" name="center_id" value={centreId} />
@@ -161,8 +161,8 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
 
         <div className="flex flex-col gap-1">
           <label className="text-meta font-semibold text-ink">Cambridge centre number</label>
-          <p className="text-sm text-ink">{centerNumber ?? "Not set"}</p>
-          <p className="text-xs text-muted">
+          <p className="text-body text-ink">{centerNumber ?? "Not set"}</p>
+          <p className="text-label text-muted">
             Prefilled from {centres.length > 1 ? "the centre you chose" : "the centre profile"} and locked here — change it in Centre
             Management, not per course.
           </p>
@@ -254,7 +254,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
                   key={d}
                   type="button"
                   onClick={() => setDaysOff((prev) => (on ? prev.filter((x) => x !== d) : [...prev, d]))}
-                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                  className={`rounded-full border px-3 py-1 text-label font-semibold ${
                     on
                       ? "border-primary bg-primary text-primary-foreground"
                       : "wash border-border bg-card text-muted hover:text-ink"
@@ -273,7 +273,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         {/* Informational notice, not urgent -- muted per the colour legend. */}
         <div className="rounded-[6px] border border-border bg-surface-muted px-[15px] py-[13px]">
           <p className="text-meta font-semibold text-muted">Tiles, not a blank calendar</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-ink">
+          <p className="mt-0.5 text-label leading-relaxed text-ink">
             Confirming here generates the timetable tiles automatically. Tiles can be moved individually
             afterwards without altering the pattern.
           </p>
@@ -309,7 +309,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             </select>
           </div>
         </div>
-        <p className="text-xs text-muted">Same role picker as the roster — the role travels with the invitation.</p>
+        <p className="text-label text-muted">Same role picker as the roster — the role travels with the invitation.</p>
 
         {/* for-claude-code-course-admin-refinements.md: "name the assessor
             now, or decide later." Never a hard requirement -- nobody really
@@ -330,7 +330,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             <input id="assessor_email" name="assessor_email" type="email" placeholder="assessor@cambridge.org" className={field} />
           </div>
         </div>
-        <p className="text-xs text-muted">Leave blank to decide later -- the MCT can set this themselves once known.</p>
+        <p className="text-label text-muted">Leave blank to decide later -- the MCT can set this themselves once known.</p>
 
         <div className="flex items-center gap-3">
           {nav(5, "Continue to review")}
@@ -343,7 +343,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
               captureStep(form);
               setStep(5);
             }}
-            className="text-sm text-muted underline"
+            className="text-body text-muted underline"
           >
             Skip — I&apos;ll assign a tutor later
           </button>
@@ -364,7 +364,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             ["Tutors", summary.inviteEmail ? `${summary.inviteEmail} — invited at launch` : "None yet — assign from the roster"],
             ["Assessor", summary.assessorName || "Not named yet -- the MCT can set this later"],
           ].map(([label, value]) => (
-            <div key={label} className="grid grid-cols-[128px_1fr] gap-3 border-b border-border-faint px-4 py-3 text-sm last:border-none">
+            <div key={label} className="grid grid-cols-[128px_1fr] gap-3 border-b border-border-faint px-4 py-3 text-body last:border-none">
               <span className="font-semibold text-muted">{label}</span>
               <span className="text-ink">{value}</span>
             </div>
@@ -380,13 +380,13 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
           >
             {pending ? "Launching…" : "Launch course"}
           </button>
-          <button type="button" onClick={() => setStep(1)} className="text-sm text-muted underline">
+          <button type="button" onClick={() => setStep(1)} className="text-body text-muted underline">
             Back to edit
           </button>
         </div>
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

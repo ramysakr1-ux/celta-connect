@@ -22,7 +22,7 @@ export function DeleteEventButton({ eventId, compact }: { eventId: string; compa
         className={
           compact
             ? "shrink-0 text-micro text-muted opacity-0 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
-            : "text-xs text-destructive hover:underline"
+            : "text-label text-destructive hover:underline"
         }
       >
         {compact ? "×" : "Delete this event"}

@@ -26,13 +26,13 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
     <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="applicant_id" value={applicant.id} />
       <h2 className="font-serif text-h3 font-semibold text-ink">Marking scheme -- selection task</h2>
-      <p className="text-sm text-muted">Same shape as the Standard of English criterion on the assignment cover sheets.</p>
+      <p className="text-body text-muted">Same shape as the Standard of English criterion on the assignment cover sheets.</p>
 
       <div className="flex flex-col gap-3">
         {ROWS.map((row) => (
           <div key={row.key} className="flex flex-col gap-1.5 border-b border-border-faint pb-3 last:border-none">
             <div className="flex items-center justify-between gap-3">
-              <label htmlFor={`marking_${row.key}`} className="text-sm text-ink">
+              <label htmlFor={`marking_${row.key}`} className="text-body text-ink">
                 {row.label}
               </label>
               <select
@@ -40,7 +40,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
                 name={`marking_${row.key}`}
                 value={values[row.key]}
                 onChange={(e) => setValues((v) => ({ ...v, [row.key]: e.target.value }))}
-                className="h-8 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink"
+                className="h-8 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink"
               >
                 <option value="">Not marked</option>
                 <option value="above">Above standard</option>
@@ -55,7 +55,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
                 placeholder="Note required for a Below standard mark"
                 required
                 defaultValue={(applicant[`marking_${row.key}_note` as keyof Applicant] as string | null) ?? ""}
-                className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-body text-ink outline-none focus:border-primary"
               />
             ) : null}
           </div>
@@ -76,17 +76,17 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
         prevent.
       */}
       <div className="flex flex-col gap-1.5 border-t border-border-faint pt-4">
-        <label htmlFor="task_feedback" className="text-sm text-ink">
+        <label htmlFor="task_feedback" className="text-body text-ink">
           What to say about their task
         </label>
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           Your words, in the offer or the rejection, and in the application file. Never sent unedited.
         </p>
 
         {applicant.task_feedback_ai_suggestion ? (
           <div className="mt-1 rounded-[6px] border border-border bg-surface-muted p-3">
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Suggested — not sent</p>
-            <p className="mt-1 text-sm text-ink">{applicant.task_feedback_ai_suggestion}</p>
+            <p className="mt-1 text-body text-ink">{applicant.task_feedback_ai_suggestion}</p>
           </div>
         ) : null}
 
@@ -96,16 +96,16 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
           rows={4}
           defaultValue={applicant.task_feedback ?? ""}
           placeholder="Strong on organisation and substance. Both analysis items were left blank, and that is worth attention early."
-          className="mt-1 rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="mt-1 rounded-[6px] border border-input bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60 wash"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60 wash"
       >
         {pending ? "Saving..." : "Save marking"}
       </button>

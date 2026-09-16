@@ -25,8 +25,8 @@ export default async function RaiseConcernPage({ params }: { params: Promise<{ t
 
       <div className="sheet flex flex-col gap-4">
         <div>
-          <h1 className="font-serif text-xl text-ink">Raise a concern</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="font-serif text-h2 text-ink">Raise a concern</h1>
+          <p className="mt-1 text-body text-muted">
             CELTA is short and intensive, so a problem left for a week is a problem that has already affected your
             course. Say it early.
           </p>
@@ -38,8 +38,8 @@ export default async function RaiseConcernPage({ params }: { params: Promise<{ t
           <p className="text-micro font-semibold tracking-[0.1em] text-muted uppercase">If you are still not satisfied</p>
           {ESCALATION.map((e) => (
             <div key={e.step} className="flex items-start gap-2.5">
-              <span className="w-4 shrink-0 text-xs font-bold text-muted">{e.step}</span>
-              <p className="text-xs leading-relaxed text-ink">{e.text}</p>
+              <span className="w-4 shrink-0 text-label font-bold text-muted">{e.step}</span>
+              <p className="text-label leading-relaxed text-ink">{e.text}</p>
             </div>
           ))}
         </div>

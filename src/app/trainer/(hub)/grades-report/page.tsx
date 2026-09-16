@@ -57,7 +57,7 @@ export default async function GradesReportPage() {
   const courseId = trainer?.course_id ?? assessorCourseId;
   const supabase = trainer && courseId ? hubReadClient(trainer, courseId) : createAdminClient();
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
 
   // Shared with the CSV export (export/route.ts) -- one computation, not two.
@@ -231,7 +231,7 @@ export default async function GradesReportPage() {
       <div className="sheet flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Centre Grade form in Appian</p>
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             {gradeFormSubmittedAt
               ? `Marked submitted ${formatDate(gradeFormSubmittedAt, gradesTimeZone, { year: "numeric" })}${
                   gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""
@@ -268,20 +268,20 @@ export default async function GradesReportPage() {
             Timing: 11.4 has the centre complete the grade form and submit it
             via Appian BEFORE the assessment, which lands near the end of the
             course, not at Stage 2. */}
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-body text-muted">
           Every candidate gets a provisional grade, proposed near the end of the teaching practice cycle and confirmed
           by the MCT before it goes to the assessor. A straight grade needs nothing further at this stage. A slashed
           grade &mdash; Fail/Pass, Pass/Pass B, Pass B/Pass A &mdash; means the last TPs decide it, and needs the box
           below saying what the candidate must do to reach the higher band.
         </p>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-body text-muted">
           At the final grade, every candidate gets a rationale: what they did to reach the higher band, or what they
           did not (Handbook 14.4).
         </p>
       </div>
 
       {(trainees ?? []).length === 0 ? (
-        <div className="sheet text-sm text-muted">No candidates on this course yet.</div>
+        <div className="sheet text-body text-muted">No candidates on this course yet.</div>
       ) : (
         <div className="flex flex-col gap-4">
           {(trainees ?? []).map((trainee, traineeIndex) => {
@@ -344,10 +344,10 @@ export default async function GradesReportPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs text-muted">
+                    <p className="text-label text-muted">
                       {assessedTp.tpsTaught} of 8 TPs taught · {assessedTp.hoursAssessed.toFixed(1)} hrs assessed
                     </p>
-                    <h2 className="font-serif text-lg text-ink">{trainee.full_name}</h2>
+                    <h2 className="font-serif text-h3 text-ink">{trainee.full_name}</h2>
                   </div>
                   <div className="flex items-center gap-1">
                     {mapTpFeedbackToGlyphRow(traineeFeedback).map((slot) => (
@@ -598,7 +598,7 @@ export default async function GradesReportPage() {
           <div className="sheet flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Centre grade approval form in Appian</p>
-              <p className="text-sm text-muted">
+              <p className="text-body text-muted">
                 {approvalSubmittedAt
                   ? `Marked submitted ${formatDate(approvalSubmittedAt, gradesTimeZone, { year: "numeric" })}${
                       approvalMarker?.full_name ? ` by ${approvalMarker.full_name}` : ""
@@ -631,11 +631,11 @@ export default async function GradesReportPage() {
 function StrengthsColumn({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <p className="text-xs font-semibold tracking-[0.04em] text-muted uppercase">{title}</p>
+      <p className="text-label font-semibold tracking-[0.04em] text-muted uppercase">{title}</p>
       {items.length > 0 ? (
-        <p className="mt-1 text-sm text-ink">{items.join(", ")}</p>
+        <p className="mt-1 text-body text-ink">{items.join(", ")}</p>
       ) : (
-        <p className="mt-1 text-sm text-muted">None</p>
+        <p className="mt-1 text-body text-muted">None</p>
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { updateCoursePricing, type FormState } from "@/app/centre/courses/[id]/actions";
 
 const initialState: FormState = { error: null };
-const field = "h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary";
+const field = "h-10 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary";
 
 export function PricingForm({
   courseId,
@@ -26,7 +26,7 @@ export function PricingForm({
       <input type="hidden" name="course_id" value={courseId} />
       <div>
         <h2 className="font-serif text-h3 font-semibold text-ink">Pricing</h2>
-        <p className="mt-1 text-xs text-muted">The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises.</p>
+        <p className="mt-1 text-label text-muted">The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-[14px] sm:grid-cols-4">
@@ -56,11 +56,11 @@ export function PricingForm({
         </div>
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save"}
       </button>

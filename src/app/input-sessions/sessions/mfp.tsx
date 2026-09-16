@@ -76,11 +76,11 @@ function WriteCcq() {
   const [open, setOpen] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Write a CCQ — meaning</p>
+      <p className="text-label font-bold text-ink">Write a CCQ — meaning</p>
       <p className="text-label text-muted">For each target item, write one CCQ that isolates the tricky part of the meaning. Compare with the model once you&apos;ve tried.</p>
       {CCQ_ITEMS.map((c, i) => (
         <div key={c.item} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-sm font-semibold text-ink">{c.item}</p>
+          <p className="font-serif text-body font-semibold text-ink">{c.item}</p>
           <p className="text-label text-muted">{c.trap}</p>
           <button
             type="button"
@@ -92,7 +92,7 @@ function WriteCcq() {
           </button>
           {open[i] ? (
             <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/5 px-3.5 py-2.5">
-              <p className="text-xs leading-relaxed text-ink">{c.model}</p>
+              <p className="text-label leading-relaxed text-ink">{c.model}</p>
             </div>
           ) : null}
         </div>
@@ -105,14 +105,14 @@ function AnalyseForm() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Analyse the form</p>
+      <p className="text-label font-bold text-ink">Analyse the form</p>
       <p className="text-label text-muted">Click the piece of each pattern that&apos;s most likely to trip students up.</p>
       {FORM_ITEMS.map((fm, fi) => {
         const picked = picks[fi];
         const answered = picked !== undefined;
         return (
           <div key={fm.pieces.join("")} className="flex flex-wrap items-center gap-3.5 rounded-[8px] border border-border bg-card p-3.5">
-            <div className="flex min-w-[200px] flex-1 flex-wrap gap-1 font-serif text-sm">
+            <div className="flex min-w-[200px] flex-1 flex-wrap gap-1 font-serif text-body">
               {fm.pieces.map((piece, pi) => {
                 const isPicked = pi === picked;
                 const isTrap = pi === fm.trap;
@@ -147,7 +147,7 @@ function QuickFire() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Meaning, form, pron, or appropriacy? Quick fire</p>
+        <p className="text-label font-bold text-ink">Meaning, form, pron, or appropriacy? Quick fire</p>
         <p className="text-label text-muted">{`${correctCount} of ${MF_ITEMS.length} correct`}</p>
       </div>
       <p className="text-label text-muted">For each task type, click which of the four it&apos;s checking.</p>
@@ -192,13 +192,13 @@ function WeakForms() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Transcribe the weak forms</p>
+      <p className="text-label font-bold text-ink">Transcribe the weak forms</p>
       <p className="text-label text-muted">Listen for how each phrase is actually said in fast speech, not how it&apos;s spelled. Click your guess, then check.</p>
       {WEAK_FORM_ITEMS.map((w, i) => {
         const picked = picks[i];
         return (
           <div key={w.written} className="flex flex-wrap items-center justify-between gap-3.5 rounded-[8px] border border-border bg-card p-3.5">
-            <p className="min-w-[160px] flex-1 font-serif text-sm font-semibold text-ink">&quot;{w.written}&quot;</p>
+            <p className="min-w-[160px] flex-1 font-serif text-body font-semibold text-ink">&quot;{w.written}&quot;</p>
             <div className="flex flex-wrap gap-1.5">
               {w.options.map((opt, oi) => {
                 const isCorrectPick = picked === oi && oi === w.answer;
@@ -232,7 +232,7 @@ function MarkStress() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Mark the sentence — stress and weak forms</p>
+      <p className="text-label font-bold text-ink">Mark the sentence — stress and weak forms</p>
       <p className="text-label text-muted">Click the word you think carries the main sentence stress in each example.</p>
       {STRESS_ITEMS.map((item, si) => {
         const picked = picks[si];
@@ -272,13 +272,13 @@ function Appropriacy() {
   const [picks, setPicks] = useState<Record<number, number>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Appropriacy — which register?</p>
+      <p className="text-label font-bold text-ink">Appropriacy — which register?</p>
       <p className="text-label text-muted">Same meaning, different register. Click who you&apos;d actually say each one to.</p>
       {APPROPRIACY_ITEMS.map((ap, ai) => {
         const picked = picks[ai];
         return (
           <div key={ap.phrase} className="flex flex-wrap items-center justify-between gap-3.5 rounded-[8px] border border-border bg-card p-3.5">
-            <p className="min-w-[200px] flex-1 font-serif text-sm font-semibold text-ink">&quot;{ap.phrase}&quot;</p>
+            <p className="min-w-[200px] flex-1 font-serif text-body font-semibold text-ink">&quot;{ap.phrase}&quot;</p>
             <div className="flex flex-wrap gap-1.5">
               {ap.options.map((opt, oi) => {
                 const isCorrectPick = picked === oi && oi === ap.answer;
@@ -312,12 +312,12 @@ function SpotTheFlaw() {
   const [open, setOpen] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Spot the flaw — MFPA done badly</p>
+      <p className="text-label font-bold text-ink">Spot the flaw — MFPA done badly</p>
       <p className="text-label text-muted">Each mini-plan skips part of MFP. Click to reveal what&apos;s missing.</p>
       {FLAWS.map((f, i) => (
         <div key={f.title} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-sm font-semibold text-ink">{f.title}</p>
-          <p className="text-xs leading-relaxed text-ink">{f.plan}</p>
+          <p className="font-serif text-body font-semibold text-ink">{f.title}</p>
+          <p className="text-label leading-relaxed text-ink">{f.plan}</p>
           <button
             type="button"
             data-print-hide
@@ -328,7 +328,7 @@ function SpotTheFlaw() {
           </button>
           {open[i] ? (
             <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/10 px-3.5 py-2.5">
-              <p className="text-xs leading-relaxed text-ink">{f.fix}</p>
+              <p className="text-label leading-relaxed text-ink">{f.fix}</p>
             </div>
           ) : null}
         </div>
@@ -345,7 +345,7 @@ function MfpAnswerKey() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-card px-4 text-xs font-semibold text-ink"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-card px-4 text-label font-semibold text-ink"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -400,7 +400,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -412,7 +412,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2.5">
-          <p className="font-serif text-lg font-semibold text-ink">Example — clarifying &quot;used to,&quot; fully MFP&apos;d</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example — clarifying &quot;used to,&quot; fully MFP&apos;d</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             <div className="grid grid-cols-[110px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Focus</p>
@@ -455,7 +455,7 @@ export default function MfpSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: has anyone taught a grammar point perfectly, then watched students say it
@@ -465,12 +465,12 @@ export default function MfpSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">The three, in thirty seconds each</p>
+        <p className="text-label font-bold text-ink">The three, in thirty seconds each</p>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {PILLARS.map((p) => (
             <div key={p.label} className="rounded-[8px] border border-t-[3px] bg-card p-3.5" style={{ borderTopColor: p.color, borderColor: "var(--color-border)" }}>
               <p className="text-micro font-bold uppercase tracking-[0.08em]" style={{ color: p.color }}>{p.label}</p>
-              <p className="mt-1.5 text-xs leading-relaxed text-ink">{p.text}</p>
+              <p className="mt-1.5 text-label leading-relaxed text-ink">{p.text}</p>
             </div>
           ))}
         </div>

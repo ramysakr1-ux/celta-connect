@@ -198,7 +198,7 @@ export function FilmedObservationWatchScreen({
               </div>
             ))}
           </div>
-          <span className="text-xs text-muted">
+          <span className="text-label text-muted">
             {present.length} joined{present.length > 6 ? ` (+${present.length - 6} more)` : ""}
           </span>
         </div>
@@ -206,7 +206,7 @@ export function FilmedObservationWatchScreen({
         {teacherName || level || learnerCount !== null || mainAim || subAim ? (
           <div className="card p-4">
             {teacherName || level || learnerCount !== null ? (
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-body text-ink">
                 {teacherName ? (
                   <span>
                     <span className="text-muted">Teacher</span> · {teacherName}
@@ -225,19 +225,19 @@ export function FilmedObservationWatchScreen({
               </div>
             ) : null}
             {mainAim ? (
-              <p className={`text-sm text-ink ${teacherName || level || learnerCount !== null ? "mt-2" : ""}`}>
+              <p className={`text-body text-ink ${teacherName || level || learnerCount !== null ? "mt-2" : ""}`}>
                 <span className="text-muted">Main aim</span> · {mainAim}
               </p>
             ) : null}
             {subAim ? (
-              <p className="mt-1 text-sm text-ink">
+              <p className="mt-1 text-body text-ink">
                 <span className="text-muted">Sub aim</span> · {subAim}
               </p>
             ) : null}
           </div>
         ) : null}
 
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           This recording can run past 45 minutes. Use the player&apos;s own seek bar to fast-forward — you&apos;re not
           expected to watch every second, just enough to answer the task.
         </p>
@@ -262,8 +262,8 @@ export function FilmedObservationWatchScreen({
             />
           ) : (
             <div className="flex aspect-video w-full flex-col items-center justify-center gap-1 bg-ink text-center text-card">
-              <p className="text-sm font-semibold">No recording loaded</p>
-              <p className="max-w-xs text-xs text-card/70">Your tutor attaches the recording before the session -- check back closer to the start time.</p>
+              <p className="text-body font-semibold">No recording loaded</p>
+              <p className="max-w-xs text-label text-card/70">Your tutor attaches the recording before the session -- check back closer to the start time.</p>
             </div>
           )}
 
@@ -272,12 +272,12 @@ export function FilmedObservationWatchScreen({
               <p className="text-label font-semibold tracking-[0.1em] uppercase text-card/70">
                 Break {activeBreak.break_number} of {breaks.length}
               </p>
-              <p className="max-w-md text-base leading-relaxed">{activeBreak.prompt}</p>
-              <p className="text-2xl font-semibold tabular-nums text-status-warning-text">{formatClock(countdown)}</p>
+              <p className="max-w-md text-lede leading-relaxed">{activeBreak.prompt}</p>
+              <p className="text-h1 font-semibold tabular-nums text-status-warning-text">{formatClock(countdown)}</p>
               <button
                 type="button"
                 onClick={resumePlayback}
-                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+                className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground"
               >
                 Resume now
               </button>
@@ -286,7 +286,7 @@ export function FilmedObservationWatchScreen({
         </div>
 
         {breaks.length > 0 ? (
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             {breaks.length} break{breaks.length === 1 ? "" : "s"} in this recording — it pauses on its own so you can
             catch up on your notes and compare notes with your TP group. Skip a pause with &ldquo;Resume now&rdquo;.
           </p>
@@ -307,7 +307,7 @@ export function FilmedObservationWatchScreen({
           // catching a moment before you know which prompt it answers.
           <div className="card card-garnet p-4">
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-label text-muted">
               Saved with the exact moment you wrote them, so you can jump straight back to it later.
             </p>
             <div className="mt-2 flex gap-2">
@@ -315,12 +315,12 @@ export function FilmedObservationWatchScreen({
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="What just happened…"
-                className="flex-1 rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                className="flex-1 rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-body text-ink outline-none focus:border-primary"
               />
               <button
                 type="button"
                 onClick={addNoteAtCurrentTime}
-                className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash"
+                className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink wash"
               >
                 {noteSaved ? "Saved" : "Add note"}
               </button>

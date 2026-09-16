@@ -31,7 +31,7 @@ export function ResourceCategoryManager({
     <div className="flex flex-col gap-3">
       {readOnly ? null : <ResourceComposer traineeId={null} centerId={centerId} fixedCategory={category} />}
       {resources.length === 0 ? (
-        <p className="sheet border-dashed text-sm text-muted">Nothing here yet.</p>
+        <p className="sheet border-dashed text-body text-muted">Nothing here yet.</p>
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {resources.map((r) => {
@@ -44,7 +44,7 @@ export function ResourceCategoryManager({
                   </span>
                   <div className="min-w-0 flex-1">
                     <ResourceContentLink title={r.title} fileUrl={r.file_url} storagePath={r.storage_path} contentType={r.content_type} />
-                    {r.description ? <p className="mt-1 text-xs leading-relaxed text-muted">{r.description}</p> : null}
+                    {r.description ? <p className="mt-1 text-label leading-relaxed text-muted">{r.description}</p> : null}
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       <span className="inline-block rounded-full border border-border px-2 py-0.5 text-[0.6875rem] font-semibold text-muted">
                         {RESOURCE_TYPE_LABELS[r.resource_type]}
@@ -65,7 +65,7 @@ export function ResourceCategoryManager({
                 {readOnly ? null : (
                   <form action={deleteResource}>
                     <input type="hidden" name="resource_id" value={r.id} />
-                    <button type="submit" className="text-xs text-destructive hover:underline">
+                    <button type="submit" className="text-label text-destructive hover:underline">
                       Remove
                     </button>
                   </form>

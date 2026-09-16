@@ -16,7 +16,7 @@ export function RejectForm({ applicantId }: { applicantId: string }) {
     <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-h3 font-semibold text-ink">Reject</h2>
-      <div className="flex gap-4 text-sm text-ink">
+      <div className="flex gap-4 text-body text-ink">
         <label className="flex items-center gap-2">
           <input
             type="radio"
@@ -43,13 +43,13 @@ export function RejectForm({ applicantId }: { applicantId: string }) {
         rows={3}
         required
         placeholder="Name the specific gap. The applicant may ask, and the assessor may look."
-        className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-destructive/40 px-4 py-2 text-sm text-destructive hover:bg-destructive/5 disabled:opacity-60 wash"
+        className="self-start rounded-[6px] border border-destructive/40 px-4 py-2 text-body text-destructive hover:bg-destructive/5 disabled:opacity-60 wash"
       >
         {pending ? "Saving..." : "Record rejection"}
       </button>

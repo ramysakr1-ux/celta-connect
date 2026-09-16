@@ -22,7 +22,7 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -46,11 +46,11 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
           Hide
         </button>
       </div>
-      {runningNote ? <p className="text-xs leading-relaxed text-ink">{runningNote}</p> : null}
+      {runningNote ? <p className="text-label leading-relaxed text-ink">{runningNote}</p> : null}
       {notes.map((n, i) => (
         <div key={i} className="flex flex-col gap-0.5">
-          <p className="text-xs font-semibold text-ink">{n.label}</p>
-          <p className="text-xs leading-relaxed text-ink">{n.text}</p>
+          <p className="text-label font-semibold text-ink">{n.label}</p>
+          <p className="text-label leading-relaxed text-ink">{n.text}</p>
         </div>
       ))}
     </div>

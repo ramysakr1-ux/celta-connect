@@ -71,7 +71,7 @@ export function FilmedObservationTaskPanel({
     return (
       <div className="card p-4">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
-        <p className="mt-2 text-sm text-muted">Your tutor hasn&apos;t attached a task to this recording yet.</p>
+        <p className="mt-2 text-body text-muted">Your tutor hasn&apos;t attached a task to this recording yet.</p>
       </div>
     );
   }
@@ -80,14 +80,14 @@ export function FilmedObservationTaskPanel({
     <div className="card card-garnet flex flex-col gap-3 p-4">
       <div>
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
-        {criteriaLine ? <p className="mt-1 text-sm text-ink">{criteriaLine}</p> : null}
-        <p className="mt-1 text-xs text-muted">
+        {criteriaLine ? <p className="mt-1 text-body text-ink">{criteriaLine}</p> : null}
+        <p className="mt-1 text-label text-muted">
           Answer as you watch — it saves as you go, and the video pauses to let you catch up.
         </p>
       </div>
 
       {completedAt ? (
-        <p className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm font-semibold text-primary">
+        <p className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body font-semibold text-primary">
           Marked complete — your answers are saved and the hour is logged.
         </p>
       ) : null}
@@ -96,7 +96,7 @@ export function FilmedObservationTaskPanel({
         {prompts.map((prompt, i) => (
           <div key={i} className="flex flex-col gap-1">
             <label className="text-meta leading-[1.45] text-ink">
-              <span className="mr-1.5 text-xs tabular-nums text-muted">{i + 1}</span>
+              <span className="mr-1.5 text-label tabular-nums text-muted">{i + 1}</span>
               {prompt}
             </label>
             <textarea
@@ -105,7 +105,7 @@ export function FilmedObservationTaskPanel({
               rows={2}
               placeholder="Write here…"
               disabled={Boolean(completedAt)}
-              className="rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+              className="rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-body text-ink outline-none focus:border-primary disabled:opacity-70"
             />
           </div>
         ))}
@@ -123,7 +123,7 @@ export function FilmedObservationTaskPanel({
                     aria-pressed={on}
                     disabled={Boolean(completedAt)}
                     onClick={() => set("rating", on ? "" : opt)}
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold disabled:opacity-70 ${
+                    className={`rounded-full border px-3 py-1 text-label font-semibold disabled:opacity-70 ${
                       on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash"
                     }`}
                   >
@@ -142,11 +142,11 @@ export function FilmedObservationTaskPanel({
           <form action={formAction} className="flex flex-col gap-1">
             <input type="hidden" name="task_id" value={taskId} />
             <input type="hidden" name="session_id" value={sessionId} />
-            {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+            {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
             <button
               type="submit"
               disabled={pending}
-              className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Saving…" : "Mark as complete"}
             </button>

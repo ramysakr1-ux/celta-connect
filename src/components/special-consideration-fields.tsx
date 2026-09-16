@@ -30,8 +30,8 @@ export function SpecialConsiderationFields({ defaultText, defaultArrangements = 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-ink">Is there anything we should know?</p>
-        <p className="text-xs text-muted">
+        <p className="text-body font-medium text-ink">Is there anything we should know?</p>
+        <p className="text-label text-muted">
           If you have a condition or circumstance that affects how you work -- dyslexia, a health condition, caring
           responsibilities -- tell us now rather than later. It does not appear on your certificate and it does not
           change the standard you are assessed against. It changes what we arrange.
@@ -42,15 +42,15 @@ export function SpecialConsiderationFields({ defaultText, defaultArrangements = 
         <label className={`flex cursor-pointer items-start gap-2.5 rounded-[6px] border p-2.5 ${declared ? "border-primary bg-primary/5" : "border-border"}`}>
           <input type="radio" name="sc_declared" checked={declared} onChange={() => setDeclared(true)} className="mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-ink">Yes, there is something</p>
-            <p className="text-xs text-muted">A condition, a health issue, or a circumstance affecting how you work.</p>
+            <p className="text-body font-semibold text-ink">Yes, there is something</p>
+            <p className="text-label text-muted">A condition, a health issue, or a circumstance affecting how you work.</p>
           </div>
         </label>
         <label className={`flex cursor-pointer items-start gap-2.5 rounded-[6px] border p-2.5 ${!declared ? "border-primary bg-primary/5" : "border-border"}`}>
           <input type="radio" name="sc_declared" checked={!declared} onChange={() => setDeclared(false)} className="mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-ink">No, nothing to declare</p>
-            <p className="text-xs text-muted">You can add this later -- conditions and circumstances change mid-course.</p>
+            <p className="text-body font-semibold text-ink">No, nothing to declare</p>
+            <p className="text-label text-muted">You can add this later -- conditions and circumstances change mid-course.</p>
           </div>
         </label>
       </div>
@@ -58,7 +58,7 @@ export function SpecialConsiderationFields({ defaultText, defaultArrangements = 
       {declared ? (
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <p className="text-xs text-muted">What would help</p>
+            <p className="text-label text-muted">What would help</p>
             <div className="flex flex-wrap gap-1.5">
               {ARRANGEMENTS.map((label) => {
                 const on = picked.has(label);
@@ -68,7 +68,7 @@ export function SpecialConsiderationFields({ defaultText, defaultArrangements = 
                     type="button"
                     onClick={() => toggle(label)}
                     aria-pressed={on}
-                    className={`h-8 rounded-full border px-3 text-xs font-medium ${
+                    className={`h-8 rounded-full border px-3 text-label font-medium ${
                       on ? "border-primary bg-primary/10 text-ink" : "border-border text-muted hover:border-primary hover:text-ink"
                     }`}
                   >
@@ -83,7 +83,7 @@ export function SpecialConsiderationFields({ defaultText, defaultArrangements = 
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="special_consideration" className="text-xs text-muted">
+            <label htmlFor="special_consideration" className="text-label text-muted">
               Tell us in your own words
             </label>
             <textarea
@@ -92,23 +92,23 @@ export function SpecialConsiderationFields({ defaultText, defaultArrangements = 
               rows={2}
               defaultValue={defaultText ?? ""}
               placeholder="Write or dictate…"
-              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="special_consideration_evidence" className="text-xs text-muted">
+            <label htmlFor="special_consideration_evidence" className="text-label text-muted">
               Supporting evidence, if you have any
             </label>
             <input
               id="special_consideration_evidence"
               name="special_consideration_evidence"
               type="file"
-              className="text-sm text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-xs file:text-ink"
+              className="text-body text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-label file:text-ink"
             />
           </div>
 
-          <p className="rounded-[6px] border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-ink">
+          <p className="rounded-[6px] border border-primary/25 bg-primary/5 px-3 py-2 text-label text-ink">
             Only the course tutors and the centre see this. It is not visible to other candidates, and it is not sent
             to Cambridge unless an extension is later requested on your behalf.
           </p>

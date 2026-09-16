@@ -27,26 +27,26 @@ export function GtkyPickForm({
             className={`flex flex-col gap-3 rounded-[8px] border p-5 ${isChosen ? "border-primary bg-primary/5" : "border-border bg-card"}`}
           >
             <div>
-              <p className="font-serif text-lg text-ink">{a.name}</p>
-              <p className="mt-1 text-xs text-muted">{a.meta}</p>
+              <p className="font-serif text-h3 text-ink">{a.name}</p>
+              <p className="mt-1 text-label text-muted">{a.meta}</p>
             </div>
             <ol className="flex flex-col gap-1.5">
               {a.steps.map((step, i) => (
-                <li key={i} className="flex gap-2 text-sm text-ink">
+                <li key={i} className="flex gap-2 text-body text-ink">
                   <span className="text-muted">{i + 1}.</span>
                   <span>{step}</span>
                 </li>
               ))}
             </ol>
             {a.onlineNote ? (
-              <p className="rounded-[6px] border border-border bg-surface-muted p-2.5 text-xs text-ink">
+              <p className="rounded-[6px] border border-border bg-surface-muted p-2.5 text-label text-ink">
                 <span className="font-semibold">Online: </span>
                 {a.onlineNote}
               </p>
             ) : null}
             {locked ? (
               isChosen ? (
-                <span className="mt-auto self-start rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
+                <span className="mt-auto self-start rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground">
                   Your choice
                 </span>
               ) : null
@@ -55,7 +55,7 @@ export function GtkyPickForm({
                 <input type="hidden" name="slug" value={a.slug} />
                 <button
                   type="submit"
-                  className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm font-medium text-ink wash"
+                  className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-body font-medium text-ink wash"
                 >
                   Choose this one
                 </button>

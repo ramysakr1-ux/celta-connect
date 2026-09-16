@@ -49,7 +49,7 @@ export function AssessorTermsForm() {
       <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Terms of access</p>
       <div className="flex flex-col gap-3">
         {TERMS.map((text, i) => (
-          <label key={i} className="flex items-start gap-2.5 text-sm text-ink">
+          <label key={i} className="flex items-start gap-2.5 text-body text-ink">
             <input
               type="checkbox"
               checked={checked[i]}
@@ -62,13 +62,13 @@ export function AssessorTermsForm() {
       </div>
       {/* This note used to say access ends when the course closes; that is now
           the third tick, so it says what "closes" means instead of repeating it. */}
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         The course closes once the centre submits final results to Cambridge. The link stops working then, and nothing here is available afterwards.
       </p>
       <button
         type="submit"
         disabled={!allChecked || pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
       >
         {pending ? "Opening…" : "Agree and open the pack"}
       </button>

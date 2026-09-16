@@ -24,7 +24,7 @@ export function DeferralLetterSection({
     <div className="flex flex-col gap-2">
       <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Deferral letter</p>
       {existingLetters.map((l) => (
-        <div key={l.id} className="flex items-center justify-between gap-3 text-xs">
+        <div key={l.id} className="flex items-center justify-between gap-3 text-label">
           <span className="text-muted">
             Issued {formatDate(l.issued_at, timeZone, { day: "numeric", month: "short", year: "numeric" })} ·{" "}
             {l.acknowledged_at ? "acknowledged" : "awaiting acknowledgement"}
@@ -35,7 +35,7 @@ export function DeferralLetterSection({
         </div>
       ))}
       {!showForm && existingLetters.length > 0 ? (
-        <button type="button" onClick={() => setShowForm(true)} className="self-start text-xs text-primary hover:underline">
+        <button type="button" onClick={() => setShowForm(true)} className="self-start text-label text-primary hover:underline">
           Issue another
         </button>
       ) : null}

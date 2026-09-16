@@ -61,7 +61,7 @@ export async function SpreadsheetImportSection({
   return (
     <div className="flex flex-col gap-6">
       {courseList.length === 0 ? (
-        <div className="sheet text-sm text-muted">
+        <div className="sheet text-body text-muted">
           There are no courses in this centre yet. An import has to land on a specific course, so create one first.
         </div>
       ) : kind === "applicants" ? (
@@ -79,8 +79,8 @@ export async function SpreadsheetImportSection({
             return (
               <div key={imp.id} className={`hover-ring flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-sm text-ink">{imp.source_filename}</p>
-                  <p className="text-xs text-muted">
+                  <p className="text-body text-ink">{imp.source_filename}</p>
+                  <p className="text-label text-muted">
                     {tallies.willImport ?? 0} imported &middot; {formatDate(imp.created_at, timeZone)}
                     {imp.undone_at
                       ? " · undone"

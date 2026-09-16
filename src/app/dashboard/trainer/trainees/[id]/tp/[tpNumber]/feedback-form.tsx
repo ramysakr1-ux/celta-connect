@@ -172,7 +172,7 @@ export function FeedbackForm({
             <FeedbackPointList label="Action points in teaching" points={feedback.action_points_teaching as FeedbackPoint[]} />
             <ReadOnlyField label="Overall comment" value={feedback.overall_comment} />
             <ReadOnlyField label="Your comment on their self-evaluation" value={feedback.self_eval_comment} />
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               ★ Starred action points carry into the Personal Aims of the TP{tpNumber + 1} plan.
             </p>
           </div>
@@ -477,7 +477,7 @@ export function FeedbackForm({
                 : "Step 2 of 3 · Nothing is released until you submit in step 3."
           }
         >
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
           {/* Tutor-side only, and never on a candidate's own plan. */}
           <WakeWordToggle />
           <SaveDraftButton pending={draftPending} disabled={draftPending || submitPending} />

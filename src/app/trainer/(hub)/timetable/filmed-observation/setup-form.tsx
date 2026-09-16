@@ -33,7 +33,7 @@ export function FilmedObservationSetupForm({
     <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="event_id" value={eventId} />
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="lesson_title" className="text-xs text-muted">
+        <label htmlFor="lesson_title" className="text-label text-muted">
           Lesson title
         </label>
         <input
@@ -42,11 +42,11 @@ export function FilmedObservationSetupForm({
           type="text"
           defaultValue={lessonTitle ?? ""}
           placeholder="Focus set by the trainer per session"
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="recording_url" className="text-xs text-muted">
+        <label htmlFor="recording_url" className="text-label text-muted">
           Recording link
         </label>
         <input
@@ -55,12 +55,12 @@ export function FilmedObservationSetupForm({
           type="url"
           defaultValue={recordingUrl ?? ""}
           placeholder="https://..."
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
         <p className="text-label text-muted">A link to a recording you hold rights to, or an internally-hosted file. Never fetched automatically.</p>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="teacher_name" className="text-xs text-muted">
+        <label htmlFor="teacher_name" className="text-label text-muted">
           Teacher
         </label>
         <input
@@ -69,11 +69,11 @@ export function FilmedObservationSetupForm({
           type="text"
           defaultValue={teacherName ?? ""}
           placeholder="Who's teaching in the recording"
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="main_aim" className="text-xs text-muted">
+        <label htmlFor="main_aim" className="text-label text-muted">
           Main aim
         </label>
         <input
@@ -82,11 +82,11 @@ export function FilmedObservationSetupForm({
           type="text"
           defaultValue={mainAim ?? ""}
           placeholder="What the lesson is aiming to teach"
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="sub_aim" className="text-xs text-muted">
+        <label htmlFor="sub_aim" className="text-label text-muted">
           Sub aim (optional)
         </label>
         <input
@@ -94,12 +94,12 @@ export function FilmedObservationSetupForm({
           name="sub_aim"
           type="text"
           defaultValue={subAim ?? ""}
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="length_minutes" className="text-xs text-muted">
+          <label htmlFor="length_minutes" className="text-label text-muted">
             Length (minutes)
           </label>
           <input
@@ -108,18 +108,18 @@ export function FilmedObservationSetupForm({
             type="number"
             min={1}
             defaultValue={lengthMinutes ?? ""}
-            className="h-9 w-32 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-32 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="level" className="text-xs text-muted">
+          <label htmlFor="level" className="text-label text-muted">
             Level
           </label>
           <select
             id="level"
             name="level"
             defaultValue={level ?? ""}
-            className="h-9 w-40 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-40 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Not set</option>
             {CEFR_LEVELS.map((l) => (
@@ -130,7 +130,7 @@ export function FilmedObservationSetupForm({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="learner_count" className="text-xs text-muted">
+          <label htmlFor="learner_count" className="text-label text-muted">
             Learners
           </label>
           <input
@@ -139,16 +139,16 @@ export function FilmedObservationSetupForm({
             type="number"
             min={0}
             defaultValue={learnerCount ?? ""}
-            className="h-9 w-24 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-24 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           />
         </div>
       </div>
       <p className="text-label text-muted">Length feeds the Observations hours log once a trainee marks their task complete.</p>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save"}
       </button>

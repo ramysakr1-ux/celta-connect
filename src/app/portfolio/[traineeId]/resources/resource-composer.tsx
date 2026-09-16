@@ -103,7 +103,7 @@ export function ResourceComposer({
           type="text"
           placeholder="Title"
           required
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         />
         {fixedCategory ? (
           <input type="hidden" name="category" value={fixedCategory} />
@@ -111,7 +111,7 @@ export function ResourceComposer({
           <select
             name="category"
             defaultValue={RESOURCE_CATEGORY_ORDER[0]}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             {RESOURCE_CATEGORY_ORDER.map((c) => (
               <option key={c} value={c}>
@@ -123,7 +123,7 @@ export function ResourceComposer({
         <select
           name="resource_type"
           defaultValue={RESOURCE_TYPE_ORDER[0]}
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         >
           {RESOURCE_TYPE_ORDER.map((t) => (
             <option key={t} value={t}>
@@ -139,7 +139,7 @@ export function ResourceComposer({
             key={mode}
             type="button"
             onClick={() => setContentMode(mode)}
-            className={`rounded-full border px-3 py-1 text-xs font-medium ${
+            className={`rounded-full border px-3 py-1 text-label font-medium ${
               contentMode === mode ? "border-primary bg-primary text-card" : "border-border text-ink wash"
             }`}
           >
@@ -153,7 +153,7 @@ export function ResourceComposer({
           name="file_url"
           type="url"
           placeholder="Link (file, Drive, video...)"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
         />
       ) : (
         <div className="flex flex-col gap-1.5">
@@ -162,15 +162,15 @@ export function ResourceComposer({
             type="file"
             accept={contentMode === "html" ? ".html" : undefined}
             onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-            className="text-sm text-ink"
+            className="text-body text-ink"
           />
           {contentMode === "html" ? (
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               A single self-contained .html file (its own CSS/JS inline) -- shown live in a sandboxed frame, not
               downloaded.
             </p>
           ) : null}
-          {selectedFile ? <p className="text-xs text-muted">Selected: {selectedFile.name}</p> : null}
+          {selectedFile ? <p className="text-label text-muted">Selected: {selectedFile.name}</p> : null}
         </div>
       )}
 
@@ -178,28 +178,28 @@ export function ResourceComposer({
         name="description"
         placeholder="Short description (optional)"
         rows={2}
-        className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
       <div className="flex flex-col gap-2">
         {traineeId !== null ? (
-          <label className="flex items-center gap-2 text-sm text-muted">
+          <label className="flex items-center gap-2 text-body text-muted">
             <input type="checkbox" name="center_wide" />
             Share across the whole center, not just this course
           </label>
         ) : (
           <input type="hidden" name="center_wide" value="on" />
         )}
-        <label className="flex items-center gap-2 text-sm text-muted">
+        <label className="flex items-center gap-2 text-body text-muted">
           <input type="checkbox" name="visible_to_trainee" defaultChecked={fixedCategory !== "centre_documents"} />
           Visible to the trainee (uncheck for trainer/assessor-only material, e.g. an internal template)
         </label>
       </div>
       <div className="flex items-center justify-between">
-        {state.error || uploadError ? <p className="text-sm text-destructive">{uploadError ?? state.error}</p> : null}
+        {state.error || uploadError ? <p className="text-body text-destructive">{uploadError ?? state.error}</p> : null}
         <button
           type="submit"
           disabled={pending || uploading}
-          className="ml-auto rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="ml-auto rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
         >
           {uploading ? "Uploading…" : pending ? "Adding…" : "Add resource"}
         </button>

@@ -8,12 +8,12 @@ export function WaitingListForm({ applicantId }: { applicantId: string }) {
       <input type="hidden" name="applicant_id" value={applicantId} />
       <div>
         <h2 className="font-serif text-h3 font-semibold text-ink">Waiting list</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           For when the intake is full. Their task and interview stay on file -- they never repeat them.
         </p>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="waiting_list_hear_by" className="text-xs text-muted">
+        <label htmlFor="waiting_list_hear_by" className="text-label text-muted">
           They&apos;ll hear either way by
         </label>
         <input
@@ -21,10 +21,10 @@ export function WaitingListForm({ applicantId }: { applicantId: string }) {
           name="waiting_list_hear_by"
           type="date"
           required
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
-      <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary wash">
+      <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-body text-ink hover:border-primary wash">
         Add to waiting list
       </button>
     </form>

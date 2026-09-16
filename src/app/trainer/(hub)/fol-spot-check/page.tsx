@@ -24,7 +24,7 @@ export default async function FolSpotCheckPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   const courseId = trainer.course_id;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
   const supabase = await createClient();
 
@@ -81,11 +81,11 @@ export default async function FolSpotCheckPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="sheet flex flex-col gap-2 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Focus on the Learner · Days 2–9</p>
+        <p className="text-label font-semibold uppercase tracking-[0.12em] text-muted">Focus on the Learner · Days 2–9</p>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
           <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">FOL pool by class</h1>
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             {dayProgress ? `Day ${dayProgress.currentDay} of ${dayProgress.totalDays}` : null}
             {dayProgress && daysUntilDivergence !== null ? " · " : null}
             {daysUntilDivergence !== null
@@ -95,7 +95,7 @@ export default async function FolSpotCheckPage() {
               : null}
           </p>
         </div>
-        <p className="text-sm text-muted">
+        <p className="text-body text-muted">
           This is a pulse check, not a ranking -- it exists to catch a class that's logged nothing before Day 10, not
           to compare candidates against each other. It doesn't show what anyone's claimed or plans to claim.
         </p>
@@ -105,17 +105,17 @@ export default async function FolSpotCheckPage() {
         <table className="table-plain w-full">
           <thead>
             <tr>
-              <th className="text-sm text-muted">Class</th>
-              <th className="text-right text-sm text-muted">Grammar</th>
-              <th className="text-right text-sm text-muted">Pronunciation</th>
-              <th className="text-right text-sm text-muted">Last logged</th>
-              <th className="text-right text-sm text-muted">Status</th>
+              <th className="text-body text-muted">Class</th>
+              <th className="text-right text-body text-muted">Grammar</th>
+              <th className="text-right text-body text-muted">Pronunciation</th>
+              <th className="text-right text-body text-muted">Last logged</th>
+              <th className="text-right text-body text-muted">Status</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-6 text-center text-sm text-muted">
+                <td colSpan={5} className="py-6 text-center text-body text-muted">
                   No TP classes set up for this course yet.
                 </td>
               </tr>
@@ -124,10 +124,10 @@ export default async function FolSpotCheckPage() {
                 const status = statusFor(row);
                 return (
                   <tr key={row.name}>
-                    <td className="text-sm font-medium text-ink">{row.name}</td>
-                    <td className="text-right tabular-nums text-sm text-ink">{row.grammarCount}</td>
-                    <td className="text-right tabular-nums text-sm text-ink">{row.pronCount}</td>
-                    <td className="text-right text-sm text-muted">{relativeTime(row.lastLoggedAt)}</td>
+                    <td className="text-body font-medium text-ink">{row.name}</td>
+                    <td className="text-right tabular-nums text-body text-ink">{row.grammarCount}</td>
+                    <td className="text-right tabular-nums text-body text-ink">{row.pronCount}</td>
+                    <td className="text-right text-body text-muted">{relativeTime(row.lastLoggedAt)}</td>
                     <td className="text-right">
                       <span className={`pill ${status.pillClass}`}>{status.label}</span>
                     </td>
@@ -139,7 +139,7 @@ export default async function FolSpotCheckPage() {
         </table>
       </div>
 
-      <div className="sheet flex flex-wrap items-center gap-4 p-4 text-xs text-muted">
+      <div className="sheet flex flex-wrap items-center gap-4 p-4 text-label text-muted">
         <span className="font-semibold uppercase tracking-[0.08em]">Status</span>
         <span className="flex items-center gap-1.5">
           <span className="pill pill-danger">Empty</span> 0 logged

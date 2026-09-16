@@ -113,7 +113,7 @@ export function RecommendationPanel({
       <p className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
         What Connect suggests
       </p>
-      <p className="max-w-[76ch] text-sm text-pretty text-muted">
+      <p className="max-w-[76ch] text-body text-pretty text-muted">
         Reading is settled first, because it is the part the Handbook constrains. Observation is then chosen from whoever
         teaches {visitDateLabel ? `on ${visitDateLabel}` : "on the visit day"}, so that at least one observed candidate is
         also being read. Every line says whether it comes from the Handbook or from custom.
@@ -122,7 +122,7 @@ export function RecommendationPanel({
           those numbers are. 15.1, 14.2. What are they?" A bare § is only
           meaningful to someone who already knows which document it belongs to.
           Said once here rather than on every pill. */}
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         § numbers are the CELTA Administration Handbook, June 2025, so any line here can be checked rather than taken on trust.
       </p>
 
@@ -263,10 +263,10 @@ export function RecommendationPanel({
                   row rather than replacing this one.
                 </p>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <button type="submit" disabled={pending} className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12] disabled:opacity-60" style={{ background: "var(--hub-accent)" }}>
+                  <button type="submit" disabled={pending} className="rounded-[6px] px-3 py-1.5 text-body font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12] disabled:opacity-60" style={{ background: "var(--hub-accent)" }}>
                     {pending ? "Saving…" : "Save my choice"}
                   </button>
-                  <button type="button" onClick={() => setOverriding(false)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
+                  <button type="button" onClick={() => setOverriding(false)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-body text-ink">
                     Cancel
                   </button>
                 </div>
@@ -282,11 +282,11 @@ export function RecommendationPanel({
                 {rec.observe.map((o) => (
                   <input key={`r-${o.traineeId}`} type="hidden" name="recommended_id" value={o.traineeId} />
                 ))}
-                <button type="submit" disabled={pending || rec.observe.length === 0} className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12] disabled:opacity-60" style={{ background: "var(--hub-accent)" }}>
+                <button type="submit" disabled={pending || rec.observe.length === 0} className="rounded-[6px] px-3 py-1.5 text-body font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12] disabled:opacity-60" style={{ background: "var(--hub-accent)" }}>
                   {pending ? "Saving…" : "Accept this suggestion"}
                 </button>
               </form>
-              <button type="button" onClick={() => setOverriding(true)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
+              <button type="button" onClick={() => setOverriding(true)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-body text-ink">
                 Choose different candidates
               </button>
               <span className="min-w-[240px] flex-1 text-label leading-[1.45] text-muted">

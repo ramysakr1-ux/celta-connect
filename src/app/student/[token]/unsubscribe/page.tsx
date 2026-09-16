@@ -40,8 +40,8 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>
-          <h1 className="mt-5 font-serif text-lg text-ink">{optedOut ? "Turn reminder emails back on?" : "Stop class reminder emails?"}</h1>
-          <p className="mt-2 text-sm text-muted">
+          <h1 className="mt-5 font-serif text-h3 text-ink">{optedOut ? "Turn reminder emails back on?" : "Stop class reminder emails?"}</h1>
+          <p className="mt-2 text-body text-muted">
             {optedOut
               ? `${volunteer?.name ? `${volunteer.name}, y` : "Y"}ou'll get the day-before and 30-minute reminder emails again for classes you haven't declined.`
               : `${volunteer?.name ? `${volunteer.name}, y` : "Y"}ou'll stop getting the day-before and 30-minute reminder emails. You can still open your class link any time, and you'll still see everything on your own page.`}

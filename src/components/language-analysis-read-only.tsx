@@ -28,7 +28,7 @@ export function LanguageAnalysisReadOnly({
 }) {
   const isVocab = analysis.type === "vocab";
   const sheet = analysis.type === "grammar" || analysis.type === "function" ? ANALYSIS_SHEETS[analysis.type] : null;
-  const body = compact ? "text-meta" : "text-sm";
+  const body = compact ? "text-meta" : "text-body";
 
   if (isVocab) {
     const rows = analysis.vocab_rows ?? [];
@@ -68,7 +68,7 @@ export function LanguageAnalysisReadOnly({
           </table>
         </div>
         {analysis.vocab_reference ? (
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             <span className="font-semibold">Reference:</span> {analysis.vocab_reference}
           </p>
         ) : null}

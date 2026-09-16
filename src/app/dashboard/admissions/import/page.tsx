@@ -21,9 +21,9 @@ export default async function AdmissionsImportPage() {
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Admissions</p>
-          <h1 className="font-serif text-2xl text-ink">Import applicants from a spreadsheet</h1>
+          <h1 className="font-serif text-h1 text-ink">Import applicants from a spreadsheet</h1>
         </div>
-        <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
+        <Link href="/dashboard/admissions" className="text-body text-muted hover:text-ink">
           Back to admissions
         </Link>
       </div>

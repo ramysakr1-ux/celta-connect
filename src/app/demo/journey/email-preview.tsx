@@ -15,7 +15,7 @@ export function EmailPreview({ title, to, html }: { title: string; to: string; h
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-muted">
+        <p className="text-label font-semibold text-muted">
           {title} <span className="font-normal">&middot; to {to}</span>
         </p>
         <button

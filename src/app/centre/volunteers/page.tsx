@@ -187,10 +187,10 @@ export default async function CentreVolunteersPage({
             <h2 className="font-serif text-h3 font-semibold text-ink">
               {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"}
             </h2>
-            <span className="text-xs text-muted">{(volunteers ?? []).length} registrations across the centre</span>
+            <span className="text-label text-muted">{(volunteers ?? []).length} registrations across the centre</span>
           </div>
           {volunteerGroups.length === 0 ? (
-            <p className="px-5 py-4 text-xs text-muted">
+            <p className="px-5 py-4 text-label text-muted">
               Nobody registered yet. That is the ordinary state until the centre shares its sign-up link &mdash;
               volunteers add themselves through it.
             </p>

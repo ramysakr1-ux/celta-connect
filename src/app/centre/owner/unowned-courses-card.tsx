@@ -80,7 +80,7 @@ export function UnownedCoursesCard({
             >
               <input type="hidden" name="courseId" value={c.id} />
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">{c.name}</span>
+                <span className="text-body font-medium">{c.name}</span>
                 <span className="text-label" style={{ color: "var(--owner-muted)" }}>
                   {/* courses.start_date is a DATE column, and bare
                       new Date("2026-09-01") reads it as UTC midnight, so

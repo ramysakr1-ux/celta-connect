@@ -87,7 +87,7 @@ export default function ProfessionalDevelopmentSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">Pick a card, or click through all four yourself</p>
+        <p className="text-label font-bold text-ink">Pick a card, or click through all four yourself</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {CARDS.map((c, i) => (
             <button
@@ -105,10 +105,10 @@ export default function ProfessionalDevelopmentSession() {
 
       <div className="flex flex-col gap-3.5 rounded-[10px] border border-border bg-card p-5">
         <div className="flex items-baseline justify-between">
-          <p className="font-serif text-xl font-semibold text-ink">{active.title}</p>
+          <p className="font-serif text-h2 font-semibold text-ink">{active.title}</p>
           <p className="text-micro text-muted">Card {idx + 1} of 4</p>
         </div>
-        <p className="text-xs leading-relaxed text-muted">{active.intro}</p>
+        <p className="text-label leading-relaxed text-muted">{active.intro}</p>
         <div className="flex flex-col gap-2">
           {active.items.map((item) => (
             <div key={item.name} className="flex flex-col gap-0.5 rounded-[6px] bg-accent px-3.5 py-2.5">
@@ -119,7 +119,7 @@ export default function ProfessionalDevelopmentSession() {
         </div>
         <div className="flex flex-col gap-0.5 border-t border-border pt-1">
           <p className="text-label font-bold text-muted">Bring back to the room</p>
-          <p className="text-xs text-ink">{active.prompt}</p>
+          <p className="text-label text-ink">{active.prompt}</p>
         </div>
         <div className="flex gap-2 pt-1">
           <button
@@ -140,7 +140,7 @@ export default function ProfessionalDevelopmentSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Whole-group share-back · ~10 minutes</p>
+        <p className="text-label font-bold text-ink">Whole-group share-back · ~10 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             Each group: one thing worth telling the room, one question you couldn&apos;t answer. See if another group&apos;s card
@@ -170,7 +170,7 @@ export default function ProfessionalDevelopmentSession() {
 
       <div className="flex flex-col gap-1 rounded-[8px] border border-destructive/25 bg-destructive/5 p-3.5">
         <p className="text-label font-bold uppercase tracking-[0.08em] text-destructive">A general caution, not specific to any site above</p>
-        <p className="text-xs leading-relaxed text-ink">
+        <p className="text-label leading-relaxed text-ink">
           A legitimate school pays your salary — it never asks you to pay it for a job, a visa, or a &quot;placement fee&quot;
           upfront. Get any contract reviewed before signing, and don&apos;t hand over an original passport or degree
           certificate for someone else to hold — copies only, unless a consulate itself requires the original.

@@ -36,7 +36,7 @@ export function ProfileDriveForm({
     <div className="flex flex-col gap-6">
       <form action={action} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="cs_name" className="text-sm text-muted">
+          <label htmlFor="cs_name" className="text-body text-muted">
             Centre name
           </label>
           <input
@@ -50,7 +50,7 @@ export function ProfileDriveForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="cs_number" className="text-sm text-muted">
+          <label htmlFor="cs_number" className="text-body text-muted">
             Cambridge centre number
           </label>
           <input
@@ -60,11 +60,11 @@ export function ProfileDriveForm({
             value={centerNumber}
             className="rounded-[6px] border border-border bg-surface-muted/50 px-3 py-2 text-muted"
           />
-          <p className="text-xs text-muted">Set by Cambridge, not editable here.</p>
+          <p className="text-label text-muted">Set by Cambridge, not editable here.</p>
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="cs_address" className="text-sm text-muted">
+          <label htmlFor="cs_address" className="text-body text-muted">
             Address
           </label>
           <input
@@ -77,7 +77,7 @@ export function ProfileDriveForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="cs_contact_email" className="text-sm text-muted">
+          <label htmlFor="cs_contact_email" className="text-body text-muted">
             Primary contact email
           </label>
           <input
@@ -90,7 +90,7 @@ export function ProfileDriveForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="cs_timezone" className="text-sm text-muted">
+          <label htmlFor="cs_timezone" className="text-body text-muted">
             Time zone
           </label>
           <select
@@ -106,13 +106,13 @@ export function ProfileDriveForm({
               </option>
             ))}
           </select>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Drives every &quot;today&quot;/&quot;is this due&quot; check for this centre -- attendance day counts, payment due dates, timetable grouping.
           </p>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="cs_currency" className="text-sm text-muted">
+          <label htmlFor="cs_currency" className="text-body text-muted">
             Currency
           </label>
           <input
@@ -123,11 +123,11 @@ export function ProfileDriveForm({
             defaultValue={currency ?? ""}
             className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
-          <p className="text-xs text-muted">Applies to every course unless a course overrides it.</p>
+          <p className="text-label text-muted">Applies to every course unless a course overrides it.</p>
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="cs_appian_url" className="text-sm text-muted">
+          <label htmlFor="cs_appian_url" className="text-body text-muted">
             Appian sign-in URL
           </label>
           <input
@@ -138,7 +138,7 @@ export function ProfileDriveForm({
             defaultValue={appianUrl ?? ""}
             className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Cambridge gives every centre the same sign-in link -- Course Admin&apos;s Entry Form card opens this,
             not a per-course link.
           </p>
@@ -152,20 +152,20 @@ export function ProfileDriveForm({
             defaultChecked={filmsTpSessions}
             className="mt-0.5 size-4 rounded border-border"
           />
-          <label htmlFor="cs_films" className="text-sm text-ink">
+          <label htmlFor="cs_films" className="text-body text-ink">
             This centre films teaching practice sessions
-            <span className="block text-xs text-muted">
+            <span className="block text-label text-muted">
               Turns on filming consent tracking on every course roster. Off by default -- most centres don&apos;t film.
             </span>
           </label>
         </div>
 
         <div className="sm:col-span-2">
-          {state.error ? <p className="mb-2 text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="mb-2 text-body text-destructive">{state.error}</p> : null}
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
@@ -173,23 +173,23 @@ export function ProfileDriveForm({
       </form>
 
       <div className="card p-5">
-        <h3 className="font-serif text-base text-ink">Google Drive</h3>
-        <p className="mt-1 text-sm text-muted">
+        <h3 className="font-serif text-h3 text-ink">Google Drive</h3>
+        <p className="mt-1 text-body text-muted">
           Used for the one-time sheet import and for centres that keep their own copy of resource-hub documents.
           Read-only, per file — never a live sync.
         </p>
         {driveConnection ? (
           <div className="mt-4 flex flex-col gap-4">
-            <p className="text-sm text-muted">Connected {formatDateTime(driveConnection.connected_at, timeZone)}.</p>
+            <p className="text-body text-muted">Connected {formatDateTime(driveConnection.connected_at, timeZone)}.</p>
             <GoogleDriveTargetsForm templateDocId={driveConnection.template_doc_id} outputFolderId={driveConnection.output_folder_id} />
             <form action={disconnectGoogleDrive}>
-              <button type="submit" className="text-sm text-destructive underline">
+              <button type="submit" className="text-body text-destructive underline">
                 Disconnect Google Drive
               </button>
             </form>
           </div>
         ) : (
-          <a href="/api/google/connect" className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
+          <a href="/api/google/connect" className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card">
             Connect Google Drive
           </a>
         )}

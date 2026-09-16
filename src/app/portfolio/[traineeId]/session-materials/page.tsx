@@ -36,7 +36,7 @@ export default async function TraineeSessionMaterialsPage({
   const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
   const courseId = trainee?.course_id;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   const { data: events } = await supabase
@@ -62,8 +62,8 @@ export default async function TraineeSessionMaterialsPage({
     <div className="flex flex-col gap-5">
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Session materials</p>
-        <h1 className="font-serif text-2xl text-ink">Share materials for a session</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">
+        <h1 className="font-serif text-h1 text-ink">Share materials for a session</h1>
+        <p className="mt-1 max-w-2xl text-body text-muted">
           For anything that isn&apos;t a graded TP -- a demo lesson. Volunteer students see whatever the session is titled on the
           timetable, with whatever you attach here.
         </p>
@@ -71,8 +71,8 @@ export default async function TraineeSessionMaterialsPage({
 
       <form method="get" className="sheet flex flex-wrap items-end gap-3">
         <div className="flex flex-1 flex-col gap-1.5">
-          <label className="text-sm text-muted">Session</label>
-          <select name="event" defaultValue={eventId ?? ""} className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary">
+          <label className="text-body text-muted">Session</label>
+          <select name="event" defaultValue={eventId ?? ""} className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary">
             <option value="">Choose a session…</option>
             {(events ?? []).map((e) => (
               <option key={e.id} value={e.id}>
@@ -81,17 +81,17 @@ export default async function TraineeSessionMaterialsPage({
             ))}
           </select>
         </div>
-        <button type="submit" className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground">
+        <button type="submit" className="h-10 rounded-[6px] bg-primary px-4 text-body font-semibold text-primary-foreground">
           Open
         </button>
       </form>
 
-      {(events ?? []).length === 0 ? <p className="text-sm text-muted">No non-TP sessions on the timetable yet.</p> : null}
+      {(events ?? []).length === 0 ? <p className="text-body text-muted">No non-TP sessions on the timetable yet.</p> : null}
 
       {selectedEvent ? (
         <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-          <h2 className="font-serif text-lg text-ink">{selectedEvent.title}</h2>
-          <p className="mt-1 mb-4 text-sm text-muted">{dateLabel(selectedEvent.event_date)}</p>
+          <h2 className="font-serif text-h3 text-ink">{selectedEvent.title}</h2>
+          <p className="mt-1 mb-4 text-body text-muted">{dateLabel(selectedEvent.event_date)}</p>
           <SessionMaterialsSection
             timetableEventId={selectedEvent.id}
             courseId={courseId}

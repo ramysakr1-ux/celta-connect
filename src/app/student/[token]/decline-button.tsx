@@ -16,38 +16,38 @@ export function DeclineButton({ token, eventId, alreadyDeclined }: { token: stri
   if (declined) {
     return (
       <div className="flex flex-wrap items-center gap-2.5">
-        <p className="text-xs font-medium text-muted">You&apos;ve let them know you can&apos;t make it.</p>
+        <p className="text-label font-medium text-muted">You&apos;ve let them know you can&apos;t make it.</p>
         <form action={undoAction}>
           <input type="hidden" name="token" value={token} />
           <input type="hidden" name="event_id" value={eventId} />
           <button
             type="submit"
             disabled={undoPending}
-            className="wash h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+            className="wash h-8 rounded-full border border-border px-3.5 text-label font-semibold text-ink disabled:opacity-60"
           >
             {undoPending ? "Sending…" : "Actually, I can come"}
           </button>
         </form>
-        {undoState.error ? <p className="text-xs text-destructive">{undoState.error}</p> : null}
+        {undoState.error ? <p className="text-label text-destructive">{undoState.error}</p> : null}
       </div>
     );
   }
 
   return (
     <div className="flex items-center gap-2.5">
-      <span className="text-xs text-muted">Can&apos;t make it?</span>
+      <span className="text-label text-muted">Can&apos;t make it?</span>
       <form action={formAction}>
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="event_id" value={eventId} />
         <button
           type="submit"
           disabled={pending}
-          className="wash h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+          className="wash h-8 rounded-full border border-border px-3.5 text-label font-semibold text-ink disabled:opacity-60"
         >
           {pending ? "Sending…" : "Let them know"}
         </button>
       </form>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </div>
   );
 }

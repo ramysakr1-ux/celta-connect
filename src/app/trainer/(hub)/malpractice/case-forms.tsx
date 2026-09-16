@@ -14,7 +14,7 @@ export function CandidateAccountForm({ caseId }: { caseId: string }) {
     <form action={action} className="sheet flex flex-col gap-3">
       <input type="hidden" name="case_id" value={caseId} />
       <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate&apos;s account</p>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Put to the candidate in person, not by a status changing overnight. Record what they said, in their own
         words -- a case cannot be decided without it.
       </p>
@@ -22,14 +22,14 @@ export function CandidateAccountForm({ caseId }: { caseId: string }) {
         name="candidate_account"
         rows={6}
         required
-        className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         placeholder="What the candidate said, in their own words..."
       />
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save account"}
       </button>
@@ -54,7 +54,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
       <input type="hidden" name="case_id" value={caseId} />
       <input type="hidden" name={hasOptions ? "outcome_option_id" : "outcome"} value={selected} />
       <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Decision</p>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         The decision comes from your own malpractice policy -- Connect never invents a penalty.
       </p>
 
@@ -65,7 +65,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
               key={option.id}
               type="button"
               onClick={() => setSelected(option.id)}
-              className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
+              className={`rounded-[6px] border p-3 text-left text-body font-medium ${
                 selected === option.id
                   ? option.fails_assignment
                     ? "border-destructive bg-destructive/10 text-ink"
@@ -74,7 +74,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
               }`}
             >
               {option.label}
-              <span className="mt-1 block text-xs font-normal text-muted">
+              <span className="mt-1 block text-label font-normal text-muted">
                 {[option.fails_assignment ? "Fails the assignment" : null, option.flagged_for_referral ? "referred to your procedure" : null]
                   .filter(Boolean)
                   .join(", ") || "No automatic consequence"}
@@ -87,24 +87,24 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
           <button
             type="button"
             onClick={() => setSelected("not_upheld")}
-            className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
+            className={`rounded-[6px] border p-3 text-left text-body font-medium ${
               selected === "not_upheld" ? "border-primary bg-accent/30 text-ink" : "border-border text-ink hover:border-primary/50"
             }`}
           >
             Not upheld
-            <span className="mt-1 block text-xs font-normal text-muted">
+            <span className="mt-1 block text-label font-normal text-muted">
               Leaves no other mark -- marking resumes normally on the original submission.
             </span>
           </button>
           <button
             type="button"
             onClick={() => setSelected("upheld")}
-            className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
+            className={`rounded-[6px] border p-3 text-left text-body font-medium ${
               selected === "upheld" ? "border-destructive bg-destructive/10 text-ink" : "border-border text-ink hover:border-primary/50"
             }`}
           >
             Upheld
-            <span className="mt-1 block text-xs font-normal text-muted">
+            <span className="mt-1 block text-label font-normal text-muted">
               Fails the assignment (their one resubmission chance, or a hard fail if already spent) and creates the
               Plagiarism Reflection task.
             </span>
@@ -113,20 +113,20 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Decision notes</label>
+        <label className="text-body text-muted">Decision notes</label>
         <textarea
           name="decision_notes"
           rows={4}
-          className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-input bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           placeholder="Which policy clause, and why -- this is what goes in the case record."
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending || !selected}
-        className={`self-start rounded-[6px] px-4 py-2 text-sm font-medium text-card disabled:opacity-60 ${
+        className={`self-start rounded-[6px] px-4 py-2 text-body font-medium text-card disabled:opacity-60 ${
           isDestructive ? "bg-destructive" : "bg-primary"
         }`}
       >

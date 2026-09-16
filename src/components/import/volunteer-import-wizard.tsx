@@ -136,7 +136,7 @@ export function VolunteerImportWizard({
                 active ? "border-primary bg-card" : "border-border bg-surface-muted/40"
               }`}
             >
-              <span className={`font-serif text-lg ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
+              <span className={`font-serif text-h3 ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
               <span className={`text-meta font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
             </div>
           );
@@ -147,18 +147,18 @@ export function VolunteerImportWizard({
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
             <h2 className="font-serif text-h2 text-ink">Point Connect at the file you already have</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               Nothing is written anywhere yet. This is a one-time read, not a live link -- your spreadsheet keeps
               working exactly as it did, and nothing here changes when somebody edits it afterwards.
             </p>
           </div>
 
           <label className="flex max-w-sm flex-col gap-1.5">
-            <span className="text-sm text-muted">Which course are these volunteers for?</span>
+            <span className="text-body text-muted">Which course are these volunteers for?</span>
             <select
               value={courseId}
               onChange={(e) => setCourseId(e.target.value)}
-              className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -169,17 +169,17 @@ export function VolunteerImportWizard({
           </label>
 
           <div className="flex max-w-sm flex-col gap-1.5">
-            <span className="text-sm text-muted">Choose a file</span>
+            <span className="text-body text-muted">Choose a file</span>
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={onDriveConnect}
                 disabled={drivePending}
-                className="wash h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-sm text-ink hover:border-primary disabled:opacity-50"
+                className="wash h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-body text-ink hover:border-primary disabled:opacity-50"
               >
                 {drivePending ? "Opening…" : "Connect centre's Drive"}
               </button>
-              <span className="shrink-0 text-xs text-muted">or</span>
+              <span className="shrink-0 text-label text-muted">or</span>
               <input
                 type="file"
                 accept=".csv,.tsv,.xlsx,.xls,text/csv"
@@ -187,13 +187,13 @@ export function VolunteerImportWizard({
                   const f = e.target.files?.[0];
                   if (f) void onFile(f);
                 }}
-                className="text-sm text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:text-ink"
+                className="text-body text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-body file:text-ink"
               />
             </div>
           </div>
 
-          {readError ? <p className="text-sm text-destructive">{readError}</p> : null}
-          <p className="text-xs text-muted">
+          {readError ? <p className="text-body text-destructive">{readError}</p> : null}
+          <p className="text-label text-muted">
             Nothing is created until you have seen the preview, and nobody is emailed automatically -- send join
             links afterward, on your own timing, the same way you already can one at a time.
           </p>
@@ -204,7 +204,7 @@ export function VolunteerImportWizard({
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
             <h2 className="font-serif text-h2 text-ink">Their column names, our fields</h2>
-            <p className="mt-1 text-sm text-muted">Connect guesses from the headings -- check each one before moving on.</p>
+            <p className="mt-1 text-body text-muted">Connect guesses from the headings -- check each one before moving on.</p>
           </div>
 
           <div className="flex flex-col">
@@ -212,12 +212,12 @@ export function VolunteerImportWizard({
               const value = mapping[header];
               return (
                 <div key={`${header}-${i}`} className={`hover-ring flex items-center gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                  <span className="w-40 shrink-0 truncate text-sm text-ink">{header || "(unnamed column)"}</span>
-                  <span className="text-xs text-muted">&rarr;</span>
+                  <span className="w-40 shrink-0 truncate text-body text-ink">{header || "(unnamed column)"}</span>
+                  <span className="text-label text-muted">&rarr;</span>
                   <select
                     value={value ?? ""}
                     onChange={(e) => setMapping((m) => ({ ...m, [header]: (e.target.value || null) as VolunteerImportFieldKey | null }))}
-                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
                   >
                     <option value="">Not imported</option>
                     {VOLUNTEER_IMPORT_FIELDS.map((f) => (
@@ -227,14 +227,14 @@ export function VolunteerImportWizard({
                       </option>
                     ))}
                   </select>
-                  <span className={`w-20 shrink-0 text-right text-xs ${value ? "text-primary" : "text-muted"}`}>{value ? "Matched" : "Skipped"}</span>
+                  <span className={`w-20 shrink-0 text-right text-label ${value ? "text-primary" : "text-muted"}`}>{value ? "Matched" : "Skipped"}</span>
                 </div>
               );
             })}
           </div>
 
           {missingRequired.length > 0 ? (
-            <p className="text-sm text-destructive">Still needed: {missingRequired.map((f) => f.label).join(", ")}.</p>
+            <p className="text-body text-destructive">Still needed: {missingRequired.map((f) => f.label).join(", ")}.</p>
           ) : null}
 
           <div className="flex items-center gap-3">
@@ -242,11 +242,11 @@ export function VolunteerImportWizard({
               type="button"
               onClick={() => setStep("preview")}
               disabled={!canPreview}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-50"
             >
               See what happens
             </button>
-            <button type="button" onClick={() => setStep("connect")} className="text-sm text-muted hover:text-ink">
+            <button type="button" onClick={() => setStep("connect")} className="text-body text-muted hover:text-ink">
               Choose a different file
             </button>
           </div>
@@ -259,7 +259,7 @@ export function VolunteerImportWizard({
             <h2 className="font-serif text-h2 text-ink">
               {rows.length} row{rows.length === 1 ? "" : "s"}, and what each will become
             </h2>
-            <p className="mt-1 text-sm text-muted">Nothing has been written yet.</p>
+            <p className="mt-1 text-body text-muted">Nothing has been written yet.</p>
           </div>
 
           <div className="flex flex-wrap gap-10 rounded-[8px] border border-border bg-surface-muted/50 px-5 py-4">
@@ -269,7 +269,7 @@ export function VolunteerImportWizard({
               { k: "No name", v: analysis.tallies.noName, cls: "text-destructive" },
             ].map((t) => (
               <div key={t.k} className="flex flex-col gap-0.5">
-                <span className={`font-serif text-2xl ${t.cls}`}>{t.v}</span>
+                <span className={`font-serif text-h1 ${t.cls}`}>{t.v}</span>
                 <span className="text-label tracking-[0.08em] text-muted uppercase">{t.k}</span>
               </div>
             ))}
@@ -283,12 +283,12 @@ export function VolunteerImportWizard({
                   r.verdict === "import" ? "border-l-primary" : r.verdict === "no_name" ? "border-l-destructive" : "border-l-status-warning-text"
                 }`}
               >
-                <span className="w-8 shrink-0 text-xs text-muted tabular-nums">{r.rowNumber}</span>
-                <span className="w-44 shrink-0 truncate text-sm text-ink">{r.name}</span>
-                <span className="w-56 shrink-0 truncate text-xs text-muted">{r.email ?? "--"}</span>
-                <span className="w-16 shrink-0 truncate text-xs text-muted">{r.level ?? "--"}</span>
+                <span className="w-8 shrink-0 text-label text-muted tabular-nums">{r.rowNumber}</span>
+                <span className="w-44 shrink-0 truncate text-body text-ink">{r.name}</span>
+                <span className="w-56 shrink-0 truncate text-label text-muted">{r.email ?? "--"}</span>
+                <span className="w-16 shrink-0 truncate text-label text-muted">{r.level ?? "--"}</span>
                 <span
-                  className={`flex-1 truncate text-xs ${
+                  className={`flex-1 truncate text-label ${
                     r.verdict === "import" ? "text-muted" : r.verdict === "no_name" ? "text-destructive" : "text-status-warning-text"
                   }`}
                 >
@@ -298,7 +298,7 @@ export function VolunteerImportWizard({
             ))}
           </div>
 
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
           <form action={action} className="flex items-center gap-3">
             <input type="hidden" name="course_id" value={courseId} />
@@ -309,15 +309,15 @@ export function VolunteerImportWizard({
             <button
               type="submit"
               disabled={pending || analysis.tallies.willImport === 0}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-50"
             >
               {pending ? "Importing..." : `Import ${analysis.tallies.willImport} volunteer${analysis.tallies.willImport === 1 ? "" : "s"}`}
             </button>
-            <button type="button" onClick={() => setStep("map")} className="text-sm text-muted hover:text-ink">
+            <button type="button" onClick={() => setStep("map")} className="text-body text-muted hover:text-ink">
               Back to the mapping
             </button>
           </form>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             {analysis.rows.length - analysis.tallies.willImport} row{analysis.rows.length - analysis.tallies.willImport === 1 ? " is" : "s are"} held
             back. Fix them in the sheet and run this again -- Connect matches on email and won&apos;t duplicate anyone it has already seen.
           </p>
@@ -328,7 +328,7 @@ export function VolunteerImportWizard({
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
             <h2 className="font-serif text-h2 text-ink">Imported, and nobody has been emailed</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               {state.imported} more volunteer{state.imported === 1 ? "" : "s"} now on the course, each with a real join link. Not one of them has
               heard from Connect.
             </p>
@@ -345,8 +345,8 @@ export function VolunteerImportWizard({
               { t: "The spreadsheet still works", d: "Nothing was changed in it and nothing is syncing.", c: "border-l-border" },
             ].map((p) => (
               <div key={p.t} className={`border-l-[3px] pl-3 ${p.c}`}>
-                <p className="text-sm font-semibold text-ink">{p.t}</p>
-                <p className="text-xs text-muted">{p.d}</p>
+                <p className="text-body font-semibold text-ink">{p.t}</p>
+                <p className="text-label text-muted">{p.d}</p>
               </div>
             ))}
           </div>

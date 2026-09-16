@@ -128,12 +128,12 @@ export default function GivingFeedbackOnTasksSession() {
       </RunningThisSession>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Lead-in · 5 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Lead-in · 5 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           Think of the last TP you watched. After a task finished, how did the teacher check it — and how long did it take?
           In pairs: was there a moment where students never found out whether they were right?
         </p>
-        <p className="text-xs italic text-muted">
+        <p className="text-label italic text-muted">
           Two minutes in pairs, then three answers from the room. No feedback from the trainer yet — the session supplies
           it.
         </p>
@@ -141,8 +141,8 @@ export default function GivingFeedbackOnTasksSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Match the task to its feedback method · 10 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Match the task to its feedback method · 10 minutes</h2>
+          <p className="text-label text-muted">
             Every task type needs a different way of checking answers. Click each task for the fastest, clearest way to
             close the loop.
           </p>
@@ -156,8 +156,8 @@ export default function GivingFeedbackOnTasksSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Spot the weak feedback move · 13 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Spot the weak feedback move · 13 minutes</h2>
+          <p className="text-label text-muted">
             Same task, five ways a teacher might run feedback on it. Pick each one to find out whether it works.
           </p>
           <p className="mt-1 rounded-[6px] border border-dashed border-border bg-accent/40 px-3 py-2 text-meta text-ink">
@@ -183,8 +183,8 @@ export default function GivingFeedbackOnTasksSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Run it live · 8 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Run it live · 8 minutes</h2>
+          <p className="text-label text-muted">
             In threes: one teacher, two students. The students do the task for 90 seconds, then the teacher runs feedback
             in under a minute — method matched to the task. Swap roles. Click a card to take it.
           </p>
@@ -197,7 +197,7 @@ export default function GivingFeedbackOnTasksSession() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 2 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Wrap-up · 2 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           One line each, round the room: the feedback method you will use in your next TP, and for which task.
         </p>
@@ -249,7 +249,7 @@ function MoveCard({ text, good, why }: { text: string; good: boolean; why: strin
       <span className="flex items-start justify-between gap-3">
         <span className="text-meta leading-relaxed text-ink">{text}</span>
         {picked ? (
-          <span className={`flex-none text-sm font-bold ${good ? "text-primary" : "text-destructive"}`}>
+          <span className={`flex-none text-body font-bold ${good ? "text-primary" : "text-destructive"}`}>
             {good ? "✓" : "✗"}
           </span>
         ) : null}

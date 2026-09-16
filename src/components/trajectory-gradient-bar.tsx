@@ -63,11 +63,11 @@ function Marker({ value }: { value: Trajectory }) {
 export function TrajectoryGradientBar({ dimension, value }: { dimension: string; value: Trajectory }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="w-36 shrink-0 text-xs text-muted">{dimension}</span>
+      <span className="w-36 shrink-0 text-label text-muted">{dimension}</span>
       <span className="relative h-2 flex-1 rounded-full" style={{ background: trackBackground(value) }}>
         <Marker value={value} />
       </span>
-      <span className="w-24 shrink-0 text-right text-xs font-semibold text-ink">{STANDING_LABEL[value]}</span>
+      <span className="w-24 shrink-0 text-right text-label font-semibold text-ink">{STANDING_LABEL[value]}</span>
     </div>
   );
 }
@@ -90,7 +90,7 @@ export function TrajectoryBarCompact({ value }: { value: Trajectory }) {
       <span className="relative h-1.5 w-full rounded-full" style={{ background: trackBackground(value) }}>
         <Marker value={value} />
       </span>
-      <span className="text-xs font-semibold text-ink">{STANDING_LABEL[value]}</span>
+      <span className="text-label font-semibold text-ink">{STANDING_LABEL[value]}</span>
     </div>
   );
 }

@@ -26,7 +26,7 @@ export function MaterialPoolSection({ items, canClaim }: { items: MaterialPoolIt
   return (
     <div>
       <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">TP7/8 material pool</h3>
-      <p className="mt-1 text-xs text-muted">
+      <p className="mt-1 text-label text-muted">
         Deliberately not the course coursebook. Claim one for TP7 and one for TP8 -- once claimed, nobody else in
         your TP group can plan around the same material.
       </p>
@@ -55,36 +55,36 @@ function ItemCard({
 
   return (
     <li className={`sheet hover-ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
-      <p className="text-sm font-semibold text-ink">
+      <p className="text-body font-semibold text-ink">
         {item.bookTitle}
-        {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}
+        {item.level ? <span className="ml-1.5 text-label font-normal text-muted">{item.level}</span> : null}
       </p>
-      {item.description ? <p className="text-xs text-muted">{item.description}</p> : null}
+      {item.description ? <p className="text-label text-muted">{item.description}</p> : null}
       {item.signedUrl ? (
-        <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary hover:underline">
+        <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="text-label font-semibold text-primary hover:underline">
           Open
         </a>
       ) : null}
 
       {item.claimedByMe ? (
         <div className="mt-1 flex items-center justify-between gap-2">
-          <span className="text-xs text-primary">Claimed for TP{item.claimedByMe.tpNumber}</span>
+          <span className="text-label text-primary">Claimed for TP{item.claimedByMe.tpNumber}</span>
           <form action={releaseMaterialClaim}>
             <input type="hidden" name="id" value={item.claimedByMe.id} />
-            <button type="submit" className="text-xs text-destructive hover:underline">
+            <button type="submit" className="text-label text-destructive hover:underline">
               Release
             </button>
           </form>
         </div>
       ) : unavailable ? (
-        <p className="mt-1 text-xs text-muted">Already claimed in your TP group.</p>
+        <p className="mt-1 text-label text-muted">Already claimed in your TP group.</p>
       ) : canClaim ? (
         <form action={action} className="mt-1 flex items-center gap-2">
           <input type="hidden" name="material_item_id" value={item.id} />
           <select
             name="tp_number"
             defaultValue="7"
-            className="h-7 rounded-[6px] border border-input bg-card-inset px-1.5 text-xs text-ink outline-none focus:border-primary"
+            className="h-7 rounded-[6px] border border-input bg-card-inset px-1.5 text-label text-ink outline-none focus:border-primary"
           >
             <option value="7">TP7</option>
             <option value="8">TP8</option>
@@ -92,13 +92,13 @@ function ItemCard({
           <button
             type="submit"
             disabled={pending}
-            className="wash h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
+            className="wash h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-label font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
           >
             {pending ? "Claiming…" : "Claim"}
           </button>
         </form>
       ) : null}
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </li>
   );
 }

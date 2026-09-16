@@ -95,7 +95,7 @@ function TechniqueRow({ technique, week1, note }: { technique: string; week1: bo
       onClick={() => setOpen((o) => !o)}
       className={`grid grid-cols-[1fr_1.3fr] items-center gap-3 rounded-[6px] border px-3.5 py-2.5 text-left ${open ? "border-primary/30 bg-primary/10" : "border-border bg-card"}`}
     >
-      <span className="text-xs font-semibold text-ink">{technique}</span>
+      <span className="text-label font-semibold text-ink">{technique}</span>
       {open ? (
         <span className="text-label text-primary">{(week1 ? "Week one. " : "Once basic decoding is established. ") + note}</span>
       ) : (
@@ -120,7 +120,7 @@ function AdaptHandout() {
       </div>
       <p className="text-label text-muted">This handout is written for a fluent reader. Pick the version you&apos;d actually give a pre-literate beginner group.</p>
       <div className="rounded-[8px] bg-accent p-3.5">
-        <p className="mb-1 text-xs font-semibold text-muted">Original handout</p>
+        <p className="mb-1 text-label font-semibold text-muted">Original handout</p>
         <p className="text-meta leading-relaxed text-ink">{ADAPT_ORIGINAL[index]}</p>
       </div>
       {options.map((o, i) => {
@@ -175,10 +175,10 @@ export default function TeachingLiteracySession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 3 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 3 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">Look at the line below for two seconds, then look away. What did it say?</p>
-          <div className="mt-2.5 rounded-[6px] bg-accent px-3.5 py-2.5 text-center text-xl tracking-wide text-ink">
+          <div className="mt-2.5 rounded-[6px] bg-accent px-3.5 py-2.5 text-center text-h2 tracking-wide text-ink">
             ᠮᠣᠩᠭᠣᠯ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ
           </div>
           <p className="mt-2 text-label text-muted">
@@ -189,7 +189,7 @@ export default function TeachingLiteracySession() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">What &quot;literacy&quot; covers here · 10 minutes</p>
+        <p className="text-label font-bold text-ink">What &quot;literacy&quot; covers here · 10 minutes</p>
         <p className="text-label text-muted">Click each to reveal what it actually looks like in the room.</p>
         {CONCEPTS.map((c, i) => (
           <ConceptCard key={c.label} n={i + 1} label={c.label} detail={c.detail} />
@@ -210,7 +210,7 @@ export default function TeachingLiteracySession() {
       <AdaptHandout />
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-ink">Techniques for a pre-literate class · 12 minutes</p>
+        <p className="text-label font-bold text-ink">Techniques for a pre-literate class · 12 minutes</p>
         <p className="text-label text-muted">
           In pairs, look at each technique below and agree: would you use this in week one, or only once basic letter
           recognition is established? Click to compare with the note.
@@ -221,7 +221,7 @@ export default function TeachingLiteracySession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Wrap-up · 5 minutes</p>
+        <p className="text-label font-bold text-ink">Wrap-up · 5 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta leading-relaxed text-ink">
             In one sentence each: what&apos;s one thing you&apos;d check about a new learner&apos;s literacy before assuming their

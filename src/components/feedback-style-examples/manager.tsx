@@ -41,10 +41,10 @@ function ToneColumn({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-ink">{TONE_LABELS[tone]}</h3>
+      <h3 className="text-body font-medium text-ink">{TONE_LABELS[tone]}</h3>
 
       {examples.length === 0 ? (
-        <p className="text-sm text-muted">No examples yet.</p>
+        <p className="text-body text-muted">No examples yet.</p>
       ) : (
         examples.map((example) => <ExampleRow key={example.id} example={example} />)
       )}
@@ -65,22 +65,22 @@ function ExampleRow({ example }: { example: StyleExample }) {
           name="example_text"
           rows={3}
           defaultValue={example.example_text}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
         <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={pending}
-            className="text-xs text-muted hover:text-ink disabled:opacity-60"
+            className="text-label text-muted hover:text-ink disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
         </div>
-        {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
       </form>
       <form action={deleteStyleExample}>
         <input type="hidden" name="id" value={example.id} />
-        <button type="submit" className="text-xs text-destructive hover:underline">
+        <button type="submit" className="text-label text-destructive hover:underline">
           Delete
         </button>
       </form>
@@ -94,21 +94,21 @@ function AddExampleForm({ tone }: { tone: "direct" | "supportive" }) {
   return (
     <form action={action} className="flex flex-col gap-1.5 rounded-[6px] border border-border p-3">
       <input type="hidden" name="tone" value={tone} />
-      <label className="text-sm text-muted">Add example</label>
+      <label className="text-body text-muted">Add example</label>
       <textarea
         name="example_text"
         rows={3}
         placeholder="Paste a real piece of feedback in this tone…"
-        className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
       />
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-xs font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-label font-medium text-card disabled:opacity-60"
       >
         {pending ? "Adding…" : "Add"}
       </button>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
     </form>
   );
 }

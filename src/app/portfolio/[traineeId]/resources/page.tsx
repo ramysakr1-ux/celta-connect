@@ -216,7 +216,7 @@ function PlainCategoryGrid({
   emptyNote?: string;
 }) {
   if (resources.length === 0)
-    return <p className="sheet border-dashed text-sm text-muted">{emptyNote ?? "Nothing here yet."}</p>;
+    return <p className="sheet border-dashed text-body text-muted">{emptyNote ?? "Nothing here yet."}</p>;
   return (
     <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
       {resources.map((r) => (
@@ -748,7 +748,7 @@ export default async function ResourceHubPage({
             <h2 className="font-serif text-h2 font-semibold text-ink">Input Sessions</h2>
             <Link
               href={`/input-sessions?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
-              className="shrink-0 text-xs font-semibold text-primary"
+              className="shrink-0 text-label font-semibold text-primary"
             >
               Connect Native session library
             </Link>
@@ -758,7 +758,7 @@ export default async function ResourceHubPage({
             the rest are on your timetable to attend.
           </p>
           {courseInputSessions.length === 0 ? (
-            <p className="sheet border-dashed text-sm text-muted">No input sessions scheduled yet.</p>
+            <p className="sheet border-dashed text-body text-muted">No input sessions scheduled yet.</p>
           ) : (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
               {courseInputSessions.map((s) => (
@@ -772,7 +772,7 @@ export default async function ResourceHubPage({
       <div className="rounded-[10px] border border-border p-[22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
         <div className="mb-1 flex items-baseline justify-between gap-3">
           <h2 className="font-serif text-h2 font-semibold text-ink">Library</h2>
-          <p className="shrink-0 text-xs tabular-nums text-muted">
+          <p className="shrink-0 text-label tabular-nums text-muted">
             {totalItems} items · {libraryCategories.length} categories
           </p>
         </div>
@@ -790,7 +790,7 @@ export default async function ResourceHubPage({
               materialPoolEnabled ? (
                 <MaterialPoolSection items={materialItems} canClaim={canClaimMaterial} />
               ) : (
-                <p className="sheet border-dashed text-sm text-muted">Not enabled for this course.</p>
+                <p className="sheet border-dashed text-body text-muted">Not enabled for this course.</p>
               )
             ) : key === "multimedia" ? (
               <div className="flex flex-col gap-5">
@@ -808,14 +808,14 @@ export default async function ResourceHubPage({
                     reasoning belongs in this comment; the candidate needs to
                     know the shelf is empty and what to do about it. */}
                 <div>
-                  <h4 className="text-sm font-medium text-ink">Video</h4>
-                  <p className="sheet mt-2 border-dashed text-sm text-muted">
+                  <h4 className="text-body font-medium text-ink">Video</h4>
+                  <p className="sheet mt-2 border-dashed text-body text-muted">
                     No video linked to this coursebook yet. Your tutor can add one, and the general video
                     shelf below is available in the meantime.
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-ink">Other videos</h4>
+                  <h4 className="text-body font-medium text-ink">Other videos</h4>
                   <VideoLibrarySection videos={videos ?? []} />
                 </div>
               </div>
@@ -831,8 +831,8 @@ export default async function ResourceHubPage({
               </div>
             ) : key === "tp_points" ? (
               <Link href="/trainer/coursebooks" className="sheet lift flex flex-col gap-1 p-4">
-                <p className="text-sm font-semibold text-ink">TP Points Library</p>
-                <p className="text-xs text-muted">Staff-only — lift the trainer's coursebooks & TP points management.</p>
+                <p className="text-body font-semibold text-ink">TP Points Library</p>
+                <p className="text-label text-muted">Staff-only — lift the trainer's coursebooks & TP points management.</p>
               </Link>
             ) : key === "forms" ? (
               // Admin Handbook §6.3 requires every centre to give candidates

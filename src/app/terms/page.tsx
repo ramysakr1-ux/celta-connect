@@ -20,15 +20,15 @@ export default function TermsPage() {
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="header" />
         </Link>
-        <h1 className="mt-6 font-serif text-2xl text-ink">Candidate Agreement &amp; Terms</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="mt-6 font-serif text-h1 text-ink">Candidate Agreement &amp; Terms</h1>
+        <p className="mt-2 text-body text-muted">
           This is what you&apos;re agreeing to when you check the boxes on the sign-up, offer-acceptance, or
           centre-admin invite page. Sections 1-4 apply to trainees, trainers, and anyone else who creates a
           Connect account through a centre&apos;s course. Section 5 applies specifically to centre
           administrators, who join through their centre rather than through a course.
         </p>
 
-        <div className="mt-6 flex flex-col gap-6 text-sm text-ink">
+        <div className="mt-6 flex flex-col gap-6 text-body text-ink">
           <section>
             <h2 className="font-semibold text-ink">1. Platform use &amp; intellectual property</h2>
             <p className="mt-1.5 text-muted">
@@ -81,7 +81,7 @@ export default function TermsPage() {
                   <li>failing to acknowledge AI use, regardless of scope or purpose</li>
                 </ul>
               </div>
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 See your centre&apos;s own uploaded AI-policy disclaimer document for the full, current
                 wording -- this section summarises it, and the uploaded document takes precedence if the
                 two ever differ.

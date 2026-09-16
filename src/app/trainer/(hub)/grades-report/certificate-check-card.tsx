@@ -23,8 +23,8 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
     <div className={`hover-ring flex flex-col gap-2 rounded-[6px] border p-3 ${mismatch ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-ink">{candidate.fullName}</p>
-          <p className="text-xs text-muted">Recommended: {candidate.recommendedGrade ?? "not yet set"}</p>
+          <p className="text-body font-medium text-ink">{candidate.fullName}</p>
+          <p className="text-label text-muted">Recommended: {candidate.recommendedGrade ?? "not yet set"}</p>
         </div>
         <form action={action} className="flex items-center gap-2">
           <input type="hidden" name="course_id" value={courseId} />
@@ -32,7 +32,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
           <select
             name="certificate_grade"
             defaultValue={candidate.certificateGrade ?? ""}
-            className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Not received yet</option>
             {GRADES.map((g) => (
@@ -44,18 +44,18 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
           <button
             type="submit"
             disabled={pending}
-            className="wash rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
+            className="wash rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink hover:border-primary disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>
         </form>
       </div>
       {mismatch ? (
-        <p className="text-sm font-semibold text-destructive">
+        <p className="text-body font-semibold text-destructive">
           Certificate says {candidate.certificateGrade}, recommended was {candidate.recommendedGrade} -- contact Cambridge immediately.
         </p>
       ) : null}
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </div>
   );
 }
@@ -70,8 +70,8 @@ export function CertificateCheckCard({ courseId, candidates }: { courseId: strin
   return (
     <div className="card flex flex-col gap-3 p-6">
       <div>
-        <h2 className="font-serif text-lg text-ink">Certificate check</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Certificate check</h2>
+        <p className="mt-1 text-body text-muted">
           Record each candidate&apos;s grade as printed on their arrived certificate. A mismatch against the
           recommended grade is flagged immediately here.
         </p>

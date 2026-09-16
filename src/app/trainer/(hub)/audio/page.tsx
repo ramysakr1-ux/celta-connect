@@ -32,7 +32,7 @@ export default async function TrainerAudioLibraryPage() {
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Tracks</h2>
+        <h2 className="font-serif text-h3 text-ink">Tracks</h2>
         <div className="mt-3">
           <AudioList rows={tracks ?? []} />
         </div>

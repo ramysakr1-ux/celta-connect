@@ -77,13 +77,13 @@ export default async function CriteriaGlossaryPage() {
         <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">
           {centre?.name ?? "Your centre"} · criteria glossary
         </p>
-        <h1 className="mt-1 font-serif text-2xl text-ink">The words that tag a criterion</h1>
-        <p className="mt-2 max-w-3xl text-sm text-muted">
+        <h1 className="mt-1 font-serif text-h1 text-ink">The words that tag a criterion</h1>
+        <p className="mt-2 max-w-3xl text-body text-muted">
           When a tutor writes a feedback point, these words and phrases attach CELTA 5 codes to it automatically. Add
           your own tutors&apos; shorthand, change what a word tags, or switch one off. The manual criteria panel on the
           feedback form is unaffected either way, and a tutor can always click a code off a point.
         </p>
-        <p className="mt-3 text-sm text-ink">
+        <p className="mt-3 text-body text-ink">
           {liveCount} terms are live at this centre. You are editing as <b>{editor.as}</b>, and every change here is
           recorded below with your name.
         </p>
@@ -96,16 +96,16 @@ export default async function CriteriaGlossaryPage() {
       />
 
       <div className="sheet p-6">
-        <h2 className="font-serif text-lg text-ink">What changed</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">What changed</h2>
+        <p className="mt-1 text-body text-muted">
           Tutors and the centre office both reach this screen, so every change says who made it.
         </p>
         {changes.length === 0 ? (
-          <p className="mt-3 text-sm text-muted">Nothing has been changed yet — the glossary is as it shipped.</p>
+          <p className="mt-3 text-body text-muted">Nothing has been changed yet — the glossary is as it shipped.</p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {changes.map((c, i) => (
-              <li key={i} className="flex flex-wrap items-baseline gap-x-2 border-b border-border-faint pb-2 text-sm last:border-b-0">
+              <li key={i} className="flex flex-wrap items-baseline gap-x-2 border-b border-border-faint pb-2 text-body last:border-b-0">
                 <span className="font-medium text-ink">{c.changed_by_name ?? "Someone"}</span>
                 <span className="text-muted">{verb(c.action)}</span>
                 <span className="font-medium text-ink">{c.term}</span>
@@ -116,7 +116,7 @@ export default async function CriteriaGlossaryPage() {
                     {c.codes_after?.length ? c.codes_after.join(" · ") : "nothing"}
                   </span>
                 ) : null}
-                <span className="ml-auto text-xs text-muted">{formatDateTime(c.changed_at, zone)}</span>
+                <span className="ml-auto text-label text-muted">{formatDateTime(c.changed_at, zone)}</span>
               </li>
             ))}
           </ul>

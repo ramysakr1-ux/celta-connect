@@ -69,7 +69,7 @@ export default async function TrainerCoursebookDetailPage({
           </h1>
           <p className="mt-2 text-muted">Status: {coursebook.generation_status}</p>
           {coursebook.generation_error ? (
-            <p className="mt-2 text-sm text-destructive">{coursebook.generation_error}</p>
+            <p className="mt-2 text-body text-destructive">{coursebook.generation_error}</p>
           ) : null}
         </div>
 

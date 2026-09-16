@@ -31,13 +31,13 @@ export function AddEventForm({
   return (
     <form action={formAction} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Type</label>
+        <label className="text-body text-muted">Type</label>
         <select
           name="type"
           required
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         >
           {Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -47,68 +47,68 @@ export function AddEventForm({
         </select>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Title</label>
+        <label className="text-body text-muted">Title</label>
         <input
           name="title"
           type="text"
           required
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Date</label>
+        <label className="text-body text-muted">Date</label>
         <input
           name="event_date"
           type="date"
           required
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Time (optional)</label>
+        <label className="text-body text-muted">Time (optional)</label>
         <input
           name="event_time"
           type="time"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">
+        <label className="text-body text-muted">
           Tag (optional -- e.g. tutor name, &quot;whole_group&quot;, &quot;individual&quot;, &quot;lunch&quot;, or
           &quot;consultation&quot;)
         </label>
         <input
           name="tag"
           type="text"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">
+        <label className="text-body text-muted">
           Subtitle (optional -- e.g. &quot;Supervised&quot;, &quot;Observation task&quot;, &quot;Self-evaluations lead&quot;)
         </label>
         <input
           name="detail"
           type="text"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
-        <p className="text-xs text-muted">Shows as the small line under the title on the trainee&apos;s read-only timetable.</p>
+        <p className="text-label text-muted">Shows as the small line under the title on the trainee&apos;s read-only timetable.</p>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Zoom link (optional)</label>
+        <label className="text-body text-muted">Zoom link (optional)</label>
         <input
           name="zoom_url"
           type="url"
           placeholder="https://zoom.us/j/…"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Linked assignment (optional)</label>
+        <label className="text-body text-muted">Linked assignment (optional)</label>
         <select
           name="linked_assignment_type"
           defaultValue=""
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         >
           <option value="">None</option>
           {ASSIGNMENT_ORDER.map((type) => (
@@ -120,11 +120,11 @@ export function AddEventForm({
       </div>
       {type === "assignment_due" && tpGroups.length > 0 ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Applies to (optional -- leave blank for the whole cohort)</label>
+          <label className="text-body text-muted">Applies to (optional -- leave blank for the whole cohort)</label>
           <select
             name="tp_group_scope_id"
             defaultValue=""
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Whole cohort</option>
             {tpGroups.map((g) => (
@@ -133,7 +133,7 @@ export function AddEventForm({
               </option>
             ))}
           </select>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             For a staggered deadline, add one event per group with its own date -- each one&apos;s reminder reaches
             only that group.
           </p>
@@ -141,7 +141,7 @@ export function AddEventForm({
       ) : null}
       {type === "supervised_session" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <p className="rounded-[6px] border border-dashed border-border bg-surface-muted p-3 text-xs text-ink">
+          <p className="rounded-[6px] border border-dashed border-border bg-surface-muted p-3 text-label text-ink">
             Never call this &quot;Self-study&quot; -- name it &quot;Supervised review -- [topic]&quot; (reviewing a
             prior input session) or &quot;[Assignment] writing&quot; (time set aside to write one). It only counts as
             contact time because the trainee submits something here and you check it -- see the task each trainee
@@ -151,28 +151,28 @@ export function AddEventForm({
       ) : null}
       {type === "input_session" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label className="text-sm text-muted">Criteria covered (optional -- e.g. &quot;4c, 5f&quot;)</label>
+          <label className="text-body text-muted">Criteria covered (optional -- e.g. &quot;4c, 5f&quot;)</label>
           <input
             name="input_session_criteria"
             type="text"
             placeholder="4c, 5f"
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Seeds that week&apos;s peer observation task -- input session → criterion → TP point → peer task.
           </p>
-          <label className="mt-2 flex items-center gap-2 text-sm text-ink">
+          <label className="mt-2 flex items-center gap-2 text-body text-ink">
             <input type="checkbox" name="is_asynchronous" checked={isAsync} onChange={(e) => setIsAsync(e.target.checked)} />
             Delivered asynchronously (recorded or Moodle, not live)
           </label>
           {isAsync ? (
             <>
-              <label className="text-sm text-muted">Linked live follow-up slot</label>
+              <label className="text-body text-muted">Linked live follow-up slot</label>
               <select
                 name="linked_live_session_event_id"
                 required
                 defaultValue=""
-                className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
               >
                 <option value="" disabled>
                   Choose a timetable slot
@@ -183,7 +183,7 @@ export function AddEventForm({
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 Handbook 3.4: recorded or Moodle input must always be combined with a live follow-up
                 discussion. Required before the timetable can be locked.
               </p>
@@ -193,21 +193,21 @@ export function AddEventForm({
       ) : null}
       {type !== "tp" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label className="flex items-center gap-2 text-sm text-ink">
+          <label className="flex items-center gap-2 text-body text-ink">
             <input type="checkbox" name="shares_materials" />
             Volunteer students can see materials shared for this session
           </label>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             For a demo lesson, Getting to know you, or anything else worth sharing a handout for -- leave unchecked for logistics like Lunch.
           </p>
         </div>
       ) : null}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Linked TP (optional)</label>
+        <label className="text-body text-muted">Linked TP (optional)</label>
         <select
           name="linked_tp_number"
           defaultValue=""
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
         >
           <option value="">None</option>
           {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -217,11 +217,11 @@ export function AddEventForm({
           ))}
         </select>
       </div>
-      {state.error ? <p className="text-sm text-destructive sm:col-span-2">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive sm:col-span-2">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60 sm:col-span-2"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60 sm:col-span-2"
       >
         {pending ? "Adding…" : "Add event"}
       </button>

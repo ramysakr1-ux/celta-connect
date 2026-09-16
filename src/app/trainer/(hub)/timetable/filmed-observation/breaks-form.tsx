@@ -27,14 +27,14 @@ export function FilmedObservationBreaksForm({
           {breaks.map((b, i) => (
             <div key={b.id} className={`flex items-start justify-between gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
               <div>
-                <p className="text-sm text-ink">
+                <p className="text-body text-ink">
                   Break {b.break_number} · at {formatTimestamp(b.timestamp_seconds)} · {b.duration_seconds}s countdown
                 </p>
-                <p className="mt-0.5 text-xs text-muted">{b.prompt}</p>
+                <p className="mt-0.5 text-label text-muted">{b.prompt}</p>
               </div>
               <form action={deleteFilmedObservationBreak}>
                 <input type="hidden" name="break_id" value={b.id} />
-                <button type="submit" className="shrink-0 text-xs text-destructive hover:underline">
+                <button type="submit" className="shrink-0 text-label text-destructive hover:underline">
                   Remove
                 </button>
               </form>
@@ -42,7 +42,7 @@ export function FilmedObservationBreaksForm({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted">No discussion breaks yet.</p>
+        <p className="text-body text-muted">No discussion breaks yet.</p>
       )}
 
       <form action={action} className="flex flex-col gap-2 border-t border-border-faint pt-3">
@@ -58,7 +58,7 @@ export function FilmedObservationBreaksForm({
               type="number"
               min={0}
               required
-              className="h-9 w-28 rounded-[6px] border border-border bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 w-28 rounded-[6px] border border-border bg-card px-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -71,7 +71,7 @@ export function FilmedObservationBreaksForm({
               type="number"
               min={1}
               defaultValue={180}
-              className="h-9 w-28 rounded-[6px] border border-border bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 w-28 rounded-[6px] border border-border bg-card px-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -85,14 +85,14 @@ export function FilmedObservationBreaksForm({
             type="text"
             required
             placeholder="What did you notice about how instructions were given in this stage?"
-            className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           />
         </div>
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
         <button
           type="submit"
           disabled={pending}
-          className="self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash disabled:opacity-60"
+          className="self-start rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink wash disabled:opacity-60"
         >
           {pending ? "Adding…" : "Add break"}
         </button>

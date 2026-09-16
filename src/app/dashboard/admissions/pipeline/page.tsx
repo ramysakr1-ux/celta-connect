@@ -146,13 +146,13 @@ export default async function AdmissionsPipelinePage({
                 <Link
                   key={c.id}
                   href={`/dashboard/admissions/pipeline?course=${c.id}`}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${c.id === activeCourseId ? "bg-primary text-primary-foreground" : "border border-border text-muted hover:border-primary wash"}`}
+                  className={`rounded-full px-3 py-1 text-label font-semibold ${c.id === activeCourseId ? "bg-primary text-primary-foreground" : "border border-border text-muted hover:border-primary wash"}`}
                 >
                   {c.course_code || c.name}
                 </Link>
               ))}
             </div>
-            <p className="font-serif text-xl text-ink">
+            <p className="font-serif text-h2 text-ink">
               {places > 0 ? `${paidCount} of ${places} places paid for` : `${paidCount} paid`}
               {daysToStart >= 0 ? ` · ${daysToStart} day${daysToStart === 1 ? "" : "s"} to go` : " · running"}
             </p>
@@ -168,17 +168,17 @@ export default async function AdmissionsPipelinePage({
       </div>
 
       <div className="card card-accent overflow-hidden !p-0">
-        <p className="border-b border-border bg-surface-muted/60 px-5 py-4 text-sm font-semibold text-ink">Across all open courses</p>
+        <p className="border-b border-border bg-surface-muted/60 px-5 py-4 text-body font-semibold text-ink">Across all open courses</p>
         <table className="table-plain w-full">
           <thead>
             <tr>
-              <th className="text-sm text-muted">Course</th>
-              <th className="text-right text-sm text-muted">Applied</th>
-              <th className="text-right text-sm text-muted">Interv.</th>
-              <th className="text-right text-sm text-muted">Offered</th>
-              <th className="text-right text-sm text-muted">Deposit</th>
-              <th className="text-right text-sm text-muted">Paid</th>
-              <th className="text-sm text-muted">Where it stands</th>
+              <th className="text-body text-muted">Course</th>
+              <th className="text-right text-body text-muted">Applied</th>
+              <th className="text-right text-body text-muted">Interv.</th>
+              <th className="text-right text-body text-muted">Offered</th>
+              <th className="text-right text-body text-muted">Deposit</th>
+              <th className="text-right text-body text-muted">Paid</th>
+              <th className="text-body text-muted">Where it stands</th>
             </tr>
           </thead>
           <tbody>
@@ -200,7 +200,7 @@ export default async function AdmissionsPipelinePage({
                     <Link href={`/dashboard/admissions/pipeline?course=${c.id}`} className="font-medium text-ink hover:underline">
                       {c.course_code || c.name}
                     </Link>
-                    <p className="text-xs text-muted">starts {formatCalendarDate(c.start_date, { year: "numeric" })}</p>
+                    <p className="text-label text-muted">starts {formatCalendarDate(c.start_date, { year: "numeric" })}</p>
                   </td>
                   {(["app", "int", "off", "dep", "paid"] as const).map((key) => (
                     <td key={key} className="text-right tabular-nums text-ink">
@@ -235,7 +235,7 @@ const STAGE_META_LABEL: Record<string, string> = {
 function HeadStat({ label, value, tone }: { label: string; value: string | number; tone?: string }) {
   return (
     <div className="flex flex-col items-end gap-0.5">
-      <span className={`font-serif text-2xl leading-none ${tone ?? "text-ink"}`}>{value}</span>
+      <span className={`font-serif text-h1 leading-none ${tone ?? "text-ink"}`}>{value}</span>
       <span className="text-micro font-semibold tracking-[0.05em] text-muted uppercase">{label}</span>
     </div>
   );

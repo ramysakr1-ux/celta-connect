@@ -17,7 +17,7 @@ export function GoogleDriveTargetsForm({
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="template_doc_id" className="text-sm text-muted">
+        <label htmlFor="template_doc_id" className="text-body text-muted">
           Template Google Doc ID
         </label>
         <input
@@ -30,7 +30,7 @@ export function GoogleDriveTargetsForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="output_folder_id" className="text-sm text-muted">
+        <label htmlFor="output_folder_id" className="text-body text-muted">
           Output Drive folder ID
         </label>
         <input
@@ -43,12 +43,12 @@ export function GoogleDriveTargetsForm({
         />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

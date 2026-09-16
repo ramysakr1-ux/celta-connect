@@ -162,9 +162,9 @@ export const MessageThread = forwardRef<
     <div className="flex flex-1 flex-col overflow-hidden" role="log" aria-live="polite">
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3">
         {loading ? (
-          hideComposer ? null : <p className="text-sm text-muted">Loading...</p>
+          hideComposer ? null : <p className="text-body text-muted">Loading...</p>
         ) : messages.length === 0 ? (
-          <p className="text-sm text-muted">No messages yet. Say hello.</p>
+          <p className="text-body text-muted">No messages yet. Say hello.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {messages.map((m) => {
@@ -179,7 +179,7 @@ export const MessageThread = forwardRef<
                     {initials(mine ? "Me" : (nameById.get(m.sender_id) ?? "?"))}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-baseline gap-1.5 text-xs font-semibold text-ink">
+                    <p className="flex items-baseline gap-1.5 text-label font-semibold text-ink">
                       {!mine && isGroup ? (nameById.get(m.sender_id) ?? "Unknown") : mine ? "You" : null}
                       <span className="text-micro font-normal text-muted">
                         {formatTime(m.created_at, timeZone)}
@@ -200,11 +200,11 @@ export const MessageThread = forwardRef<
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Message"
-            className="flex-1 rounded-full border border-border bg-card-inset px-4 py-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="flex-1 rounded-full border border-border bg-card-inset px-4 py-2.5 text-body text-ink outline-none focus:border-primary"
           />
           <button
             type="submit"
-            className="rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-card"
+            className="rounded-full bg-primary px-4 py-2.5 text-body font-medium text-card"
           >
             Send
           </button>

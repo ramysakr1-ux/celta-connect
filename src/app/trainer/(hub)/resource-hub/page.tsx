@@ -54,7 +54,7 @@ export default async function TrainerResourceHubPage() {
   const centerId =
     trainer?.center_id ?? (courseId ? (await cambridgeAdmin.from("courses").select("center_id").eq("id", courseId).maybeSingle()).data?.center_id : null) ?? null;
   if (!centerId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   // remaining-compliance.md §5 -- readable by everyone, editable only by
@@ -267,24 +267,24 @@ export default async function TrainerResourceHubPage() {
           other tabs. Five columns, one row, and they read as a set. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Link href="/trainer/coursebooks" className="lift sheet flex flex-col gap-1 p-5">
-          <p className="font-serif text-lg text-ink">TP points library</p>
-          <p className="text-xs text-muted">The staged point-by-point content. Trainer-only -- never shown to trainees.</p>
+          <p className="font-serif text-h3 text-ink">TP points library</p>
+          <p className="text-label text-muted">The staged point-by-point content. Trainer-only -- never shown to trainees.</p>
         </Link>
         <Link href="/trainer/audio" className="lift sheet flex flex-col gap-1 p-5">
-          <p className="font-serif text-lg text-ink">Multimedia</p>
-          <p className="text-xs text-muted">Coursebook audio tracks. Manage uploads here; trainees can play them from their portfolio.</p>
+          <p className="font-serif text-h3 text-ink">Multimedia</p>
+          <p className="text-label text-muted">Coursebook audio tracks. Manage uploads here; trainees can play them from their portfolio.</p>
         </Link>
         <Link href="/trainer/video" className="lift sheet flex flex-col gap-1 p-5">
-          <p className="font-serif text-lg text-ink">Video Library</p>
-          <p className="text-xs text-muted">Training and observation videos, linked not uploaded. Trainees can watch from their portfolio.</p>
+          <p className="font-serif text-h3 text-ink">Video Library</p>
+          <p className="text-label text-muted">Training and observation videos, linked not uploaded. Trainees can watch from their portfolio.</p>
         </Link>
         <Link href="/trainer/assignment-briefs" className="lift sheet flex flex-col gap-1 p-5">
-          <p className="font-serif text-lg text-ink">Assignment briefs</p>
-          <p className="text-xs text-muted">Upload and publish briefs. Trainees browse published sections from their portfolio.</p>
+          <p className="font-serif text-h3 text-ink">Assignment briefs</p>
+          <p className="text-label text-muted">Upload and publish briefs. Trainees browse published sections from their portfolio.</p>
         </Link>
         <Link href="/trainer/marking-guidance" className="lift sheet flex flex-col gap-1 p-5">
-          <p className="font-serif text-lg text-ink">Marking guidance</p>
-          <p className="text-xs text-muted">Where this centre&apos;s line sits per criterion. Tutors and the assessor only -- never trainees.</p>
+          <p className="font-serif text-h3 text-ink">Marking guidance</p>
+          <p className="text-label text-muted">Where this centre&apos;s line sits per criterion. Tutors and the assessor only -- never trainees.</p>
         </Link>
       </div>
 
@@ -296,8 +296,8 @@ export default async function TrainerResourceHubPage() {
           ran down one column with nothing between them. */}
       <div className="group-frame flex flex-col gap-8 p-5 sm:p-6">
       <div id="tp-points">
-        <h2 className="font-serif text-lg text-ink">TP points — this course&apos;s schedule</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">TP points — this course&apos;s schedule</h2>
+        <p className="mt-1 text-body text-muted">
           Release style, round, source and usage for every point in a coursebook scheduled on this course. The full
           centre-wide library (all coursebooks, all courses) is on the{" "}
           <Link href="/trainer/coursebooks" className="text-primary">
@@ -307,7 +307,7 @@ export default async function TrainerResourceHubPage() {
         </p>
         <div className="mt-3 overflow-x-auto rounded-[6px] border border-border">
           {tpPointRows.length === 0 ? (
-            <p className="p-4 text-sm text-muted">
+            <p className="p-4 text-body text-muted">
               No coursebook is scheduled on this course yet -- set one on the{" "}
               <Link href="/trainer/rotation" className="text-primary">
                 Rotation
@@ -315,7 +315,7 @@ export default async function TrainerResourceHubPage() {
               page.
             </p>
           ) : (
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full border-collapse text-body">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Point</th>
@@ -346,8 +346,8 @@ export default async function TrainerResourceHubPage() {
           <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={Boolean(trainer)} />
         ) : (
           <div className="sheet p-6">
-            <h3 className="font-serif text-lg text-ink">Coursebooks</h3>
-            <p className="mt-2 text-sm text-muted">
+            <h3 className="font-serif text-h3 text-ink">Coursebooks</h3>
+            <p className="mt-2 text-body text-muted">
               Nothing scheduled yet -- set a coursebook for at least one TP number on the{" "}
               <Link href="/trainer/rotation" className="text-primary">
                 Rotation
@@ -359,12 +359,12 @@ export default async function TrainerResourceHubPage() {
       </div>
 
       <div id="input-sessions">
-        <h2 className="font-serif text-lg text-ink">Input sessions</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Input sessions</h2>
+        <p className="mt-1 text-body text-muted">
           Materials for each input session -- a link, a file, or a self-contained interactive .html shown live.
         </p>
         <div className="mt-3 sheet flex items-center justify-between gap-3 p-4">
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             The built-in library of interactive input sessions (lead-in, exercises, trainer notes) lives on its own
             page.
           </p>
@@ -378,7 +378,7 @@ export default async function TrainerResourceHubPage() {
               inconsistency, not the fix. */}
           <Link
             href="/input-sessions"
-            className="flex h-8 shrink-0 items-center rounded-full px-4 text-xs font-semibold text-primary-foreground"
+            className="flex h-8 shrink-0 items-center rounded-full px-4 text-label font-semibold text-primary-foreground"
             style={{ background: "var(--hub-accent)" }}
           >
             Open input sessions
@@ -390,8 +390,8 @@ export default async function TrainerResourceHubPage() {
       </div>
 
       <div id="forms-and-documents">
-        <h2 className="font-serif text-lg text-ink">Forms and documents</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Forms and documents</h2>
+        <p className="mt-1 text-body text-muted">
           Blank PDFs of the built-in forms -- lesson plan template, self-evaluation form -- for when the platform is
           down or paper is preferred, plus the centre&apos;s wider Cambridge documentation set (admin handbook,
           syllabus, refresher training, and the rest). Use the visible-to-trainee toggle per item -- most of this set
@@ -408,8 +408,8 @@ export default async function TrainerResourceHubPage() {
       </div>
 
       <div id="centre-documents">
-        <h2 className="font-serif text-lg text-ink">Centre documents</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Centre documents</h2>
+        <p className="mt-1 text-body text-muted">
           Policies and internal paperwork -- staff-only, never shown on a candidate&apos;s Resources tab regardless
           of the visible-to-trainee setting below. Cambridge&apos;s own documents live in{" "}
           <a href="#cambridge-documents" className="text-primary">
@@ -425,8 +425,8 @@ export default async function TrainerResourceHubPage() {
       </div>
 
       <div id="cambridge-documents">
-        <h2 className="font-serif text-lg text-ink">Cambridge documents</h2>
-        <p className="mt-1 text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink">Cambridge documents</h2>
+        <p className="mt-1 text-body text-muted">
           The CELTA Syllabus, Administration Handbook and Appeals Procedure -- one copy, read by every course
           {cambridgeCentre?.organisation_id ? " across the organisation" : ""}. The Centre Authorisation Certificate
           is this centre&apos;s own. Visible to candidates, tutors, admins and the assessor alike.
@@ -438,7 +438,7 @@ export default async function TrainerResourceHubPage() {
 
       {isMct || materialPoolEnabled ? (
         <div id="tp-material-pool">
-          <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
+          <h2 className="font-serif text-h3 text-ink">TP7/8 material pool</h2>
           {isMct && courseId ? (
             <div className="mt-3">
               <MaterialPoolToggleCard courseId={courseId} enabled={materialPoolEnabled} />

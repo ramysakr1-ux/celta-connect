@@ -43,8 +43,8 @@ export function TpGroupBoard({
   if (allDates.length === 0) {
     return (
       <div className="sheet flex flex-col gap-2 p-6">
-        <h3 className="font-serif text-lg text-ink">{groupName}</h3>
-        <p className="text-sm text-muted">
+        <h3 className="font-serif text-h3 text-ink">{groupName}</h3>
+        <p className="text-body text-muted">
           No TP days scheduled yet -- add some on the{" "}
           <a href="/trainer/timetable" className="text-primary">
             Timetable
@@ -58,8 +58,8 @@ export function TpGroupBoard({
   return (
     <div className="sheet flex flex-col gap-4 p-6">
       <div>
-        <h3 className="font-serif text-lg text-ink">{groupName}</h3>
-        <p className="text-sm text-muted">Day A and Day B teach on alternating TP days.</p>
+        <h3 className="font-serif text-h3 text-ink">{groupName}</h3>
+        <p className="text-body text-muted">Day A and Day B teach on alternating TP days.</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -104,7 +104,7 @@ export function TpGroupBoard({
                   </div>
                   <div className="mt-2 flex flex-col gap-2.5">
                     {half.members.map((m) => (
-                      <p key={m.traineeId} className="flex items-baseline gap-2 text-sm text-ink">
+                      <p key={m.traineeId} className="flex items-baseline gap-2 text-body text-ink">
                         <span className="w-4 shrink-0 text-label font-bold tabular-nums text-muted">{letters.get(m.traineeId) ?? ""}</span>
                         {m.fullName}
                       </p>
@@ -136,7 +136,7 @@ export function TpGroupBoard({
                                 : "bg-surface-muted text-muted";
                             return (
                               <div key={m.traineeId} className="flex flex-col items-center gap-0.5">
-                                <span className={`flex size-[22px] items-center justify-center rounded-[6px] text-xs font-bold ${chipClass}`}>
+                                <span className={`flex size-[22px] items-center justify-center rounded-[6px] text-label font-bold ${chipClass}`}>
                                   {position}
                                 </span>
                                 <span className={`text-micro font-semibold ${isNextCol ? "text-status-warning-text" : "text-muted"}`}>

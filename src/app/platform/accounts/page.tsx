@@ -153,8 +153,8 @@ export default async function CommandCenterPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <BackLink href="/platform/command-center/money" label={"Money"} />
-          <h1 className="mt-2 font-serif text-2xl text-ink">Accounts</h1>
-          <p className="mt-1 text-sm text-muted">Revenue and accounts across every centre — platform-owner only.</p>
+          <h1 className="mt-2 font-serif text-h1 text-ink">Accounts</h1>
+          <p className="mt-1 text-body text-muted">Revenue and accounts across every centre — platform-owner only.</p>
         </div>
       </div>
 
@@ -166,21 +166,21 @@ export default async function CommandCenterPage() {
           treatment. */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Active centres</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">Active centres</p>
           <p className="mt-1.5 font-serif text-h1 tabular-nums text-ink">{centresList.length}</p>
         </div>
         <div className="card card-gold p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">MRR</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">MRR</p>
           <p className="mt-1.5 font-serif text-h1 tabular-nums text-ink">
             {mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "—"}
           </p>
         </div>
         <div className={`card p-5${renewalsDue.length ? " card-amber" : ""}`}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Renewals due (30d)</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">Renewals due (30d)</p>
           <p className="mt-1.5 font-serif text-h1 tabular-nums text-ink">{renewalsDue.length}</p>
         </div>
         <div className={`card p-5${outstanding.length ? " card-red" : ""}`}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Outstanding invoices</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">Outstanding invoices</p>
           <p className="mt-1.5 font-serif text-h1 tabular-nums text-ink">
             {outstanding.length} {outstandingByCurrency.length ? `(${outstandingByCurrency.map((m) => money(m.amount, m.currency)).join(" · ")})` : ""}
           </p>
@@ -189,24 +189,24 @@ export default async function CommandCenterPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Connect</p>
-          <p className="mt-1.5 text-xl font-bold text-ink">{centresList.length} centres</p>
-          <p className="mt-1 text-sm text-muted">{mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "£0"}/mo</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-primary">Connect</p>
+          <p className="mt-1.5 text-h2 font-bold text-ink">{centresList.length} centres</p>
+          <p className="mt-1 text-body text-muted">{mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "£0"}/mo</p>
         </div>
         {/* B7c: these two were dimmed to opacity-60 to say "illustrative".
             Nothing in the building dims -- a dimmed card reads as disabled --
             so they say it in words, on a dashed edge. */}
         <div className="card card-gold border-dashed p-5">
           <p className="mb-1 text-micro font-bold tracking-[0.1em] text-muted uppercase">Illustrative</p>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Connect Hub</p>
-          <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
-          <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">Connect Hub</p>
+          <p className="mt-1.5 text-h2 font-bold text-ink">Illustrative</p>
+          <p className="mt-1 text-body text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
         <div className="card card-amber border-dashed p-5">
           <p className="mb-1 text-micro font-bold tracking-[0.1em] text-muted uppercase">Illustrative</p>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Affina</p>
-          <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
-          <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">Affina</p>
+          <p className="mt-1.5 text-h2 font-bold text-ink">Illustrative</p>
+          <p className="mt-1 text-body text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
       </div>
 
@@ -215,7 +215,7 @@ export default async function CommandCenterPage() {
           <h2 className="font-serif text-h3 font-semibold text-ink">Accounts ({centresList.length})</h2>
         </div>
         {centresList.length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted">No centres yet.</p>
+          <p className="px-5 py-4 text-body text-muted">No centres yet.</p>
         ) : (
           centresList.map((c) => {
             const sub = subByCenter.get(c.id);
@@ -223,11 +223,11 @@ export default async function CommandCenterPage() {
             return (
               <div key={c.id} className="list-row hover-ring flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-ink">
+                  <span className="text-body font-medium text-ink">
                     {c.name}
-                    {c.is_demo ? <span className="ml-2 text-xs font-normal text-muted">(demo)</span> : null}
+                    {c.is_demo ? <span className="ml-2 text-label font-normal text-muted">(demo)</span> : null}
                   </span>
-                  <span className="text-xs text-muted">
+                  <span className="text-label text-muted">
                     {sub ? `${sub.plan_name} · ${money(sub.monthly_amount, sub.currency)}/mo · ${sub.status}` : "No subscription on record"}
                     {sub?.renewal_date ? ` · renews ${sub.renewal_date}` : ""}
                   </span>
@@ -235,13 +235,13 @@ export default async function CommandCenterPage() {
                 <div className="flex items-center gap-3">
                   {latestInvoice ? (
                     <span className="flex items-center gap-2">
-                      <span className="text-xs text-muted">
+                      <span className="text-label text-muted">
                         Last invoice: {money(latestInvoice.amount, latestInvoice.currency)} ({latestInvoice.status})
                       </span>
                       {latestInvoice.status === "outstanding" ? <InvoiceRowActions invoiceId={latestInvoice.id} /> : null}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted">No invoices yet</span>
+                    <span className="text-label text-muted">No invoices yet</span>
                   )}
                 </div>
               </div>
@@ -253,30 +253,30 @@ export default async function CommandCenterPage() {
       <div className="card">
         <div className="border-b border-border-faint px-5 py-4">
           <h2 className="font-serif text-h3 font-semibold text-ink">Trainers ({trainerRows.length})</h2>
-          <p className="mt-0.5 text-xs text-muted">Who&apos;s working where, across every centre — owner-only.</p>
+          <p className="mt-0.5 text-label text-muted">Who&apos;s working where, across every centre — owner-only.</p>
         </div>
         {trainerRows.length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted">No trainers on record yet.</p>
+          <p className="px-5 py-4 text-body text-muted">No trainers on record yet.</p>
         ) : (
           trainerRows.map((t) => (
             <div key={t.name} className="list-row hover-ring flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-ink">{t.name}</span>
+              <span className="text-body font-medium text-ink">{t.name}</span>
               {t.current.length > 0 ? (
                 <div className="flex flex-col gap-0.5">
                   {t.current.map((a, i) => (
-                    <span key={i} className="text-xs text-ink">
+                    <span key={i} className="text-label text-ink">
                       {a.centerName} · {a.courseLabel} — {a.role}
                     </span>
                   ))}
                 </div>
               ) : (
-                <span className="text-xs text-muted">Not currently active on a course</span>
+                <span className="text-label text-muted">Not currently active on a course</span>
               )}
               {t.history.length > 0 ? (
                 <div className="mt-1 flex flex-col gap-0.5 border-t border-border-faint pt-1.5">
                   <span className="text-micro font-semibold uppercase tracking-wide text-muted">History</span>
                   {t.history.map((a, i) => (
-                    <span key={i} className="text-xs text-muted">
+                    <span key={i} className="text-label text-muted">
                       {a.centerName} · {a.courseLabel} — {a.role} ({a.startDate}–{a.endDate})
                     </span>
                   ))}
@@ -289,7 +289,7 @@ export default async function CommandCenterPage() {
 
       <div className="card p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Set a centre&apos;s subscription</h2>
-        <p className="mt-1 text-sm text-muted">Hand-entered — no payment provider connected yet. One active plan per centre; saving again updates it.</p>
+        <p className="mt-1 text-body text-muted">Hand-entered — no payment provider connected yet. One active plan per centre; saving again updates it.</p>
         <div className="mt-4">
           <SubscriptionForm centres={centresList} />
         </div>
@@ -304,11 +304,11 @@ export default async function CommandCenterPage() {
 
       <div className="card p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Payments</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           No payment provider is connected for centre subscriptions. Wiring one (Stripe or equivalent — webhooks, checkout, invoice automation) is its
           own scoped piece of work.
         </p>
-        <button type="button" disabled className="mt-3 h-10 rounded-[6px] border border-input bg-card-inset px-4 text-sm font-semibold text-muted opacity-60">
+        <button type="button" disabled className="mt-3 h-10 rounded-[6px] border border-input bg-card-inset px-4 text-body font-semibold text-muted opacity-60">
           Connect payment provider
         </button>
       </div>
@@ -318,16 +318,16 @@ export default async function CommandCenterPage() {
           <h2 className="font-serif text-h3 font-semibold text-ink">Activity</h2>
         </div>
         {activity.length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted">Nothing yet.</p>
+          <p className="px-5 py-4 text-body text-muted">Nothing yet.</p>
         ) : (
           activity.map((item, i) => (
             <div key={i} className="list-row hover-ring flex items-center justify-between gap-3">
-              <span className="text-sm text-ink">{item.label}</span>
+              <span className="text-body text-ink">{item.label}</span>
               {/* A platform-wide log has no single centre; the platform
                   owner's own zone is the right one, the same call
                   platform-owner-greeting.ts makes. toLocaleString() with no
                   arguments was the SERVER's locale and zone. */}
-              <span className="text-xs text-muted">{formatDateTime(item.at, DEFAULT_TIMEZONE)}</span>
+              <span className="text-label text-muted">{formatDateTime(item.at, DEFAULT_TIMEZONE)}</span>
             </div>
           ))
         )}

@@ -146,14 +146,14 @@ export function PushSubscribeButton({
           type="button"
           onClick={handleSubscribe}
           disabled={pending}
-          className="self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
+          className="self-start rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink hover:border-primary disabled:opacity-60"
         >
           {pending ? "Enabling..." : "Enable notifications"}
         </button>
         {dismissed ? (
           <p className="text-label text-muted">You closed your browser&apos;s prompt. Click again if you&apos;d like these on.</p>
         ) : null}
-        {error ? <p className="text-xs text-destructive">{error}</p> : null}
+        {error ? <p className="text-label text-destructive">{error}</p> : null}
       </div>
     );
   }
@@ -164,11 +164,11 @@ export function PushSubscribeButton({
         type="button"
         onClick={handleUnsubscribe}
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-destructive hover:text-destructive disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-muted hover:border-destructive hover:text-destructive disabled:opacity-60"
       >
         {pending ? "Turning off..." : "Notifications on -- turn off"}
       </button>
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
     </div>
   );
 }

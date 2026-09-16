@@ -68,11 +68,11 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
         </div>
 
         {(volunteers ?? []).length === 0 ? (
-          <p className="text-sm text-muted">No volunteer students on this course yet.</p>
+          <p className="text-body text-muted">No volunteer students on this course yet.</p>
         ) : (
           <div className="flex flex-col divide-y divide-border-faint">
             {(volunteers ?? []).map((v) => (
-              <label key={v.id} className="wash flex items-center gap-3 rounded-[8px] px-2 py-2.5 text-sm text-ink">
+              <label key={v.id} className="wash flex items-center gap-3 rounded-[8px] px-2 py-2.5 text-body text-ink">
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attended.has(v.id)} className="size-4" />
                 <span className="flex-1">
                   {v.name}

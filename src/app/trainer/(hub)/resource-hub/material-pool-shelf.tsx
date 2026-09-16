@@ -29,7 +29,7 @@ export function MaterialPoolShelf({ items, readOnly = false }: { items: Material
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         For TP7/8, deliberately not the course coursebook. A candidate claims one item per group -- once claimed,
         nobody else in the same TP group can plan around it too.
       </p>
@@ -54,45 +54,45 @@ export function MaterialPoolShelf({ items, readOnly = false }: { items: Material
             ))}
           </div>
         ) : (
-          <p className="mt-2 text-xs text-muted">Nothing added yet.</p>
+          <p className="mt-2 text-label text-muted">Nothing added yet.</p>
         )}
       </div>
 
       {readOnly ? null : (
       <form action={action} className="flex flex-col gap-2 rounded-[6px] border border-border p-3">
-        <label className="text-sm text-muted">Add a scan</label>
+        <label className="text-body text-muted">Add a scan</label>
         <div className="flex flex-wrap items-center gap-2">
           <input
             name="book_title"
             type="text"
             placeholder="Book title"
             required
-            className="h-8 min-w-[160px] flex-1 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary"
+            className="h-8 min-w-[160px] flex-1 rounded-[6px] border border-input bg-card px-2 text-label text-ink outline-none focus:border-primary"
           />
           <input
             name="level"
             type="text"
             placeholder="Level, e.g. B1"
-            className="h-8 w-24 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary"
+            className="h-8 w-24 rounded-[6px] border border-input bg-card px-2 text-label text-ink outline-none focus:border-primary"
           />
         </div>
         <input
           name="description"
           type="text"
           placeholder="Note (optional)"
-          className="h-8 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary"
+          className="h-8 rounded-[6px] border border-input bg-card px-2 text-label text-ink outline-none focus:border-primary"
         />
         <div className="flex items-center gap-2">
-          <input type="file" name="file" accept="application/pdf,image/*" required className="text-xs text-muted" />
+          <input type="file" name="file" accept="application/pdf,image/*" required className="text-label text-muted" />
           <button
             type="submit"
             disabled={pending}
-            className="h-8 shrink-0 rounded-[6px] bg-primary px-3 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            className="h-8 shrink-0 rounded-[6px] bg-primary px-3 text-label font-semibold text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Adding…" : "Add"}
           </button>
         </div>
-        {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
       </form>
       )}
     </div>
@@ -104,15 +104,15 @@ function ItemCard({ item, removable }: { item: MaterialPoolItemView; removable: 
     <div className="hover-ring rounded-[6px] border border-border p-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold text-ink">
+          <p className="text-body font-semibold text-ink">
             {item.bookTitle}
-            {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}
+            {item.level ? <span className="ml-1.5 text-label font-normal text-muted">{item.level}</span> : null}
           </p>
-          {item.description ? <p className="mt-0.5 text-xs text-muted">{item.description}</p> : null}
-          {item.claimedByLabel ? <p className="mt-1 text-xs text-status-warning-text">Claimed -- {item.claimedByLabel}</p> : null}
+          {item.description ? <p className="mt-0.5 text-label text-muted">{item.description}</p> : null}
+          {item.claimedByLabel ? <p className="mt-1 text-label text-status-warning-text">Claimed -- {item.claimedByLabel}</p> : null}
         </div>
         {item.signedUrl ? (
-          <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs font-semibold text-primary hover:underline">
+          <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-label font-semibold text-primary hover:underline">
             Open
           </a>
         ) : null}
@@ -120,7 +120,7 @@ function ItemCard({ item, removable }: { item: MaterialPoolItemView; removable: 
       {removable ? (
         <form action={deleteMaterialPoolItem} className="mt-2">
           <input type="hidden" name="id" value={item.id} />
-          <button type="submit" className="text-xs text-destructive hover:underline">
+          <button type="submit" className="text-label text-destructive hover:underline">
             Remove
           </button>
         </form>

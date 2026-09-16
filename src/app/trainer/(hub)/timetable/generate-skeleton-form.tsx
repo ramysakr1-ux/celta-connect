@@ -49,10 +49,10 @@ export function GenerateSkeletonForm() {
       <input type="hidden" name="shape" value={shape} />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Course shape</label>
+        <label className="text-body text-muted">Course shape</label>
         <div className="flex flex-col gap-2">
           {(Object.keys(STANDARD_VARIANTS) as StandardVariant[]).map((variant) => (
-            <label key={variant} className="flex items-center gap-1.5 text-sm text-ink">
+            <label key={variant} className="flex items-center gap-1.5 text-body text-ink">
               <input
                 type="radio"
                 checked={shape === "standard" && standardVariant === variant}
@@ -64,7 +64,7 @@ export function GenerateSkeletonForm() {
               {STANDARD_VARIANTS[variant].label}
             </label>
           ))}
-          <label className="flex items-center gap-1.5 text-sm text-ink">
+          <label className="flex items-center gap-1.5 text-body text-ink">
             <input type="radio" checked={shape === "part_time"} onChange={() => setShape("part_time")} />
             Part-time -- two independent groups, each on its own fixed weekday
           </label>
@@ -73,16 +73,16 @@ export function GenerateSkeletonForm() {
 
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Course start date</label>
+          <label className="text-body text-muted">Course start date</label>
           <input
             name="start_date"
             type="date"
             required
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Total teaching days</label>
+          <label className="text-body text-muted">Total teaching days</label>
           <input
             key={shape}
             name="total_teaching_days"
@@ -91,20 +91,20 @@ export function GenerateSkeletonForm() {
             max={60}
             defaultValue={shape === "part_time" ? PART_TIME_DEFAULT_DAYS : DEFAULT_TEACHING_DAYS}
             required
-            className="w-28 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="w-28 rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">
+        <label className="text-body text-muted">
           {shape === "part_time"
             ? "Which days does the course meet? -- Saturday and Wednesday is the reference pattern; pick your centre's actual two days if different."
             : "Which days does the course meet? -- same contact days either way; this is just the calendar spread. Edit freely before generating."}
         </label>
         <div className="flex flex-wrap gap-3">
           {DAYS.map((day) => (
-            <label key={`${shape}-${standardVariant}-${day.value}`} className="flex items-center gap-1.5 text-sm text-ink">
+            <label key={`${shape}-${standardVariant}-${day.value}`} className="flex items-center gap-1.5 text-body text-ink">
               <input
                 type="checkbox"
                 name="meeting_day"
@@ -122,11 +122,11 @@ export function GenerateSkeletonForm() {
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? "Generating…" : "Generate skeleton"}
       </button>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

@@ -155,7 +155,7 @@ export function FinalReportFields({
         <input type="hidden" name="final_higher_grade_evidence" value={evidence} />
       )}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <div className="flex items-center justify-between gap-3">
         {handover ? <CopyField value={handover} label="Copy for the Assessor Report" /> : <span />}

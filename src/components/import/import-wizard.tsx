@@ -162,7 +162,7 @@ export function ImportWizard({
                 active ? "border-primary bg-card" : "border-border bg-surface-muted/40"
               }`}
             >
-              <span className={`font-serif text-lg ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
+              <span className={`font-serif text-h3 ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
               <span className={`text-meta font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
             </div>
           );
@@ -173,18 +173,18 @@ export function ImportWizard({
         <div className="sheet flex flex-col gap-4">
           <div>
             <h2 className="font-serif text-h2 text-ink">Point Connect at the file you already have</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               Nothing is written anywhere yet. This is a one-time read, not a live link -- your spreadsheet keeps
               working exactly as it did, and nothing here changes when somebody edits it afterwards.
             </p>
           </div>
 
           <label className="flex max-w-sm flex-col gap-1.5">
-            <span className="text-sm text-muted">Which intake are these people for?</span>
+            <span className="text-body text-muted">Which intake are these people for?</span>
             <select
               value={intakeCourseId}
               onChange={(e) => setIntakeCourseId(e.target.value)}
-              className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -195,17 +195,17 @@ export function ImportWizard({
           </label>
 
           <div className="flex max-w-sm flex-col gap-1.5">
-            <span className="text-sm text-muted">Choose a file</span>
+            <span className="text-body text-muted">Choose a file</span>
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={onDriveConnect}
                 disabled={drivePending}
-                className="wash h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-sm text-ink hover:border-primary disabled:opacity-50"
+                className="wash h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-body text-ink hover:border-primary disabled:opacity-50"
               >
                 {drivePending ? "Opening…" : "Connect centre's Drive"}
               </button>
-              <span className="shrink-0 text-xs text-muted">or</span>
+              <span className="shrink-0 text-label text-muted">or</span>
               <input
                 type="file"
                 accept=".csv,.tsv,.xlsx,.xls,text/csv"
@@ -213,13 +213,13 @@ export function ImportWizard({
                   const f = e.target.files?.[0];
                   if (f) void onFile(f);
                 }}
-                className="text-sm text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:text-ink"
+                className="text-body text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-body file:text-ink"
               />
             </div>
           </div>
 
-          {readError ? <p className="text-sm text-destructive">{readError}</p> : null}
-          <p className="text-xs text-muted">
+          {readError ? <p className="text-body text-destructive">{readError}</p> : null}
+          <p className="text-label text-muted">
             Nothing is created until you have seen the preview. The Drive option reads through your centre&apos;s
             existing connection (Settings &gt; Google Drive) -- picking a file doesn&apos;t grant any new standing
             access beyond what&apos;s already connected there. .csv, .tsv, .xlsx, and native Google Sheets all read
@@ -232,7 +232,7 @@ export function ImportWizard({
         <div className="sheet flex flex-col gap-4">
           <div>
             <h2 className="font-serif text-h2 text-ink">Their column names, our fields</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               Connect guesses from the headings. What it can&apos;t guess is what your own words mean -- every centre
               has a status column and no two use the same vocabulary.
             </p>
@@ -243,14 +243,14 @@ export function ImportWizard({
               const value = mapping[header];
               return (
                 <div key={`${header}-${i}`} className={`hover-ring flex items-center gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                  <span className="w-40 shrink-0 truncate text-sm text-ink">{header || "(unnamed column)"}</span>
-                  <span className="text-xs text-muted">&rarr;</span>
+                  <span className="w-40 shrink-0 truncate text-body text-ink">{header || "(unnamed column)"}</span>
+                  <span className="text-label text-muted">&rarr;</span>
                   <select
                     value={value ?? ""}
                     onChange={(e) =>
                       setMapping((m) => ({ ...m, [header]: (e.target.value || null) as ImportFieldKey | null }))
                     }
-                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
                   >
                     <option value="">Not imported</option>
                     {IMPORT_FIELDS.map((f) => (
@@ -260,7 +260,7 @@ export function ImportWizard({
                       </option>
                     ))}
                   </select>
-                  <span className={`w-20 shrink-0 text-right text-xs ${value ? "text-primary" : "text-muted"}`}>
+                  <span className={`w-20 shrink-0 text-right text-label ${value ? "text-primary" : "text-muted"}`}>
                     {value ? "Matched" : "Skipped"}
                   </span>
                 </div>
@@ -269,7 +269,7 @@ export function ImportWizard({
           </div>
 
           {missingRequired.length > 0 ? (
-            <p className="text-sm text-destructive">
+            <p className="text-body text-destructive">
               Still needed: {missingRequired.map((f) => f.label).join(", ")}. Without an email nobody can be invited
               later.
             </p>
@@ -280,14 +280,14 @@ export function ImportWizard({
               <p className="text-label font-semibold tracking-[0.12em] text-status-warning-text uppercase">
                 Your status words &middot; {statusValues.length}
               </p>
-              <p className="text-sm text-muted">
+              <p className="text-body text-muted">
                 Tell Connect what each of your own status values means. Anything set to &ldquo;Don&apos;t import&rdquo;
                 holds those rows back entirely.
               </p>
               {statusValues.map((v) => (
                 <div key={v} className="hover-ring flex items-center gap-3 py-1">
-                  <span className="w-40 shrink-0 truncate text-sm text-ink">{v}</span>
-                  <span className="text-xs text-muted">&rarr;</span>
+                  <span className="w-40 shrink-0 truncate text-body text-ink">{v}</span>
+                  <span className="text-label text-muted">&rarr;</span>
                   <select
                     value={v in statusMapping ? (statusMapping[v] ?? "__skip__") : ""}
                     onChange={(e) => {
@@ -297,7 +297,7 @@ export function ImportWizard({
                         [v]: raw === "__skip__" ? null : (raw as (typeof APPLICANT_STAGES)[number]),
                       }));
                     }}
-                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
                   >
                     <option value="" disabled>
                       Needs a decision
@@ -319,11 +319,11 @@ export function ImportWizard({
               type="button"
               onClick={() => setStep("preview")}
               disabled={!canPreview}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-50"
             >
               See what happens
             </button>
-            <button type="button" onClick={() => setStep("connect")} className="text-sm text-muted hover:text-ink">
+            <button type="button" onClick={() => setStep("connect")} className="text-body text-muted hover:text-ink">
               Choose a different file
             </button>
           </div>
@@ -336,7 +336,7 @@ export function ImportWizard({
             <h2 className="font-serif text-h2 text-ink">
               {rows.length} row{rows.length === 1 ? "" : "s"}, and what each will become
             </h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               Nothing has been written. This is the whole import with its problems on top, so the mapping can be fixed
               before it becomes phantom candidates nobody can delete.
             </p>
@@ -350,7 +350,7 @@ export function ImportWizard({
               { k: "Skipped by you", v: analysis.tallies.skipped, cls: "text-muted" },
             ].map((t) => (
               <div key={t.k} className="flex flex-col gap-0.5">
-                <span className={`font-serif text-2xl ${t.cls}`}>{t.v}</span>
+                <span className={`font-serif text-h1 ${t.cls}`}>{t.v}</span>
                 <span className="text-label tracking-[0.08em] text-muted uppercase">{t.k}</span>
               </div>
             ))}
@@ -370,12 +370,12 @@ export function ImportWizard({
                         : "border-l-border"
                 }`}
               >
-                <span className="w-8 shrink-0 text-xs text-muted tabular-nums">{r.rowNumber}</span>
-                <span className="w-44 shrink-0 truncate text-sm text-ink">{r.fullName}</span>
-                <span className="w-56 shrink-0 truncate text-xs text-muted">{r.email ?? "--"}</span>
-                <span className="w-32 shrink-0 truncate text-xs text-muted">{STAGE_LABEL[r.stage]}</span>
+                <span className="w-8 shrink-0 text-label text-muted tabular-nums">{r.rowNumber}</span>
+                <span className="w-44 shrink-0 truncate text-body text-ink">{r.fullName}</span>
+                <span className="w-56 shrink-0 truncate text-label text-muted">{r.email ?? "--"}</span>
+                <span className="w-32 shrink-0 truncate text-label text-muted">{STAGE_LABEL[r.stage]}</span>
                 <span
-                  className={`flex-1 truncate text-xs ${
+                  className={`flex-1 truncate text-label ${
                     r.verdict === "import"
                       ? "text-muted"
                       : r.verdict === "missing_email"
@@ -391,7 +391,7 @@ export function ImportWizard({
             ))}
           </div>
 
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
           <form action={action} className="flex items-center gap-3">
             <input type="hidden" name="intake_course_id" value={intakeCourseId} />
@@ -403,15 +403,15 @@ export function ImportWizard({
             <button
               type="submit"
               disabled={pending || analysis.tallies.willImport === 0}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-50"
             >
               {pending ? "Importing..." : `Import ${analysis.tallies.willImport} people`}
             </button>
-            <button type="button" onClick={() => setStep("map")} className="text-sm text-muted hover:text-ink">
+            <button type="button" onClick={() => setStep("map")} className="text-body text-muted hover:text-ink">
               Back to the mapping
             </button>
           </form>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             {analysis.rows.length - analysis.tallies.willImport} row
             {analysis.rows.length - analysis.tallies.willImport === 1 ? " is" : "s are"} held back. Fix them in the
             sheet and run this again -- Connect matches on email and won&apos;t duplicate anyone it has already seen.
@@ -423,7 +423,7 @@ export function ImportWizard({
         <div className="sheet flex flex-col gap-4">
           <div>
             <h2 className="font-serif text-h2 text-ink">Imported, and nobody has been emailed</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               The pipeline now has {state.imported} more {state.imported === 1 ? "person" : "people"} in it, at the
               stages you chose. Not one of them has heard from Connect.
             </p>
@@ -452,12 +452,12 @@ export function ImportWizard({
               },
             ].map((p) => (
               <div key={p.t} className={`border-l-[3px] pl-3 ${p.c}`}>
-                <p className="text-sm font-semibold text-ink">{p.t}</p>
-                <p className="text-xs text-muted">{p.d}</p>
+                <p className="text-body font-semibold text-ink">{p.t}</p>
+                <p className="text-label text-muted">{p.d}</p>
               </div>
             ))}
           </div>
-          <Link href="/dashboard/admissions" className="text-sm text-primary hover:underline">
+          <Link href="/dashboard/admissions" className="text-body text-primary hover:underline">
             Go to the pipeline
           </Link>
         </div>

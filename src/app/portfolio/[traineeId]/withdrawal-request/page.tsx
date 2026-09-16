@@ -39,21 +39,21 @@ export default async function WithdrawalRequestPage({ params }: { params: Promis
 
       <div className="sheet flex flex-col gap-4">
         <div>
-          <h1 className="font-serif text-xl text-ink">Leaving or deferring the course</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="font-serif text-h2 text-ink">Leaving or deferring the course</h1>
+          <p className="mt-1 text-body text-muted">
             A few questions produce the letter, rather than you having to write one. This sends a request to the
             centre -- it doesn&apos;t take effect until a tutor actions it.
           </p>
         </div>
 
         {profile.course_status !== "active" ? (
-          <p className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-4 text-sm text-ink">
+          <p className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-4 text-body text-ink">
             Your course status has already been recorded. Talk to your tutor if you think this is wrong.
           </p>
         ) : existingRequest?.status === "pending" ? (
           <div className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-4">
-            <p className="text-sm font-semibold text-primary">Sent -- waiting for the centre.</p>
-            <p className="mt-1 text-sm text-muted">
+            <p className="text-body font-semibold text-primary">Sent -- waiting for the centre.</p>
+            <p className="mt-1 text-body text-muted">
               Your {existingRequest.kind === "withdraw" ? "withdrawal" : "deferral"} request was sent{" "}
               {new Intl.DateTimeFormat("en-GB", { timeZone }).format(new Date(existingRequest.created_at))}. A tutor will act on it and follow
               up with you.

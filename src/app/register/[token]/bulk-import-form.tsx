@@ -51,15 +51,15 @@ export function BulkImportForm({ token }: { token: string }) {
 
   return (
     <details className="group">
-      <summary className="cursor-pointer text-sm font-medium text-primary hover:underline">Import a spreadsheet</summary>
+      <summary className="cursor-pointer text-body font-medium text-primary hover:underline">Import a spreadsheet</summary>
       <form action={formAction} className="mt-3 flex flex-col items-start gap-2.5 border-t border-border-faint pt-3">
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="csv" value={csvText} />
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           In Google Sheets: File → Download → Comma Separated Values (.csv). Columns: Name, Email (optional), Level
           (optional).
         </p>
-        <button type="button" onClick={downloadTemplate} className="text-xs font-medium text-primary hover:underline">
+        <button type="button" onClick={downloadTemplate} className="text-label font-medium text-primary hover:underline">
           Download a template
         </button>
         <input
@@ -67,14 +67,14 @@ export function BulkImportForm({ token }: { token: string }) {
           type="file"
           accept=".csv,text/csv"
           onChange={handleFileChange}
-          className="text-sm text-ink file:mr-3 file:rounded-[6px] file:border file:border-input file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink"
+          className="text-body text-ink file:mr-3 file:rounded-[6px] file:border file:border-input file:bg-card file:px-3 file:py-1.5 file:text-body file:font-medium file:text-ink"
         />
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-        {state.summary ? <p className="text-sm text-ink">{state.summary}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
+        {state.summary ? <p className="text-body text-ink">{state.summary}</p> : null}
         <button
           type="submit"
           disabled={pending || !csvText}
-          className="h-10 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+          className="h-10 rounded-[6px] bg-ink-warm px-4 text-body font-semibold text-card disabled:opacity-60"
         >
           {pending ? `Importing${fileName ? ` ${fileName}` : ""}…` : "Import"}
         </button>

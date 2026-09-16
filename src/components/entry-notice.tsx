@@ -15,7 +15,7 @@ export function EntryNotice({ heading, children }: { heading: string; children: 
             <Wordmark size="hero" />
           </Link>
           <h1 className="mt-4 font-serif text-h2 leading-[1.25] font-semibold text-ink">{heading}</h1>
-          <p className="mt-2 text-sm text-muted">{children}</p>
+          <p className="mt-2 text-body text-muted">{children}</p>
         </div>
       </div>
     </div>

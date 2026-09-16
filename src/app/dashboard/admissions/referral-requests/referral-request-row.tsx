@@ -33,9 +33,9 @@ export function ReferralRequestRow({
   return (
     <div className={`card flex flex-col gap-3 p-5 hover-ring`}>
       <div>
-        <p className="text-sm font-semibold text-ink">{request.applicantName}</p>
-        <p className="text-xs text-muted">{request.applicantEmail}</p>
-        <p className="mt-1 text-xs text-muted">
+        <p className="text-body font-semibold text-ink">{request.applicantName}</p>
+        <p className="text-label text-muted">{request.applicantEmail}</p>
+        <p className="mt-1 text-label text-muted">
           Requested by {request.fromCenterName} · {formatDateTime(request.requestedAt, timeZone)}
         </p>
       </div>
@@ -49,7 +49,7 @@ export function ReferralRequestRow({
               name="to_course_id"
               required
               defaultValue=""
-              className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
             >
               <option value="" disabled>
                 Place into which intake
@@ -63,7 +63,7 @@ export function ReferralRequestRow({
             <button
               type="submit"
               disabled={acceptPending || courses.length === 0}
-              className="rounded-[6px] border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+              className="rounded-[6px] border border-primary bg-primary px-3 py-2 text-body font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
               {acceptPending ? "Accepting..." : "Accept"}
             </button>
@@ -71,7 +71,7 @@ export function ReferralRequestRow({
           <button
             type="button"
             onClick={() => setDeclining(true)}
-            className="rounded-[6px] border border-border px-3 py-2 text-sm font-medium text-ink hover:border-destructive wash"
+            className="rounded-[6px] border border-border px-3 py-2 text-body font-medium text-ink hover:border-destructive wash"
           >
             Decline
           </button>
@@ -84,19 +84,19 @@ export function ReferralRequestRow({
             type="text"
             name="reason"
             placeholder="Reason (optional)"
-            className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink outline-none focus:border-primary"
           />
           <button
             type="submit"
             disabled={declinePending}
-            className="rounded-[6px] border border-destructive px-3 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-60 wash"
+            className="rounded-[6px] border border-destructive px-3 py-2 text-body font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-60 wash"
           >
             {declinePending ? "Declining..." : "Confirm decline"}
           </button>
           <button
             type="button"
             onClick={() => setDeclining(false)}
-            className="rounded-[6px] border border-border px-3 py-2 text-sm text-muted hover:text-ink wash"
+            className="rounded-[6px] border border-border px-3 py-2 text-body text-muted hover:text-ink wash"
           >
             Cancel
           </button>
@@ -104,10 +104,10 @@ export function ReferralRequestRow({
       )}
 
       {courses.length === 0 ? (
-        <p className="text-xs text-destructive">This branch has no intakes to place them into yet.</p>
+        <p className="text-label text-destructive">This branch has no intakes to place them into yet.</p>
       ) : null}
-      {acceptState.error ? <p className="text-sm text-destructive">{acceptState.error}</p> : null}
-      {declineState.error ? <p className="text-sm text-destructive">{declineState.error}</p> : null}
+      {acceptState.error ? <p className="text-body text-destructive">{acceptState.error}</p> : null}
+      {declineState.error ? <p className="text-body text-destructive">{declineState.error}</p> : null}
     </div>
   );
 }

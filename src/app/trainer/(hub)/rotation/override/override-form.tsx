@@ -65,11 +65,11 @@ export function OverrideForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Trainee</label>
+          <label className="text-body text-muted">Trainee</label>
           <select
             value={traineeId}
             onChange={(e) => setTraineeId(e.target.value)}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">— choose —</option>
             {trainees.map((t) => (
@@ -81,14 +81,14 @@ export function OverrideForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">TP number</label>
+          <label className="text-body text-muted">TP number</label>
           <select
             value={tpNumber}
             onChange={(e) => {
               setTpNumber(e.target.value ? Number(e.target.value) : "");
               setTpPointId("");
             }}
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           >
             <option value="">— choose —</option>
             {tpNumbers.map((n) => (
@@ -103,14 +103,14 @@ export function OverrideForm({
 
       {tpNumber !== "" ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">TP point</label>
+          <label className="text-body text-muted">TP point</label>
           {pointsForTp.length === 0 ? (
-            <p className="text-sm text-muted">No published TP points for TP{tpNumber} yet.</p>
+            <p className="text-body text-muted">No published TP points for TP{tpNumber} yet.</p>
           ) : (
             <select
               value={tpPointId}
               onChange={(e) => setTpPointId(e.target.value)}
-              className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
             >
               <option value="">— choose —</option>
               {[...grouped.entries()].map(([aimType, list]) => (
@@ -125,7 +125,7 @@ export function OverrideForm({
             </select>
           )}
           {tpPointId ? (
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               {points.find((p) => p.id === tpPointId)?.main_lesson_aim}
               {points.find((p) => p.id === tpPointId)?.sub_aim
                 ? ` — ${points.find((p) => p.id === tpPointId)?.sub_aim}`
@@ -135,11 +135,11 @@ export function OverrideForm({
         </div>
       ) : null}
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending || !traineeId || tpNumber === "" || !tpPointId}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Assigning…" : "Assign this point"}
       </button>

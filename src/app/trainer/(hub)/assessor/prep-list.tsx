@@ -59,7 +59,7 @@ function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolea
         </span>
         <span className="shrink-0 text-micro font-semibold text-muted tabular-nums">§{item.cite}</span>
       </div>
-      <p className="pl-[21px] text-xs text-muted">{item.detail}</p>
+      <p className="pl-[21px] text-label text-muted">{item.detail}</p>
       {item.evidence ? (
         <p className="pl-[21px] text-label font-medium" style={{ color: tone }}>
           {item.evidence}
@@ -96,7 +96,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
-          <p className="max-w-[70ch] text-sm text-muted">
+          <p className="max-w-[70ch] text-body text-muted">
             Administration Handbook §14.1.{" "}
             {deadline
               ? `Available by ${deadline} — two to three days before the visit, so the assessor can read it.`

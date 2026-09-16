@@ -81,7 +81,7 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
 
       <div className="flex flex-col px-2.5 pb-2.5">
         {alerts.length === 0 ? (
-          <p className="px-3 py-3 text-sm text-muted">Nothing needs you right now.</p>
+          <p className="px-3 py-3 text-body text-muted">Nothing needs you right now.</p>
         ) : (
           visible.map((a, i) => (
             <Link

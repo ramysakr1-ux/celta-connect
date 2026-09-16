@@ -52,13 +52,13 @@ function ChooseTechnique() {
   const [picked, setPicked] = useState<Record<number, string>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Choose a technique for each item</p>
+      <p className="text-label font-bold text-ink">Choose a technique for each item</p>
       <p className="text-label text-muted">For each word, click the technique you&apos;d actually use to clarify it — then check.</p>
       {CHOOSE_ITEMS.map((item, ci) => {
         const pick = picked[ci];
         return (
           <div key={item.word} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-            <p className="font-serif text-sm font-semibold text-ink">{item.word}</p>
+            <p className="font-serif text-body font-semibold text-ink">{item.word}</p>
             <div className="flex flex-wrap gap-1.5">
               {CHOOSE_OPTIONS.map((opt) => {
                 const isCorrectPick = pick === opt && opt === item.correct;
@@ -109,7 +109,7 @@ function CollocationGroup({ verb, base, correctSet }: { verb: string; base: stri
 
   return (
     <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-3.5">
-      <p className="font-serif text-sm font-semibold text-ink">{verb} ___</p>
+      <p className="font-serif text-body font-semibold text-ink">{verb} ___</p>
       <div className="flex flex-wrap gap-1.5">
         {options.map((word) => {
           const isPicked = picked.has(word);
@@ -157,7 +157,7 @@ export default function TeachingVocabularySession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: how many words do you think &quot;take up (a hobby)&quot; actually is — one, or more
@@ -172,7 +172,7 @@ export default function TeachingVocabularySession() {
 
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Build the collocations</p>
+          <p className="text-label font-bold text-ink">Build the collocations</p>
           <p className="text-label text-muted">
             Vocabulary rarely stands alone. Click the words that naturally collocate with &quot;make,&quot; then with
             &quot;do.&quot;
@@ -186,7 +186,7 @@ export default function TeachingVocabularySession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Discuss: your own examples</p>
+          <p className="text-label font-bold text-ink">Discuss: your own examples</p>
           <p className="text-label text-muted">Think of your own next TP point&apos;s vocabulary. For each question, jot a quick answer before comparing with a partner.</p>
         </div>
         {DISCUSS_QS.map((q, i) => (
@@ -215,7 +215,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -227,7 +227,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2.5">
-          <p className="font-serif text-lg font-semibold text-ink">Example — clarifying &quot;take up (a hobby)&quot;</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example — clarifying &quot;take up (a hobby)&quot;</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[150px_1fr] border-b border-border-faint last:border-b-0">

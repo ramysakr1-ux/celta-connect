@@ -9,10 +9,10 @@ import { BackLink } from "@/components/back-link";
 // paragraph · actions on the right. Never inside a card: a head is the page
 // speaking, not a panel on it.
 export const ROOM_BUTTON =
-  "wash inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-4 text-sm font-semibold whitespace-nowrap text-ink";
+  "wash inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-4 text-body font-semibold whitespace-nowrap text-ink";
 
 export const ROOM_PRIMARY =
-  "inline-flex h-[38px] items-center rounded-[6px] bg-primary px-4 text-sm font-semibold whitespace-nowrap text-primary-foreground hover:bg-primary/90";
+  "inline-flex h-[38px] items-center rounded-[6px] bg-primary px-4 text-body font-semibold whitespace-nowrap text-primary-foreground hover:bg-primary/90";
 
 export function RoomHead({
   eyebrow,

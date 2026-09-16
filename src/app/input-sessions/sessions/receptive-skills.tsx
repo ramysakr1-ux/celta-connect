@@ -53,8 +53,8 @@ function ReceptiveOrderAndKey() {
     <>
       <div className="flex flex-col gap-2.5 border-t border-border pt-5">
         <div className="flex flex-col gap-1">
-          <p className="font-serif text-lg font-semibold text-ink">Debrief — put the stages back in order</p>
-          <p className="text-xs text-muted">
+          <p className="font-serif text-h3 font-semibold text-ink">Debrief — put the stages back in order</p>
+          <p className="text-label text-muted">
             You just moved through these seven stages — click each one in the order you actually experienced it. This is a{" "}
             <strong className="text-ink">loop input</strong>: the session modelled the technique instead of only describing it.
           </p>
@@ -97,7 +97,7 @@ function ReceptiveOrderAndKey() {
           type="button"
           onClick={() => setRevealed(true)}
           data-print-hide
-          className="self-start flex h-9 items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+          className="self-start flex h-9 items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="7.5" cy="15.5" r="5.5" />
@@ -121,16 +121,16 @@ function ReceptiveOrderAndKey() {
             </div>
           </div>
           <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-            <p className="text-xs font-semibold text-ink">Terminology</p>
+            <p className="text-label font-semibold text-ink">Terminology</p>
             {TERMS.map((t) => (
               <div key={t.term} className="grid grid-cols-[220px_1fr] gap-2.5 border-b border-border-faint py-1">
-                <p className="font-serif text-xs font-semibold text-ink">{t.term}</p>
+                <p className="font-serif text-label font-semibold text-ink">{t.term}</p>
                 <p className="text-label leading-snug text-muted">{t.definition}</p>
               </div>
             ))}
           </div>
           <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-            <p className="text-xs font-semibold text-ink">True or false</p>
+            <p className="text-label font-semibold text-ink">True or false</p>
             {DETAILS.map((d) => (
               <div key={d.q} className="grid grid-cols-[1fr_90px] gap-2.5 border-b border-border-faint py-1">
                 <p className="text-label text-ink">{d.q}</p>
@@ -139,7 +139,7 @@ function ReceptiveOrderAndKey() {
             ))}
           </div>
           <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-semibold text-ink">Correct stage order</p>
+            <p className="text-label font-semibold text-ink">Correct stage order</p>
             <p className="text-label leading-relaxed text-ink">{CORRECT_ORDER_LABEL}</p>
           </div>
           <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
@@ -148,15 +148,15 @@ function ReceptiveOrderAndKey() {
               Trainer only
             </p>
             <div className="flex flex-col gap-0.5">
-              <p className="text-xs font-semibold text-ink">A real time limit, not a formality</p>
-              <p className="text-xs leading-relaxed text-ink">
+              <p className="text-label font-semibold text-ink">A real time limit, not a formality</p>
+              <p className="text-label leading-relaxed text-ink">
                 Time the gist task honestly, out loud, so trainees feel the pressure that forces skimming rather than
                 close reading.
               </p>
             </div>
             <div className="flex flex-col gap-0.5">
-              <p className="text-xs font-semibold text-ink">Peer check is doing real work</p>
-              <p className="text-xs leading-relaxed text-ink">
+              <p className="text-label font-semibold text-ink">Peer check is doing real work</p>
+              <p className="text-label leading-relaxed text-ink">
                 Don&apos;t skip straight to whole-class feedback — the peer-check step is part of what&apos;s being modelled,
                 not padding.
               </p>
@@ -200,7 +200,7 @@ export default function ReceptiveSkillsSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Stage 2</p>
+        <p className="text-label font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-4">
           <p className="text-meta text-ink">How do you think receptive skills lessons should be taught?</p>
           <p className="text-label italic text-muted">Discuss with your partner, about a minute.</p>
@@ -208,9 +208,9 @@ export default function ReceptiveSkillsSession() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
+        <p className="text-label font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2.5 rounded-[8px] border border-border bg-card p-5">
-          <p className="font-serif text-base font-semibold text-ink">Staging a receptive skills lesson</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Staging a receptive skills lesson</p>
           <p className="text-meta leading-relaxed text-ink">
             A receptive skills lesson never starts cold. It opens by creating interest in the topic — visuals,
             personalisation, brainstorming what the class already knows — because background knowledge is part of
@@ -238,7 +238,7 @@ export default function ReceptiveSkillsSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Stage 4</p>
+          <p className="text-label font-bold text-ink">Stage 4</p>
           <p className="text-label italic text-muted">More time now — look again at the text and answer these questions, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (

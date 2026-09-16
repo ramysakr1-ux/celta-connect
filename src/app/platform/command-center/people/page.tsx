@@ -45,7 +45,7 @@ export default async function CommandCenterPeoplePage() {
     return (
       <div className="card p-5">
         <h2 className="mb-2 font-serif text-h3 font-semibold text-ink">People, across your centres</h2>
-        <p className="text-sm text-muted">You don&apos;t currently have Owner or Invited access to any centre.</p>
+        <p className="text-body text-muted">You don&apos;t currently have Owner or Invited access to any centre.</p>
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default async function CommandCenterPeoplePage() {
       <div className="card flex flex-col gap-3.5 p-5">
         <div>
           <h2 className="font-serif text-h3 font-semibold text-ink">Change a user&apos;s role</h2>
-          <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
+          <p className="mt-1 text-body text-muted">Looks someone up by email and sets their account-level role directly.</p>
         </div>
         <ChangeRoleForm />
       </div>
@@ -198,7 +198,7 @@ export default async function CommandCenterPeoplePage() {
             </div>
           );
         })}
-        {coursesList.length === 0 ? <p className="p-5 text-sm text-muted">No courses at your accessible centres yet.</p> : null}
+        {coursesList.length === 0 ? <p className="p-5 text-body text-muted">No courses at your accessible centres yet.</p> : null}
       </div>
     </div>
   );

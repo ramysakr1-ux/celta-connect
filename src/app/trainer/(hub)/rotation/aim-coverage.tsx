@@ -30,12 +30,12 @@ export function AimCoverageMatrix({ members, plans }: { members: CoverageMember[
   return (
     <div className="sheet flex flex-col gap-3 p-5">
       <div className="flex items-baseline justify-between gap-4">
-        <h4 className="font-serif text-base text-ink">Main aims so far</h4>
-        <p className="text-xs text-muted">Every candidate should meet a range of aims across their lessons</p>
+        <h4 className="font-serif text-h3 text-ink">Main aims so far</h4>
+        <p className="text-label text-muted">Every candidate should meet a range of aims across their lessons</p>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse text-body">
           <thead>
             <tr className="border-b border-border">
               <th className="p-2 text-left text-micro font-semibold tracking-[0.08em] text-muted uppercase">Candidate</th>
@@ -79,7 +79,7 @@ export function AimCoverageMatrix({ members, plans }: { members: CoverageMember[
                       </td>
                     );
                   })}
-                  <td className={`p-2 text-right text-xs font-semibold ${spread.distinct >= 3 ? "text-muted" : "text-status-warning-text"}`}>
+                  <td className={`p-2 text-right text-label font-semibold ${spread.distinct >= 3 ? "text-muted" : "text-status-warning-text"}`}>
                     {spread.distinct} of {spread.total} kinds
                   </td>
                 </tr>

@@ -202,7 +202,7 @@ export default async function CommandCenterOverviewPage() {
               href={`/platform/command-center/enter-course/${c.courseId}`}
               className="lift flex items-center justify-between border-t border-border-faint py-3"
             >
-              <span className="text-sm font-semibold text-ink">
+              <span className="text-body font-semibold text-ink">
                 {c.centerName} · {c.label} — {(c.role ?? "role not set").replace(/_/g, " ")}
               </span>
               <span className="text-label text-muted">{c.running ? "Running now" : "Not currently running"}</span>
@@ -218,7 +218,7 @@ export default async function CommandCenterOverviewPage() {
               <h2 className="font-serif text-h3 font-semibold text-ink">Centres</h2>
               <Link
                 href="/platform/command-center/centres/new"
-                className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90"
+                className="rounded-full bg-primary px-4 py-2 text-label font-bold text-primary-foreground hover:bg-primary/90"
               >
                 + Add a centre
               </Link>
@@ -289,7 +289,7 @@ export default async function CommandCenterOverviewPage() {
           <div className="card card-red flex flex-col gap-3.5 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Needs your attention</h2>
             {needsAttentionCount === 0 ? (
-              <p className="text-sm text-muted">Nothing needs you right now.</p>
+              <p className="text-body text-muted">Nothing needs you right now.</p>
             ) : (
               <>
                 {flaggedCases.map((c) => (
@@ -356,7 +356,7 @@ export default async function CommandCenterOverviewPage() {
                     </div>
                     <span className="text-label text-muted">{relativeTime(m.received_at)}</span>
                   </div>
-                  <div className="pl-[13px] text-xs text-muted">{m.snippet}</div>
+                  <div className="pl-[13px] text-label text-muted">{m.snippet}</div>
                 </div>
               ))
             )}
@@ -410,8 +410,8 @@ function AttentionRow({ dot, title, detail }: { dot: string; title: string; deta
     >
       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: dot }} />
       <div className="flex flex-col gap-0.5">
-        <div className="text-sm font-bold text-ink">{title}</div>
-        <div className="text-xs text-muted">{detail}</div>
+        <div className="text-body font-bold text-ink">{title}</div>
+        <div className="text-label text-muted">{detail}</div>
       </div>
     </div>
   );

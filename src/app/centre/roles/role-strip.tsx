@@ -151,7 +151,7 @@ export function RoleStrip({
             >
               <span className={`absolute inset-x-0 top-0 h-[3px] ${active ? s.spine : "bg-transparent"}`} aria-hidden="true" />
               <span className={`block text-body font-bold ${s.tone}`}>{roleLabel(role, customRoles)}</span>
-              <span className="mt-0.5 block text-xs text-muted">{whoFor(role)}</span>
+              <span className="mt-0.5 block text-label text-muted">{whoFor(role)}</span>
               {(holders[role] ?? []).length > 0 ? (
                 <span className="mt-1.5 block text-label text-ink">
                   {(holders[role] ?? []).map((h) => h.name).join(", ")}
@@ -165,12 +165,12 @@ export function RoleStrip({
       </div>
 
       <div className="card px-5 py-4">
-        <p className="text-sm text-ink">{summaryFor(selected)}</p>
+        <p className="text-body text-ink">{summaryFor(selected)}</p>
 
         <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
           {permsFor(selected).map((p) => (
             <div key={p.text} className="hover-ring flex items-start gap-2.5 rounded-[6px] bg-surface-muted/60 px-3 py-2 wash">
-              <span className="mt-px shrink-0 text-sm">
+              <span className="mt-px shrink-0 text-body">
                 <Mark grant={p.grant} />
               </span>
               <span className="flex flex-col">
@@ -181,7 +181,7 @@ export function RoleStrip({
         </div>
 
         <div className={`mt-4 rounded-[6px] border px-4 py-3 ${style.band}`}>
-          <p className="text-xs leading-relaxed text-ink">{style.rule}</p>
+          <p className="text-label leading-relaxed text-ink">{style.rule}</p>
         </div>
       </div>
     </div>

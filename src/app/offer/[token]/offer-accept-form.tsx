@@ -7,7 +7,7 @@ import { SpecialConsiderationFields } from "@/components/special-consideration-f
 import { AiDisclaimerFields } from "@/components/ai-disclaimer-fields";
 
 const initialState: AcceptOfferState = { error: null };
-const inputClass = "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary";
 
 // Same disclosures as join/[token]/join-form.tsx's trainee path, verbatim
 // -- accepting an offer creates exactly the same kind of account a course
@@ -31,14 +31,14 @@ export function OfferAcceptForm({
       <input type="hidden" name="token" value={token} />
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm text-muted">
+        <label htmlFor="password" className="text-body text-muted">
           Choose a password
         </label>
         <input id="password" name="password" type="password" required autoComplete="new-password" className={inputClass} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="confirm_password" className="text-sm text-muted">
+        <label htmlFor="confirm_password" className="text-body text-muted">
           Confirm password
         </label>
         <input id="confirm_password" name="confirm_password" type="password" required autoComplete="new-password" className={inputClass} />
@@ -46,10 +46,10 @@ export function OfferAcceptForm({
 
       {isUkCentre ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="uln" className="text-sm text-muted">
+          <label htmlFor="uln" className="text-body text-muted">
             Unique Learner Number (ULN)
           </label>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             The 10-digit identifier applied to your Personal Learning Record for UK education and training, if you
             have one.
           </p>
@@ -63,40 +63,40 @@ export function OfferAcceptForm({
       <SpecialConsiderationFields defaultText={defaultSpecialConsideration} />
 
       <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           By checking the boxes below you agree to our{" "}
           <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
             full terms
           </Link>
           .
         </p>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
           <span>
             I agree not to copy, reverse-engineer, or share access to the Connect platform, and to use it only for
             the purposes of my course.
           </span>
         </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_data" required className="mt-0.5 accent-primary" />
           <span>
             I understand that my coursework, tutor feedback, and records are held in Connect during the course and
             archived to the centre&apos;s secure Google Drive afterwards.
           </span>
         </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_link_private" required className="mt-0.5 accent-primary" />
           <span>I will keep my workspace link private -- it opens my portfolio and nobody else&apos;s.</span>
         </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_course_policies" required className="mt-0.5 accent-primary" />
           <span>I accept the centre&apos;s attendance, plagiarism, complaints and resubmission policies.</span>
         </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_own_work" required className="mt-0.5 accent-primary" />
           <span>The work I submit here is my own, and I will confirm that per assignment.</span>
         </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_fingerprint" required className="mt-0.5 accent-primary" />
           <span>
             I understand that Connect keeps a text fingerprint of my written assignments -- not the assignments
@@ -104,7 +104,7 @@ export function OfferAcceptForm({
             against it.
           </span>
         </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+        <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
           <input type="checkbox" name="agree_contact" required className="mt-0.5 accent-primary" />
           <span>
             I understand a tutor on my course may contact me directly by phone or email in an urgent situation --
@@ -113,12 +113,12 @@ export function OfferAcceptForm({
         </label>
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {pending ? "Setting up..." : "Accept and set up my account"}
       </button>

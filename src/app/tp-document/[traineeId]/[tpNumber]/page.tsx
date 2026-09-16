@@ -160,7 +160,7 @@ export default async function AssembledDocumentPage({
           <p className="text-label font-bold tracking-[0.16em] uppercase" style={{ color: MUTED }}>
             Assembled document
           </p>
-          <p className="text-sm" style={{ color: INK }}>
+          <p className="text-body" style={{ color: INK }}>
             {trainee.full_name} · TP{tpNumber}
           </p>
         </div>

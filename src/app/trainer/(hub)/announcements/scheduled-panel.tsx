@@ -73,7 +73,7 @@ export function ScheduledPanel({
         <span className="text-meta text-muted">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
       </div>
       {scheduled.length === 0 ? (
-        <p className="px-[18px] py-4 text-sm text-muted">Anchor an announcement to a timetable event and it waits here until it fires.</p>
+        <p className="px-[18px] py-4 text-body text-muted">Anchor an announcement to a timetable event and it waits here until it fires.</p>
       ) : (
         <div className="divide-y divide-border-faint">
           {scheduled.map((row) =>
@@ -119,10 +119,10 @@ function ReadRow({
   return (
     <div className={`hover-ring mx-2.5 flex flex-col gap-1.5 rounded-[10px] px-3 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
       <div className="flex items-center gap-2">
-        <p className="text-sm font-semibold text-ink">{row.title}</p>
+        <p className="text-body font-semibold text-ink">{row.title}</p>
         {held ? <span className="pill pill-neutral">Held</span> : null}
       </div>
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         {/* A row with no anchor event is never fired by the cron
             (announcements-cron.ts only looks at anchored rows), so it waits
             for a person -- the case the CELTA 5 Stage 3 sign-off notice is
@@ -144,7 +144,7 @@ function ReadRow({
         <div className="flex items-center gap-2.5">
           <form action={postBroadcastNow}>
             <input type="hidden" name="broadcast_id" value={row.id} />
-            <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+            <button type="submit" className="text-label font-semibold text-primary hover:underline">
               Post now
             </button>
           </form>
@@ -152,26 +152,26 @@ function ReadRow({
           {held && row.anchorEventTitle === null ? null : held ? (
             <form action={resumeBroadcast}>
               <input type="hidden" name="broadcast_id" value={row.id} />
-              <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+              <button type="submit" className="text-label font-semibold text-primary hover:underline">
                 Resume
               </button>
             </form>
           ) : (
             <form action={holdBroadcast}>
               <input type="hidden" name="broadcast_id" value={row.id} />
-              <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+              <button type="submit" className="text-label font-semibold text-primary hover:underline">
                 Hold
               </button>
             </form>
           )}
           {held && row.anchorEventTitle === null ? null : <span className="text-border">|</span>}
-          <button type="button" onClick={onEdit} className="text-xs font-semibold text-primary hover:underline">
+          <button type="button" onClick={onEdit} className="text-label font-semibold text-primary hover:underline">
             Edit
           </button>
           <span className="text-border">|</span>
           <form action={deleteBroadcast}>
             <input type="hidden" name="broadcast_id" value={row.id} />
-            <button type="submit" className="text-xs text-destructive hover:underline">
+            <button type="submit" className="text-label text-destructive hover:underline">
               Skip
             </button>
           </form>
@@ -229,14 +229,14 @@ function EditRow({
         className="rounded-[6px] border border-input bg-card p-2 text-meta text-ink outline-none focus:border-primary"
       />
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-muted">Send timing</label>
+        <label className="text-label text-muted">Send timing</label>
         <div className="flex items-center gap-2">
           <select
             name="anchor_event_id"
             value={anchorEventId}
             onChange={(e) => setAnchorEventId(e.target.value)}
             required
-            className="h-9 flex-1 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 flex-1 rounded-[6px] border border-input bg-card px-2 text-body text-ink outline-none focus:border-primary"
           >
             {timetableEvents.map((event) => (
               <option key={event.id} value={event.id}>
@@ -249,32 +249,32 @@ function EditRow({
             name="anchor_offset_days"
             value={offsetDays}
             onChange={(e) => setOffsetDays(e.target.value)}
-            className="h-9 w-16 rounded-[6px] border border-input bg-card px-2 text-center text-sm outline-none focus:border-primary"
+            className="h-9 w-16 rounded-[6px] border border-input bg-card px-2 text-center text-body outline-none focus:border-primary"
           />
-          <span className="text-xs text-muted">days (negative = before)</span>
+          <span className="text-label text-muted">days (negative = before)</span>
         </div>
       </div>
-      <label className="flex items-center justify-between text-sm text-muted">
+      <label className="flex items-center justify-between text-body text-muted">
         Pin to top
         <input type="checkbox" name="pinned" defaultChecked={row.pinned} />
       </label>
-      <label className="flex items-center justify-between text-sm text-muted">
+      <label className="flex items-center justify-between text-body text-muted">
         Keep when the course duplicates
         <input type="checkbox" name="keep_on_duplicate" defaultChecked={row.keepOnDuplicate} />
       </label>
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-medium text-ink wash"
+          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-label font-medium text-ink wash"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+          className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save"}
         </button>

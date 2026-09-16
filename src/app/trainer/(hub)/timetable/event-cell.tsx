@@ -101,14 +101,14 @@ function EventRow({
           <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             {event.detail ? `Subtitle: ${event.detail}` : "Set subtitle"}
           </summary>
-          <form action={setEventDetail} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
+          <form action={setEventDetail} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-label">
             <input type="hidden" name="event_id" value={event.id} />
             <input
               name="detail"
               type="text"
               defaultValue={event.detail ?? ""}
               placeholder="Supervised, Observation task…"
-              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
             />
             <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 wash">
               Save
@@ -123,14 +123,14 @@ function EventRow({
           <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             {event.input_session_criteria.length > 0 ? `Criteria: ${event.input_session_criteria.join(", ")}` : "Set criteria"}
           </summary>
-          <form action={setInputSessionCriteria} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
+          <form action={setInputSessionCriteria} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-label">
             <input type="hidden" name="event_id" value={event.id} />
             <input
               name="input_session_criteria"
               type="text"
               defaultValue={event.input_session_criteria.join(", ")}
               placeholder="4c, 5f"
-              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
             />
             <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 wash">
               Save
@@ -143,12 +143,12 @@ function EventRow({
           <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
           </summary>
-          <form action={setTpEventMode} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
+          <form action={setTpEventMode} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-label">
             <input type="hidden" name="event_id" value={event.id} />
             <select
               name="mode"
               defaultValue={event.mode ?? ""}
-              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
             >
               <option value="">Not set</option>
               <option value="f2f">Face-to-face</option>
@@ -165,7 +165,7 @@ function EventRow({
           <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             Attendance {attendedIds.size}/{volunteers.length}
           </summary>
-          <form action={setAttendance} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
+          <form action={setAttendance} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-label">
             <input type="hidden" name="event_id" value={event.id} />
             {volunteers.map((v) => (
               <label key={v.id} className="flex items-center gap-1.5">
@@ -225,7 +225,7 @@ export function EventCell({
   const accent = CATEGORY_ACCENT[category];
   return (
     <div
-      className={`group bg-transparent text-xs leading-snug ${
+      className={`group bg-transparent text-label leading-snug ${
         category === "lu" ? "pl-0 text-muted" : "border-l-[3px] pl-2.5"
       }`}
       style={category === "lu" ? undefined : { borderLeftColor: accent }}

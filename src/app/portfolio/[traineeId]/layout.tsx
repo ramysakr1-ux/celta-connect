@@ -516,7 +516,7 @@ export default async function PortfolioLayout({
                 <HideDuringPreview>
                   <Link
                     href={`/portfolio/${trainee.id}?preview=trainee`}
-                    className="flex shrink-0 items-center gap-1.5 rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-ink hover:border-primary"
+                    className="flex shrink-0 items-center gap-1.5 rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-label font-medium text-ink hover:border-primary"
                   >
                     <Eye className="size-3.5" aria-hidden="true" />
                     Preview as trainee
@@ -536,7 +536,7 @@ export default async function PortfolioLayout({
 
       {isCourseStatusReadOnly(trainee.course_status) ? (
         <div className="bg-destructive/8 border-b border-destructive/20">
-          <div className="container flex h-9 items-center text-xs text-destructive">
+          <div className="container flex h-9 items-center text-label text-destructive">
             {COURSE_STATUS_LABEL[trainee.course_status]} -- this portfolio is kept as a record but is
             read-only going forward.
           </div>
@@ -576,7 +576,7 @@ export default async function PortfolioLayout({
           32px of padding, and 80-132px up on mobile against 80px. The last
           thing in this footer sat underneath it in both. Same fault, and the
           same fix, as the Centre settings bar on 26 Aug. */}
-      <footer className={`mt-auto flex flex-col items-center gap-3 py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-40 md:pb-24" : ""}`}>
+      <footer className={`mt-auto flex flex-col items-center gap-3 py-8 text-center text-label text-muted ${showTraineeNav ? "pb-40 md:pb-24" : ""}`}>
         <span>
           {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]
             .filter(Boolean)

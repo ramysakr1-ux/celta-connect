@@ -49,7 +49,7 @@ export function BranchVisibilityCard({
             >
               <div>
                 <span className="text-meta font-semibold">{viewer.name}</span>
-                <span className="text-xs" style={{ color: "var(--owner-muted)" }}>
+                <span className="text-label" style={{ color: "var(--owner-muted)" }}>
                   {" "}
                   can see{" "}
                 </span>

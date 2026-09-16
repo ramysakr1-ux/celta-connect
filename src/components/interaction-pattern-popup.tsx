@@ -42,7 +42,7 @@ export function InteractionPatternPopup({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onChange(value.trim() ? `${value} + ${p.code}` : p.code)}
-                className="rounded px-2 py-1 text-left text-xs text-ink hover:bg-background"
+                className="rounded px-2 py-1 text-left text-label text-ink hover:bg-background"
               >
                 {p.label}
               </button>

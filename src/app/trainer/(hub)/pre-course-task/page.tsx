@@ -27,12 +27,12 @@ export default async function TrainerPreCourseTaskPage() {
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
 
   const { data: course } = await supabase.from("courses").select("center_id, start_date").eq("id", courseId).maybeSingle();
   if (!course) {
-    return <div className="sheet p-6 text-sm text-muted">Course not found.</div>;
+    return <div className="sheet p-6 text-body text-muted">Course not found.</div>;
   }
 
   // Perf, 6 Sep 2026: five round trips in a line, of which only two pairs
@@ -97,12 +97,12 @@ export default async function TrainerPreCourseTaskPage() {
       <div>
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Who&apos;s answered what</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           Answered in Connect and never submitted -- candidates type into the task itself and it saves as they go.
           This counts tasks actually answered per section; open a name to read their answers.
         </p>
         {answerKeyDate ? (
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-label text-muted">
             Answer key {answerKeyOpen ? "opened" : "opens"} {answerKeyDate ? formatCalendarDate(answerKeyDate, { year: "numeric" }) : "--"} -- 48 hours before the course starts,
             cohort-wide. A candidate only sees the answer to a task once they have answered it themselves; you see all
             of them regardless.
@@ -111,12 +111,12 @@ export default async function TrainerPreCourseTaskPage() {
       </div>
 
       {orderedSections.length === 0 ? (
-        <div className="sheet text-sm text-muted">No pre-course task sections set up for this centre yet.</div>
+        <div className="sheet text-body text-muted">No pre-course task sections set up for this centre yet.</div>
       ) : (trainees ?? []).length === 0 ? (
-        <div className="sheet text-sm text-muted">No candidates on this course yet.</div>
+        <div className="sheet text-body text-muted">No candidates on this course yet.</div>
       ) : (
         <div className="overflow-x-auto rounded-[6px] border border-border">
-          <table className="w-full border-collapse text-sm">
+          <table className="w-full border-collapse text-body">
             <thead>
               <tr className="border-b border-border">
                 <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Candidate</th>
@@ -157,7 +157,7 @@ export default async function TrainerPreCourseTaskPage() {
                         </td>
                       );
                     })}
-                    <td className="px-4 py-2.5 text-center text-xs font-medium text-muted">
+                    <td className="px-4 py-2.5 text-center text-label font-medium text-muted">
                       {answeredTotal} of {itemsTotal}
                     </td>
                   </tr>
@@ -168,7 +168,7 @@ export default async function TrainerPreCourseTaskPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-4 text-xs text-muted">
+      <div className="flex flex-wrap items-center gap-4 text-label text-muted">
         <span>C = Cambridge&apos;s Pre-Course Task</span>
         <span>S = your centre&apos;s supplement</span>
       </div>

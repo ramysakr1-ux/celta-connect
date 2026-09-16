@@ -40,7 +40,7 @@ export function PlatformAccessTab({
     <div className="flex flex-col gap-5">
       <div>
         <h2 className="font-serif text-h3 font-semibold text-ink">Connect access</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           Connect&apos;s platform owner has no standing access to your centre&apos;s data unless you invite them in. If you do, every visit is
           logged here, permanently.
         </p>
@@ -49,26 +49,26 @@ export function PlatformAccessTab({
       {invite ? (
         <div className="sheet flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-ink">Standing access granted</p>
-            <p className="mt-1 text-xs text-muted">
+            <p className="text-body font-medium text-ink">Standing access granted</p>
+            <p className="mt-1 text-label text-muted">
               Since {formatDate(invite.invitedAt, timeZone, { year: "numeric" })}
               {invite.note ? ` — ${invite.note}` : ""}
             </p>
           </div>
           <form action={revokePlatformOwnerInvite}>
             <input type="hidden" name="invite_id" value={invite.id} />
-            <button type="submit" className="shrink-0 text-xs text-destructive hover:underline">
+            <button type="submit" className="shrink-0 text-label text-destructive hover:underline">
               Revoke
             </button>
           </form>
         </div>
       ) : (
         <div className="sheet">
-          <h3 className="font-serif text-base text-ink">Invite Connect in</h3>
-          <p className="mt-1 text-sm text-muted">Standing, not time-limited — revoke it any time from this same screen.</p>
+          <h3 className="font-serif text-h3 text-ink">Invite Connect in</h3>
+          <p className="mt-1 text-body text-muted">Standing, not time-limited — revoke it any time from this same screen.</p>
           <form action={action} className="mt-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="note" className="text-sm text-muted">
+              <label htmlFor="note" className="text-body text-muted">
                 Note (optional)
               </label>
               <textarea
@@ -76,14 +76,14 @@ export function PlatformAccessTab({
                 name="note"
                 rows={2}
                 placeholder="What you'd like help with"
-                className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
               />
             </div>
-            {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+            {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
             <button
               type="submit"
               disabled={pending}
-              className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+              className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Sending…" : "Send invite"}
             </button>
@@ -92,17 +92,17 @@ export function PlatformAccessTab({
       )}
 
       <div>
-        <h3 className="font-serif text-base text-ink">Access log</h3>
-        <p className="mt-1 text-sm text-muted">Every real visit, whenever standing access has existed.</p>
+        <h3 className="font-serif text-h3 text-ink">Access log</h3>
+        <p className="mt-1 text-body text-muted">Every real visit, whenever standing access has existed.</p>
         <div className="sheet mt-3 overflow-hidden !p-0">
           {accessLog.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No visits recorded.</p>
+            <p className="p-6 text-body text-muted">No visits recorded.</p>
           ) : (
             <ul>
               {accessLog.map((a) => (
                 <li key={a.id} className="list-row flex items-center justify-between gap-4">
-                  <span className="text-sm text-ink">Opened {a.page}</span>
-                  <span className="text-xs text-muted">{formatDateTime(a.accessedAt, timeZone)}</span>
+                  <span className="text-body text-ink">Opened {a.page}</span>
+                  <span className="text-label text-muted">{formatDateTime(a.accessedAt, timeZone)}</span>
                 </li>
               ))}
             </ul>

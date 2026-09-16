@@ -135,11 +135,11 @@ export default async function NewCoursePage() {
           centre role at all, and /centre would bounce them to /dashboard --
           a back link that does not go back. They return the way they came. */}
       {session.profile.role === "platform_owner" ? (
-        <Link href="/platform/command-center" className="text-sm text-muted underline">
+        <Link href="/platform/command-center" className="text-body text-muted underline">
           Back to command center
         </Link>
       ) : (
-        <Link href="/centre" className="text-sm text-muted underline">
+        <Link href="/centre" className="text-body text-muted underline">
           Back to centre management
         </Link>
       )}

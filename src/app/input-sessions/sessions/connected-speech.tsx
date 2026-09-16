@@ -101,11 +101,11 @@ function HomophoneLines() {
   const [shown, setShown] = useState<Record<number, boolean>>({});
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-xs font-bold text-ink">Lead-in, alternative · read these aloud</p>
+      <p className="text-label font-bold text-ink">Lead-in, alternative · read these aloud</p>
       <p className="text-label text-muted">Sound out each line fast — they&apos;re homophone strings, not real sentences on the page.</p>
       {HOMOPHONE_LINES.map((h, i) => (
         <div key={h.line} className="flex items-center gap-3 rounded-[8px] border border-border bg-card px-3.5 py-3">
-          <p className="flex-1 font-serif text-sm italic text-ink">{h.line}</p>
+          <p className="flex-1 font-serif text-body italic text-ink">{h.line}</p>
           {shown[i] ? <p className="text-label text-muted">{h.answer}</p> : null}
           <button
             type="button"
@@ -152,7 +152,7 @@ function FeatureExample({ ex, tone, voiceIdx }: { ex: Example; tone: string; voi
                 if (picked !== null) return;
                 setPicked(oi);
               }}
-              className={`rounded-[6px] border-[1.5px] px-3.5 py-1.5 text-xs font-semibold ${
+              className={`rounded-[6px] border-[1.5px] px-3.5 py-1.5 text-label font-semibold ${
                 show && isRight
                   ? "border-primary bg-primary/10 text-primary"
                   : show && isPicked
@@ -166,7 +166,7 @@ function FeatureExample({ ex, tone, voiceIdx }: { ex: Example; tone: string; voi
         })}
       </div>
       {picked !== null ? (
-        <p className="pl-[46px] text-xs leading-relaxed" style={{ color: tone }}>
+        <p className="pl-[46px] text-label leading-relaxed" style={{ color: tone }}>
           {ex.answer}
         </p>
       ) : null}
@@ -182,7 +182,7 @@ function TrainerScript() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -209,8 +209,8 @@ function TrainerScript() {
         <div key={t.step} className="flex gap-2.5">
           <p className="w-14 flex-none pt-px text-micro font-bold text-destructive">{t.time}</p>
           <div className="flex flex-col gap-0.5">
-            <p className="text-xs font-semibold text-ink">{t.step}</p>
-            <p className="text-xs leading-relaxed text-ink">{t.note}</p>
+            <p className="text-label font-semibold text-ink">{t.step}</p>
+            <p className="text-label leading-relaxed text-ink">{t.note}</p>
           </div>
         </div>
       ))}
@@ -253,7 +253,7 @@ export default function ConnectedSpeechSession() {
       <VoicePicker voiceIdx={voiceIdx} setVoiceIdx={setVoiceIdx} />
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 3 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 3 minutes</p>
         <div className="flex items-center gap-3 rounded-[8px] border border-border bg-card p-4">
           <button
             type="button"
@@ -281,7 +281,7 @@ export default function ConnectedSpeechSession() {
         {SECTIONS.map((sec, si) => (
           <div key={sec.title} className="flex flex-col gap-2">
             <div className="flex items-baseline gap-2.5">
-              <p className="font-serif text-lg font-semibold text-ink">
+              <p className="font-serif text-h3 font-semibold text-ink">
                 {si + 1}. {sec.title}
               </p>
               <p className="text-label text-muted">{sec.def}</p>
@@ -294,7 +294,7 @@ export default function ConnectedSpeechSession() {
       </div>
 
       <div className="flex items-center gap-3.5 rounded-[8px] border border-border bg-card p-4">
-        <p className="flex-1 text-xs leading-relaxed text-ink">
+        <p className="flex-1 text-label leading-relaxed text-ink">
           For face-to-face, run every clip live from a laptop speaker — no headphones needed. The BBC&apos;s{" "}
           <strong className="font-semibold">Learning English</strong> pronunciation series has short free clips of
           natural connected speech if you want more examples beyond today&apos;s five.
@@ -303,7 +303,7 @@ export default function ConnectedSpeechSession() {
           href="https://www.bbc.co.uk/learningenglish/english/features/pronunciation"
           target="_blank"
           rel="noreferrer"
-          className="flex h-8 flex-none items-center rounded-[6px] bg-primary px-3.5 text-xs font-bold text-white"
+          className="flex h-8 flex-none items-center rounded-[6px] bg-primary px-3.5 text-label font-bold text-white"
         >
           bbc.co.uk/learningenglish
         </a>

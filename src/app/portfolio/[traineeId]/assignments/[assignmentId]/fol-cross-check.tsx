@@ -35,17 +35,17 @@ export function FolCrossCheck({ claims, poolEntries }: { claims: Claim[]; poolEn
 
   return (
     <div className="sheet flex flex-col gap-2 p-6">
-      <h2 className="font-serif text-lg text-ink">Focus on the Learner -- claimed problems</h2>
-      <p className="text-sm text-muted">Cross-checked against the class log. A flag means the citation doesn&apos;t trace to a logged instance.</p>
+      <h2 className="font-serif text-h3 text-ink">Focus on the Learner -- claimed problems</h2>
+      <p className="text-body text-muted">Cross-checked against the class log. A flag means the citation doesn&apos;t trace to a logged instance.</p>
       <ul className="flex flex-col gap-1.5">
         {claims.map((c) => {
           const words = significantWords(c.problem_description);
           const traces = poolEntries.some((e) => words.some((w) => e.note.toLowerCase().includes(w)));
           return (
-            <li key={c.id} className="flex items-center gap-2 text-sm">
+            <li key={c.id} className="flex items-center gap-2 text-body">
               <span className="pill pill-neutral">{c.problem_type}</span>
               <span className="text-ink">{c.problem_description}</span>
-              <span className="text-xs text-muted">({c.source === "pooled_log" ? "class log" : "sign-up recording"})</span>
+              <span className="text-label text-muted">({c.source === "pooled_log" ? "class log" : "sign-up recording"})</span>
               {!traces ? <span className="pill pill-danger ml-auto">Doesn&apos;t trace to a logged instance</span> : null}
             </li>
           );

@@ -32,8 +32,8 @@ export function WithdrawalRequestForm({
   if (state.sent) {
     return (
       <div className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-4">
-        <p className="text-sm font-semibold text-primary">Sent -- waiting for the centre.</p>
-        <p className="mt-1 text-sm text-muted">A tutor will act on this and follow up with you.</p>
+        <p className="text-body font-semibold text-primary">Sent -- waiting for the centre.</p>
+        <p className="mt-1 text-body text-muted">A tutor will act on this and follow up with you.</p>
       </div>
     );
   }
@@ -53,7 +53,7 @@ export function WithdrawalRequestForm({
         <input type="hidden" name="reason_tag" value={reasonTag} />
 
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-muted">What are you asking for?</p>
+          <p className="text-label text-muted">What are you asking for?</p>
           <div className="flex flex-col gap-2">
             <label
               className={`flex cursor-pointer flex-col gap-1 rounded-[6px] border p-3 ${
@@ -62,9 +62,9 @@ export function WithdrawalRequestForm({
             >
               <span className="flex items-center gap-2.5">
                 <input type="radio" checked={kind === "withdraw"} onChange={() => pickKind("withdraw")} className="mt-0.5" />
-                <span className="text-sm font-semibold text-ink">Withdraw from the course</span>
+                <span className="text-body font-semibold text-ink">Withdraw from the course</span>
               </span>
-              <span className="pl-6 text-xs text-muted">You are leaving and will not complete this course. This cannot be undone.</span>
+              <span className="pl-6 text-label text-muted">You are leaving and will not complete this course. This cannot be undone.</span>
             </label>
             <label
               className={`flex cursor-pointer flex-col gap-1 rounded-[6px] border p-3 ${
@@ -73,9 +73,9 @@ export function WithdrawalRequestForm({
             >
               <span className="flex items-center gap-2.5">
                 <input type="radio" checked={kind === "defer"} onChange={() => pickKind("defer")} className="mt-0.5" />
-                <span className="text-sm font-semibold text-ink">Request a deferral</span>
+                <span className="text-body font-semibold text-ink">Request a deferral</span>
               </span>
-              <span className="pl-6 text-xs text-muted">
+              <span className="pl-6 text-label text-muted">
                 You want to stop now and finish on a later course. Subject to the centre agreeing and a place being available.
               </span>
             </label>
@@ -83,14 +83,14 @@ export function WithdrawalRequestForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-muted">{kind === "withdraw" ? "Your reason for withdrawing" : "Your reason for asking to defer"}</p>
+          <p className="text-label text-muted">{kind === "withdraw" ? "Your reason for withdrawing" : "Your reason for asking to defer"}</p>
           <div className="flex flex-wrap gap-1.5">
             {WITHDRAWAL_REASON_TAGS.map((tag) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => setReasonTag(tag)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                className={`rounded-full border px-3 py-1.5 text-label font-semibold ${
                   reasonTag === tag ? "border-primary bg-primary/10 text-primary" : "border-border text-muted hover:border-primary/40"
                 }`}
               >
@@ -102,7 +102,7 @@ export function WithdrawalRequestForm({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-baseline justify-between gap-3">
-            <label htmlFor="note" className="text-xs text-muted">
+            <label htmlFor="note" className="text-label text-muted">
               Anything you would like the centre to know
             </label>
             <span className="text-label text-muted">optional</span>
@@ -116,7 +116,7 @@ export function WithdrawalRequestForm({
                 ? "Write or dictate -- this appears in your letter in your own words…"
                 : "When would you hope to return, and is there anything the centre should know…"
             }
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
           <p className="text-label text-muted italic">
             This is read by the centre only. It does not affect your record, and nothing you write here reaches Cambridge.
@@ -124,7 +124,7 @@ export function WithdrawalRequestForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="effective_date" className="text-xs text-muted">
+          <label htmlFor="effective_date" className="text-label text-muted">
             {kind === "withdraw" ? "Last day on the course" : "Last day you will attend"}
           </label>
           <input
@@ -132,13 +132,13 @@ export function WithdrawalRequestForm({
             name="effective_date"
             type="date"
             required
-            className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
           />
         </div>
 
         {kind === "withdraw" ? (
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-muted">Would you like to keep attending sessions?</p>
+            <p className="text-label text-muted">Would you like to keep attending sessions?</p>
             <input type="hidden" name="still_attending" value={stillAttending} />
             {(
               [
@@ -153,7 +153,7 @@ export function WithdrawalRequestForm({
                 }`}
               >
                 <input type="radio" checked={stillAttending === value} onChange={() => setStillAttending(value)} />
-                <span className="text-sm text-ink">{label}</span>
+                <span className="text-body text-ink">{label}</span>
               </label>
             ))}
           </div>
@@ -162,7 +162,7 @@ export function WithdrawalRequestForm({
         <div className="flex flex-col gap-2 border-t border-border-faint pt-4">
           <p className="text-micro font-semibold tracking-[0.1em] text-muted uppercase">Please confirm</p>
           {confirmations.map((text, i) => (
-            <label key={text} className="flex items-start gap-2.5 text-sm text-ink">
+            <label key={text} className="flex items-start gap-2.5 text-body text-ink">
               <input
                 type="checkbox"
                 name="confirmed"
@@ -182,20 +182,20 @@ export function WithdrawalRequestForm({
           ))}
         </div>
 
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
         {signatureName ? (
           <div className="flex flex-col gap-2 border-t border-border-faint pt-4">
             <input type="hidden" name="signed_name" value={signatureName} />
-            <p className="text-xs text-muted">Signed electronically. Your name and the time are recorded on the request.</p>
+            <p className="text-label text-muted">Signed electronically. Your name and the time are recorded on the request.</p>
             <button
               type="submit"
               disabled={pending || !allConfirmed}
-              className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Sending…" : `Sign as ${signatureName} and send`}
             </button>
-            {!allConfirmed ? <p className="text-xs text-muted">Confirm every statement above to sign.</p> : null}
+            {!allConfirmed ? <p className="text-label text-muted">Confirm every statement above to sign.</p> : null}
           </div>
         ) : null}
       </form>

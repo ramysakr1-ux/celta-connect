@@ -44,11 +44,11 @@ export function PaymentsPanel({
       <div>
         <h2 className="font-serif text-h3 font-semibold text-ink">Payments</h2>
         {sorted.length > 0 ? (
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-body text-muted">
             {paidTotal} of {total} {sorted[0].currency} paid
           </p>
         ) : (
-          <p className="mt-1 text-sm text-muted">No payment plan set up yet.</p>
+          <p className="mt-1 text-body text-muted">No payment plan set up yet.</p>
         )}
       </div>
 
@@ -60,10 +60,10 @@ export function PaymentsPanel({
             <li key={payment.id} className="rounded-[6px] border border-border p-3 hover-ring">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-ink">
+                  <p className="text-body font-medium text-ink">
                     Instalment {payment.instalment_index} of {sorted.length} -- {payment.amount} {payment.currency}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-label text-muted">
                     Due {formatCalendarDate(payment.due_date, { year: "numeric" })}
                     {payment.source ? ` · ${payment.source === "provider" ? "via Stripe" : "marked manually"}` : ""}
                   </p>
@@ -72,7 +72,7 @@ export function PaymentsPanel({
               </div>
 
               {payment.status === "paid" ? (
-                <div className="mt-2 text-xs text-ink">
+                <div className="mt-2 text-label text-ink">
                   <p>Paid{payment.paid_at ? ` on ${formatDate(payment.paid_at, timeZone, { year: "numeric" })}` : ""}.</p>
                   {payment.marked_note ? <p className="mt-0.5 text-muted">{payment.marked_note}</p> : null}
                   {payment.source === "manual" ? (
@@ -80,7 +80,7 @@ export function PaymentsPanel({
                       <input type="hidden" name="payment_id" value={payment.id} />
                       <input type="hidden" name="applicant_id" value={applicant.id} />
                       <input type="hidden" name="paid" value="false" />
-                      <button type="submit" className="text-xs text-destructive hover:underline">
+                      <button type="submit" className="text-label text-destructive hover:underline">
                         Undo -- mark unpaid
                       </button>
                     </form>
@@ -89,7 +89,7 @@ export function PaymentsPanel({
               ) : payment.status === "pending" || payment.status === "missed" ? (
                 <div className="mt-3 flex flex-col gap-2">
                   {payment.status === "missed" ? (
-                    <p className="text-xs text-destructive">Overdue -- flagged as a payment task.</p>
+                    <p className="text-label text-destructive">Overdue -- flagged as a payment task.</p>
                   ) : null}
                   <div className="flex flex-wrap items-start gap-4">
                     <form action={markPaymentManual} className="flex flex-wrap items-end gap-2">
@@ -100,9 +100,9 @@ export function PaymentsPanel({
                         name="marked_note"
                         type="text"
                         placeholder="Reference note (optional)"
-                        className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
+                        className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-label text-ink outline-none focus:border-primary"
                       />
-                      <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary wash">
+                      <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-label text-ink hover:border-primary wash">
                         Mark paid manually
                       </button>
                     </form>

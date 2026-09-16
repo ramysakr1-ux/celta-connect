@@ -25,7 +25,7 @@ export function CountdownBadge({ expiresAt }: { expiresAt: string }) {
   }, [expiresAt]);
 
   return (
-    <span className="shrink-0 rounded-full bg-status-warning-bg px-3 py-1.5 text-xs font-semibold text-status-warning-text">
+    <span className="shrink-0 rounded-full bg-status-warning-bg px-3 py-1.5 text-label font-semibold text-status-warning-text">
       {label ?? "…"}
     </span>
   );

@@ -35,7 +35,7 @@ export default async function TrainerRotationPage() {
   // this page and its override now do too.
   const courseId = trainer.course_id;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
   const supabase = hubReadClient(trainer, courseId);
 
@@ -195,13 +195,13 @@ export default async function TrainerRotationPage() {
       {looksIntensive ? (
         <div className="sheet p-6">
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Intensive TP block</p>
-          <p className="mt-1 text-xs text-muted">Handbook 9.1.3: a two-day minimum break midway, no more than six consecutive TP days.</p>
-          <p className="mt-2 text-sm text-ink">Longest run so far: {intensiveCheck.longestConsecutiveRun} consecutive TP days.</p>
+          <p className="mt-1 text-label text-muted">Handbook 9.1.3: a two-day minimum break midway, no more than six consecutive TP days.</p>
+          <p className="mt-2 text-body text-ink">Longest run so far: {intensiveCheck.longestConsecutiveRun} consecutive TP days.</p>
           {intensiveCheck.exceedsMaxConsecutive ? (
-            <p className="mt-1 text-xs text-status-warning-text">Over six days in a row -- worth a look.</p>
+            <p className="mt-1 text-label text-status-warning-text">Over six days in a row -- worth a look.</p>
           ) : null}
           {!intensiveCheck.hasTwoDayBreak ? (
-            <p className="mt-1 text-xs text-status-warning-text">No two-day break anywhere in the schedule yet.</p>
+            <p className="mt-1 text-label text-status-warning-text">No two-day break anywhere in the schedule yet.</p>
           ) : null}
         </div>
       ) : null}
@@ -211,7 +211,7 @@ export default async function TrainerRotationPage() {
           <p className="text-label font-semibold tracking-[0.08em] text-status-warning-text uppercase">
             TP block ends on the final day
           </p>
-          <p className="mt-1 text-sm text-status-warning-text">
+          <p className="mt-1 text-body text-status-warning-text">
             The last scheduled TP day lands on the course&apos;s own final day (Handbook 9.1.4). Worth moving it
             earlier so the final day isn&apos;t also someone&apos;s last assessed lesson.
           </p>
@@ -221,16 +221,16 @@ export default async function TrainerRotationPage() {
       {tpDistribution.length >= 2 ? (
         <div className="sheet p-6">
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">TP feedback given, per tutor</p>
-          <p className="mt-1 text-xs text-muted">Handbook 3.7: TP should be split evenly between the two tutors.</p>
+          <p className="mt-1 text-label text-muted">Handbook 3.7: TP should be split evenly between the two tutors.</p>
           <div className="mt-2 flex flex-wrap gap-4">
             {tpDistribution.map((t) => (
-              <span key={t.name} className="text-sm text-ink">
+              <span key={t.name} className="text-body text-ink">
                 {t.name}: <span className="font-semibold tabular-nums">{t.count}</span>
               </span>
             ))}
           </div>
           {tpDistributionUneven ? (
-            <p className="mt-2 text-xs text-status-warning-text">Uneven so far -- worth a look before the round ends.</p>
+            <p className="mt-2 text-label text-status-warning-text">Uneven so far -- worth a look before the round ends.</p>
           ) : null}
         </div>
       ) : null}
@@ -245,7 +245,7 @@ export default async function TrainerRotationPage() {
   const tutorCard = (tpGroup: { id: string; tutor_profile_id: string | null; meeting_days: string | null }, showUnpair: boolean) => (
             <div className="sheet flex flex-wrap items-end justify-between gap-3 p-4">
               <div className="flex-1">
-                <p className="mb-1 text-xs font-semibold tracking-[0.08em] text-muted uppercase">Group tutor</p>
+                <p className="mb-1 text-label font-semibold tracking-[0.08em] text-muted uppercase">Group tutor</p>
                 <GroupTutorForm
                   groupId={tpGroup.id}
                   courseId={courseId}
@@ -356,7 +356,7 @@ export default async function TrainerRotationPage() {
                   }))}
               />
             ) : (
-              <div className="sheet p-5 text-sm text-muted">
+              <div className="sheet p-5 text-body text-muted">
                 No upcoming TP day scheduled -- add one on the Timetable page.
               </div>
             )}
@@ -387,8 +387,8 @@ export default async function TrainerRotationPage() {
 
   const peerNotesSection = (
     <div className="sheet p-6">
-      <h2 className="font-serif text-lg text-ink">Peer observation notes</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Peer observation notes</h2>
+      <p className="mt-1 text-body text-muted">
         Reveal a TP day&apos;s peer notes for everyone at once -- notes stay private until you do.
         Nothing to reveal for a lesson nobody has noted yet.
       </p>
@@ -400,19 +400,19 @@ export default async function TrainerRotationPage() {
 
   const oneToOneSection = (
     <div className="sheet p-6">
-      <h2 className="font-serif text-lg text-ink">1-to-1 / small-group TP</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">1-to-1 / small-group TP</h2>
+      <p className="mt-1 text-body text-muted">
         Handbook: one of the six assessed TP lessons may be given to a single or paired student instead of the
         whole class, planned in advance -- never the final two (TP7/TP8), and only one per candidate for the
         course.
       </p>
       {oneToOnePlan ? (
-        <p className="mt-3 text-sm text-ink">
+        <p className="mt-3 text-body text-ink">
           Currently: <span className="font-semibold">{nameByTraineeId.get(oneToOnePlan.trainee_id) ?? "Unknown"}</span>,{" "}
           TP{oneToOnePlan.tp_number}.
         </p>
       ) : (
-        <p className="mt-3 text-sm text-muted">No trainee has a 1-to-1/small-group TP set yet.</p>
+        <p className="mt-3 text-body text-muted">No trainee has a 1-to-1/small-group TP set yet.</p>
       )}
       <div className="mt-4">
         <ClassGroupingForm trainees={roster ?? []} />
@@ -422,8 +422,8 @@ export default async function TrainerRotationPage() {
 
   const aimConstraintsSection = (
     <div className="sheet p-6">
-      <h2 className="font-serif text-lg text-ink">TP7/8 aim-type constraints</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">TP7/8 aim-type constraints</h2>
+      <p className="mt-1 text-body text-muted">
         TP7 and TP8 aren&apos;t rotation-assigned -- trainees pick their own topic. Restrict which main-aim types
         are on offer for each slot, if you want to. Coverage and remediation suggestions shown to trainees always
         stay inside whatever you set here.
@@ -439,18 +439,18 @@ export default async function TrainerRotationPage() {
 
   const coursebookSection = (
     <div className="sheet p-6">
-      <h2 className="font-serif text-lg text-ink">Coursebook schedule</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Coursebook schedule</h2>
+      <p className="mt-1 text-body text-muted">
         Which coursebook&apos;s TP Points Library feeds each TP number -- set per
         group, so two groups can teach different levels at once.
       </p>
       {(tpGroups ?? []).length === 0 ? (
-        <p className="mt-3 text-sm text-muted">Create a TP group first.</p>
+        <p className="mt-3 text-body text-muted">Create a TP group first.</p>
       ) : (
         <div className="mt-4 flex flex-col gap-6">
           {(tpGroups ?? []).map((tpGroup) => (
             <div key={tpGroup.id} className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-ink">{tpGroup.name}</h3>
+              <h3 className="text-body font-semibold text-ink">{tpGroup.name}</h3>
               {TP_NUMBERS.map((tpNumber) => (
                 <ScheduleForm
                   key={tpNumber}
@@ -481,7 +481,7 @@ export default async function TrainerRotationPage() {
         </div>
         <Link
           href="/trainer/rotation/override"
-          className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink wash"
+          className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-body font-medium text-ink wash"
         >
           Manual override
         </Link>
@@ -524,7 +524,7 @@ function UnpairedSubgroupBoard({
   return (
     <div className="sheet flex flex-col gap-6 p-6">
       <div>
-        <h2 className="font-serif text-lg text-ink">{name}</h2>
+        <h2 className="font-serif text-h3 text-ink">{name}</h2>
         {size > 0 ? (
           <>
             <div className="mt-3">
@@ -532,7 +532,7 @@ function UnpairedSubgroupBoard({
             </div>
             <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
               {members.map((m) => (
-                <li key={m.memberId} className="flex items-center gap-1.5 text-sm text-ink">
+                <li key={m.memberId} className="flex items-center gap-1.5 text-body text-ink">
                   {m.fullName}
                   <RemoveMemberButton courseId={courseId} memberId={m.memberId} />
                 </li>
@@ -540,7 +540,7 @@ function UnpairedSubgroupBoard({
             </ul>
           </>
         ) : (
-          <p className="mt-2 text-sm text-muted">No trainees in this subgroup yet.</p>
+          <p className="mt-2 text-body text-muted">No trainees in this subgroup yet.</p>
         )}
         <div className="mt-3">
           <AddMemberForm courseId={courseId} subgroupId={subgroupId} availableTrainees={availableTrainees} />
@@ -549,13 +549,13 @@ function UnpairedSubgroupBoard({
 
       {size > 0 ? (
         <div>
-          <h3 className="text-sm text-muted">Teaching order preview</h3>
+          <h3 className="text-body text-muted">Teaching order preview</h3>
           <div className="mt-2 overflow-x-auto">
             <table className="table-plain w-full">
               <thead>
                 <tr>
-                  <th className="text-sm text-muted">TP</th>
-                  <th className="text-sm text-muted">Teaching order</th>
+                  <th className="text-body text-muted">TP</th>
+                  <th className="text-body text-muted">Teaching order</th>
                   <th></th>
                 </tr>
               </thead>
@@ -582,8 +582,8 @@ function UnpairedSubgroupBoard({
 
       {size > 0 ? (
         <div>
-          <h3 className="text-sm text-muted">Progress</h3>
-          <p className="mt-1 text-xs text-muted">
+          <h3 className="text-body text-muted">Progress</h3>
+          <p className="mt-1 text-label text-muted">
             Logging a trainee&apos;s TP lesson (on their trainee page) unlocks assigning
             their next one -- keeps the Plan page to one upcoming lesson at a time.
           </p>
@@ -591,9 +591,9 @@ function UnpairedSubgroupBoard({
             <table className="table-plain w-full">
               <thead>
                 <tr>
-                  <th className="text-sm text-muted">Trainee</th>
+                  <th className="text-body text-muted">Trainee</th>
                   {TP_NUMBERS.map((tpNumber) => (
-                    <th key={tpNumber} className="text-sm text-muted">
+                    <th key={tpNumber} className="text-body text-muted">
                       TP{tpNumber}
                     </th>
                   ))}
@@ -621,7 +621,7 @@ function UnpairedSubgroupBoard({
                       }
                       if (!plan) {
                         return (
-                          <td key={tpNumber} className="text-sm text-muted">
+                          <td key={tpNumber} className="text-body text-muted">
                             &mdash;
                           </td>
                         );
@@ -639,7 +639,7 @@ function UnpairedSubgroupBoard({
                         );
                       }
                       return (
-                        <td key={tpNumber} className="text-sm text-muted">
+                        <td key={tpNumber} className="text-body text-muted">
                           Awaiting lesson log
                           {oneToOneTag}
                         </td>

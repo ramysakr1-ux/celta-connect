@@ -109,11 +109,11 @@ export default async function ThisWeeksInterviewsPage({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         {days.map((d) => (
           <div key={d.date} className="flex flex-col gap-2">
-            <div className="text-center text-xs font-bold text-muted">
+            <div className="text-center text-label font-bold text-muted">
               {d.label} <span className="font-normal">{formatCalendarDate(d.date)}</span>
             </div>
             {d.slots.length === 0 ? (
-              <div className="rounded-[8px] border border-dashed border-border p-3 text-center text-xs text-muted">No slots</div>
+              <div className="rounded-[8px] border border-dashed border-border p-3 text-center text-label text-muted">No slots</div>
             ) : (
               d.slots.map((s) => {
                 const filled = Boolean(s.booked_applicant_id);
@@ -124,15 +124,15 @@ export default async function ThisWeeksInterviewsPage({
                       filled ? "border-primary/30 bg-primary/5" : "border-border bg-card"
                     }`}
                   >
-                    <div className={`text-xs font-bold ${filled ? "text-primary" : "text-muted"}`}>
+                    <div className={`text-label font-bold ${filled ? "text-primary" : "text-muted"}`}>
                       {s.slot_time.slice(0, 5)} · {s.mode === "online" ? "Online" : "Face to face"}
                     </div>
                     {filled ? (
                       <>
-                        <div className="text-sm font-semibold text-ink">
+                        <div className="text-body font-semibold text-ink">
                           {nameByApplicantId.get(s.booked_applicant_id!) ?? "Booked"}
                         </div>
-                        <div className="text-xs text-muted">
+                        <div className="text-label text-muted">
                           {nameByProfileId.get(s.interviewer_id) ?? "Unknown interviewer"}
                         </div>
                         {s.panel ? (
@@ -143,7 +143,7 @@ export default async function ThisWeeksInterviewsPage({
                         ) : null}
                       </>
                     ) : (
-                      <div className="text-xs italic text-muted">Open</div>
+                      <div className="text-label italic text-muted">Open</div>
                     )}
                   </div>
                 );
@@ -156,7 +156,7 @@ export default async function ThisWeeksInterviewsPage({
       {waitingApplicants && waitingApplicants.length > 0 ? (
         <div className="card flex items-start gap-3 border-destructive/30 bg-destructive/5 p-5">
           <div className="mt-1.5 h-1.5 w-1.5 flex-none rounded-full bg-destructive" />
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             {waitingApplicants.length} applicant{waitingApplicants.length === 1 ? "" : "s"} waiting, no slots open
             {waitingApplicants.length <= 3 ? ` (${waitingApplicants.map((a) => a.full_name).join(", ")})` : ""}. Each holds an
             honest email: &quot;we would like to meet you, we are finding a time, we will write within two working days.&quot;

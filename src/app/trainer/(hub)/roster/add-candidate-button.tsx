@@ -44,24 +44,24 @@ export function AddCandidateButton({ courseId, joinUrl }: { courseId: string; jo
   return (
     <div className="sheet flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-ink">Add a candidate</p>
-        <button type="button" onClick={() => setOpen(false)} className="text-xs text-muted hover:text-ink">
+        <p className="text-body font-semibold text-ink">Add a candidate</p>
+        <button type="button" onClick={() => setOpen(false)} className="text-label text-muted hover:text-ink">
           Close
         </button>
       </div>
       {joinUrl ? (
         <>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             Share this link directly -- whoever opens it sets up their own account instantly.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 truncate rounded-[6px] border border-border bg-card px-3 py-2 text-xs text-ink">
+            <code className="flex-1 truncate rounded-[6px] border border-border bg-card px-3 py-2 text-label text-ink">
               {joinUrl}
             </code>
             <button
               type="button"
               onClick={handleCopy}
-              className="rounded-[6px] border border-border px-3 py-2 text-xs text-ink wash"
+              className="rounded-[6px] border border-border px-3 py-2 text-label text-ink wash"
             >
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -74,20 +74,20 @@ export function AddCandidateButton({ courseId, joinUrl }: { courseId: string; jo
               name="to_email"
               placeholder="Or email this link to..."
               required
-              className="flex-1 rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs text-ink outline-none focus:border-primary"
+              className="flex-1 rounded-[6px] border border-border bg-card px-3 py-1.5 text-label text-ink outline-none focus:border-primary"
             />
             <button
               type="submit"
               disabled={pending}
-              className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink wash disabled:opacity-60"
+              className="rounded-[6px] border border-border px-3 py-1.5 text-label text-ink wash disabled:opacity-60"
             >
               {pending ? "Sending..." : state.sent ? "Sent!" : "Send"}
             </button>
           </form>
-          {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
         </>
       ) : (
-        <p className="text-xs text-destructive">No join link set up for this course yet -- ask your centre admin.</p>
+        <p className="text-label text-destructive">No join link set up for this course yet -- ask your centre admin.</p>
       )}
     </div>
   );

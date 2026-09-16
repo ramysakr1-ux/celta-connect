@@ -61,7 +61,7 @@ function ReadOnlyField({ label, value }: { label: string; value?: string | null 
   if (!value) return null;
   return (
     <div>
-      <p className="text-sm text-muted">{label}</p>
+      <p className="text-body text-muted">{label}</p>
       <p className="whitespace-pre-line text-ink">{value}</p>
     </div>
   );
@@ -158,8 +158,8 @@ export default async function TpDetailPage({
       <div className="flex flex-col gap-4">
         <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
         <div className="sheet p-6">
-          <h1 className="font-serif text-xl text-ink">{trainee.full_name} — TP{tpNumber}</h1>
-          <p className="mt-1 text-sm text-muted">Peer observation</p>
+          <h1 className="font-serif text-h2 text-ink">{trainee.full_name} — TP{tpNumber}</h1>
+          <p className="mt-1 text-body text-muted">Peer observation</p>
         </div>
         {/* Decorative teal/garnet alternation against the header sheet
             above -- no status meaning of its own, same rule as elsewhere. */}
@@ -175,7 +175,7 @@ export default async function TpDetailPage({
             />
           ) : (
             <div>
-              <p className="text-sm text-muted">Notes have been revealed -- read them together, then agree the group feedback.</p>
+              <p className="text-body text-muted">Notes have been revealed -- read them together, then agree the group feedback.</p>
               <GroupFeedbackForm traineeId={traineeId} tpNumber={tpNumber} initialFeedback="" />
             </div>
           )}
@@ -279,8 +279,8 @@ export default async function TpDetailPage({
       <div className="flex flex-col gap-4">
         <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
         <div className="sheet p-6">
-          <h1 className="font-serif text-2xl text-ink">TP{tpNumber}</h1>
-          <p className="mt-2 text-sm text-muted">
+          <h1 className="font-serif text-h1 text-ink">TP{tpNumber}</h1>
+          <p className="mt-2 text-body text-muted">
             Not yet assigned{isStaff ? "." : " -- your trainer will unlock this closer to the time."}
           </p>
         </div>
@@ -428,18 +428,18 @@ export default async function TpDetailPage({
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Criteria evidenced{criteriaCodes.length > 0 ? ` · ${criteriaCodes.length}` : ""}
         </p>
-        <p className="mt-1 text-xs text-muted">The CELTA 5 criteria your tutor tagged in this lesson&apos;s feedback.</p>
+        <p className="mt-1 text-label text-muted">The CELTA 5 criteria your tutor tagged in this lesson&apos;s feedback.</p>
         {criteriaCodes.length > 0 ? (
           <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
             {criteriaCodes.map((code) => (
               <li key={code}>
-                <p className="text-xs font-semibold tracking-wide text-ink uppercase">{code}</p>
-                <p className="text-xs text-muted">{CRITERIA_LABELS[code]}</p>
+                <p className="text-label font-semibold tracking-wide text-ink uppercase">{code}</p>
+                <p className="text-label text-muted">{CRITERIA_LABELS[code]}</p>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-muted">No criteria tagged in this lesson&apos;s feedback.</p>
+          <p className="mt-3 text-body text-muted">No criteria tagged in this lesson&apos;s feedback.</p>
         )}
       </div>
     ) : null;
@@ -458,13 +458,13 @@ export default async function TpDetailPage({
           content sheets ("Brief" above stays teal) -- no status
           meaning of its own, same rule as everywhere else. */}
       <div id="plan" className="sheet sheet-garnet scroll-mt-20 p-6">
-        <h2 className="font-serif text-lg text-ink">What they planned</h2>
+        <h2 className="font-serif text-h3 text-ink">What they planned</h2>
         {!plan ? (
-          <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
+          <p className="mt-2 text-body text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
         ) : (
           <>
             {!plan.submitted_at ? (
-              <p className="mt-2 text-sm text-muted">Not submitted yet -- shown here as a live draft.</p>
+              <p className="mt-2 text-body text-muted">Not submitted yet -- shown here as a live draft.</p>
             ) : null}
             <div className="mt-4 flex flex-col gap-3">
               <ReadOnlyField label="Main Aims" value={plan.main_aims} />
@@ -474,7 +474,7 @@ export default async function TpDetailPage({
               <ReadOnlyField label="Materials description" value={plan.materials_description} />
               {plan.anticipated_problems.length > 0 ? (
                 <div>
-                  <p className="text-sm text-muted">Anticipated problems & solutions</p>
+                  <p className="text-body text-muted">Anticipated problems & solutions</p>
                   <ul className="mt-1 flex flex-col gap-1">
                     {plan.anticipated_problems.map((p, i) =>
                       p.problem || p.solution ? (
@@ -488,9 +488,9 @@ export default async function TpDetailPage({
               ) : null}
               {plan.procedure.length > 0 ? (
                 <div>
-                  <p className="text-sm text-muted">Procedure</p>
+                  <p className="text-body text-muted">Procedure</p>
                   <div className="mt-2 overflow-x-auto">
-                    <table className="w-full border-collapse text-sm">
+                    <table className="w-full border-collapse text-body">
                       <colgroup>
                         <col className="w-[116px]" />
                         <col />
@@ -499,10 +499,10 @@ export default async function TpDetailPage({
                       </colgroup>
                       <thead>
                         <tr>
-                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                          <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
+                          <th className="border-b border-border-faint p-2 text-left text-label text-muted">Stage / Aim</th>
+                          <th className="border-b border-border-faint p-2 text-left text-label text-muted">Procedure</th>
+                          <th className="border-b border-border-faint p-2 text-left text-label text-muted">Interaction</th>
+                          <th className="border-b border-border-faint p-2 text-left text-label text-muted">Time</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -510,7 +510,7 @@ export default async function TpDetailPage({
                           <tr key={i}>
                             <td className="border-b border-border-faint p-2 align-top text-ink">
                               {row.stage}
-                              {row.aim ? <p className="mt-1 text-xs italic text-muted">{row.aim}</p> : null}
+                              {row.aim ? <p className="mt-1 text-label italic text-muted">{row.aim}</p> : null}
                             </td>
                             <td className="border-b border-border-faint p-2 align-top whitespace-pre-line text-ink">
                               {row.procedure}
@@ -527,11 +527,11 @@ export default async function TpDetailPage({
                     const overBy = total - TP_LESSON_LENGTH_MINUTES;
                     return (
                       <div className="mt-1.5 flex items-center justify-between gap-3">
-                        <span className="text-xs text-muted">
+                        <span className="text-label text-muted">
                           {plan.procedure.length} stages · {total} minutes planned for a {TP_LESSON_LENGTH_MINUTES} minute lesson
                         </span>
                         {overBy > 0 ? (
-                          <span className="text-xs font-semibold text-status-warning-text">Over by {overBy} min</span>
+                          <span className="text-label font-semibold text-status-warning-text">Over by {overBy} min</span>
                         ) : null}
                       </div>
                     );
@@ -545,7 +545,7 @@ export default async function TpDetailPage({
 
       {languageAnalysis ? (
         <div id="analysis" className="sheet scroll-mt-20 p-6">
-          <h2 className="font-serif text-lg text-ink">Language Analysis ({languageAnalysis.type})</h2>
+          <h2 className="font-serif text-h3 text-ink">Language Analysis ({languageAnalysis.type})</h2>
           <div className="mt-3">
             <LanguageAnalysisReadOnly analysis={languageAnalysis} />
           </div>
@@ -554,8 +554,8 @@ export default async function TpDetailPage({
 
       {materials && materials.length > 0 ? (
         <div id="materials" className="sheet sheet-garnet scroll-mt-20 p-6">
-          <h2 className="font-serif text-lg text-ink">Materials</h2>
-          <ul className="mt-2 flex flex-col gap-2 text-sm text-ink">
+          <h2 className="font-serif text-h3 text-ink">Materials</h2>
+          <ul className="mt-2 flex flex-col gap-2 text-body text-ink">
             {materials.map((m) => {
               const shared = sharedMaterialIds.has(m.id);
               return (
@@ -568,7 +568,7 @@ export default async function TpDetailPage({
                       <input type="hidden" name="tp_number" value={tpNumber} />
                       <button
                         type="submit"
-                        className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                        className={`rounded-full border px-2.5 py-1 text-label font-medium ${
                           shared
                             ? "border-border bg-status-neutral-bg text-ink"
                             : "border-border text-muted wash hover:text-primary"
@@ -578,7 +578,7 @@ export default async function TpDetailPage({
                       </button>
                     </form>
                   ) : shared ? (
-                    <span className="rounded-full border border-border bg-status-neutral-bg px-2.5 py-1 text-xs font-medium text-ink">
+                    <span className="rounded-full border border-border bg-status-neutral-bg px-2.5 py-1 text-label font-medium text-ink">
                       Shared with students ✓
                     </span>
                   ) : null}
@@ -590,7 +590,7 @@ export default async function TpDetailPage({
       ) : null}
 
       <div id="self" className="sheet scroll-mt-20 p-6">
-        <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
+        <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
         {selfEvaluation?.submitted_at ? (
           <div className="mt-3 flex flex-col gap-3">
             <ReadOnlyField label="What went to plan?" value={selfEvaluation.what_went_well} />
@@ -600,7 +600,7 @@ export default async function TpDetailPage({
             <ReadOnlyField label="What do you want to work on in the next TP?" value={selfEvaluation.next_tp_focus} />
           </div>
         ) : (
-          <p className="mt-2 text-sm text-muted">Not submitted yet.</p>
+          <p className="mt-2 text-body text-muted">Not submitted yet.</p>
         )}
       </div>
     </>
@@ -613,10 +613,10 @@ export default async function TpDetailPage({
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl text-ink">
+            <h1 className="font-serif text-h1 text-ink">
               TP{tpNumber} — {assignment.main_lesson_aim}
             </h1>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               {densityLabel.name}
               {volunteerAttendance
                 ? volunteerAttendance.expected === 0
@@ -636,20 +636,20 @@ export default async function TpDetailPage({
                       candidate's own uploaded handouts into the file. */}
                   <a
                     href={`/tp-document/${traineeId}/${tpNumber}`}
-                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
                   >
                     The assembled document
                   </a>
                   <a
                     href={`/api/tp-plans/${plan!.id}/pdf`}
-                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+                    className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
                   >
                     PDF with materials
                   </a>
                 </>
               ) : (
                 <span
-                  className="cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted"
+                  className="cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-body text-muted"
                   title="Available once the plan, self-evaluation and feedback are all submitted"
                 >
                   Export TP PDF
@@ -661,7 +661,7 @@ export default async function TpDetailPage({
         </div>
 
         {!isStaff && bannerMessage ? (
-          <div className="sheet flex items-center gap-2 border-primary/20 bg-accent/30 text-sm text-ink">
+          <div className="sheet flex items-center gap-2 border-primary/20 bg-accent/30 text-body text-ink">
             <span aria-hidden="true">🔒</span>
             {bannerMessage}
           </div>
@@ -678,7 +678,7 @@ export default async function TpDetailPage({
             <a
               key={item.key}
               href={`#${item.key}`}
-              className="flex items-center gap-1.5 rounded-[5px] px-2.5 py-1.5 text-xs font-semibold text-muted hover:bg-accent/40 hover:text-ink"
+              className="flex items-center gap-1.5 rounded-[5px] px-2.5 py-1.5 text-label font-semibold text-muted hover:bg-accent/40 hover:text-ink"
             >
               {item.label}
               {item.badge ? (
@@ -692,30 +692,30 @@ export default async function TpDetailPage({
 
         <div id="brief" className="sheet scroll-mt-20 p-6">
           <div className="flex items-start justify-between gap-4">
-            <h2 className="font-serif text-lg text-ink">Assigned brief</h2>
+            <h2 className="font-serif text-h3 text-ink">Assigned brief</h2>
             <span className="badge-solid">{densityLabel.name}</span>
           </div>
-          <p className="mt-1 text-sm text-muted">{densityLabel.blurb}</p>
+          <p className="mt-1 text-body text-muted">{densityLabel.blurb}</p>
           <div className="mt-4 flex flex-col gap-3">
             <div>
-              <p className="text-sm text-muted">Main aim</p>
+              <p className="text-body text-muted">Main aim</p>
               <p className="text-ink">{assignment.main_lesson_aim}</p>
             </div>
             {assignment.sub_aim ? (
               <div>
-                <p className="text-sm text-muted">Sub aim</p>
+                <p className="text-body text-muted">Sub aim</p>
                 <p className="text-ink">{assignment.sub_aim}</p>
               </div>
             ) : null}
             {assignment.materials_description ? (
               <div>
-                <p className="text-sm text-muted">Materials</p>
+                <p className="text-body text-muted">Materials</p>
                 <p className="text-ink">{assignment.materials_description}</p>
               </div>
             ) : null}
             {assignment.page_references ? (
               <div>
-                <p className="text-sm text-muted">Page references</p>
+                <p className="text-body text-muted">Page references</p>
                 <p className="text-ink">{assignment.page_references}</p>
               </div>
             ) : null}
@@ -725,10 +725,10 @@ export default async function TpDetailPage({
             <div className="mt-5 flex flex-col gap-4 border-t border-border-faint pt-4">
               {showsAbbreviationsGlossary(tier) ? (
                 <div>
-                  <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Abbreviations</p>
+                  <p className="text-label font-semibold tracking-[0.06em] text-muted uppercase">Abbreviations</p>
                   <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
                     {ABBREVIATIONS_GLOSSARY.map((a) => (
-                      <span key={a.abbr} className="text-xs text-muted">
+                      <span key={a.abbr} className="text-label text-muted">
                         <span className="font-semibold text-ink">{a.abbr}</span> -- {a.meaning}
                       </span>
                     ))}
@@ -738,20 +738,20 @@ export default async function TpDetailPage({
               {showsTips(tier) ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Planning tips</p>
+                    <p className="text-label font-semibold tracking-[0.06em] text-muted uppercase">Planning tips</p>
                     <ul className="mt-1.5 flex flex-col gap-1">
                       {PLANNING_TIPS.map((tip) => (
-                        <li key={tip} className="text-xs text-muted">
+                        <li key={tip} className="text-label text-muted">
                           {tip}
                         </li>
                       ))}
                     </ul>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Teaching tips</p>
+                    <p className="text-label font-semibold tracking-[0.06em] text-muted uppercase">Teaching tips</p>
                     <ul className="mt-1.5 flex flex-col gap-1">
                       {TEACHING_TIPS.map((tip) => (
-                        <li key={tip} className="text-xs text-muted">
+                        <li key={tip} className="text-label text-muted">
                           {tip}
                         </li>
                       ))}
@@ -768,12 +768,12 @@ export default async function TpDetailPage({
             {writerMounted ? (
               <details className="group">
                 <summary className="sheet wash flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-3.5">
-                  <span className="text-sm font-semibold text-ink">
+                  <span className="text-body font-semibold text-ink">
                     The plan, as submitted
                     <span className="ml-2 font-normal text-muted">aims · procedure · language analysis · materials · self-evaluation</span>
                   </span>
-                  <span className="text-xs text-muted group-open:hidden">Also on step 1 of the writer · show</span>
-                  <span className="hidden text-xs text-muted group-open:inline">hide</span>
+                  <span className="text-label text-muted group-open:hidden">Also on step 1 of the writer · show</span>
+                  <span className="hidden text-label text-muted group-open:inline">hide</span>
                 </summary>
                 <div className="mt-6 flex flex-col gap-6">{planSheets}</div>
               </details>
@@ -799,8 +799,8 @@ export default async function TpDetailPage({
               />
             ) : plan ? (
               <div className="sheet sheet-garnet p-6">
-                <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
-                <p className="mt-2 text-sm text-muted">Not yet submitted.</p>
+                <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
+                <p className="mt-2 text-body text-muted">Not yet submitted.</p>
               </div>
             ) : null}
             {criteriaEvidenced}
@@ -832,8 +832,8 @@ export default async function TpDetailPage({
                 />
               ) : (
                 <div className="sheet rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-                  <h2 className="font-serif text-lg text-ink">Materials</h2>
-                  <p className="mt-2 text-sm text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
+                  <h2 className="font-serif text-h3 text-ink">Materials</h2>
+                  <p className="mt-2 text-body text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
                 </div>
               )}
             </div>
@@ -866,12 +866,12 @@ export default async function TpDetailPage({
         {peerSheet?.revealed_at && (peerNotes ?? []).length > 0 ? (
           <div className="sheet p-6">
             <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">From your peers</p>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-label text-muted">
               Not a Cambridge document -- kept out of the portfolio, CELTA5, and the assessor pack.
             </p>
             <ul className="mt-3 flex flex-col gap-2">
               {(peerNotes ?? []).map((n, i) => (
-                <li key={i} className="rounded-[6px] border border-border-faint p-2.5 text-sm text-ink">
+                <li key={i} className="rounded-[6px] border border-border-faint p-2.5 text-body text-ink">
                   {n.note_1 ? <p>{n.note_1}</p> : null}
                   {n.note_2 ? <p>{n.note_2}</p> : null}
                 </li>
@@ -879,8 +879,8 @@ export default async function TpDetailPage({
             </ul>
             {peerSheet.group_feedback ? (
               <div className="mt-3 border-t border-border-faint pt-3">
-                <p className="text-xs font-semibold text-muted uppercase">Group feedback</p>
-                <p className="mt-1 whitespace-pre-line text-sm text-ink">{peerSheet.group_feedback}</p>
+                <p className="text-label font-semibold text-muted uppercase">Group feedback</p>
+                <p className="mt-1 whitespace-pre-line text-body text-ink">{peerSheet.group_feedback}</p>
               </div>
             ) : null}
           </div>

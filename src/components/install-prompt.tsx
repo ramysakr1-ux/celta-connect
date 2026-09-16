@@ -174,7 +174,7 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
         <button
           type="button"
           onClick={handleInstallClick}
-          className="wash inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink hover:border-primary"
+          className="wash inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-label font-medium whitespace-nowrap text-ink hover:border-primary"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <rect x="5" y="2" width="14" height="20" rx="2" />
@@ -210,7 +210,7 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
   if (offLanding || !installable || bannerSnoozed) return null;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-border bg-accent/40 px-4 py-2 text-sm text-ink">
+    <div className="flex items-center justify-between gap-3 border-b border-border bg-accent/40 px-4 py-2 text-body text-ink">
       {ios ? (
         <p>
           Add Connect to your home screen: tap <span className="font-semibold">Share</span>, then{" "}
@@ -224,12 +224,12 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
           <button
             type="button"
             onClick={handleInstallClick}
-            className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+            className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground"
           >
             Add
           </button>
         ) : null}
-        <button type="button" onClick={snooze} className="text-xs text-muted hover:text-ink" aria-label="Not now">
+        <button type="button" onClick={snooze} className="text-label text-muted hover:text-ink" aria-label="Not now">
           Not now
         </button>
       </div>

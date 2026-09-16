@@ -49,11 +49,11 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
       .maybeSingle();
     return (
       <Shell>
-        <p className="mt-4 text-sm text-ink">
+        <p className="mt-4 text-body text-ink">
           {applicant.full_name}, you&apos;re booked in{bookedSlot ? "" : " -- we'll confirm the details by email"}.
         </p>
         {bookedSlot ? (
-          <p className="mt-2 text-sm text-ink">
+          <p className="mt-2 text-body text-ink">
             {/* Both zones, theirs first. This used to be a bare toLocaleString
                 with no timeZone option at all, so it printed the time in
                 whatever zone the server ran in and named no zone -- the same
@@ -74,7 +74,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
         {bookedSlot && !applicant.interview_rescheduled_at ? (
           <RescheduleButton token={token} />
         ) : bookedSlot ? (
-          <p className="mt-5 text-xs text-muted">
+          <p className="mt-5 text-label text-muted">
             You have already moved this interview once. Contact the centre if you need to change it again.
           </p>
         ) : null}
@@ -90,13 +90,13 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
 
   return (
     <Shell>
-      <p className="mt-4 text-sm text-ink">
+      <p className="mt-4 text-body text-ink">
         {applicant.full_name}, thank you for the written tasks — we have read them and we would like to meet you
         {course ? ` about ${course.name}` : ""}.
       </p>
       {/* The centre's own slot length, not a number typed in here: a centre
           that interviews for thirty minutes should not promise forty-five. */}
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-body text-muted">
         The interview takes about {(options.find((o) => o.bookable) ?? options[0])?.durationMinutes ?? 45} minutes. There is
         nothing to prepare.
       </p>
@@ -110,12 +110,12 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
           centreCity={center?.time_zone ? center.time_zone.split("/").pop()?.replace(/_/g, " ") : undefined}
         />
       ) : (
-        <p className="mt-4 rounded-[6px] border border-dashed border-border p-4 text-sm text-muted">
+        <p className="mt-4 rounded-[6px] border border-dashed border-border p-4 text-body text-muted">
           We&apos;re still finding you a time — check back shortly, or reply to the invitation email and we&apos;ll
           write as soon as one opens up.
         </p>
       )}
-      {center ? <p className="mt-6 text-xs text-muted">{center.name}</p> : null}
+      {center ? <p className="mt-6 text-label text-muted">{center.name}</p> : null}
     </Shell>
   );
 }

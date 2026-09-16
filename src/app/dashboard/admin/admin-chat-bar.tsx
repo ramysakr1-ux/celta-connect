@@ -150,7 +150,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
               }
             }}
             placeholder={`Message ${selected.name}`}
-            className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70"
+            className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-body text-ink outline-none placeholder:text-muted/70"
           />
 
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
@@ -162,7 +162,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
             type="button"
             onClick={() => setThreadOpen((v) => !v)}
             aria-expanded={threadOpen}
-            className="wash flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
+            className="wash flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-label font-semibold hover:bg-accent/60 sm:px-3"
           >
             {threadOpen ? "Hide" : "Thread"}
           </button>

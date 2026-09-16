@@ -137,7 +137,7 @@ export function CohortSheet({
               <button
                 type="submit"
                 disabled={pending}
-                className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
               >
                 <span className="size-[5px] rounded-full bg-muted" />
                 {pending ? "Releasing..." : "Release final reports"}
@@ -146,7 +146,7 @@ export function CohortSheet({
           ) : null}
         </div>
       </div>
-      {canRelease && state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {canRelease && state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <ProvisionalDeadlineBanner
         dueAt={provisionalDueAt}
@@ -164,7 +164,7 @@ export function CohortSheet({
             Undecided — needs justification · {undecidedRows.length}
           </p>
           {undecidedRows.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted">No candidate is currently in doubt between two grades.</p>
+            <p className="px-4 py-3 text-body text-muted">No candidate is currently in doubt between two grades.</p>
           ) : (
             <div className="divide-y divide-border-faint">
               {undecidedRows.map((row) => (
@@ -174,12 +174,12 @@ export function CohortSheet({
                   className="flex flex-col gap-1.5 px-4 py-3 hover:bg-accent/40"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-ink">{row.name}</span>
-                    <span className="text-sm font-bold text-destructive">{row.provisionalLabel}</span>
+                    <span className="text-body text-ink">{row.name}</span>
+                    <span className="text-body font-bold text-destructive">{row.provisionalLabel}</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`pill ${STAGE3_PILL[row.stage3Status].cls}`}>{STAGE3_PILL[row.stage3Status].label}</span>
-                    <span className="text-xs text-muted">
+                    <span className="text-label text-muted">
                       {row.tpsRemaining} TP{row.tpsRemaining === 1 ? "" : "s"} left to teach
                     </span>
                   </div>
@@ -204,13 +204,13 @@ export function CohortSheet({
             {settledCounts.map(({ band, count }) => (
               <div key={band} className="flex items-center justify-between px-4 py-2.5">
                 <span className={`pill ${GRADE_PILL_CLASS[band]}`}>{band}</span>
-                <span className="text-sm tabular-nums text-ink">{count}</span>
+                <span className="text-body tabular-nums text-ink">{count}</span>
               </div>
             ))}
             {notYetGradedCount > 0 ? (
               <div className="flex items-center justify-between px-4 py-2.5">
                 <span className="pill pill-neutral">Not yet graded</span>
-                <span className="text-sm tabular-nums text-ink">{notYetGradedCount}</span>
+                <span className="text-body tabular-nums text-ink">{notYetGradedCount}</span>
               </div>
             ) : null}
           </div>
@@ -218,7 +218,7 @@ export function CohortSheet({
       </div>
 
       <div className="overflow-x-auto rounded-[6px] border border-border">
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse text-body">
           <thead>
             <tr className="border-b border-border">
               <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Candidate</th>
@@ -245,7 +245,7 @@ export function CohortSheet({
                     <StandardRatingGlyph rating={slot.grade} title={`TP${slot.tpNumber}`} />
                   </td>
                 ))}
-                <td className="px-4 py-2.5 text-center text-xs font-medium text-muted">{row.provisionalLabel}</td>
+                <td className="px-4 py-2.5 text-center text-label font-medium text-muted">{row.provisionalLabel}</td>
                 <td className="px-4 py-2.5 text-center">
                   {row.recommendedGrade ? (
                     <span className={`pill ${GRADE_PILL_CLASS[row.recommendedGrade]}`}>{row.recommendedGrade}</span>
@@ -253,7 +253,7 @@ export function CohortSheet({
                     <span className="pill pill-neutral">Not set</span>
                   )}
                 </td>
-                <td className="px-4 py-2.5 text-xs text-muted">{row.outstanding || "--"}</td>
+                <td className="px-4 py-2.5 text-label text-muted">{row.outstanding || "--"}</td>
               </tr>
             ))}
           </tbody>
@@ -267,10 +267,10 @@ export function CohortSheet({
             <StandardRatingGlyph
               rating={l.code === "S+" ? "above_standard" : l.code === "S" ? "to_standard" : "not_to_standard"}
             />
-            <span className="text-xs text-muted">{l.label}</span>
+            <span className="text-label text-muted">{l.label}</span>
           </div>
         ))}
-        <span className="text-xs text-muted">
+        <span className="text-label text-muted">
           Grades remain provisional until confirmed by Cambridge English after verification by a Chief Assessor.
         </span>
       </div>

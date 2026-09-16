@@ -9,7 +9,7 @@ export function RemoveMemberButton({ courseId, memberId }: { courseId: string; m
     <form action={removeSubgroupMember}>
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="member_id" value={memberId} />
-      <button type="submit" className="text-xs text-muted hover:text-destructive">
+      <button type="submit" className="text-label text-muted hover:text-destructive">
         Remove
       </button>
     </form>

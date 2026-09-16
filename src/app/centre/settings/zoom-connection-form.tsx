@@ -17,32 +17,32 @@ export function ZoomConnectionForm({
 }) {
   return (
     <div className="card p-5">
-      <h3 className="font-serif text-base text-ink">Zoom</h3>
-      <p className="mt-1 text-sm text-muted">
+      <h3 className="font-serif text-h3 text-ink">Zoom</h3>
+      <p className="mt-1 text-body text-muted">
         Connects Zoom&apos;s webhook so joining/leaving a TP session&apos;s meeting fills in the attendance register
         automatically. Manual entry stays available as the correction path -- this only adds a second, automatic way
         the register gets filled in.
       </p>
-      {connected ? <p className="mt-3 text-sm text-primary">Zoom connected.</p> : null}
+      {connected ? <p className="mt-3 text-body text-primary">Zoom connected.</p> : null}
       {error ? (
-        <p className="mt-3 text-sm text-destructive">
+        <p className="mt-3 text-body text-destructive">
           {ZOOM_ERROR_MESSAGES[error] ?? "Something went wrong connecting Zoom."}
         </p>
       ) : null}
       {connection ? (
         <div className="mt-4 flex flex-col gap-3">
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             Connected {formatDateTime(connection.connected_at, timeZone)}
             {connection.zoom_account_email ? ` as ${connection.zoom_account_email}` : ""}.
           </p>
           <form action={disconnectZoom}>
-            <button type="submit" className="text-sm text-destructive underline">
+            <button type="submit" className="text-body text-destructive underline">
               Disconnect Zoom
             </button>
           </form>
         </div>
       ) : (
-        <a href="/api/zoom/connect" className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
+        <a href="/api/zoom/connect" className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card">
           Connect Zoom
         </a>
       )}

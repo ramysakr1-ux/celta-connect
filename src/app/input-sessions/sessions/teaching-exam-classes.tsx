@@ -192,8 +192,8 @@ export default function TeachingExamClassesSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">1 · The CEFR ladder · 8 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">1 · The CEFR ladder · 8 minutes</h2>
+          <p className="text-label text-muted">
             Bottom rung up. Click each for the descriptor — and at each one, name a learner from your own TP who sat there.
           </p>
         </div>
@@ -207,8 +207,8 @@ export default function TeachingExamClassesSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">2 · Decode the acronyms · 8 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">2 · Decode the acronyms · 8 minutes</h2>
+          <p className="text-label text-muted">
             Half the profession says FCE, half says B2 First. Job adverts and parents use both, so you need to recognise
             both.
           </p>
@@ -218,8 +218,8 @@ export default function TeachingExamClassesSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">3 · Exam explorer · 15 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">3 · Exam explorer · 15 minutes</h2>
+          <p className="text-label text-muted">
             Nine exams, yours to wander. Find the one you would least like to teach, and be ready to say why.
           </p>
         </div>
@@ -232,8 +232,8 @@ export default function TeachingExamClassesSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">4 · Which exam? · 8 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">4 · Which exam? · 8 minutes</h2>
+          <p className="text-label text-muted">
             Five corridor questions. Your pick locks on the first click — in the corridor there is no second guess.
           </p>
         </div>
@@ -246,8 +246,8 @@ export default function TeachingExamClassesSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">5 · Being an examiner · 10 minutes</h2>
-          <p className="text-xs text-muted">The other side of the desk, and a real route into paid work with a CELTA.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">5 · Being an examiner · 10 minutes</h2>
+          <p className="text-label text-muted">The other side of the desk, and a real route into paid work with a CELTA.</p>
         </div>
         <div className="flex flex-col gap-2">
           {ROLES.map((r) => (
@@ -258,7 +258,7 @@ export default function TeachingExamClassesSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 rounded-[8px] border border-dashed p-5" style={{ borderColor: GOLD }}>
-          <h2 className="font-serif text-lg font-semibold text-ink">You can now tell your KET from your CAE</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">You can now tell your KET from your CAE</h2>
           <p className="text-meta leading-relaxed text-ink">
             — and an IELTS band from a TOEFL score. That is more than most first-year teachers can say, and it is the
             question you will be asked most.
@@ -319,7 +319,7 @@ function LadderRung({ rung }: { rung: (typeof CEFR)[number] }) {
     >
       <span className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="flex items-baseline gap-2.5">
-          <span className="font-serif text-base font-semibold" style={{ color: rung.hue }}>
+          <span className="font-serif text-h3 font-semibold" style={{ color: rung.hue }}>
             {rung.lvl}
           </span>
           <span className="text-meta font-semibold text-ink">{rung.name}</span>

@@ -47,7 +47,7 @@ export function CarriedWorkPanel({
     <div className="card card-amber flex flex-col gap-4 p-5">
       <div>
         <h2 className="font-serif text-h3 font-semibold text-ink">Carried work waiting to be linked</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           {transfers.length === 1 ? "A candidate was" : `${transfers.length} candidates were`}{" "}
           marked for a restart or a deferral on an earlier course, and what they had already done is being held. Once they have joined this
           course, say which person they are and their work is written onto this course&apos;s record.
@@ -55,7 +55,7 @@ export function CarriedWorkPanel({
       </div>
 
       {trainees.length === 0 ? (
-        <p className="text-sm text-muted">
+        <p className="text-body text-muted">
           Nobody has joined this course yet. The work keeps until they do &mdash; nothing expires.
         </p>
       ) : null}
@@ -70,15 +70,15 @@ export function CarriedWorkPanel({
           <input type="hidden" name="course_id" value={courseId} />
 
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-sm font-semibold text-ink">{t.sourceName}</p>
+            <p className="text-body font-semibold text-ink">{t.sourceName}</p>
             <span className="rounded-full border border-border bg-card px-2.5 py-0.5 text-label font-semibold text-muted">
               {t.kind === "restart" ? "Restart" : "Deferral"}
             </span>
           </div>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             From {t.sourceCourseName}, marked {t.markedOn} &middot; carries {t.carries}
           </p>
-          {t.note ? <p className="text-xs text-muted italic">&ldquo;{t.note}&rdquo;</p> : null}
+          {t.note ? <p className="text-label text-muted italic">&ldquo;{t.note}&rdquo;</p> : null}
 
           {/* Handbook 7.9 (June 2025): "The new course should be in the same
               mode of delivery as the original course, unless otherwise agreed
@@ -87,34 +87,34 @@ export function CarriedWorkPanel({
               silently. */}
           {t.modeChanged ? (
             <div className="flex flex-col gap-2 rounded-[8px] border border-status-warning-text/40 bg-status-warning-bg p-3">
-              <p className="text-xs text-status-warning-text">
+              <p className="text-label text-status-warning-text">
                 This course is {t.destinationMode ?? "a different mode"}; their original course was{" "}
                 {t.sourceMode ?? "another mode"}. Handbook 7.9 asks for the candidate&apos;s agreement in writing
                 before a deferral changes mode.
               </p>
-              <label className="flex items-start gap-2 text-xs text-ink">
+              <label className="flex items-start gap-2 text-label text-ink">
                 <input type="checkbox" name="mode_change_agreed" required className="mt-0.5" />
                 The candidate has agreed to the change of mode in writing.
               </label>
-              <label className="flex flex-col gap-1 text-xs text-muted">
+              <label className="flex flex-col gap-1 text-label text-muted">
                 How they will be brought up to speed in the new mode
                 <textarea
                   name="familiarisation_plan"
                   rows={2}
-                  className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                  className="rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary"
                 />
               </label>
             </div>
           ) : null}
 
           <div className="flex flex-wrap items-end gap-3">
-            <label className="flex min-w-[240px] flex-1 flex-col gap-1 text-xs text-muted">
+            <label className="flex min-w-[240px] flex-1 flex-col gap-1 text-label text-muted">
               Who are they on this course?
               <select
                 name="destination_trainee_id"
                 required
                 defaultValue=""
-                className="h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+                className="h-10 rounded-[6px] border border-border bg-card px-3 text-body text-ink outline-none focus:border-primary"
               >
                 <option value="" disabled>
                   Choose a candidate…
@@ -129,12 +129,12 @@ export function CarriedWorkPanel({
             <button
               type="submit"
               disabled={trainees.length === 0}
-              className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="h-10 rounded-[6px] bg-primary px-4 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               Link their work
             </button>
           </div>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             This writes their carried work onto this course and cannot be undone from here.
           </p>
         </form>

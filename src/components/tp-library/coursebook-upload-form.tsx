@@ -72,9 +72,9 @@ export function CoursebookUploadForm({
 
   return (
     <form onSubmit={handleSubmit} className="card flex flex-col gap-4 p-6">
-      <h2 className="font-serif text-lg text-ink">Upload a coursebook</h2>
+      <h2 className="font-serif text-h3 text-ink">Upload a coursebook</h2>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="title" className="text-sm text-muted">
+        <label htmlFor="title" className="text-body text-muted">
           Title
         </label>
         <input
@@ -87,7 +87,7 @@ export function CoursebookUploadForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="level" className="text-sm text-muted">
+        <label htmlFor="level" className="text-body text-muted">
           Level
         </label>
         <input
@@ -100,7 +100,7 @@ export function CoursebookUploadForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="file" className="text-sm text-muted">
+        <label htmlFor="file" className="text-body text-muted">
           Coursebook PDF
         </label>
         <input
@@ -110,21 +110,21 @@ export function CoursebookUploadForm({
           accept="application/pdf"
           required
           onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-          className="text-sm text-ink"
+          className="text-body text-ink"
         />
         {selectedFile ? (
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
           </p>
         ) : null}
       </div>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-body text-destructive">{error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="flex items-center gap-2 self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
       >
         {pending ? (
           <>

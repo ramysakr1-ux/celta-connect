@@ -75,16 +75,16 @@ export default async function TrainerAssignmentReviewPage({
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
         <div>
-          <h1 className="font-serif text-xl text-ink">
+          <h1 className="font-serif text-h2 text-ink">
             {trainee.full_name} -- {ASSIGNMENT_INFO[assignment.assignment_type].title}
           </h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-body text-muted">
             {ASSIGNMENT_RESULT_LABEL[result]}
             {round === "resubmission" && roundStatus === "submitted" ? " · resubmission in" : ""}
             {assignment.first_submitted_late ? " · first submission late" : ""}
           </p>
         </div>
-        <Link href={`/dashboard/trainer/trainees/${id}`} className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary">
+        <Link href={`/dashboard/trainer/trainees/${id}`} className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary">
           Back to {trainee.full_name}
         </Link>
       </div>
@@ -93,15 +93,15 @@ export default async function TrainerAssignmentReviewPage({
         <form action={updateAssignmentDueDate} className="flex items-end gap-3">
           <input type="hidden" name="assignment_id" value={assignmentId} />
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Deadline</label>
+            <label className="text-body text-muted">Deadline</label>
             <input
               type="date"
               name="due_date"
               defaultValue={assignment.due_date ?? ""}
-              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
-          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary">
+          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary">
             Save deadline
           </button>
         </form>
@@ -142,7 +142,7 @@ export default async function TrainerAssignmentReviewPage({
 
       {roundStatus === "submitted" ? (
         <div className="card flex flex-col gap-1 p-4">
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             AI declaration: {aiDeclared ? "used" : "not used"}
             {aiDeclared && aiConversationUrl ? (
               <>
@@ -154,9 +154,9 @@ export default async function TrainerAssignmentReviewPage({
             ) : null}
           </p>
           {aiCitationMismatch ? (
-            <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p>
+            <p className="text-body text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p>
           ) : null}
-          {registerNote ? <p className="text-sm text-status-warning-text">Language pre-check: {registerNote}</p> : null}
+          {registerNote ? <p className="text-body text-status-warning-text">Language pre-check: {registerNote}</p> : null}
         </div>
       ) : null}
 

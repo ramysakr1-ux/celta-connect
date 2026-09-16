@@ -47,8 +47,8 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
     <div className="min-h-screen bg-background">
       <div className="container flex flex-col gap-4 py-8">
         <div>
-          <h1 className="font-serif text-2xl text-ink">Volunteer student register</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="font-serif text-h1 text-ink">Volunteer student register</h1>
+          <p className="mt-1 text-body text-muted">
             {[course?.name, course ? `${formatCalendarDate(course.start_date)} – ${formatCalendarDate(course.end_date, { year: "numeric" })}` : null].filter(Boolean).join(" · ")}
           </p>
         </div>
@@ -65,9 +65,9 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
                 const vToken = tokenByVolunteer.get(v.id);
                 return (
                   <li key={v.id} className="list-row flex items-center justify-between gap-4">
-                    <p className="text-sm text-ink">
+                    <p className="text-body text-ink">
                       {v.name}
-                      {v.level ? <span className="ml-2 text-xs text-muted">{v.level}</span> : null}
+                      {v.level ? <span className="ml-2 text-label text-muted">{v.level}</span> : null}
                     </p>
                     {vToken ? <CopyLinkButton token={vToken} /> : null}
                   </li>
@@ -75,12 +75,12 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
               })}
             </ul>
           ) : (
-            <p className="p-6 text-sm text-muted">No volunteer students registered yet.</p>
+            <p className="p-6 text-body text-muted">No volunteer students registered yet.</p>
           )}
         </div>
 
         <div>
-          <h2 className="font-serif text-lg text-ink">Attendance register</h2>
+          <h2 className="font-serif text-h3 text-ink">Attendance register</h2>
           <div className="mt-3">
             <AttendanceRegisterGrid events={tpEvents ?? []} volunteers={volunteers ?? []} attendance={attendanceRows ?? []} />
           </div>

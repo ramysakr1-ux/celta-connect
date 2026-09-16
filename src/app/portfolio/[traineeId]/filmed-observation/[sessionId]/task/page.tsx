@@ -60,8 +60,8 @@ export default async function FilmedObservationTaskPage({
       <BackLink href={`/portfolio/${traineeId}/filmed-observation/${sessionId}`} label={"Back to the session"} />
 
       <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-        <h1 className="font-serif text-xl text-ink">{fSession.lesson_title ?? "Filmed lesson"}</h1>
-        <p className="text-sm text-muted">
+        <h1 className="font-serif text-h2 text-ink">{fSession.lesson_title ?? "Filmed lesson"}</h1>
+        <p className="text-body text-muted">
           {[fSession.level, fSession.learner_count ? `${fSession.learner_count} learners` : null, fSession.length_minutes ? `${fSession.length_minutes} min` : null]
             .filter(Boolean)
             .join(" · ") || "Details not set yet"}
@@ -71,7 +71,7 @@ export default async function FilmedObservationTaskPage({
       {task.criteria_codes.length > 0 ? (
         <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Input session this week</p>
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             {task.criteria_codes.map((c) => `${c} · ${CRITERIA_LABELS[c] ?? c}`).join(" · ")}
           </p>
         </div>
@@ -96,7 +96,7 @@ export default async function FilmedObservationTaskPage({
         <div className="border-t border-border-faint pt-4">
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
           {notes.length === 0 ? (
-            <p className="mt-1.5 text-sm text-muted">Add quick notes while you watch — they&apos;ll show up here.</p>
+            <p className="mt-1.5 text-body text-muted">Add quick notes while you watch — they&apos;ll show up here.</p>
           ) : (
             <ul className="mt-1.5 flex flex-col gap-1.5">
               {notes
@@ -110,7 +110,7 @@ export default async function FilmedObservationTaskPage({
                     >
                       {formatClock(n.timestamp_seconds)}
                     </Link>
-                    <p className="text-sm text-ink">{n.note}</p>
+                    <p className="text-body text-ink">{n.note}</p>
                   </li>
                 ))}
             </ul>

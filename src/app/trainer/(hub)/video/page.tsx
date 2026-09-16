@@ -34,22 +34,22 @@ export default async function TrainerVideoLibraryPage() {
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Videos</h2>
+        <h2 className="font-serif text-h3 text-ink">Videos</h2>
         <div className="mt-3 flex flex-col gap-2">
           {(videos ?? []).length === 0 ? (
-            <p className="sheet p-4 text-sm text-muted">No videos added yet.</p>
+            <p className="sheet p-4 text-body text-muted">No videos added yet.</p>
           ) : (
             (videos ?? []).map((v) => (
               <div key={v.id} className="sheet flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
-                  <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline">
+                  <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="text-body font-medium text-primary hover:underline">
                     {v.title}
                   </a>
-                  {v.description ? <p className="mt-1 text-sm text-muted">{v.description}</p> : null}
+                  {v.description ? <p className="mt-1 text-body text-muted">{v.description}</p> : null}
                 </div>
                 <form action={deleteVideoRecord}>
                   <input type="hidden" name="video_id" value={v.id} />
-                  <button type="submit" className="shrink-0 text-xs text-muted hover:text-destructive">
+                  <button type="submit" className="shrink-0 text-label text-muted hover:text-destructive">
                     Delete
                   </button>
                 </form>

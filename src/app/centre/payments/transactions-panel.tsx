@@ -41,16 +41,16 @@ export function TransactionsPanel({ transactions, timeZone }: { transactions: Tr
     <div className="card">
       <div className="border-b border-border px-5 py-4">
         <h2 className="font-serif text-h3 font-semibold text-ink">Recent provider activity</h2>
-        <p className="mt-0.5 text-xs text-muted">Every Stripe event received, most recent first.</p>
+        <p className="mt-0.5 text-label text-muted">Every Stripe event received, most recent first.</p>
       </div>
       <ul className="flex flex-col">
         {transactions.map((t) => (
           <li key={t.id} className="hover-ring flex items-center justify-between gap-3 px-5 py-4 border-b border-border-faint last:border-none">
             <div>
               <span className={`status-pill ${EVENT_PILL_CLASS[t.eventType]}`}>{EVENT_LABEL[t.eventType]}</span>
-              <p className="mt-1 text-xs text-muted">{when(t.receivedAt)}</p>
+              <p className="mt-1 text-label text-muted">{when(t.receivedAt)}</p>
             </div>
-            <p className="shrink-0 text-sm text-ink">{t.amount != null && t.currency ? formatCurrency(t.amount, t.currency) : "--"}</p>
+            <p className="shrink-0 text-body text-ink">{t.amount != null && t.currency ? formatCurrency(t.amount, t.currency) : "--"}</p>
           </li>
         ))}
       </ul>

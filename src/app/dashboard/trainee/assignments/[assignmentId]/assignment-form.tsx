@@ -759,7 +759,7 @@ export function AssignmentAuthoringForm({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+            {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
             {notYetOpen ? (
               <button
                 type="button"
@@ -836,7 +836,7 @@ export function AssignmentAuthoringForm({
           </div>
         </div>
         {deadlinePassed && !readOnly ? (
-          <p className="mt-2 text-xs text-destructive">The deadline for this assignment has passed.</p>
+          <p className="mt-2 text-label text-destructive">The deadline for this assignment has passed.</p>
         ) : null}
       </form>
     </DictationScope>

@@ -9,7 +9,7 @@ import { VolunteerRecorder } from "@/app/student/[token]/volunteer-recorder";
 const initialState: VolunteerSignupState = { error: null };
 
 const inputClass =
-  "rounded-lg border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "rounded-lg border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary";
 
 type Step = "language" | "consent" | "questions" | "recording";
 const STEPS: Step[] = ["language", "consent", "questions", "recording"];
@@ -70,7 +70,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <button
             type="button"
             onClick={goBack}
-            className="flex items-center gap-1 text-sm font-medium text-muted hover:text-ink"
+            className="flex items-center gap-1 text-body font-medium text-muted hover:text-ink"
           >
             ← Back
           </button>
@@ -89,8 +89,8 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "language" ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-ink">Welcome</h2>
-            <p className="mt-1 text-sm text-muted">Which language would you like to read in?</p>
+            <h2 className="font-serif text-h2 text-ink">Welcome</h2>
+            <p className="mt-1 text-body text-muted">Which language would you like to read in?</p>
           </div>
           <div className="flex flex-col gap-2">
             {SIGNUP_LANGUAGES.map((l) => (
@@ -103,19 +103,19 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
                 }`}
               >
                 <div>
-                  <p className="text-sm font-semibold text-ink">{l.native}</p>
-                  <p className="text-xs text-muted">{l.english}</p>
+                  <p className="text-body font-semibold text-ink">{l.native}</p>
+                  <p className="text-label text-muted">{l.english}</p>
                 </div>
                 {lang === l.code ? <span className="text-primary">✓</span> : null}
               </button>
             ))}
           </div>
-          {t ? <p className="text-xs text-muted">{t.languageSub}</p> : null}
+          {t ? <p className="text-label text-muted">{t.languageSub}</p> : null}
           <button
             type="button"
             onClick={goNext}
             disabled={!lang}
-            className="self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className="self-start rounded-lg bg-primary px-5 py-2.5 text-body font-semibold text-primary-foreground disabled:opacity-50"
           >
             {t?.continueLabel ?? "Continue"}
           </button>
@@ -125,8 +125,8 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "consent" && t ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-ink">{t.consentHeading}</h2>
-            <p className="mt-1 text-sm text-muted">{t.consentIntro}</p>
+            <h2 className="font-serif text-h2 text-ink">{t.consentHeading}</h2>
+            <p className="mt-1 text-body text-muted">{t.consentIntro}</p>
           </div>
           <div className="flex flex-col gap-2.5">
             {t.consentLines.map((line, i) => (
@@ -134,7 +134,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
                 <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-primary text-micro text-primary-foreground">
                   ✓
                 </span>
-                <p className="text-sm leading-relaxed text-ink">{line}</p>
+                <p className="text-body leading-relaxed text-ink">{line}</p>
               </div>
             ))}
           </div>
@@ -144,7 +144,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               setConsented(true);
               goNext();
             }}
-            className="self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+            className="self-start rounded-lg bg-primary px-5 py-2.5 text-body font-semibold text-primary-foreground"
           >
             {t.agreeLabel}
           </button>
@@ -154,14 +154,14 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "questions" ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-ink">About you</h2>
-            <p className="mt-1 text-sm text-muted">
+            <h2 className="font-serif text-h2 text-ink">About you</h2>
+            <p className="mt-1 text-body text-muted">
               Six short questions. Answer in English -- anything you can manage is fine. Nothing here is marked.
             </p>
           </div>
           {questions.map((question, i) => (
             <div key={i} className="flex flex-col gap-1.5">
-              <label htmlFor={`answer_${i}`} className="text-sm text-muted">
+              <label htmlFor={`answer_${i}`} className="text-body text-muted">
                 {question}
               </label>
               <textarea
@@ -176,7 +176,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <button
             type="button"
             onClick={goNext}
-            className="self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+            className="self-start rounded-lg bg-primary px-5 py-2.5 text-body font-semibold text-primary-foreground"
           >
             Next
           </button>
@@ -186,8 +186,8 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "recording" ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-ink">Now just talk</h2>
-            <p className="mt-1 text-sm text-muted">
+            <h2 className="font-serif text-h2 text-ink">Now just talk</h2>
+            <p className="mt-1 text-body text-muted">
               Eight questions. Answer out loud in English. Stop when you want -- two to three minutes altogether.
             </p>
           </div>
@@ -196,12 +196,12 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             recordingConsentLine={t?.recordingConsentLine ?? "I agree to being recorded, in sound or on video, during this sign-up and in lessons, for teacher-training purposes only."}
             onStatusChange={setRecorderStatus}
           />
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
           {recorderStatus === "reviewing" ? (
             <button
               type="submit"
               disabled={pending}
-              className="flex items-center gap-2 self-start rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="flex items-center gap-2 self-start rounded-lg bg-primary px-6 py-2.5 text-body font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? (
                 <>

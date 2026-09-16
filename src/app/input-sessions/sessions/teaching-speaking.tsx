@@ -158,23 +158,23 @@ export default function TeachingSpeakingSession() {
       </RunningThisSession>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-serif text-lg font-semibold text-ink">Stage 1 · Lead-in</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Stage 1 · Lead-in</h2>
         <RevealCard variant="hero" question="What is a productive skill?" answer="Speaking or writing." />
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Stage 2 · Preparing to speak</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Stage 2 · Preparing to speak</h2>
         <p className="text-meta leading-relaxed text-ink">
           Think of a real opinion or story you’d actually want to share about your journey into teaching. Don’t write it
           down yet — just have it ready.
         </p>
-        <p className="text-xs italic text-muted">A minute alone, then compare with a partner.</p>
+        <p className="text-label italic text-muted">A minute alone, then compare with a partner.</p>
       </section>
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 3 · Six terms you’ll need</h2>
-          <p className="text-xs text-muted">Click each to reveal.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 3 · Six terms you’ll need</h2>
+          <p className="text-label text-muted">Click each to reveal.</p>
         </div>
         <div className="flex flex-col gap-2">
           {TERMS.map((t) => (
@@ -185,8 +185,8 @@ export default function TeachingSpeakingSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 4 · Now do it — pick the right task type</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 4 · Now do it — pick the right task type</h2>
+          <p className="text-label text-muted">
             Using the opinion or story from Stage 2: which task type below would actually get a partner to hear it? Click
             each to see what it’s for, then tell your partner which you’d pick and why.
           </p>
@@ -199,11 +199,11 @@ export default function TeachingSpeakingSession() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-serif text-lg font-semibold text-ink">
+        <h2 className="font-serif text-h3 font-semibold text-ink">
           Stage 4, continued · Read the text and check whether your ideas were right
         </h2>
         <article className="flex flex-col gap-3 rounded-[8px] border border-border bg-card p-5">
-          <h3 className="font-serif text-base font-semibold text-ink">Staging a productive skills lesson</h3>
+          <h3 className="font-serif text-h3 font-semibold text-ink">Staging a productive skills lesson</h3>
           <p className="text-meta leading-relaxed text-ink">
             A productive skills lesson doesn’t open with instructions. It opens by creating interest in the topic and
             giving learners something to think or feel before they need any language for it — ideas and content come
@@ -229,7 +229,7 @@ export default function TeachingSpeakingSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stage 5 · Look again, then check with your partner</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stage 5 · Look again, then check with your partner</h2>
         </div>
         <div className="flex flex-col gap-2">
           {DETAILS.map((d) => (
@@ -240,10 +240,10 @@ export default function TeachingSpeakingSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">
+          <h2 className="font-serif text-h3 font-semibold text-ink">
             Stage 5, continued · Content feedback, or language feedback?
           </h2>
-          <p className="text-xs text-muted">Four things a teacher notices while monitoring a task. Choose for each.</p>
+          <p className="text-label text-muted">Four things a teacher notices while monitoring a task. Choose for each.</p>
         </div>
         <div className="flex flex-col gap-2">
           {MONITORING.map((s) => (

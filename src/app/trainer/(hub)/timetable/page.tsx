@@ -63,7 +63,7 @@ export default async function TrainerTimetablePage({
   const supabase = trainer ? hubReadClient(trainer, courseId!) : createAdminClient();
   if (!courseId) {
     return (
-      <div className="sheet text-sm text-muted">No course assigned.</div>
+      <div className="sheet text-body text-muted">No course assigned.</div>
     );
   }
 
@@ -582,7 +582,7 @@ export default async function TrainerTimetablePage({
               title="Edit timetable"
               lede={
                 <>
-                  {weekRange ? <span className="font-serif text-lg text-ink">{weekRange}. </span> : null}
+                  {weekRange ? <span className="font-serif text-h3 text-ink">{weekRange}. </span> : null}
                   The single source of truth for the course clock -- This Week, due dates, and TP dates all read from this.
                 </>
               }
@@ -615,27 +615,27 @@ export default async function TrainerTimetablePage({
           </div>
 
           {locked ? (
-            <div className="sheet border-primary/20 bg-accent/30 text-sm text-ink">
+            <div className="sheet border-primary/20 bg-accent/30 text-body text-ink">
               Locked -- the course clock now calculates off these dates. Unlock to make changes.
             </div>
           ) : null}
 
           {lock_error === "async_missing_link" ? (
-            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+            <div className="sheet border-destructive/30 bg-destructive/10 text-body text-destructive">
               Can&apos;t lock -- an asynchronous input session has no linked live follow-up slot (Handbook
               3.4). Add the link on that session, or add the live slot first.
             </div>
           ) : null}
 
           {lock_error === "tp_double_booked" ? (
-            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+            <div className="sheet border-destructive/30 bg-destructive/10 text-body text-destructive">
               Can&apos;t lock -- two TP rounds are scheduled on {lockErrorDate ?? "the same date"}, which means a
               candidate would be teaching twice in one day (Handbook 9.1.3). Move one of the rounds to a different date.
             </div>
           ) : null}
 
           {lock_error === "mode_not_blocked" ? (
-            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+            <div className="sheet border-destructive/30 bg-destructive/10 text-body text-destructive">
               Can&apos;t lock -- {lockErrorHalf ? `group ${lockErrorHalf}'s` : "a group's"} TP rounds switch between
               face-to-face and online more than once (Handbook 3.5). Each half teaches one mode, then the other --
               not a mix. Check each TP round&apos;s mode in its detail panel.
@@ -643,7 +643,7 @@ export default async function TrainerTimetablePage({
           ) : null}
 
           {lock_error === "intensive_no_break" ? (
-            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+            <div className="sheet border-destructive/30 bg-destructive/10 text-body text-destructive">
               Can&apos;t lock -- {lockErrorRun ?? "several"} TP days in a row with no break (Handbook 9.1.3). No more
               than 6 consecutive TP days without a two-day break in the middle. Move a session to open a gap.
             </div>
@@ -665,7 +665,7 @@ export default async function TrainerTimetablePage({
               />
             </div>
           ) : (
-            <div className="sheet text-sm text-muted">No events yet.</div>
+            <div className="sheet text-body text-muted">No events yet.</div>
           )}
 
           {/* specs/build-spec.md §7 "Laptop only: ... editing the timetable." */}
@@ -677,12 +677,12 @@ export default async function TrainerTimetablePage({
             // there's nothing on the grid yet). Every course that already has
             // events gets the collapsed default the spec asks for.
             <details className="sheet sheet-garnet" open={allEvents.length === 0}>
-              <summary className="cursor-pointer font-serif text-lg text-ink">Course setup</summary>
+              <summary className="cursor-pointer font-serif text-h3 text-ink">Course setup</summary>
               <div className="mt-4 flex flex-col gap-6">
                 {allEvents.length === 0 ? (
                   <div>
-                    <h3 className="font-serif text-base text-ink">Start from the standard skeleton</h3>
-                    <p className="mt-1 text-sm text-muted">
+                    <h3 className="font-serif text-h3 text-ink">Start from the standard skeleton</h3>
+                    <p className="mt-1 text-body text-muted">
                       Generates the usual 4-week CELTA shape -- 8 teaching practices, all 4 written
                       assignments, VO1-3, Stage 1 &amp; 2 tutorials -- anchored to a real start date. Nobody
                       builds a course from a blank grid: tweak or remove anything below afterwards.
@@ -696,8 +696,8 @@ export default async function TrainerTimetablePage({
                 </div>
 
                 <div className="border-t border-border-faint pt-6">
-                  <h3 className="font-serif text-base text-ink">Add event</h3>
-                  <p className="mt-1 text-sm text-muted">
+                  <h3 className="font-serif text-h3 text-ink">Add event</h3>
+                  <p className="mt-1 text-body text-muted">
                     Add a single dated item to the timetable below -- an input session, a TP, an
                     assignment or resubmission due date, or a milestone.
                   </p>
@@ -742,7 +742,7 @@ export default async function TrainerTimetablePage({
           ) : null}
 
           {allEvents.length === 0 ? (
-            <div className="sheet text-sm text-muted">No events yet.</div>
+            <div className="sheet text-body text-muted">No events yet.</div>
           ) : (
             <ReadOnlyTimetableBoard
               events={allEvents}

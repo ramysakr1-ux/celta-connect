@@ -17,15 +17,15 @@ function BriefCard({ brief, garnet }: { brief: BriefRow; garnet: boolean }) {
 
   return (
     <li className={`sheet hover-ring flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
-      <button type="button" onClick={() => setOpen((o) => !o)} className="text-left text-sm font-semibold text-ink hover:text-primary">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="text-left text-body font-semibold text-ink hover:text-primary">
         {info?.title ?? brief.assignment_type} {open ? "▾" : "▸"}
       </button>
       {open ? (
         <div className="mt-1 flex flex-col gap-3">
           {brief.sections.map((s) => (
             <div key={s.key}>
-              <p className="text-xs font-semibold text-ink">{s.title}</p>
-              <p className="mt-0.5 whitespace-pre-line text-xs text-muted">{s.instruction}</p>
+              <p className="text-label font-semibold text-ink">{s.title}</p>
+              <p className="mt-0.5 whitespace-pre-line text-label text-muted">{s.instruction}</p>
             </div>
           ))}
         </div>

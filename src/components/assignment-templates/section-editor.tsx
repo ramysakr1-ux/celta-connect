@@ -8,7 +8,7 @@ export interface SectionEditorFormState {
 }
 
 const inputClass =
-  "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-body text-ink outline-none focus:border-primary";
 
 function emptySection(): TemplateSection {
   return { key: `section_${Date.now()}`, title: "", instruction: "" };
@@ -50,7 +50,7 @@ export function SectionEditor({
         <input type="hidden" name="sections" value={JSON.stringify(sections)} />
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium uppercase tracking-wide text-muted">Format</label>
+          <label className="text-label font-medium uppercase tracking-wide text-muted">Format</label>
           <select
             name="format"
             value={format}
@@ -60,20 +60,20 @@ export function SectionEditor({
             <option value="prose">Academic prose</option>
             <option value="structured">Structured (sections/tables)</option>
           </select>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             The Handbook requires at least two of the four assignments to be continuous prose.
           </p>
-          {formatWarning ? <p className="text-xs text-status-warning-text">{formatWarning}</p> : null}
+          {formatWarning ? <p className="text-label text-status-warning-text">{formatWarning}</p> : null}
         </div>
 
         {sections.map((section, i) => (
           <div key={section.key || i} className="rounded-[6px] border border-border-faint p-4">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-muted">Section {i + 1}</span>
+              <span className="text-label font-medium uppercase tracking-wide text-muted">Section {i + 1}</span>
               <button
                 type="button"
                 onClick={() => setSections(sections.filter((_, x) => x !== i))}
-                className="text-sm text-destructive hover:underline"
+                className="text-body text-destructive hover:underline"
               >
                 Remove
               </button>
@@ -100,17 +100,17 @@ export function SectionEditor({
         <button
           type="button"
           onClick={() => setSections([...sections, emptySection()])}
-          className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+          className="self-start rounded-[6px] border border-border px-3 py-1.5 text-body text-ink hover:border-primary"
         >
           + Add section
         </button>
 
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
         <button
           type="submit"
           disabled={pending}
-          className="self-start rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink hover:border-primary disabled:opacity-60"
+          className="self-start rounded-[6px] border border-border px-4 py-2 text-body font-medium text-ink hover:border-primary disabled:opacity-60"
         >
           {pending ? "Saving..." : "Save sections"}
         </button>
@@ -122,7 +122,7 @@ export function SectionEditor({
             <span className="status-pill status-pill-on-track">Published</span>
             <form action={unpublishAction}>
               <input type="hidden" name="template_id" value={templateId} />
-              <button type="submit" className="text-sm text-destructive hover:underline">
+              <button type="submit" className="text-body text-destructive hover:underline">
                 Unpublish
               </button>
             </form>
@@ -132,7 +132,7 @@ export function SectionEditor({
             <input type="hidden" name="template_id" value={templateId} />
             <button
               type="submit"
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card"
+              className="rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card"
             >
               Publish to trainees
             </button>

@@ -11,7 +11,7 @@ import type { UserRole } from "@/lib/supabase/types";
 const initialState: JoinCourseState = { error: null };
 
 const inputClass =
-  "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
+  "h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary";
 
 export function JoinForm({ token, role, isUkCentre }: { token: string; role: UserRole; isUkCentre: boolean }) {
   const [state, action, pending] = useActionState(joinCourse, initialState);
@@ -21,7 +21,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
       <input type="hidden" name="token" value={token} />
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="full_name" className="text-sm text-muted">
+        <label htmlFor="full_name" className="text-body text-muted">
           Full name
         </label>
         <input id="full_name" name="full_name" type="text" required className={inputClass} />
@@ -29,7 +29,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
 
       {role === "trainer" ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tutor_role" className="text-sm text-muted">
+          <label htmlFor="tutor_role" className="text-body text-muted">
             Your role on this course (optional)
           </label>
           <select id="tutor_role" name="tutor_role" defaultValue="" className={inputClass}>
@@ -44,14 +44,14 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm text-muted">
+        <label htmlFor="email" className="text-body text-muted">
           Email
         </label>
         <input id="email" name="email" type="email" required className={inputClass} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm text-muted">
+        <label htmlFor="password" className="text-body text-muted">
           Password
         </label>
         <input
@@ -65,7 +65,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="confirm_password" className="text-sm text-muted">
+        <label htmlFor="confirm_password" className="text-body text-muted">
           Confirm password
         </label>
         <input
@@ -80,10 +80,10 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
 
       {role === "trainee" ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="phone" className="text-sm text-muted">
+          <label htmlFor="phone" className="text-body text-muted">
             Phone (optional)
           </label>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             So a tutor can reach you directly if something&apos;s urgent -- for example, if you haven&apos;t arrived
             for teaching practice.
           </p>
@@ -93,10 +93,10 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
 
       {role === "trainee" && isUkCentre ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="uln" className="text-sm text-muted">
+          <label htmlFor="uln" className="text-body text-muted">
             Unique Learner Number (ULN)
           </label>
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             The 10-digit identifier applied to your Personal Learning Record for UK education and
             training, if you have one.
           </p>
@@ -114,7 +114,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
       ) : null}
 
       <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
-        <p className="text-xs text-muted">
+        <p className="text-label text-muted">
           By checking the boxes below you agree to our{" "}
           <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
             full terms
@@ -123,14 +123,14 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
         </p>
         {role === "trainee" ? (
           <>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
               <span>
                 I agree not to copy, reverse-engineer, or share access to the Connect platform,
                 and to use it only for the purposes of my course.
               </span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_data" required className="mt-0.5 accent-primary" />
               <span>
                 I understand that my coursework, tutor feedback, and records are held in
@@ -138,7 +138,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
                 afterwards.
               </span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_fingerprint" required className="mt-0.5 accent-primary" />
               <span>
                 I understand that Connect keeps a text fingerprint of my written assignments -- not the
@@ -146,25 +146,25 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
                 work can be checked against it.
               </span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_policies" required className="mt-0.5 accent-primary" />
               <span>
                 I have read and agree to follow the centre&apos;s policies on attendance, plagiarism,
                 complaints, and resubmission.
               </span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_own_work" required className="mt-0.5 accent-primary" />
               <span>Each assignment I submit is my own work, produced for this course.</span>
             </label>
             {/* From the entry-screens PDF; the overnight rewrite of this block
                 didn't carry it. Worded per role -- a trainer has no portfolio,
                 and their link opens the whole course. */}
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_link_private" required className="mt-0.5 accent-primary" />
               <span>I will keep my workspace link private -- it opens my portfolio and nobody else&apos;s.</span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_contact" required className="mt-0.5 accent-primary" />
               <span>
                 I understand a tutor on my course may contact me directly by phone or email in an urgent situation --
@@ -174,21 +174,21 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
           </>
         ) : (
           <>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_confidentiality" required className="mt-0.5 accent-primary" />
               <span>I will keep candidate work, grades, and records confidential.</span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_procedures" required className="mt-0.5 accent-primary" />
               <span>I will follow the centre&apos;s malpractice and safeguarding procedures.</span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_link_private" required className="mt-0.5 accent-primary" />
               <span>
                 I will keep my workspace link private -- it opens every candidate&apos;s records on this course.
               </span>
             </label>
-            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <label className="flex items-start gap-2 text-label leading-relaxed text-muted">
               <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
               <span>
                 I agree not to copy, reverse-engineer, or share access to the Connect platform,
@@ -199,12 +199,12 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
         )}
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {pending ? "Joining..." : "Join course"}
       </button>

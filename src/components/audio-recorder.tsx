@@ -108,25 +108,25 @@ export function AudioRecorder({ name, required }: { name: string; required?: boo
             type="button"
             onClick={startRecording}
             disabled={status === "requesting"}
-            className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
           >
             {status === "requesting" ? "Requesting microphone…" : "Start recording"}
           </button>
-          {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
+          {errorMessage ? <p className="text-body text-destructive">{errorMessage}</p> : null}
         </div>
       ) : null}
 
       {status === "recording" ? (
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
+          <span className="flex items-center gap-1.5 text-body font-semibold text-destructive">
             <span className="size-2 shrink-0 animate-pulse rounded-full bg-destructive" />
             Recording
           </span>
-          <span className="tabular-nums text-sm text-ink">{formatTime(elapsedSeconds)}</span>
+          <span className="tabular-nums text-body text-ink">{formatTime(elapsedSeconds)}</span>
           <button
             type="button"
             onClick={stopRecording}
-            className="ml-auto rounded-[6px] border border-border px-3.5 py-1.5 text-sm font-medium text-ink hover:border-primary"
+            className="ml-auto rounded-[6px] border border-border px-3.5 py-1.5 text-body font-medium text-ink hover:border-primary"
           >
             Stop
           </button>
@@ -138,8 +138,8 @@ export function AudioRecorder({ name, required }: { name: string; required?: boo
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <audio src={audioUrl} controls className="w-full" />
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted">{formatTime(elapsedSeconds)} recorded</span>
-            <button type="button" onClick={retake} className="ml-auto text-xs font-medium text-primary hover:underline">
+            <span className="text-label text-muted">{formatTime(elapsedSeconds)} recorded</span>
+            <button type="button" onClick={retake} className="ml-auto text-label font-medium text-primary hover:underline">
               Retake
             </button>
           </div>

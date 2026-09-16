@@ -70,29 +70,29 @@ export function AssignmentResultSignature({
 
   return (
     <div className="sheet flex flex-col gap-2">
-      <h3 className="font-serif text-lg text-ink">Your result</h3>
-      <p className="text-sm text-ink">{resultLine}</p>
-      <p className="text-sm text-muted">{consequence}</p>
+      <h3 className="font-serif text-h3 text-ink">Your result</h3>
+      <p className="text-body text-ink">{resultLine}</p>
+      <p className="text-body text-muted">{consequence}</p>
 
       {signedAt ? (
-        <p className="mt-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-muted">
+        <p className="mt-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-muted">
           Acknowledged by {signatureName} on{" "}
           {formatDate(signedAt, timeZone, { day: "numeric", month: "long", year: "numeric" })}.
         </p>
       ) : !canSign ? (
-        <p className="mt-1 text-xs text-muted">Not yet acknowledged by the candidate.</p>
+        <p className="mt-1 text-label text-muted">Not yet acknowledged by the candidate.</p>
       ) : !viewerSignatureName ? (
-        <p className="mt-1 text-xs text-muted">Set your signature name on your CELTA 5 page before acknowledging this.</p>
+        <p className="mt-1 text-label text-muted">Set your signature name on your CELTA 5 page before acknowledging this.</p>
       ) : (
         <form action={formAction} className="mt-1 flex flex-col gap-1">
           <input type="hidden" name="assignment_id" value={assignmentId} />
           <input type="hidden" name="round" value={round} />
-          <p className="text-sm text-ink">I have seen this result and understand what it means for this assignment.</p>
-          {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+          <p className="text-body text-ink">I have seen this result and understand what it means for this assignment.</p>
+          {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
           <button
             type="submit"
             disabled={pending}
-            className="mt-1 self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            className="mt-1 self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Saving…" : `Sign as ${viewerSignatureName}`}
           </button>

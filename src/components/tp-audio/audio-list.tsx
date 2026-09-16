@@ -44,8 +44,8 @@ function AudioRowItem({ row }: { row: AudioRow }) {
     <li className="flex flex-col gap-2 rounded-[6px] border border-border-faint px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm text-ink">{row.file_name}</p>
-          {row.unit_label ? <p className="text-xs text-muted">{row.unit_label}</p> : null}
+          <p className="truncate text-body text-ink">{row.file_name}</p>
+          {row.unit_label ? <p className="text-label text-muted">{row.unit_label}</p> : null}
         </div>
         <div className="flex shrink-0 items-center gap-3">
           {!signedUrl ? (
@@ -53,20 +53,20 @@ function AudioRowItem({ row }: { row: AudioRow }) {
               type="button"
               onClick={handlePlay}
               disabled={loading}
-              className="text-sm text-primary hover:underline disabled:opacity-60"
+              className="text-body text-primary hover:underline disabled:opacity-60"
             >
               {loading ? "Loading…" : "Play"}
             </button>
           ) : null}
           <form action={deleteAudioRecord}>
             <input type="hidden" name="audio_id" value={row.id} />
-            <button type="submit" className="text-sm text-destructive hover:underline">
+            <button type="submit" className="text-body text-destructive hover:underline">
               Remove
             </button>
           </form>
         </div>
       </div>
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
       {signedUrl ? (
         // eslint-disable-next-line jsx-a11y/media-has-caption -- audio tracks from a coursebook, no caption source exists
         <audio controls autoPlay src={signedUrl} className="w-full" />
@@ -105,7 +105,7 @@ export function AudioList({ rows }: { rows: AudioRow[] }) {
             <div className="mt-2 flex flex-col gap-4">
               {books.map((book) => (
                 <div key={book}>
-                  <h4 className="text-sm font-medium text-ink">{book}</h4>
+                  <h4 className="text-body font-medium text-ink">{book}</h4>
                   <ul className="mt-2 flex flex-col gap-2">
                     {byBook
                       .get(book)!

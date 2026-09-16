@@ -214,12 +214,12 @@ export default async function CourseAdminDetailPage({
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="font-serif text-h3 font-semibold text-ink">Admissions pipeline</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               Ongoing for as long as this course is still accepting applications -- interview notifications,
               acceptances, and invites all happen from here.
             </p>
           </div>
-          <Link href={`/dashboard/admissions/pipeline?course=${course.id}`} className="shrink-0 text-sm font-medium text-primary hover:underline">
+          <Link href={`/dashboard/admissions/pipeline?course=${course.id}`} className="shrink-0 text-body font-medium text-primary hover:underline">
             Full applications view
           </Link>
         </div>
@@ -239,19 +239,19 @@ export default async function CourseAdminDetailPage({
                 href={`/dashboard/admissions/${row.id}`}
                 className="lift grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border-faint py-2.5 transition-colors duration-150 wash"
               >
-                <span className="truncate text-sm font-medium text-ink">{row.fullName}</span>
-                <span className="text-xs text-muted">{row.stageLabel}</span>
+                <span className="truncate text-body font-medium text-ink">{row.fullName}</span>
+                <span className="text-label text-muted">{row.stageLabel}</span>
                 {row.flagged ? (
                   <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-micro font-bold text-destructive">Flagged</span>
                 ) : row.accepted ? (
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 text-label font-semibold text-primary">Accepted</span>
                 ) : (
-                  <span className="text-xs text-muted">{row.statusLabel}</span>
+                  <span className="text-label text-muted">{row.statusLabel}</span>
                 )}
               </Link>
             ))}
             {hiddenCandidateCount > 0 ? (
-              <p className="pt-2 text-xs text-muted">
+              <p className="pt-2 text-label text-muted">
                 +{hiddenCandidateCount} more --{" "}
                 <Link href={`/dashboard/admissions/pipeline?course=${course.id}`} className="text-primary hover:underline">
                   full applications view
@@ -260,10 +260,10 @@ export default async function CourseAdminDetailPage({
             ) : null}
           </div>
         ) : (
-          <p className="text-sm text-muted">No applicants yet.</p>
+          <p className="text-body text-muted">No applicants yet.</p>
         )}
         {belowMinimum ? (
-          <p className="text-sm text-status-warning-text">
+          <p className="text-body text-status-warning-text">
             {acceptedCount} accepted -- below the minimum of {MIN_CANDIDATES} (Handbook §7). Contact Cambridge (JCA) if
             this doesn&apos;t change before the start date.
           </p>
@@ -284,14 +284,14 @@ export default async function CourseAdminDetailPage({
       <div className={`card flex flex-col gap-4 p-5 ${entryFormOverdue ? "card-red" : ""}`}>
         <div>
           <h2 className="font-serif text-h3 font-semibold text-ink">Entry form</h2>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-body text-muted">
             Fixes the cohort and the candidates&apos; names as Cambridge holds them, and decides whether a later
             withdrawal is internal only or reportable. Submitted in Appian directly -- Connect only tracks whether
             it&apos;s been done.
           </p>
         </div>
         {!course.entry_form_sent_at ? (
-          <p className={`text-sm ${entryFormOverdue ? "font-semibold text-destructive" : "text-muted"}`}>
+          <p className={`text-body ${entryFormOverdue ? "font-semibold text-destructive" : "text-muted"}`}>
             {entryFormOverdue ? "Overdue" : "Due"} {calendarDay(entryFormDeadline)} -- {course.delivery_mode === "online" ? "four" : "two"} weeks before
             the course starts (Handbook 4.1).
           </p>
@@ -300,7 +300,7 @@ export default async function CourseAdminDetailPage({
           // the way every other date on this page is, not "2026-08-27".
           // A .slice(0, 10) here was the UTC day, which is the wrong day
           // every evening for a centre east of Greenwich.
-          <p className="text-sm text-ink">Marked sent {formatDate(course.entry_form_sent_at, timeZone, { year: "numeric" })}.</p>
+          <p className="text-body text-ink">Marked sent {formatDate(course.entry_form_sent_at, timeZone, { year: "numeric" })}.</p>
         )}
         <div className="flex flex-wrap items-center gap-4">
           {center?.appian_url ? (
@@ -308,12 +308,12 @@ export default async function CourseAdminDetailPage({
               href={center.appian_url}
               target="_blank"
               rel="noreferrer"
-              className="wash rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+              className="wash rounded-[6px] border border-border px-3.5 py-2 text-body font-medium text-ink hover:border-primary"
             >
               Open Appian
             </a>
           ) : (
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               No Appian sign-in link set yet --{" "}
               <Link href="/centre/settings" className="text-primary hover:underline">
                 add one in Centre Settings
@@ -332,8 +332,8 @@ export default async function CourseAdminDetailPage({
               the assessor's report cannot open without (15.2). Shared with
               the MCT's Grade form page -- whoever submits it marks it. */}
           <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
-            <p className="text-sm font-semibold text-ink">Centre Grade form</p>
-            <p className="text-xs text-muted">
+            <p className="text-body font-semibold text-ink">Centre Grade form</p>
+            <p className="text-label text-muted">
               {gradeFormSubmittedAt
                 ? `Marked submitted ${formatDate(gradeFormSubmittedAt, timeZone, { year: "numeric" })}${
                     gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""
@@ -353,8 +353,8 @@ export default async function CourseAdminDetailPage({
               approval form (Handbook 14.4). Cambridge's confirmation is the
               MCT's close-out tick. */}
           <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
-            <p className="text-sm font-semibold text-ink">Centre grade approval form</p>
-            <p className="text-xs text-muted">
+            <p className="text-body font-semibold text-ink">Centre grade approval form</p>
+            <p className="text-label text-muted">
               {approvalSubmittedAt
                 ? `Marked submitted ${formatDate(approvalSubmittedAt, timeZone, { year: "numeric" })}${
                     approvalMarker?.full_name ? ` by ${approvalMarker.full_name}` : ""
@@ -378,16 +378,16 @@ export default async function CourseAdminDetailPage({
       <div className="card flex flex-col gap-4 p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
         {tutors.length === 0 ? (
-          <p className="text-sm text-muted">No tutors have joined yet.</p>
+          <p className="text-body text-muted">No tutors have joined yet.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {tutors.map((t) => (
               <div key={t.profileId} className="flex items-center justify-between gap-3 border-t border-border-faint pt-2 first:border-none first:pt-0">
                 <div>
-                  <p className="text-sm text-ink">
-                    {t.name} {!t.joined ? <span className="text-xs text-muted">(invited)</span> : null}
+                  <p className="text-body text-ink">
+                    {t.name} {!t.joined ? <span className="text-label text-muted">(invited)</span> : null}
                   </p>
-                  <p className="text-xs text-muted">{t.email}</p>
+                  <p className="text-label text-muted">{t.email}</p>
                 </div>
                 <TutorRoleControl
                   courseTutorId={t.courseTutorId}
@@ -413,7 +413,7 @@ export default async function CourseAdminDetailPage({
       <div className="card flex flex-col gap-4 p-5">
         <div>
           <h2 className="font-serif text-h3 font-semibold text-ink">Assessor</h2>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-body text-muted">
             Optional -- often not known this early. Name it now if you already know, or leave it for the MCT to set
             once the course is running. The MCT gets notified with this contact info as soon as it&apos;s set.
           </p>
@@ -421,7 +421,7 @@ export default async function CourseAdminDetailPage({
         <form action={updateAssessor} className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
           <input type="hidden" name="course_id" value={course.id} />
           <div className="flex flex-col gap-1">
-            <label htmlFor="assessor_name" className="text-xs text-muted">
+            <label htmlFor="assessor_name" className="text-label text-muted">
               Name
             </label>
             <input
@@ -429,11 +429,11 @@ export default async function CourseAdminDetailPage({
               name="assessor_name"
               type="text"
               defaultValue={course.assessor_name ?? ""}
-              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="assessor_email" className="text-xs text-muted">
+            <label htmlFor="assessor_email" className="text-label text-muted">
               Email
             </label>
             <input
@@ -441,7 +441,7 @@ export default async function CourseAdminDetailPage({
               name="assessor_email"
               type="email"
               defaultValue={course.assessor_email ?? ""}
-              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           {/* The same shared column the MCT's Assessor card writes (migration
@@ -454,7 +454,7 @@ export default async function CourseAdminDetailPage({
               once set it appears on the assessor's landing page to copy.
               The generated Database type lags the migration, hence the cast. */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="appian_notification_reference" className="text-xs text-muted">
+            <label htmlFor="appian_notification_reference" className="text-label text-muted">
               Appian course notification reference
             </label>
             <input
@@ -463,10 +463,10 @@ export default async function CourseAdminDetailPage({
               type="text"
               defaultValue={(course as { appian_notification_reference?: string | null }).appian_notification_reference ?? ""}
               placeholder="From CELTA Admin's course approval email"
-              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
             />
           </div>
-          <button type="submit" className="wash h-10 rounded-[6px] border border-border px-3 text-sm text-ink hover:border-primary">
+          <button type="submit" className="wash h-10 rounded-[6px] border border-border px-3 text-body text-ink hover:border-primary">
             Save
           </button>
         </form>
@@ -476,7 +476,7 @@ export default async function CourseAdminDetailPage({
             reminder reads it regardless of who set it. */}
         <form action={updateAssessorVisitDate} className="flex items-center gap-2 border-t border-border-faint pt-3">
           <input type="hidden" name="course_id" value={course.id} />
-          <label htmlFor="assessor_visit_date" className="text-xs text-muted">
+          <label htmlFor="assessor_visit_date" className="text-label text-muted">
             Visit date (if known)
           </label>
           <input
@@ -484,15 +484,15 @@ export default async function CourseAdminDetailPage({
             type="date"
             name="assessor_visit_date"
             defaultValue={course.assessor_visit_date ?? ""}
-            className="h-9 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-border bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
           />
-          <button type="submit" className="wash rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
+          <button type="submit" className="wash rounded-[6px] border border-border px-3 py-1.5 text-label text-ink hover:border-primary">
             Save
           </button>
         </form>
       </div>
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Not on this page: timetable, TP groups, assignments, grades, chat retention, feedback tone, close-out, and
         the Drive/resource library. All of that is MCT-owned once the course is running, inside the course itself.
       </p>

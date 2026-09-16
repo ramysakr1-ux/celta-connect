@@ -242,15 +242,15 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <BackLink href="/dashboard/admissions" label="Admissions" />
         <div className="mt-2 flex items-center justify-between">
           <div>
-            <h1 className="font-serif text-xl text-ink">{applicant.full_name}</h1>
-            <p className="mt-1 text-sm text-muted">
+            <h1 className="font-serif text-h2 text-ink">{applicant.full_name}</h1>
+            <p className="mt-1 text-body text-muted">
               {applicant.email} &middot; Applying for {intake?.name ?? "--"}
             </p>
           </div>
           <span className="status-pill status-pill-pending">{applicant.stage.replaceAll("_", " ")}</span>
         </div>
         {applicant.referred_to_center_id ? (
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-label text-muted">
             Referred to {referredToCentre?.name ?? "another branch"}
             {referredByProfile ? ` by ${referredByProfile.full_name}` : ""}
             {applicant.referred_at ? ` · ${formatDateTime(applicant.referred_at, timeZone)}` : ""}
@@ -260,8 +260,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {isRejected ? (
         <div className="card p-5">
-          <p className="text-sm font-semibold text-ink">Rejected {formatDate(applicant.rejected_at, timeZone, { year: "numeric" })}</p>
-          <p className="mt-1 text-sm text-ink">{applicant.rejection_reason}</p>
+          <p className="text-body font-semibold text-ink">Rejected {formatDate(applicant.rejected_at, timeZone, { year: "numeric" })}</p>
+          <p className="mt-1 text-body text-ink">{applicant.rejection_reason}</p>
         </div>
       ) : null}
 
@@ -269,8 +269,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <h2 className="font-serif text-h3 font-semibold text-ink">Application</h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-muted">Date of birth</dt>
-            <dd className="text-sm text-ink">
+            <dt className="text-label text-muted">Date of birth</dt>
+            <dd className="text-body text-ink">
               {/* A date-only column, so no zone: formatCalendarDate, not formatDate. */}
               {applicant.date_of_birth ? formatCalendarDate(applicant.date_of_birth, { year: "numeric" }) : "--"}
               {/* Handbook 7.3 governs SELECTION, not application -- "applicants
@@ -299,33 +299,33 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Phone</dt>
-            <dd className="text-sm text-ink">{applicant.phone ?? "--"}</dd>
+            <dt className="text-label text-muted">Phone</dt>
+            <dd className="text-body text-ink">{applicant.phone ?? "--"}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs text-muted">Education</dt>
-            <dd className="text-sm text-ink whitespace-pre-wrap">{applicant.education_summary ?? "--"}</dd>
+            <dt className="text-label text-muted">Education</dt>
+            <dd className="text-body text-ink whitespace-pre-wrap">{applicant.education_summary ?? "--"}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-xs text-muted">ELT experience</dt>
-            <dd className="text-sm text-ink whitespace-pre-wrap">{applicant.elt_experience_summary ?? "--"}</dd>
+            <dt className="text-label text-muted">ELT experience</dt>
+            <dd className="text-body text-ink whitespace-pre-wrap">{applicant.elt_experience_summary ?? "--"}</dd>
           </div>
           {applicant.special_requirements ? (
             <div className="sm:col-span-2">
-              <dt className="text-xs text-muted">Special requirements</dt>
-              <dd className="text-sm text-ink whitespace-pre-wrap">{applicant.special_requirements}</dd>
+              <dt className="text-label text-muted">Special requirements</dt>
+              <dd className="text-body text-ink whitespace-pre-wrap">{applicant.special_requirements}</dd>
             </div>
           ) : null}
           {applicant.cannot_attend_note ? (
             <div className="sm:col-span-2">
-              <dt className="text-xs text-muted">Can&apos;t attend</dt>
-              <dd className="text-sm text-ink whitespace-pre-wrap">{applicant.cannot_attend_note}</dd>
+              <dt className="text-label text-muted">Can&apos;t attend</dt>
+              <dd className="text-body text-ink whitespace-pre-wrap">{applicant.cannot_attend_note}</dd>
             </div>
           ) : null}
           {applicant.anything_else ? (
             <div className="sm:col-span-2">
-              <dt className="text-xs text-muted">Anything else</dt>
-              <dd className="text-sm text-ink whitespace-pre-wrap">{applicant.anything_else}</dd>
+              <dt className="text-label text-muted">Anything else</dt>
+              <dd className="text-body text-ink whitespace-pre-wrap">{applicant.anything_else}</dd>
             </div>
           ) : null}
         </dl>
@@ -336,13 +336,13 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       <div className="card flex flex-col gap-3 p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Extended writing task</h2>
         {prompt ? (
-          <p className="text-xs text-muted">
+          <p className="text-label text-muted">
             {prompt.prompt_type[0].toUpperCase() + prompt.prompt_type.slice(1)}: {prompt.prompt_text}
           </p>
         ) : null}
-        <p className="whitespace-pre-wrap text-sm text-ink">{applicant.writing_task_submission ?? "--"}</p>
+        <p className="whitespace-pre-wrap text-body text-ink">{applicant.writing_task_submission ?? "--"}</p>
 
-        <h3 className="mt-2 text-sm font-semibold text-ink">Language awareness</h3>
+        <h3 className="mt-2 text-body font-semibold text-ink">Language awareness</h3>
         {/* Array.isArray, not `?? []`. The column is jsonb NOT NULL DEFAULT
             '[]', so the nullish guard could never fire -- but jsonb will hold
             anything, and a row carrying a bare string (the demo pipeline wrote
@@ -356,23 +356,23 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           : []
         ).map((qa, i) => (
           <div key={i}>
-            <p className="text-xs text-muted">{qa.question}</p>
-            <p className="whitespace-pre-wrap text-sm text-ink">{qa.answer}</p>
+            <p className="text-label text-muted">{qa.question}</p>
+            <p className="whitespace-pre-wrap text-body text-ink">{qa.answer}</p>
           </div>
         ))}
 
         {speakingPrompt || speakingAudioSignedUrl ? (
           <>
-            <h3 className="mt-2 text-sm font-semibold text-ink">Speaking task</h3>
-            {speakingPrompt ? <p className="text-xs text-muted">{speakingPrompt.prompt_text}</p> : null}
+            <h3 className="mt-2 text-body font-semibold text-ink">Speaking task</h3>
+            {speakingPrompt ? <p className="text-label text-muted">{speakingPrompt.prompt_text}</p> : null}
             {speakingAudioSignedUrl ? (
               // eslint-disable-next-line jsx-a11y/media-has-caption
               <audio src={speakingAudioSignedUrl} controls className="w-full" />
             ) : (
-              <p className="text-sm text-muted">No recording submitted.</p>
+              <p className="text-body text-muted">No recording submitted.</p>
             )}
             {applicant.speaking_task_transcript ? (
-              <details className="text-xs text-muted">
+              <details className="text-label text-muted">
                 <summary className="cursor-pointer select-none">Transcript</summary>
                 <p className="mt-1 whitespace-pre-wrap">{applicant.speaking_task_transcript}</p>
               </details>
@@ -383,7 +383,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             {applicant.speaking_task_ai_suggestion ? (
               <div className="rounded-[6px] border border-dashed border-border p-3">
                 <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
-                <p className="mt-1 text-sm text-ink">{applicant.speaking_task_ai_suggestion}</p>
+                <p className="mt-1 text-body text-ink">{applicant.speaking_task_ai_suggestion}</p>
               </div>
             ) : null}
           </>
@@ -394,20 +394,20 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <h2 className="font-serif text-h3 font-semibold text-ink">Course commitments and code of conduct</h2>
         {applicant.commitments_accepted_at ? (
           <>
-            <p className="text-sm text-ink">
+            <p className="text-body text-ink">
               Accepted {formatDate(applicant.commitments_accepted_at, timeZone, { day: "numeric", month: "long", year: "numeric" })}
             </p>
             {applicant.commitments_snapshot ? (
               <details className="mt-1">
-                <summary className="cursor-pointer text-xs font-semibold text-primary hover:underline">View the exact text they accepted</summary>
-                <pre className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-[6px] bg-surface-muted/40 p-3 font-sans text-xs leading-relaxed text-muted">
+                <summary className="cursor-pointer text-label font-semibold text-primary hover:underline">View the exact text they accepted</summary>
+                <pre className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-[6px] bg-surface-muted/40 p-3 font-sans text-label leading-relaxed text-muted">
                   {applicant.commitments_snapshot}
                 </pre>
               </details>
             ) : null}
           </>
         ) : (
-          <p className="text-sm text-muted">Not yet accepted -- this applicant predates the commitments requirement.</p>
+          <p className="text-body text-muted">Not yet accepted -- this applicant predates the commitments requirement.</p>
         )}
       </div>
 
@@ -418,14 +418,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       ) : (
         <div className="card flex flex-col gap-1 p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">Marking scheme -- selection task</h2>
-          <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can mark this.</p>
+          <p className="text-body text-muted">Only a verified course tutor or a nominated admissions decider can mark this.</p>
         </div>
       )}
 
       <div className="card flex flex-col gap-4 p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Interview</h2>
         {bookedSlot ? (
-          <p className="text-sm text-ink">
+          <p className="text-body text-ink">
             Booked: {formatCalendarDate(bookedSlot.slot_date, { weekday: "short" })} at {bookedSlot.slot_time.slice(0, 5)} ({bookedSlot.mode === "online" ? "Online" : "Face to face"}
             {bookedSlot.panel ? ", panel" : ""})
           </p>
@@ -440,16 +440,16 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             */}
             <div className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
               <div>
-                <p className="text-sm text-ink">
+                <p className="text-body text-ink">
                   {applicant.interview_invite_sent_at
                     ? `Invite sent ${formatDate(applicant.interview_invite_sent_at, timeZone, { day: "numeric", month: "long" })} -- no time picked yet`
                     : "Send the applicant a link to pick their own time"}
                 </p>
-                <p className="text-xs text-muted">Same link every time -- reply to admissions if none of the times suit.</p>
+                <p className="text-label text-muted">Same link every time -- reply to admissions if none of the times suit.</p>
               </div>
               <form action={sendInterviewInviteManually}>
                 <input type="hidden" name="applicant_id" value={applicant.id} />
-                <button type="submit" className="shrink-0 rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+                <button type="submit" className="shrink-0 rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-card">
                   {applicant.interview_invite_sent_at ? "Resend invite" : "Send interview invite"}
                 </button>
               </form>
@@ -457,17 +457,17 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           </>
         )}
         {!bookedSlot && (openSlots ?? []).length > 0 ? (
-          <details className="text-xs text-muted">
+          <details className="text-label text-muted">
             <summary className="cursor-pointer font-semibold text-primary hover:underline">
               Or book a specific time on their behalf (e.g. agreed by phone)
             </summary>
             <form action={bookInterviewSlot} className="mt-2 flex flex-wrap items-end gap-3">
               <input type="hidden" name="applicant_id" value={applicant.id} />
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="time_key" className="text-xs text-muted">
+                <label htmlFor="time_key" className="text-label text-muted">
                   Book a time -- assigned to whoever has interviewed least this intake
                 </label>
-                <select id="time_key" name="time_key" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
+                <select id="time_key" name="time_key" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink">
                   {groupedSlots.map(([key, g]) => (
                     <option key={key} value={key}>
                       {formatCalendarDate(g.slotDate, { weekday: "short" })} {g.slotTime.slice(0, 5)} ({g.mode === "online" ? "Online" : "Face to face"}
@@ -477,15 +477,15 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                   ))}
                 </select>
               </div>
-              <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+              <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-card">
                 Book
               </button>
             </form>
-            <details className="text-xs text-muted">
+            <details className="text-label text-muted">
               <summary className="cursor-pointer font-semibold text-primary hover:underline">Or choose a specific interviewer instead</summary>
               <form action={bookInterviewSlot} className="mt-2 flex flex-wrap items-end gap-3">
                 <input type="hidden" name="applicant_id" value={applicant.id} />
-                <select name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
+                <select name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink">
                   {(openSlots ?? []).map((s) => (
                     <option key={s.id} value={s.id}>
                       {formatCalendarDate(s.slot_date, { weekday: "short" })} {s.slot_time.slice(0, 5)} -- {interviewerNameById.get(s.interviewer_id) ?? "Unknown"} (
@@ -494,14 +494,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary wash">
+                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink hover:border-primary wash">
                   Book with this interviewer
                 </button>
               </form>
             </details>
           </details>
         ) : !bookedSlot ? (
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             No open slots for this intake yet.{" "}
             <Link href="/dashboard/admissions" className="text-primary hover:underline">
               Create one
@@ -523,7 +523,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           />
         ) : bookedSlot || interviewRecord ? (
           <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can record this interview.</p>
+            <p className="text-body text-muted">Only a verified course tutor or a nominated admissions decider can record this interview.</p>
             {interviewRecord ? <IdentityCheckLine record={interviewRecord} timeZone={timeZone} /> : null}
           </div>
         ) : null}
@@ -533,14 +533,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <>
           <div className="card p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Offer</h2>
-            <p className="mt-1 text-sm text-ink">
+            <p className="mt-1 text-body text-ink">
               Sent {formatDate(applicant.offer_sent_at, timeZone, { year: "numeric" })}, accept by {formatCalendarDate(applicant.offer_accept_by, { year: "numeric" })}.
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
           <div className="card p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Deposit</h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-body text-muted">
               {paymentState.label}
               {paymentState.outstanding !== null ? ` \u00b7 ${paymentState.outstanding} outstanding` : ""}
             </p>
@@ -582,7 +582,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       {isWaitingList ? (
         <div className="card p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">Waiting list</h2>
-          <p className="mt-1 text-sm text-ink">
+          <p className="mt-1 text-body text-ink">
             Position {applicant.waiting_list_position}. Will hear by {formatCalendarDate(applicant.waiting_list_hear_by, { year: "numeric" })}.
           </p>
         </div>
@@ -603,14 +603,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           {existingRequest ? (
             <div className="card flex flex-col gap-1 p-5">
               <h2 className="font-serif text-h3 font-semibold text-ink">Referral request</h2>
-              <p className="text-sm text-ink">
+              <p className="text-body text-ink">
                 {existingRequest.status === "pending"
                   ? `Waiting on ${existingRequest.toCenterName} to accept or decline.`
                   : existingRequest.status === "accepted"
                     ? `${existingRequest.toCenterName} accepted this request.`
                     : `${existingRequest.toCenterName} declined this request${existingRequest.declineReason ? `: ${existingRequest.declineReason}` : "."}`}
               </p>
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 Sent {formatDateTime(existingRequest.requestedAt, timeZone)}
               </p>
             </div>
@@ -664,7 +664,7 @@ function AcknowledgementsGiven({
   if (given.length === 0) return null;
   return (
     <div className="mt-1 border-t border-border-faint pt-3">
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Acknowledged on the application form, {formatDate(given[0][1], timeZone, { year: "numeric" })}
       </p>
       <ul className="mt-1 flex flex-col gap-1">
@@ -695,10 +695,10 @@ function IdentityCheckLine({
   timeZone: string;
 }) {
   const r = record;
-  if (!r.identity_checked_at) return <p className="text-xs text-status-warning-text">Identity not yet recorded as checked (Handbook §7.2).</p>;
+  if (!r.identity_checked_at) return <p className="text-label text-status-warning-text">Identity not yet recorded as checked (Handbook §7.2).</p>;
   const doc = IDENTITY_DOCUMENT_LABEL[r.identity_document_type ?? ""] ?? "a document";
   return (
-    <p className="text-xs text-muted">
+    <p className="text-label text-muted">
       Identity checked — {doc} seen, {formatDate(r.identity_checked_at, timeZone, { year: "numeric" })}
       {r.interviewer_signature_name ? ` by ${r.interviewer_signature_name}` : ""}.
     </p>

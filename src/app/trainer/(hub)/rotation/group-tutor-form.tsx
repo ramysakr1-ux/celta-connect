@@ -53,11 +53,11 @@ export function GroupTutorForm({
   const [daysState, daysAction, daysPending] = useActionState(setTpGroupTutor, initial);
   const sorted = [...assignments].sort((a, b) => a.fromTp - b.fromTp);
   const effective = sorted.filter((a) => a.fromTp <= Math.max(currentTp, 1)).at(-1) ?? null;
-  const inputClass = "h-8 rounded-[6px] border border-input bg-card-inset px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60";
+  const inputClass = "h-8 rounded-[6px] border border-input bg-card-inset px-2 text-label text-ink outline-none focus:border-primary disabled:opacity-60";
 
   return (
     <div className="mt-1 flex flex-col gap-2.5">
-      <p className="text-sm text-ink">
+      <p className="text-body text-ink">
         <span className="font-semibold">{currentTutorName ?? "No tutor yet"}</span>
         {currentTp > 0 ? <span className="text-muted"> · now, at TP{currentTp}</span> : <span className="text-muted"> · before TP1</span>}
       </p>
@@ -65,7 +65,7 @@ export function GroupTutorForm({
       {sorted.length > 0 ? (
         <ul className="flex flex-col gap-1">
           {sorted.map((a) => (
-            <li key={a.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+            <li key={a.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-label">
               <span className={`rounded-full px-2 py-[2px] font-semibold ${effective?.id === a.id ? "bg-card-inset text-ink" : "text-muted"}`}>
                 From TP{a.fromTp}
               </span>
@@ -86,7 +86,7 @@ export function GroupTutorForm({
           ))}
         </ul>
       ) : (
-        <p className="text-xs text-muted">No tutor planned for this group yet.</p>
+        <p className="text-label text-muted">No tutor planned for this group yet.</p>
       )}
 
       <form action={addAction} className="flex flex-wrap items-center gap-2">
@@ -102,7 +102,7 @@ export function GroupTutorForm({
             </option>
           ))}
         </select>
-        <span className="text-xs text-muted">from</span>
+        <span className="text-label text-muted">from</span>
         <select name="from_tp_number" defaultValue={sorted.length === 0 ? "1" : ""} disabled={addPending} className={inputClass} required>
           <option value="" disabled>
             TP
@@ -117,7 +117,7 @@ export function GroupTutorForm({
         <button
           type="submit"
           disabled={addPending}
-          className="wash h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
+          className="wash h-8 rounded-[6px] border border-border px-2.5 text-label font-semibold text-ink hover:border-primary disabled:opacity-60"
         >
           {addPending ? "Saving…" : sorted.length === 0 ? "Set tutor" : "Add handover"}
         </button>
@@ -127,12 +127,12 @@ export function GroupTutorForm({
       <form action={daysAction} className="flex flex-wrap items-center gap-2">
         <input type="hidden" name="group_id" value={groupId} />
         <input type="hidden" name="course_id" value={courseId} />
-        <span className="text-xs text-muted">Meets</span>
+        <span className="text-label text-muted">Meets</span>
         <input name="meeting_days" type="text" defaultValue={currentMeetingDays ?? ""} placeholder="odd days" disabled={daysPending} className={`${inputClass} w-28`} />
         <button
           type="submit"
           disabled={daysPending}
-          className="wash h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
+          className="wash h-8 rounded-[6px] border border-border px-2.5 text-label font-semibold text-ink hover:border-primary disabled:opacity-60"
         >
           {daysPending ? "Saving…" : "Save"}
         </button>

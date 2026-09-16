@@ -242,7 +242,7 @@ export default async function TraineeTimetablePage({
         <div className="flex justify-end">
           <a
             href={`/api/portfolio/${traineeId}/timetable.ics`}
-            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink wash"
+            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-body font-medium text-ink wash"
           >
             Add to my calendar
           </a>
@@ -250,7 +250,7 @@ export default async function TraineeTimetablePage({
       ) : null}
 
       {allEvents.length === 0 ? (
-        <div className="sheet text-sm text-muted">No events yet.</div>
+        <div className="sheet text-body text-muted">No events yet.</div>
       ) : (
         <ReadOnlyTimetableBoard
           events={allEvents}

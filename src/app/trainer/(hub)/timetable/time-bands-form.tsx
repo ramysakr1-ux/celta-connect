@@ -22,8 +22,8 @@ export function TimeBandsForm({ timeBands, isCustom }: { timeBands: TimeBand[]; 
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h3 className="font-serif text-lg text-ink">Daily time bands</h3>
-        <p className="mt-1 text-sm text-muted">
+        <h3 className="font-serif text-h3 text-ink">Daily time bands</h3>
+        <p className="mt-1 text-body text-muted">
           The columns of the timetable grid below -- match your course&apos;s actual daily rhythm (full-time,
           afternoon-only, online all run different hours). {isCustom ? "Customised for this course." : "Using the standard default shape."}
         </p>
@@ -39,22 +39,22 @@ export function TimeBandsForm({ timeBands, isCustom }: { timeBands: TimeBand[]; 
                 required
                 value={row.start}
                 onChange={(e) => updateRow(i, "start", e.target.value)}
-                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-body text-ink outline-none focus:border-primary"
               />
-              <span className="text-sm text-muted">–</span>
+              <span className="text-body text-muted">–</span>
               <input
                 name="band_end"
                 type="time"
                 required
                 value={row.end}
                 onChange={(e) => updateRow(i, "end", e.target.value)}
-                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-body text-ink outline-none focus:border-primary"
               />
               <button
                 type="button"
                 onClick={() => setRows((prev) => prev.filter((_, idx) => idx !== i))}
                 disabled={rows.length <= 1}
-                className="rounded-[6px] px-2 py-1.5 text-sm text-muted hover:text-destructive disabled:opacity-30"
+                className="rounded-[6px] px-2 py-1.5 text-body text-muted hover:text-destructive disabled:opacity-30"
               >
                 Remove
               </button>
@@ -66,14 +66,14 @@ export function TimeBandsForm({ timeBands, isCustom }: { timeBands: TimeBand[]; 
           <button
             type="button"
             onClick={() => setRows((prev) => [...prev, { start: "", end: "" }])}
-            className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+            className="self-start rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
           >
             + Add band
           </button>
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            className="rounded-[6px] bg-primary px-4 py-1.5 text-body font-medium text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save time bands"}
           </button>
@@ -81,14 +81,14 @@ export function TimeBandsForm({ timeBands, isCustom }: { timeBands: TimeBand[]; 
             <button
               type="submit"
               formAction={resetTimeBands}
-              className="text-sm text-muted hover:text-ink hover:underline"
+              className="text-body text-muted hover:text-ink hover:underline"
             >
               Reset to default
             </button>
           ) : null}
         </div>
 
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       </form>
     </div>
   );

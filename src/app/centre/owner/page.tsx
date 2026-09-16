@@ -373,7 +373,7 @@ function StatCard({ label, value, suffix, accent }: { label: string; value: stri
       </p>
       <p className="owner-serif mt-[7px] text-h1 tabular-nums" style={accent ? { color: "var(--owner-garnet)" } : undefined}>
         {value}
-        {suffix ? <span className="ml-1 text-xs font-sans font-normal" style={{ color: "var(--owner-muted)" }}>{suffix}</span> : null}
+        {suffix ? <span className="ml-1 text-label font-sans font-normal" style={{ color: "var(--owner-muted)" }}>{suffix}</span> : null}
       </p>
     </div>
   );

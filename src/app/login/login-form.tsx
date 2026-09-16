@@ -14,7 +14,7 @@ export function LoginForm({ next }: { next?: string }) {
       <form action={action} className="flex flex-col gap-4">
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm text-muted">
+          <label htmlFor="email" className="text-body text-muted">
             Email
           </label>
           <input
@@ -23,12 +23,12 @@ export function LoginForm({ next }: { next?: string }) {
             type="email"
             required
             autoComplete="email"
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm text-muted">
+            <label htmlFor="password" className="text-body text-muted">
               Password
             </label>
             {/* "Forgot?" excluded the people who need it most. Most accounts
@@ -36,7 +36,7 @@ export function LoginForm({ next }: { next?: string }) {
                 sign-in links -- so someone setting one for the first time
                 read "Forgot?" as not meant for them and never clicked it.
                 Ramy lost an evening to exactly that, 2 Sep 2026. */}
-            <a href="/forgot-password" className="text-xs text-muted hover:text-ink">
+            <a href="/forgot-password" className="text-label text-muted hover:text-ink">
               Set or reset
             </a>
           </div>
@@ -46,18 +46,18 @@ export function LoginForm({ next }: { next?: string }) {
             type="password"
             required
             autoComplete="current-password"
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-body text-ink outline-none focus:border-primary"
           />
         </div>
 
         {state.error ? (
-          <p className="text-sm text-destructive">{state.error}</p>
+          <p className="text-body text-destructive">{state.error}</p>
         ) : null}
 
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+          className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? "Signing in..." : "Sign in"}
         </button>

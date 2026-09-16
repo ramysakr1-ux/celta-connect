@@ -41,13 +41,13 @@ export function ResourceHubSearch({ items, placeholder = "Search the resource hu
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder={placeholder}
-          className="w-full min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted"
+          className="w-full min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-muted"
         />
       </div>
       {open && query.trim() ? (
         <div className="absolute z-20 mt-1 max-h-80 w-full overflow-y-auto rounded-[6px] border border-border bg-card shadow-lg">
           {matches.length === 0 ? (
-            <p className="p-3 text-sm text-muted">No matches for &ldquo;{query}&rdquo;.</p>
+            <p className="p-3 text-body text-muted">No matches for &ldquo;{query}&rdquo;.</p>
           ) : (
             matches.map((m) => (
               <Link
@@ -56,8 +56,8 @@ export function ResourceHubSearch({ items, placeholder = "Search the resource hu
                 onClick={() => setOpen(false)}
                 className="block border-b border-border-faint px-3 py-2 last:border-none hover:bg-surface-muted"
               >
-                <p className="text-sm text-ink">{m.title}</p>
-                {m.subtitle ? <p className="text-xs text-muted">{m.subtitle}</p> : null}
+                <p className="text-body text-ink">{m.title}</p>
+                {m.subtitle ? <p className="text-label text-muted">{m.subtitle}</p> : null}
               </Link>
             ))
           )}

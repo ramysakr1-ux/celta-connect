@@ -23,28 +23,28 @@ export default async function TrainerDashboardPage() {
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
         <div>
-          <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
+          <h1 className="font-serif text-h2 text-ink">Welcome, {profile.full_name}</h1>
           <p className="mt-2 text-muted">Your cohort&apos;s TP and assignment progress.</p>
         </div>
         <div className="flex gap-4">
-          <Link href="/trainer/coursebooks" className="text-sm text-muted hover:text-ink">
+          <Link href="/trainer/coursebooks" className="text-body text-muted hover:text-ink">
             TP Points Library
           </Link>
-          <Link href="/trainer/rotation" className="text-sm text-muted hover:text-ink">
+          <Link href="/trainer/rotation" className="text-body text-muted hover:text-ink">
             TP Rotation
           </Link>
         </div>
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Cohort</h2>
+        <h2 className="font-serif text-h3 text-ink">Cohort</h2>
         <div className="card mt-3 overflow-hidden">
           <table className="table-plain w-full">
             <thead>
               <tr>
-                <th className="text-sm text-muted">Name</th>
-                <th className="text-sm text-muted">TP hours taught</th>
-                <th className="text-sm text-muted">Assignments approved</th>
+                <th className="text-body text-muted">Name</th>
+                <th className="text-body text-muted">TP hours taught</th>
+                <th className="text-body text-muted">Assignments approved</th>
               </tr>
             </thead>
             <tbody>

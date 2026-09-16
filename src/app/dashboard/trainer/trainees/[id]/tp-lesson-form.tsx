@@ -38,11 +38,11 @@ export function TpLessonForm({
         {lesson ? <input type="hidden" name="lesson_id" value={lesson.id} /> : null}
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">TP number</label>
+          <label className="text-body text-muted">TP number</label>
           <select
             name="tp_number"
             defaultValue={lesson?.tp_number ?? suggestedTpNumber ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Not part of rotation</option>
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -55,29 +55,29 @@ export function TpLessonForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Date</label>
+            <label className="text-body text-muted">Date</label>
             <input
               name="lesson_date"
               type="date"
               defaultValue={lesson?.lesson_date ?? ""}
-              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Length (minutes)</label>
+            <label className="text-body text-muted">Length (minutes)</label>
             <input
               name="length_minutes"
               type="number"
               defaultValue={lesson?.length_minutes ?? ""}
-              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Level</label>
+            <label className="text-body text-muted">Level</label>
             <select
               name="level"
               defaultValue={lesson?.level ?? ""}
-              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             >
               <option value="">Select a level</option>
               {CEFR_LEVELS.map((l) => (
@@ -88,33 +88,33 @@ export function TpLessonForm({
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Learners</label>
+            <label className="text-body text-muted">Learners</label>
             <input
               name="learner_count"
               type="number"
               defaultValue={lesson?.learner_count ?? ""}
-              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Lesson focus</label>
+          <label className="text-body text-muted">Lesson focus</label>
           <input
             name="lesson_focus"
             type="text"
             defaultValue={lesson?.lesson_focus ?? ""}
             placeholder="e.g. Grammar and speaking"
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Tutor assessment</label>
+          <label className="text-body text-muted">Tutor assessment</label>
           <select
             name="tutor_assessment"
             defaultValue={lesson?.tutor_assessment ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-body text-ink outline-none focus:border-primary"
           >
             <option value="">Not yet assessed</option>
             {STANDARD_RATING_OPTIONS.map((opt) => (
@@ -126,21 +126,21 @@ export function TpLessonForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted">Tutor comments</label>
+          <label className="text-body text-muted">Tutor comments</label>
           <TrainerFeedbackTextarea
             name="tutor_comments"
             rows={2}
             defaultValue={lesson?.tutor_comments ?? ""}
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
           />
         </div>
 
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
         <button
           type="submit"
           disabled={pending}
-          className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-medium text-card disabled:opacity-60"
         >
           {pending ? "Saving..." : lesson ? "Save" : "Add lesson"}
         </button>

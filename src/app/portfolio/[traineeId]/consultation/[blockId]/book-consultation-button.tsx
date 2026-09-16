@@ -15,8 +15,8 @@ export function BookConsultationButton({ blockId, assignments, ownTutor }: { blo
   return (
     <form action={formAction} className="sheet flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-col gap-1">
-        <p className="text-sm text-ink">Claim the next open position.</p>
-        <p className="text-xs text-muted">
+        <p className="text-body text-ink">Claim the next open position.</p>
+        <p className="text-label text-muted">
           {ownTutor
             ? "This is your own tutor's sheet, so any assignment is fine."
             : "Before an assignment's first submission you may book any tutor; after it, only your own tutor for that assignment."}
@@ -24,7 +24,7 @@ export function BookConsultationButton({ blockId, assignments, ownTutor }: { blo
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <input type="hidden" name="block_id" value={blockId} />
-        <select name="assignment_type" defaultValue="" aria-label="About which assignment" className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary">
+        <select name="assignment_type" defaultValue="" aria-label="About which assignment" className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary">
           <option value="">General / not about an assignment</option>
           {assignments.map((a) => (
             <option key={a} value={a}>
@@ -32,11 +32,11 @@ export function BookConsultationButton({ blockId, assignments, ownTutor }: { blo
             </option>
           ))}
         </select>
-        <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+        <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60">
           {pending ? "Booking…" : "Book next open position"}
         </button>
       </div>
-      {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-body text-destructive">{state.error}</p> : null}
     </form>
   );
 }

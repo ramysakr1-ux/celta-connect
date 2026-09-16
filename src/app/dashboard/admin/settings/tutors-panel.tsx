@@ -90,7 +90,7 @@ function TutorRow({
           </td>
         ) : null}
         <td className="py-2.5 text-right">
-          <button type="button" onClick={() => setEditing(true)} className="text-sm text-primary hover:underline">
+          <button type="button" onClick={() => setEditing(true)} className="text-body text-primary hover:underline">
             Edit
           </button>
         </td>
@@ -104,18 +104,18 @@ function TutorRow({
         <form action={action} className="flex flex-col gap-3 rounded-[6px] border border-border bg-accent/20 p-4">
           <input type="hidden" name="id" value={row.id} />
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-ink">{row.tutorName}</p>
-            <button type="button" onClick={() => setEditing(false)} className="text-xs text-muted hover:text-ink">
+            <p className="text-body font-semibold text-ink">{row.tutorName}</p>
+            <button type="button" onClick={() => setEditing(false)} className="text-label text-muted hover:text-ink">
               Cancel
             </button>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-muted">Role on this course</label>
+            <label className="text-label text-muted">Role on this course</label>
             <select
               name="tutor_role"
               defaultValue={row.tutorRole ?? ""}
-              className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-body text-ink"
             >
               <option value="">No role set</option>
               {TUTOR_ROLE_OPTIONS.map((r) => (
@@ -127,7 +127,7 @@ function TutorRow({
           </div>
 
           <div className="flex flex-col gap-2 rounded-[6px] border border-border-faint p-3">
-            <label className="flex items-center gap-2 text-sm text-ink">
+            <label className="flex items-center gap-2 text-body text-ink">
               <input
                 type="checkbox"
                 name="is_trainer_in_training"
@@ -138,26 +138,26 @@ function TutorRow({
             </label>
             {isTit ? (
               <>
-                <p className="text-xs text-muted">
+                <p className="text-label text-muted">
                   Handbook 3.7.4/3.7.5 -- training undertaken without prior Cambridge verification isn&apos;t
                   acknowledged, so a verification date is required before this can be saved as checked.
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs text-muted">Verified on</label>
+                    <label className="text-label text-muted">Verified on</label>
                     <input
                       type="date"
                       name="verified_at"
                       defaultValue={row.verifiedAt ? row.verifiedAt.slice(0, 10) : ""}
-                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
+                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-body text-ink"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs text-muted">Supervised by</label>
+                    <label className="text-label text-muted">Supervised by</label>
                     <select
                       name="supervisor_profile_id"
                       defaultValue={row.supervisorProfileId ?? ""}
-                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
+                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-body text-ink"
                     >
                       <option value="">Not set</option>
                       {supervisorOptions.map((s) => (
@@ -174,11 +174,11 @@ function TutorRow({
 
           {requiresOnlineExperience ? (
             <div className="flex flex-col gap-2 rounded-[6px] border border-border-faint p-3">
-              <label className="flex items-center gap-2 text-sm text-ink">
+              <label className="flex items-center gap-2 text-body text-ink">
                 <input type="checkbox" name="online_experience_evidenced" defaultChecked={row.onlineExperienceEvidenced} />
                 Online teaching/training experience evidenced
               </label>
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 Required for every tutor on an online or mixed-mode course -- this course is one.
               </p>
               <input
@@ -186,17 +186,17 @@ function TutorRow({
                 name="online_experience_note"
                 defaultValue={row.onlineExperienceNote ?? ""}
                 placeholder="e.g. two years teaching on Zoom at a previous centre"
-                className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
+                className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-body text-ink"
               />
             </div>
           ) : null}
 
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
           <button
             type="submit"
             disabled={pending}
-            className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:opacity-60"
+            className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-body font-medium text-card disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>
@@ -214,7 +214,7 @@ export function TutorsPanel({
   supervisorOptions: { id: string; name: string }[];
 }) {
   if (groups.length === 0) {
-    return <p className="text-sm text-muted">No tutors on any course at this centre yet.</p>;
+    return <p className="text-body text-muted">No tutors on any course at this centre yet.</p>;
   }
 
   return (
@@ -224,10 +224,10 @@ export function TutorsPanel({
         return (
           <div key={group.courseId}>
             <div className="mb-2 flex items-baseline gap-2">
-              <h3 className="text-sm font-semibold text-ink">{group.courseName}</h3>
-              <span className="text-xs text-muted">{DELIVERY_MODE_LABEL[group.deliveryMode]}</span>
+              <h3 className="text-body font-semibold text-ink">{group.courseName}</h3>
+              <span className="text-label text-muted">{DELIVERY_MODE_LABEL[group.deliveryMode]}</span>
             </div>
-            <table className="w-full text-sm">
+            <table className="w-full text-body">
               <thead>
                 <tr className="border-b border-border text-left text-micro font-semibold uppercase tracking-[0.1em] text-muted">
                   <th className="pb-2 font-semibold">Name</th>

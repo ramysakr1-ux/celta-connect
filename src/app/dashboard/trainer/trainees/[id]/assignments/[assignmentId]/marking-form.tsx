@@ -779,7 +779,7 @@ export function AssignmentMarkingForm({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {error ? <p className="text-body text-destructive">{error}</p> : null}
           {closed ? null : (
             <>
               <DictateButton variant="bar" hue={accent} />

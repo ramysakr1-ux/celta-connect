@@ -43,8 +43,8 @@ export function SelfEvaluationSection({
   if (!plan.submitted_at) {
     return (
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-        <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
-        <p className="mt-2 text-sm text-muted">Opens once you have submitted your lesson plan.</p>
+        <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
+        <p className="mt-2 text-body text-muted">Opens once you have submitted your lesson plan.</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export function SelfEvaluationSection({
   if (!taught) {
     return (
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-        <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
+        <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
         {/* Ramy, 12 Sep 2026: "the self-evaluation should unlock when the
             lesson date passes." It used to wait for the tutor to log the
             lesson as taught, which on the feedback path meant waiting for the
@@ -60,7 +60,7 @@ export function SelfEvaluationSection({
             reading their tutor's view, and the tutor's own "comment on their
             self-evaluation" box could never be filled on a first pass. The
             CELTA order is: teach, reflect, then be fed back to. */}
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-body text-muted">
           {lessonDate
             ? `Opens after you teach this lesson, on ${lessonDate}.`
             : "Opens once you have taught this lesson."}
@@ -86,7 +86,7 @@ export function SelfEvaluationSection({
     <>
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
+          <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
           <span className="status-pill status-pill-on-track">Submitted -- locked</span>
         </div>
         <div className="mt-4 flex flex-col gap-3">
@@ -102,7 +102,7 @@ export function SelfEvaluationSection({
       {feedback?.submitted_at ? (
         <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
+            <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
             {feedback.grade ? <StandardRatingPill rating={feedback.grade} /> : null}
           </div>
           <div className="mt-4 flex flex-col gap-4">
@@ -118,7 +118,7 @@ export function SelfEvaluationSection({
             {[...feedback.action_points_planning, ...feedback.action_points_teaching].some(
               (p) => (p as FeedbackPoint).starred
             ) ? (
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 ★ Starred action points carry into the Personal Aims of your TP{tpNumber + 1} plan.
               </p>
             ) : null}
@@ -126,8 +126,8 @@ export function SelfEvaluationSection({
         </div>
       ) : (
         <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
-          <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
-          <p className="mt-2 text-sm text-muted">Not yet released by your trainer.</p>
+          <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
+          <p className="mt-2 text-body text-muted">Not yet released by your trainer.</p>
         </div>
       )}
     </>
@@ -138,7 +138,7 @@ export function ReadOnlyField({ label, value }: { label: string; value?: string 
   if (!value) return null;
   return (
     <div>
-      <p className="text-sm text-muted">{label}</p>
+      <p className="text-body text-muted">{label}</p>
       <p className="whitespace-pre-line text-ink">{value}</p>
     </div>
   );
@@ -149,15 +149,15 @@ function ActionPointsReadOnly({ points }: { points: SelfEvalActionPoint[] }) {
   if (withContent.length === 0) return null;
   return (
     <div>
-      <p className="text-sm text-muted">Action points from the last TP</p>
+      <p className="text-body text-muted">Action points from the last TP</p>
       <div className="mt-1 overflow-x-auto rounded-[6px] border border-border-faint">
-        <table className="w-full min-w-[480px] border-collapse text-sm">
+        <table className="w-full min-w-[480px] border-collapse text-body">
           <thead>
             <tr>
-              <th className="border-b border-border-faint bg-background p-2 text-left text-xs text-muted">
+              <th className="border-b border-border-faint bg-background p-2 text-left text-label text-muted">
                 Action point set last time
               </th>
-              <th className="border-b border-border-faint bg-background p-2 text-left text-xs text-muted">
+              <th className="border-b border-border-faint bg-background p-2 text-left text-label text-muted">
                 What I did about it
               </th>
             </tr>
@@ -166,7 +166,7 @@ function ActionPointsReadOnly({ points }: { points: SelfEvalActionPoint[] }) {
             {withContent.map((point, i) => (
               <tr key={i}>
                 <td className="border-b border-border-faint p-2 align-top text-ink">
-                  {point.carried ? <span className="mr-1 text-xs text-status-warning-text">★</span> : null}
+                  {point.carried ? <span className="mr-1 text-label text-status-warning-text">★</span> : null}
                   {point.previous_point}
                 </td>
                 <td className="border-b border-border-faint p-2 align-top text-ink">{point.what_i_did}</td>
@@ -183,14 +183,14 @@ export function FeedbackPointList({ label, points }: { label: string; points: Fe
   if (points.length === 0) return null;
   return (
     <div>
-      <p className="text-sm text-muted">{label}</p>
+      <p className="text-body text-muted">{label}</p>
       <ul className="mt-1 flex flex-col gap-2">
         {points.map((point, i) => (
           <li key={i} className="text-ink">
             {point.starred ? <span className="mr-1 text-primary">★</span> : null}
             {point.text}
             {point.criteria_codes.length > 0 ? (
-              <span className="ml-2 text-xs text-muted">
+              <span className="ml-2 text-label text-muted">
                 (
                 {point.criteria_codes
                   .map((code) => `${code}${CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}`)

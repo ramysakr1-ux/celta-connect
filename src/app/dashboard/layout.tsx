@@ -181,7 +181,7 @@ export default async function DashboardLayout({
           </div>
           </div>
         </div>
-        <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
+        <div className="container flex items-center justify-end gap-4 pb-2.5 text-body text-muted">
           <BranchFilter branches={switchable} />
           {/* The role sits next to the name rather than on a line of its own.
               Ramy, 31 Aug 2026, asked whether the header was needed: the

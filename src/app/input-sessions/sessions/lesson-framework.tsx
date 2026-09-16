@@ -47,14 +47,14 @@ const NOTES = [
 function DecisionTree() {
   return (
     <div className="flex flex-col items-center gap-0 rounded-[8px] border border-border bg-card p-5">
-      <p className="rounded-[8px] border-[1.5px] border-border bg-accent px-5 py-2.5 text-center font-serif text-base font-semibold text-ink">
+      <p className="rounded-[8px] border-[1.5px] border-border bg-accent px-5 py-2.5 text-center font-serif text-h3 font-semibold text-ink">
         Is the main aim language or skills?
       </p>
       <div className="h-5 w-[1.5px] bg-border" />
       <div className="grid w-full grid-cols-2 gap-10">
         <div className="flex flex-col items-center gap-2">
           <p className="text-micro font-bold uppercase tracking-[0.08em] text-primary">Language</p>
-          <p className="text-center text-xs text-muted">Does the target language arise from a text?</p>
+          <p className="text-center text-label text-muted">Does the target language arise from a text?</p>
           <div className="flex w-full gap-2">
             <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/5 p-2 text-center text-label font-semibold text-primary">No → PPP / TTT</div>
             <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/10 p-2 text-center text-label font-semibold text-primary">Yes → Text-Based</div>
@@ -63,7 +63,7 @@ function DecisionTree() {
         </div>
         <div className="flex flex-col items-center gap-2">
           <p className="text-micro font-bold uppercase tracking-[0.08em] text-destructive">Skills</p>
-          <p className="text-center text-xs text-muted">Is it listening or reading?</p>
+          <p className="text-center text-label text-muted">Is it listening or reading?</p>
           <div className="flex w-full gap-2">
             <div className="flex-1 rounded-[6px] border border-destructive/25 bg-destructive/5 p-2 text-center text-label font-semibold text-destructive">Yes → Receptive Skills</div>
             <div className="flex-1 rounded-[6px] border border-border bg-accent p-2 text-center text-label font-semibold text-muted">No → Productive Skills</div>
@@ -93,7 +93,7 @@ function CardSort() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Card sort — pin each stage to its shape</p>
+        <p className="text-label font-bold text-ink">Card sort — pin each stage to its shape</p>
         <p className="text-label text-muted">{`${Object.keys(placed).length} of ${STAGES.length} pinned`}</p>
       </div>
       <p className="text-label text-muted">Click a stage, then the shape you think it belongs to.</p>
@@ -107,7 +107,7 @@ function CardSort() {
               type="button"
               onClick={() => pickCard(i)}
               disabled={isPlaced}
-              className={`rounded-[6px] border-[1.5px] px-3.5 py-2 text-xs font-semibold ${isSel ? "border-primary bg-primary/10 text-ink" : "border-border bg-card text-ink"} ${isPlaced ? "opacity-25" : ""}`}
+              className={`rounded-[6px] border-[1.5px] px-3.5 py-2 text-label font-semibold ${isSel ? "border-primary bg-primary/10 text-ink" : "border-border bg-card text-ink"} ${isPlaced ? "opacity-25" : ""}`}
             >
               {s.text}
             </button>
@@ -169,7 +169,7 @@ function BuildSequence() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Build the sequence — pick a shape</p>
+        <p className="text-label font-bold text-ink">Build the sequence — pick a shape</p>
         <p className="text-label text-muted">
           {done ? (allCorrect ? "Correct order!" : "Not quite — click a slot to remove it and retry") : `${built.length} of ${correct.length} placed`}
         </p>
@@ -236,7 +236,7 @@ function NameThatFramework() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold text-ink">Name that framework</p>
+        <p className="text-label font-bold text-ink">Name that framework</p>
         <p className="text-label text-muted">{`${count} of ${SCENARIOS.length} correct`}</p>
       </div>
       {SCENARIOS.map((s, si) => (
@@ -275,14 +275,14 @@ function StageTimer() {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Stage timer — pacing challenge</p>
-      <p className="text-xs leading-relaxed text-muted">
+      <p className="text-label font-bold text-ink">Stage timer — pacing challenge</p>
+      <p className="text-label leading-relaxed text-muted">
         You have 45 minutes for a Text-Based lesson. Budget the minutes across the three stages below — the total
         should land close to 45.
       </p>
       {PACING_STAGES.map((name, i) => (
         <div key={name} className="flex items-center justify-between gap-3.5 rounded-[6px] border border-border bg-card px-3.5 py-2.5">
-          <p className="text-xs font-semibold text-ink">{name}</p>
+          <p className="text-label font-semibold text-ink">{name}</p>
           <div className="flex items-center gap-1.5">
             <input
               type="number"
@@ -297,7 +297,7 @@ function StageTimer() {
                   return next;
                 });
               }}
-              className="w-14 rounded-[5px] border-[1.5px] border-border px-1.5 py-1 text-center text-xs text-ink outline-none"
+              className="w-14 rounded-[5px] border-[1.5px] border-border px-1.5 py-1 text-center text-label text-ink outline-none"
             />
             <p className="text-label text-muted">min</p>
           </div>
@@ -319,7 +319,7 @@ function StageTimer() {
         </button>
         {revealed ? (
           <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/10 px-3.5 py-2.5">
-            <p className="text-xs leading-relaxed text-ink">
+            <p className="text-label leading-relaxed text-ink">
               Trim <strong className="font-semibold">Controlled Practice &amp; Feedback</strong>, not Clarification.
               Clarification (meaning, form, pronunciation) is where the actual learning happens — cutting it short
               undermines the lesson aim. Practice can run one activity instead of two, or feedback can be briefer,
@@ -355,7 +355,7 @@ export default function LessonFrameworkSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             Quick show of hands: when you plan a lesson, what&apos;s the first decision you make — the language point,
@@ -365,13 +365,13 @@ export default function LessonFrameworkSession() {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-ink">The one question that decides your shape</p>
+        <p className="text-label font-bold text-ink">The one question that decides your shape</p>
         <DecisionTree />
       </div>
 
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">The six shapes, stage by stage</p>
+          <p className="text-label font-bold text-ink">The six shapes, stage by stage</p>
           <p className="text-label text-muted">Study these for a couple of minutes before the card sort below — you&apos;ll need them.</p>
         </div>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">

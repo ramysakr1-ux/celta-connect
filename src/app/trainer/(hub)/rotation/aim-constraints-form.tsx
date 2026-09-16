@@ -29,7 +29,7 @@ export function AimConstraintsForm({
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink wash disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-body font-medium text-ink wash disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save constraints"}
       </button>
@@ -41,10 +41,10 @@ function AimTypeCheckboxes({ name, label, defaultValue }: { name: string; label:
   const defaults = new Set(defaultValue ?? []);
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-sm text-muted">{label}</p>
+      <p className="text-body text-muted">{label}</p>
       <div className="flex flex-col gap-1">
         {AIM_TYPES.map((t) => (
-          <label key={t} className="flex items-center gap-2 text-sm text-ink">
+          <label key={t} className="flex items-center gap-2 text-body text-ink">
             <input type="checkbox" name={name} value={t} defaultChecked={defaults.has(t)} className="size-3.5" />
             {AIM_TYPE_LABELS[t]}
           </label>

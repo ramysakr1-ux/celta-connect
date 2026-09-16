@@ -191,8 +191,8 @@ export default async function AssignmentDetailPage({
 
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl text-ink">{ASSIGNMENT_INFO[assignment.assignment_type].title}</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="font-serif text-h1 text-ink">{ASSIGNMENT_INFO[assignment.assignment_type].title}</h1>
+          <p className="mt-1 text-body text-muted">
             {isStaff
               ? `${ASSIGNMENT_RESULT_LABEL[result]}${round === "resubmission" && roundStatus === "submitted" ? " · resubmission in" : ""}${assignment.first_submitted_late ? " · first submission late" : ""}`
               : assignment.due_date
@@ -203,13 +203,13 @@ export default async function AssignmentDetailPage({
         {canExportCoverSheet ? (
           <a
             href={`/api/portfolio/${traineeId}/assignments/${assignmentId}/cover-sheet`}
-            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink wash"
+            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-body text-ink wash"
           >
             Export cover sheet + assignment PDF
           </a>
         ) : (
           <span
-            className="shrink-0 cursor-not-allowed rounded-[6px] border border-border px-4 py-2 text-sm text-muted"
+            className="shrink-0 cursor-not-allowed rounded-[6px] border border-border px-4 py-2 text-body text-muted"
             title="Available once the first round has been submitted and returned"
           >
             Export cover sheet + assignment PDF
@@ -218,7 +218,7 @@ export default async function AssignmentDetailPage({
       </div>
 
       {assessorCourseId && assignment.due_date ? (
-        <p className="text-sm text-muted">Due {formatCalendarDate(assignment.due_date, { year: "numeric" })}</p>
+        <p className="text-body text-muted">Due {formatCalendarDate(assignment.due_date, { year: "numeric" })}</p>
       ) : null}
 
       {!template ? (

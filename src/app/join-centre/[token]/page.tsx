@@ -36,7 +36,7 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           You&apos;re joining {center?.name ?? "your centre"} as a {roleLabel}. You do not need to be on a course —
           this link opens the centre.
         </p>

@@ -27,7 +27,7 @@ export function AddRoleForm() {
         </button>
       </div>
       {state.error ? (
-        <p className="text-xs" style={{ color: "var(--owner-garnet)" }}>
+        <p className="text-label" style={{ color: "var(--owner-garnet)" }}>
           {state.error}
         </p>
       ) : null}

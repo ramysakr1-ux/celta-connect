@@ -216,11 +216,11 @@ export default async function AdmissionsPage({
         <table className="table-plain w-full">
           <thead>
             <tr>
-              <th className="text-sm text-muted">Name</th>
-              <th className="text-sm text-muted">Intake</th>
-              <th className="text-sm text-muted">Stage</th>
-              <th className="text-sm text-muted">Deposit</th>
-              <th className="text-sm text-muted">Applied</th>
+              <th className="text-body text-muted">Name</th>
+              <th className="text-body text-muted">Intake</th>
+              <th className="text-body text-muted">Stage</th>
+              <th className="text-body text-muted">Deposit</th>
+              <th className="text-body text-muted">Applied</th>
             </tr>
           </thead>
           <tbody>
@@ -272,7 +272,7 @@ export default async function AdmissionsPage({
 
       <div className="card p-5">
         <h2 className="font-serif text-h3 font-semibold text-ink">Interview availability</h2>
-        <p className="mt-1 text-sm text-muted">Slots are generated from a rule, not typed in every week.</p>
+        <p className="mt-1 text-body text-muted">Slots are generated from a rule, not typed in every week.</p>
         <div className="mt-4">
           <InterviewAvailabilityPanel interviewers={interviewerOptions} patterns={patterns} blocks={blocks} settings={generationSettings} />
         </div>
@@ -288,7 +288,7 @@ export default async function AdmissionsPage({
             reasons -- shown only when a face-to-face slot is open on such
             an intake. */}
         {faceToFaceOnOnlineIntakes.length > 0 ? (
-          <p className="rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg/40 px-3 py-2 text-xs leading-relaxed text-status-warning-text">
+          <p className="rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg/40 px-3 py-2 text-label leading-relaxed text-status-warning-text">
             {faceToFaceOnOnlineIntakes.join(" and ")}{" "}
             {faceToFaceOnOnlineIntakes.length === 1 ? "has" : "have"} an online element, and{" "}
             {faceToFaceOnOnlineIntakes.length === 1 ? "its" : "their"} open slots include face-to-face times. Handbook §7.2 asks
@@ -298,23 +298,23 @@ export default async function AdmissionsPage({
         {(openSlots ?? []).length > 0 ? (
           <ul className="flex flex-col gap-1.5">
             {(openSlots ?? []).map((s) => (
-              <li key={s.id} className="text-sm text-ink hover-ring">
+              <li key={s.id} className="text-body text-ink hover-ring">
                 {intakeNameById.get(s.intake_course_id) ?? "--"} -- {formatCalendarDate(s.slot_date, { weekday: "short" })} at {s.slot_time.slice(0, 5)} ({s.mode === "online" ? "Online" : "Face to face"}
                 {s.panel ? ", panel" : ""})
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted">No open slots. Create one below.</p>
+          <p className="text-body text-muted">No open slots. Create one below.</p>
         )}
 
         {intakes && intakes.length > 0 ? (
           <form action={createInterviewSlot} className="flex flex-wrap items-end gap-3 border-t border-border pt-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="intake_course_id" className="text-xs text-muted">
+              <label htmlFor="intake_course_id" className="text-label text-muted">
                 Intake
               </label>
-              <select id="intake_course_id" name="intake_course_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
+              <select id="intake_course_id" name="intake_course_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink">
                 {intakes.map((i) => (
                   <option key={i.id} value={i.id}>
                     {i.name}
@@ -323,53 +323,53 @@ export default async function AdmissionsPage({
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="slot_date" className="text-xs text-muted">
+              <label htmlFor="slot_date" className="text-label text-muted">
                 Date
               </label>
-              <input id="slot_date" name="slot_date" type="date" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
+              <input id="slot_date" name="slot_date" type="date" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="slot_time" className="text-xs text-muted">
+              <label htmlFor="slot_time" className="text-label text-muted">
                 Time
               </label>
-              <input id="slot_time" name="slot_time" type="time" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
+              <input id="slot_time" name="slot_time" type="time" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="mode" className="text-xs text-muted">
+              <label htmlFor="mode" className="text-label text-muted">
                 Mode
               </label>
-              <select id="mode" name="mode" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
+              <select id="mode" name="mode" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-body text-ink">
                 <option value="face_to_face">Face to face</option>
                 <option value="online">Online</option>
               </select>
             </div>
-            <label className="flex items-center gap-1.5 pb-2 text-xs text-ink">
+            <label className="flex items-center gap-1.5 pb-2 text-label text-ink">
               <input type="checkbox" name="panel" />A panel (second interviewer)
             </label>
-            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-card">
               Create slot
             </button>
           </form>
         ) : (
-          <p className="text-xs text-muted">Open a course for applications first (from its admin page) to book interview slots.</p>
+          <p className="text-label text-muted">Open a course for applications first (from its admin page) to book interview slots.</p>
         )}
       </div>
 
       {marketingByCourse.size > 0 ? (
         <div className="card flex flex-col gap-4 p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">How they heard about us</h2>
-          <p className="text-sm text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
+          <p className="text-body text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
           <ul className="flex flex-col gap-4">
             {Array.from(marketingByCourse.entries()).map(([courseId, { name, total, counts }]) => (
               <li key={courseId} className="border-t border-border pt-3 hover-ring">
-                <p className="text-sm font-medium text-ink">
+                <p className="text-body font-medium text-ink">
                   {name} <span className="font-normal text-muted">({total})</span>
                 </p>
                 <ul className="mt-1.5 flex flex-col gap-1">
                   {(Object.entries(counts) as [MarketingSource, number][])
                     .sort((a, b) => b[1] - a[1])
                     .map(([source, count]) => (
-                      <li key={source} className="flex items-center justify-between text-xs text-muted">
+                      <li key={source} className="flex items-center justify-between text-label text-muted">
                         <span>{MARKETING_SOURCE_LABEL[source]}</span>
                         <span>
                           {count} ({Math.round((count / total) * 100)}%)
@@ -386,14 +386,14 @@ export default async function AdmissionsPage({
       {waitingByIntake.size > 0 ? (
         <div className="card flex flex-col gap-4 p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">Waiting lists</h2>
-          <p className="text-sm text-muted">
+          <p className="text-body text-muted">
             When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever&apos;s next -- the app
             picks who, not you.
           </p>
           <ul className="flex flex-col gap-3">
             {Array.from(waitingByIntake.entries()).map(([intakeCourseId, { name, count }]) => (
               <li key={intakeCourseId} className="flex items-center justify-between border-t border-border pt-3 hover-ring">
-                <span className="text-sm text-ink">{name}</span>
+                <span className="text-body text-ink">{name}</span>
                 <OfferNextPlaceForm intakeCourseId={intakeCourseId} waitingCount={count} />
               </li>
             ))}

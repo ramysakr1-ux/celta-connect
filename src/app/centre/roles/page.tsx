@@ -113,7 +113,7 @@ export default async function CentreRolesPage() {
 
       <div className="card px-5 py-4">
         <h2 className="font-serif text-h3 font-semibold text-ink">Areas of responsibility</h2>
-        <p className="mt-1 text-xs text-muted">
+        <p className="mt-1 text-label text-muted">
           A role says what someone is capable of; an area says what is actually their job. Everyone sees every area —
           only its holder can act in it, and everyone else sees their name instead of the button.
         </p>
@@ -123,7 +123,7 @@ export default async function CentreRolesPage() {
             return (
               <div key={a} className="hover-ring flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/60 px-3 py-2">
                 <span className="text-meta text-ink">{AREA_LABELS[a]}</span>
-                <span className="shrink-0 text-xs text-muted">
+                <span className="shrink-0 text-label text-muted">
                   {h ? (
                     <>
                       {h.name}
@@ -145,7 +145,7 @@ export default async function CentreRolesPage() {
         {mayAppoint ? (
           <div className="mt-4 border-t border-border-faint pt-3">
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Assign an area</p>
-            <p className="mt-1 mb-2 text-xs text-muted">
+            <p className="mt-1 mb-2 text-label text-muted">
               Nobody assigns their own. An end date makes it temporary cover that lapses on its own.
             </p>
             <AssignAreaForm />
@@ -157,7 +157,7 @@ export default async function CentreRolesPage() {
       {mayAppoint ? (
         <div className="card card-gold px-5 py-4">
           <h2 className="font-serif text-h3 font-semibold text-ink">Appoint someone</h2>
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-label text-muted">
             Roles are appointed, never chosen — nobody promotes their own account. They need an account in this
             centre already; appointing gives a role to an existing person. Inviting someone who doesn&apos;t have
             one yet is below.
@@ -172,7 +172,7 @@ export default async function CentreRolesPage() {
               <div className="mt-2 flex flex-col gap-1.5">
                 {(grants ?? []).map((g) => (
                   <div key={g.id} className="flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-2 text-xs text-ink">
+                    <span className="flex items-center gap-2 text-label text-ink">
                       <Avatar name={nameOf.get(g.profile_id) ?? "Unknown"} size="xs" />
                       <span>
                         {nameOf.get(g.profile_id) ?? "Unknown"}{" "}
@@ -191,7 +191,7 @@ export default async function CentreRolesPage() {
       {mayAppoint ? (
         <div className="card px-5 py-4">
           <h2 className="font-serif text-h3 font-semibold text-ink">Invite a new admin</h2>
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-label text-muted">
             For someone who has no account here at all. The link opens the centre, not a course — they set up their
             account and accept the centre agreement in one step, and their access lasts for as long as the centre
             runs, not just one course.
@@ -208,7 +208,7 @@ export default async function CentreRolesPage() {
                   const deliveryStatus = inv.email ? deliveryStatusByEmail.get(inv.email.toLowerCase()) : null;
                   return (
                     <div key={inv.id} className="flex items-center justify-between gap-3">
-                      <span className="text-xs text-ink">
+                      <span className="text-label text-ink">
                         {roleLabel(inv.role, ctx.customRoles)}
                         {inv.email ? <span className="text-muted"> · {inv.email}</span> : <span className="text-muted"> · not yet accepted</span>}
                         {deliveryStatus ? (
@@ -228,12 +228,12 @@ export default async function CentreRolesPage() {
       {mayAppoint && (log ?? []).length > 0 ? (
         <div className="rounded-[10px] border border-destructive/25 bg-destructive/5 px-5 py-4">
           <h2 className="font-serif text-h3 font-semibold text-ink">Owner actions</h2>
-          <p className="mt-0.5 text-xs text-muted">
+          <p className="mt-0.5 text-label text-muted">
             Every intervention an owner makes is recorded — visible logging, not silent senior access.
           </p>
           <div className="mt-2 flex flex-col gap-1">
             {(log ?? []).map((entry, i) => (
-              <div key={i} className="flex items-center justify-between gap-3 text-xs">
+              <div key={i} className="flex items-center justify-between gap-3 text-label">
                 <span className="text-ink">
                   {nameOf.get(entry.actor_profile_id) ?? "Unknown"} &middot; {entry.action}
                 </span>

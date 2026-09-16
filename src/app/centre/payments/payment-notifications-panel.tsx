@@ -23,19 +23,19 @@ export function PaymentNotificationsPanel({ notifications, canEdit, timeZone }: 
     <div className="rounded-[10px] border border-status-warning-text/40 border-t-[3px] border-t-status-warning-text bg-status-warning-bg">
       <div className="border-b border-status-warning-text/30 px-5 py-4">
         <h2 className="font-serif text-h3 font-semibold text-ink">Overdue instalments</h2>
-        <p className="mt-0.5 text-xs text-muted">{notifications.length} flagged by the missed-instalment sweep.</p>
+        <p className="mt-0.5 text-label text-muted">{notifications.length} flagged by the missed-instalment sweep.</p>
       </div>
       <ul className="flex flex-col">
         {notifications.map((n) => (
           <li key={n.id} className="hover-ring flex items-center justify-between gap-3 border-b border-status-warning-text/20 px-5 py-4 last:border-none">
             <div>
-              <p className="text-sm text-ink">{n.message}</p>
-              <p className="mt-0.5 text-xs text-muted">{day(n.createdAt)}</p>
+              <p className="text-body text-ink">{n.message}</p>
+              <p className="mt-0.5 text-label text-muted">{day(n.createdAt)}</p>
             </div>
             {canEdit ? (
               <form action={markPaymentNotificationRead}>
                 <input type="hidden" name="notification_id" value={n.id} />
-                <button type="submit" className="wash shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary">
+                <button type="submit" className="wash shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink hover:border-primary">
                   Dismiss
                 </button>
               </form>

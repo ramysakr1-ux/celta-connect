@@ -200,15 +200,15 @@ export default async function TrainerMarkAssignmentPage({
         <form action={updateAssignmentDueDate} className="flex items-end gap-3">
           <input type="hidden" name="assignment_id" value={assignmentId} />
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted">Deadline</label>
+            <label className="text-body text-muted">Deadline</label>
             <input
               type="date"
               name="due_date"
               defaultValue={assignment.due_date ?? ""}
-              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
-          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink wash">
+          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-body text-ink wash">
             Save deadline
           </button>
         </form>
@@ -241,7 +241,7 @@ export default async function TrainerMarkAssignmentPage({
           </p>
           <Link
             href={`/trainer/malpractice/${assignment.open_case_id}`}
-            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink wash"
+            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-body text-ink wash"
           >
             Open the case
           </Link>
@@ -254,14 +254,14 @@ export default async function TrainerMarkAssignmentPage({
           <p className="text-muted">
             Not yet submitted for this round — nothing to review until {trainee.full_name.split(" ")[0]} submits.
           </p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-body text-muted">
             Due {assignment.due_date ? formatCalendarDate(assignment.due_date, { year: "numeric" }) : "— no deadline set"}.
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           <div className="sheet sheet-garnet flex flex-col gap-1">
-            <p className="text-sm text-ink">
+            <p className="text-body text-ink">
               AI declaration: {aiDeclared ? "used" : "not used"}
               {aiDeclared && aiConversationUrl ? (
                 <>
@@ -272,8 +272,8 @@ export default async function TrainerMarkAssignmentPage({
                 </>
               ) : null}
             </p>
-            {aiCitationMismatch ? <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
-            {registerNote ? <p className="text-sm text-status-warning-text">Language pre-check: {registerNote}</p> : null}
+            {aiCitationMismatch ? <p className="text-body text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
+            {registerNote ? <p className="text-body text-status-warning-text">Language pre-check: {registerNote}</p> : null}
           </div>
 
           {isFol && folCross ? <FolCrossCheck claims={folCross.claims} poolEntries={folCross.poolEntries} /> : null}

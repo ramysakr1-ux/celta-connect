@@ -25,11 +25,11 @@ export function UnsubscribeButton({ token, initiallyOptedOut }: { token: string;
         <button
           type="submit"
           disabled={resubPending}
-          className="wash h-9 rounded-full border border-border px-4 text-sm font-semibold text-ink disabled:opacity-60"
+          className="wash h-9 rounded-full border border-border px-4 text-body font-semibold text-ink disabled:opacity-60"
         >
           {resubPending ? "Saving…" : "Turn reminder emails back on"}
         </button>
-        {error ? <p className="text-xs text-destructive">{error}</p> : null}
+        {error ? <p className="text-label text-destructive">{error}</p> : null}
       </form>
     );
   }
@@ -41,11 +41,11 @@ export function UnsubscribeButton({ token, initiallyOptedOut }: { token: string;
       <button
         type="submit"
         disabled={unsubPending}
-        className="wash h-9 rounded-full border border-border px-4 text-sm font-semibold text-ink disabled:opacity-60"
+        className="wash h-9 rounded-full border border-border px-4 text-body font-semibold text-ink disabled:opacity-60"
       >
         {unsubPending ? "Saving…" : "Yes, stop these emails"}
       </button>
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="text-label text-destructive">{error}</p> : null}
     </form>
   );
 }

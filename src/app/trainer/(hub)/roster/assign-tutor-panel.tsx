@@ -29,8 +29,8 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
 
   return (
     <div className="card p-6">
-      <h2 className="font-serif text-lg text-ink">Add an existing tutor</h2>
-      <p className="mt-1 text-sm text-muted">
+      <h2 className="font-serif text-h3 text-ink">Add an existing tutor</h2>
+      <p className="mt-1 text-body text-muted">
         For a tutor who already has an account from another course at this centre. It adds this course to their
         assignments -- it doesn&apos;t remove them from the other one.
       </p>
@@ -44,7 +44,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
             name="profile_id"
             required
             defaultValue=""
-            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink outline-none focus:border-primary"
           >
             <option value="" disabled>
               Choose a tutor
@@ -62,7 +62,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
             name="tutor_role"
             value={tutorRole}
             onChange={(e) => setTutorRole(e.target.value)}
-            className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink outline-none focus:border-primary"
           >
             {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
@@ -74,16 +74,16 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
         <button
           type="submit"
           disabled={pending}
-          className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+          className="h-9 rounded-[6px] bg-ink-warm px-4 text-body font-semibold text-card disabled:opacity-60"
         >
           {pending ? "Adding…" : "Add to this course"}
         </button>
       </form>
 
-      {state.error ? <p className="mt-2 text-sm text-destructive">{state.error}</p> : null}
-      {!state.error && state.warning ? <p className="mt-2 text-sm text-status-warning-text">{state.warning}</p> : null}
+      {state.error ? <p className="mt-2 text-body text-destructive">{state.error}</p> : null}
+      {!state.error && state.warning ? <p className="mt-2 text-body text-status-warning-text">{state.warning}</p> : null}
       {!state.error && !state.warning && state.assigned ? (
-        <p className="mt-2 text-sm text-primary">{state.assigned} added to this course.</p>
+        <p className="mt-2 text-body text-primary">{state.assigned} added to this course.</p>
       ) : null}
     </div>
   );

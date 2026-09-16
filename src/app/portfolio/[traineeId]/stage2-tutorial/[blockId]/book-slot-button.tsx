@@ -10,14 +10,14 @@ export function BookSlotButton({ blockId }: { blockId: string }) {
 
   return (
     <form action={formAction} className="sheet flex items-center justify-between gap-3">
-      <p className="text-sm text-ink">Claim the next open position.</p>
+      <p className="text-body text-ink">Claim the next open position.</p>
       <div className="flex items-center gap-3">
-        {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+        {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
         <input type="hidden" name="block_id" value={blockId} />
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
         >
           {pending ? "Booking…" : "Book next open position"}
         </button>

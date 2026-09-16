@@ -14,7 +14,7 @@ export function VideoReveal({ embedUrl, label = "Click for video" }: { embedUrl:
       <button
         type="button"
         onClick={() => setPlaying(true)}
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/5 px-4 text-xs font-semibold text-destructive"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/5 px-4 text-label font-semibold text-destructive"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7z" />

@@ -87,7 +87,7 @@ export function AttachMenu({
   }
 
   const itemClass =
-    "flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-card-inset";
+    "flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 text-left text-body text-ink transition-colors hover:bg-card-inset";
 
   return (
     <div ref={wrap} className="relative">
@@ -95,7 +95,7 @@ export function AttachMenu({
         type="button"
         onClick={() => setMode(mode === null ? "menu" : null)}
         disabled={uploading}
-        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform lift disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-body font-semibold text-primary-foreground transition-transform lift disabled:opacity-60"
         style={{ background: "var(--color-primary)" }}
       >
         <Paperclip size={15} />
@@ -125,7 +125,7 @@ export function AttachMenu({
             <div className="mt-0.5 border-t border-border-faint pt-1.5">
               <div className="flex items-center gap-2.5 px-3 py-1">
                 <HardDrive size={16} className="text-muted" />
-                <span className="text-sm text-ink">From your centre&apos;s Drive</span>
+                <span className="text-body text-ink">From your centre&apos;s Drive</span>
               </div>
               <div className="px-3 pb-1.5">
                 <DriveAttachButtons tpPlanId={tpPlanId} onError={onError} />
@@ -138,7 +138,7 @@ export function AttachMenu({
       {mode === "upload" ? (
         <div className="mt-3 rounded-[10px] border border-border bg-card p-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-ink">Upload a file</p>
+            <p className="text-body font-semibold text-ink">Upload a file</p>
             <button type="button" onClick={() => setMode(null)} aria-label="Close" className="text-muted hover:text-ink">
               <X size={15} />
             </button>
@@ -162,8 +162,8 @@ export function AttachMenu({
             }}
           >
             <Upload size={20} className="text-muted" />
-            <p className="text-sm text-ink">Drag a file here</p>
-            <p className="text-xs text-muted">or click to browse</p>
+            <p className="text-body text-ink">Drag a file here</p>
+            <p className="text-label text-muted">or click to browse</p>
           </div>
           <input
             ref={fileInput}
@@ -182,7 +182,7 @@ export function AttachMenu({
       {mode === "link" ? (
         <form onSubmit={saveLink} className="mt-3 flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-ink">Paste a link</p>
+            <p className="text-body font-semibold text-ink">Paste a link</p>
             <button type="button" onClick={() => setMode(null)} aria-label="Close" className="text-muted hover:text-ink">
               <X size={15} />
             </button>
@@ -192,19 +192,19 @@ export function AttachMenu({
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
             placeholder="https://…"
-            className="h-9 rounded-[8px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[8px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
           />
           <input
             type="text"
             value={linkName}
             onChange={(e) => setLinkName(e.target.value)}
             placeholder="What is it? (optional)"
-            className="h-9 rounded-[8px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[8px] border border-input bg-card-inset px-3 text-body text-ink outline-none focus:border-primary"
           />
           <button
             type="submit"
             disabled={savingLink || !linkUrl.trim()}
-            className="self-start rounded-full px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            className="self-start rounded-full px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
             style={{ background: "var(--color-primary)" }}
           >
             {savingLink ? "Attaching…" : "Attach link"}

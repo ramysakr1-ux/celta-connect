@@ -46,12 +46,12 @@ export function AdminRoster({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-muted">{rows.length} people have centre-level access.</p>
+        <p className="text-body text-muted">{rows.length} people have centre-level access.</p>
         {mayAppoint ? (
           <button
             type="button"
             onClick={() => setShowInvite((v) => !v)}
-            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            className="rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground"
           >
             Invite someone
           </button>
@@ -61,11 +61,11 @@ export function AdminRoster({
       {mayAppoint && showInvite ? (
         <div className="flex flex-col gap-4 card p-5">
           <div>
-            <h3 className="font-serif text-sm text-ink">Appoint someone with an account already</h3>
+            <h3 className="font-serif text-body text-ink">Appoint someone with an account already</h3>
             <GrantRoleForm />
           </div>
           <div className="border-t border-border-faint pt-4">
-            <h3 className="font-serif text-sm text-ink">Or send an invite link</h3>
+            <h3 className="font-serif text-body text-ink">Or send an invite link</h3>
             <CreateInviteForm />
           </div>
         </div>
@@ -78,15 +78,15 @@ export function AdminRoster({
             className={`hover-ring flex items-center justify-between gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}
           >
             <div className="min-w-0">
-              <p className="truncate text-sm text-ink">{row.name}</p>
-              <p className="truncate text-xs text-muted">{row.email}</p>
+              <p className="truncate text-body text-ink">{row.name}</p>
+              <p className="truncate text-label text-muted">{row.email}</p>
             </div>
             <span
               className={`shrink-0 rounded-full border px-2.5 py-0.5 text-label font-semibold ${ROLE_PILL_CLASS[row.role as CentreRole] ?? DEFAULT_ROLE_PILL_CLASS}`}
             >
               {roleLabel(row.role, customRoles)}
             </span>
-            <span className="w-32 shrink-0 truncate text-right text-xs text-muted">{row.scope}</span>
+            <span className="w-32 shrink-0 truncate text-right text-label text-muted">{row.scope}</span>
             <span className="w-16 shrink-0 text-right">
               {row.role === "centre_owner" ? null : mayAppoint ? <RevokeRoleButton grantId={row.grantId} /> : null}
             </span>
@@ -99,8 +99,8 @@ export function AdminRoster({
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
           {invites.map((inv) => (
             <div key={inv.id} className="hover-ring flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2">
-              <span className="text-sm text-ink">{roleLabel(inv.role, customRoles)}</span>
-              <span className="text-xs text-muted">{formatDate(inv.created_at, timeZone, { year: "numeric" })}</span>
+              <span className="text-body text-ink">{roleLabel(inv.role, customRoles)}</span>
+              <span className="text-label text-muted">{formatDate(inv.created_at, timeZone, { year: "numeric" })}</span>
               {/* Same gate as the grant and revoke controls beside it. This
                   showed for everyone who could open the tab, so a Centre
                   observer got a Withdraw button the server then refused. */}
@@ -110,7 +110,7 @@ export function AdminRoster({
         </div>
       ) : null}
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Nobody chooses their own role — the invitation carries it.{" "}
         <Link href="/centre/roles" className="text-primary hover:underline">
           See the full permission breakdown per role

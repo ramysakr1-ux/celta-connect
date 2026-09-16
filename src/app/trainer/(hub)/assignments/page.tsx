@@ -397,7 +397,7 @@ export default async function TrainerAssignmentsBoardPage() {
                   </div>
                 );
               })}
-              {active.length === 0 ? <p className="py-6 text-sm" style={{ color: MUTED }}>No candidates on this course yet.</p> : null}
+              {active.length === 0 ? <p className="py-6 text-body" style={{ color: MUTED }}>No candidates on this course yet.</p> : null}
             </div>
           </div>
         </div>

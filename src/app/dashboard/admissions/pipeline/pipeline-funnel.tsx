@@ -52,10 +52,10 @@ export function PipelineFunnel({
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <span className={`font-serif text-2xl leading-none ${on ? "text-primary" : "text-ink"}`}>{s.count}</span>
-                {s.dropPct !== null ? <span className="text-xs font-bold text-muted">{s.dropPct}%</span> : null}
+                <span className={`font-serif text-h1 leading-none ${on ? "text-primary" : "text-ink"}`}>{s.count}</span>
+                {s.dropPct !== null ? <span className="text-label font-bold text-muted">{s.dropPct}%</span> : null}
               </div>
-              <span className={`text-xs font-semibold ${on ? "text-primary" : "text-ink"}`}>{s.label}</span>
+              <span className={`text-label font-semibold ${on ? "text-primary" : "text-ink"}`}>{s.label}</span>
               <span className="text-micro leading-tight text-muted">{s.sub}</span>
             </button>
           );
@@ -65,13 +65,13 @@ export function PipelineFunnel({
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.35fr_1fr]">
         <div className="overflow-hidden rounded-[7px] border border-border">
           <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-muted/60 px-4 py-2.5">
-            <span className="text-sm font-semibold text-ink">{current?.label}</span>
-            <span className="text-xs text-muted">
+            <span className="text-body font-semibold text-ink">{current?.label}</span>
+            <span className="text-label text-muted">
               {people.length} of {current?.count ?? 0} shown
             </span>
           </div>
           {people.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted">Nobody in this stage.</p>
+            <p className="px-4 py-3 text-body text-muted">Nobody in this stage.</p>
           ) : (
             <ul>
               {people.map((p) => (
@@ -81,8 +81,8 @@ export function PipelineFunnel({
                       and for an accepted applicant this and the course page are
                       the only places their name still appears. */}
                   <Link href={`/dashboard/admissions/${p.id}`} className="block px-4 py-2.5 no-underline">
-                    <p className="text-sm font-semibold text-ink">{p.name}</p>
-                    <p className="text-xs text-muted">{p.meta}</p>
+                    <p className="text-body font-semibold text-ink">{p.name}</p>
+                    <p className="text-label text-muted">{p.meta}</p>
                   </Link>
                 </li>
               ))}
@@ -91,12 +91,12 @@ export function PipelineFunnel({
         </div>
         <div className="flex flex-col gap-2.5">
           {alerts.length === 0 ? (
-            <p className="sheet-interactive p-3 text-xs text-muted">Nothing needs attention right now.</p>
+            <p className="sheet-interactive p-3 text-label text-muted">Nothing needs attention right now.</p>
           ) : (
             alerts.map((a, i) => (
               <div key={i} className={`rounded-[6px] border border-border-faint border-l-[3px] bg-card p-3.5 ${ALERT_TONE_CLASS[a.tone]}`}>
-                <p className="text-xs font-bold">{a.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-ink">{a.text}</p>
+                <p className="text-label font-bold">{a.title}</p>
+                <p className="mt-1 text-label leading-relaxed text-ink">{a.text}</p>
               </div>
             ))
           )}

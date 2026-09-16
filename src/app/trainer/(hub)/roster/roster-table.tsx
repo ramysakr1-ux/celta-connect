@@ -161,7 +161,7 @@ export function RosterTable({
               <RosterRowView key={row.id} row={row} isMct={isMct} showContact={showContact} courseCode={courseCode} showDetail={showDetail} frozenSub={frozenSubById[row.id]} />
             ))
           ) : (
-            <p className="px-5 py-4 text-sm text-muted">{filter ? "Nobody in this set. Click the tile again to show everyone." : "No trainees on this course yet."}</p>
+            <p className="px-5 py-4 text-body text-muted">{filter ? "Nobody in this set. Click the tile again to show everyone." : "No trainees on this course yet."}</p>
           )}
         </div>
       </div>

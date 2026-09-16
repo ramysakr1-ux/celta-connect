@@ -224,8 +224,8 @@ export default async function AdminDashboardPage({
         <div className="flex items-start gap-3 rounded-[6px] border border-destructive/30 bg-destructive/5 p-4">
           <span className="mt-1 size-1.5 shrink-0 rounded-full bg-destructive" />
           <div>
-            <p className="text-sm font-semibold text-ink">Your centre number is still a placeholder -- {center.center_number}</p>
-            <p className="mt-0.5 text-sm text-muted">
+            <p className="text-body font-semibold text-ink">Your centre number is still a placeholder -- {center.center_number}</p>
+            <p className="mt-0.5 text-body text-muted">
               It prints on every final report and cover sheet.{" "}
               <Link href="/dashboard/admin/settings" className="text-primary hover:underline">
                 Set the real Cambridge number
@@ -241,7 +241,7 @@ export default async function AdminDashboardPage({
           <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[oklch(30%_0.042_58)]" />
           <div className="flex flex-col gap-[3px]">
             <p className="text-meta font-semibold text-ink">Centre number set — {center.center_number}</p>
-            <p className="text-xs leading-relaxed text-muted">Prints on every final report and cover sheet.</p>
+            <p className="text-label leading-relaxed text-muted">Prints on every final report and cover sheet.</p>
           </div>
         </div>
       ) : null}
@@ -254,7 +254,7 @@ export default async function AdminDashboardPage({
                 <div key={group.group} className="flex flex-col gap-2">
                   <div className="flex items-baseline gap-2.5">
                     <p className="text-micro font-semibold tracking-[0.12em] text-muted uppercase">{GROUP_LABEL[group.group]}</p>
-                    <p className="text-xs text-muted">
+                    <p className="text-label text-muted">
                       {group.courses.length} course{group.courses.length === 1 ? "" : "s"}
                     </p>
                   </div>
@@ -283,34 +283,34 @@ export default async function AdminDashboardPage({
                         className="flex min-w-0 flex-1 items-center justify-between gap-4"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-ink">
+                          <p className="truncate text-body font-semibold text-ink">
                             {row.course.name}
                             {/* Which branch runs it. Shown only when more than
                                 one branch is in view -- naming it on every row
                                 of a single-branch centre is noise. */}
                             {aggregated ? <BranchChip name={nameById.get(row.course.center_id)} className="ml-2" /> : null}
                           </p>
-                          <p className="mt-0.5 text-xs text-muted">
+                          <p className="mt-0.5 text-label text-muted">
                             {courseDates(row.course.start_date, row.course.end_date)}
                           </p>
                         </div>
                         {row.counts ? (
-                          <span className="hidden shrink-0 text-xs text-muted sm:inline">
+                          <span className="hidden shrink-0 text-label text-muted sm:inline">
                             {row.counts.accepted} accepted
                             {row.counts.flagged > 0 ? ` · ${row.counts.flagged} flagged` : ""} · {row.counts.pending} pending
                           </span>
                         ) : (
-                          <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.people}</span>
+                          <span className="hidden shrink-0 text-label text-muted sm:inline">{row.people}</span>
                         )}
                         {row.entryFormLabel ? (
-                          <span className={`hidden shrink-0 text-xs sm:inline ${row.entryFormLabel.overdue ? "font-semibold text-destructive" : "text-status-warning-text"}`}>
+                          <span className={`hidden shrink-0 text-label sm:inline ${row.entryFormLabel.overdue ? "font-semibold text-destructive" : "text-status-warning-text"}`}>
                             {row.entryFormLabel.text}
                           </span>
                         ) : (
-                          <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.progress}</span>
+                          <span className="hidden shrink-0 text-label text-muted sm:inline">{row.progress}</span>
                         )}
                         {group.group === "running" ? (
-                          <span className="hidden shrink-0 text-xs text-muted sm:inline">Nothing needed from you</span>
+                          <span className="hidden shrink-0 text-label text-muted sm:inline">Nothing needed from you</span>
                         ) : null}
                         <CourseStatePill state={GROUP_STATE[group.group]} label={GROUP_LABEL[group.group]} />
                       </Link>
@@ -330,10 +330,10 @@ export default async function AdminDashboardPage({
                     href="/dashboard/admin/courses/closed"
                     className="wash card flex items-center justify-between gap-4 px-5 py-4 transition-colors duration-150"
                   >
-                    <span className="text-sm text-ink">
+                    <span className="text-body text-ink">
                       {closedCourses.length} closed course{closedCourses.length === 1 ? "" : "s"}
                     </span>
-                    <span className="text-xs font-medium text-primary">View history</span>
+                    <span className="text-label font-medium text-primary">View history</span>
                   </Link>
                 </div>
               ) : null}
@@ -354,7 +354,7 @@ export default async function AdminDashboardPage({
         <div className="card flex flex-col gap-3 p-5">
           <div>
             <h2 className="font-serif text-h3 font-semibold text-ink">Centre material</h2>
-            <p className="mt-0.5 text-xs text-muted">Shared by every course at this centre. Built once, carried forward.</p>
+            <p className="mt-0.5 text-label text-muted">Shared by every course at this centre. Built once, carried forward.</p>
           </div>
           <div className="flex flex-col">
             {centreMaterial.map((m) => (
@@ -363,8 +363,8 @@ export default async function AdminDashboardPage({
                 href={m.href}
                 className="lift -mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none wash"
               >
-                <span className="text-xs text-ink">{m.label}</span>
-                <span className="text-xs tabular-nums text-muted">
+                <span className="text-label text-ink">{m.label}</span>
+                <span className="text-label tabular-nums text-muted">
                   {m.count}
                   {m.suffix ? ` ${m.suffix}` : ""}
                 </span>
@@ -385,7 +385,7 @@ export default async function AdminDashboardPage({
             course&apos;s own page. TP points and assignment briefs are already shared centre-wide, so there is
             nothing to copy there.
           </p>
-          <Link href="/dashboard/admin/settings" className="text-xs font-medium text-primary hover:underline">
+          <Link href="/dashboard/admin/settings" className="text-label font-medium text-primary hover:underline">
             Settings
           </Link>
         </div>

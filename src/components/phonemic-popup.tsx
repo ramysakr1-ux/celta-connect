@@ -38,14 +38,14 @@ export function PhonemicPopup({
         <div className="absolute left-0 top-full z-10 mt-1 w-max max-w-md rounded-[6px] border border-border bg-card p-2 shadow-md">
           {IPA_SYMBOL_GROUPS.map((group) => (
             <div key={group.label} className="mb-1 flex flex-wrap items-center gap-1 last:mb-0">
-              <span className="mr-1 text-xs text-muted">{group.label}:</span>
+              <span className="mr-1 text-label text-muted">{group.label}:</span>
               {group.symbols.map((sym) => (
                 <button
                   key={sym}
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => onChange(value + sym)}
-                  className="rounded border border-border-faint px-1.5 py-0.5 font-serif text-sm hover:border-primary"
+                  className="rounded border border-border-faint px-1.5 py-0.5 font-serif text-body hover:border-primary"
                 >
                   {sym}
                 </button>

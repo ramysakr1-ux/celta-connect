@@ -22,7 +22,7 @@ export default async function TrainerSettingsPage() {
   if (!trainer) redirect("/login");
   const courseId = trainer.course_id;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
 
   // design_handoff_feedback_assist (2026-08-17): a trainer's own tool, not
@@ -35,7 +35,7 @@ export default async function TrainerSettingsPage() {
       <div className="flex flex-col gap-1">
         <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">{trainer.full_name ?? "Trainer"} &middot; This course</p>
         <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Feedback wording</h1>
-        <p className="max-w-[62ch] text-sm text-muted">
+        <p className="max-w-[62ch] text-body text-muted">
           How your written feedback is phrased when Connect drafts it for you. Yours alone for this course &mdash; it changes nothing
           that candidates or other tutors see, and never what you actually say.
         </p>
@@ -48,7 +48,7 @@ export default async function TrainerSettingsPage() {
           initialSupportive={feedbackAssist.supportive}
         />
       ) : (
-        <p className="rounded-[12px] border border-border bg-card px-[22px] py-5 text-sm text-muted">
+        <p className="rounded-[12px] border border-border bg-card px-[22px] py-5 text-body text-muted">
           Feedback assist is a tutor&apos;s own tool and only appears when you are signed in as one.
         </p>
       )}
@@ -58,15 +58,15 @@ export default async function TrainerSettingsPage() {
           one door from each side. Unlike feedback wording above, this one is
           shared: what you change, every tutor at the centre gets. */}
       <div className="rounded-[12px] border border-border bg-card px-[22px] py-5">
-        <h2 className="font-serif text-lg text-ink-warm">Criteria glossary</h2>
-        <p className="mt-1 max-w-[62ch] text-sm text-muted">
+        <h2 className="font-serif text-h3 text-ink-warm">Criteria glossary</h2>
+        <p className="mt-1 max-w-[62ch] text-body text-muted">
           The words that attach a CELTA 5 code to a feedback point as you type &mdash; &ldquo;rapport&rdquo; tags 1d,
           &ldquo;gist&rdquo; tags 3a. Add your own shorthand or switch one off. Shared with every tutor at the centre,
           so each change is recorded with your name.
         </p>
         <Link
           href="/criteria-glossary"
-          className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
         >
           Open the glossary
         </Link>

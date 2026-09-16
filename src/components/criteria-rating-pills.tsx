@@ -22,7 +22,7 @@ export function CriteriaRatingPills({
           type="button"
           aria-pressed={value === opt}
           onClick={() => onChange(value === opt ? "" : opt)}
-          className={`rounded-[6px] border px-2 py-1 text-xs font-medium transition-colors ${
+          className={`rounded-[6px] border px-2 py-1 text-label font-medium transition-colors ${
             value === opt
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border text-muted hover:border-primary hover:text-ink"

@@ -25,7 +25,7 @@ export function FilmedObservationTaskForm({
     <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="session_id" value={sessionId} />
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="criteria_codes" className="text-xs text-muted">
+        <label htmlFor="criteria_codes" className="text-label text-muted">
           Criteria (comma-separated, e.g. 4c, 5f)
         </label>
         <input
@@ -33,11 +33,11 @@ export function FilmedObservationTaskForm({
           name="criteria_codes"
           type="text"
           defaultValue={(task?.criteria_codes ?? []).join(", ")}
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="prompt_1" className="text-xs text-muted">
+        <label htmlFor="prompt_1" className="text-label text-muted">
           Prompt 1 — tied directly to the criterion
         </label>
         <input
@@ -47,11 +47,11 @@ export function FilmedObservationTaskForm({
           required
           defaultValue={task?.prompt_1 ?? ""}
           placeholder="Note two examples of clear instructions."
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="prompt_2" className="text-xs text-muted">
+        <label htmlFor="prompt_2" className="text-label text-muted">
           Prompt 2 — tied directly to the criterion
         </label>
         <input
@@ -61,11 +61,11 @@ export function FilmedObservationTaskForm({
           required
           defaultValue={task?.prompt_2 ?? ""}
           placeholder="One moment where instructions could have been clearer."
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="general_prompt" className="text-xs text-muted">
+        <label htmlFor="general_prompt" className="text-label text-muted">
           General prompt
         </label>
         <input
@@ -73,12 +73,12 @@ export function FilmedObservationTaskForm({
           name="general_prompt"
           type="text"
           defaultValue={task?.general_prompt ?? "What would you borrow for your own teaching?"}
-          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="rating_label" className="text-xs text-muted">
+          <label htmlFor="rating_label" className="text-label text-muted">
             Rating axis
           </label>
           <input
@@ -86,11 +86,11 @@ export function FilmedObservationTaskForm({
             name="rating_label"
             type="text"
             defaultValue={task?.rating_label ?? "Pace"}
-            className="h-9 w-40 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-40 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="rating_options" className="text-xs text-muted">
+          <label htmlFor="rating_options" className="text-label text-muted">
             Options (comma-separated)
           </label>
           <input
@@ -98,15 +98,15 @@ export function FilmedObservationTaskForm({
             name="rating_options"
             type="text"
             defaultValue={(task?.rating_options ?? ["Too slow", "Just right", "Too fast"]).join(", ")}
-            className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-body text-ink outline-none focus:border-primary"
           />
         </div>
       </div>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save task"}
       </button>

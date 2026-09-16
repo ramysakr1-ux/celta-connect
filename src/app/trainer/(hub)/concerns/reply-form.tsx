@@ -16,13 +16,13 @@ export function ConcernReplyForm({ concernId }: { concernId: string }) {
         rows={2}
         required
         placeholder="Reply…"
-        className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-body text-ink outline-none focus:border-primary"
       />
-      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink wash disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink wash disabled:opacity-60"
       >
         {pending ? "Sending…" : "Reply"}
       </button>

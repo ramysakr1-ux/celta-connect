@@ -49,24 +49,24 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
     <div className="card card-gold">
       <div className="border-b border-border px-5 py-4">
         <h2 className="font-serif text-h3 font-semibold text-ink">Refunds</h2>
-        <p className="mt-0.5 text-xs text-muted">
+        <p className="mt-0.5 text-label text-muted">
           Agreed and not yet returned. These are the figure on your Overview.
         </p>
       </div>
 
       {pending.length === 0 ? (
-        <p className="px-5 py-4 text-sm text-muted">Nothing awaiting payout.</p>
+        <p className="px-5 py-4 text-body text-muted">Nothing awaiting payout.</p>
       ) : (
         pending.map((r) => {
           const age = r.ageDays;
           return (
             <div key={r.id} className="hover-ring flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
               <div>
-                <p className="text-sm text-ink">
+                <p className="text-body text-ink">
                   {money(r)}
                   {r.applicantName ? ` · ${r.applicantName}` : ""}
                 </p>
-                <p className="text-xs text-muted">
+                <p className="text-label text-muted">
                   Agreed {day(r.agreedAt)}
                   {age > 0 ? ` · ${age} day${age === 1 ? "" : "s"} ago` : " · today"}
                   {r.settlement === "provider" ? " · awaiting the provider" : " · paid by the centre"}
@@ -80,7 +80,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
                     <button
                       type="submit"
                       disabled={settling}
-                      className="rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
+                      className="rounded-[6px] bg-ink-warm px-3 py-1.5 text-label font-semibold text-card disabled:opacity-60"
                     >
                       Mark as sent
                     </button>
@@ -88,7 +88,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
                   <form action={settleAction}>
                     <input type="hidden" name="refund_id" value={r.id} />
                     <input type="hidden" name="cancel" value="1" />
-                    <button type="submit" disabled={settling} className="text-xs text-muted underline disabled:opacity-60">
+                    <button type="submit" disabled={settling} className="text-label text-muted underline disabled:opacity-60">
                       Cancel
                     </button>
                   </form>
@@ -109,7 +109,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
               step="0.01"
               min="0"
               required
-              className="h-9 w-28 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 w-28 rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -120,7 +120,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
               required
               maxLength={3}
               placeholder="GBP"
-              className="h-9 w-20 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink uppercase outline-none focus:border-primary"
+              className="h-9 w-20 rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink uppercase outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-1 flex-col gap-1">
@@ -129,7 +129,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
               name="reason"
               type="text"
               placeholder="Withdrew before the course started"
-              className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -137,7 +137,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
             <select
               name="settlement"
               defaultValue="manual"
-              className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-body text-ink outline-none focus:border-primary"
             >
               <option value="manual">The centre</option>
               <option value="provider">The provider</option>
@@ -146,21 +146,21 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
           <button
             type="submit"
             disabled={agreeing}
-            className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+            className="h-9 rounded-[6px] bg-ink-warm px-4 text-body font-semibold text-card disabled:opacity-60"
           >
             {agreeing ? "Recording…" : "Agree a refund"}
           </button>
         </form>
       ) : null}
 
-      {agreeState.error ? <p className="px-5 pb-3 text-sm text-destructive">{agreeState.error}</p> : null}
-      {settleState.error ? <p className="px-5 pb-3 text-sm text-destructive">{settleState.error}</p> : null}
+      {agreeState.error ? <p className="px-5 pb-3 text-body text-destructive">{agreeState.error}</p> : null}
+      {settleState.error ? <p className="px-5 pb-3 text-body text-destructive">{settleState.error}</p> : null}
 
       {settled.length > 0 ? (
         <div className="border-t border-border px-5 py-4">
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Settled</p>
           {settled.slice(0, 5).map((r) => (
-            <p key={r.id} className="mt-1 text-xs text-muted">
+            <p key={r.id} className="mt-1 text-label text-muted">
               {money(r)}
               {r.applicantName ? ` · ${r.applicantName}` : ""} · {r.status === "completed" ? "sent" : "cancelled"}
             </p>

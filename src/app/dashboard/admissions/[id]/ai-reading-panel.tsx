@@ -60,7 +60,7 @@ export function AiReadingPanel({
       <div className="flex items-center justify-between gap-3">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
         {lane ? (
-          <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-ink">{lane.label}</span>
+          <span className="rounded-full border border-border px-2.5 py-0.5 text-label font-semibold text-ink">{lane.label}</span>
         ) : null}
       </div>
 
@@ -69,33 +69,33 @@ export function AiReadingPanel({
           const row = reading[key];
           return (
             <div key={key} className="flex items-start justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
-              <span className="text-sm text-ink">{ROW_LABELS[key]}</span>
+              <span className="text-body text-ink">{ROW_LABELS[key]}</span>
               <div className="text-right">
-                <span className="text-sm text-muted">{LEVEL_LABEL[row.level]}</span>
-                {row.note ? <p className="mt-0.5 max-w-sm text-xs text-muted">{row.note}</p> : null}
+                <span className="text-body text-muted">{LEVEL_LABEL[row.level]}</span>
+                {row.note ? <p className="mt-0.5 max-w-sm text-label text-muted">{row.note}</p> : null}
               </div>
             </div>
           );
         })}
       </div>
 
-      <p className="text-sm text-ink">{reading.summary}</p>
-      {lane ? <p className="text-xs text-muted">{lane.note}</p> : null}
+      <p className="text-body text-ink">{reading.summary}</p>
+      {lane ? <p className="text-label text-muted">{lane.note}</p> : null}
 
       {holdPending ? (
         <form action={holdAutoSentInterview} className="flex items-center gap-2 border-t border-border-faint pt-3">
           <input type="hidden" name="applicant_id" value={applicant.id} />
-          <p className="flex-1 text-xs text-muted">
+          <p className="flex-1 text-label text-muted">
             An interview will be booked automatically -- held until{" "}
             {formatTime(applicant.interview_auto_send_at!, timeZone)}.
           </p>
-          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary wash">
+          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-label font-semibold text-ink hover:border-primary wash">
             Hold
           </button>
         </form>
       ) : null}
       {applicant.interview_auto_send_cancelled_at ? (
-        <p className="border-t border-border-faint pt-3 text-xs text-muted">Held -- book an interview by hand below when ready.</p>
+        <p className="border-t border-border-faint pt-3 text-label text-muted">Held -- book an interview by hand below when ready.</p>
       ) : null}
     </div>
   );

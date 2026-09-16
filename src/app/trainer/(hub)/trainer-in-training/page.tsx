@@ -30,7 +30,7 @@ export default async function TrainerInTrainingPage() {
   const timeZone = (trainer ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
   }
 
   const admin = createAdminClient();
@@ -67,7 +67,7 @@ export default async function TrainerInTrainingPage() {
         {/* An assessor can reach this page now (the pack links to it where the
             course has a trainer-in-training), so the empty state must not tell
             them to go and set one up -- that is the centre's job, not theirs. */}
-        <div className="sheet text-sm text-muted">
+        <div className="sheet text-body text-muted">
           {trainer
             ? "Nobody on this course is a trainer-in-training. The tab is here anyway so the room is findable: set someone as one on the Tutors panel in Centre settings, with a Cambridge verification date and a supervisor, and their portfolio, shadow-marking record and signature trails live here. It also adds a day to your assessor's visit where the scheme requires moderation -- the Assessor tab spells that out."
             : "No trainer-in-training on this course, so there is nothing here to moderate."}
@@ -79,7 +79,7 @@ export default async function TrainerInTrainingPage() {
     return (
       <div className="flex flex-col gap-4">
         {heading}
-        <div className="sheet text-sm text-muted">
+        <div className="sheet text-body text-muted">
           This course has a trainer-in-training, but their record is private to them, their supervisor and the main course tutor. The MCT can grant
           you access.
         </div>
@@ -156,7 +156,7 @@ export default async function TrainerInTrainingPage() {
               // The assessor's read-only view: the record's state, not its
               // working forms. TinT Handbook §5.2.1 -- the assessor's own TinT
               // day is where they see the rest.
-              <section className="flex flex-col gap-3 rounded-[12px] border border-border bg-card px-[22px] py-5 text-sm">
+              <section className="flex flex-col gap-3 rounded-[12px] border border-border bg-card px-[22px] py-5 text-body">
                 <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">{nameOf(ct.profile_id)} · read-only</p>
                 <dl className="grid grid-cols-[160px_1fr] gap-x-4 gap-y-1.5">
                   <dt className="text-muted">Verified</dt>

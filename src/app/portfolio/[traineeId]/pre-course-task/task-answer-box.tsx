@@ -19,11 +19,11 @@ import {
 // explicitly never graded and never handed in, so there is nothing to
 // submit to.
 
-const INPUT = "rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
-const ROW_LABEL = "text-sm text-ink";
+const INPUT = "rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary";
+const ROW_LABEL = "text-body text-ink";
 
 function RowIndex({ n }: { n: number }) {
-  return <span className="w-5 shrink-0 pt-2 text-xs tabular-nums text-muted">{n}</span>;
+  return <span className="w-5 shrink-0 pt-2 text-label tabular-nums text-muted">{n}</span>;
 }
 
 export function TaskAnswerBox({
@@ -88,16 +88,16 @@ export function TaskAnswerBox({
   if (readOnly) {
     if (!structured) {
       return plain.trim() ? (
-        <p className="whitespace-pre-wrap rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink">{plain}</p>
+        <p className="whitespace-pre-wrap rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink">{plain}</p>
       ) : (
-        <p className="rounded-[6px] border border-dashed border-border px-3 py-2 text-sm text-muted">Not answered yet.</p>
+        <p className="rounded-[6px] border border-dashed border-border px-3 py-2 text-body text-muted">Not answered yet.</p>
       );
     }
     if (!answerHasContent(value)) {
-      return <p className="rounded-[6px] border border-dashed border-border px-3 py-2 text-sm text-muted">Not answered yet.</p>;
+      return <p className="rounded-[6px] border border-dashed border-border px-3 py-2 text-body text-muted">Not answered yet.</p>;
     }
     return (
-      <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm">
+      <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body">
         {Object.entries(value).map(([k, v]) => (
           <p key={k} className="text-ink">
             <span className="text-muted">{k === "_text" ? "" : `${Number(k) + 1}. `}</span>
@@ -142,7 +142,7 @@ export function TaskAnswerBox({
           {s.parts.map((part, i) => (
             <div key={i} className="flex flex-col gap-1">
               <label className={ROW_LABEL}>
-                <span className="mr-1.5 text-xs tabular-nums text-muted">{i + 1}</span>
+                <span className="mr-1.5 text-label tabular-nums text-muted">{i + 1}</span>
                 {part}
               </label>
               <textarea value={str(String(i))} onChange={(e) => set(String(i), e.target.value)} rows={2} placeholder="Write your answer…" className={INPUT} />
@@ -157,7 +157,7 @@ export function TaskAnswerBox({
             <div key={i} className="flex flex-col gap-1">
               <div className="flex items-start gap-1">
                 <RowIndex n={i + 1} />
-                <span className="flex-1 pt-1.5 text-sm text-ink">{row}</span>
+                <span className="flex-1 pt-1.5 text-body text-ink">{row}</span>
               </div>
               <div className={`ml-5 grid gap-2 ${s.cols.length > 1 ? "sm:grid-cols-2" : ""}`}>
                 {s.cols.map((col, c) => (
@@ -184,7 +184,7 @@ export function TaskAnswerBox({
               <div key={i} className="flex flex-col gap-2 py-2.5 first:pt-0">
                 <div className="flex flex-wrap items-start gap-2">
                   <RowIndex n={i + 1} />
-                  <span className="min-w-[12rem] flex-1 pt-1.5 text-sm text-ink">{row}</span>
+                  <span className="min-w-[12rem] flex-1 pt-1.5 text-body text-ink">{row}</span>
                   <span className="flex shrink-0 gap-1.5 pt-1">
                     {s.options.map((opt) => (
                       <button
@@ -192,7 +192,7 @@ export function TaskAnswerBox({
                         type="button"
                         aria-pressed={c.choice === opt}
                         onClick={() => set(String(i), { ...c, choice: c.choice === opt ? undefined : opt })}
-                        className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        className={`rounded-full border px-3 py-1 text-label font-semibold transition-colors ${
                           c.choice === opt ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash"
                         }`}
                       >
@@ -221,7 +221,7 @@ export function TaskAnswerBox({
           {s.rows.map((row, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2 py-2 first:pt-0">
               <RowIndex n={i + 1} />
-              <span className="min-w-[10rem] flex-1 text-sm text-ink">{row}</span>
+              <span className="min-w-[10rem] flex-1 text-body text-ink">{row}</span>
               <select value={str(String(i))} onChange={(e) => set(String(i), e.target.value)} className={`${INPUT} shrink-0 py-1.5`}>
                 <option value="">Choose…</option>
                 {s.options.map((opt) => (
@@ -242,7 +242,7 @@ export function TaskAnswerBox({
             const atLimit = picked.length >= s.pick;
             return (
               <>
-                <p className="text-xs text-muted">
+                <p className="text-label text-muted">
                   Pick {s.pick} — {picked.length} chosen
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -258,7 +258,7 @@ export function TaskAnswerBox({
                         // for a top five, so the limit is the point.
                         disabled={!on && atLimit}
                         onClick={() => set("picked", on ? picked.filter((p) => p !== opt) : [...picked, opt])}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${
+                        className={`rounded-full border px-3 py-1 text-label font-medium transition-colors disabled:opacity-40 ${
                           on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted wash"
                         }`}
                       >

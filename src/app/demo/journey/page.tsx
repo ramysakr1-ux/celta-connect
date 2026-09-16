@@ -62,8 +62,8 @@ function Facts({ caption, rows }: { caption: string; rows: [string, string][] })
       <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{caption}</p>
       {rows.map(([label, fact]) => (
         <div key={label} className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
-          <span className="shrink-0 text-xs font-bold text-ink sm:w-40">{label}</span>
-          <span className="text-xs text-muted">{fact}</span>
+          <span className="shrink-0 text-label font-bold text-ink sm:w-40">{label}</span>
+          <span className="text-label text-muted">{fact}</span>
         </div>
       ))}
     </div>
@@ -73,10 +73,10 @@ function Facts({ caption, rows }: { caption: string; rows: [string, string][] })
 function Ripple({ from, to }: { from: string; to: { where: string; what: string; href?: string }[] }) {
   return (
     <div className="flex flex-wrap items-stretch gap-2">
-      <div className="flex items-center rounded-[6px] bg-ink px-3 py-2 text-xs font-semibold text-card">{from}</div>
+      <div className="flex items-center rounded-[6px] bg-ink px-3 py-2 text-label font-semibold text-card">{from}</div>
       {to.map((t) => (
         <div key={t.where} className="flex items-stretch gap-2">
-          <div className="flex items-center text-sm text-muted" aria-hidden>
+          <div className="flex items-center text-body text-muted" aria-hidden>
             &rarr;
           </div>
           {t.href ? (
@@ -85,12 +85,12 @@ function Ripple({ from, to }: { from: string; to: { where: string; what: string;
               className="wash flex flex-col justify-center rounded-[6px] border border-primary/40 bg-primary/5 px-3 py-2"
             >
               <span className="text-label font-bold tracking-[0.06em] text-primary uppercase">{t.where}</span>
-              <span className="text-xs text-ink">{t.what}</span>
+              <span className="text-label text-ink">{t.what}</span>
             </a>
           ) : (
             <div className="flex flex-col justify-center rounded-[6px] border border-border bg-card px-3 py-2">
               <span className="text-label font-bold tracking-[0.06em] text-muted uppercase">{t.where}</span>
-              <span className="text-xs text-ink">{t.what}</span>
+              <span className="text-label text-ink">{t.what}</span>
             </div>
           )}
         </div>
@@ -119,20 +119,20 @@ function Step({
   return (
     <div className="sheet flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-label font-bold text-primary-foreground">
           {number}
         </span>
         <div className="flex flex-col gap-0.5">
-          <p className="font-serif text-lg text-ink">{title}</p>
-          <p className="text-sm text-muted">{blurb}</p>
+          <p className="font-serif text-h3 text-ink">{title}</p>
+          <p className="text-body text-muted">{blurb}</p>
         </div>
       </div>
       {href ? (
-        <a href={href} className="wash inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
+        <a href={href} className="wash inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-body font-medium text-ink">
           {hrefLabel ?? "Open →"}
         </a>
       ) : null}
-      {caveat ? <p className="text-xs text-status-warning-text">{caveat}</p> : null}
+      {caveat ? <p className="text-label text-status-warning-text">{caveat}</p> : null}
       {children}
     </div>
   );
@@ -430,15 +430,15 @@ export default async function JourneyPage() {
           <Link href="/" className="hover:opacity-80">
             <Wordmark size="hero" />
           </Link>
-          <h1 className="font-serif text-2xl text-ink">The application journey</h1>
-          <p className="max-w-lg text-sm text-muted">
+          <h1 className="font-serif text-h1 text-ink">The application journey</h1>
+          <p className="max-w-lg text-body text-muted">
             Every stage a real trainee or volunteer goes through, in order -- the live form or page where there is
             one, and the actual email Connect sends at that point where there isn&apos;t.
           </p>
         </div>
 
         <div className="flex flex-col gap-4">
-          <p className="border-b-2 border-destructive pb-2 text-sm font-semibold tracking-[0.1em] text-destructive uppercase">
+          <p className="border-b-2 border-destructive pb-2 text-body font-semibold tracking-[0.1em] text-destructive uppercase">
             The trainee&apos;s journey
           </p>
 
@@ -498,42 +498,42 @@ export default async function JourneyPage() {
                 { where: "Borderline", what: "queued for a person" },
               ]}
             />
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               There is no fourth lane. The app never writes a rejection at any confidence &mdash; the worst outcome an
               automated reading can reach is &ldquo;a person should look at this&rdquo;.
             </p>
             <div className="flex flex-col gap-2">
-              <p className="text-xs font-semibold text-muted">And when a staff member does sign in --</p>
+              <p className="text-label font-semibold text-muted">And when a staff member does sign in --</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/demo-journey/sign-in.png" alt="Connect sign-in page" className="w-full max-w-sm rounded-[6px] border border-border" />
-              <p className="text-xs font-semibold text-muted">-- it is already there, alongside everyone else who has applied.</p>
+              <p className="text-label font-semibold text-muted">-- it is already there, alongside everyone else who has applied.</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/demo-journey/admissions-pipeline.png"
                 alt="Admissions pipeline showing the new application"
                 className="w-full max-w-xl rounded-[6px] border border-border"
               />
-              <p className="text-xs text-muted">
+              <p className="text-label text-muted">
                 If the centre has turned on AI shadow-mode reading (off by default), a private reading against the
                 marking scheme is also recorded right on this applicant&apos;s page -- never shown to them, never
                 auto-rejects anyone. Here&apos;s what that reading actually looks like:
               </p>
               <AiReadingPanel applicant={sampleAiReading} timeZone={DEFAULT_TIMEZONE} />
 
-              <p className="mt-2 text-xs text-muted">
+              <p className="mt-2 text-label text-muted">
                 The recorded speaking task is transcribed automatically (fails silently if it can&apos;t -- a missing
                 transcript never blocks the application) and read for a short advisory note, shown separately on the
                 same applicant page:
               </p>
               <div className="rounded-[6px] border border-border bg-card p-3">
-                <p className="text-xs font-semibold text-muted">Speaking task</p>
-                <p className="mt-1 text-sm text-ink">
+                <p className="text-label font-semibold text-muted">Speaking task</p>
+                <p className="mt-1 text-body text-ink">
                   &quot;Tell us about a time you had to adapt your communication style for a new audience.&quot;
                 </p>
-                <p className="mt-2 text-xs text-muted">0:47 recording -- played back exactly as submitted.</p>
+                <p className="mt-2 text-label text-muted">0:47 recording -- played back exactly as submitted.</p>
                 <details className="mt-2">
-                  <summary className="cursor-pointer text-xs font-semibold text-primary">Transcript</summary>
-                  <p className="mt-1 text-sm whitespace-pre-wrap text-ink">
+                  <summary className="cursor-pointer text-label font-semibold text-primary">Transcript</summary>
+                  <p className="mt-1 text-body whitespace-pre-wrap text-ink">
                     So, um, a good example would be when I was tutoring a group of teenagers after mostly doing adult
                     classes for years. I had to slow down, use a lot more visual support, and check in more often
                     because they wouldn&apos;t always say when they were lost. It taught me to read the room rather
@@ -542,18 +542,18 @@ export default async function JourneyPage() {
                 </details>
                 <div className="mt-2 rounded-[6px] border border-dashed border-border p-2.5">
                   <p className="text-micro font-semibold tracking-[0.06em] text-muted uppercase">AI reading -- suggested, not sent</p>
-                  <p className="mt-1 text-sm text-ink">{sampleSpeakingSuggestion}</p>
+                  <p className="mt-1 text-body text-ink">{sampleSpeakingSuggestion}</p>
                 </div>
               </div>
 
-              <p className="mt-2 text-xs font-semibold text-muted">And admissions staff are notified immediately --</p>
+              <p className="mt-2 text-label font-semibold text-muted">And admissions staff are notified immediately --</p>
               <div className="flex flex-wrap items-center gap-3 rounded-[6px] border border-border bg-card p-3">
                 <span
                   aria-hidden="true"
                   title="New admissions activity -- click to clear"
                   className="size-2.5 shrink-0 animate-pulse rounded-full bg-destructive"
                 />
-                <p className="text-sm text-ink">
+                <p className="text-body text-ink">
                   A live dot next to &quot;Admissions pipeline&quot; on Centre Management&apos;s overview, for anyone
                   with the page open -- stays lit until someone clicks it, shared across every staff member who can
                   see it. Alongside a push notification to every device that&apos;s enabled them. No chime for this
@@ -564,14 +564,14 @@ export default async function JourneyPage() {
               <EmailPreview title="New application" to="Jordan Blake (MCT)" html={submittedHtml} />
             </div>
           </Step>
-          <p className="ml-8 max-w-2xl text-xs text-muted">
+          <p className="ml-8 max-w-2xl text-label text-muted">
             Neither of the next two happens automatically for everyone. If AI shadow-mode reading is on and this
             applicant is clear on every criterion, an interview invite queues itself and sends 15 minutes later --
             unless a staff member cancels it first. Everyone else gets nothing automatic: a real person on the admin
             or MCT side reads the application themselves and manually sends one of the two below.
           </p>
           <div className="ml-8 flex flex-col gap-2 border-l-2 border-dashed border-destructive/40 pl-4">
-            <p className="text-xs font-semibold text-destructive">Manually sent -- decided not to proceed</p>
+            <p className="text-label font-semibold text-destructive">Manually sent -- decided not to proceed</p>
             <EmailPreview title="We are not taking your application further" to="Priya Sharma" html={rejectionHtml} />
           </div>
           <Step
@@ -601,7 +601,7 @@ export default async function JourneyPage() {
           >
             {interviewQuestions && interviewQuestions.length > 0 ? (
               <div className="flex flex-col gap-2">
-                <p className="text-xs font-semibold text-muted">
+                <p className="text-label font-semibold text-muted">
                   {realCenter?.name ?? "The centre"}&apos;s own live question bank, right now:
                 </p>
                 <ul className="flex flex-col gap-2">
@@ -610,31 +610,31 @@ export default async function JourneyPage() {
                       <span className="text-micro font-semibold uppercase tracking-[0.06em] text-muted">
                         {COVERAGE_LABEL[q.coverage_area] ?? q.coverage_area}
                       </span>
-                      <p className="text-sm text-ink">{q.question_text}</p>
+                      <p className="text-body text-ink">{q.question_text}</p>
                     </li>
                   ))}
                 </ul>
               </div>
             ) : (
-              <p className="text-sm text-muted">No active questions configured yet.</p>
+              <p className="text-body text-muted">No active questions configured yet.</p>
             )}
           </Step>
           <div className="ml-8 flex flex-col gap-2 border-l-2 border-dashed border-destructive/40 pl-4">
-            <p className="text-xs font-semibold text-destructive">OR -- meeting them changes the decision</p>
+            <p className="text-label font-semibold text-destructive">OR -- meeting them changes the decision</p>
             <EmailPreview title="We are not able to offer you a place this time" to="Daniel Kim" html={rejectionAfterInterviewHtml} />
           </div>
           <div className="ml-8 flex flex-col gap-2 border-l-2 border-dashed border-status-warning-text/50 pl-4">
-            <p className="text-xs font-semibold text-status-warning-text">
+            <p className="text-label font-semibold text-status-warning-text">
               OR -- they&apos;re a clear yes, but the course is full: waiting list, with a real date they&apos;ll hear
               either way -- their task and interview stay on file, they never repeat them
             </p>
             <EmailPreview title="A place has come free — it is yours if you want it" to="Priya Sharma" html={placeFreedHtml} />
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               Sent automatically the moment a real place opens -- withdrawal, deferral, or an unaccepted offer lapsing.
               48 hours to respond, same accept-page as any offer.
             </p>
             <EmailPreview title="The course filled before a place came free" to="Priya Sharma" html={notThisTimeHtml} />
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               Or, if their own hear-by date passes first with nothing freed -- sent automatically by the nightly job,
               nobody left waiting past the date they were promised.
             </p>
@@ -689,7 +689,7 @@ export default async function JourneyPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <p className="border-b-2 border-destructive pb-2 text-sm font-semibold tracking-[0.1em] text-destructive uppercase">
+          <p className="border-b-2 border-destructive pb-2 text-body font-semibold tracking-[0.1em] text-destructive uppercase">
             The volunteer student&apos;s journey
           </p>
 
@@ -821,7 +821,7 @@ export default async function JourneyPage() {
             href="/demo/trainee"
             hrefLabel="Open a candidate's workspace &rarr;"
           >
-            <p className="text-xs text-muted">
+            <p className="text-label text-muted">
               Tutors get a spot-check view of their own, showing per-class log counts and flagging any class sitting at
               nearly zero entries -- reachable from the roster&apos;s &quot;FOL pool, by class&quot; row.
             </p>

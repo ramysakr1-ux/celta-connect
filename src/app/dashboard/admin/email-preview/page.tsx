@@ -221,7 +221,7 @@ export default async function EmailPreviewPage({
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · emails</p>
         <h1 className="mt-1 font-serif text-h1 text-ink">What your centre sends</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-body text-muted">
           Rendered exactly as they send, with the design files&apos; own sample names so you can hold this next to
           the source. Nothing here is real candidate data.
         </p>
@@ -232,7 +232,7 @@ export default async function EmailPreviewPage({
           <Link
             key={s.key}
             href={`/dashboard/admin/email-preview?email=${s.key}`}
-            className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+            className={`rounded-full border px-3 py-1.5 text-label font-semibold ${
               s.key === active.key
                 ? "border-ink bg-ink text-card"
                 : "wash border-border text-muted hover:border-rule hover:text-ink"
@@ -243,7 +243,7 @@ export default async function EmailPreviewPage({
         ))}
       </div>
 
-      <p className="text-xs text-muted">
+      <p className="text-label text-muted">
         Source: <span className="text-ink">{active.source}</span>
       </p>
 

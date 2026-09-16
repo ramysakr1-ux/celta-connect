@@ -59,7 +59,7 @@ export function AssessorCard({
       <div className="flex items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Assessor</p>
-          <p className="text-xs leading-[1.5] text-muted text-pretty">
+          <p className="text-label leading-[1.5] text-muted text-pretty">
             Shared with Course Admin -- whichever side sets this first is what the other sees.
           </p>
         </div>
@@ -154,7 +154,7 @@ export function AssessorCard({
               before the visit; once it is here, it appears on their landing page for them to copy.
             </p>
           </div>
-          {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+          {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
           <div className="mt-1 flex justify-end">
             <button
               type="submit"

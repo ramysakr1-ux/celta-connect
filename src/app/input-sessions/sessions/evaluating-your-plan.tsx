@@ -156,20 +156,20 @@ export default function EvaluatingYourPlanSession() {
       </RunningThisSession>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">1 · Whose fault was it? · 5 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">1 · Whose fault was it? · 5 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           A lesson goes badly. In pairs, two lists: things the <strong>plan</strong> did, and things the{" "}
           <strong>teacher</strong> did. Two minutes, then read a few out.
         </p>
-        <p className="text-xs italic text-muted">
+        <p className="text-label italic text-muted">
           Most lists come back almost entirely teacher. That imbalance is the session.
         </p>
       </section>
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">2 · The plan, or the teaching? · 12 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">2 · The plan, or the teaching? · 12 minutes</h2>
+          <p className="text-label text-muted">
             Six things trainees have actually written after a TP. Which criterion is each one really about — 4n (the
             plan) or 5m (how you taught)? Two of them are genuinely both.
           </p>
@@ -183,8 +183,8 @@ export default function EvaluatingYourPlanSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">3 · The three questions · 10 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">3 · The three questions · 10 minutes</h2>
+          <p className="text-label text-muted">
             Every plan evaluation answers these, in this order. Anything else is optional; these are not.
           </p>
         </div>
@@ -199,8 +199,8 @@ export default function EvaluatingYourPlanSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">5 · Carry it forward · 6 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">5 · Carry it forward · 6 minutes</h2>
+          <p className="text-label text-muted">
             Cambridge’s second bullet for 4n is “address weak areas in the planning of future TP lessons”. So: which part
             of the next plan does each lesson change?
           </p>
@@ -213,7 +213,7 @@ export default function EvaluatingYourPlanSession() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 2 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Wrap-up · 2 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           Open your next lesson plan now, before you leave. Write one thing into it that came out of your last one — a
           timing, an instruction in full, an anticipated problem, an extension. One line, in the plan, today.
@@ -262,8 +262,8 @@ function RewriteStage() {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-serif text-lg font-semibold text-ink">4 · Rewrite it · 10 minutes</h2>
-        <p className="text-xs text-muted">
+        <h2 className="font-serif text-h3 font-semibold text-ink">4 · Rewrite it · 10 minutes</h2>
+        <p className="text-label text-muted">
           Three sentences from real self-evaluations. Rewrite each so it is about the plan, carries evidence, and says
           what changes — then compare with a version that does.
         </p>

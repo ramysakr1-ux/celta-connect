@@ -23,7 +23,7 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
   const trainer = await requireRole(["trainer", "admin"]);
   const courseId = trainer.course_id;
   if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+    return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
   const { others } = await searchParams;
   const supabase = hubReadClient(trainer, courseId);

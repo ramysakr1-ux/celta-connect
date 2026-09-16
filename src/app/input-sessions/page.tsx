@@ -49,8 +49,8 @@ export default async function InputSessionsIndexPage({ searchParams }: { searchP
           <BackLink href={backHref} label={"Resource hub"} />
         ) : null}
         <p className="mt-3 text-label font-bold uppercase tracking-[0.14em] text-muted">Resource hub</p>
-        <h1 className="mt-1 font-serif text-2xl text-ink">Input sessions</h1>
-        <p className="mt-2 text-sm text-muted">Interactive versions of the centre&apos;s input sessions — the same content whether you&apos;re running one or working through it.</p>
+        <h1 className="mt-1 font-serif text-h1 text-ink">Input sessions</h1>
+        <p className="mt-2 text-body text-muted">Interactive versions of the centre&apos;s input sessions — the same content whether you&apos;re running one or working through it.</p>
       </div>
       <div className="flex flex-col gap-2">
         {INPUT_SESSIONS.map((s) => (
@@ -60,10 +60,10 @@ export default async function InputSessionsIndexPage({ searchParams }: { searchP
             className="lift flex items-center justify-between gap-4 rounded-[8px] border border-border bg-card px-4 py-3"
           >
             <div>
-              <p className="text-sm font-semibold text-ink">{s.title}</p>
-              <p className="text-xs text-muted">{s.kind}</p>
+              <p className="text-body font-semibold text-ink">{s.title}</p>
+              <p className="text-label text-muted">{s.kind}</p>
             </div>
-            <p className="text-xs text-muted">{s.minutes}</p>
+            <p className="text-label text-muted">{s.minutes}</p>
           </Link>
         ))}
       </div>

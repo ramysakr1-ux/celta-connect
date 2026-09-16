@@ -44,15 +44,15 @@ export function AttendanceRegisterGrid({
   const dates = [...new Set(events.map((e) => e.event_date))].sort();
 
   if (volunteers.length === 0) {
-    return <p className="p-4 text-sm text-muted">No volunteer students registered yet.</p>;
+    return <p className="p-4 text-body text-muted">No volunteer students registered yet.</p>;
   }
   if (events.length === 0) {
-    return <p className="p-4 text-sm text-muted">No TP sessions scheduled yet -- attendance has nothing to log against.</p>;
+    return <p className="p-4 text-body text-muted">No TP sessions scheduled yet -- attendance has nothing to log against.</p>;
   }
 
   return (
     <div className="overflow-x-auto rounded-[6px] border border-border">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-body">
         <thead>
           <tr className="border-b border-border">
             <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Volunteer</th>
@@ -80,12 +80,12 @@ export function AttendanceRegisterGrid({
               <tr key={v.id} className={`border-b border-border-faint transition-colors last:border-none ${ROW_HOVER}`}>
                 <td className="px-4 py-2.5 text-ink">
                   {v.name}
-                  {v.level ? <span className="ml-2 text-xs text-muted">{v.level}</span> : null}
+                  {v.level ? <span className="ml-2 text-label text-muted">{v.level}</span> : null}
                 </td>
                 {days.map((d) => (
                   <td key={d.date} className="px-0.5 py-2.5 text-center">
                     {d.lessons === 0 ? (
-                      <span title="Their class did not run this day" className="text-xs text-muted">&nbsp;</span>
+                      <span title="Their class did not run this day" className="text-label text-muted">&nbsp;</span>
                     ) : (
                       <span
                         title={
@@ -95,7 +95,7 @@ export function AttendanceRegisterGrid({
                               ? `One lesson only -- ${d.attended} of ${d.lessons}, banks nothing`
                               : "Not marked present"
                         }
-                        className={`inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] text-xs font-medium transition-shadow hover:shadow-[inset_0_0_0_1px_var(--hover-accent,var(--color-primary))] ${
+                        className={`inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] text-label font-medium transition-shadow hover:shadow-[inset_0_0_0_1px_var(--hover-accent,var(--color-primary))] ${
                           d.present
                             ? "status-pill status-pill-on-track"
                             : d.attended > 0
@@ -108,7 +108,7 @@ export function AttendanceRegisterGrid({
                     )}
                   </td>
                 ))}
-                <td className="px-4 py-2.5 text-center text-xs font-medium text-muted">
+                <td className="px-4 py-2.5 text-center text-label font-medium text-muted">
                   {attendedCount} of {heldDays}
                 </td>
               </tr>

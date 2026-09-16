@@ -154,7 +154,7 @@ export default function ClassroomManagementSession() {
       </RunningThisSession>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Lead-in · 4 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Lead-in · 4 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           What do you think classroom management entails? Four minutes to brainstorm as many things as you can in your
           group before moving on.
@@ -163,8 +163,8 @@ export default function ClassroomManagementSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">What classroom management entails · 15 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">What classroom management entails · 15 minutes</h2>
+          <p className="text-label text-muted">
             The fuller list. Compare it with what your group brainstormed — click each for a discussion prompt. Four are
             tagged: one has its own session, three you practise below.
           </p>
@@ -176,7 +176,7 @@ export default function ClassroomManagementSession() {
                 <RevealCard question={`${String(i + 1).padStart(2, "0")} · ${v.label}`} answer={v.prompt} />
               ) : (
                 <div className="flex flex-wrap items-center gap-2 rounded-[8px] border border-dashed border-border bg-accent/30 px-4 py-3">
-                  <span className="text-xs text-ink">
+                  <span className="text-label text-ink">
                     {String(i + 1).padStart(2, "0")} · {v.label}
                   </span>
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 text-micro font-semibold text-primary">
@@ -195,8 +195,8 @@ export default function ClassroomManagementSession() {
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Stopping an activity</h2>
-          <p className="text-xs text-muted">Five ways to take the room back. Click each for when it is the right one.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Stopping an activity</h2>
+          <p className="text-label text-muted">Five ways to take the room back. Click each for when it is the right one.</p>
         </div>
         <div className="flex flex-col gap-2">
           {STOP_ITEMS.map((s) => (
@@ -208,7 +208,7 @@ export default function ClassroomManagementSession() {
       <InternalClock />
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 4 minutes</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Wrap-up · 4 minutes</h2>
         <p className="text-meta leading-relaxed text-ink">
           One thing from the monitoring simulation you will do differently, and one instruction you will write down in
           full before your next TP rather than improvising it in the room.
@@ -280,13 +280,13 @@ function MonitoringSimulation() {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="font-serif text-lg font-semibold text-ink">Monitoring · 15 minutes</h2>
-          <p className="text-xs text-muted">
+          <h2 className="font-serif text-h3 font-semibold text-ink">Monitoring · 15 minutes</h2>
+          <p className="text-label text-muted">
             Sixty seconds of a pairwork task. Pairs change as it runs — go to one and choose what you actually say. You
             will not get to all of them, which is the point.
           </p>
         </div>
-        <span className="font-serif text-2xl font-semibold tabular-nums" style={{ color: running ? RED : undefined }}>
+        <span className="font-serif text-h1 font-semibold tabular-nums" style={{ color: running ? RED : undefined }}>
           0:{String(remaining).padStart(2, "0")}
         </span>
       </div>
@@ -295,7 +295,7 @@ function MonitoringSimulation() {
         <button
           type="button"
           onClick={() => setRunning(true)}
-          className="self-start rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+          className="self-start rounded-full bg-primary px-4 py-2 text-label font-semibold text-primary-foreground"
         >
           Start the task
         </button>
@@ -429,8 +429,8 @@ function InstructionPractice() {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-serif text-lg font-semibold text-ink">Instructions · 20 minutes</h2>
-        <p className="text-xs text-muted">
+        <h2 className="font-serif text-h3 font-semibold text-ink">Instructions · 20 minutes</h2>
+        <p className="text-label text-muted">
           Write the instruction you would actually say, word for word. Then say it out loud to your partner, who does only
           what you literally asked for.
         </p>
@@ -475,7 +475,7 @@ function InstructionPractice() {
                 r.ok ? "border-primary/30 bg-primary/5" : "border-status-warning-text/40 bg-status-warning-bg"
               }`}
             >
-              <span className={`flex-none text-xs font-bold ${r.ok ? "text-primary" : "text-status-warning-text"}`}>
+              <span className={`flex-none text-label font-bold ${r.ok ? "text-primary" : "text-status-warning-text"}`}>
                 {r.ok ? "✓" : "!"}
               </span>
               <span className="text-label leading-relaxed text-ink">
@@ -502,8 +502,8 @@ function InternalClock() {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-serif text-lg font-semibold text-ink">Your internal clock · 2 minutes</h2>
-        <p className="text-xs text-muted">
+        <h2 className="font-serif text-h3 font-semibold text-ink">Your internal clock · 2 minutes</h2>
+        <p className="text-label text-muted">
           Start it, and stop it when you think exactly one minute has passed. No counting, no watching anything.
         </p>
       </div>
@@ -520,7 +520,7 @@ function InternalClock() {
               setState("running");
             }
           }}
-          className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+          className="rounded-full bg-primary px-4 py-2 text-label font-semibold text-primary-foreground"
         >
           {state === "running" ? "Stop — that’s a minute" : state === "done" ? "Try again" : "Start"}
         </button>

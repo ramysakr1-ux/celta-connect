@@ -55,13 +55,13 @@ function ChooseAspect() {
   const [picked, setPicked] = useState<Record<number, string>>({});
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-ink">Choose the aspect the context needs</p>
+      <p className="text-label font-bold text-ink">Choose the aspect the context needs</p>
       <p className="text-label text-muted">Each situation only works with one option — click your answer, then check.</p>
       {CHOOSE_ITEMS.map((item, ci) => {
         const pick = picked[ci];
         return (
           <div key={item.context} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-            <p className="font-serif text-sm font-semibold text-ink">{item.context}</p>
+            <p className="font-serif text-body font-semibold text-ink">{item.context}</p>
             <div className="flex flex-wrap gap-1.5">
               {[item.a, item.b].map((opt) => {
                 const isCorrectPick = pick === opt && opt === item.correct;
@@ -113,7 +113,7 @@ function SortByAspect() {
   function column(label: string, key: "simple" | "continuous") {
     return (
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-3.5">
-        <p className="font-serif text-sm font-semibold text-ink">{label}</p>
+        <p className="font-serif text-body font-semibold text-ink">{label}</p>
         <div className="flex flex-col gap-1.5">
           {items.map((item) => {
             const shown = picked[item.s] === key;
@@ -143,7 +143,7 @@ function SortByAspect() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-bold text-ink">Sort by aspect</p>
+        <p className="text-label font-bold text-ink">Sort by aspect</p>
         <p className="text-label text-muted">Same idea, different tense. Click each sentence into Simple or Continuous.</p>
       </div>
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
@@ -162,7 +162,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-label font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -174,7 +174,7 @@ function StagingExample() {
       </button>
       {open ? (
         <div className="flex flex-col gap-2.5">
-          <p className="font-serif text-lg font-semibold text-ink">Example — staging &quot;used to&quot; vs past simple</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Example — staging &quot;used to&quot; vs past simple</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[150px_1fr] border-b border-border-faint last:border-b-0">
@@ -211,7 +211,7 @@ export default function TenseAndAspectSession() {
       </RunningThisSession>
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
+        <p className="text-label font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
           <p className="text-meta text-ink">
             &quot;I&apos;ve read three books this month&quot; and &quot;I&apos;ve been reading a book about Istanbul all
@@ -228,7 +228,7 @@ export default function TenseAndAspectSession() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
-          <p className="text-xs font-bold text-ink">Discuss: these pairs</p>
+          <p className="text-label font-bold text-ink">Discuss: these pairs</p>
           <p className="text-label text-muted">
             Same idea, two aspects. With a partner, agree what changes in meaning — not just which is &quot;more
             correct.&quot;
