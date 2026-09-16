@@ -66,3 +66,28 @@ export const CATEGORY_STYLE: Record<DisplayCategory, CategoryStyle> = {
     titleWeight: 400,
   },
 };
+
+/**
+ * The glass tile, as CSS, for anything that IS a timetable event.
+ *
+ * for-claude-code-trainee-workspace-complete.md B2: the candidate shell has
+ * two surfaces and only two -- the plain card for static content, and this for
+ * a session on the candidate's own week (Your day, the hero, Next for you, the
+ * board, a filmed observation, a consultation or tutorial slot). Radius 14 and
+ * the 3px top spine in the category's accent, which B3 keeps: on a tile the
+ * spine is the one coloured edge, and it says which kind of session this is.
+ */
+export function glassTile(category: DisplayCategory): {
+  background: string;
+  border: string;
+  borderTop: string;
+  borderRadius: number;
+} {
+  const s = CATEGORY_STYLE[category];
+  return {
+    background: `linear-gradient(160deg, ${s.tintFrom}, ${s.tintTo})`,
+    border: "1px solid oklch(100% 0 0 / 0.8)",
+    borderTop: `3px solid ${s.accent}`,
+    borderRadius: 14,
+  };
+}

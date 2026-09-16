@@ -7,6 +7,7 @@ import { ordinal } from "@/lib/stage2-tutorials";
 import { BookSlotButton } from "@/app/portfolio/[traineeId]/stage2-tutorial/[blockId]/book-slot-button";
 import { releaseStage2Slot } from "@/app/trainer/(hub)/timetable/stage2-actions";
 import { formatCalendarDate } from "@/lib/format-date";
+import { glassTile } from "@/lib/timetable-category-style";
 
 // Trainee-facing side of the Stage 2 tutorial booking sheet (§3a). Access
 // is enforced by RLS, not by traineeId in the URL -- a candidate only ever
@@ -43,9 +44,11 @@ export default async function TraineeStage2TutorialPage({
     <div className="flex flex-col gap-6">
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
-      <div className="plain-card">
-        <p className="text-label text-muted">Stage 2 tutorials</p>
-        <h1 className="font-serif text-h2 text-ink">
+      {/* Trainee spec B2: the tutorial itself is a session on the week, so
+          the card that IS it takes the glass, like the consultation. */}
+      <div className="p-4" style={glassTile("iw")}>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Stage 2 tutorials</p>
+        <h1 className="mt-1 font-serif text-h1 font-semibold text-ink">
           {event ? `${formatCalendarDate(event.event_date, { weekday: "long" })} · ${event.event_time?.slice(0, 5) ?? ""}` : "Stage 2 tutorials"}
         </h1>
         <p className="mt-2 text-body text-muted">

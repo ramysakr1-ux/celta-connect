@@ -28,6 +28,7 @@ import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambri
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { formatCalendarDate } from "@/lib/format-date";
 import { RoomHead } from "@/components/room-head";
+import { CATEGORY_STYLE } from "@/lib/timetable-category-style";
 
 type ResourceRow = Database["public"]["Tables"]["resources"]["Row"];
 
@@ -683,11 +684,17 @@ export default async function ResourceHubPage({
                   ) : null}
                 </>
               );
+              // Trainee spec B2: a filmed observation IS a timetable event --
+              // it is tied 1:1 to a slot on the candidate's own week -- so it
+              // wears the timetable's glass like every other session, tinted
+              // `iw` (watched alone, in your own time). B3: the spine is on
+              // top, not the side; the gold left edge that used to mark a
+              // waiting task is gone, and the pill on the row still says it.
+              const filmedStyle = CATEGORY_STYLE.iw;
               const style = {
-                background: "oklch(99.2% 0.005 90)",
-                ...(isActive
-                  ? { borderColor: "color-mix(in oklab, oklch(60% 0.11 70) 40%, transparent)", borderLeftWidth: "3px", borderLeftColor: "oklch(60% 0.11 70)" }
-                  : {}),
+                background: `linear-gradient(160deg, ${filmedStyle.tintFrom}, ${filmedStyle.tintTo})`,
+                border: "1px solid oklch(100% 0 0 / 0.8)",
+                borderTop: `3px solid ${isActive ? "oklch(60% 0.11 70)" : filmedStyle.accent}`,
               };
               // A session with no recording is not a link -- there is
               // nothing behind it yet, and a dead click reads as broken.
@@ -695,14 +702,14 @@ export default async function ResourceHubPage({
                 <li key={s.id}>
                   <Link
                     href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
-                    className="lift flex flex-col overflow-hidden rounded-[6px] border border-border"
+                    className="lift hover-ring flex flex-col overflow-hidden rounded-[10px]"
                     style={style}
                   >
                     {row}
                   </Link>
                 </li>
               ) : (
-                <li key={s.id ?? s.eventTitle} className="flex flex-col overflow-hidden rounded-[6px] border border-dashed border-border">
+                <li key={s.id ?? s.eventTitle} className="flex flex-col overflow-hidden rounded-[10px] border border-dashed border-border">
                   {row}
                 </li>
               );

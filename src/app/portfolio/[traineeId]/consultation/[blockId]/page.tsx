@@ -7,6 +7,7 @@ import { ordinal } from "@/lib/stage2-tutorials";
 import { BookConsultationButton } from "@/app/portfolio/[traineeId]/consultation/[blockId]/book-consultation-button";
 import { releaseConsultationSlot } from "@/app/trainer/(hub)/timetable/consultation-actions";
 import { shortDate, shortTime } from "@/lib/tutorials-section";
+import { glassTile } from "@/lib/timetable-category-style";
 
 // Candidate side of a consultation sheet (migration 0275). Visibility is
 // RLS's: a candidate sees every block on their own course. Whether they
@@ -51,9 +52,13 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
     <div className="flex flex-col gap-6">
       <BackLink href={`/portfolio/${traineeId}/timetable`} label="Timetable" />
 
-      <div className="plain-card">
-        <p className="text-label text-muted">Consultation</p>
-        <h1 className="font-serif text-h2 text-ink">
+      {/* Trainee spec B2: a consultation is a session on the candidate's own
+          timetable, so the card that IS the session wears the timetable's
+          glass -- `iw`, the individual/bookable tint, the same one the slot
+          carries on the board. */}
+      <div className="p-4" style={glassTile("iw")}>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Consultation</p>
+        <h1 className="mt-1 font-serif text-h1 font-semibold text-ink">
           {tutor?.full_name ?? "Your tutor"} · {event ? `${shortDate(event.event_date)} ${shortTime(event.event_time)}` : ""}
         </h1>
         <p className="mt-2 text-body text-muted">
