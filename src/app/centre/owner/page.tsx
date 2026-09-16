@@ -9,6 +9,7 @@ import { sumByCurrency, formatTotals } from "@/lib/money-by-currency";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { roleLabel, CAPABILITY_LABELS, type Capability } from "@/lib/auth/centre-permissions";
 import { CapabilityCustomizer } from "@/app/centre/owner/capability-customizer";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card";
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { UnownedCoursesCard } from "@/app/centre/owner/unowned-courses-card";
@@ -255,7 +256,12 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             the header to configure another.
           </p>
         ) : null}
-        <CapabilityCustomizer overrides={ctx.overrides} customRoles={customRoles ?? []} capabilityRows={capabilityRows} />
+        {/* High-traffic audit 16 Sep 2026, A9: the capability matrix is a wide
+            table with a column per role -- on a phone it says so instead of
+            shipping cramped (build-spec §7). */}
+        <LaptopOnlyGate task="Shaping roles">
+          <CapabilityCustomizer overrides={ctx.overrides} customRoles={customRoles ?? []} capabilityRows={capabilityRows} />
+        </LaptopOnlyGate>
 
         <div className="owner-card flex flex-col gap-4 px-7 py-6">
           <h2 className="owner-serif text-[19px]">Who holds what</h2>
@@ -263,7 +269,9 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             {(grants ?? []).map((g, i) => (
               <div
                 key={g.id}
-                className={`wash grid grid-cols-3 items-center gap-2.5 rounded px-3 py-3 ${i > 0 ? "border-t" : ""}`}
+                // A9: three columns collapsed names, roles and branches into
+                // ~100px each on a phone; one column below sm.
+                className={`wash grid grid-cols-1 gap-1 rounded px-3 py-3 sm:grid-cols-3 sm:items-center sm:gap-2.5 ${i > 0 ? "border-t" : ""}`}
                 style={{ borderColor: "var(--owner-line)" }}
               >
                 <span className="text-[12.5px] font-semibold">{nameById.get(g.profile_id) ?? "Unknown"}</span>
