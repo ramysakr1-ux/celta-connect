@@ -17,7 +17,12 @@ export function Panel({
 }: {
   title: string;
   children: React.ReactNode;
-  accent?: "gold" | "none";
+  /**
+   * Gold is the identity accent (the requirements band). Amber is B1's one
+   * surviving meaning -- the assessor needs to look at this -- and is the
+   * only semantic edge a panel can carry. Everything else is a hairline.
+   */
+  accent?: "gold" | "amber" | "none";
 }) {
   return (
     <div>
@@ -31,7 +36,14 @@ export function Panel({
       </p>
       <div
         className="card overflow-hidden"
-        style={{ borderTop: accent === "gold" ? `3px solid ${GOLD}` : `1px solid ${BORDER}` }}
+        style={{
+          borderTop:
+            accent === "gold"
+              ? `3px solid ${GOLD}`
+              : accent === "amber"
+                ? `3px solid ${AMBER}`
+                : `1px solid ${BORDER}`,
+        }}
       >
         {children}
       </div>

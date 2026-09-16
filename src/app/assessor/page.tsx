@@ -1173,14 +1173,12 @@ export default async function AssessorPage({
               ) : null}
             </Panel>
 
-            <div>
-              <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
-                Malpractice cases
-              </p>
-              <div
-                className="card card-amber"
-                style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}
-              >
+            {/* The one panel that keeps a semantic edge: amber when there is
+                a case to read (B1's surviving meaning), a hairline when the
+                course has none -- an amber rule over "no cases have been
+                raised" was the colour claiming attention for nothing. */}
+            <Panel title="Malpractice cases" accent={(malpracticeCases ?? []).length > 0 ? "amber" : "none"}>
+              <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
                 {(malpracticeCases ?? []).length === 0 ? (
                   <p style={{ fontSize: "var(--text-meta)", color: MUTED }}>No plagiarism or malpractice cases have been raised on this course.</p>
                 ) : (
@@ -1232,7 +1230,7 @@ export default async function AssessorPage({
                   ))
                 )}
               </div>
-            </div>
+            </Panel>
 
             <div>
               <p style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
