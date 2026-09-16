@@ -104,15 +104,21 @@ export default async function AssessorHistoryPage({
                     {assessorEmailById.get(a.profileId) ? ` · ${assessorEmailById.get(a.profileId)}` : ""}
                   </p>
                 </div>
+                {/* Remainder pass §3 and the type scale's own table: a KPI
+                    figure is h1, tabular. These two were Tailwind's own 20px
+                    step before the scale landed and the mechanical mapping
+                    took them to h2 -- the section-head size, not the figure
+                    size. Ramy, 16 Sep 2026: "make the figures 28 like the
+                    spec says." */}
                 <div className="flex shrink-0 gap-5">
                   <div className="flex flex-col items-end gap-0.5">
-                    <p className="font-serif text-h2 font-semibold" style={{ color: SEVERITY_COLOR[a.currentStreakSeverity] }}>
+                    <p className="font-serif text-h1 leading-none font-semibold tabular-nums" style={{ color: SEVERITY_COLOR[a.currentStreakSeverity] }}>
                       {a.currentStreak}
                     </p>
                     <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Consecutive streak</p>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <p className="font-serif text-h2 font-semibold" style={{ color: SEVERITY_COLOR[a.peakConcurrentSeverity] }}>
+                    <p className="font-serif text-h1 leading-none font-semibold tabular-nums" style={{ color: SEVERITY_COLOR[a.peakConcurrentSeverity] }}>
                       {a.peakConcurrent}
                     </p>
                     <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Peak concurrent</p>

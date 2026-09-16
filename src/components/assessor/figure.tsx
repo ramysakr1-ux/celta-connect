@@ -27,7 +27,17 @@ export function Figure({
       >
         {label}
       </p>
-      <p style={{ fontFamily: SERIF, fontSize: "var(--text-h2)", lineHeight: 1, color: ink ?? INK, marginTop: 5 }}>
+      {/* The type scale's own table gives KPI figures h1, tabular -- the same
+          size Command Center, the platform accounts screen and the owner's
+          stat cards already use. This one sat at h2, the section-head size,
+          which is what the mechanical mapping off Tailwind's 20px step
+          produced. Ramy, 16 Sep 2026. */}
+      <p
+        style={{
+          fontFamily: SERIF, fontSize: "var(--text-h1)", lineHeight: 1.05, fontWeight: 600,
+          fontVariantNumeric: "tabular-nums", color: ink ?? INK, marginTop: 5,
+        }}
+      >
         {value}
         {of ? <span style={{ fontSize: "var(--text-meta)", color: MUTED, marginLeft: 6 }}>{of}</span> : null}
       </p>
