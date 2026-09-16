@@ -16,6 +16,7 @@ import { UnownedCoursesCard } from "@/app/centre/owner/unowned-courses-card";
 import { BranchChip } from "@/components/branch-chip";
 import { HeaderCredit } from "@/components/designer-credit";
 import { OwnerRegisterStyles } from "@/app/centre/owner/owner-register";
+import { InstallPrompt } from "@/components/install-prompt";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -211,6 +212,9 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
 
   return (
     <div className="owner-surface -m-6 flex flex-col">
+      {/* The owner gets the same quick access as everyone else (Ramy, 17 Sep
+          2026). This screen IS the owner's landing, so no landingPath. */}
+      <InstallPrompt />
       <div className="owner-header flex items-start justify-between gap-6 px-11 py-9">
         <div>
           <p className="owner-eyebrow" style={{ color: "oklch(78% 0.03 75)" }}>

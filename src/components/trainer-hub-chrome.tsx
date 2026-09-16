@@ -21,6 +21,7 @@ import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { getCourseTutorRole } from "@/lib/course-tutor-role";
 import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP, HUB_TEAL } from "@/lib/hub-accent";
 import { CentreTimeZoneProvider } from "@/components/centre-time-zone";
+import { InstallPrompt } from "@/components/install-prompt";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -217,6 +218,11 @@ export async function TrainerHubChrome({
     <CentreTimeZoneProvider timeZone={center?.time_zone}>
     <div className="flex min-h-full flex-1 flex-col" style={hubVars}>
       {isDemo ? <DemoModeBanner /> : null}
+      {/* Everyone gets quick access, not only trainees and volunteers (Ramy,
+          17 Sep 2026: "why only trainees and volunteers? Everyone should be
+          able to have quick access to the platform"). Landing only, and "Not
+          now" snoozes it for a week, same as the candidate's. */}
+      <InstallPrompt landingPath="/trainer" />
       {/* design_handoff_trainer_homepage_v4 README, "Header (56px, white,
           1px bottom border)": one row -- mark, tab row, then the right
           cluster (role pill in the accent, name, Settings). Replaces the

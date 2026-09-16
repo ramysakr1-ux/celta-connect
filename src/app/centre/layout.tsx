@@ -17,6 +17,7 @@ import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { InstallPrompt } from "@/components/install-prompt";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -103,6 +104,11 @@ export default async function CentreLayout({ children }: { children: React.React
        more than one: the volunteer pool is its own room with its own colour,
        and everything else is Centre Management. */
     <AreaTheme className="flex min-h-full flex-1 flex-col">
+      {/* Everyone gets quick access, not only trainees and volunteers (Ramy,
+          17 Sep 2026: "why only trainees and volunteers? Everyone should be
+          able to have quick access to the platform"). Landing only, and "Not
+          now" snoozes it for a week, same as the candidate's. */}
+      <InstallPrompt landingPath="/centre" />
       {/* Header: 32px mark + wordmark, the credit, a hairline divider, then
           the pill. Two rows on the right (Ramy, 23 Aug 2026): row 2 carries
           the branch filter, name and sign out. The headroom row 1 used to

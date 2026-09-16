@@ -78,11 +78,19 @@ function snoozed(): boolean {
 
 const subscribeNothing = () => () => {};
 
-export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "banner" | "inline"; landingPath?: string }) {
+export function InstallPrompt({
+  variant = "banner",
+  landingPath,
+}: {
+  variant?: "banner" | "inline";
+  /** One path, or several -- /dashboard wraps Course Admin and Admissions. */
+  landingPath?: string | string[];
+}) {
   // Only the banner is ever confined to one page; the inline variant is
   // placed by hand where it belongs.
   const pathname = usePathname();
-  const offLanding = variant === "banner" && landingPath !== undefined && pathname !== landingPath;
+  const landings = landingPath === undefined ? null : Array.isArray(landingPath) ? landingPath : [landingPath];
+  const offLanding = variant === "banner" && landings !== null && !landings.includes(pathname);
   // Everything this component decides on -- user agent, display mode,
   // localStorage -- exists only in the browser, so the server render and
   // the hydration render must both be "nothing". useSyncExternalStore is
@@ -111,7 +119,19 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
   const standalone = onClient && isStandalone();
   const route = onClient ? manualRoute() : "desktop";
   const ios = onClient && isIos();
-  const installable = onClient && !standalone && (ios || promptFired);
+  // The banner used to be gated on `promptFired` -- Chrome's
+  // beforeinstallprompt. That is the browser's decision, not ours: Chrome
+  // withholds it behind engagement heuristics, and desktop Safari and Firefox
+  // never fire it at all. The inline variant was ungated on 6 Sep 2026 for
+  // exactly that reason; the banner was not, and then the inline entry was
+  // removed from the trainee's footer the same day -- which left a trainee on
+  // any of those browsers with NO way to install, on the one screen that was
+  // supposed to offer it. Measured on production 17 Sep 2026: nothing rendered.
+  //
+  // So the banner is offered whenever the app is not already installed. The
+  // click fires the real prompt when there is one and explains the gesture
+  // when there is not, which is what the inline entry has done since the 6th.
+  const installable = onClient && !standalone;
   // The inline entry is never snoozed -- that is the whole point of it.
   const bannerSnoozed = variant === "banner" && (snoozedNow || (onClient && snoozed()));
 
@@ -216,6 +236,22 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
           Add Connect to your home screen: tap <span className="font-semibold">Share</span>, then{" "}
           <span className="font-semibold">Add to Home Screen</span>.
         </p>
+      ) : showIosSteps ? (
+        // No real prompt on this browser, so the button says how instead of
+        // doing nothing.
+        <p>
+          {route === "android" ? (
+            <>
+              Open your browser&apos;s menu, then <span className="font-semibold">Add to Home screen</span>.
+            </>
+          ) : (
+            <>
+              In Chrome or Edge, use the install icon at the right of the address bar, or the menu then{" "}
+              <span className="font-semibold">Install page as app</span>. In Safari, use{" "}
+              <span className="font-semibold">File &rsaquo; Add to Dock</span>.
+            </>
+          )}
+        </p>
       ) : (
         <p>Add Connect to your home screen for quicker daily access.</p>
       )}
@@ -226,7 +262,7 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
             onClick={handleInstallClick}
             className="rounded-[6px] bg-primary px-3 py-1.5 text-label font-semibold text-primary-foreground"
           >
-            Add
+            {promptFired ? "Add" : showIosSteps ? "Got it" : "How"}
           </button>
         ) : null}
         <button type="button" onClick={snooze} className="text-label text-muted hover:text-ink" aria-label="Not now">

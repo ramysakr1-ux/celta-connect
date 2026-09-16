@@ -19,6 +19,7 @@ import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { InstallPrompt } from "@/components/install-prompt";
 
 export default async function DashboardLayout({
   children,
@@ -114,6 +115,11 @@ export default async function DashboardLayout({
     // Wraps header AND main: the section pills live in the header, and they
     // should wear the room's colour like everything else inside it.
     <AreaTheme className="flex min-h-full flex-1 flex-col">
+      {/* Everyone gets quick access, not only trainees and volunteers (Ramy,
+          17 Sep 2026: "why only trainees and volunteers? Everyone should be
+          able to have quick access to the platform"). Landing only, and "Not
+          now" snoozes it for a week, same as the candidate's. */}
+      <InstallPrompt landingPath={["/dashboard/admin", "/dashboard/admissions"]} />
       {/* The rule is per AREA now, not per role. Applying it on
           `role === "admin"` -- which is what shipped on 31 Aug -- was wrong:
           that condition is true across this entire layout, so Course Admin,
