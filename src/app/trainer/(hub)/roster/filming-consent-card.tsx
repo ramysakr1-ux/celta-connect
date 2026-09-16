@@ -12,6 +12,27 @@ export interface ConsentCandidate {
 // tint, not signed = dashed warn. Clicking a pill toggles the record.
 export function FilmingConsentCard({ candidates }: { candidates: ConsentCandidate[] }) {
   const signed = candidates.filter((c) => c.confirmed).length;
+  const everyoneSigned = candidates.length > 0 && signed === candidates.length;
+
+  // Polish pass §2: once everybody has handed a form in, the chip cloud is a
+  // wall of identical teal saying one thing. It collapses to that one thing.
+  // Computed from the records, not a toggle -- the day somebody withdraws
+  // consent it opens itself back up, which a remembered switch would not do.
+  if (everyoneSigned) {
+    return (
+      <div className="sheet flex flex-wrap items-center justify-between gap-3 px-6 py-3.5">
+        <span className="flex items-center gap-2.5 text-body" style={{ color: "oklch(32% 0.05 195)" }}>
+          <span className="block size-1.5 shrink-0 rounded-full bg-current" />
+          <span className="font-semibold">Everyone has signed</span>
+          <span className="text-muted">· filming can go ahead</span>
+        </span>
+        <a href="/api/filming-consent.pdf" className="text-meta font-semibold text-primary hover:underline">
+          Download blank form
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="sheet flex flex-wrap items-center gap-4 px-6 py-4">
       <div

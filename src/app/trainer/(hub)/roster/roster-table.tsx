@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RosterRowView, ROSTER_COLS } from "@/app/trainer/(hub)/roster/roster-row";
+import { RosterRowView, rosterCols } from "@/app/trainer/(hub)/roster/roster-row";
 import type { RosterRow } from "@/lib/roster";
 import { isCourseStatusReadOnly } from "@/lib/course-status";
 
@@ -138,21 +138,26 @@ export function RosterTable({
           <span className="relative block h-3.5 w-[26px] shrink-0 rounded-full transition-colors duration-150" style={{ background: showDetail ? "var(--hub-accent)" : "oklch(80% 0.014 82)" }}>
             <span className="absolute top-0.5 block size-2.5 rounded-full bg-card transition-[left] duration-150" style={{ left: showDetail ? 14 : 2 }} />
           </span>
-          {showDetail ? "Progress detail on" : "Show progress detail"}
+          {showDetail ? "Full detail on" : "Show full detail"}
         </button>
       </div>
 
       {/* The only shadowed card on the page (handoff, "Roster table"). */}
       <div className="overflow-x-auto rounded-[12px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
-        <div className="min-w-[1120px]">
-          <div className={`${ROSTER_COLS} items-end border-b border-border px-4 pt-3.5 pb-2.5 text-micro leading-[1.2] font-bold tracking-[0.08em] text-muted uppercase`}>
+        {/* Six columns need 950px, nine need 1230 (§2's own measures plus the
+            grid gaps and the card's padding). The old fixed 1120 scrolled the
+            default view for no reason and clipped the detail view. */}
+        <div className={showDetail ? "min-w-[1230px]" : "min-w-[950px]"}>
+          <div className={`${rosterCols(showDetail)} items-end border-b border-border px-4 pt-3.5 pb-2.5 text-micro leading-[1.2] font-bold tracking-[0.08em] text-muted uppercase`}>
             <Th>Candidate</Th>
             <Th>TPs passed · of 8</Th>
             <Th>Assessed hrs</Th>
-            <Th>Assignments</Th>
-            <Th>Criteria met</Th>
+            {/* Polish pass §2: the three marking/assessor columns ride with
+                the switch. Order matches the row's own cells. */}
+            {showDetail ? <Th>Assignments</Th> : null}
+            {showDetail ? <Th>Criteria met</Th> : null}
             <Th>Attendance</Th>
-            <Th>Provisional</Th>
+            {showDetail ? <Th>Provisional</Th> : null}
             <Th>Flags</Th>
             <Th align="right">{showContact ? "Contact" : null}</Th>
           </div>

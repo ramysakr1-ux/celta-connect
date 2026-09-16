@@ -14,10 +14,19 @@ import { Avatar, toneForName } from "@/components/avatar";
 const moveEarlierInitialState: FormState = { error: null };
 
 // design_handoff_trainer_roster_v2: one grid for the header row and every
-// candidate row. Candidate · TPs · Assessed hrs · Assignments · Criteria ·
-// Attendance · Provisional · Flags · Contact. (Assignments is wider than
-// the handoff's 110px because Connect has four assignments, not two.)
-export const ROSTER_COLS = "grid gap-x-1.5 grid-cols-[236px_122px_96px_124px_112px_84px_100px_minmax(140px,1fr)_74px]";
+// candidate row.
+//
+// Polish pass §2 (16 Sep 2026): six columns by default, nine on demand.
+// "The default question is 'who is in trouble', already answered by
+// at-risk-first sort plus flags; the other three are marking/assessor
+// questions." So Assignments, Criteria met and Provisional now ride with the
+// detail switch, and the six that stay get the room they were short of.
+export const ROSTER_COLS_DEFAULT = "grid gap-x-1.5 grid-cols-[290px_170px_140px_130px_minmax(140px,1fr)_90px]";
+export const ROSTER_COLS_DETAIL =
+  "grid gap-x-1.5 grid-cols-[290px_150px_130px_110px_150px_110px_130px_minmax(140px,1fr)_90px]";
+export function rosterCols(showDetail: boolean): string {
+  return showDetail ? ROSTER_COLS_DETAIL : ROSTER_COLS_DEFAULT;
+}
 
 // The v2 colour vocabulary: teal = good, gold = watch, red = problem.
 export const TONE = {
@@ -349,7 +358,7 @@ export function RosterRowView({
       style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
       onClick={() => router.push(`/portfolio/${row.id}`)}
     >
-      <div className={`${ROSTER_COLS} min-h-[58px] items-center px-4 py-2.5`}>
+      <div className={`${rosterCols(showDetail)} min-h-[58px] items-center px-4 py-2.5`}>
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={row.name} size="sm" />
           <div className="flex min-w-0 flex-col gap-0.5">
@@ -368,7 +377,7 @@ export function RosterRowView({
         </div>
 
         {frozen ? (
-          <div className="col-span-7 text-center">
+          <div className={`${showDetail ? "col-span-7" : "col-span-4"} text-center`}>
             <span className="rounded-full px-2.5 py-[3px] text-label font-semibold" style={{ background: "oklch(93.5% 0.008 85)", color: "oklch(44% 0.014 70)" }}>
               {COURSE_STATUS_LABEL[row.courseStatus]}
             </span>
@@ -396,32 +405,36 @@ export function RosterRowView({
                 <span className="font-medium opacity-75">of 6</span>
               </span>
             </div>
-            <AssignmentTiles row={row} />
+            {showDetail ? <AssignmentTiles row={row} /> : null}
+            {showDetail ? (
             <div className="flex items-center gap-2" title={`${row.criteriaPct}% of the CELTA 5 criteria met`}>
               <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.07]">
                 <span className="absolute inset-y-0 left-0 block rounded-full" style={{ width: `${row.criteriaPct}%`, background: criteriaBar }} />
               </span>
               <span className="w-[34px] text-right text-meta font-semibold tabular-nums text-ink">{row.criteriaPct}%</span>
             </div>
+            ) : null}
             <div>
               <span className={PILL} style={attendanceTone}>
                 <span className="block size-1.5 rounded-full bg-current" />
                 {row.attendancePct}%
               </span>
             </div>
-            <div>
-              {row.provisionalLabel ? (
-                <span
-                  className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-meta font-bold tracking-[0.02em] whitespace-nowrap"
-                  style={provisionalStyle(row)}
-                  title={row.provisionalSlashed ? "Provisional grade not yet settled between two grades" : "Provisional grade"}
-                >
-                  {row.provisionalLabel}
-                </span>
-              ) : (
-                <span className="text-meta text-muted">Not set</span>
-              )}
-            </div>
+            {showDetail ? (
+              <div>
+                {row.provisionalLabel ? (
+                  <span
+                    className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-meta font-bold tracking-[0.02em] whitespace-nowrap"
+                    style={provisionalStyle(row)}
+                    title={row.provisionalSlashed ? "Provisional grade not yet settled between two grades" : "Provisional grade"}
+                  >
+                    {row.provisionalLabel}
+                  </span>
+                ) : (
+                  <span className="text-meta text-muted">Not set</span>
+                )}
+              </div>
+            ) : null}
             <div className="flex flex-wrap gap-1" onClick={stop}>
               {flags.map((f) => (
                 <span key={f.label} title={f.title} className="inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-label font-semibold whitespace-nowrap" style={f.tone}>
