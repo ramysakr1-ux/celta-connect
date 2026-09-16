@@ -131,7 +131,7 @@ export default async function EmailDeliveryPage({
           {(bounceTasks ?? []).map((b) => (
             <div
               key={b.id}
-              className="flex items-start gap-3 rounded-[8px] border border-destructive/25 bg-destructive/5 px-4 py-3.5 hover-ring"
+              className="flex items-start gap-3 rounded-[8px] border border-destructive/25 bg-destructive/5 px-4 py-3.5 lift"
             >
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-destructive" />
               <p className="flex-1 text-[13px] leading-relaxed text-ink">

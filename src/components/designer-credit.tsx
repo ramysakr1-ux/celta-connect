@@ -151,14 +151,17 @@ export function LandingDesignerCredit({ landingPath }: { landingPath: string }) 
  *
  * `onDark` for the trainee's ink-warm band, where bronze has nothing to sit on.
  */
-export function HeaderCredit({ onDark = false, landingPath }: { onDark?: boolean; landingPath?: string }) {
+export function HeaderCredit({ onDark = false, landingPath }: { onDark?: boolean; landingPath?: string | string[] }) {
   // C1, trainer-hub live audit 15 Sep 2026: on the hub the header is shared
   // by every tab, and the credit beside a tab strip that was already "kind
   // of squished" is chrome noise. Landing pages only -- so a layout that
   // wraps several routes names its landing, and the credit renders nowhere
   // else. Same check LandingDesignerCredit makes.
   const pathname = usePathname();
-  if (landingPath && pathname !== landingPath) return null;
+  // A shell can wrap several rooms -- /dashboard holds Course Admin and
+  // Admissions -- so a landing is a list, not one path (centre side C4).
+  const landings = landingPath === undefined ? null : Array.isArray(landingPath) ? landingPath : [landingPath];
+  if (landings && !landings.includes(pathname)) return null;
   return (
     <span
       className="hidden shrink-0 items-center gap-1.5 text-[10.5px] whitespace-nowrap md:inline-flex"

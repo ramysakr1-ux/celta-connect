@@ -226,7 +226,7 @@ export default async function AdmissionsPage({
           <tbody>
             {stale.length > 0 ? (
               stale.map((a) => (
-                <tr key={a.id} className="hover-ring">
+                <tr key={a.id} className="lift">
                   <td>
                     <Link href={`/dashboard/admissions/${a.id}`} className="inline-flex items-center gap-2.5 font-medium text-ink hover:underline">
                       <Avatar name={a.full_name} size="sm" />

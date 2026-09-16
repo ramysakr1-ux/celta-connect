@@ -195,7 +195,7 @@ export default async function AdmissionsPipelinePage({
                     ? "Full and paid"
                     : `${shortfall} short${waiting > 0 ? `, ${waiting} on the waiting list` : ""}`;
               return (
-                <tr key={c.id} className="hover-ring">
+                <tr key={c.id} className="lift">
                   <td>
                     <Link href={`/dashboard/admissions/pipeline?course=${c.id}`} className="font-medium text-ink hover:underline">
                       {c.course_code || c.name}

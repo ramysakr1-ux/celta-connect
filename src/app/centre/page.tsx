@@ -331,7 +331,7 @@ export default async function CentreOverviewPage({
             const state = stateOf(c.start_date, c.end_date);
             const owed = owedByCourse.get(c.id) ?? 0;
             return (
-              <div key={c.id} className={`hover-ring flex flex-wrap items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+              <div key={c.id} className={`lift flex flex-wrap items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <Link href={`/centre/courses/${c.id}`} className="min-w-[13rem] flex-1 hover:text-primary">
                   <p className="text-sm font-semibold text-ink">
                     {c.name}
@@ -362,14 +362,17 @@ export default async function CentreOverviewPage({
       {/* "Only 'bounced' creates a task." Above the fold, because a bounced
           workspace invitation to a paid-up candidate is someone with no way
           into the course they've paid for. */}
+      {/* C6: card-red already draws the edge; the inline border utility
+          painted it a second time. The tint stays -- it is the panel, not
+          the edge. */}
       {(bounces ?? []).length > 0 ? (
-        <div className="card card-red !p-0 border-destructive/25 bg-destructive/5">
+        <div className="card card-red !p-0 bg-destructive/5">
           <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-4">
             <h2 className="font-serif text-[17px] font-semibold text-ink">Email couldn&apos;t be delivered</h2>
             <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
           </div>
           {(bounces ?? []).map((b, i) => (
-            <div key={b.id} className={`hover-ring px-5 py-4 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
+            <div key={b.id} className={`lift px-5 py-4 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
               <div className="flex items-center justify-between gap-3">
                 {b.applicant_id ? (
                   <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-sm text-ink hover:underline">

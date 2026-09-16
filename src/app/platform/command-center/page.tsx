@@ -368,7 +368,7 @@ export default async function CommandCenterOverviewPage() {
               <p className="text-[12.5px] text-muted">Nothing yet.</p>
             ) : (
               activity.map((item, i) => (
-                <div key={i} className="hover-ring flex items-baseline gap-2.5">
+                <div key={i} className="lift flex items-baseline gap-2.5">
                   <div className="w-11 shrink-0 text-[11px] text-muted">{relativeTime(item.at)}</div>
                   <div className="text-[12.5px] text-ink">{item.label}</div>
                 </div>

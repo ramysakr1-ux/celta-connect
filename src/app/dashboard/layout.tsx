@@ -154,7 +154,7 @@ export default async function DashboardLayout({
                 screen had none, so it read as the generic dashboard rather
                 than as the course admin's own view. */}
           </Link>
-          <HeaderCredit />
+          <HeaderCredit landingPath={["/dashboard/admin", "/dashboard/admissions"]} />
 
           {/* The same pill row Centre Management carries, with the teal on
               this view instead. Ramy, 31 Aug 2026: "this is meant to be a
@@ -173,10 +173,6 @@ export default async function DashboardLayout({
               centre role to /centre, so clicking the mark from inside Course
               Admin kicked you out of it. Pinning the logo to /dashboard/admin
               fixed that and removed the only door. */}
-          {profile?.role === "admin" ? (
-            <>
-            </>
-          ) : null}
           {/* Ramy, 10 Sep 2026: a clock on every landing. The clock only --
               this header sits over every course this administrator touches,
               not one of them, so there is no single teaching day to draw. */}

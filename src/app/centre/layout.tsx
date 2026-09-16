@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView, adminHomePath } from "@/lib/auth/centre-permissions";
 import { RoomPills } from "@/components/room-pills";
-import { AreaTheme } from "@/components/area-theme";
+import { AreaTheme, AreaHeaderRule } from "@/components/area-theme";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { CentreHeaderMeta } from "@/app/centre/header-meta";
 import { OwnerBranchRow } from "@/app/centre/owner-branch-row";
@@ -120,7 +120,7 @@ export default async function CentreLayout({ children }: { children: React.React
           >
             <Wordmark size="header" />
           </Link>
-          <HeaderCredit />
+          <HeaderCredit landingPath="/centre" />
         </div>
         {/* Ramy, 10 Sep 2026: "Centre should have a clock. Centre management
             should have a clock. Every landing page should have a clock."
@@ -160,6 +160,7 @@ export default async function CentreLayout({ children }: { children: React.React
           and one hue should not mean two unrelated things. globals.css calls
           --color-bronze "the third accent, from the Centre Admin design
           system" -- it was made for this section. */}
+      <AreaHeaderRule />
       <OwnerBranchRow branches={switchable} />
 
       {/* The pills sit on the page, not in the header. Measured before moving

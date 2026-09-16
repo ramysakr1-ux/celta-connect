@@ -14,6 +14,7 @@ import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card"
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { UnownedCoursesCard } from "@/app/centre/owner/unowned-courses-card";
 import { BranchChip } from "@/components/branch-chip";
+import { HeaderCredit } from "@/components/designer-credit";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -239,7 +240,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
           {/* The one figure here that was a dead end: it counted rows whose
               only rendering was six lines in another room. Now it opens
               them. */}
-          <Link href={`/centre/owner/log${branch ? `?branch=${branch}` : ""}`} className="wash rounded-[10px]">
+          <Link href={`/centre/owner/log${branch ? `?branch=${branch}` : ""}`} className="lift rounded-[10px]">
             <StatCard label="Owner actions logged" value={String(ownerActionsThisMonth)} suffix="this month" />
           </Link>
         </div>
@@ -350,7 +351,9 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
            here highlights as firmly as a row anywhere else. */
       `}</style>
       {/* Every landing carries the credit in the same corner (Ramy, 10 Sep
-          2026). This one had none at all. */}
+          2026). This one had none at all -- the comment promised it and
+          nothing rendered it (centre side C3). */}
+      <HeaderCredit onDark />
 
     </div>
   );
@@ -379,11 +382,3 @@ function StatCard({ label, value, suffix, accent }: { label: string; value: stri
 // Was hard-coded to GBP, so a New York centre's balance read in sterling.
 // centers.currency is the centre's own; sterling stays the fallback for a
 // centre that has not set one rather than guessing from the address.
-function formatMoney(amount: number, currency: string | null | undefined): string {
-  const code = currency && /^[A-Z]{3}$/.test(currency) ? currency : "GBP";
-  return new Intl.NumberFormat(code === "USD" ? "en-US" : "en-GB", {
-    style: "currency",
-    currency: code,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
