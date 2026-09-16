@@ -178,15 +178,15 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
             borderLeft: `3px solid ${AMBER}`,
           }}
         >
-          <p className="text-[10px] font-bold tracking-[0.09em] uppercase" style={{ color: AMBER }}>
+          <p className="text-micro font-bold tracking-[0.09em] uppercase" style={{ color: AMBER }}>
             Special arrangements in place
           </p>
-          <p className="mt-1 text-[12.5px]" style={{ color: INK }}>
+          <p className="mt-1 text-meta" style={{ color: INK }}>
             {arrangements.length > 0
               ? arrangements.join(" · ")
               : "Arrangements were agreed with this candidate."}
           </p>
-          <p className="mt-1 text-[11.5px]" style={{ color: MUTED }}>
+          <p className="mt-1 text-label" style={{ color: MUTED }}>
             The reason is held by the centre and not shown here — Handbook §12.2 limits the personal information shared
             with Cambridge to candidate names. Ask the main course tutor if you need it.
           </p>
@@ -307,12 +307,12 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
           style={{ borderLeft: `3px solid ${AMBER}` }}
         >
           <span>
-            <span className="block text-[13px] font-semibold text-ink">Withdrawal letter</span>
-            <span className="block text-[12px] text-muted">
+            <span className="block text-meta font-semibold text-ink">Withdrawal letter</span>
+            <span className="block text-meta text-muted">
               The candidate&apos;s signed withdrawal, countersigned by the centre — Handbook §14.2. Opens as a PDF.
             </span>
           </span>
-          <span className="shrink-0 text-[12px] font-semibold" style={{ color: AMBER }}>
+          <span className="shrink-0 text-meta font-semibold" style={{ color: AMBER }}>
             Open
           </span>
         </a>
@@ -328,10 +328,10 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
 function Figure({ label, value, of, ink }: { label: string; value: string; of?: string; ink?: string }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold tracking-[0.05em] text-muted uppercase">{label}</p>
-      <p className="mt-1 font-serif text-[21px] leading-none" style={{ color: ink ?? INK }}>
+      <p className="text-micro font-semibold tracking-[0.05em] text-muted uppercase">{label}</p>
+      <p className="mt-1 font-serif text-h2 leading-none" style={{ color: ink ?? INK }}>
         {value}
-        {of ? <span className="ml-1.5 font-sans text-[13px] text-muted">{of}</span> : null}
+        {of ? <span className="ml-1.5 font-sans text-meta text-muted">{of}</span> : null}
       </p>
     </div>
   );
@@ -352,17 +352,17 @@ function Pill({
   const body = (
     <>
       <span className="min-w-0">
-        <span className="block truncate text-[12.5px] font-semibold" style={{ color: INK }}>
+        <span className="block truncate text-meta font-semibold" style={{ color: INK }}>
           {title}
         </span>
-        <span className="block truncate text-[11px]" style={{ color: muted ? AMBER : MUTED }}>
+        <span className="block truncate text-label" style={{ color: muted ? AMBER : MUTED }}>
           {state}
         </span>
       </span>
       {/* No trailing arrow on a label (Ramy, 5 Sep 2026) -- the pill's own
           shape and hover say it opens. The placeholder kept the row's
           spacing when there is nothing to open, so it stays as a spacer. */}
-      <span className="shrink-0 text-[11px] font-semibold" style={{ color: "transparent" }} aria-hidden>
+      <span className="shrink-0 text-label font-semibold" style={{ color: "transparent" }} aria-hidden>
         &nbsp;
       </span>
     </>
@@ -405,26 +405,26 @@ function Card({
       className="lift card flex items-start gap-3 p-4 no-underline"
       style={{ borderLeft: `3px solid ${open ? AMBER : TEAL}` }}
     >
-      <span className="shrink-0 pt-[3px] text-[10px] font-bold tabular-nums" style={{ color: MUTED }}>
+      <span className="shrink-0 pt-[3px] text-micro font-bold tabular-nums" style={{ color: MUTED }}>
         {n}
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <span className="text-[13.5px] font-semibold" style={{ color: INK }}>
+          <span className="text-body font-semibold" style={{ color: INK }}>
             {title}
           </span>
-          <span className="text-[11px] font-semibold" style={{ color: open ? AMBER : TEAL }}>
+          <span className="text-label font-semibold" style={{ color: open ? AMBER : TEAL }}>
             {state}
           </span>
         </span>
-        <span className="mt-0.5 block text-[12.5px]" style={{ color: MUTED }}>
+        <span className="mt-0.5 block text-meta" style={{ color: MUTED }}>
           {detail}
         </span>
-        <span className="mt-1.5 block text-[11.5px]" style={{ color: FAINT }}>
+        <span className="mt-1.5 block text-label" style={{ color: FAINT }}>
           {note}
         </span>
       </span>
-      <span className="shrink-0 pt-[3px] text-[11px] font-semibold" style={{ color: TEAL }}>
+      <span className="shrink-0 pt-[3px] text-label font-semibold" style={{ color: TEAL }}>
         Open
       </span>
     </Link>

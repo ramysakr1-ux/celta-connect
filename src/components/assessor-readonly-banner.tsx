@@ -85,12 +85,12 @@ export function AssessorReadOnlyBanner({ subject, portfolioHref }: { subject?: s
     >
       <div className="flex min-w-0 items-center gap-2.5">
         <span
-          className="shrink-0 rounded px-2.5 py-0.5 text-[10.5px] font-bold tracking-[0.08em] uppercase"
+          className="shrink-0 rounded px-2.5 py-0.5 text-micro font-bold tracking-[0.08em] uppercase"
           style={{ color: WARM, background: `color-mix(in oklab, ${GOLD} 75%, transparent)` }}
         >
           Read-only
         </span>
-        <span className="truncate text-[12.5px]" style={{ color: "oklch(88% 0.01 85)" }}>
+        <span className="truncate text-meta" style={{ color: "oklch(88% 0.01 85)" }}>
           {contextLabel}
         </span>
       </div>
@@ -98,7 +98,7 @@ export function AssessorReadOnlyBanner({ subject, portfolioHref }: { subject?: s
       {showPortfolioLink ? (
         <Link
           href={portfolioHref!}
-          className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[12.5px] font-semibold no-underline"
+          className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-meta font-semibold no-underline"
           style={{
             color: "oklch(97% 0.008 88)",
             background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",

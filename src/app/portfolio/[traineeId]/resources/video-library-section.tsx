@@ -11,7 +11,7 @@ export function VideoLibrarySection({ videos }: { videos: VideoRow[] }) {
 
   return (
     <div>
-      <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Video Library</h3>
+      <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Video Library</h3>
       <p className="mt-1 text-xs text-muted">
         Some of these run well over 45 minutes. Skim ahead and fast-forward to the parts your task asks about — you
         don&apos;t need to watch start to finish.

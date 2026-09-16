@@ -194,7 +194,7 @@ export default async function TrainerRotationPage() {
     <>
       {looksIntensive ? (
         <div className="sheet p-6">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Intensive TP block</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Intensive TP block</p>
           <p className="mt-1 text-xs text-muted">Handbook 9.1.3: a two-day minimum break midway, no more than six consecutive TP days.</p>
           <p className="mt-2 text-sm text-ink">Longest run so far: {intensiveCheck.longestConsecutiveRun} consecutive TP days.</p>
           {intensiveCheck.exceedsMaxConsecutive ? (
@@ -208,7 +208,7 @@ export default async function TrainerRotationPage() {
 
       {endsOnFinalDay ? (
         <div className="sheet bg-status-warning-bg p-6">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-status-warning-text uppercase">
+          <p className="text-label font-semibold tracking-[0.08em] text-status-warning-text uppercase">
             TP block ends on the final day
           </p>
           <p className="mt-1 text-sm text-status-warning-text">
@@ -220,7 +220,7 @@ export default async function TrainerRotationPage() {
 
       {tpDistribution.length >= 2 ? (
         <div className="sheet p-6">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">TP feedback given, per tutor</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">TP feedback given, per tutor</p>
           <p className="mt-1 text-xs text-muted">Handbook 3.7: TP should be split evenly between the two tutors.</p>
           <div className="mt-2 flex flex-wrap gap-4">
             {tpDistribution.map((t) => (
@@ -472,8 +472,8 @@ export default async function TrainerRotationPage() {
     <div className="flex flex-col gap-6">
       <div className="sheet flex items-start justify-between gap-4 p-6">
         <div>
-          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
-          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Teaching Practice rotation</h1>
+          <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
+          <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Teaching Practice rotation</h1>
           <p className="mt-2 text-muted">
             Manage each subgroup&apos;s rotation order, schedule which coursebook feeds each TP
             number, and assign a round once library content is published.
@@ -628,7 +628,7 @@ function UnpairedSubgroupBoard({
                       }
                       const oneToOneTag =
                         plan.class_grouping === "one_to_one_or_small_group" ? (
-                          <span className="pill pill-info ml-1.5 text-[10px]">1-to-1</span>
+                          <span className="pill pill-info ml-1.5 text-micro">1-to-1</span>
                         ) : null;
                       if (plan.taught_at) {
                         return (

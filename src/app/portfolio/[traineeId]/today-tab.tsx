@@ -913,9 +913,9 @@ export async function TodayTab({
       <div className="flex flex-col items-start gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-5">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <StreamEyebrow firstName={firstName} dateLabel={dateLabel} serverNowMs={serverNowMs} timeZone={timeZone} />
-          <h1 className="font-serif text-[26px] leading-tight text-ink lg:text-[32px]">{heroTitle}</h1>
+          <h1 className="font-serif text-h1 leading-tight text-ink lg:text-display">{heroTitle}</h1>
           {!teachingToday && genericHero?.bigSub ? (
-            <p className="text-[13px] text-muted">{genericHero.bigSub}</p>
+            <p className="text-meta text-muted">{genericHero.bigSub}</p>
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-2.5">
@@ -925,7 +925,7 @@ export async function TodayTab({
                 href={heroPrimary.href}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold text-primary-foreground"
+                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-meta font-semibold text-primary-foreground"
               >
                 <span aria-hidden className="size-[5px] rounded-full bg-gold" />
                 {heroPrimary.label}
@@ -933,7 +933,7 @@ export async function TodayTab({
             ) : (
               <Link
                 href={heroPrimary.href}
-                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold text-primary-foreground"
+                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-meta font-semibold text-primary-foreground"
               >
                 <span aria-hidden className="size-[5px] rounded-full bg-gold" />
                 {heroPrimary.label}
@@ -943,7 +943,7 @@ export async function TodayTab({
           {heroSecondary ? (
             <Link
               href={heroSecondary.href}
-              className="wash inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
+              className="wash inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-[14px] text-meta font-medium text-ink"
             >
               {heroSecondary.label}
             </Link>
@@ -968,8 +968,8 @@ export async function TodayTab({
         {waiting.length > 0 ? (
           <section className="flex flex-col">
             <div className="mb-1 flex items-baseline gap-2.5">
-              <h2 className="font-serif text-[21px] font-semibold text-ink-warm">Catch up</h2>
-              <span className="text-[12.5px] text-muted">{waiting.length} · all shown</span>
+              <h2 className="font-serif text-h2 font-semibold text-ink-warm">Catch up</h2>
+              <span className="text-meta text-muted">{waiting.length} · all shown</span>
             </div>
             {waiting.map((w, i) => {
               const overdue = w.pill === "Overdue" || w.pill === "Today";
@@ -982,7 +982,7 @@ export async function TodayTab({
                 >
                   <span
                     aria-hidden
-                    className={`grid size-[38px] shrink-0 place-items-center rounded-[10px] text-[11.5px] font-bold ${
+                    className={`grid size-[38px] shrink-0 place-items-center rounded-[10px] text-label font-bold ${
                       garnet
                         ? "bg-garnet text-primary-foreground"
                         : w.kind === "progress"
@@ -993,10 +993,10 @@ export async function TodayTab({
                     {initialsFor(w.label)}
                   </span>
                   <span className="min-w-0">
-                    <span className={`block text-[14px] font-semibold ${garnet ? "text-garnet" : "text-ink"}`}>{w.label}</span>
-                    <span className="block text-[12.5px] text-muted">{w.detail}</span>
+                    <span className={`block text-body font-semibold ${garnet ? "text-garnet" : "text-ink"}`}>{w.label}</span>
+                    <span className="block text-meta text-muted">{w.detail}</span>
                   </span>
-                  <span className={`text-[12px] ${overdue ? "font-bold text-garnet" : "font-semibold text-muted"}`}>
+                  <span className={`text-meta ${overdue ? "font-bold text-garnet" : "font-semibold text-muted"}`}>
                     {w.pill ?? ""}
                   </span>
                 </Link>
@@ -1016,19 +1016,19 @@ export async function TodayTab({
         {broadcastsCapped.length > 0 ? (
           <section className="flex flex-col">
             <div className="mb-1 flex items-baseline gap-2.5">
-              <h2 className="font-serif text-[21px] font-semibold text-ink-warm">From your tutors</h2>
-              <span className="text-[12.5px] text-muted">{broadcastsCapped.length}</span>
+              <h2 className="font-serif text-h2 font-semibold text-ink-warm">From your tutors</h2>
+              <span className="text-meta text-muted">{broadcastsCapped.length}</span>
             </div>
             {broadcastsCapped.map((b) => {
               const unread = !readIds.has(b.id);
               return (
                 <div key={b.id} className="border-t border-border py-[11px]">
-                  <p className={`flex items-center gap-[7px] text-[14px] ${unread ? "font-bold" : "font-semibold"} text-ink`}>
+                  <p className={`flex items-center gap-[7px] text-body ${unread ? "font-bold" : "font-semibold"} text-ink`}>
                     {unread ? <span aria-hidden className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
                     {b.title}
                   </p>
-                  {unread && b.body ? <p className="mt-[3px] text-[12.5px] leading-relaxed text-ink">{b.body}</p> : null}
-                  <p className="mt-[3px] text-[12px] text-muted">
+                  {unread && b.body ? <p className="mt-[3px] text-meta leading-relaxed text-ink">{b.body}</p> : null}
+                  <p className="mt-[3px] text-meta text-muted">
                     {authorNameById.get(b.author_id ?? "") ?? "Your tutor"} · {relativeTime(b.created_at)}
                   </p>
                 </div>

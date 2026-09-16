@@ -57,7 +57,7 @@ export function FilmedObservationSetupForm({
           placeholder="https://..."
           className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
         />
-        <p className="text-[11px] text-muted">A link to a recording you hold rights to, or an internally-hosted file. Never fetched automatically.</p>
+        <p className="text-label text-muted">A link to a recording you hold rights to, or an internally-hosted file. Never fetched automatically.</p>
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="teacher_name" className="text-xs text-muted">
@@ -143,7 +143,7 @@ export function FilmedObservationSetupForm({
           />
         </div>
       </div>
-      <p className="text-[11px] text-muted">Length feeds the Observations hours log once a trainee marks their task complete.</p>
+      <p className="text-label text-muted">Length feeds the Observations hours log once a trainee marks their task complete.</p>
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <button
         type="submit"

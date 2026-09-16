@@ -104,7 +104,7 @@ export function ObservationHoursRoster({ rows, obsTasksTotal }: { rows: Candidat
                     filteredLog.map((entry) => (
                       <div key={entry.id} className="flex flex-col gap-1 py-3 text-sm first:pt-3">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${KIND_CLASS[entry.kind]}`}>
+                          <span className={`rounded-full border px-2 py-0.5 text-micro font-semibold uppercase tracking-wide ${KIND_CLASS[entry.kind]}`}>
                             {KIND_LABEL[entry.kind]}
                           </span>
                           {entry.date ? <span className="text-xs text-muted">{formatDate(entry.date, timeZone)}</span> : null}

@@ -49,7 +49,7 @@ export function SupportAccessTab({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Platform support access</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Platform support access</h2>
         <p className="mt-1 text-sm text-muted">
           support@celtaconnect.com has no standing access to this centre&apos;s data. Access exists only as
           time-boxed grants, scoped to exactly what&apos;s needed and logged permanently, including grants declined
@@ -112,7 +112,7 @@ export function SupportAccessTab({
                       {g.chatIncluded ? <span className="ml-2 text-xs text-muted">+ course chat</span> : null}
                     </p>
                     <p className="mt-0.5 text-xs text-muted">{g.reason}</p>
-                    <p className="mt-1 text-[11px] text-muted">
+                    <p className="mt-1 text-label text-muted">
                       Granted by {g.grantedByName} · {formatDateTime(g.grantedAt, timeZone)} · {g.durationHours}h window
                     </p>
                   </div>

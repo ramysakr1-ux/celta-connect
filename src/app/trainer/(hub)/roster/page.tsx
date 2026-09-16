@@ -247,8 +247,8 @@ export default async function TrainerRosterPage() {
       {isMct ? (
         <section className="mt-2 flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline gap-3">
-            <h2 className="font-serif text-[22px] font-semibold text-ink-warm">Course settings</h2>
-            <p className="text-[12.5px] text-muted">Main course tutor only</p>
+            <h2 className="font-serif text-h2 font-semibold text-ink-warm">Course settings</h2>
+            <p className="text-meta text-muted">Main course tutor only</p>
           </div>
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_360px]">
             <ManageTutorsCard courseId={courseId} tutors={rosterTutors} pendingInvites={pendingTutorInvites} assignable={assignableTrainers} />

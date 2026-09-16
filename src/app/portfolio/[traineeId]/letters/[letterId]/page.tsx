@@ -58,7 +58,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
       <div className="sheet flex flex-col gap-3">
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{snapshot.kicker ?? "Formal letter"}</p>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{snapshot.kicker ?? "Formal letter"}</p>
         <h1 className="font-serif text-xl text-ink">{LETTER_TITLE[letter.letter_type] ?? snapshot.docTitle}</h1>
         <p className="text-sm text-muted">Issued {formatLetterDate(letter.issued_at)}</p>
 
@@ -70,7 +70,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
           ))}
           {snapshot.list && snapshot.list.items.length > 0 ? (
             <div className="rounded-[6px] bg-surface-muted/40 p-3">
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{snapshot.list.title}</p>
+              <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{snapshot.list.title}</p>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {snapshot.list.items.map((item, i) => (
                   <li key={i} className="text-sm text-ink">

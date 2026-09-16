@@ -86,7 +86,7 @@ export function CourseSupportAccessForm({ courseName, grants }: { courseName: st
                       {g.chatIncluded ? <span className="ml-2 text-xs text-muted">+ course chat</span> : null}
                     </p>
                     <p className="mt-0.5 text-xs text-muted">{g.reason}</p>
-                    <p className="mt-1 text-[11px] text-muted">
+                    <p className="mt-1 text-label text-muted">
                       Granted by {g.grantedByName} · {formatDateTime(g.grantedAt, timeZone)} · {g.durationHours}h window
                     </p>
                   </div>

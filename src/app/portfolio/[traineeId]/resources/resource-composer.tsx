@@ -96,7 +96,7 @@ export function ResourceComposer({
           borderColor: "color-mix(in oklab, var(--hub-accent, var(--color-primary)) 25%, transparent)",
         }}
       >
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Add a resource</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Add a resource</p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <input
           name="title"

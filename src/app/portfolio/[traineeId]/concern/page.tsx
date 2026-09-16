@@ -35,7 +35,7 @@ export default async function RaiseConcernPage({ params }: { params: Promise<{ t
         <ConcernForm traineeId={traineeId} />
 
         <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
-          <p className="text-[10px] font-semibold tracking-[0.1em] text-muted uppercase">If you are still not satisfied</p>
+          <p className="text-micro font-semibold tracking-[0.1em] text-muted uppercase">If you are still not satisfied</p>
           {ESCALATION.map((e) => (
             <div key={e.step} className="flex items-start gap-2.5">
               <span className="w-4 shrink-0 text-xs font-bold text-muted">{e.step}</span>

@@ -60,7 +60,7 @@ export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
   if (tracks.length === 0) {
     return (
       <div>
-        <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
+        <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
         <p className="sheet mt-3 border-dashed text-sm text-muted">
           Coursebook audio your tutors add for teaching practice — nothing here yet.
         </p>
@@ -77,7 +77,7 @@ export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
 
   return (
     <div>
-      <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
+      <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
       <div className="mt-3 flex flex-col gap-4">
         {[...byBook.entries()].map(([book, rows]) => (
           <div key={book}>

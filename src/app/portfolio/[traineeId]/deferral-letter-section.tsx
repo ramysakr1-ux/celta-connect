@@ -22,7 +22,7 @@ export function DeferralLetterSection({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Deferral letter</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Deferral letter</p>
       {existingLetters.map((l) => (
         <div key={l.id} className="flex items-center justify-between gap-3 text-xs">
           <span className="text-muted">

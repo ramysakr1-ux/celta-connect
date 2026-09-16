@@ -56,7 +56,7 @@ export function UnsubscribeButton({ token, initiallyOptedOut }: { token: string;
 function ReminderStatusTag({ enabled }: { enabled: boolean }) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold"
       style={{
         background: enabled ? "var(--color-status-on-track-bg)" : "var(--color-status-at-risk-bg)",
         color: enabled ? "var(--color-status-on-track-text)" : "var(--color-status-at-risk-text)",

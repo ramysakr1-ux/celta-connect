@@ -150,7 +150,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
 
       {reflectionAssignments.length > 0 ? (
         <div className="flex flex-col gap-3">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
             Plagiarism reflection -- a centre sanction, not a Cambridge assignment
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
@@ -206,7 +206,7 @@ function AssignmentCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
           <h3 className="font-serif text-lg text-ink">{info.title}</h3>
         </div>
         {notYetOpen ? (
@@ -252,7 +252,7 @@ function AssignmentCard({
           <p className="text-sm text-muted">Read the brief and the criteria now; writing starts on the day above.</p>
         ) : (
           <>
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
             <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || feedbackPreview || "No feedback yet."}</p>
           </>
         )}

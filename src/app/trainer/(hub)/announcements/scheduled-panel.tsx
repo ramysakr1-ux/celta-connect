@@ -69,8 +69,8 @@ export function ScheduledPanel({
   return (
     <div className="hover-ring flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
-        <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Scheduled</h3>
-        <span className="text-[12.5px] text-muted">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
+        <h3 className="font-serif text-h2 font-semibold text-ink-warm">Scheduled</h3>
+        <span className="text-meta text-muted">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
       </div>
       {scheduled.length === 0 ? (
         <p className="px-[18px] py-4 text-sm text-muted">Anchor an announcement to a timetable event and it waits here until it fires.</p>
@@ -219,14 +219,14 @@ function EditRow({
         defaultValue={row.title}
         rows={2}
         required
-        className="rounded-[6px] border border-input bg-card p-2 text-[13px] text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card p-2 text-meta text-ink outline-none focus:border-primary"
       />
       <textarea
         name="body"
         defaultValue={row.body ?? ""}
         rows={3}
         placeholder="Write your announcement…"
-        className="rounded-[6px] border border-input bg-card p-2 text-[13px] text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card p-2 text-meta text-ink outline-none focus:border-primary"
       />
       <div className="flex flex-col gap-1.5">
         <label className="text-xs text-muted">Send timing</label>

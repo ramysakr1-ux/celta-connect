@@ -102,9 +102,9 @@ export default async function OwnerActionLogPage({
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre owner</p>
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Centre owner</p>
           <h1 className="font-serif text-2xl text-ink">Owner actions</h1>
-          <p className="max-w-[560px] text-[13px] text-muted">
+          <p className="max-w-[560px] text-meta text-muted">
             Every intervention an owner makes is recorded — visible logging, not silent senior access.{" "}
             {thisMonth} {thisMonth === 1 ? "action" : "actions"} this month
             {aggregated ? " across all branches" : ""}.

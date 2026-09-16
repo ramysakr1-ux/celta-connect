@@ -53,7 +53,7 @@ function ChooseTechnique() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Choose a technique for each item</p>
-      <p className="text-[11.5px] text-muted">For each word, click the technique you&apos;d actually use to clarify it — then check.</p>
+      <p className="text-label text-muted">For each word, click the technique you&apos;d actually use to clarify it — then check.</p>
       {CHOOSE_ITEMS.map((item, ci) => {
         const pick = picked[ci];
         return (
@@ -68,7 +68,7 @@ function ChooseTechnique() {
                     key={opt}
                     type="button"
                     onClick={() => setPicked((p) => ({ ...p, [ci]: opt }))}
-                    className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
+                    className={`rounded-full border-[1.5px] px-3 py-1.5 text-label font-semibold ${
                       isCorrectPick
                         ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
@@ -81,7 +81,7 @@ function ChooseTechnique() {
                 );
               })}
             </div>
-            {pick ? <p className="text-[11.5px] leading-relaxed text-muted">{item.feedback}</p> : null}
+            {pick ? <p className="text-label leading-relaxed text-muted">{item.feedback}</p> : null}
           </div>
         );
       })}
@@ -119,7 +119,7 @@ function CollocationGroup({ verb, base, correctSet }: { verb: string; base: stri
               key={word}
               type="button"
               onClick={() => setPicked((p) => new Set(p).add(word))}
-              className={`rounded-[6px] border-[1.5px] px-2.5 py-1 text-[11.5px] font-semibold ${
+              className={`rounded-[6px] border-[1.5px] px-2.5 py-1 text-label font-semibold ${
                 isPicked
                   ? isCorrect
                     ? "border-primary bg-primary/10 text-primary"
@@ -159,7 +159,7 @@ export default function TeachingVocabularySession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: how many words do you think &quot;take up (a hobby)&quot; actually is — one, or more
             than one?
           </p>
@@ -173,7 +173,7 @@ export default function TeachingVocabularySession() {
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Build the collocations</p>
-          <p className="text-[11.5px] text-muted">
+          <p className="text-label text-muted">
             Vocabulary rarely stands alone. Click the words that naturally collocate with &quot;make,&quot; then with
             &quot;do.&quot;
           </p>
@@ -187,11 +187,11 @@ export default function TeachingVocabularySession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Discuss: your own examples</p>
-          <p className="text-[11.5px] text-muted">Think of your own next TP point&apos;s vocabulary. For each question, jot a quick answer before comparing with a partner.</p>
+          <p className="text-label text-muted">Think of your own next TP point&apos;s vocabulary. For each question, jot a quick answer before comparing with a partner.</p>
         </div>
         {DISCUSS_QS.map((q, i) => (
           <div key={q} className="rounded-[6px] border border-border bg-card px-3.5 py-2.5">
-            <p className="text-[12.5px] font-semibold text-ink">
+            <p className="text-meta font-semibold text-ink">
               {i + 1}. {q}
             </p>
           </div>
@@ -231,8 +231,8 @@ function StagingExample() {
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[150px_1fr] border-b border-border-faint last:border-b-0">
-                <p className="bg-accent px-3 py-2 text-[11px] font-semibold text-ink">{r.label}</p>
-                <p className="px-3 py-2 text-[11.5px] leading-relaxed text-muted">{r.value}</p>
+                <p className="bg-accent px-3 py-2 text-label font-semibold text-ink">{r.label}</p>
+                <p className="px-3 py-2 text-label leading-relaxed text-muted">{r.value}</p>
               </div>
             ))}
           </div>

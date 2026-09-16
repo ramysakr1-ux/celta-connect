@@ -52,7 +52,7 @@ export function StreamEyebrow({
   );
 
   return (
-    <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">
+    <p className="text-label font-bold tracking-[0.14em] text-muted uppercase">
       {greeting}, {firstName} &middot; {dateLabel}
       {mounted ? <> &middot; <span className="tabular-nums">{clock}</span></> : null}
     </p>
@@ -137,15 +137,15 @@ export function StreamDayTrack({
   return (
     <section className="flex flex-col">
       <div className="mb-2.5 flex items-baseline justify-between gap-4">
-        <span className="text-[10.5px] font-bold tracking-[0.14em] text-muted uppercase">{heading}</span>
-        <span className="text-[12.5px] text-muted">
+        <span className="text-micro font-bold tracking-[0.14em] text-muted uppercase">{heading}</span>
+        <span className="text-meta text-muted">
           {meta.lead}
           {countdown ? ` · ${countdown}` : null}
         </span>
       </div>
 
       {slots.length === 0 ? (
-        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-6 text-center text-[13px] text-muted">
+        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-6 text-center text-meta text-muted">
           Nothing timetabled for you today.
         </p>
       ) : (
@@ -222,7 +222,7 @@ export function StreamDayTrack({
                 >
                   {/* Stacked, the time is a fixed gutter so every title starts
                       at the same x. One inline line from lg up. */}
-                  <span className="flex w-[52px] shrink-0 flex-col items-start gap-1 text-[11px] font-bold tabular-nums text-muted lg:w-auto lg:flex-row lg:items-center lg:gap-1.5">
+                  <span className="flex w-[52px] shrink-0 flex-col items-start gap-1 text-label font-bold tabular-nums text-muted lg:w-auto lg:flex-row lg:items-center lg:gap-1.5">
                     {s.time}
                   </span>
                   {/* `lg:contents` dissolves this wrapper from lg up, so the
@@ -230,7 +230,7 @@ export function StreamDayTrack({
                       the box. Stacked, they are the second half of the row. */}
                   <span className="flex min-w-0 flex-1 flex-col gap-[3px] lg:contents">
                   <span
-                    className="text-[12px] leading-tight text-ink"
+                    className="text-meta leading-tight text-ink"
                     style={{ fontWeight: cat.titleWeight }}
                   >
                     {s.title}
@@ -242,15 +242,15 @@ export function StreamDayTrack({
                       other box shows its room/level sub-line. */}
                   {joinable ? (
                     <span
-                      className="w-fit rounded-full px-1.5 py-px text-[10px] font-bold tracking-[0.06em] uppercase"
+                      className="w-fit rounded-full px-1.5 py-px text-micro font-bold tracking-[0.06em] uppercase"
                       style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
                     >
                       Join
                     </span>
                   ) : s.mine ? (
-                    <span className="pill pill-neutral w-fit text-[9px]">You teach</span>
+                    <span className="pill pill-neutral w-fit text-micro">You teach</span>
                   ) : s.sub ? (
-                    <span className="text-[11px] leading-tight text-muted">{s.sub}</span>
+                    <span className="text-label leading-tight text-muted">{s.sub}</span>
                   ) : null}
                   </span>
                 </Box>
@@ -270,7 +270,7 @@ export function StreamDayTrack({
                       style={{ background: "var(--color-garnet)" }}
                     />
                     <span
-                      className="absolute -bottom-[18px] text-[10.5px] font-bold tabular-nums whitespace-nowrap"
+                      className="absolute -bottom-[18px] text-micro font-bold tabular-nums whitespace-nowrap"
                       style={{
                         color: "var(--color-garnet)",
                         // Slides from left-aligned to right-aligned across the

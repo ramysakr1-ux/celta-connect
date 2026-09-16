@@ -41,7 +41,7 @@ function SlotPill({
       disabled={blocked}
       title={blockedReason ?? undefined}
       onClick={() => setSlot((prev) => (prev === opt ? "" : opt))}
-      className={`shrink-0 rounded-full border px-2.5 py-1 text-[11.5px] font-medium whitespace-nowrap transition-colors ${
+      className={`shrink-0 rounded-full border px-2.5 py-1 text-label font-medium whitespace-nowrap transition-colors ${
         blocked
           ? "cursor-not-allowed border-border-faint text-muted/50 line-through"
           : selected
@@ -119,7 +119,7 @@ export function ProvisionalGradeForm({
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] border border-border px-3 py-1 text-[13px] text-ink wash disabled:opacity-60"
+            className="rounded-[6px] border border-border px-3 py-1 text-meta text-ink wash disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>
@@ -143,7 +143,7 @@ export function ProvisionalGradeForm({
             screen rather than in a tooltip alone. */}
         {eligibility?.reason ? (
           <p
-            className={`text-[11.5px] leading-relaxed ${eligibility.overridden ? "text-muted" : "text-status-warning-text"}`}
+            className={`text-label leading-relaxed ${eligibility.overridden ? "text-muted" : "text-status-warning-text"}`}
           >
             {eligibility.reason}
           </p>

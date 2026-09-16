@@ -50,7 +50,7 @@ export function RegisterLinkButton({ small = false }: { small?: boolean }) {
         ) : null}
         {state === "loading" ? "Getting link…" : state === "copied" ? "Link copied" : "Front-desk link"}
       </button>
-      {message ? <p className="absolute top-full right-0 z-10 mt-1 w-max max-w-[280px] rounded-[6px] bg-card px-2 py-1 text-right text-[11px] text-destructive shadow-sm">{message}</p> : null}
+      {message ? <p className="absolute top-full right-0 z-10 mt-1 w-max max-w-[280px] rounded-[6px] bg-card px-2 py-1 text-right text-label text-destructive shadow-sm">{message}</p> : null}
     </div>
   );
 }

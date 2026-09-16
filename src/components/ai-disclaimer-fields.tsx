@@ -43,7 +43,7 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Cambridge English Teaching Qualifications</p>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Cambridge English Teaching Qualifications</p>
         <p className="text-lg font-serif text-ink">Disclaimer for AI use</p>
       </div>
 
@@ -51,7 +51,7 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
         <div key={s.letter} className={`flex flex-col gap-2.5 rounded-[6px] border p-3.5 ${s.letter === "C" ? "border-status-warning-text bg-status-warning-bg" : "border-primary/20 bg-primary/5"}`}>
           <div className="flex items-start gap-2.5">
             <span
-              className={`flex size-5 shrink-0 items-center justify-center rounded-[5px] text-[11px] font-bold text-primary-foreground ${s.letter === "C" ? "bg-status-warning-text" : "bg-primary"}`}
+              className={`flex size-5 shrink-0 items-center justify-center rounded-[5px] text-label font-bold text-primary-foreground ${s.letter === "C" ? "bg-status-warning-text" : "bg-primary"}`}
             >
               {s.letter}
             </span>
@@ -90,7 +90,7 @@ export function AiDisclaimerFields({ fullName = "" }: { fullName?: string }) {
           onChange={(e) => setSignedName(e.target.value)}
           className="h-11 rounded-[6px] border border-input bg-card px-3 font-serif text-base text-ink outline-none focus:border-primary"
         />
-        <p className="text-[11px] text-muted">Name, date and time are recorded. A copy is filed in your portfolio.</p>
+        <p className="text-label text-muted">Name, date and time are recorded. A copy is filed in your portfolio.</p>
       </div>
 
       <input type="hidden" name="ai_disclaimer_ticked" value={allTicked ? "1" : ""} />

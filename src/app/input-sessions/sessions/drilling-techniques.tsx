@@ -57,8 +57,8 @@ function DiscussCard({ question, answer }: { question: string; answer: string })
   const [open, setOpen] = useState(false);
   return (
     <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full flex-col gap-1.5 rounded-[8px] border border-border bg-card px-3.5 py-3 text-left">
-      <p className="text-[13px] font-semibold text-ink">{question}</p>
-      {open ? <p className="text-[11.5px] leading-relaxed text-muted">{answer}</p> : null}
+      <p className="text-meta font-semibold text-ink">{question}</p>
+      {open ? <p className="text-label leading-relaxed text-muted">{answer}</p> : null}
     </button>
   );
 }
@@ -68,13 +68,13 @@ function DrillCard({ n, drill }: { n: string; drill: Drill }) {
   return (
     <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full flex-col gap-1.5 rounded-[8px] border border-border bg-card px-4 py-3 text-left">
       <div className="flex items-baseline gap-2.5">
-        <span className="min-w-[18px] text-[10.5px] font-bold" style={{ color: drill.accent }}>{n}</span>
-        <span className="flex-1 text-[13px] font-semibold text-ink">{drill.name}</span>
-        <span className="text-[10px] font-semibold text-muted">{drill.hint}</span>
+        <span className="min-w-[18px] text-micro font-bold" style={{ color: drill.accent }}>{n}</span>
+        <span className="flex-1 text-meta font-semibold text-ink">{drill.name}</span>
+        <span className="text-micro font-semibold text-muted">{drill.hint}</span>
       </div>
       {open ? (
         <div className="flex flex-col gap-1.5 pl-7">
-          <p className="text-[11.5px] leading-relaxed text-muted">{drill.desc}</p>
+          <p className="text-label leading-relaxed text-muted">{drill.desc}</p>
           <p className="rounded-[6px] bg-accent px-3 py-2 font-mono text-xs text-ink">{drill.example}</p>
         </div>
       ) : null}
@@ -108,8 +108,8 @@ export default function DrillingTechniquesSession() {
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-[13px] font-bold text-ink">Discuss first · 5 minutes</p>
-        <p className="text-[11.5px] text-muted">In pairs, discuss each question, then click to compare with the trainer&apos;s notes.</p>
+        <p className="text-meta font-bold text-ink">Discuss first · 5 minutes</p>
+        <p className="text-label text-muted">In pairs, discuss each question, then click to compare with the trainer&apos;s notes.</p>
         {DISCUSS.map((d) => (
           <DiscussCard key={d.question} {...d} />
         ))}
@@ -117,15 +117,15 @@ export default function DrillingTechniquesSession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">Six drill types, trainer-modelled · 20 minutes</p>
-        <p className="text-[11.5px] text-muted">Trainer models each one live with the room first — then click a card to reveal the description and try it on your partner.</p>
+        <p className="text-label text-muted">Trainer models each one live with the room first — then click a card to reveal the description and try it on your partner.</p>
         {DRILLS.map((d, i) => (
           <DrillCard key={d.name} n={String(i + 1).padStart(2, "0")} drill={d} />
         ))}
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-[13px] font-bold text-ink">Match the drill to the problem · 10 minutes</p>
-        <p className="text-[11.5px] text-muted">A learner has a specific problem below. Which drill type actually fixes it? Click your answer.</p>
+        <p className="text-meta font-bold text-ink">Match the drill to the problem · 10 minutes</p>
+        <p className="text-label text-muted">A learner has a specific problem below. Which drill type actually fixes it? Click your answer.</p>
         {SCENARIOS.map((s) => (
           <ChoiceScenarioCard key={s.text} scenario={s} />
         ))}
@@ -133,7 +133,7 @@ export default function DrillingTechniquesSession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">Four more techniques · 15 minutes</p>
-        <p className="text-[11.5px] text-muted">Same pattern — trainer models, then click to reveal.</p>
+        <p className="text-label text-muted">Same pattern — trainer models, then click to reveal.</p>
         {DRILLS_2.map((d, i) => (
           <DrillCard key={d.name} n={String(i + 7).padStart(2, "0")} drill={d} />
         ))}
@@ -142,12 +142,12 @@ export default function DrillingTechniquesSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Drill each other in an unknown language · 10 minutes</p>
         <div className="flex flex-col gap-1.5 rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             In pairs: teach your partner one short phrase in a language neither of you has studied (ask the trainer for a
             phrase, or use one you half-remember). Drill it on them using any two techniques from today. Then swap — they
             drill you.
           </p>
-          <p className="text-[11.5px] text-muted">
+          <p className="text-label text-muted">
             The point: experiencing drilling as the actual learner, with zero existing anchor in the language, is the
             closest trainees will get on this course to feeling what a real beginner feels.
           </p>
@@ -157,7 +157,7 @@ export default function DrillingTechniquesSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Wrap-up · 5 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Drilling produces accurate, fluent form — but it&apos;s not communication yet. That&apos;s exactly where the next
             session, Language Practice, picks up.
           </p>

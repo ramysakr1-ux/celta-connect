@@ -48,7 +48,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
   return (
     <div className="card card-gold">
       <div className="border-b border-border px-5 py-4">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Refunds</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Refunds</h2>
         <p className="mt-0.5 text-xs text-muted">
           Agreed and not yet returned. These are the figure on your Overview.
         </p>
@@ -102,7 +102,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
       {canEdit ? (
         <form action={agreeAction} className="flex flex-wrap items-end gap-2 px-5 py-4">
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-medium text-muted">Amount</label>
+            <label className="text-label font-medium text-muted">Amount</label>
             <input
               name="amount"
               type="number"
@@ -113,7 +113,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-medium text-muted">Currency</label>
+            <label className="text-label font-medium text-muted">Currency</label>
             <input
               name="currency"
               type="text"
@@ -124,7 +124,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
             />
           </div>
           <div className="flex flex-1 flex-col gap-1">
-            <label className="text-[11px] font-medium text-muted">Why</label>
+            <label className="text-label font-medium text-muted">Why</label>
             <input
               name="reason"
               type="text"
@@ -133,7 +133,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-medium text-muted">Settled by</label>
+            <label className="text-label font-medium text-muted">Settled by</label>
             <select
               name="settlement"
               defaultValue="manual"
@@ -158,7 +158,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
 
       {settled.length > 0 ? (
         <div className="border-t border-border px-5 py-4">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Settled</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Settled</p>
           {settled.slice(0, 5).map((r) => (
             <p key={r.id} className="mt-1 text-xs text-muted">
               {money(r)}

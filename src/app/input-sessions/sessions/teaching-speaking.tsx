@@ -145,8 +145,8 @@ export default function TeachingSpeakingSession() {
       ]}
     >
       <div className="flex items-start gap-3 rounded-[8px] border border-border bg-card p-4">
-        <span className="flex-none rounded-[5px] bg-primary px-2 py-1 text-[11px] font-bold text-primary-foreground">3b</span>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <span className="flex-none rounded-[5px] bg-primary px-2 py-1 text-label font-bold text-primary-foreground">3b</span>
+        <p className="text-meta leading-relaxed text-ink">
           Helping learners to produce oral language — a dedicated pass on speaking fluency. Cambridge combines speaking and
           writing as one criterion (3b), not two.
         </p>
@@ -164,7 +164,7 @@ export default function TeachingSpeakingSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Stage 2 · Preparing to speak</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Think of a real opinion or story you’d actually want to share about your journey into teaching. Don’t write it
           down yet — just have it ready.
         </p>
@@ -204,22 +204,22 @@ export default function TeachingSpeakingSession() {
         </h2>
         <article className="flex flex-col gap-3 rounded-[8px] border border-border bg-card p-5">
           <h3 className="font-serif text-base font-semibold text-ink">Staging a productive skills lesson</h3>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A productive skills lesson doesn’t open with instructions. It opens by creating interest in the topic and
             giving learners something to think or feel before they need any language for it — ideas and content come
             first, because nobody can speak or write about a topic they haven’t engaged with yet.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Useful language comes next, but only if it’s needed — a handful of words or phrases learners are missing to do
             the task, not a full presentation. Many productive skills lessons skip this stage entirely if the target
             language was already covered earlier in the day.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             The task itself is where the teacher gets out of the way. Clear instructions, a genuine information gap or a
             real opinion to share, then the teacher circulates and monitors without interrupting — every minute of teacher
             talk here is a minute a learner isn’t producing language.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Feedback closes the lesson in two parts. First, feedback on whether the task was actually achieved — content,
             not language. Only after that does the teacher share language noticed while monitoring: what worked, and what
             to fix, dealt with once the task is over rather than mid-flow.

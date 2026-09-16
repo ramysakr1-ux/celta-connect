@@ -54,7 +54,7 @@ export function TraineeSidebarNav({ traineeId, status }: { traineeId: string; st
 
   return (
     <div className="hidden w-[232px] shrink-0 flex-col gap-px border-r border-border py-1 pr-4 md:flex">
-      <div className="px-2.5 pb-2.5 text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Workspace</div>
+      <div className="px-2.5 pb-2.5 text-micro font-bold tracking-[0.12em] text-muted uppercase">Workspace</div>
       {SIDEBAR_TABS.map((tab) => {
         const href = `${base}${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
@@ -80,7 +80,7 @@ export function TraineeSidebarNav({ traineeId, status }: { traineeId: string; st
             }`}
           >
             <span className="flex items-center justify-between gap-2">
-              <span className="text-[13px]">{tab.label}</span>
+              <span className="text-meta">{tab.label}</span>
               {/* design_handoff_trainee_landing: a gold dot on any door with
                   something live today. It is the only thing in the rail that
                   is allowed to be gold, so it stays legible as "look here". */}
@@ -88,7 +88,7 @@ export function TraineeSidebarNav({ traineeId, status }: { traineeId: string; st
             </span>
             {door ? (
               <span
-                className={`text-[11.5px] leading-[1.35] font-normal ${door.urgent ? "text-garnet" : "text-muted"}`}
+                className={`text-label leading-[1.35] font-normal ${door.urgent ? "text-garnet" : "text-muted"}`}
               >
                 {door.status}
               </span>
@@ -104,13 +104,13 @@ export function TraineeSidebarNav({ traineeId, status }: { traineeId: string; st
           drew a full course in progress on a course with no first day yet. */}
       {status && status.courseState !== "running" ? (
         <div className="mt-auto border-t border-border pt-3.5">
-          <p className="px-0.5 text-[11px] text-muted">
+          <p className="px-0.5 text-label text-muted">
             {status.courseState === "upcoming" ? "Your course hasn't started yet" : "Your course has finished"}
           </p>
         </div>
       ) : status && (status.weekNumber || status.tpNumber) ? (
         <div className="mt-auto border-t border-border pt-3.5">
-          <div className="flex justify-between px-0.5 pb-[7px] text-[11px] tabular-nums text-muted">
+          <div className="flex justify-between px-0.5 pb-[7px] text-label tabular-nums text-muted">
             <span>{status.weekNumber && status.weekTotal ? `Week ${status.weekNumber} of ${status.weekTotal}` : ""}</span>
             <span>{status.tpNumber && status.tpTotal ? `TP${status.tpNumber} of ${status.tpTotal}` : ""}</span>
           </div>

@@ -98,7 +98,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Tutors</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
           {tutors.length === 0 ? (
             <p className="mt-2 text-sm text-muted">No tutors have joined yet.</p>
           ) : (
@@ -120,7 +120,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
         </div>
 
         <div className="card p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Cohort</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Cohort</h2>
           <p className="mt-2 text-sm text-ink">
             {traineeCount ?? 0} trainee{(traineeCount ?? 0) === 1 ? "" : "s"}
             {course.cohort_size ? ` of ${course.cohort_size} max` : ""}

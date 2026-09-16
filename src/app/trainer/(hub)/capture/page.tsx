@@ -43,8 +43,8 @@ export default async function CapturePage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div className="sheet">
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Capture a point</h1>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Today</p>
+        <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Capture a point</h1>
         <p className="mt-2 text-sm text-muted">
           Quick, typed or dictated, tagged and timestamped -- pull it into the real feedback form later, on your
           laptop.
@@ -55,7 +55,7 @@ export default async function CapturePage() {
 
       {recentNotes && recentNotes.length > 0 ? (
         <div className="sheet">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Captured just now</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Captured just now</p>
           <ul className="mt-3 flex flex-col gap-3">
             {recentNotes.map((note) => (
               <li key={note.id} className="border-b border-border-faint pb-3 text-sm last:border-none">

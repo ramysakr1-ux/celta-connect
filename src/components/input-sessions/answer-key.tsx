@@ -40,15 +40,15 @@ export function AnswerKey({ terms, details }: { terms: AnswerKeyTermRow[]; detai
   return (
     <div className="flex flex-col gap-3.5 border-t border-border pt-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
+        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
         <div className="flex gap-2" data-print-hide>
-          <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+          <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Hide
           </button>
           <button
             type="button"
             onClick={() => window.print()}
-            className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink"
+            className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink"
           >
             Print
           </button>
@@ -56,22 +56,22 @@ export function AnswerKey({ terms, details }: { terms: AnswerKeyTermRow[]; detai
       </div>
       {terms.length > 0 ? (
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-[15px] font-semibold text-ink">Terms</p>
+          <p className="font-serif text-h3 font-semibold text-ink">Terms</p>
           {terms.map((row, i) => (
             <div key={i} className="grid grid-cols-[150px_1fr] gap-2.5 border-b border-border-faint py-1">
               <p className="font-serif text-xs font-semibold text-ink">{row.term}</p>
-              <p className="text-[11px] leading-snug text-muted">{row.def}</p>
+              <p className="text-label leading-snug text-muted">{row.def}</p>
             </div>
           ))}
         </div>
       ) : null}
       {details.length > 0 ? (
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="font-serif text-[15px] font-semibold text-ink">True or false</p>
+          <p className="font-serif text-h3 font-semibold text-ink">True or false</p>
           {details.map((row, i) => (
             <div key={i} className="flex flex-col gap-0.5 border-b border-border-faint py-1">
-              <p className="text-[11.5px] text-ink">{row.q}</p>
-              <p className="text-[11px] italic text-muted">{row.a}</p>
+              <p className="text-label text-ink">{row.q}</p>
+              <p className="text-label italic text-muted">{row.a}</p>
             </div>
           ))}
         </div>

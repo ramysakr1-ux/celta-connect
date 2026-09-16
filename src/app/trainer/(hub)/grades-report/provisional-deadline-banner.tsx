@@ -43,11 +43,11 @@ export function ProvisionalDeadlineBanner({
   return (
     <div className="flex flex-col gap-1.5 rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[13px] font-semibold text-ink">
+        <p className="text-meta font-semibold text-ink">
           {dueAt ? `Provisional grades due to the assessor — ${formatDate(dueAt, timeZone, { weekday: "long", month: "long" })}` : "Provisional grades due date not set yet"}
         </p>
         {dueAt && derived ? (
-          <span className="rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">
+          <span className="rounded-full bg-card px-2 py-0.5 text-micro font-semibold tracking-[0.06em] text-muted uppercase">
             Suggested
           </span>
         ) : null}

@@ -260,7 +260,7 @@ export function StaffChatDrawer({
             anything overflow-hidden), so it isn't clipped. */}
         {pickerOpen && !readOnly ? (
           <div className="w-[300px] self-start rounded-[16px] border border-border bg-card p-2 shadow-lg">
-            <p className="px-3 pb-2 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+            <p className="px-3 pb-2 pt-2.5 text-micro font-semibold uppercase tracking-[0.12em] text-muted">
               Choose a channel
             </p>
             {groupChannel ? (
@@ -275,14 +275,14 @@ export function StaffChatDrawer({
                 }`}
               >
                 <span
-                  className={`flex size-[26px] shrink-0 items-center justify-center rounded-[8px] text-[9px] font-semibold ${
+                  className={`flex size-[26px] shrink-0 items-center justify-center rounded-[8px] text-micro font-semibold ${
                     groupChannel.id === selectedId ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
                   }`}
                 >
                   {initials(groupChannel.name)}
                 </span>
-                <span className="flex-1 truncate text-[13px] font-medium text-ink">{groupChannel.name}</span>
-                <span className="shrink-0 text-[10px] text-muted">{channelMeta(groupChannel.type)}</span>
+                <span className="flex-1 truncate text-meta font-medium text-ink">{groupChannel.name}</span>
+                <span className="shrink-0 text-micro text-muted">{channelMeta(groupChannel.type)}</span>
               </button>
             ) : null}
             {coworkers.map((c) => {
@@ -298,14 +298,14 @@ export function StaffChatDrawer({
                   }`}
                 >
                   <span
-                    className={`flex size-[26px] shrink-0 items-center justify-center rounded-[8px] text-[9px] font-semibold ${
+                    className={`flex size-[26px] shrink-0 items-center justify-center rounded-[8px] text-micro font-semibold ${
                       isSelected ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
                     }`}
                   >
                     {initials(c.full_name)}
                   </span>
-                  <span className="flex-1 truncate text-[13px] font-medium text-ink">{c.full_name}</span>
-                  <span className="shrink-0 text-[10px] text-muted">trainer</span>
+                  <span className="flex-1 truncate text-meta font-medium text-ink">{c.full_name}</span>
+                  <span className="shrink-0 text-micro text-muted">trainer</span>
                 </button>
               );
             })}
@@ -316,7 +316,7 @@ export function StaffChatDrawer({
                 genuinely empty chat was indistinguishable from a broken
                 one. */}
             {!groupChannel && coworkers.length === 0 ? (
-              <p className="px-3 pb-2.5 pt-0.5 text-[12px] leading-[1.5] text-muted">
+              <p className="px-3 pb-2.5 pt-0.5 text-meta leading-[1.5] text-muted">
                 No one to message yet. Your TP group chat opens once the tutors have drawn up the groups.
               </p>
             ) : null}
@@ -342,7 +342,7 @@ export function StaffChatDrawer({
         ) : null}
 
         {quietHoursNote && !readOnly ? (
-          <p className="rounded-full bg-status-warning-bg px-3 py-1 text-center text-[11px] text-status-warning-text">{quietHoursNote}</p>
+          <p className="rounded-full bg-status-warning-bg px-3 py-1 text-center text-label text-status-warning-text">{quietHoursNote}</p>
         ) : null}
 
         <div className="flex min-h-14 items-center gap-1.5 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg sm:gap-3">
@@ -356,10 +356,10 @@ export function StaffChatDrawer({
               readOnly ? "cursor-default opacity-60" : ""
             }`}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-[9px] font-semibold text-primary-foreground">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-micro font-semibold text-primary-foreground">
               {selected ? initials(selected.name) : "+"}
             </span>
-            <span className="max-w-[70px] truncate text-[13px] font-semibold text-ink sm:max-w-[130px]">
+            <span className="max-w-[70px] truncate text-meta font-semibold text-ink sm:max-w-[130px]">
               {selected ? selected.name : nobodyToMessage ? "No chat yet" : "Pick who to message"}
             </span>
             {!readOnly ? <ChevronDown className="size-[9px] shrink-0 text-muted" aria-hidden="true" /> : null}
@@ -400,7 +400,7 @@ export function StaffChatDrawer({
 
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
             <span className="size-[5px] shrink-0 rounded-full bg-muted" aria-hidden="true" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
+            <span className="text-micro font-semibold uppercase tracking-[0.06em] text-muted">
               {retentionCopy.charAt(0).toUpperCase() + retentionCopy.slice(1)}
             </span>
           </div>
@@ -424,7 +424,7 @@ export function StaffChatDrawer({
           >
             {threadOpen ? "Hide" : "Thread"}
             {!threadOpen && unreadCount > 0 ? (
-              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1.5 text-[10px] font-semibold text-card">
+              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1.5 text-micro font-semibold text-card">
                 {unreadCount}
               </span>
             ) : null}

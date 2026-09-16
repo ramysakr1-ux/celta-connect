@@ -12,7 +12,7 @@
 export function BranchChip({ name, className = "" }: { name: string | null | undefined; className?: string }) {
   if (!name) return null;
   return (
-    <span className={`rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-medium whitespace-nowrap text-muted ${className}`}>
+    <span className={`rounded-full bg-surface-muted px-2 py-0.5 text-micro font-medium whitespace-nowrap text-muted ${className}`}>
       {name}
     </span>
   );

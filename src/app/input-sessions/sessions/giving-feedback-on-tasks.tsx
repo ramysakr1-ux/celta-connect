@@ -129,7 +129,7 @@ export default function GivingFeedbackOnTasksSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Lead-in · 5 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Think of the last TP you watched. After a task finished, how did the teacher check it — and how long did it take?
           In pairs: was there a moment where students never found out whether they were right?
         </p>
@@ -160,7 +160,7 @@ export default function GivingFeedbackOnTasksSession() {
           <p className="text-xs text-muted">
             Same task, five ways a teacher might run feedback on it. Pick each one to find out whether it works.
           </p>
-          <p className="mt-1 rounded-[6px] border border-dashed border-border bg-accent/40 px-3 py-2 text-[12px] text-ink">
+          <p className="mt-1 rounded-[6px] border border-dashed border-border bg-accent/40 px-3 py-2 text-meta text-ink">
             <strong className="font-semibold">Task:</strong> pairs read a short text and answer five true/false
             comprehension questions.
           </p>
@@ -198,7 +198,7 @@ export default function GivingFeedbackOnTasksSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 2 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           One line each, round the room: the feedback method you will use in your next TP, and for which task.
         </p>
       </section>
@@ -247,7 +247,7 @@ function MoveCard({ text, good, why }: { text: string; good: boolean; why: strin
       }`}
     >
       <span className="flex items-start justify-between gap-3">
-        <span className="text-[12.5px] leading-relaxed text-ink">{text}</span>
+        <span className="text-meta leading-relaxed text-ink">{text}</span>
         {picked ? (
           <span className={`flex-none text-sm font-bold ${good ? "text-primary" : "text-destructive"}`}>
             {good ? "✓" : "✗"}
@@ -255,9 +255,9 @@ function MoveCard({ text, good, why }: { text: string; good: boolean; why: strin
         ) : null}
       </span>
       {picked ? (
-        <span className={`text-[11.5px] leading-relaxed ${good ? "text-primary" : "text-destructive"}`}>{why}</span>
+        <span className={`text-label leading-relaxed ${good ? "text-primary" : "text-destructive"}`}>{why}</span>
       ) : (
-        <span className="text-[10.5px] font-semibold text-primary">Click to judge it ▾</span>
+        <span className="text-micro font-semibold text-primary">Click to judge it ▾</span>
       )}
     </button>
   );
@@ -273,14 +273,14 @@ function LiveCard({ n, task, watch }: { n: number; task: string; watch: string }
         taken ? "border-primary/40 bg-primary/5" : "border-border bg-card"
       }`}
     >
-      <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted">Task card {n}</span>
-      <span className="text-[12.5px] leading-relaxed text-ink">{task}</span>
+      <span className="text-micro font-bold uppercase tracking-[0.1em] text-muted">Task card {n}</span>
+      <span className="text-meta leading-relaxed text-ink">{task}</span>
       {taken ? (
-        <span className="border-t border-border pt-1.5 text-[11.5px] leading-relaxed text-primary">
+        <span className="border-t border-border pt-1.5 text-label leading-relaxed text-primary">
           <strong className="font-semibold">Watch for:</strong> {watch}
         </span>
       ) : (
-        <span className="text-[10.5px] font-semibold text-primary">Click to take this card ▾</span>
+        <span className="text-micro font-semibold text-primary">Click to take this card ▾</span>
       )}
     </button>
   );

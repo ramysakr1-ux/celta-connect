@@ -38,13 +38,13 @@ export function AimCoverageMatrix({ members, plans }: { members: CoverageMember[
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="p-2 text-left text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate</th>
+              <th className="p-2 text-left text-micro font-semibold tracking-[0.08em] text-muted uppercase">Candidate</th>
               {AIM_TYPES.map((t) => (
-                <th key={t} className="p-2 text-center text-[10px] font-semibold tracking-[0.05em] text-muted uppercase">
+                <th key={t} className="p-2 text-center text-micro font-semibold tracking-[0.05em] text-muted uppercase">
                   {AIM_TYPE_LABELS[t]}
                 </th>
               ))}
-              <th className="p-2 text-right text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">Spread</th>
+              <th className="p-2 text-right text-micro font-semibold tracking-[0.08em] text-muted uppercase">Spread</th>
             </tr>
           </thead>
           <tbody>

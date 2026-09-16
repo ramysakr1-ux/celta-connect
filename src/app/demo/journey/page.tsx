@@ -59,7 +59,7 @@ export const revalidate = 300;
 function Facts({ caption, rows }: { caption: string; rows: [string, string][] }) {
   return (
     <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card p-3">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{caption}</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{caption}</p>
       {rows.map(([label, fact]) => (
         <div key={label} className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
           <span className="shrink-0 text-xs font-bold text-ink sm:w-40">{label}</span>
@@ -84,12 +84,12 @@ function Ripple({ from, to }: { from: string; to: { where: string; what: string;
               href={t.href}
               className="wash flex flex-col justify-center rounded-[6px] border border-primary/40 bg-primary/5 px-3 py-2"
             >
-              <span className="text-[11px] font-bold tracking-[0.06em] text-primary uppercase">{t.where}</span>
+              <span className="text-label font-bold tracking-[0.06em] text-primary uppercase">{t.where}</span>
               <span className="text-xs text-ink">{t.what}</span>
             </a>
           ) : (
             <div className="flex flex-col justify-center rounded-[6px] border border-border bg-card px-3 py-2">
-              <span className="text-[11px] font-bold tracking-[0.06em] text-muted uppercase">{t.where}</span>
+              <span className="text-label font-bold tracking-[0.06em] text-muted uppercase">{t.where}</span>
               <span className="text-xs text-ink">{t.what}</span>
             </div>
           )}
@@ -459,7 +459,7 @@ export default async function JourneyPage() {
                 below, for seeing a real centre's own prompts and branding. */}
             <a
               href="/apply"
-              className="wash inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted"
+              className="wash inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-meta font-medium text-muted"
             >
               Or see {realCenter?.name ?? "the real centre"}&apos;s live form → (don&apos;t submit that one)
             </a>
@@ -541,7 +541,7 @@ export default async function JourneyPage() {
                   </p>
                 </details>
                 <div className="mt-2 rounded-[6px] border border-dashed border-border p-2.5">
-                  <p className="text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">AI reading -- suggested, not sent</p>
+                  <p className="text-micro font-semibold tracking-[0.06em] text-muted uppercase">AI reading -- suggested, not sent</p>
                   <p className="mt-1 text-sm text-ink">{sampleSpeakingSuggestion}</p>
                 </div>
               </div>
@@ -607,7 +607,7 @@ export default async function JourneyPage() {
                 <ul className="flex flex-col gap-2">
                   {interviewQuestions.map((q, i) => (
                     <li key={i} className="rounded-[6px] border border-border bg-card p-3">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
+                      <span className="text-micro font-semibold uppercase tracking-[0.06em] text-muted">
                         {COVERAGE_LABEL[q.coverage_area] ?? q.coverage_area}
                       </span>
                       <p className="text-sm text-ink">{q.question_text}</p>

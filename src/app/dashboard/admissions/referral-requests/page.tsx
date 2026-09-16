@@ -82,7 +82,7 @@ export default async function ReferralRequestsPage({
           edge inside a room carries the room's colour or nothing (centre
           side A1, 16 Sep 2026). */}
       <div className="flex flex-col gap-3">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Waiting on you ({pendingIncoming.length})</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Waiting on you ({pendingIncoming.length})</h2>
         {pendingIncoming.length === 0 ? (
           <p className="text-sm text-muted">Nothing waiting.</p>
         ) : (
@@ -106,7 +106,7 @@ export default async function ReferralRequestsPage({
 
       {decidedIncoming.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Already decided</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Already decided</h2>
           {decidedIncoming.map((r, i) => (
             <div key={r.id} className={`card p-5 text-sm text-ink hover-ring`}>
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} from{" "}
@@ -119,7 +119,7 @@ export default async function ReferralRequestsPage({
 
       {(sent ?? []).length > 0 ? (
         <div className="flex flex-col gap-2">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Sent by this branch</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Sent by this branch</h2>
           {(sent ?? []).map((r, i) => (
             <div key={r.id} className={`card p-5 text-sm text-ink hover-ring`}>
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} to{" "}

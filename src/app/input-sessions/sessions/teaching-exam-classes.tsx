@@ -259,7 +259,7 @@ export default function TeachingExamClassesSession() {
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 rounded-[8px] border border-dashed p-5" style={{ borderColor: GOLD }}>
           <h2 className="font-serif text-lg font-semibold text-ink">You can now tell your KET from your CAE</h2>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             — and an IELTS band from a TOEFL score. That is more than most first-year teachers can say, and it is the
             question you will be asked most.
           </p>
@@ -267,10 +267,10 @@ export default function TeachingExamClassesSession() {
         <ol className="flex flex-col gap-2">
           {CLOSING.map((q, i) => (
             <li key={q} className="flex items-start gap-3 rounded-[8px] border border-border bg-card px-4 py-3">
-              <span className="flex size-5 flex-none items-center justify-center rounded-full bg-accent text-[10.5px] font-bold text-muted">
+              <span className="flex size-5 flex-none items-center justify-center rounded-full bg-accent text-micro font-bold text-muted">
                 {i + 1}
               </span>
-              <span className="text-[12.5px] leading-relaxed text-ink">{q}</span>
+              <span className="text-meta leading-relaxed text-ink">{q}</span>
             </li>
           ))}
         </ol>
@@ -322,11 +322,11 @@ function LadderRung({ rung }: { rung: (typeof CEFR)[number] }) {
           <span className="font-serif text-base font-semibold" style={{ color: rung.hue }}>
             {rung.lvl}
           </span>
-          <span className="text-[12.5px] font-semibold text-ink">{rung.name}</span>
+          <span className="text-meta font-semibold text-ink">{rung.name}</span>
         </span>
-        <span className="text-[10.5px] text-muted">{rung.hint}</span>
+        <span className="text-micro text-muted">{rung.hint}</span>
       </span>
-      {open ? <span className="border-t border-border pt-1.5 text-[11.5px] leading-relaxed text-ink">{rung.d}</span> : null}
+      {open ? <span className="border-t border-border pt-1.5 text-label leading-relaxed text-ink">{rung.d}</span> : null}
     </button>
   );
 }
@@ -340,13 +340,13 @@ function ExamCard({ exam }: { exam: Exam }) {
       className="flex h-full flex-col gap-1 rounded-[8px] border border-t-[3px] border-border bg-card p-3.5 text-left"
       style={{ borderTopColor: exam.hue }}
     >
-      <span className="font-serif text-[15px] font-semibold text-ink">{exam.acro}</span>
-      <span className="text-[10.5px] text-muted">{exam.full}</span>
-      <span className="text-[11px] font-semibold" style={{ color: exam.hue }}>
+      <span className="font-serif text-h3 font-semibold text-ink">{exam.acro}</span>
+      <span className="text-micro text-muted">{exam.full}</span>
+      <span className="text-label font-semibold" style={{ color: exam.hue }}>
         {exam.level}
       </span>
       {open ? (
-        <span className="mt-1 flex flex-col gap-1 border-t border-border pt-2 text-[11px] leading-relaxed text-ink">
+        <span className="mt-1 flex flex-col gap-1 border-t border-border pt-2 text-label leading-relaxed text-ink">
           <span>
             <strong className="font-semibold">Age:</strong> {exam.age}
           </span>
@@ -359,7 +359,7 @@ function ExamCard({ exam }: { exam: Exam }) {
           <span className="italic text-primary">{exam.fact}</span>
         </span>
       ) : (
-        <span className="mt-auto pt-1.5 text-[10.5px] font-semibold text-primary">Click to open ▾</span>
+        <span className="mt-auto pt-1.5 text-micro font-semibold text-primary">Click to open ▾</span>
       )}
     </button>
   );

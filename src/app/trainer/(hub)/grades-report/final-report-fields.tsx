@@ -67,13 +67,13 @@ export function FinalReportFields({
     return (
       <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">Recommended grade</span>
+          <span className="text-label font-bold tracking-[0.1em] text-gold uppercase">Recommended grade</span>
           {record.final_recommended_grade ? (
-            <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
+            <span className="rounded-full bg-ink px-2.5 py-0.5 text-label font-bold text-card">
               {record.final_recommended_grade}
             </span>
           ) : (
-            <span className="text-[12px] text-muted italic">Not yet recorded</span>
+            <span className="text-meta text-muted italic">Not yet recorded</span>
           )}
         </div>
         <ReadBlock label="Update on strengths and areas for development" value={update} required />
@@ -94,14 +94,14 @@ export function FinalReportFields({
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
 
       <div className="flex items-center justify-between gap-3">
-        <label htmlFor={`grd-${record.trainee_id}`} className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">
+        <label htmlFor={`grd-${record.trainee_id}`} className="text-label font-bold tracking-[0.1em] text-gold uppercase">
           Recommended grade
         </label>
         <select
           id={`grd-${record.trainee_id}`}
           name="final_recommended_grade"
           defaultValue={record.final_recommended_grade ?? ""}
-          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-center text-[13px] text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-center text-meta text-ink outline-none focus:border-primary"
         >
           <option value="">Not yet decided</option>
           <option value="Pass">Pass</option>
@@ -115,10 +115,10 @@ export function FinalReportFields({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={`upd-${record.trainee_id}`} className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">
+        <label htmlFor={`upd-${record.trainee_id}`} className="text-label font-bold tracking-[0.1em] text-gold uppercase">
           Update on strengths and areas for development
         </label>
-        <p className="text-[11px] leading-[1.45] text-muted">
+        <p className="text-label leading-[1.45] text-muted">
           Required on the Assessor Report for every candidate &mdash; including extensions, deferrals and withdrawals
           (Handbook 15.2).
         </p>
@@ -127,16 +127,16 @@ export function FinalReportFields({
           name="final_update_notes"
           rows={5}
           defaultValue={update}
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-[13px] text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-meta text-ink outline-none focus:border-primary"
         />
       </div>
 
       {isBorderline ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={`evi-${record.trainee_id}`} className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">
+          <label htmlFor={`evi-${record.trainee_id}`} className="text-label font-bold tracking-[0.1em] text-gold uppercase">
             What evidence was provided for a pass/higher
           </label>
-          <p className="text-[11px] leading-[1.45] text-muted">
+          <p className="text-label leading-[1.45] text-muted">
             Answers the conditions set at the provisional stage. Optional in Appian, but 15.2 asks for it on any borderline
             candidate so the final grade has a recorded justification.
           </p>
@@ -145,7 +145,7 @@ export function FinalReportFields({
             name="final_higher_grade_evidence"
             rows={3}
             defaultValue={evidence}
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-[13px] text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-meta text-ink outline-none focus:border-primary"
           />
         </div>
       ) : (
@@ -162,7 +162,7 @@ export function FinalReportFields({
         <button
           type="submit"
           disabled={pending}
-          className="wash self-start rounded-[6px] border border-border px-3 py-1.5 text-[13px] text-ink disabled:opacity-60"
+          className="wash self-start rounded-[6px] border border-border px-3 py-1.5 text-meta text-ink disabled:opacity-60"
         >
           {pending ? "Saving..." : "Save"}
         </button>
@@ -174,13 +174,13 @@ export function FinalReportFields({
 function ReadBlock({ label, value, required }: { label: string; value: string; required?: boolean }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">{label}</span>
+      <span className="text-label font-bold tracking-[0.1em] text-gold uppercase">{label}</span>
       {value ? (
-        <p className="rounded-[6px] border border-border bg-card-inset px-3 py-2.5 text-[12px] leading-[1.55] whitespace-pre-wrap text-ink">
+        <p className="rounded-[6px] border border-border bg-card-inset px-3 py-2.5 text-meta leading-[1.55] whitespace-pre-wrap text-ink">
           {value}
         </p>
       ) : (
-        <p className="text-[12px] text-muted italic">
+        <p className="text-meta text-muted italic">
           {required ? "Not written yet -- Appian will not accept the report without it." : "Not written yet."}
         </p>
       )}

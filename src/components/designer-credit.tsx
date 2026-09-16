@@ -89,7 +89,7 @@ export function DesignerCredit({
   const toneClass = tone === "bronze" ? "text-bronze/75" : "text-muted/70";
   const nameClass = tone === "bronze" ? "text-bronze" : "text-muted";
   const mark = (
-    <span className={`pointer-events-auto inline-flex items-center gap-1.5 text-[10.5px] ${toneClass}`}>
+    <span className={`pointer-events-auto inline-flex items-center gap-1.5 text-micro ${toneClass}`}>
       <Wordmark size="icon" iconSizePx={13} />
       <span>
         designed and built by <span className={`font-semibold ${nameClass}`}>Ramy</span>
@@ -164,7 +164,7 @@ export function HeaderCredit({ onDark = false, landingPath }: { onDark?: boolean
   if (landings && !landings.includes(pathname)) return null;
   return (
     <span
-      className="hidden shrink-0 items-center gap-1.5 text-[10.5px] whitespace-nowrap md:inline-flex"
+      className="hidden shrink-0 items-center gap-1.5 text-micro whitespace-nowrap md:inline-flex"
       style={{ color: onDark ? "oklch(72% 0.05 65)" : "var(--color-bronze)", opacity: onDark ? 0.9 : 0.8 }}
     >
       designed and built by{" "}

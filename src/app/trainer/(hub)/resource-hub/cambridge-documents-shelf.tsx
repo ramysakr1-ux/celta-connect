@@ -39,9 +39,9 @@ function DocCard({ doc, editable }: { doc: DocRow; editable: boolean }) {
               otherwise "Open" on the Appeals slot silently hands you the
               Handbook and looks like the wrong file. */}
           {doc.withinDocumentNote ? (
-            <p className="mt-0.5 text-[11px] text-muted">{doc.withinDocumentNote}</p>
+            <p className="mt-0.5 text-label text-muted">{doc.withinDocumentNote}</p>
           ) : doc.fromHubTitle ? (
-            <p className="mt-0.5 text-[11px] text-muted">{doc.fromHubTitle}</p>
+            <p className="mt-0.5 text-label text-muted">{doc.fromHubTitle}</p>
           ) : null}
         </div>
         {hasDoc ? (

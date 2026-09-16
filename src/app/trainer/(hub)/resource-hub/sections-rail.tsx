@@ -75,7 +75,7 @@ export function SectionsRail({ sections, search }: { sections: SectionLink[]; se
               key={s.href}
               href={s.href}
               aria-current={on ? "true" : undefined}
-              className="inline-flex items-baseline gap-1.5 rounded-[6px] px-2.5 py-1.5 text-[12.5px] whitespace-nowrap transition-colors"
+              className="inline-flex items-baseline gap-1.5 rounded-[6px] px-2.5 py-1.5 text-meta whitespace-nowrap transition-colors"
               style={
                 on
                   ? { color: "var(--hub-accent-deep)", background: "color-mix(in oklab, var(--hub-accent) 12%, transparent)", fontWeight: 600 }
@@ -83,7 +83,7 @@ export function SectionsRail({ sections, search }: { sections: SectionLink[]; se
               }
             >
               {s.label}
-              {s.count > 0 ? <span className="text-[10.5px] tabular-nums opacity-70">{s.count}</span> : null}
+              {s.count > 0 ? <span className="text-micro tabular-nums opacity-70">{s.count}</span> : null}
             </a>
           );
         })}

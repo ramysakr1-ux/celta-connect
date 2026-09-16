@@ -49,7 +49,7 @@ export function SettingsNav({ items }: { items: SettingsNavItem[] }) {
 
   return (
     <nav className="sticky top-4 flex flex-col gap-0.5 rounded-[6px] border border-border bg-card py-3.5">
-      <p className="px-4 pb-2 text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Settings</p>
+      <p className="px-4 pb-2 text-micro font-semibold tracking-[0.12em] text-muted uppercase">Settings</p>
       {items.map((item) => {
         const isActive = !item.external && item.href === active;
         const className = `wash flex items-center justify-between gap-2 border-l-2 px-4 py-2 text-sm ${

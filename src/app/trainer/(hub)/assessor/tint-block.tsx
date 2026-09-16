@@ -48,7 +48,7 @@ export function TintBlock({
 function Pill({ label, tone }: { label: string; tone: "accent" | "muted" }) {
   return (
     <span
-      className="rounded-full px-2.5 py-[3px] text-[10px] font-bold tracking-[0.07em] uppercase"
+      className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.07em] uppercase"
       style={
         tone === "accent"
           ? { background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }
@@ -69,13 +69,13 @@ function TintEmpty() {
     // it -- lifted to the corner so the row still reads as one line.
     <div className="group-frame-inner hover-ring relative rounded-[12px] bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
       <div className="flex flex-wrap items-center gap-3 pr-0 sm:pr-40">
-        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
+        <span className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit &middot; trainer-in-training
         </span>
         <Pill label="None on this course" tone="muted" />
       </div>
       <details className="group">
-        <summary className="mt-2 inline-flex cursor-pointer list-none text-[12px] font-semibold text-primary hover:underline sm:absolute sm:top-4 sm:right-[22px] sm:mt-0">
+        <summary className="mt-2 inline-flex cursor-pointer list-none text-meta font-semibold text-primary hover:underline sm:absolute sm:top-4 sm:right-[22px] sm:mt-0">
           <span className="group-open:hidden">What it would mean</span>
           <span className="hidden group-open:inline">Hide</span>
         </summary>
@@ -89,17 +89,17 @@ function TintEmpty() {
           className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] border px-4 py-3"
           style={{ borderColor: `color-mix(in oklab, ${AMBER} 34%, transparent)`, background: `color-mix(in oklab, ${AMBER} 8%, var(--color-card))` }}
         >
-          <span className="rounded-full px-2.5 py-[3px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: AMBER, color: "var(--color-primary-foreground)" }}>
+          <span className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: AMBER, color: "var(--color-primary-foreground)" }}>
             Usually an extra day
           </span>
-          <span className="min-w-[280px] flex-1 text-[12.5px] leading-[1.55] text-ink">
+          <span className="min-w-[280px] flex-1 text-meta leading-[1.55] text-ink">
             Where moderation applies, your assessor spends longer on the course &mdash; and a visit timetabled from the
             candidate side alone will not have booked it.
           </span>
         </div>
         <div className="hub-hairline flex flex-wrap items-baseline gap-x-3 border-b pb-1.5">
-          <h3 className="font-serif text-[16px] font-semibold text-ink">Whether it applies at all depends on the scheme</h3>
-          <span className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+          <h3 className="font-serif text-h3 font-semibold text-ink">Whether it applies at all depends on the scheme</h3>
+          <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
             TinT Handbook &sect;5.1
           </span>
         </div>
@@ -109,21 +109,21 @@ function TintEmpty() {
             ["Internal scheme, trainer from another centre", "required"],
             ["Internal scheme, your own trainer", "not required — the supervisor assesses them"],
           ].map(([a, b]) => (
-            <li key={a} className="hub-hairline border-t py-2.5 text-[12.5px] text-muted first:border-t-0 first:pt-0">
+            <li key={a} className="hub-hairline border-t py-2.5 text-meta text-muted first:border-t-0 first:pt-0">
               <b className="text-ink">{a}</b> &mdash; {b}
             </li>
           ))}
         </ul>
         <div className="hub-hairline flex flex-wrap items-baseline gap-x-3 border-b pb-1.5">
-          <h3 className="font-serif text-[16px] font-semibold text-ink">And what the assessor would do with them</h3>
-          <span className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+          <h3 className="font-serif text-h3 font-semibold text-ink">And what the assessor would do with them</h3>
+          <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
             TinT Handbook &sect;5.2.2
           </span>
         </div>
         <ul className="flex flex-col">
           {TINT_ASSESSOR_DUTIES.map((d) => (
             <li key={d.label} className="hub-hairline flex flex-col gap-[2px] border-t py-2.5 first:border-t-0 first:pt-0">
-              <p className="text-[13px] font-semibold text-ink">{d.label}</p>
+              <p className="text-meta font-semibold text-ink">{d.label}</p>
               {d.detail ? <p className="text-xs leading-[1.5] text-muted">{d.detail}</p> : null}
             </li>
           ))}
@@ -155,13 +155,13 @@ function TintPresent({
       style={{ borderTop: "3px solid var(--hub-accent)" }}
     >
       <div className="flex flex-wrap items-center gap-3 pr-0 sm:pr-24">
-        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
+        <span className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit · trainer-in-training
         </span>
         <Pill label={name} tone="accent" />
       </div>
       <details className="group" open>
-        <summary className="inline-flex cursor-pointer list-none text-[12px] font-semibold text-primary hover:underline sm:absolute sm:top-5 sm:right-[22px]">
+        <summary className="inline-flex cursor-pointer list-none text-meta font-semibold text-primary hover:underline sm:absolute sm:top-5 sm:right-[22px]">
           <span className="group-open:hidden">Show</span>
           <span className="hidden group-open:inline">Hide</span>
         </summary>
@@ -182,7 +182,7 @@ function TintPresent({
         }}
       >
         <span
-          className="rounded-full px-2.5 py-[3px] text-[10px] font-bold tracking-[0.07em] uppercase"
+          className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.07em] uppercase"
           style={
             heavy
               ? { background: AMBER, color: "var(--color-primary-foreground)" }
@@ -193,11 +193,11 @@ function TintPresent({
         >
           {heavy ? "Moderation required · usually an extra day" : unknown ? "Scheme not recorded" : "No moderation required"}
         </span>
-        <span className="min-w-[280px] flex-1 text-[12.5px] leading-[1.55] text-ink">{moderation.because}</span>
+        <span className="min-w-[280px] flex-1 text-meta leading-[1.55] text-ink">{moderation.because}</span>
       </div>
 
       {moderation.action ? (
-        <p className="text-[12.5px] leading-[1.55]" style={{ color: tone }}>
+        <p className="text-meta leading-[1.55]" style={{ color: tone }}>
           <b>What you do about it.</b> {moderation.action}
         </p>
       ) : null}
@@ -205,9 +205,9 @@ function TintPresent({
       {heavy ? (
         <>
           <div className="flex flex-wrap items-baseline gap-x-3 border-b hub-hairline pb-1.5">
-            <h3 className="font-serif text-[16px] font-semibold text-ink">What the assessor does with them</h3>
+            <h3 className="font-serif text-h3 font-semibold text-ink">What the assessor does with them</h3>
             <span
-              className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase"
+              className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase"
               style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}
             >
               TinT Handbook §5.2.2
@@ -216,13 +216,13 @@ function TintPresent({
           <ul className="flex flex-col">
             {TINT_ASSESSOR_DUTIES.map((d) => (
               <li key={d.label} className="flex flex-col gap-[2px] border-t hub-hairline py-2.5 first:border-t-0 first:pt-0">
-                <p className="text-[13px] font-semibold text-ink">{d.label}</p>
+                <p className="text-meta font-semibold text-ink">{d.label}</p>
                 {d.detail ? <p className="text-xs leading-[1.5] text-muted">{d.detail}</p> : null}
               </li>
             ))}
           </ul>
           {moderation.reportTo ? (
-            <p className="rounded-[10px] bg-card-inset px-4 py-3 text-[12.5px] leading-[1.55] text-ink">
+            <p className="rounded-[10px] bg-card-inset px-4 py-3 text-meta leading-[1.55] text-ink">
               <b>Afterwards</b>, the assessor completes the <i>CELTA Trainer-in-Training Assessor Moderation Report</i> and sends
               it to {moderation.reportTo}. It is not part of the assessor report, and Connect does not hold it. The content is
               discussed with {name} and their supervisor.
@@ -234,10 +234,10 @@ function TintPresent({
       <div className="flex flex-wrap items-center gap-3 border-t hub-hairline pt-3">
         {/* The record has its own tab in this hub; this is a pointer to it, not
             a second copy of the door. */}
-        <Link href="/trainer/trainer-in-training" className="text-[12.5px] font-semibold text-primary hover:underline">
+        <Link href="/trainer/trainer-in-training" className="text-meta font-semibold text-primary hover:underline">
           Open the Trainer-in-Training tab
         </Link>
-        <span className="text-[11.5px] text-muted">
+        <span className="text-label text-muted">
           The e-portfolio, the shadow-marking record and both signature trails live there. Your assessor reaches it from the
           pack.
         </span>

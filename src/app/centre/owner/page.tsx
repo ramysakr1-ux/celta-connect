@@ -217,8 +217,8 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
               ? `All branches · ${scope.length} centres`
               : `${siblingBranches.length > 0 ? `${siblingBranches.length + 1} branches · ` : ""}${center?.name ?? "Your centre"}`}
           </p>
-          <h1 className="owner-serif mt-2 text-[33px] font-semibold text-[oklch(98%_0.008_85)]">Centre owner</h1>
-          <p className="mt-2 max-w-[480px] text-[13px] leading-relaxed text-[oklch(74%_0.025_75)]">
+          <h1 className="owner-serif mt-2 text-display font-semibold text-[oklch(98%_0.008_85)]">Centre owner</h1>
+          <p className="mt-2 max-w-[480px] text-meta leading-relaxed text-[oklch(74%_0.025_75)]">
             Full oversight, custodial powers over every course, and the ability to shape exactly how each role at
             your centre works.
           </p>
@@ -253,7 +253,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             branches" at once. When the figures above are totalling several,
             say plainly which one these pills apply to. */}
         {aggregated ? (
-          <p className="-mb-4 text-[11.5px]" style={{ color: "var(--owner-muted)" }}>
+          <p className="-mb-4 text-label" style={{ color: "var(--owner-muted)" }}>
             Roles and permissions below apply to <strong>{center?.name ?? "this branch"}</strong>. Pick a branch in
             the header to configure another.
           </p>
@@ -266,7 +266,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
         </LaptopOnlyGate>
 
         <div className="owner-card flex flex-col gap-4 px-7 py-6">
-          <h2 className="owner-serif text-[19px]">Who holds what</h2>
+          <h2 className="owner-serif text-h3">Who holds what</h2>
           <div className="flex flex-col">
             {(grants ?? []).map((g, i) => (
               <div
@@ -276,8 +276,8 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
                 className={`wash grid grid-cols-1 gap-1 rounded px-3 py-3 sm:grid-cols-3 sm:items-center sm:gap-2.5 ${i > 0 ? "border-t" : ""}`}
                 style={{ borderColor: "var(--owner-line)" }}
               >
-                <span className="text-[12.5px] font-semibold">{nameById.get(g.profile_id) ?? "Unknown"}</span>
-                <span className="text-[11.5px] font-semibold" style={{ color: "var(--owner-garnet)" }}>
+                <span className="text-meta font-semibold">{nameById.get(g.profile_id) ?? "Unknown"}</span>
+                <span className="text-label font-semibold" style={{ color: "var(--owner-garnet)" }}>
                   {roleLabel(g.role, customRoles ?? [])}
                 </span>
                 <BranchChip name={branchNameById.get(g.center_id)} />
@@ -295,8 +295,8 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             what this screen is for. */}
         <div className="owner-card flex flex-col gap-4 px-7 py-6" style={{ borderTop: "3px solid var(--owner-garnet)" }}>
           <div className="flex flex-col gap-1">
-            <h2 className="owner-serif text-[19px]">Danger zone</h2>
-            <p className="text-[12.5px]" style={{ color: "var(--owner-muted)" }}>
+            <h2 className="owner-serif text-h3">Danger zone</h2>
+            <p className="text-meta" style={{ color: "var(--owner-muted)" }}>
               {custodialIsElsewhere ? (
                 <>
                   These act on <strong>{custodialName}</strong>, the centre you are signed in against &mdash; not on the
@@ -371,7 +371,7 @@ function StatCard({ label, value, suffix, accent }: { label: string; value: stri
       <p className="owner-eyebrow" style={{ color: "var(--owner-muted)" }}>
         {label}
       </p>
-      <p className="owner-serif mt-[7px] text-[28px] tabular-nums" style={accent ? { color: "var(--owner-garnet)" } : undefined}>
+      <p className="owner-serif mt-[7px] text-h1 tabular-nums" style={accent ? { color: "var(--owner-garnet)" } : undefined}>
         {value}
         {suffix ? <span className="ml-1 text-xs font-sans font-normal" style={{ color: "var(--owner-muted)" }}>{suffix}</span> : null}
       </p>

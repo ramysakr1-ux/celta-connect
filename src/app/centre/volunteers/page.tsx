@@ -184,7 +184,7 @@ export default async function CentreVolunteersPage({
         {/* The room's own object carries the room's colour (centre side A1); B3: the card radius, not 9px. */}
         <div className="card card-accent">
           <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">
+            <h2 className="font-serif text-h3 font-semibold text-ink">
               {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"}
             </h2>
             <span className="text-xs text-muted">{(volunteers ?? []).length} registrations across the centre</span>
@@ -226,7 +226,7 @@ export default async function CentreVolunteersPage({
               ))}
             </div>
           )}
-          <p className="border-t border-border-faint px-5 py-4 text-[11px] leading-[1.5] text-muted">
+          <p className="border-t border-border-faint px-5 py-4 text-label leading-[1.5] text-muted">
             Linked automatically when a signup&apos;s email matches one already on file; otherwise link them
             yourself above -- never guessed from name alone. Hours accumulate across every course a
             volunteer&apos;s linked records span.

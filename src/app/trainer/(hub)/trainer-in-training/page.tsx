@@ -157,7 +157,7 @@ export default async function TrainerInTrainingPage() {
               // working forms. TinT Handbook §5.2.1 -- the assessor's own TinT
               // day is where they see the rest.
               <section className="flex flex-col gap-3 rounded-[12px] border border-border bg-card px-[22px] py-5 text-sm">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">{nameOf(ct.profile_id)} · read-only</p>
+                <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">{nameOf(ct.profile_id)} · read-only</p>
                 <dl className="grid grid-cols-[160px_1fr] gap-x-4 gap-y-1.5">
                   <dt className="text-muted">Verified</dt>
                   <dd className="text-ink">{ct.verified_at ? formatDate(ct.verified_at, timeZone) : "Not yet"}</dd>

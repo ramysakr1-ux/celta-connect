@@ -301,8 +301,8 @@ export default async function CentreOverviewPage({
               key={m.label}
               className={`card px-5 py-4 ${m.tone === "owed" ? "card-side-amber" : ""}`}
             >
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
-              <p className={`mt-1 font-serif text-[28px] ${m.tone === "owed" ? "text-status-warning-text" : "text-ink"}`}>{m.value}</p>
+              <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
+              <p className={`mt-1 font-serif text-h1 ${m.tone === "owed" ? "text-status-warning-text" : "text-ink"}`}>{m.value}</p>
               <p className="mt-0.5 text-xs text-muted">{m.note}</p>
             </div>
           ))}
@@ -317,7 +317,7 @@ export default async function CentreOverviewPage({
       {/* The room's own object carries the room's colour (centre side A1). */}
       <div className="card card-accent !p-0">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">All courses</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">All courses</h2>
           <span className="text-xs text-muted">
             {/* for-claude-code-course-admin-final-scope.md: "how many, their
                 status." A per-status breakdown, not just a flat total. */}
@@ -368,7 +368,7 @@ export default async function CentreOverviewPage({
       {(bounces ?? []).length > 0 ? (
         <div className="card card-red !p-0 bg-destructive/5">
           <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-4">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Email couldn&apos;t be delivered</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Email couldn&apos;t be delivered</h2>
             <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
           </div>
           {(bounces ?? []).map((b, i) => (
@@ -399,7 +399,7 @@ export default async function CentreOverviewPage({
           <div className="card !p-0">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
               <div className="flex items-center gap-2">
-                <h2 className="font-serif text-[17px] font-semibold text-ink">Admissions pipeline</h2>
+                <h2 className="font-serif text-h3 font-semibold text-ink">Admissions pipeline</h2>
                 <AdmissionsChangeIndicator centerIds={scope} initialUnread={(unreadAdmissionsCount ?? 0) > 0} />
               </div>
               <Link href="/dashboard/admissions" className="text-xs font-medium text-primary hover:underline">
@@ -420,7 +420,7 @@ export default async function CentreOverviewPage({
                   </div>
                   {/* The per-branch split sits beneath the total, per §13. */}
                   {multiBranch && !branch ? (
-                    <div className="mt-0.5 flex flex-wrap gap-x-3 text-[11px] text-muted">
+                    <div className="mt-0.5 flex flex-wrap gap-x-3 text-label text-muted">
                       {[...(stageByBranch.get(stage) ?? new Map()).entries()].map(([cid, n]) => (
                         <span key={cid}>
                           {branchName.get(cid)} {n}
@@ -439,7 +439,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "payments.view", ctx.overrides) ? (
             <div className={`card !p-0 ${missed.length > 0 ? "card-red" : ""}`}>
               <div className="border-b border-border px-5 py-4">
-                <h2 className="font-serif text-[17px] font-semibold text-ink">Payments needing attention</h2>
+                <h2 className="font-serif text-h3 font-semibold text-ink">Payments needing attention</h2>
               </div>
               {missed.length === 0 ? (
                 <p className="px-5 py-4 text-sm text-muted">Nothing missed.</p>
@@ -470,7 +470,7 @@ export default async function CentreOverviewPage({
               className="wash card flex items-center justify-between gap-3 px-5 py-4 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
-                <h2 className="font-serif text-[17px] font-semibold text-ink">Volunteer pool</h2>
+                <h2 className="font-serif text-h3 font-semibold text-ink">Volunteer pool</h2>
                 <span className="text-xs text-muted">
                   {volunteerPersonCount} {volunteerPersonCount === 1 ? "person" : "people"} &middot;{" "}
                   {(volunteers ?? []).length} registrations
@@ -489,7 +489,7 @@ export default async function CentreOverviewPage({
               className="wash card flex items-center justify-between gap-3 px-5 py-4 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
-                <h2 className="font-serif text-[17px] font-semibold text-ink">Criteria glossary</h2>
+                <h2 className="font-serif text-h3 font-semibold text-ink">Criteria glossary</h2>
                 <span className="text-xs text-muted">
                   The words that tag a CELTA 5 criterion as a tutor writes feedback
                 </span>
@@ -504,7 +504,7 @@ export default async function CentreOverviewPage({
               className="wash card card-gold flex items-center justify-between gap-3 px-5 py-4 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
-                <h2 className="font-serif text-[17px] font-semibold text-ink">Assessor history</h2>
+                <h2 className="font-serif text-h3 font-semibold text-ink">Assessor history</h2>
                 <span className="text-xs text-muted">
                   {assessorHistory.length} {assessorHistory.length === 1 ? "assessor" : "assessors"}
                   {assessorHistory.some((a) => a.flag)

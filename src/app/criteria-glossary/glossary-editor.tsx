@@ -135,7 +135,7 @@ function Section({
 }) {
   return (
     <div className="mt-5">
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{title}</p>
+      <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{title}</p>
       <p className="mt-0.5 text-xs text-muted">{blurb}</p>
       <ul className="mt-2 flex flex-col">
         {terms.length === 0 ? (

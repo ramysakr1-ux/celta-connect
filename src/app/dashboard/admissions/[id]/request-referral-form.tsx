@@ -30,7 +30,7 @@ export function RequestReferralForm({
   return (
     <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Request a referral to another branch</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Request a referral to another branch</h2>
       <p className="text-xs text-muted">
         You don&apos;t hold admissions at these branches, so this sends a request instead of referring directly.
         Everything the candidate has done still moves with them once accepted -- nothing changes for them in the

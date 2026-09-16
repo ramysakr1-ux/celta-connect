@@ -35,11 +35,11 @@ export function VoicePicker({ voiceIdx, setVoiceIdx }: { voiceIdx: number; setVo
 
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-primary/25 bg-primary/5 p-4">
-      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
+      <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-primary">
         <span className="size-1.5 rounded-full bg-current" />
         Voice
       </p>
-      <p className="text-[12.5px] leading-relaxed text-ink">
+      <p className="text-meta leading-relaxed text-ink">
         {voicesLoaded ? "Using your browser's built-in speech — in Chrome this is Google's natural voices." : "Loading voices… works best in Chrome."}
       </p>
       <div className="flex flex-wrap items-center gap-2">
@@ -48,7 +48,7 @@ export function VoicePicker({ voiceIdx, setVoiceIdx }: { voiceIdx: number; setVo
             key={label}
             type="button"
             onClick={() => setVoiceIdx(i)}
-            className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
+            className={`rounded-full border-[1.5px] px-3 py-1.5 text-label font-semibold ${
               voiceIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-ink"
             }`}
           >

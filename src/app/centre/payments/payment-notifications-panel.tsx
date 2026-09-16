@@ -22,7 +22,7 @@ export function PaymentNotificationsPanel({ notifications, canEdit, timeZone }: 
   return (
     <div className="rounded-[10px] border border-status-warning-text/40 border-t-[3px] border-t-status-warning-text bg-status-warning-bg">
       <div className="border-b border-status-warning-text/30 px-5 py-4">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Overdue instalments</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Overdue instalments</h2>
         <p className="mt-0.5 text-xs text-muted">{notifications.length} flagged by the missed-instalment sweep.</p>
       </div>
       <ul className="flex flex-col">

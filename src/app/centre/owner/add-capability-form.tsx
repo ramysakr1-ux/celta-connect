@@ -13,15 +13,15 @@ export function AddCapabilityForm({ roleCols }: { roleCols: { key: string; label
       <input
         name="label"
         placeholder="Add a capability not on this list…"
-        className="h-[37px] min-w-[220px] flex-1 rounded-md px-3.5 text-[12.5px]"
+        className="h-[37px] min-w-[220px] flex-1 rounded-md px-3.5 text-meta"
         style={{ border: "1px solid var(--owner-line)", background: "var(--owner-paper)" }}
       />
-      <span className="text-[11.5px]" style={{ color: "var(--owner-muted)" }}>
+      <span className="text-label" style={{ color: "var(--owner-muted)" }}>
         Give it to:
       </span>
       <select
         name="grant_to_role"
-        className="h-[37px] rounded-md px-2.5 text-[11.5px]"
+        className="h-[37px] rounded-md px-2.5 text-label"
         style={{ border: "1px solid var(--owner-line)", background: "var(--owner-paper)" }}
       >
         {roleCols.map((rc) => (

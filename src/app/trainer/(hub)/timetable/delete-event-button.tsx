@@ -21,7 +21,7 @@ export function DeleteEventButton({ eventId, compact }: { eventId: string; compa
         onClick={() => setConfirming(true)}
         className={
           compact
-            ? "shrink-0 text-[10px] text-muted opacity-0 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
+            ? "shrink-0 text-micro text-muted opacity-0 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
             : "text-xs text-destructive hover:underline"
         }
       >
@@ -41,13 +41,13 @@ export function DeleteEventButton({ eventId, compact }: { eventId: string; compa
 
   return (
     <div className={compact ? "mt-1 flex flex-col items-start gap-1" : "mt-1 flex flex-col items-start gap-1.5"}>
-      <span className="text-[10px] text-muted">Remove, or cancel and notify the cohort?</span>
+      <span className="text-micro text-muted">Remove, or cancel and notify the cohort?</span>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={pending}
           onClick={() => run(cancelTimetableEvent)}
-          className="text-[10px] font-semibold text-destructive hover:underline disabled:opacity-50"
+          className="text-micro font-semibold text-destructive hover:underline disabled:opacity-50"
         >
           Cancel &amp; notify
         </button>
@@ -55,11 +55,11 @@ export function DeleteEventButton({ eventId, compact }: { eventId: string; compa
           type="button"
           disabled={pending}
           onClick={() => run(deleteTimetableEvent)}
-          className="text-[10px] text-muted hover:text-ink disabled:opacity-50"
+          className="text-micro text-muted hover:text-ink disabled:opacity-50"
         >
           Just remove
         </button>
-        <button type="button" disabled={pending} onClick={() => setConfirming(false)} className="text-[10px] text-muted hover:text-ink">
+        <button type="button" disabled={pending} onClick={() => setConfirming(false)} className="text-micro text-muted hover:text-ink">
           Never mind
         </button>
       </div>

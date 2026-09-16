@@ -234,7 +234,7 @@ export default async function AnnouncementsPage() {
              other side: an announcement row is read, not opened. */
           <div className="flex flex-col gap-2 overflow-hidden rounded-[12px] border border-border bg-frame pb-4">
             <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
-              <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Write an announcement</h2>
+              <h2 className="font-serif text-h2 font-semibold text-ink-warm">Write an announcement</h2>
             </div>
             <p className="px-[18px] text-sm text-muted">
               Whole-cohort announcements are sent by the main course tutor. You can post to a TP group once you are named
@@ -248,8 +248,8 @@ export default async function AnnouncementsPage() {
 
           <section className="flex flex-col overflow-hidden rounded-[12px] border border-border bg-frame">
             <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
-              <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Posted</h3>
-              <span className="text-[12.5px] text-muted">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>
+              <h3 className="font-serif text-h2 font-semibold text-ink-warm">Posted</h3>
+              <span className="text-meta text-muted">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>
             </div>
             <div className="flex flex-col px-2.5 pt-2 pb-2.5">
               {posted.map((b) => {
@@ -260,15 +260,15 @@ export default async function AnnouncementsPage() {
                 return (
                   <div key={b.id} className="grid grid-cols-[40px_1fr] items-center gap-3.5 rounded-[10px] px-3 py-[10px]">
                     <span className="flex size-10 flex-col items-center justify-center rounded-[10px] bg-ink-warm text-primary-foreground">
-                      <span className="text-[13px] leading-none font-bold">{when.getDate()}</span>
-                      <span className="text-[9px] leading-none tracking-[0.06em] uppercase">{formatCalendarDateObject(when, { month: "short" })}</span>
+                      <span className="text-meta leading-none font-bold">{when.getDate()}</span>
+                      <span className="text-micro leading-none tracking-[0.06em] uppercase">{formatCalendarDateObject(when, { month: "short" })}</span>
                     </span>
                     <span className="min-w-0">
                       <span className="flex items-center gap-2">
-                        <span className="truncate text-[14px] font-semibold text-ink">{b.title}</span>
-                        {b.pinned ? <span className="rounded-full bg-card-inset px-1.5 py-[2px] text-[9.5px] font-bold tracking-[0.08em] text-muted uppercase">Pinned</span> : null}
+                        <span className="truncate text-body font-semibold text-ink">{b.title}</span>
+                        {b.pinned ? <span className="rounded-full bg-card-inset px-1.5 py-[2px] text-micro font-bold tracking-[0.08em] text-muted uppercase">Pinned</span> : null}
                       </span>
-                      <span className="block truncate text-[12.5px] text-muted">
+                      <span className="block truncate text-meta text-muted">
                         {authorNameById.get(b.author_id) ?? "Unknown"}
                         {` · ${recipientLabel(b)}`}
                       </span>

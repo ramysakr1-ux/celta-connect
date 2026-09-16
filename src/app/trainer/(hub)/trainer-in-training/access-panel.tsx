@@ -44,13 +44,13 @@ export function AccessPanel({
   return (
     <section className="flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
       <div className="flex flex-col gap-[3px]">
-        <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Who can see this</p>
+        <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Who can see this</p>
         <p className="text-sm text-muted">
           Everything on this page is visible to the people below and to nobody else. The assessor sees it read-only on their visit day.
         </p>
       </div>
 
-      <ul className="flex flex-col gap-2 text-[13px]">
+      <ul className="flex flex-col gap-2 text-meta">
         <li className="flex items-baseline justify-between gap-3 border-b border-border-faint pb-2">
           <span className="font-semibold text-ink">{tintName}</span>
           <span className="text-xs text-muted">Trainer-in-training</span>
@@ -74,7 +74,7 @@ export function AccessPanel({
                 {canManage ? (
                   <form action={revokeTitAccess}>
                     <input type="hidden" name="id" value={g.id} />
-                    <button type="submit" className="rounded-[6px] border border-border px-2.5 py-1 text-[11.5px] font-semibold text-ink wash">
+                    <button type="submit" className="rounded-[6px] border border-border px-2.5 py-1 text-label font-semibold text-ink wash">
                       Revoke
                     </button>
                   </form>
@@ -91,7 +91,7 @@ export function AccessPanel({
         grantable.length > 0 ? (
           <form action={grantTitAccess} className="flex flex-wrap items-end gap-2 border-t border-border-faint pt-4">
             <input type="hidden" name="course_tutors_id" value={courseTutorsId} />
-            <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">
+            <label className="flex flex-col gap-1 text-label font-semibold tracking-[0.06em] text-muted uppercase">
               Grant access to
               <select name="grantee_profile_id" required className="h-9 rounded-[6px] border border-border bg-card px-2 text-sm font-normal tracking-normal text-ink normal-case">
                 {grantable.map((t) => (
@@ -101,7 +101,7 @@ export function AccessPanel({
                 ))}
               </select>
             </label>
-            <label className="flex min-w-[220px] flex-1 flex-col gap-1 text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">
+            <label className="flex min-w-[220px] flex-1 flex-col gap-1 text-label font-semibold tracking-[0.06em] text-muted uppercase">
               Why
               <input
                 name="reason"

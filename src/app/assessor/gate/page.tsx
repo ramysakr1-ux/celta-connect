@@ -13,7 +13,7 @@ export default async function AssessorGatePage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center gap-6 px-6 py-16">
       <div className="flex flex-col gap-2">
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Cambridge assessor · read-only access</p>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Cambridge assessor · read-only access</p>
         <h1 className="font-serif text-2xl text-ink">Before you open the pack</h1>
       </div>
       <div className="sheet">

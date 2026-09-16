@@ -95,8 +95,8 @@ export default async function TrainerPreCourseTaskPage() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Who&apos;s answered what</h1>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
+        <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Who&apos;s answered what</h1>
         <p className="mt-1 text-sm text-muted">
           Answered in Connect and never submitted -- candidates type into the task itself and it saves as they go.
           This counts tasks actually answered per section; open a name to read their answers.
@@ -119,14 +119,14 @@ export default async function TrainerPreCourseTaskPage() {
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Candidate</th>
+                <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Candidate</th>
                 {orderedSections.map((s) => (
-                  <th key={s.id} className="w-[40px] px-0.5 py-2.5 text-center text-[10px] font-semibold text-muted" title={s.title}>
+                  <th key={s.id} className="w-[40px] px-0.5 py-2.5 text-center text-micro font-semibold text-muted" title={s.title}>
                     {s.source === "cambridge" ? "C" : "S"}
                     {s.sequence_index}
                   </th>
                 ))}
-                <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Total</th>
+                <th className="px-4 py-2.5 text-center text-micro font-semibold uppercase tracking-[0.12em] text-muted">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -148,7 +148,7 @@ export default async function TrainerPreCourseTaskPage() {
                         <td key={s.id} className="px-0.5 py-2.5 text-center">
                           <span
                             title={sectionItemCount > 0 ? `${answered} of ${sectionItemCount} answered` : "No tasks in this section yet"}
-                            className={`inline-flex h-[22px] w-[34px] items-center justify-center rounded-[5px] text-[11px] font-medium tabular-nums ${
+                            className={`inline-flex h-[22px] w-[34px] items-center justify-center rounded-[5px] text-label font-medium tabular-nums ${
                               complete ? "status-pill status-pill-on-track" : "border border-dashed border-border-faint text-muted"
                             }`}
                           >

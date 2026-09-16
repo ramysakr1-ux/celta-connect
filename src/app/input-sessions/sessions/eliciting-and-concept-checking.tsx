@@ -72,7 +72,7 @@ function ElicitingTechniques() {
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
         <p className="text-xs font-bold text-ink">Eliciting — drawing it out instead of giving it</p>
-        <p className="text-[11.5px] text-muted">Get learners to produce or work out language themselves before you supply it. Click each technique for a real example.</p>
+        <p className="text-label text-muted">Get learners to produce or work out language themselves before you supply it. Click each technique for a real example.</p>
       </div>
       {ELICIT_TECHNIQUES.map((e, i) => (
         <button
@@ -82,10 +82,10 @@ function ElicitingTechniques() {
           className={`flex flex-col gap-1.5 rounded-[8px] border px-3.5 py-3 text-left ${open[i] ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}
         >
           <div className="flex items-baseline justify-between">
-            <p className="text-[13px] font-semibold text-ink">{e.name}</p>
-            <p className="text-[10px] font-semibold text-muted">{e.hint}</p>
+            <p className="text-meta font-semibold text-ink">{e.name}</p>
+            <p className="text-micro font-semibold text-muted">{e.hint}</p>
           </div>
-          {open[i] ? <p className="text-[11.5px] leading-relaxed text-muted">{e.example}</p> : null}
+          {open[i] ? <p className="text-label leading-relaxed text-muted">{e.example}</p> : null}
         </button>
       ))}
     </div>
@@ -96,8 +96,8 @@ function ElicitOrTell() {
   const [picked, setPicked] = useState<Record<number, "elicit" | "tell">>({});
   return (
     <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-      <p className="text-[13px] font-bold text-ink">Match: elicit, or just tell them?</p>
-      <p className="text-[11.5px] text-muted">A teaching moment below. Would eliciting actually work here, or is telling faster and clearer? Click your answer.</p>
+      <p className="text-meta font-bold text-ink">Match: elicit, or just tell them?</p>
+      <p className="text-label text-muted">A teaching moment below. Would eliciting actually work here, or is telling faster and clearer? Click your answer.</p>
       {ELICIT_SCENARIOS.map((s, i) => {
         const pick = picked[i];
         const correct = pick === s.answer;
@@ -108,18 +108,18 @@ function ElicitOrTell() {
               pick === undefined ? "border-border bg-card" : correct ? "border-primary/30 bg-primary/10" : "border-destructive/30 bg-destructive/5"
             }`}
           >
-            <p className="text-[12.5px] leading-relaxed text-ink">{s.text}</p>
+            <p className="text-meta leading-relaxed text-ink">{s.text}</p>
             {pick === undefined ? (
               <div className="flex gap-2">
-                <button type="button" onClick={() => setPicked((p) => ({ ...p, [i]: "elicit" }))} className="flex h-7 items-center rounded-full border border-border px-3.5 text-[11px] font-semibold text-ink">
+                <button type="button" onClick={() => setPicked((p) => ({ ...p, [i]: "elicit" }))} className="flex h-7 items-center rounded-full border border-border px-3.5 text-label font-semibold text-ink">
                   Elicit it
                 </button>
-                <button type="button" onClick={() => setPicked((p) => ({ ...p, [i]: "tell" }))} className="flex h-7 items-center rounded-full border border-border px-3.5 text-[11px] font-semibold text-ink">
+                <button type="button" onClick={() => setPicked((p) => ({ ...p, [i]: "tell" }))} className="flex h-7 items-center rounded-full border border-border px-3.5 text-label font-semibold text-ink">
                   Just tell them
                 </button>
               </div>
             ) : (
-              <p className={`text-[11.5px] leading-relaxed ${correct ? "text-primary" : "text-destructive"}`}>
+              <p className={`text-label leading-relaxed ${correct ? "text-primary" : "text-destructive"}`}>
                 {correct ? "✓ " : "✗ "}
                 {s.feedback}
               </p>
@@ -137,9 +137,9 @@ function SpotBadCcq() {
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Spot the bad CCQ</p>
-        <p className="text-[11.5px] text-muted">{picked !== null ? "1 of 5 examined" : "0 of 5 examined"}</p>
+        <p className="text-label text-muted">{picked !== null ? "1 of 5 examined" : "0 of 5 examined"}</p>
       </div>
-      <p className="text-[11.5px] text-muted">
+      <p className="text-label text-muted">
         Target: &quot;I&apos;ve lived here for six years.&quot; Click the question you think is genuinely a bad CCQ.
       </p>
       {CCQ_ITEMS.map((c, i) => {
@@ -153,9 +153,9 @@ function SpotBadCcq() {
               show ? (c.bad ? "border-primary bg-primary/10" : "border-destructive bg-destructive/5") : "border-border bg-card"
             }`}
           >
-            <p className="text-[12.5px] text-ink">{c.text}</p>
+            <p className="text-meta text-ink">{c.text}</p>
             {show ? (
-              <p className={`flex-none text-[10.5px] font-bold ${c.bad ? "text-primary" : "text-destructive"}`}>
+              <p className={`flex-none text-micro font-bold ${c.bad ? "text-primary" : "text-destructive"}`}>
                 {c.bad ? "Bad CCQ" : "Actually fine"}
               </p>
             ) : null}
@@ -179,7 +179,7 @@ function WriteYourOwn() {
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
         <p className="text-xs font-bold text-ink">Write your own CCQs</p>
-        <p className="text-[11.5px] text-muted">For each target item, write two CCQs. Compare with a model once you&apos;ve tried.</p>
+        <p className="text-label text-muted">For each target item, write two CCQs. Compare with a model once you&apos;ve tried.</p>
       </div>
       {WRITE_ITEMS.map((w, i) => (
         <div key={w.item} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
@@ -188,7 +188,7 @@ function WriteYourOwn() {
             type="button"
             data-print-hide
             onClick={() => setOpen((o) => ({ ...o, [i]: !o[i] }))}
-            className="self-start flex h-7 items-center rounded-full border border-primary/40 bg-primary/10 px-3 text-[11px] font-semibold text-primary"
+            className="self-start flex h-7 items-center rounded-full border border-primary/40 bg-primary/10 px-3 text-label font-semibold text-primary"
           >
             {open[i] ? "Hide model CCQs" : "Compare with model CCQs"}
           </button>
@@ -209,7 +209,7 @@ function BeyondCcqs() {
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-0.5">
         <p className="text-xs font-bold text-ink">Beyond CCQs — match the technique</p>
-        <p className="text-[11.5px] text-muted">CCQs aren&apos;t the only tool. Match each technique to when you&apos;d actually use it.</p>
+        <p className="text-label text-muted">CCQs aren&apos;t the only tool. Match each technique to when you&apos;d actually use it.</p>
       </div>
       {TECHNIQUES.map((t, i) => (
         <button
@@ -222,9 +222,9 @@ function BeyondCcqs() {
         >
           <p className="text-xs font-semibold text-ink">{t.technique}</p>
           {open[i] ? (
-            <p className="text-[11.5px] text-primary">{t.use}</p>
+            <p className="text-label text-primary">{t.use}</p>
           ) : (
-            <p className="text-[10.5px] font-semibold text-muted">When would you use this? Click to reveal</p>
+            <p className="text-micro font-semibold text-muted">When would you use this? Click to reveal</p>
           )}
         </button>
       ))}
@@ -256,8 +256,8 @@ function StagingExample() {
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[130px_1fr] border-b border-border-faint last:border-b-0">
-                <p className="bg-accent px-3 py-2 text-[11px] font-semibold text-ink">{r.label}</p>
-                <p className="px-3 py-2 text-[11.5px] leading-relaxed text-muted">{r.value}</p>
+                <p className="bg-accent px-3 py-2 text-label font-semibold text-ink">{r.label}</p>
+                <p className="px-3 py-2 text-label leading-relaxed text-muted">{r.value}</p>
               </div>
             ))}
           </div>
@@ -290,31 +290,31 @@ function AnswerKey() {
   return (
     <div className="flex flex-col gap-3.5 border-t border-border pt-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
+        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
         <div className="flex gap-2" data-print-hide>
-          <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+          <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Hide
           </button>
-          <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+          <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Print
           </button>
         </div>
       </div>
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-        <p className="font-serif text-[15px] font-semibold text-ink">Good CCQ or bad CCQ?</p>
+        <p className="font-serif text-h3 font-semibold text-ink">Good CCQ or bad CCQ?</p>
         {CCQ_ITEMS.map((c) => (
           <div key={c.text} className="flex flex-col gap-0.5 border-b border-border-faint py-1">
-            <p className="text-[11.5px] text-ink">{c.text}</p>
-            <p className="text-[11px] italic text-muted">{c.bad ? `Bad CCQ — ${c.why}` : "Good CCQ"}</p>
+            <p className="text-label text-ink">{c.text}</p>
+            <p className="text-label italic text-muted">{c.bad ? `Bad CCQ — ${c.why}` : "Good CCQ"}</p>
           </div>
         ))}
       </div>
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-        <p className="font-serif text-[15px] font-semibold text-ink">Model CCQs</p>
+        <p className="font-serif text-h3 font-semibold text-ink">Model CCQs</p>
         {WRITE_ITEMS.map((w) => (
           <div key={w.item} className="flex flex-col gap-0.5 border-b border-border-faint py-1">
-            <p className="text-[11.5px] text-ink">{w.item}</p>
-            <p className="text-[11px] italic text-muted">{w.model}</p>
+            <p className="text-label text-ink">{w.item}</p>
+            <p className="text-label italic text-muted">{w.model}</p>
           </div>
         ))}
       </div>
@@ -346,7 +346,7 @@ export default function ElicitingAndConceptCheckingSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: has anyone ever said &quot;yes, I understand&quot; in a foreign language class, and not
             actually understood?
           </p>
@@ -366,7 +366,7 @@ export default function ElicitingAndConceptCheckingSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Discuss: near misses</p>
-          <p className="text-[11.5px] text-muted">These sound like CCQs but aren&apos;t quite. Click each to see why, then discuss: what would fix it?</p>
+          <p className="text-label text-muted">These sound like CCQs but aren&apos;t quite. Click each to see why, then discuss: what would fix it?</p>
         </div>
         {NEAR_MISSES.map((n) => (
           <RevealCard key={n.text} question={n.text} answer={n.why} />

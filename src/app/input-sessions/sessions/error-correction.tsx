@@ -164,10 +164,10 @@ export default function ErrorCorrectionSession() {
         <ol className="flex flex-col gap-1.5">
           {TECHNIQUES.map((t, i) => (
             <li key={t.label} className="flex items-start gap-3 rounded-[7px] border border-border bg-card px-3.5 py-2.5">
-              <span className="flex size-5 flex-none items-center justify-center rounded-full bg-accent text-[10.5px] font-bold text-muted">
+              <span className="flex size-5 flex-none items-center justify-center rounded-full bg-accent text-micro font-bold text-muted">
                 {i + 1}
               </span>
-              <span className="text-[12.5px] leading-relaxed text-ink">
+              <span className="text-meta leading-relaxed text-ink">
                 <strong className="font-semibold">{t.label}</strong> — {t.desc}
               </span>
             </li>
@@ -192,7 +192,7 @@ export default function ErrorCorrectionSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 3 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Which two techniques will you try in your next TP — and which one error type from your own learners will you try
           them on? Say it to your partner; write it in your plan tonight.
         </p>
@@ -234,12 +234,12 @@ function PracticeRow({ utterance, suggestion }: { utterance: string; suggestion:
   const [choice, setChoice] = useState("");
   return (
     <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-3.5">
-      <p className="font-serif text-[15px] font-semibold text-ink">“{utterance}”</p>
+      <p className="font-serif text-h3 font-semibold text-ink">“{utterance}”</p>
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={choice}
           onChange={(e) => setChoice(e.target.value)}
-          className="rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-[11.5px] text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-label text-ink outline-none focus:border-primary"
         >
           <option value="">Choose a technique…</option>
           {TECHNIQUES.map((t) => (

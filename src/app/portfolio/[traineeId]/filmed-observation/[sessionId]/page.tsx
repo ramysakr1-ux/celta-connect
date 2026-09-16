@@ -86,7 +86,7 @@ export default async function FilmedObservationWatchPage({
       <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · filmed observation · group session</p>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · filmed observation · group session</p>
         <h1 className="mt-0.5 font-serif text-2xl text-ink">{fSession.lesson_title ?? "Filmed lesson — focus set by the trainer per session"}</h1>
         {event?.event_date ? (
           <p className="mt-1 text-sm text-muted">

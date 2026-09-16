@@ -230,7 +230,7 @@ export default async function GradesReportPage() {
           their course page, whoever first (migration 0289, 12 Sep 2026). */}
       <div className="sheet flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Centre Grade form in Appian</p>
+          <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Centre Grade form in Appian</p>
           <p className="text-sm text-muted">
             {gradeFormSubmittedAt
               ? `Marked submitted ${formatDate(gradeFormSubmittedAt, gradesTimeZone, { year: "numeric" })}${
@@ -388,8 +388,8 @@ export default async function GradesReportPage() {
                       />
                     ) : record?.provisional_grade && record.provisional_approved_at ? (
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
-                        <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
+                        <span className="text-label font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
+                        <span className="rounded-full bg-ink px-2.5 py-0.5 text-label font-bold text-card">
                           {record.provisional_grade}
                           {record.provisional_grade_upper ? ` / ${record.provisional_grade_upper}` : ""}
                         </span>
@@ -400,14 +400,14 @@ export default async function GradesReportPage() {
                          -- the MCT approves and sends, and until then this
                          candidate's grade is the centre's business. */
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
-                        <span className="text-[11.5px] text-muted italic">
+                        <span className="text-label font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
+                        <span className="text-label text-muted italic">
                           {record?.provisional_grade ? "Grade not yet confirmed by the centre" : "No grade proposed yet"}
                         </span>
                       </div>
                     )}
 
-                    <p className="text-[11px] text-muted italic">
+                    <p className="text-label text-muted italic">
                       All criteria not listed below is assumed to be &lsquo;To standard&rsquo;.
                     </p>
 
@@ -472,7 +472,7 @@ export default async function GradesReportPage() {
                     {wasSlashed ? (
                     <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card-inset p-3">
                       <div className="flex items-baseline justify-between gap-3">
-                        <span className="text-[11px] font-bold tracking-[0.09em] text-muted uppercase">
+                        <span className="text-label font-bold tracking-[0.09em] text-muted uppercase">
                           Evidence needed for a pass/higher (if applicable)
                         </span>
                         {record?.provisional_upgrade_conditions ? (
@@ -488,12 +488,12 @@ export default async function GradesReportPage() {
                           .filter(Boolean)
                           .map((linePart, i) => (
                             <div key={i} className="flex items-start gap-2">
-                              <span className="shrink-0 text-[11px] leading-[1.5] text-gold">&mdash;</span>
-                              <span className="text-[12px] leading-[1.5] text-ink">{linePart}</span>
+                              <span className="shrink-0 text-label leading-[1.5] text-gold">&mdash;</span>
+                              <span className="text-meta leading-[1.5] text-ink">{linePart}</span>
                             </div>
                           ))
                       ) : (
-                        <p className="text-[12px] text-muted">Not yet set by the centre.</p>
+                        <p className="text-meta text-muted">Not yet set by the centre.</p>
                       )}
                     </div>
                     ) : null}
@@ -524,7 +524,7 @@ export default async function GradesReportPage() {
                   {record ? (
                     <FinalReportFields record={record} editable={Boolean(trainer)} isBorderline={isBorderline} />
                   ) : (
-                    <div className="rounded-[6px] border border-border bg-card p-5 text-[12px] text-muted italic">
+                    <div className="rounded-[6px] border border-border bg-card p-5 text-meta text-muted italic">
                       No CELTA 5 record for this candidate yet.
                     </div>
                   )}
@@ -540,13 +540,13 @@ export default async function GradesReportPage() {
                   {trainer ? (
                     <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border-faint pt-3">
                       {releaseChecks.every((c) => c.met) ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-label font-semibold text-primary">
                           <span className="size-[5px] rounded-full bg-current" />
                           Ready to release
                         </span>
                       ) : (
                         <>
-                          <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+                          <span className="text-label font-bold tracking-[0.1em] text-muted uppercase">
                             Outstanding before release
                           </span>
                           {releaseChecks
@@ -554,7 +554,7 @@ export default async function GradesReportPage() {
                             .map((check) => (
                               <span
                                 key={check.label}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-warning-text"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-label font-semibold text-status-warning-text"
                               >
                                 <span className="size-[5px] rounded-full bg-current" />
                                 {check.label} &middot; {check.state}
@@ -576,7 +576,7 @@ export default async function GradesReportPage() {
                         href={appianHref(appianUrl)}
                         target="_blank"
                         rel="noreferrer"
-                        className="wash ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
+                        className="wash ml-auto rounded-[6px] border border-border px-3 py-1 text-label font-medium text-ink"
                       >
                         Open Appian
                       </a>
@@ -597,7 +597,7 @@ export default async function GradesReportPage() {
               Cambridge's own confirmation is the close-out card's tick below. */}
           <div className="sheet flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Centre grade approval form in Appian</p>
+              <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Centre grade approval form in Appian</p>
               <p className="text-sm text-muted">
                 {approvalSubmittedAt
                   ? `Marked submitted ${formatDate(approvalSubmittedAt, gradesTimeZone, { year: "numeric" })}${

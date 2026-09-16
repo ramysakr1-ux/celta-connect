@@ -125,6 +125,47 @@
   --color-border-faint: color-mix(in srgb, var(--color-border) 40%, var(--color-card) 60%);
 }
 
+/* ---------------------------------------------------------------------------
+   The type scale (for-claude-code-type-scale.md, 16 Sep 2026).
+
+   Nine steps, two families. A search for text-[Npx] returned 830+ matches
+   using 22 arbitrary values, plus Tailwind's own six named sizes and inline
+   fontSize numbers in the sheet components: about 30 sizes for a product
+   that needs 9. Nobody chose them -- each page picked what looked right on
+   its own, and the result was two identical labels on adjacent screens half
+   a pixel apart.
+
+   Weights: sans 400/600/700 only. Serif 600, italic 500 for quoted
+   candidate text. Tracking: caps eyebrows 0.1em at label, 0.12em at micro,
+   nothing else.
+
+   Exceptions that keep their own sizes, by design: the CELTA 5 booklet
+   (a Cambridge document), the Notebook (its own paper register), the PDF
+   routes and the email templates (inline styles for mail clients).
+   ------------------------------------------------------------------------ */
+@theme {
+  --text-micro: 10.5px;        /* criteria codes, tag chips, table column heads */
+  --text-micro--line-height: 1.2;
+  --text-label: 11.5px;        /* eyebrows, pill text, meta labels */
+  --text-label--line-height: 1.3;
+  --text-meta: 12.5px;         /* sub-lines, timestamps, helper text, table cells */
+  --text-meta--line-height: 1.45;
+  --text-body: 13.5px;         /* body copy, row titles, inputs, buttons */
+  --text-body--line-height: 1.55;
+  --text-lede: 16px;           /* the paragraph under a room head; long-form reading */
+  --text-lede--line-height: 1.6;
+  --text-h3: 17px;             /* card and panel headings */
+  --text-h3--line-height: 1.3;
+  --text-h2: 21px;             /* section heads inside a sheet; column heads */
+  --text-h2--line-height: 1.25;
+  --text-h1: 28px;             /* room head title, hero title, KPI figures */
+  --text-h1--line-height: 1.15;
+  --text-display: 34px;        /* sentence titles, dark-band titles */
+  --text-display--line-height: 1.08;
+  --text-hero: 44px;           /* the hero clock, and nothing else */
+  --text-hero--line-height: 1;
+}
+
 @theme inline {
   --color-background: var(--color-background);
   --color-frame: var(--color-frame);

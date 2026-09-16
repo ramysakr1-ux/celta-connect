@@ -59,7 +59,7 @@ function StatusPill({ attended, awaitingRegister }: { attended: boolean | null; 
   if (attended === null && awaitingRegister) {
     return (
       <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold"
         style={{ background: "var(--color-card-inset)", color: "var(--color-muted)" }}
       >
         <span className="size-1.5 rounded-full bg-current" />
@@ -73,7 +73,7 @@ function StatusPill({ attended, awaitingRegister }: { attended: boolean | null; 
   if (attended === null) {
     return (
       <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold"
         style={{ background: "var(--color-status-on-track-bg)", color: "var(--color-status-on-track-text)" }}
       >
         <span className="size-1.5 rounded-full border border-current" />
@@ -83,7 +83,7 @@ function StatusPill({ attended, awaitingRegister }: { attended: boolean | null; 
   }
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold"
       style={{
         background: attended ? "var(--color-status-on-track-bg)" : "var(--color-status-at-risk-bg)",
         color: attended ? "var(--color-status-on-track-text)" : "var(--color-status-at-risk-text)",
@@ -117,7 +117,7 @@ function MilestoneTile({ hours, hoursCredited, isLast, isNext }: { hours: number
   return (
     <div className="flex flex-1 flex-col items-center gap-0.5 rounded-[6px] border px-1 py-1.5 text-center" style={style}>
       <span className="text-xs font-bold">{hours}h</span>
-      <span className="text-[9px] font-semibold tracking-[0.06em] uppercase">{label}</span>
+      <span className="text-micro font-semibold tracking-[0.06em] uppercase">{label}</span>
     </div>
   );
 }
@@ -738,11 +738,11 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
             <div className="flex flex-col gap-5 p-[22px_20px]">
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-                <p className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+                <p className="text-label font-bold tracking-[0.08em] text-muted uppercase">
                   {course?.name ?? "Your course"}
                   {courseDatesLabel ? ` · ${courseDatesLabel}` : ""}
                 </p>
-                <Greeting name={volunteer.name} suffix="volunteer student" className="font-serif text-[19px] text-ink" />
+                <Greeting name={volunteer.name} suffix="volunteer student" className="font-serif text-h3 text-ink" />
               </div>
               {nextClass ? (
                 <NextClassBanner
@@ -847,11 +847,11 @@ function TitleBlock({
   // does not land as repetition.
   return (
     <div>
-      <p className={`font-bold text-muted uppercase ${desktop ? "text-[11px] tracking-[0.08em]" : "text-[10px] tracking-[0.08em]"}`}>
+      <p className={`font-bold text-muted uppercase ${desktop ? "text-label tracking-[0.08em]" : "text-micro tracking-[0.08em]"}`}>
         {course?.name ?? "Your course"}
         {desktop && endDateLabel ? ` · until ${endDateLabel}` : ""}
       </p>
-      <h1 className={`mt-1 font-serif font-semibold text-ink ${desktop ? "text-[22px]" : "text-[21px]"}`}>{headline}</h1>
+      <h1 className={`mt-1 font-serif font-semibold text-ink ${desktop ? "text-h2" : "text-h2"}`}>{headline}</h1>
     </div>
   );
 }
@@ -863,8 +863,8 @@ function NextClassFacts({ whereLabel, topicLabel, teachersLabel }: { whereLabel:
   return (
     <div className="flex flex-col gap-1.5">
       {facts.map(([label, value]) => (
-        <div key={label} className="flex gap-2.5 text-[13px] text-ink">
-          <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">{label}</span>
+        <div key={label} className="flex gap-2.5 text-meta text-ink">
+          <span className="w-[62px] shrink-0 text-micro font-bold tracking-[0.06em] text-muted uppercase">{label}</span>
           <span>{value}</span>
         </div>
       ))}
@@ -907,13 +907,13 @@ function NextClassCard({
       style={{ borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)", background: "oklch(99.2% 0.005 90)" }}
     >
       <div className="flex items-baseline justify-between gap-2">
-        <p className="font-serif text-[19px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        <p className="font-serif text-h3 font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
         {/* Labelled for the same reason the desktop panel is: a bare time
             beside a date reads as a clock rather than as when the class
             begins. */}
         {nextClass.eventTime ? (
-          <p className="text-[13px] font-semibold text-primary">
-            <span className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-75">Starts </span>
+          <p className="text-meta font-semibold text-primary">
+            <span className="text-micro font-bold tracking-[0.1em] uppercase opacity-75">Starts </span>
             <span className="tabular-nums">{nextClass.eventTime.slice(0, 5)}</span>
           </p>
         ) : null}
@@ -1030,7 +1030,7 @@ function NextClassBanner({
           thing said it twice in two type sizes. Ramy: "we understand this.
           The next class is enough." */}
       <div className="flex items-baseline justify-between gap-3">
-        <p className="font-serif text-[21px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        <p className="font-serif text-h2 font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
         {/* "Starts", not a bare number. Ramy read the unlabelled pill as a
             clock and asked why it wasn't moving -- fair, since a lone 10:00
             in a dark pill at a card corner looks like a widget rather than a
@@ -1039,8 +1039,8 @@ function NextClassBanner({
             its own word. */}
         {nextClass.eventTime ? (
           <span className="inline-flex items-baseline gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-primary-foreground">
-            <span className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-80">Starts</span>
-            <span className="text-[15px] font-bold tabular-nums">{nextClass.eventTime.slice(0, 5)}</span>
+            <span className="text-micro font-bold tracking-[0.1em] uppercase opacity-80">Starts</span>
+            <span className="text-lede font-bold tabular-nums">{nextClass.eventTime.slice(0, 5)}</span>
           </span>
         ) : null}
       </div>
@@ -1048,8 +1048,8 @@ function NextClassBanner({
       <div className="flex flex-col gap-[7px]">
         {facts.map((f) => (
           <div key={f.label} className="flex items-baseline gap-2.5">
-            <span className="w-[62px] flex-none text-[10px] font-bold tracking-[0.1em] text-muted uppercase">{f.label}</span>
-            <span className="text-[13px] text-ink">{f.value}</span>
+            <span className="w-[62px] flex-none text-micro font-bold tracking-[0.1em] text-muted uppercase">{f.label}</span>
+            <span className="text-meta text-ink">{f.value}</span>
           </div>
         ))}
       </div>
@@ -1071,11 +1071,11 @@ function NextClassBanner({
             timeZone={courseTimeZone}
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
-            className="wash flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary px-6 text-[14.5px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
+            className="wash flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary px-6 text-lede font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
           />
         ) : (
           <span
-            className="flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] px-6 text-[14.5px] font-semibold"
+            className="flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] px-6 text-lede font-semibold"
             style={{
               background: "color-mix(in oklab, var(--color-primary) 14%, transparent)",
               color: "var(--color-primary)",
@@ -1111,8 +1111,8 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
   return (
     <div id="classes" className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Your classes</p>
-        <p className="text-[11px] text-muted">{attendedCount} attended</p>
+        <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Your classes</p>
+        <p className="text-label text-muted">{attendedCount} attended</p>
       </div>
       {rows.length === 0 ? (
         <p className="text-sm text-muted">No classes scheduled yet.</p>
@@ -1121,7 +1121,7 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
           <div key={c.eventId} className="flex flex-col gap-2 rounded-[10px] border border-border bg-card px-[14px] py-[13px]">
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-semibold text-ink">{c.topic ?? c.courseName}</p>
-              <p className="shrink-0 text-[11px] text-muted">
+              <p className="shrink-0 text-label text-muted">
                 {formatShortDate(c.eventDate)}
                 {c.eventTime ? <span className="tabular-nums"> · {c.eventTime.slice(0, 5)}</span> : null}
               </p>
@@ -1145,7 +1145,7 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
     // header and the last row instead.
     <div id="classes" className="rounded-[6px] border border-border">
       <div
-        className="grid grid-cols-[96px_1fr_128px_150px] rounded-t-[6px] border-b border-border px-4 py-2 text-[9px] font-bold tracking-[0.06em] text-muted uppercase"
+        className="grid grid-cols-[96px_1fr_128px_150px] rounded-t-[6px] border-b border-border px-4 py-2 text-micro font-bold tracking-[0.06em] text-muted uppercase"
         style={{ background: "var(--color-card)" }}
       >
         <div>Date</div>
@@ -1202,7 +1202,7 @@ function MaterialsPanel({
   if (lessonCards.length === 0) return null;
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Materials</p>
+      <p className="text-micro font-bold tracking-[0.12em] text-muted uppercase">Materials</p>
       <div className="grid grid-cols-3 gap-2.5">
         {lessonCards.map((c) => (
           <LessonMaterialsCard
@@ -1241,15 +1241,15 @@ function HoursCard({
       }}
     >
       <div className="flex items-baseline justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.1em] text-primary uppercase">
+        <p className="flex items-center gap-1.5 text-micro font-bold tracking-[0.1em] text-primary uppercase">
           <span aria-hidden className="size-1.5 rounded-full bg-current" />
           Your hours
         </p>
         <p className="flex items-baseline gap-1">
-          <span className="font-serif text-[26px] leading-none font-semibold text-primary">
+          <span className="font-serif text-h1 leading-none font-semibold text-primary">
             {hoursCredited.toFixed(1)}
           </span>
-          <span className="text-[11px] font-semibold text-primary/70">hrs</span>
+          <span className="text-label font-semibold text-primary/70">hrs</span>
         </p>
       </div>
       <p className="mt-1 text-xs text-muted">
@@ -1263,7 +1263,7 @@ function HoursCard({
           <MilestoneTile key={m} hours={m} hoursCredited={hoursCredited} isLast={i === milestones.length - 1} isNext={i === nextMilestoneIndex} />
         ))}
       </div>
-      <p className="mt-2.5 text-[11px] text-muted">Every class counts, whichever level you are in. Stay for at least two of the three lessons and the class is yours.</p>
+      <p className="mt-2.5 text-label text-muted">Every class counts, whichever level you are in. Stay for at least two of the three lessons and the class is yours.</p>
     </div>
   );
 }
@@ -1284,13 +1284,13 @@ function ThisCourseCard({
   const pct = thisCourseHeldSoFar > 0 ? Math.round((thisCourseAttended / thisCourseHeldSoFar) * 100) : null;
   return (
     <div className="rounded-[10px] border border-border bg-card p-3.5">
-      <p className="text-[10px] font-bold tracking-[0.1em] text-muted uppercase">This course</p>
+      <p className="text-micro font-bold tracking-[0.1em] text-muted uppercase">This course</p>
       <div className="mt-1.5 flex items-baseline gap-1.5">
-        <span className="font-serif text-[28px] leading-none font-semibold text-ink">{thisCourseAttended}</span>
-        <span className="text-[13px] text-muted">of {thisCourseHeldSoFar} so far</span>
+        <span className="font-serif text-h1 leading-none font-semibold text-ink">{thisCourseAttended}</span>
+        <span className="text-meta text-muted">of {thisCourseHeldSoFar} so far</span>
         {pct !== null ? (
           <span
-            className="ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold"
+            className="ml-auto rounded-full px-2 py-0.5 text-label font-bold"
             style={{
               background: "color-mix(in oklab, var(--color-primary) 12%, transparent)",
               color: "var(--color-primary)",
@@ -1300,7 +1300,7 @@ function ThisCourseCard({
           </span>
         ) : null}
       </div>
-      <p className="mt-1 text-[11px] text-muted">{thisCourseClasses.length} classes in the course</p>
+      <p className="mt-1 text-label text-muted">{thisCourseClasses.length} classes in the course</p>
       <div className="mt-2 flex gap-1">
         {thisCourseClasses
           .slice()
@@ -1342,10 +1342,10 @@ function NeverShowsPanel() {
   ];
   return (
     <div className="rounded-[10px] border border-border bg-card p-3.5">
-      <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">What this link never shows</p>
+      <p className="text-micro font-bold tracking-[0.12em] text-muted uppercase">What this link never shows</p>
       <ul className="mt-2.5 grid grid-cols-2 gap-x-5 gap-y-1.5">
         {never.map((line) => (
-          <li key={line} className="flex items-start gap-2 text-[11.5px] leading-[1.5] text-muted">
+          <li key={line} className="flex items-start gap-2 text-label leading-[1.5] text-muted">
             <span aria-hidden className="mt-[6px] size-[3px] shrink-0 rounded-full bg-border" />
             {line}
           </li>
@@ -1358,7 +1358,7 @@ function NeverShowsPanel() {
 function Footer({ endDateLabel, materials, token }: { endDateLabel: string | null; materials: unknown[]; token: string }) {
   return (
     <div className="mt-2 flex flex-col items-center gap-2 border-t border-border-faint pt-4 text-center">
-      <p className="text-[11px] leading-[1.55] text-muted">
+      <p className="text-label leading-[1.55] text-muted">
         This link is yours alone. It stops working when the course ends{endDateLabel ? ` on ${endDateLabel}` : ""} — download anything you want to keep
         before then.
       </p>
@@ -1375,7 +1375,7 @@ function Footer({ endDateLabel, materials, token }: { endDateLabel: string | nul
         <InstallPrompt variant="inline" />
         <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
       </div>
-      <a href={`/student/${token}/unsubscribe`} className="text-[11px] text-muted hover:underline">
+      <a href={`/student/${token}/unsubscribe`} className="text-label text-muted hover:underline">
         Manage reminder emails
       </a>
     </div>

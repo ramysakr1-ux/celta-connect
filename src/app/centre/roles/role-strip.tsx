@@ -150,14 +150,14 @@ export function RoleStrip({
               }`}
             >
               <span className={`absolute inset-x-0 top-0 h-[3px] ${active ? s.spine : "bg-transparent"}`} aria-hidden="true" />
-              <span className={`block text-[13.5px] font-bold ${s.tone}`}>{roleLabel(role, customRoles)}</span>
+              <span className={`block text-body font-bold ${s.tone}`}>{roleLabel(role, customRoles)}</span>
               <span className="mt-0.5 block text-xs text-muted">{whoFor(role)}</span>
               {(holders[role] ?? []).length > 0 ? (
-                <span className="mt-1.5 block text-[11px] text-ink">
+                <span className="mt-1.5 block text-label text-ink">
                   {(holders[role] ?? []).map((h) => h.name).join(", ")}
                 </span>
               ) : (
-                <span className="mt-1.5 block text-[11px] text-muted">Nobody yet</span>
+                <span className="mt-1.5 block text-label text-muted">Nobody yet</span>
               )}
             </button>
           );
@@ -174,7 +174,7 @@ export function RoleStrip({
                 <Mark grant={p.grant} />
               </span>
               <span className="flex flex-col">
-                <span className="text-[13px] text-ink">{p.text}</span>
+                <span className="text-meta text-ink">{p.text}</span>
               </span>
             </div>
           ))}

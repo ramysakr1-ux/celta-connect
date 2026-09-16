@@ -65,16 +65,16 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example lesson — comparative adjectives</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -109,7 +109,7 @@ export default function PppSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: who learned a language mostly by being told the rule first, then practising it? Did that
             work for you?
           </p>
@@ -127,8 +127,8 @@ export default function PppSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">How do you think a PPP lesson should be staged?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
+          <p className="text-meta text-ink">How do you think a PPP lesson should be staged?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
         </div>
       </div>
 
@@ -136,7 +136,7 @@ export default function PppSession() {
         <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">Staging a PPP lesson</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A PPP lesson opens with the target language given directly, not discovered. The teacher sets up a clear
             context, models the form once or twice, and checks meaning with CCQs — all before students produce
             anything themselves. Form comes next, usually a short board summary, then pronunciation: stress, weak
@@ -153,7 +153,7 @@ export default function PppSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — answer these from the text, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />
@@ -162,7 +162,7 @@ export default function PppSession() {
 
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
         <p className="font-serif text-sm font-semibold text-ink">Presentation and practice, kept brief</p>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Present the form directly — a short board example and a quick CCQ check, not an extended explanation. Then
           move to controlled practice (drilling, a gap-fill, or a matching task using the same form) before freer
           practice (students producing the language themselves in a short exchange or writing task). Keep each stage

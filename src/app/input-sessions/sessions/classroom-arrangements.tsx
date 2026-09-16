@@ -144,7 +144,7 @@ export default function ClassroomArrangementsSession() {
         <div className="flex flex-col gap-2">
           {STAGES.map((s) => (
             <div key={s.stage} className="flex flex-col gap-1.5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">{s.stage}</p>
+              <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">{s.stage}</p>
               <ChoiceScenarioCard scenario={s} />
             </div>
           ))}
@@ -165,13 +165,13 @@ export default function ClassroomArrangementsSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Online equivalent · 7 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Breakout rooms replace physical rearranging — pair, small-group and whole-class “layouts” are just different
           room configurations. The planning question is the same: does this activity need everyone seeing everyone (main
           room, gallery view), or small isolated groups (breakouts)? Screen-share and annotation tools replace the
           whiteboard; a shared doc or the chat replaces the handout on the desk.
         </p>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Run the three stages above again, online: which room configuration for each, and what replaces the board?
         </p>
       </section>

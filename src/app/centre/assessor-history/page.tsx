@@ -75,8 +75,8 @@ export default async function AssessorHistoryPage({
     <div className="flex flex-col gap-8">
       <div className="flex items-end justify-between gap-4">
         <div className="flex max-w-[820px] flex-col gap-[13px]">
-          <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
-          <h1 className="font-serif text-[34px] leading-[1.14] font-semibold text-ink">Assessor history</h1>
+          <p className="text-label font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
+          <h1 className="font-serif text-display leading-[1.14] font-semibold text-ink">Assessor history</h1>
           <p className="text-sm leading-[1.6] text-muted text-pretty">
             Handbook 13.3: the same assessor must not be used for more than two consecutive courses. Handbook 13.8: an assessor must not assess
             more than two concurrent courses at a centre. A centre does not choose its assessor and repeat visits are common, so this is not
@@ -96,7 +96,7 @@ export default async function AssessorHistoryPage({
             <div key={a.profileId} className="hover-ring flex flex-col gap-4 rounded-[8px] border border-border bg-card p-[22px_24px]">
               <div className="flex flex-wrap items-baseline justify-between gap-3.5">
                 <div className="flex flex-col gap-[3px]">
-                  <p className="font-serif text-[19px] font-semibold text-ink">{a.name}</p>
+                  <p className="font-serif text-h3 font-semibold text-ink">{a.name}</p>
                   <p className="text-xs text-muted">
                     {a.courses.length} {a.courses.length === 1 ? "course" : "courses"} assessed at this centre
                     {assessorEmailById.get(a.profileId) ? ` · ${assessorEmailById.get(a.profileId)}` : ""}
@@ -107,13 +107,13 @@ export default async function AssessorHistoryPage({
                     <p className="font-serif text-xl font-semibold" style={{ color: SEVERITY_COLOR[a.currentStreakSeverity] }}>
                       {a.currentStreak}
                     </p>
-                    <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Consecutive streak</p>
+                    <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Consecutive streak</p>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
                     <p className="font-serif text-xl font-semibold" style={{ color: SEVERITY_COLOR[a.peakConcurrentSeverity] }}>
                       {a.peakConcurrent}
                     </p>
-                    <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Peak concurrent</p>
+                    <p className="text-micro font-bold tracking-[0.08em] text-muted uppercase">Peak concurrent</p>
                   </div>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export default async function AssessorHistoryPage({
               ) : null}
 
               <div className="overflow-hidden rounded-[6px] border border-border">
-                <div className="grid grid-cols-[96px_1fr_minmax(0,160px)_96px] gap-2 bg-[color-mix(in_oklab,var(--color-card-inset)_60%,var(--color-card))] px-3 py-2.5 text-[10px] font-bold tracking-[0.08em] text-muted uppercase">
+                <div className="grid grid-cols-[96px_1fr_minmax(0,160px)_96px] gap-2 bg-[color-mix(in_oklab,var(--color-card-inset)_60%,var(--color-card))] px-3 py-2.5 text-micro font-bold tracking-[0.08em] text-muted uppercase">
                   <span>Dates</span>
                   <span>Course</span>
                   <span>Overlap</span>
@@ -141,14 +141,14 @@ export default async function AssessorHistoryPage({
                 {a.courses.map((c, i) => (
                   <div
                     key={c.id}
-                    className={`hover-ring grid grid-cols-[96px_1fr_minmax(0,160px)_96px] items-center gap-2 px-3 py-2.5 text-[12.5px] text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
+                    className={`hover-ring grid grid-cols-[96px_1fr_minmax(0,160px)_96px] items-center gap-2 px-3 py-2.5 text-meta text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
                   >
                     <span className="text-xs text-muted">{dateRange(c.start_date, c.end_date)}</span>
                     <span className="font-semibold">{c.label}</span>
                     <span className="text-xs text-muted">{c.overlap}</span>
                     <span>
                       <span
-                        className="inline-flex items-center rounded-full px-2.5 py-[3px] text-[11px] font-semibold"
+                        className="inline-flex items-center rounded-full px-2.5 py-[3px] text-label font-semibold"
                         style={
                           c.status === "Active"
                             ? { background: "var(--color-status-on-track-bg)", color: "var(--color-status-on-track-text)" }

@@ -69,16 +69,16 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example lesson — a magazine article about changing city life</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -113,7 +113,7 @@ export default function TextBasedTeachingSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: think of the last coursebook lesson you did as a student. Did it start from a
             grammar point, or from a text?
           </p>
@@ -131,8 +131,8 @@ export default function TextBasedTeachingSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">How do you think a text-based lesson should be staged?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
+          <p className="text-meta text-ink">How do you think a text-based lesson should be staged?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function TextBasedTeachingSession() {
         <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">Staging a text-based lesson</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A text-based lesson starts from a text — a reading or a listening — chosen for its content and its
             language together, not from a grammar point chosen first. It opens with a lead-in that creates interest
             in the topic, often a prediction task from a title or image. A gist task comes next, testing global
@@ -157,7 +157,7 @@ export default function TextBasedTeachingSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — answer these from the text, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />
@@ -167,7 +167,7 @@ export default function TextBasedTeachingSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Highlight, then language focus and practice</p>
-          <p className="text-[11px] italic text-muted">Click each card for an example of how that stage can look with language that emerged from this text.</p>
+          <p className="text-label italic text-muted">Click each card for an example of how that stage can look with language that emerged from this text.</p>
         </div>
         {LANG_CARDS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />

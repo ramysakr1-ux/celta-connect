@@ -266,7 +266,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       ) : null}
 
       <div className="card flex flex-col gap-3 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Application</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Application</h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-muted">Date of birth</dt>
@@ -283,14 +283,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 const { band, age } = celtaAgeBand(applicant.date_of_birth, intake?.start_date ?? null);
                 if (band === "under_18") {
                   return (
-                    <span className="mt-1 block text-[11.5px] leading-relaxed font-semibold text-destructive">
+                    <span className="mt-1 block text-label leading-relaxed font-semibold text-destructive">
                       {age} at the course start. Cambridge requires candidates to be at least 18 — this applicant
                       must not be selected for the course (Handbook 7.3).
                     </span>
                   );
                 }
                 return band === "discretionary_18_20" ? (
-                  <span className="mt-1 block text-[11.5px] leading-relaxed text-status-warning-text">
+                  <span className="mt-1 block text-label leading-relaxed text-status-warning-text">
                     {age} at the course start. Cambridge recommends 20 or over; 18–20 is accepted at your
                     discretion (Handbook 7.3).
                   </span>
@@ -334,7 +334,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       </div>
 
       <div className="card flex flex-col gap-3 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Extended writing task</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Extended writing task</h2>
         {prompt ? (
           <p className="text-xs text-muted">
             {prompt.prompt_type[0].toUpperCase() + prompt.prompt_type.slice(1)}: {prompt.prompt_text}
@@ -382,7 +382,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 lane or the autobook/notification it drives. */}
             {applicant.speaking_task_ai_suggestion ? (
               <div className="rounded-[6px] border border-dashed border-border p-3">
-                <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
+                <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
                 <p className="mt-1 text-sm text-ink">{applicant.speaking_task_ai_suggestion}</p>
               </div>
             ) : null}
@@ -391,7 +391,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       </div>
 
       <div className="card flex flex-col gap-2 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Course commitments and code of conduct</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Course commitments and code of conduct</h2>
         {applicant.commitments_accepted_at ? (
           <>
             <p className="text-sm text-ink">
@@ -417,13 +417,13 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <MarkingForm applicant={applicant} />
       ) : (
         <div className="card flex flex-col gap-1 p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Marking scheme -- selection task</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Marking scheme -- selection task</h2>
           <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can mark this.</p>
         </div>
       )}
 
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Interview</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Interview</h2>
         {bookedSlot ? (
           <p className="text-sm text-ink">
             Booked: {formatCalendarDate(bookedSlot.slot_date, { weekday: "short" })} at {bookedSlot.slot_time.slice(0, 5)} ({bookedSlot.mode === "online" ? "Online" : "Face to face"}
@@ -532,14 +532,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       {hasOffer ? (
         <>
           <div className="card p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Offer</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Offer</h2>
             <p className="mt-1 text-sm text-ink">
               Sent {formatDate(applicant.offer_sent_at, timeZone, { year: "numeric" })}, accept by {formatCalendarDate(applicant.offer_accept_by, { year: "numeric" })}.
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
           <div className="card p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Deposit</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Deposit</h2>
             <p className="mt-1 text-sm text-muted">
               {paymentState.label}
               {paymentState.outstanding !== null ? ` \u00b7 ${paymentState.outstanding} outstanding` : ""}
@@ -581,7 +581,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {isWaitingList ? (
         <div className="card p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Waiting list</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Waiting list</h2>
           <p className="mt-1 text-sm text-ink">
             Position {applicant.waiting_list_position}. Will hear by {formatCalendarDate(applicant.waiting_list_hear_by, { year: "numeric" })}.
           </p>
@@ -602,7 +602,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <ReferForm applicantId={applicant.id} destinations={referDestinations} />
           {existingRequest ? (
             <div className="card flex flex-col gap-1 p-5">
-              <h2 className="font-serif text-[17px] font-semibold text-ink">Referral request</h2>
+              <h2 className="font-serif text-h3 font-semibold text-ink">Referral request</h2>
               <p className="text-sm text-ink">
                 {existingRequest.status === "pending"
                   ? `Waiting on ${existingRequest.toCenterName} to accept or decline.`
@@ -669,7 +669,7 @@ function AcknowledgementsGiven({
       </p>
       <ul className="mt-1 flex flex-col gap-1">
         {given.map(([statement]) => (
-          <li key={statement} className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink">
+          <li key={statement} className="flex items-start gap-2 text-meta leading-relaxed text-ink">
             <span className="mt-[2px] shrink-0 text-primary">&#10003;</span>
             <span>{statement}</span>
           </li>

@@ -61,8 +61,8 @@ export function CapabilityCustomizer({
     <div className="owner-card flex flex-col gap-5 px-[30px] py-7">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="owner-serif text-[21px]">Customize what each role can do</h2>
-          <p className="mt-1.5 max-w-[780px] text-[12.5px] leading-relaxed" style={{ color: "var(--owner-muted)" }}>
+          <h2 className="owner-serif text-h2">Customize what each role can do</h2>
+          <p className="mt-1.5 max-w-[780px] text-meta leading-relaxed" style={{ color: "var(--owner-muted)" }}>
             Defaults are sensible out of the box -- change only what your centre runs differently. The description
             shown on the Roles tab updates automatically to match whatever you set here.
           </p>
@@ -76,7 +76,7 @@ export function CapabilityCustomizer({
         <p className="owner-eyebrow mb-2.5" style={{ color: "var(--owner-garnet)" }}>
           How to use this
         </p>
-        <ol className="flex flex-col gap-2.5 text-[12.5px] leading-relaxed">
+        <ol className="flex flex-col gap-2.5 text-meta leading-relaxed">
           <li>
             <strong>Adjust an existing role:</strong> click any pill in the table to cycle it Full &rarr; View &rarr;
             None. Each cell is independent, so mix and match freely.
@@ -94,14 +94,14 @@ export function CapabilityCustomizer({
       </div>
 
       <div className="owner-card overflow-x-auto" style={{ boxShadow: "none" }}>
-        <table className="w-full border-collapse text-[12.5px]">
+        <table className="w-full border-collapse text-meta">
           <thead>
             <tr>
-              <th className="border-b px-4 py-3 text-left text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--owner-muted)", background: "var(--owner-parchment)", borderColor: "var(--owner-line)" }}>
+              <th className="border-b px-4 py-3 text-left text-micro font-bold tracking-[0.06em] uppercase" style={{ color: "var(--owner-muted)", background: "var(--owner-parchment)", borderColor: "var(--owner-line)" }}>
                 Capability
               </th>
               {roleCols.map((rc) => (
-                <th key={rc.key} className="border-b px-3 py-3 text-center text-[11px] font-bold" style={{ color: rc.color, background: "var(--owner-parchment)", borderColor: "var(--owner-line)" }}>
+                <th key={rc.key} className="border-b px-3 py-3 text-center text-label font-bold" style={{ color: rc.color, background: "var(--owner-parchment)", borderColor: "var(--owner-line)" }}>
                   {rc.label}
                 </th>
               ))}
@@ -127,7 +127,7 @@ export function CapabilityCustomizer({
         </table>
       </div>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <p className="max-w-[640px] text-[11px]" style={{ color: "var(--owner-muted)" }}>
+        <p className="max-w-[640px] text-label" style={{ color: "var(--owner-muted)" }}>
           Click any pill to cycle Full &rarr; View &rarr; None, independently per role -- mix and match freely. Course
           chat, grading, and candidate work never appear here; no role in this family can ever hold them.
         </p>
@@ -140,7 +140,7 @@ export function CapabilityCustomizer({
           <form action={resetCapabilityOverrides}>
             <button
               type="submit"
-              className="shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors"
+              className="shrink-0 rounded-full border px-3 py-1 text-label font-semibold transition-colors"
               style={{ borderColor: "var(--owner-line)", color: "var(--owner-muted)" }}
             >
               Reset all to defaults
@@ -163,7 +163,7 @@ export function CapabilityCustomizer({
               <p className="mb-1.5 text-xs font-bold" style={{ color: rc.color }}>
                 {rc.label}
               </p>
-              <p className="text-[11.5px] leading-relaxed">{describeRoleCapabilities(rc.key, overrides, customCapabilitiesOnly)}</p>
+              <p className="text-label leading-relaxed">{describeRoleCapabilities(rc.key, overrides, customCapabilitiesOnly)}</p>
             </div>
           ))}
         </div>

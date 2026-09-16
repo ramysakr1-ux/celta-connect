@@ -155,7 +155,7 @@ export default function ClassroomManagementSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Lead-in · 4 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           What do you think classroom management entails? Four minutes to brainstorm as many things as you can in your
           group before moving on.
         </p>
@@ -179,7 +179,7 @@ export default function ClassroomManagementSession() {
                   <span className="text-xs text-ink">
                     {String(i + 1).padStart(2, "0")} · {v.label}
                   </span>
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10.5px] font-semibold text-primary">
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-micro font-semibold text-primary">
                     {v.tag}
                   </span>
                 </div>
@@ -209,7 +209,7 @@ export default function ClassroomManagementSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 4 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           One thing from the monitoring simulation you will do differently, and one instruction you will write down in
           full before your next TP rather than improvising it in the room.
         </p>
@@ -323,9 +323,9 @@ function MonitoringSimulation() {
               }`}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[12.5px] font-semibold text-ink">{p.label}</span>
+                <span className="text-meta font-semibold text-ink">{p.label}</span>
                 <span
-                  className="text-[11px] font-semibold"
+                  className="text-label font-semibold"
                   style={{
                     color: status === "fine" ? MUTED : status === "stuck" ? GOLD : status === "finished" ? TEAL : RED,
                   }}
@@ -341,7 +341,7 @@ function MonitoringSimulation() {
                         key={o.label}
                         type="button"
                         onClick={() => setChosen((c) => ({ ...c, [p.key]: i }))}
-                        className="rounded-[6px] border border-border px-3 py-1.5 text-left text-[11.5px] text-ink hover:border-primary"
+                        className="rounded-[6px] border border-border px-3 py-1.5 text-left text-label text-ink hover:border-primary"
                       >
                         {o.label}
                       </button>
@@ -351,13 +351,13 @@ function MonitoringSimulation() {
                   <button
                     type="button"
                     onClick={() => setOpenPair(p.key)}
-                    className="self-start text-[11px] font-semibold text-primary"
+                    className="self-start text-label font-semibold text-primary"
                   >
                     Go over to them ▾
                   </button>
                 )
               ) : (
-                <p className={`text-[11.5px] leading-relaxed ${options[pick].good ? "text-primary" : "text-destructive"}`}>
+                <p className={`text-label leading-relaxed ${options[pick].good ? "text-primary" : "text-destructive"}`}>
                   {options[pick].good ? "✓ " : "✗ "}
                   {options[pick].why}
                 </p>
@@ -369,7 +369,7 @@ function MonitoringSimulation() {
 
       {done ? (
         <div className="flex flex-wrap items-center gap-3 rounded-[8px] border border-dashed border-border bg-accent/30 px-4 py-3">
-          <p className="text-[12px] text-ink">
+          <p className="text-meta text-ink">
             Time. Which pairs did you reach, in which order, and which one never actually needed you?
           </p>
           <button
@@ -379,7 +379,7 @@ function MonitoringSimulation() {
               setChosen({});
               setOpenPair(null);
             }}
-            className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-ink"
+            className="rounded-full border border-border px-3 py-1 text-label font-semibold text-ink"
           >
             Run it again
           </button>
@@ -445,7 +445,7 @@ function InstructionPractice() {
               setIndex(i);
               setText("");
             }}
-            className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+            className={`rounded-full px-3 py-1 text-label font-semibold ${
               i === index ? "bg-primary text-primary-foreground" : "border border-border text-muted"
             }`}
           >
@@ -454,7 +454,7 @@ function InstructionPractice() {
         ))}
       </div>
 
-      <p className="rounded-[6px] border border-dashed border-border bg-accent/30 px-3 py-2 text-[12px] text-ink">
+      <p className="rounded-[6px] border border-dashed border-border bg-accent/30 px-3 py-2 text-meta text-ink">
         <strong className="font-semibold">The task:</strong> {task.prompt}
       </p>
 
@@ -463,7 +463,7 @@ function InstructionPractice() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="“Work in pairs. Ask your partner about their weekend…”"
-        className="w-full rounded-[8px] border border-border bg-card px-3 py-2 text-[13px] leading-relaxed text-ink outline-none focus:border-primary"
+        className="w-full rounded-[8px] border border-border bg-card px-3 py-2 text-meta leading-relaxed text-ink outline-none focus:border-primary"
       />
 
       {results ? (
@@ -478,7 +478,7 @@ function InstructionPractice() {
               <span className={`flex-none text-xs font-bold ${r.ok ? "text-primary" : "text-status-warning-text"}`}>
                 {r.ok ? "✓" : "!"}
               </span>
-              <span className="text-[11.5px] leading-relaxed text-ink">
+              <span className="text-label leading-relaxed text-ink">
                 <strong className="font-semibold">{r.label}</strong>
                 {r.ok ? "" : ` — ${r.hint}`}
               </span>
@@ -486,7 +486,7 @@ function InstructionPractice() {
           ))}
         </ul>
       ) : (
-        <p className="text-[11px] italic text-muted">The check appears as you type. It is a prompt for discussion, not a grade.</p>
+        <p className="text-label italic text-muted">The check appears as you type. It is a prompt for discussion, not a grade.</p>
       )}
     </section>
   );
@@ -525,7 +525,7 @@ function InternalClock() {
           {state === "running" ? "Stop — that’s a minute" : state === "done" ? "Try again" : "Start"}
         </button>
         {result !== null ? (
-          <p className="text-[12.5px] text-ink">
+          <p className="text-meta text-ink">
             <strong className="font-semibold tabular-nums">{result.toFixed(1)}s.</strong>{" "}
             {result < 45
               ? "Short — under pressure a minute feels much longer than it is, which is why tasks get cut before learners are ready."

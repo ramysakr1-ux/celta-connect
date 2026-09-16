@@ -238,7 +238,7 @@ export function VolunteerRecorder({
       {status === "recording" ? (
         <div className="flex flex-col items-center gap-4">
           <div className="w-full rounded-lg border border-border bg-card-inset p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-muted">
+            <p className="text-micro font-bold uppercase tracking-wide text-muted">
               Question {promptIndex + 1} of {prompts.length}
             </p>
             <p className="mt-1 text-lg text-ink">{current.question}</p>

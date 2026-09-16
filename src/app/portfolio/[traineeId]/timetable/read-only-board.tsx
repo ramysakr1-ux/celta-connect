@@ -158,12 +158,12 @@ export function ReadOnlyTimetableBoard({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · Timetable</p>
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · Timetable</p>
           <h1 className="font-serif text-2xl text-ink">{week ? `Week ${weekIndex + 1} · ${week.label}` : "Nothing scheduled yet"}</h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-label font-semibold text-primary-foreground">
               {initials || "?"}
             </span>
             <span className="text-sm text-ink">
@@ -194,7 +194,7 @@ export function ReadOnlyTimetableBoard({
         <div className="flex items-center justify-between gap-3 rounded-[10px] px-4 py-3 text-primary-foreground" style={{ background: "oklch(38% 0.072 195)" }}>
           <div className="flex items-center gap-3">
             <span className="size-2 shrink-0 animate-pulse rounded-full" style={{ background: "oklch(63% 0.096 72)" }} />
-            <span className="text-[11px] font-semibold tracking-[0.08em] uppercase">Live now</span>
+            <span className="text-label font-semibold tracking-[0.08em] uppercase">Live now</span>
             <span className="text-sm font-medium">{liveEvent.title}</span>
             {liveEvent.event_time ? (
               <span className="text-xs opacity-80">
@@ -218,7 +218,7 @@ export function ReadOnlyTimetableBoard({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap justify-end gap-4 text-[11px] text-muted">
+      <div className="flex flex-wrap justify-end gap-4 text-label text-muted">
         {(Object.keys(CATEGORY_STYLE) as DisplayCategory[]).map((cat) => (
           <span key={cat} className="flex items-center gap-1.5">
             <span className="inline-block size-2.5 rounded-[3px]" style={{ background: CATEGORY_STYLE[cat].accent || "oklch(88% 0.016 82)" }} />
@@ -247,11 +247,11 @@ export function ReadOnlyTimetableBoard({
             produces. */}
         <div style={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, alignItems: "stretch" }}>
           <div />
-          <div className="px-2.5 pt-3 pb-2 text-[9.5px] font-bold tracking-[0.1em] text-muted uppercase">
+          <div className="px-2.5 pt-3 pb-2 text-micro font-bold tracking-[0.1em] text-muted uppercase">
             Admin &amp; deadlines
           </div>
           {timeBands.map((band) => (
-            <div key={band.label} className="px-2.5 pt-3 pb-2 text-[9.5px] font-bold tracking-[0.06em] text-muted">
+            <div key={band.label} className="px-2.5 pt-3 pb-2 text-micro font-bold tracking-[0.06em] text-muted">
               {band.label.replace(/\s*[–-]\s*/, " – ")}
             </div>
           ))}
@@ -272,12 +272,12 @@ export function ReadOnlyTimetableBoard({
                     borderLeft: `3px solid ${isToday ? "oklch(38% 0.072 195)" : "transparent"}`,
                   }}
                 >
-                  <p className={`font-serif text-[19px] leading-none ${isToday ? "text-primary" : "text-ink"}`}>
+                  <p className={`font-serif text-h3 leading-none ${isToday ? "text-primary" : "text-ink"}`}>
                     {row.date.split(" ")[1]}
                   </p>
-                  <p className="text-[9px] font-bold tracking-[0.12em] text-muted uppercase">{row.weekday}</p>
+                  <p className="text-micro font-bold tracking-[0.12em] text-muted uppercase">{row.weekday}</p>
                   {isToday ? (
-                    <p className="text-[8.5px] font-bold tracking-[0.1em] text-primary uppercase">Today</p>
+                    <p className="text-micro font-bold tracking-[0.1em] text-primary uppercase">Today</p>
                   ) : null}
                 </div>
                 {/* overflow visible so a lifted card is not clipped by its
@@ -336,9 +336,9 @@ export function ReadOnlyTimetableBoard({
             >
               <div className="flex items-baseline gap-2 border-b border-border-faint px-3.5 py-2.5">
                 <span className={`font-serif text-lg ${isToday ? "text-primary" : "text-ink"}`}>{row.date.split(" ")[1]}</span>
-                <span className="text-[9px] font-semibold tracking-[0.12em] text-muted uppercase">{row.weekday}</span>
+                <span className="text-micro font-semibold tracking-[0.12em] text-muted uppercase">{row.weekday}</span>
                 {isToday ? (
-                  <span className="text-[8.5px] font-semibold tracking-[0.1em] text-primary uppercase">Today</span>
+                  <span className="text-micro font-semibold tracking-[0.1em] text-primary uppercase">Today</span>
                 ) : null}
               </div>
               {visible.map(({ band, event }) => {
@@ -354,9 +354,9 @@ export function ReadOnlyTimetableBoard({
                     className="flex w-full items-start gap-3 border-b border-border-faint px-3.5 py-2.5 text-left last:border-b-0"
                     style={{ borderLeft: `3px solid ${style.accent === "transparent" ? "oklch(88% 0.016 82)" : style.accent}` }}
                   >
-                    <span className="w-[74px] shrink-0 pt-0.5 text-[10px] font-semibold text-muted">{band}</span>
+                    <span className="w-[74px] shrink-0 pt-0.5 text-micro font-semibold text-muted">{band}</span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="text-[12.5px] text-ink" style={{ fontWeight: style.titleWeight }}>
+                      <span className="text-meta text-ink" style={{ fontWeight: style.titleWeight }}>
                         {event.title}
                       </span>
                       {/* The subtitle the grid Cell shows (room and level for a
@@ -364,16 +364,16 @@ export function ReadOnlyTimetableBoard({
                           two parallel groups' identically-titled slots ("TP5 ·
                           B" in both) read as duplicates on a narrow screen. */}
                       {event.detail ? (
-                        <span className="text-[10.5px] text-muted">{event.detail}</span>
+                        <span className="text-micro text-muted">{event.detail}</span>
                       ) : null}
                       {meta.groupName || meta.teachingLetters ? (
-                        <span className="text-[10.5px] text-muted">
+                        <span className="text-micro text-muted">
                           {[meta.groupName, meta.teachingLetters].filter(Boolean).join(" · ")}
                         </span>
                       ) : null}
                       {mineOnly && meta.ownTpSlot ? (
                         <span
-                          className="mt-0.5 self-start rounded-full px-2 py-0.5 text-[9px] font-bold tracking-[0.06em] uppercase"
+                          className="mt-0.5 self-start rounded-full px-2 py-0.5 text-micro font-bold tracking-[0.06em] uppercase"
                           style={{ background: "oklch(60% 0.11 70 / 0.18)", color: "oklch(45% 0.09 70)" }}
                         >
                           You teach
@@ -419,7 +419,7 @@ export function ReadOnlyTimetableBoard({
         <DetailPanel event={selectedEvent} onClose={() => setSelectedEvent(null)} meta={eventMeta[selectedEvent.id] ?? EMPTY_META} />
       ) : null}
 
-      <p className="text-center text-[11px] text-muted">
+      <p className="text-center text-label text-muted">
         {/* The two views do different things and the sentence has to be true
             of both: the grid fades a session it can still show in place,
             the phone list drops it because vertical space is the scarce
@@ -591,20 +591,20 @@ function SessionTile({
 
   return (
     <button type="button" onClick={() => onSelect(event)} className="flex h-full w-full min-h-0 flex-col items-start gap-1 text-left">
-      <span className="line-clamp-2 text-[11.5px] leading-[1.25] text-ink" style={{ fontWeight: titleWeight }}>
+      <span className="line-clamp-2 text-label leading-[1.25] text-ink" style={{ fontWeight: titleWeight }}>
         {event.title}
       </span>
       {/* One meta line, as the design has it: the subtitle if there is one,
           otherwise time, group and letters. A second line pushed the join
           icon off the floor of a fixed tile. */}
       {event.detail ? (
-        <span className="line-clamp-2 text-[10px] leading-[1.3] text-muted">{event.detail}</span>
+        <span className="line-clamp-2 text-micro leading-[1.3] text-muted">{event.detail}</span>
       ) : letters || groupName || event.event_time ? (
-        <span className="text-[10px] leading-[1.3] text-muted">
+        <span className="text-micro leading-[1.3] text-muted">
           {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
-      {youTeach ? <span className="pill pill-neutral mt-auto text-[9px]">You teach</span> : null}
+      {youTeach ? <span className="pill pill-neutral mt-auto text-micro">You teach</span> : null}
       {showCamera ? (
         <span className={youTeach ? "" : "mt-auto"}>
           <CameraChip event={event} live={live} mine={mine} />

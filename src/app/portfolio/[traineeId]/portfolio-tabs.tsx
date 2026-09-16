@@ -63,7 +63,7 @@ export function PortfolioTabs({
 
   return (
     <nav className="flex w-[232px] shrink-0 flex-col gap-0.5 py-1">
-      <p className="px-3 pb-2.5 text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Workspace</p>
+      <p className="px-3 pb-2.5 text-micro font-semibold tracking-[0.12em] text-muted uppercase">Workspace</p>
       {TABS.map((tab) => {
         const href = `${base}${tab.href}`;
         const active = tab.href === "" ? pathname === base : pathname.startsWith(href);

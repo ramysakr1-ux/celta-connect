@@ -213,7 +213,7 @@ export default async function CourseAdminDetailPage({
       <div className={`card flex flex-col gap-4 p-5 ${belowMinimum ? "card-amber" : ""}`}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Admissions pipeline</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Admissions pipeline</h2>
             <p className="mt-1 text-sm text-muted">
               Ongoing for as long as this course is still accepting applications -- interview notifications,
               acceptances, and invites all happen from here.
@@ -242,9 +242,9 @@ export default async function CourseAdminDetailPage({
                 <span className="truncate text-sm font-medium text-ink">{row.fullName}</span>
                 <span className="text-xs text-muted">{row.stageLabel}</span>
                 {row.flagged ? (
-                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">Flagged</span>
+                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-micro font-bold text-destructive">Flagged</span>
                 ) : row.accepted ? (
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">Accepted</span>
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-label font-semibold text-primary">Accepted</span>
                 ) : (
                   <span className="text-xs text-muted">{row.statusLabel}</span>
                 )}
@@ -283,7 +283,7 @@ export default async function CourseAdminDetailPage({
           teal, since Tutors right below stays teal. */}
       <div className={`card flex flex-col gap-4 p-5 ${entryFormOverdue ? "card-red" : ""}`}>
         <div>
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Entry form</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Entry form</h2>
           <p className="mt-1 text-sm text-muted">
             Fixes the cohort and the candidates&apos; names as Cambridge holds them, and decides whether a later
             withdrawal is internal only or reportable. Submitted in Appian directly -- Connect only tracks whether
@@ -376,7 +376,7 @@ export default async function CourseAdminDetailPage({
           to their in-course work (roster/subgroups/grades etc. are MCT
           territory, see the footnote). */}
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Tutors</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
         {tutors.length === 0 ? (
           <p className="text-sm text-muted">No tutors have joined yet.</p>
         ) : (
@@ -412,7 +412,7 @@ export default async function CourseAdminDetailPage({
           sets it first is what the other sees. */}
       <div className="card flex flex-col gap-4 p-5">
         <div>
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Assessor</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Assessor</h2>
           <p className="mt-1 text-sm text-muted">
             Optional -- often not known this early. Name it now if you already know, or leave it for the MCT to set
             once the course is running. The MCT gets notified with this contact info as soon as it&apos;s set.

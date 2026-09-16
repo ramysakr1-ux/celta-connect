@@ -163,7 +163,7 @@ export function ImportWizard({
               }`}
             >
               <span className={`font-serif text-lg ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
-              <span className={`text-[13px] font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
+              <span className={`text-meta font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
             </div>
           );
         })}
@@ -172,7 +172,7 @@ export function ImportWizard({
       {currentStep === "connect" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-[22px] text-ink">Point Connect at the file you already have</h2>
+            <h2 className="font-serif text-h2 text-ink">Point Connect at the file you already have</h2>
             <p className="mt-1 text-sm text-muted">
               Nothing is written anywhere yet. This is a one-time read, not a live link -- your spreadsheet keeps
               working exactly as it did, and nothing here changes when somebody edits it afterwards.
@@ -231,7 +231,7 @@ export function ImportWizard({
       {currentStep === "map" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-[22px] text-ink">Their column names, our fields</h2>
+            <h2 className="font-serif text-h2 text-ink">Their column names, our fields</h2>
             <p className="mt-1 text-sm text-muted">
               Connect guesses from the headings. What it can&apos;t guess is what your own words mean -- every centre
               has a status column and no two use the same vocabulary.
@@ -277,7 +277,7 @@ export function ImportWizard({
 
           {statusValues.length > 0 ? (
             <div className="flex flex-col gap-2 border-t border-border-faint pt-4">
-              <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">
+              <p className="text-label font-semibold tracking-[0.12em] text-status-warning-text uppercase">
                 Your status words &middot; {statusValues.length}
               </p>
               <p className="text-sm text-muted">
@@ -333,7 +333,7 @@ export function ImportWizard({
       {currentStep === "preview" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-[22px] text-ink">
+            <h2 className="font-serif text-h2 text-ink">
               {rows.length} row{rows.length === 1 ? "" : "s"}, and what each will become
             </h2>
             <p className="mt-1 text-sm text-muted">
@@ -351,7 +351,7 @@ export function ImportWizard({
             ].map((t) => (
               <div key={t.k} className="flex flex-col gap-0.5">
                 <span className={`font-serif text-2xl ${t.cls}`}>{t.v}</span>
-                <span className="text-[11px] tracking-[0.08em] text-muted uppercase">{t.k}</span>
+                <span className="text-label tracking-[0.08em] text-muted uppercase">{t.k}</span>
               </div>
             ))}
           </div>
@@ -422,7 +422,7 @@ export function ImportWizard({
       {currentStep === "after" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-[22px] text-ink">Imported, and nobody has been emailed</h2>
+            <h2 className="font-serif text-h2 text-ink">Imported, and nobody has been emailed</h2>
             <p className="mt-1 text-sm text-muted">
               The pipeline now has {state.imported} more {state.imported === 1 ? "person" : "people"} in it, at the
               stages you chose. Not one of them has heard from Connect.

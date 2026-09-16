@@ -59,8 +59,8 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
       >
         <input type="hidden" name="event_id" value={event.id} />
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Who came</h2>
-          <span className="text-[12.5px] text-muted">
+          <h2 className="font-serif text-h2 font-semibold text-ink-warm">Who came</h2>
+          <span className="text-meta text-muted">
             {event.register_submitted_at
               ? `Last taken ${formatDateTime(event.register_submitted_at, timeZone)}`
               : "Not taken yet"}
@@ -83,10 +83,10 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
                       level is free text on the volunteer, and a register
                       that silently hides someone who walked in is worse
                       than one that lists a name too many. */}
-                  {v.level ? <span className="ml-2 text-[12px] text-muted">{v.level}</span> : null}
+                  {v.level ? <span className="ml-2 text-meta text-muted">{v.level}</span> : null}
                 </span>
-                {viaZoom.has(v.id) ? <span className="pill pill-neutral text-[10px]">via Zoom</span> : null}
-                {declined.has(v.id) ? <span className="pill pill-neutral text-[10px]">said they could not come</span> : null}
+                {viaZoom.has(v.id) ? <span className="pill pill-neutral text-micro">via Zoom</span> : null}
+                {declined.has(v.id) ? <span className="pill pill-neutral text-micro">said they could not come</span> : null}
               </label>
             ))}
           </div>
@@ -94,7 +94,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
 
         <button
           type="submit"
-          className="mt-1 inline-flex h-9 w-fit items-center rounded-full px-5 text-[13px] font-semibold text-primary-foreground"
+          className="mt-1 inline-flex h-9 w-fit items-center rounded-full px-5 text-meta font-semibold text-primary-foreground"
           style={{ background: "var(--hub-accent)" }}
         >
           Save the register

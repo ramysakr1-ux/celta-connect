@@ -284,7 +284,7 @@ export default async function TpHubPage({
     <div className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Teaching practice record</p>
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Teaching practice record</p>
           <h2 className="font-serif text-2xl text-ink">
             {tpsTaught} of 8 taught · {assessedHours.toFixed(1)} hrs assessed
           </h2>
@@ -319,7 +319,7 @@ export default async function TpHubPage({
 
       <div className={`grid grid-cols-1 gap-4 ${!isStaff && carriedForward.length > 0 ? "lg:grid-cols-[1.5fr_1fr]" : ""}`}>
         <div className="sheet flex flex-col gap-1 border-t-[3px] border-t-primary">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Your lessons</p>
+          <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">Your lessons</p>
           <div className="flex flex-col">
             {visibleTpNumbers.map((tpNumber) => {
               const plan = planByTpNumber.get(tpNumber);
@@ -397,7 +397,7 @@ export default async function TpHubPage({
               );
             })}
           </div>
-          <p className="mt-2 text-[11px] text-muted">
+          <p className="mt-2 text-label text-muted">
             No grade column anywhere. A candidate never sees a provisional grade -- they see whether a lesson was to
             standard, and what to do next.
           </p>
@@ -408,7 +408,7 @@ export default async function TpHubPage({
           // it -- no status meaning of its own (the warning-colored eyebrow
           // text inside is untouched).
           <div className="sheet sheet-garnet flex flex-col gap-2.5">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
+            <p className="text-label font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
             <p className="text-xs text-muted">
               Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan
               as personal aims.
@@ -420,7 +420,7 @@ export default async function TpHubPage({
                 </li>
               ))}
             </ul>
-            <p className="text-[11px] text-muted">Starred action points arrive as personal aims in your next plan automatically. You never copy them across.</p>
+            <p className="text-label text-muted">Starred action points arrive as personal aims in your next plan automatically. You never copy them across.</p>
           </div>
         ) : null}
       </div>
@@ -428,9 +428,9 @@ export default async function TpHubPage({
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {canSeeCriteria ? (
           <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
+            <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
             <div className="flex items-baseline gap-2.5">
-              <span className="font-serif text-[32px] leading-none text-ink">{criteriaPct}%</span>
+              <span className="font-serif text-display leading-none text-ink">{criteriaPct}%</span>
               <span className="text-xs text-muted">{achievedCount} of {CELTA_CRITERIA_CODES.length} met</span>
             </div>
             <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">

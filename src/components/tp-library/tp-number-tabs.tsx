@@ -67,7 +67,7 @@ export function TpNumberTabs({
             }`}
           >
             <span className={`text-xs font-bold ${n === selected ? "text-primary" : "text-ink"}`}>TP{n}</span>
-            <span className="text-[10px] text-muted">{DENSITY_TIER_LABELS[getDensityTier(n)].name}</span>
+            <span className="text-micro text-muted">{DENSITY_TIER_LABELS[getDensityTier(n)].name}</span>
           </button>
         ))}
       </div>

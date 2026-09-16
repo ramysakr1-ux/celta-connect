@@ -64,16 +64,16 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example lesson — uses of the present continuous</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function TestTeachTestSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: has a teacher ever corrected you on something you actually already knew? How did
             that feel, compared to genuinely being taught something new?
           </p>
@@ -126,8 +126,8 @@ export default function TestTeachTestSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">How do you think a Test-Teach-Test lesson should be staged?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute.</p>
+          <p className="text-meta text-ink">How do you think a Test-Teach-Test lesson should be staged?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute.</p>
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default function TestTeachTestSession() {
         <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">Staging a Test-Teach-Test lesson</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             TTT begins with a test, not a presentation. Students attempt a task — sentence choice, gap-fill, matching,
             or a discussion that requires the target language — before any teaching happens. The point isn&apos;t to
             catch students out; it&apos;s diagnostic, revealing exactly which gaps exist, and which of meaning, form or
@@ -155,7 +155,7 @@ export default function TestTeachTestSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — answer these from the text, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />
@@ -163,11 +163,11 @@ export default function TestTeachTestSession() {
 
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">Handling the teach stage without over-explaining</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             The test already showed which gap is real, so the teach stage only closes that gap — the fastest ways to
             do it involve the teacher talking least. Some examples:
           </p>
-          <ul className="list-disc space-y-1.5 pl-[18px] text-[12.5px] leading-relaxed text-ink">
+          <ul className="list-disc space-y-1.5 pl-[18px] text-meta leading-relaxed text-ink">
             <li>
               <strong className="font-semibold">Meaning gap</strong> — put the sentence on the board and ask two or
               three CCQs (&quot;did this happen once or many times?&quot;) rather than explaining the rule; let
@@ -191,11 +191,11 @@ export default function TestTeachTestSession() {
 
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">What the second test can look like</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Test 2 checks the same gap the first test found — same task type, new items, so students can&apos;t just
             recall answers from Test 1. Examples, matched to the first test&apos;s task type:
           </p>
-          <ul className="list-disc space-y-1.5 pl-[18px] text-[12.5px] leading-relaxed text-ink">
+          <ul className="list-disc space-y-1.5 pl-[18px] text-meta leading-relaxed text-ink">
             <li>Test 1 was a gap-fill → Test 2 is a fresh gap-fill with the same target language in new sentences, not the same sentences reused.</li>
             <li>Test 1 was sentence choice (right/wrong) → Test 2 is a short set of new sentences to judge, or a quick error-correction task.</li>
             <li>Test 1 was matching → Test 2 asks students to produce the language themselves — a short written sentence or a spoken exchange — a slightly freer check than the first test, since accuracy should now be closer.</li>

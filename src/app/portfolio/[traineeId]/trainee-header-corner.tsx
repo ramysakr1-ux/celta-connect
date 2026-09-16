@@ -42,7 +42,7 @@ export function TraineeHeaderCorner({
           of 20" indefinitely, which told someone opening Connect weeks later
           that they were still on the last day of a course that was over. */}
       {courseDayProgress ? (
-        <span className="text-[11px] font-medium tabular-nums" style={{ color: "oklch(78% 0.02 80)" }}>
+        <span className="text-label font-medium tabular-nums" style={{ color: "oklch(78% 0.02 80)" }}>
           {courseDayProgress.finished
             ? "Course finished"
             : `Day ${courseDayProgress.currentDay} of ${courseDayProgress.totalDays}`}

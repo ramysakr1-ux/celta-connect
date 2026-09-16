@@ -425,7 +425,7 @@ export default async function TpDetailPage({
   const criteriaEvidenced =
     plan && feedback?.submitted_at ? (
       <div className="sheet p-6">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Criteria evidenced{criteriaCodes.length > 0 ? ` · ${criteriaCodes.length}` : ""}
         </p>
         <p className="mt-1 text-xs text-muted">The CELTA 5 criteria your tutor tagged in this lesson&apos;s feedback.</p>
@@ -682,7 +682,7 @@ export default async function TpDetailPage({
             >
               {item.label}
               {item.badge ? (
-                <span className="flex min-w-[16px] items-center justify-center rounded-full bg-surface-muted px-1 py-0.5 text-[10px] font-bold text-muted">
+                <span className="flex min-w-[16px] items-center justify-center rounded-full bg-surface-muted px-1 py-0.5 text-micro font-bold text-muted">
                   {item.badge}
                 </span>
               ) : null}
@@ -865,7 +865,7 @@ export default async function TpDetailPage({
 
         {peerSheet?.revealed_at && (peerNotes ?? []).length > 0 ? (
           <div className="sheet p-6">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">From your peers</p>
+            <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">From your peers</p>
             <p className="mt-1 text-xs text-muted">
               Not a Cambridge document -- kept out of the portfolio, CELTA5, and the assessor pack.
             </p>

@@ -105,8 +105,8 @@ export function CohortSheet({
     <div className="sheet flex flex-col gap-4">
       <div className="flex items-end justify-between gap-5">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Cohort</p>
-          <h2 className="font-serif text-[20px] font-semibold text-ink-warm">
+          <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Cohort</p>
+          <h2 className="font-serif text-h2 font-semibold text-ink-warm">
             {rows.length} candidate{rows.length === 1 ? "" : "s"}
           </h2>
         </div>
@@ -160,7 +160,7 @@ export function CohortSheet({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
         {/* Undecided -- needs justification */}
         <div className="rounded-[6px] border border-border">
-          <p className="border-b border-border bg-status-warning-bg px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-status-warning-text">
+          <p className="border-b border-border bg-status-warning-bg px-4 py-2 text-micro font-semibold uppercase tracking-[0.12em] text-status-warning-text">
             Undecided — needs justification · {undecidedRows.length}
           </p>
           {undecidedRows.length === 0 ? (
@@ -188,7 +188,7 @@ export function CohortSheet({
             </div>
           )}
           {undecidedRows.length > 0 ? (
-            <p className="border-t border-border-faint px-4 py-2.5 text-[11px] leading-relaxed text-muted">
+            <p className="border-t border-border-faint px-4 py-2.5 text-label leading-relaxed text-muted">
               Admin Handbook 10.2: a fail-risk letter must be issued with at least two assessed lessons still to
               teach -- issued from each candidate&apos;s own CELTA 5 page, not from here.
             </p>
@@ -197,7 +197,7 @@ export function CohortSheet({
 
         {/* Settled */}
         <div className="rounded-[6px] border border-border">
-          <p className="border-b border-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+          <p className="border-b border-border px-4 py-2 text-micro font-semibold uppercase tracking-[0.12em] text-muted">
             Settled · {settledRows.length}
           </p>
           <div className="divide-y divide-border-faint">
@@ -221,15 +221,15 @@ export function CohortSheet({
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Candidate</th>
+              <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Candidate</th>
               {Array.from({ length: 8 }, (_, i) => (
-                <th key={i} className="w-[34px] px-0.5 py-2.5 text-center text-[10px] font-semibold text-muted">
+                <th key={i} className="w-[34px] px-0.5 py-2.5 text-center text-micro font-semibold text-muted">
                   {i + 1}
                 </th>
               ))}
-              <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Provisional</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-status-warning-text">Recommended</th>
-              <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Outstanding</th>
+              <th className="px-4 py-2.5 text-center text-micro font-semibold uppercase tracking-[0.12em] text-muted">Provisional</th>
+              <th className="px-4 py-2.5 text-center text-micro font-semibold uppercase tracking-[0.12em] text-status-warning-text">Recommended</th>
+              <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Outstanding</th>
             </tr>
           </thead>
           <tbody>
@@ -261,7 +261,7 @@ export function CohortSheet({
       </div>
 
       <div className="flex flex-wrap items-center gap-5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">TP rating</span>
+        <span className="text-micro font-semibold uppercase tracking-[0.12em] text-muted">TP rating</span>
         {LEGEND.map((l) => (
           <div key={l.code} className="flex items-center gap-2">
             <StandardRatingGlyph

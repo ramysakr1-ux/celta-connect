@@ -38,7 +38,7 @@ export default async function SupportScopedViewPage({ params }: { params: Promis
     <div className="mx-auto flex max-w-3xl flex-col gap-5 p-6">
       <div className="sheet flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">
             {grant.scope === "course" ? "Course access" : "Billing access"} · {center?.name ?? "Centre"}
           </p>
           <p className="mt-1 text-sm text-ink">{grant.reason}</p>
@@ -46,7 +46,7 @@ export default async function SupportScopedViewPage({ params }: { params: Promis
         </div>
         <CountdownBadge expiresAt={grant.expires_at} />
       </div>
-      <p className="text-[11px] text-muted">
+      <p className="text-label text-muted">
         Every page opened during this window is logged to the centre&apos;s own access log.
       </p>
 

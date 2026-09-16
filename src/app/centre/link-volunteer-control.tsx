@@ -17,7 +17,7 @@ export function LinkVolunteerControl({
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="text-[11px] text-primary hover:underline">
+      <button type="button" onClick={() => setOpen(true)} className="text-label text-primary hover:underline">
         Same person as…
       </button>
     );
@@ -40,7 +40,7 @@ export function LinkVolunteerControl({
         });
       }}
       onBlur={() => setOpen(false)}
-      className="h-7 rounded-[6px] border border-border bg-card-inset px-1.5 text-[11px] text-ink outline-none focus:border-primary"
+      className="h-7 rounded-[6px] border border-border bg-card-inset px-1.5 text-label text-ink outline-none focus:border-primary"
     >
       <option value="" disabled>
         {pending ? "Linking…" : "Choose who…"}

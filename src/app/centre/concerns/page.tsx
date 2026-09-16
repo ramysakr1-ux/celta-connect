@@ -96,7 +96,7 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
                 {c.anonymous ? "Anonymous" : (nameById.get(c.trainee_id) ?? "Candidate")}
                 <span className="font-normal text-muted"> &middot; {courseNameById.get(c.course_id) ?? "Course"}</span>
               </span>
-              <span className="text-[11.5px] text-muted">
+              <span className="text-label text-muted">
                 {formatDate(c.created_at, zoneByCourse.get(c.course_id) ?? DEFAULT_TIMEZONE, {
                   day: "numeric",
                   month: "long",
@@ -107,7 +107,7 @@ export default async function CentreConcernsPage({ searchParams }: { searchParam
             <p className="text-sm leading-[1.6] whitespace-pre-wrap text-ink">{c.body}</p>
             {c.response ? (
               <div className="rounded-[10px] bg-card-inset px-4 py-3">
-                <p className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">The centre replied</p>
+                <p className="text-label font-bold tracking-[0.08em] text-muted uppercase">The centre replied</p>
                 <p className="mt-1 text-sm leading-[1.55] whitespace-pre-wrap text-ink">{c.response}</p>
               </div>
             ) : (

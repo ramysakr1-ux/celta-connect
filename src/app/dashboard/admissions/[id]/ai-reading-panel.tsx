@@ -58,7 +58,7 @@ export function AiReadingPanel({
   return (
     <div className="card flex flex-col gap-3 border-dashed p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
         {lane ? (
           <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-ink">{lane.label}</span>
         ) : null}

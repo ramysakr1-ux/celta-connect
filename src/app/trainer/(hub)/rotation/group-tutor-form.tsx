@@ -78,7 +78,7 @@ export function GroupTutorForm({
                 <input type="hidden" name="assignment_id" value={a.id} />
                 <input type="hidden" name="group_id" value={groupId} />
                 <input type="hidden" name="course_id" value={courseId} />
-                <button type="submit" className="text-[11px] text-muted underline hover:text-ink">
+                <button type="submit" className="text-label text-muted underline hover:text-ink">
                   Remove
                 </button>
               </form>
@@ -121,7 +121,7 @@ export function GroupTutorForm({
         >
           {addPending ? "Saving…" : sorted.length === 0 ? "Set tutor" : "Add handover"}
         </button>
-        {addState.error ? <span className="w-full text-[11px] text-destructive">{addState.error}</span> : null}
+        {addState.error ? <span className="w-full text-label text-destructive">{addState.error}</span> : null}
       </form>
 
       <form action={daysAction} className="flex flex-wrap items-center gap-2">
@@ -136,7 +136,7 @@ export function GroupTutorForm({
         >
           {daysPending ? "Saving…" : "Save"}
         </button>
-        {daysState.error ? <span className="w-full text-[11px] text-destructive">{daysState.error}</span> : null}
+        {daysState.error ? <span className="w-full text-label text-destructive">{daysState.error}</span> : null}
       </form>
     </div>
   );

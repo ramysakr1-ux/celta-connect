@@ -219,8 +219,8 @@ export default async function EmailPreviewPage({
           Admin. */}
       <BackLink href="/dashboard/admissions" label={"Admissions"} />
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · emails</p>
-        <h1 className="mt-1 font-serif text-[26px] text-ink">What your centre sends</h1>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Connect · emails</p>
+        <h1 className="mt-1 font-serif text-h1 text-ink">What your centre sends</h1>
         <p className="mt-1 text-sm text-muted">
           Rendered exactly as they send, with the design files&apos; own sample names so you can hold this next to
           the source. Nothing here is real candidate data.

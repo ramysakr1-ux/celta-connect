@@ -79,10 +79,10 @@ function ConceptCard({ n, label, detail }: { n: number; label: string; detail: s
   return (
     <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full flex-col gap-1 rounded-[8px] border border-border bg-card px-3.5 py-2.5 text-left">
       <div className="flex items-baseline gap-2.5">
-        <span className="min-w-[16px] text-[10.5px] font-bold text-muted">{String(n).padStart(2, "0")}</span>
-        <span className="flex-1 text-[12.5px] font-semibold text-ink">{label}</span>
+        <span className="min-w-[16px] text-micro font-bold text-muted">{String(n).padStart(2, "0")}</span>
+        <span className="flex-1 text-meta font-semibold text-ink">{label}</span>
       </div>
-      {open ? <p className="pl-[26px] text-[11.5px] leading-relaxed text-muted">{detail}</p> : null}
+      {open ? <p className="pl-[26px] text-label leading-relaxed text-muted">{detail}</p> : null}
     </button>
   );
 }
@@ -97,9 +97,9 @@ function TechniqueRow({ technique, week1, note }: { technique: string; week1: bo
     >
       <span className="text-xs font-semibold text-ink">{technique}</span>
       {open ? (
-        <span className="text-[11.5px] text-primary">{(week1 ? "Week one. " : "Once basic decoding is established. ") + note}</span>
+        <span className="text-label text-primary">{(week1 ? "Week one. " : "Once basic decoding is established. ") + note}</span>
       ) : (
-        <span className="text-[10.5px] font-semibold text-muted">Click to reveal</span>
+        <span className="text-micro font-semibold text-muted">Click to reveal</span>
       )}
     </button>
   );
@@ -113,15 +113,15 @@ function AdaptHandout() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
       <div className="flex items-baseline justify-between">
-        <p className="text-[13px] font-bold text-ink">Adapt the handout</p>
-        <p className="text-[10.5px] font-semibold text-muted">
+        <p className="text-meta font-bold text-ink">Adapt the handout</p>
+        <p className="text-micro font-semibold text-muted">
           Handout {index + 1} of {ADAPT_OPTIONS.length}
         </p>
       </div>
-      <p className="text-[11.5px] text-muted">This handout is written for a fluent reader. Pick the version you&apos;d actually give a pre-literate beginner group.</p>
+      <p className="text-label text-muted">This handout is written for a fluent reader. Pick the version you&apos;d actually give a pre-literate beginner group.</p>
       <div className="rounded-[8px] bg-accent p-3.5">
         <p className="mb-1 text-xs font-semibold text-muted">Original handout</p>
-        <p className="text-[13px] leading-relaxed text-ink">{ADAPT_ORIGINAL[index]}</p>
+        <p className="text-meta leading-relaxed text-ink">{ADAPT_ORIGINAL[index]}</p>
       </div>
       {options.map((o, i) => {
         const picked = choice === i;
@@ -134,8 +134,8 @@ function AdaptHandout() {
               picked ? (o.good ? "border-primary/40 bg-primary/10" : "border-destructive/40 bg-destructive/5") : "border-border bg-card"
             }`}
           >
-            <p className="text-[13px] leading-relaxed text-ink">{o.text}</p>
-            {picked ? <p className={`text-[11.5px] leading-relaxed ${o.good ? "text-primary" : "text-destructive"}`}>{o.note}</p> : null}
+            <p className="text-meta leading-relaxed text-ink">{o.text}</p>
+            {picked ? <p className={`text-label leading-relaxed ${o.good ? "text-primary" : "text-destructive"}`}>{o.note}</p> : null}
           </button>
         );
       })}
@@ -146,7 +146,7 @@ function AdaptHandout() {
             setIndex((i) => i + 1);
             setChoice(null);
           }}
-          className="self-start flex h-7 items-center gap-1.5 rounded-full border border-border px-3.5 text-[11px] font-semibold text-ink"
+          className="self-start flex h-7 items-center gap-1.5 rounded-full border border-border px-3.5 text-label font-semibold text-ink"
         >
           Next handout →
         </button>
@@ -177,11 +177,11 @@ export default function TeachingLiteracySession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 3 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">Look at the line below for two seconds, then look away. What did it say?</p>
+          <p className="text-meta text-ink">Look at the line below for two seconds, then look away. What did it say?</p>
           <div className="mt-2.5 rounded-[6px] bg-accent px-3.5 py-2.5 text-center text-xl tracking-wide text-ink">
             ᠮᠣᠩᠭᠣᠯ ᠬᠡᠯᠡ ᠰᠤᠷᠬᠤ
           </div>
-          <p className="mt-2 text-[11.5px] text-muted">
+          <p className="mt-2 text-label text-muted">
             Most people can&apos;t hold or reproduce a script they&apos;ve never learned to decode. That&apos;s the position some
             of your learners are in with the Latin alphabet — even after weeks in your class.
           </p>
@@ -190,15 +190,15 @@ export default function TeachingLiteracySession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">What &quot;literacy&quot; covers here · 10 minutes</p>
-        <p className="text-[11.5px] text-muted">Click each to reveal what it actually looks like in the room.</p>
+        <p className="text-label text-muted">Click each to reveal what it actually looks like in the room.</p>
         {CONCEPTS.map((c, i) => (
           <ConceptCard key={c.label} n={i + 1} label={c.label} detail={c.detail} />
         ))}
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[10px] border border-border bg-card p-5">
-        <p className="text-[13px] font-bold text-ink">Spot the pre-literacy barrier</p>
-        <p className="text-[11.5px] text-muted">
+        <p className="text-meta font-bold text-ink">Spot the pre-literacy barrier</p>
+        <p className="text-label text-muted">
           Each of these is a real moment from a beginner class. Decide: does this need a literacy adaptation, or is it a
           normal beginner-level language gap? Click to check.
         </p>
@@ -211,7 +211,7 @@ export default function TeachingLiteracySession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">Techniques for a pre-literate class · 12 minutes</p>
-        <p className="text-[11.5px] text-muted">
+        <p className="text-label text-muted">
           In pairs, look at each technique below and agree: would you use this in week one, or only once basic letter
           recognition is established? Click to compare with the note.
         </p>
@@ -223,7 +223,7 @@ export default function TeachingLiteracySession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Wrap-up · 5 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             In one sentence each: what&apos;s one thing you&apos;d check about a new learner&apos;s literacy before assuming their
             silence in a reading task is a language problem?
           </p>

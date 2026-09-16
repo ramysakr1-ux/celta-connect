@@ -46,7 +46,7 @@ function gradeStyle(label: string | null, withdrawn: boolean): React.CSSProperti
 /** One of the three completeness dots along the foot of a card. */
 function Dot({ ok, label, title }: { ok: boolean; label: string; title: string }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[10.5px]" title={title} style={{ color: ok ? "var(--color-muted)" : AMBER }}>
+    <span className="inline-flex items-center gap-1 text-micro" title={title} style={{ color: ok ? "var(--color-muted)" : AMBER }}>
       <span className="block size-[7px] rounded-full" style={{ background: ok ? "var(--color-ink)" : AMBER }} />
       {label}
     </span>
@@ -72,18 +72,18 @@ function CandidateCard({ c }: { c: WallCandidate }) {
     >
       <div className="flex items-start justify-between gap-2">
         <span className="flex min-w-0 flex-col gap-[2px]">
-          <span className="truncate font-serif text-[19px] leading-[1.1] font-semibold text-ink">{c.name}</span>
-          {c.groupName ? <span className="truncate text-[11px] text-muted">{c.groupName}</span> : null}
+          <span className="truncate font-serif text-h3 leading-[1.1] font-semibold text-ink">{c.name}</span>
+          {c.groupName ? <span className="truncate text-label text-muted">{c.groupName}</span> : null}
         </span>
         <span
-          className="inline-flex h-[22px] shrink-0 items-center rounded-full px-[9px] text-[10.5px] font-bold whitespace-nowrap"
+          className="inline-flex h-[22px] shrink-0 items-center rounded-full px-[9px] text-micro font-bold whitespace-nowrap"
           style={gradeStyle(c.provisionalLabel, withdrawn)}
         >
           {withdrawn ? "Withdrawn" : (c.provisionalLabel ?? "No grade yet")}
         </span>
       </div>
 
-      <p className="min-h-[34px] text-[12px] leading-[1.45] text-pretty" style={{ color: whyColor }}>
+      <p className="min-h-[34px] text-meta leading-[1.45] text-pretty" style={{ color: whyColor }}>
         {c.why}
         {issue ? ` ${issue}.` : ""}
       </p>
@@ -102,7 +102,7 @@ function CandidateCard({ c }: { c: WallCandidate }) {
             title={c.assignmentsComplete ? "Every assignment marked" : "An assignment is still unresolved"}
           />
         </span>
-        <span className="shrink-0 text-[10.5px] whitespace-nowrap text-muted tabular-nums">TP {c.tpsTaught}/8</span>
+        <span className="shrink-0 text-micro whitespace-nowrap text-muted tabular-nums">TP {c.tpsTaught}/8</span>
       </div>
     </Link>
   );
@@ -137,12 +137,12 @@ export function CandidateWall({
           <section key={id} className="flex flex-col gap-2.5">
             <div className="flex flex-wrap items-baseline gap-3">
               <h2
-                className="font-serif text-[18px] font-semibold"
+                className="font-serif text-h3 font-semibold"
                 style={{ color: meta.headingColor ?? (meta.muted ? "var(--color-muted)" : "var(--color-ink)") }}
               >
                 {id === "observe" ? observeHeading : meta.heading}
               </h2>
-              {note ? <span className="text-[12px] text-muted">{note}</span> : null}
+              {note ? <span className="text-meta text-muted">{note}</span> : null}
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {inSection.map((c) => (
@@ -153,7 +153,7 @@ export function CandidateWall({
         );
       })}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-[11.5px] text-muted">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-label text-muted">
         <span className="text-pretty">{footLine}</span>
         {/* No toggle when the centre has put everybody forward -- "Show the 0
             not put forward" is a link to nothing. */}

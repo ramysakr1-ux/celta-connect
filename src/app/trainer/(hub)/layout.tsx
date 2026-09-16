@@ -229,7 +229,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             // says it.
             <Link
               href="/assessor"
-              className="wash flex h-7 shrink-0 items-center rounded-full border border-border bg-card px-3 text-[11px] font-semibold text-ink"
+              className="wash flex h-7 shrink-0 items-center rounded-full border border-border bg-card px-3 text-label font-semibold text-ink"
             >
               Assessor pack
             </Link>
@@ -243,7 +243,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
                 <button
                   type="submit"
                   title={actPreview ? "Viewing as an ACT -- click to switch back to your MCT view" : "Click to preview the hub as an ACT sees it"}
-                  className="cursor-pointer rounded-full px-[9px] py-1 text-[10.5px] font-bold tracking-[0.09em] text-primary-foreground uppercase transition-[filter] hover:brightness-110"
+                  className="cursor-pointer rounded-full px-[9px] py-1 text-micro font-bold tracking-[0.09em] text-primary-foreground uppercase transition-[filter] hover:brightness-110"
                   style={{ background: accent }}
                 >
                   {actPreview ? "ACT · preview" : "MCT"}
@@ -251,7 +251,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               </form>
             ) : isRealStaff ? (
               <span
-                className="rounded-full px-[9px] py-1 text-[10.5px] font-bold tracking-[0.09em] text-primary-foreground uppercase"
+                className="rounded-full px-[9px] py-1 text-micro font-bold tracking-[0.09em] text-primary-foreground uppercase"
                 style={{ background: accent }}
               >
                 ACT
@@ -267,7 +267,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
                 <button
                   type="submit"
                   title={wholeCourse ? "Showing every candidate on the course -- click for your own group" : "Showing your own group -- click for the whole course"}
-                  className="cursor-pointer rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors hover:bg-frame"
+                  className="cursor-pointer rounded-full border border-border bg-card px-2.5 py-1 text-label font-semibold text-ink transition-colors hover:bg-frame"
                 >
                   {wholeCourse ? "Whole course" : "Your group"}
                 </button>
@@ -281,7 +281,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               // course code was the piece that pushed a 375px screen sideways
               // (432px, measured). A tutor already knows which course they are
               // signed in to; the switcher, when there is more than one, stays.
-              <span className="hidden rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink sm:inline">{courseCode}</span>
+              <span className="hidden rounded-full border border-border bg-card px-2.5 py-1 text-label font-semibold text-ink sm:inline">{courseCode}</span>
             ) : null}
             {/* The tutor's name is no longer here. Ramy, 11 Sep 2026: "the MCT
                 tab bar gets kind of squished, especially when we have the

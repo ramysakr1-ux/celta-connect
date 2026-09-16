@@ -58,7 +58,7 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
+        <p className="text-label font-semibold tracking-[0.16em] text-muted uppercase">
           {/* Ramy, 12 Sep 2026: "go with whatever is written on the timetable"
               -- when this happens is the centre's timetable's business, not
               a fixed "day one". The session is named here the moment a

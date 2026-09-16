@@ -72,7 +72,7 @@ export async function SpreadsheetImportSection({
 
       {(imports ?? []).length > 0 ? (
         <div className="sheet flex flex-col gap-3">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Recent imports</p>
+          <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">Recent imports</p>
           {(imports ?? []).map((imp, i) => {
             const tallies = (imp.tallies ?? {}) as { willImport?: number };
             const undoable = !imp.undone_at && isWithinUndoWindow(imp.created_at);

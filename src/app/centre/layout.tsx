@@ -137,7 +137,7 @@ export default async function CentreLayout({ children }: { children: React.React
             now, and for an owner home IS the owner screen. Ramy: "you don't
             need a Centre owner pill. You just click on Connect." */}
       </div>
-      <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
+      <div className="container flex items-center justify-end gap-4 pt-2 text-meta text-muted">
         <CentreHeaderMeta
           branches={switchable}
           fullName={profile.full_name}

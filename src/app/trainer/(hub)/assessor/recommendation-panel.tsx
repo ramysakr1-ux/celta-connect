@@ -27,13 +27,13 @@ function gradeStyle(label: string | null): React.CSSProperties {
 function Provenance({ kind }: { kind: "handbook" | "custom" }) {
   return kind === "handbook" ? (
     <span
-      className="rounded-full px-2 py-[2px] text-[9.5px] font-bold tracking-[0.07em] uppercase"
+      className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase"
       style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}
     >
       Handbook
     </span>
   ) : (
-    <span className="rounded-full border px-2 py-[2px] text-[9.5px] font-bold tracking-[0.07em] text-primary uppercase" style={{ borderColor: "color-mix(in oklab, var(--color-primary) 45%, transparent)" }}>
+    <span className="rounded-full border px-2 py-[2px] text-micro font-bold tracking-[0.07em] text-primary uppercase" style={{ borderColor: "color-mix(in oklab, var(--color-primary) 45%, transparent)" }}>
       Common practice
     </span>
   );
@@ -47,16 +47,16 @@ function Card({ c, muted = false }: { c: RecommendedCandidate; muted?: boolean }
     >
       <div className="flex items-start justify-between gap-2">
         <span className="flex min-w-0 flex-col">
-          <span className="truncate font-serif text-[18px] leading-tight font-semibold text-ink">{c.name}</span>
-          <span className="truncate text-[11px] text-muted">
+          <span className="truncate font-serif text-h3 leading-tight font-semibold text-ink">{c.name}</span>
+          <span className="truncate text-label text-muted">
             {[c.groupName, c.slot].filter(Boolean).join(" · ") || "Not teaching on the visit day"}
           </span>
         </span>
-        <span className="inline-flex h-[22px] shrink-0 items-center rounded-full px-[9px] text-[10.5px] font-bold whitespace-nowrap" style={gradeStyle(c.provisionalLabel)}>
+        <span className="inline-flex h-[22px] shrink-0 items-center rounded-full px-[9px] text-micro font-bold whitespace-nowrap" style={gradeStyle(c.provisionalLabel)}>
           {c.provisionalLabel ?? "No grade yet"}
         </span>
       </div>
-      <p className="text-[12px] leading-[1.45] text-pretty" style={{ color: c.provenance === "handbook" ? "var(--color-ink)" : "var(--color-muted)" }}>
+      <p className="text-meta leading-[1.45] text-pretty" style={{ color: c.provenance === "handbook" ? "var(--color-ink)" : "var(--color-muted)" }}>
         {c.why}
       </p>
       <div className="border-t hub-hairline pt-2">
@@ -69,11 +69,11 @@ function Card({ c, muted = false }: { c: RecommendedCandidate; muted?: boolean }
 function Heading({ title, cite, note }: { title: string; cite: string; note?: string }) {
   return (
     <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b hub-hairline pb-1.5 first:mt-0">
-      <h3 className="font-serif text-[16px] font-semibold text-ink">{title}</h3>
-      <span className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+      <h3 className="font-serif text-h3 font-semibold text-ink">{title}</h3>
+      <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
         {cite}
       </span>
-      {note ? <span className="text-[12px] text-muted">{note}</span> : null}
+      {note ? <span className="text-meta text-muted">{note}</span> : null}
     </div>
   );
 }
@@ -110,7 +110,7 @@ export function RecommendationPanel({
 
   return (
     <section className="flex flex-col gap-1 rounded-[12px] border border-border bg-card px-[22px] py-5" style={{ borderTop: "3px solid var(--hub-accent)" }}>
-      <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
+      <p className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
         What Connect suggests
       </p>
       <p className="max-w-[76ch] text-sm text-pretty text-muted">
@@ -135,7 +135,7 @@ export function RecommendationPanel({
         {rec.read.map((c) => (
           <Card key={c.traineeId} c={c} />
         ))}
-        {rec.read.length === 0 ? <p className="text-[12.5px] text-muted">No candidates to read yet.</p> : null}
+        {rec.read.length === 0 ? <p className="text-meta text-muted">No candidates to read yet.</p> : null}
       </div>
 
       {rec.alsoWorthReading ? (
@@ -144,18 +144,18 @@ export function RecommendationPanel({
           style={{ borderColor: "color-mix(in oklab, var(--color-primary) 40%, transparent)", background: "var(--color-card-inset)" }}
         >
           <Provenance kind="custom" />
-          <span className="font-serif text-[17px] leading-tight font-semibold text-ink">{rec.alsoWorthReading.name}</span>
-          <span className="inline-flex h-[22px] items-center rounded-full px-[9px] text-[10.5px] font-bold" style={gradeStyle(rec.alsoWorthReading.provisionalLabel)}>
+          <span className="font-serif text-h3 leading-tight font-semibold text-ink">{rec.alsoWorthReading.name}</span>
+          <span className="inline-flex h-[22px] items-center rounded-full px-[9px] text-micro font-bold" style={gradeStyle(rec.alsoWorthReading.provisionalLabel)}>
             {rec.alsoWorthReading.provisionalLabel ?? "No grade yet"}
           </span>
-          <span className="min-w-[220px] flex-1 text-[12px] leading-[1.45] text-muted">
+          <span className="min-w-[220px] flex-1 text-meta leading-[1.45] text-muted">
             <b className="text-ink">Also worth a look, if there is time.</b> {rec.alsoWorthReading.why}
           </span>
         </div>
       ) : null}
 
       {rec.noPool ? (
-        <p className="mt-4 text-[12.5px] leading-[1.5] text-muted">
+        <p className="mt-4 text-meta leading-[1.5] text-muted">
           Nobody is timetabled to teach on the visit day, so there is nothing to recommend observing. The visit-day notice
           above says what to do about that.
         </p>
@@ -174,7 +174,7 @@ export function RecommendationPanel({
               on the day and you may want a different one; they do not need a
               card twice on the same page. */}
           {rec.alsoTeaching.length > 0 ? (
-            <p className="mt-2.5 text-[12px] leading-[1.5] text-muted">
+            <p className="mt-2.5 text-meta leading-[1.5] text-muted">
               <b className="text-ink">Also teaching that day:</b>{" "}
               {rec.alsoTeaching.map((c) => c.name).join(", ")}. Their plans are in the pack either way, and the assessor can
               choose any of them on the day.
@@ -182,7 +182,7 @@ export function RecommendationPanel({
           ) : null}
 
           <div
-            className="mt-3.5 rounded-[8px] border px-4 py-3 text-[12.5px] leading-[1.55] text-ink"
+            className="mt-3.5 rounded-[8px] border px-4 py-3 text-meta leading-[1.55] text-ink"
             style={{
               borderColor: rec.overlapWaived ? `color-mix(in oklab, ${AMBER} 34%, transparent)` : "color-mix(in oklab, var(--hub-accent) 24%, transparent)",
               background: rec.overlapWaived ? `color-mix(in oklab, ${AMBER} 8%, var(--color-card))` : "var(--color-card-inset)",
@@ -203,7 +203,7 @@ export function RecommendationPanel({
           </div>
 
           {existing ? (
-            <p className="mt-3 text-[11.5px] text-muted">
+            <p className="mt-3 text-label text-muted">
               Recorded: <b className="text-ink">{existing.names.join(" and ")}</b>
               {existing.source === "centre" ? " — your choice, not Connect's" : " — Connect's suggestion, accepted"} · {existing.by} ·{" "}
               {existing.at}
@@ -212,16 +212,16 @@ export function RecommendationPanel({
           ) : null}
 
           {error ? (
-            <p className="mt-3 text-[12px] font-semibold" style={{ color: RED }}>
+            <p className="mt-3 text-meta font-semibold" style={{ color: RED }}>
               {error}
             </p>
           ) : null}
 
           {overriding ? (
             <form action={action} className="mt-3 overflow-hidden rounded-[10px] border" style={{ borderColor: "color-mix(in oklab, var(--hub-accent) 34%, transparent)" }}>
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-[12.5px] font-semibold" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-meta font-semibold" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
                 <span>Choose different candidates</span>
-                <span className="text-[11.5px] font-normal opacity-85">pick two of the {pool.length} teaching that day</span>
+                <span className="text-label font-normal opacity-85">pick two of the {pool.length} teaching that day</span>
               </div>
               <div className="flex flex-col gap-2 px-4 py-3.5">
                 <input type="hidden" name="source" value="centre" />
@@ -240,25 +240,25 @@ export function RecommendationPanel({
                       }}
                     >
                       <input type="checkbox" name="trainee_id" value={c.traineeId} checked={on} onChange={() => toggle(c.traineeId)} className="size-[15px] accent-[var(--hub-accent)]" />
-                      <span className="text-[13px] font-semibold text-ink">{c.name}</span>
-                      <span className="ml-auto text-right text-[11.5px] text-muted">
+                      <span className="text-meta font-semibold text-ink">{c.name}</span>
+                      <span className="ml-auto text-right text-label text-muted">
                         {[c.slot, c.provisionalLabel ?? "No grade yet"].filter(Boolean).join(" · ")}
                       </span>
                     </label>
                   );
                 })}
                 <label className="mt-1 flex flex-col gap-1.5">
-                  <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">Why you are choosing differently</span>
+                  <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">Why you are choosing differently</span>
                   <textarea
                     name="reason"
                     rows={2}
                     required
                     minLength={3}
-                    className="rounded-[7px] border border-border bg-card px-3 py-2.5 text-[12.5px] text-ink"
+                    className="rounded-[7px] border border-border bg-card px-3 py-2.5 text-meta text-ink"
                     placeholder="Nadia asked to be observed, and Priya was observed at the last visit…"
                   />
                 </label>
-                <p className="border-t hub-hairline pt-2.5 text-[11.5px] text-muted">
+                <p className="border-t hub-hairline pt-2.5 text-label text-muted">
                   Recorded against the visit with your name and today&apos;s date, and kept &mdash; a later change adds a
                   row rather than replacing this one.
                 </p>
@@ -289,7 +289,7 @@ export function RecommendationPanel({
               <button type="button" onClick={() => setOverriding(true)} className="wash rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink">
                 Choose different candidates
               </button>
-              <span className="min-w-[240px] flex-1 text-[11.5px] leading-[1.45] text-muted">
+              <span className="min-w-[240px] flex-1 text-label leading-[1.45] text-muted">
                 Advisory. Accepting records your proposal with your name against the visit; it does not narrow what the
                 assessor sees. The choice is theirs, in consultation with you (§15.1).
               </span>

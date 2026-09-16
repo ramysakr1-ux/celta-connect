@@ -38,11 +38,11 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
       <div className="flex items-center justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — trainer notes
         </p>
-        <button type="button" onClick={() => setOpen(false)} className="text-[10.5px] font-semibold text-destructive">
+        <button type="button" onClick={() => setOpen(false)} className="text-micro font-semibold text-destructive">
           Hide
         </button>
       </div>
@@ -63,11 +63,11 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
 export function RunningThisSession({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5 rounded-[8px] border border-border bg-muted/10 p-4">
-      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">
+      <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-muted">
         <span className="size-1.5 rounded-full bg-current" />
         Running this session
       </p>
-      <p className="text-[12.5px] leading-relaxed text-ink">{children}</p>
+      <p className="text-meta leading-relaxed text-ink">{children}</p>
     </div>
   );
 }

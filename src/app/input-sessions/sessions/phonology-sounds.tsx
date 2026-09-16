@@ -237,7 +237,7 @@ function PlayButton({ onClick, label = "Play" }: { onClick: () => void; label?: 
 
 function Score({ right, total }: { right: number; total: number }) {
   return (
-    <span className="text-[11.5px] font-semibold" style={{ color: right === total ? TEAL : GOLD }}>
+    <span className="text-label font-semibold" style={{ color: right === total ? TEAL : GOLD }}>
       {right} / {total} correct
     </span>
   );
@@ -289,24 +289,24 @@ function LeadIn({ say }: { say: (t: string) => void }) {
                 value={a.word}
                 onChange={(e) => set(i, { word: e.target.value })}
                 placeholder="the word"
-                className="w-32 rounded-[6px] border border-border bg-card px-2 py-1 text-[12.5px] text-ink outline-none focus:border-primary"
+                className="w-32 rounded-[6px] border border-border bg-card px-2 py-1 text-meta text-ink outline-none focus:border-primary"
               />
-              <label className="flex items-center gap-1.5 text-[11.5px] text-muted">
+              <label className="flex items-center gap-1.5 text-label text-muted">
                 letters
                 <input
                   value={a.letters}
                   onChange={(e) => set(i, { letters: e.target.value })}
                   inputMode="numeric"
-                  className="w-12 rounded-[6px] border border-border bg-card px-2 py-1 text-center text-[12.5px] text-ink outline-none focus:border-primary"
+                  className="w-12 rounded-[6px] border border-border bg-card px-2 py-1 text-center text-meta text-ink outline-none focus:border-primary"
                 />
               </label>
-              <label className="flex items-center gap-1.5 text-[11.5px] text-muted">
+              <label className="flex items-center gap-1.5 text-label text-muted">
                 sounds
                 <input
                   value={a.sounds}
                   onChange={(e) => set(i, { sounds: e.target.value })}
                   inputMode="numeric"
-                  className="w-12 rounded-[6px] border border-border bg-card px-2 py-1 text-center text-[12.5px] text-ink outline-none focus:border-primary"
+                  className="w-12 rounded-[6px] border border-border bg-card px-2 py-1 text-center text-meta text-ink outline-none focus:border-primary"
                 />
               </label>
             </div>
@@ -314,7 +314,7 @@ function LeadIn({ say }: { say: (t: string) => void }) {
         })}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={() => setChecked(true)} className="rounded-full bg-primary px-4 py-1.5 text-[11.5px] font-semibold text-primary-foreground">
+        <button type="button" onClick={() => setChecked(true)} className="rounded-full bg-primary px-4 py-1.5 text-label font-semibold text-primary-foreground">
           Check
         </button>
       </div>
@@ -355,7 +355,7 @@ function Obstruction({ say }: { say: (t: string) => void }) {
                 setChecked(false);
                 setPicks((p) => ({ ...p, [i]: Number(e.target.value) }));
               }}
-              className="min-w-0 flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-[11.5px] text-ink outline-none focus:border-primary"
+              className="min-w-0 flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
             >
               {PLACES.map((label, pi) => (
                 <option key={label} value={pi}>
@@ -366,14 +366,14 @@ function Obstruction({ say }: { say: (t: string) => void }) {
           </div>
         ))}
       </div>
-      <button type="button" onClick={() => setChecked(true)} className="self-start rounded-full bg-primary px-4 py-1.5 text-[11.5px] font-semibold text-primary-foreground">
+      <button type="button" onClick={() => setChecked(true)} className="self-start rounded-full bg-primary px-4 py-1.5 text-label font-semibold text-primary-foreground">
         Check
       </button>
       <a
         href="https://www.seeingspeech.ac.uk/ipa-charts/"
         target="_blank"
         rel="noreferrer"
-        className="self-start rounded-[8px] border border-border bg-card px-4 py-2 text-[12px] text-ink hover:border-primary"
+        className="self-start rounded-[8px] border border-border bg-card px-4 py-2 text-meta text-ink hover:border-primary"
       >
         Seeing Speech — real ultrasound and MRI of each sound, on the IPA chart
       </a>
@@ -413,23 +413,23 @@ function Voicing({ say }: { say: (t: string) => void }) {
           const a = get(i);
           return (
             <div key={row.ipa} className={`flex flex-wrap items-center gap-2 rounded-[8px] border px-3 py-2 ${markClass(checked, rowOk(i))}`}>
-              <span className="w-20 font-serif text-[15px] text-ink">{row.ipa}</span>
+              <span className="w-20 font-serif text-h3 text-ink">{row.ipa}</span>
               <PlayButton onClick={() => say(row.word)} label={`Play ${row.word}`} />
               <input
                 value={a.word}
                 onChange={(e) => set(i, { word: e.target.value })}
                 placeholder="spelling"
-                className="w-28 rounded-[6px] border border-border bg-card px-2 py-1 text-[12.5px] text-ink outline-none focus:border-primary"
+                className="w-28 rounded-[6px] border border-border bg-card px-2 py-1 text-meta text-ink outline-none focus:border-primary"
               />
               {(["first", "last"] as const).map((which) => (
                 <span key={which} className="flex items-center gap-1">
-                  <span className="text-[10.5px] text-muted">{which}</span>
+                  <span className="text-micro text-muted">{which}</span>
                   {(["v", "u"] as const).map((v) => (
                     <button
                       key={v}
                       type="button"
                       onClick={() => set(i, { [which]: v })}
-                      className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
+                      className={`rounded-full px-2 py-0.5 text-micro font-semibold ${
                         a[which] === v ? "bg-primary text-primary-foreground" : "border border-border text-muted"
                       }`}
                     >
@@ -442,7 +442,7 @@ function Voicing({ say }: { say: (t: string) => void }) {
           );
         })}
       </div>
-      <button type="button" onClick={() => setChecked(true)} className="self-start rounded-full bg-primary px-4 py-1.5 text-[11.5px] font-semibold text-primary-foreground">
+      <button type="button" onClick={() => setChecked(true)} className="self-start rounded-full bg-primary px-4 py-1.5 text-label font-semibold text-primary-foreground">
         Check
       </button>
     </section>
@@ -452,7 +452,7 @@ function Voicing({ say }: { say: (t: string) => void }) {
 function ChartBlock({ title, cells, columns, say }: { title: string; cells: Cell[]; columns: number; say: (t: string) => void }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">{title}</p>
+      <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">{title}</p>
       <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
         {cells.map((cell, i) =>
           cell === null ? (
@@ -468,8 +468,8 @@ function ChartBlock({ title, cells, columns, say }: { title: string; cells: Cell
               className="flex flex-col items-center gap-0.5 rounded-[6px] border-2 bg-card px-1 py-1.5"
               style={{ borderColor: cell[2] }}
             >
-              <span className="font-serif text-[15px] leading-none text-ink">{cell[0]}</span>
-              <span className="text-[9.5px] text-muted">{cell[1]}</span>
+              <span className="font-serif text-h3 leading-none text-ink">{cell[0]}</span>
+              <span className="text-micro text-muted">{cell[1]}</span>
             </button>
           )
         )}
@@ -496,7 +496,7 @@ function Chart({ say }: { say: (t: string) => void }) {
           ["Voiced consonants", WARM],
           ["Unvoiced consonants", MUTED],
         ].map(([label, hue]) => (
-          <span key={label} className="flex items-center gap-1.5 text-[10.5px] text-muted">
+          <span key={label} className="flex items-center gap-1.5 text-micro text-muted">
             <span className="size-2 rounded-[2px]" style={{ background: hue }} />
             {label}
           </span>
@@ -540,7 +540,7 @@ function ScriptWriting() {
                 setChecked(false);
                 setAnswers((a) => ({ ...a, [active]: (a[active] ?? "") + k }));
               }}
-              className="min-w-7 rounded-[5px] border border-border bg-card px-1.5 py-1 font-serif text-[13px] text-ink hover:border-primary"
+              className="min-w-7 rounded-[5px] border border-border bg-card px-1.5 py-1 font-serif text-meta text-ink hover:border-primary"
             >
               {k}
             </button>
@@ -551,7 +551,7 @@ function ScriptWriting() {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {SCRIPT.map((row, i) => (
           <div key={row.word} className={`flex items-center gap-2 rounded-[8px] border px-3 py-2 ${markClass(checked, ok(i))}`}>
-            <span className="w-20 text-[12.5px] text-ink">{row.word}</span>
+            <span className="w-20 text-meta text-ink">{row.word}</span>
             <span className="text-muted">/</span>
             <input
               value={answers[i] ?? ""}
@@ -560,7 +560,7 @@ function ScriptWriting() {
                 setChecked(false);
                 setAnswers((a) => ({ ...a, [i]: e.target.value }));
               }}
-              className={`min-w-0 flex-1 rounded-[6px] border bg-card px-2 py-1 font-serif text-[13px] text-ink outline-none ${
+              className={`min-w-0 flex-1 rounded-[6px] border bg-card px-2 py-1 font-serif text-meta text-ink outline-none ${
                 active === i ? "border-primary" : "border-border"
               }`}
             />
@@ -570,7 +570,7 @@ function ScriptWriting() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={() => setChecked(true)} className="rounded-full bg-primary px-4 py-1.5 text-[11.5px] font-semibold text-primary-foreground">
+        <button type="button" onClick={() => setChecked(true)} className="rounded-full bg-primary px-4 py-1.5 text-label font-semibold text-primary-foreground">
           Check
         </button>
       </div>
@@ -604,25 +604,25 @@ function FilmRace() {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {FILMS.map((f, i) => (
           <div key={f.ipa} className={`flex items-center gap-2 rounded-[8px] border px-3 py-2 ${markClass(checked, ok(i))}`}>
-            <span className="w-40 font-serif text-[14px] text-ink">{f.ipa}</span>
+            <span className="w-40 font-serif text-body text-ink">{f.ipa}</span>
             <input
               value={answers[i] ?? ""}
               onChange={(e) => {
                 setChecked(false);
                 setAnswers((a) => ({ ...a, [i]: e.target.value }));
               }}
-              className="min-w-0 flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-[12.5px] text-ink outline-none focus:border-primary"
+              className="min-w-0 flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-meta text-ink outline-none focus:border-primary"
             />
           </div>
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={() => setChecked(true)} className="rounded-full bg-primary px-4 py-1.5 text-[11.5px] font-semibold text-primary-foreground">
+        <button type="button" onClick={() => setChecked(true)} className="rounded-full bg-primary px-4 py-1.5 text-label font-semibold text-primary-foreground">
           Check
         </button>
       </div>
       <RevealCard question="Reveal the titles" answer={FILMS.map((f) => `${f.ipa} — ${f.answer}`).join("  ·  ")} />
-      <p className="text-[12.5px] leading-relaxed text-ink">
+      <p className="text-meta leading-relaxed text-ink">
         To close: which two sounds from today are most likely to trouble your own TP group, and why?
       </p>
     </section>

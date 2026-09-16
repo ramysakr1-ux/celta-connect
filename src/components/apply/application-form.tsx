@@ -615,7 +615,7 @@ export function ApplicationForm({
       )}
 
       <div className="mt-8 flex items-center justify-end gap-1.5 border-t border-border pt-4">
-        <span className="text-[10px] text-muted">Powered by</span>
+        <span className="text-micro text-muted">Powered by</span>
         <Link href="/" className="hover:opacity-80">
           <Wordmark size="header" />
         </Link>
@@ -629,7 +629,7 @@ export function ApplicationForm({
 // wizard shows one step at a time and the head is simply its title.
 function SectionHead({ n, title }: { n: number; title: string }) {
   return (
-    <h2 className="z-[1] -mx-1 bg-card px-1 pt-1 pb-1 font-serif text-[17px] leading-snug font-semibold text-ink md:sticky md:top-0">
+    <h2 className="z-[1] -mx-1 bg-card px-1 pt-1 pb-1 font-serif text-h3 leading-snug font-semibold text-ink md:sticky md:top-0">
       <span className="mr-2 text-muted">{n}</span>
       {title}
     </h2>

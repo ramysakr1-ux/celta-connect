@@ -66,7 +66,7 @@ export function TpGroupBoard({
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="w-40 shrink-0 border-b border-border p-2 text-left text-[10px] font-semibold tracking-[0.1em] text-muted uppercase">
+              <th className="w-40 shrink-0 border-b border-border p-2 text-left text-micro font-semibold tracking-[0.1em] text-muted uppercase">
                 Candidate
               </th>
               {allDates.map((date, i) => {
@@ -79,10 +79,10 @@ export function TpGroupBoard({
                       isNext ? "bg-status-warning-bg" : ""
                     }`}
                   >
-                    <span className={`block text-[10px] font-semibold ${isNext ? "text-status-warning-text" : "text-ink"}`}>
+                    <span className={`block text-micro font-semibold ${isNext ? "text-status-warning-text" : "text-ink"}`}>
                       {formatCalendarDate(date, { day: "numeric", month: "short" })}
                     </span>
-                    <span className="block text-[9px] font-semibold uppercase tracking-[0.06em] text-muted">
+                    <span className="block text-micro font-semibold uppercase tracking-[0.06em] text-muted">
                       {dayLabel(owningHalf)}
                     </span>
                   </th>
@@ -98,14 +98,14 @@ export function TpGroupBoard({
                     <span
                       className={`h-3.5 w-[3px] shrink-0 rounded-full ${half.halfOrder === 1 ? "bg-primary" : "bg-[oklch(45%_0.1_300)]"}`}
                     />
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
+                    <span className="text-label font-semibold uppercase tracking-[0.08em] text-ink">
                       {dayLabel(half.halfOrder)}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-col gap-2.5">
                     {half.members.map((m) => (
                       <p key={m.traineeId} className="flex items-baseline gap-2 text-sm text-ink">
-                        <span className="w-4 shrink-0 text-[11px] font-bold tabular-nums text-muted">{letters.get(m.traineeId) ?? ""}</span>
+                        <span className="w-4 shrink-0 text-label font-bold tabular-nums text-muted">{letters.get(m.traineeId) ?? ""}</span>
                         {m.fullName}
                       </p>
                     ))}
@@ -139,7 +139,7 @@ export function TpGroupBoard({
                                 <span className={`flex size-[22px] items-center justify-center rounded-[6px] text-xs font-bold ${chipClass}`}>
                                   {position}
                                 </span>
-                                <span className={`text-[9px] font-semibold ${isNextCol ? "text-status-warning-text" : "text-muted"}`}>
+                                <span className={`text-micro font-semibold ${isNextCol ? "text-status-warning-text" : "text-muted"}`}>
                                   TP{tpNumber}
                                 </span>
                               </div>
@@ -159,17 +159,17 @@ export function TpGroupBoard({
       <div className="flex flex-wrap items-center gap-5">
         <div className="flex items-center gap-2">
           <span className="size-3.5 rounded-[4px] bg-ink" />
-          <span className="text-[11px] text-muted">Taught</span>
+          <span className="text-label text-muted">Taught</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="size-3.5 rounded-[4px] bg-status-warning-text" />
-          <span className="text-[11px] text-muted">Next TP day</span>
+          <span className="text-label text-muted">Next TP day</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="size-3.5 rounded-[4px] bg-surface-muted" />
-          <span className="text-[11px] text-muted">Scheduled</span>
+          <span className="text-label text-muted">Scheduled</span>
         </div>
-        <span className="text-[11px] text-muted">
+        <span className="text-label text-muted">
           Number in the cell is the teaching position that day. Blank means the other half is teaching.
         </span>
       </div>

@@ -97,11 +97,11 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
   // These return elements directly, so nothing remounts.
   const stepHeader = (n: number, title: string, blurb: string) => (
     <div className="flex flex-col gap-1.5">
-      <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+      <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">
         {eyebrow} · step {n} of 5
       </p>
-      <h3 className="font-serif text-[22px] font-semibold text-ink">{title}</h3>
-      <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">{blurb}</p>
+      <h3 className="font-serif text-h2 font-semibold text-ink">{title}</h3>
+      <p className="max-w-[62ch] text-meta leading-relaxed text-muted">{blurb}</p>
     </div>
   );
 
@@ -112,7 +112,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         captureStep(e.currentTarget.form);
         setStep(next);
       }}
-      className="self-start rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-semibold text-primary-foreground"
+      className="self-start rounded-[6px] bg-primary px-[15px] py-2 text-meta font-semibold text-primary-foreground"
     >
       {label}
     </button>
@@ -136,7 +136,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             here against what this person may actually create at. */}
         {centres.length > 1 ? (
           <div className="flex flex-col gap-1">
-            <label htmlFor="center_id" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="center_id" className="text-meta font-semibold text-ink">
               Which centre is this course for?
             </label>
             <select
@@ -160,7 +160,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         )}
 
         <div className="flex flex-col gap-1">
-          <label className="text-[13px] font-semibold text-ink">Cambridge centre number</label>
+          <label className="text-meta font-semibold text-ink">Cambridge centre number</label>
           <p className="text-sm text-ink">{centerNumber ?? "Not set"}</p>
           <p className="text-xs text-muted">
             Prefilled from {centres.length > 1 ? "the centre you chose" : "the centre profile"} and locked here — change it in Centre
@@ -169,14 +169,14 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="course_code" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="course_code" className="text-meta font-semibold text-ink">
             Course code
           </label>
           <input id="course_code" name="course_code" type="text" placeholder="C3/2024" className={field} />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="name" className="text-meta font-semibold text-ink">
             Course name (internal, candidates don&apos;t see this)
           </label>
           <input id="name" name="name" type="text" required placeholder="January intensive 2024" className={field} />
@@ -184,13 +184,13 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
 
         <div className="grid grid-cols-2 gap-[14px]">
           <div className="flex flex-col gap-1">
-            <label htmlFor="start_date" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="start_date" className="text-meta font-semibold text-ink">
               Start date
             </label>
             <input id="start_date" name="start_date" type="date" required className={field} />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="end_date" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="end_date" className="text-meta font-semibold text-ink">
               End date
             </label>
             <input id="end_date" name="end_date" type="date" required className={field} />
@@ -198,7 +198,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="cohort_size" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="cohort_size" className="text-meta font-semibold text-ink">
             Maximum cohort size
           </label>
           <input
@@ -231,13 +231,13 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
 
         <div className="grid grid-cols-2 gap-[14px]">
           <div className="flex flex-col gap-1">
-            <label htmlFor="input_start_time" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="input_start_time" className="text-meta font-semibold text-ink">
               Weekday input starts
             </label>
             <input id="input_start_time" name="input_start_time" type="time" defaultValue="09:30" className={field} />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="tp_start_time" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="tp_start_time" className="text-meta font-semibold text-ink">
               TP block starts
             </label>
             <input id="tp_start_time" name="tp_start_time" type="time" defaultValue="13:00" className={field} />
@@ -245,7 +245,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-semibold text-ink">Days off</span>
+          <span className="text-meta font-semibold text-ink">Days off</span>
           <div className="flex flex-wrap gap-1.5">
             {WEEKDAYS.map((d) => {
               const on = daysOff.includes(d);
@@ -272,7 +272,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
 
         {/* Informational notice, not urgent -- muted per the colour legend. */}
         <div className="rounded-[6px] border border-border bg-surface-muted px-[15px] py-[13px]">
-          <p className="text-[13px] font-semibold text-muted">Tiles, not a blank calendar</p>
+          <p className="text-meta font-semibold text-muted">Tiles, not a blank calendar</p>
           <p className="mt-0.5 text-xs leading-relaxed text-ink">
             Confirming here generates the timetable tiles automatically. Tiles can be moved individually
             afterwards without altering the pattern.
@@ -291,13 +291,13 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
 
         <div className="grid grid-cols-[1fr_auto] gap-[14px]">
           <div className="flex flex-col gap-1">
-            <label htmlFor="invite_email" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="invite_email" className="text-meta font-semibold text-ink">
               Email
             </label>
             <input id="invite_email" name="invite_email" type="email" placeholder="tutor@email.com" className={field} />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="invite_tutor_role" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="invite_tutor_role" className="text-meta font-semibold text-ink">
               Role
             </label>
             <select id="invite_tutor_role" name="invite_tutor_role" defaultValue={DEFAULT_INVITE_TUTOR_ROLE} className={field}>
@@ -318,13 +318,13 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             the course. */}
         <div className="grid grid-cols-2 gap-[14px] border-t border-border-faint pt-4">
           <div className="flex flex-col gap-1">
-            <label htmlFor="assessor_name" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="assessor_name" className="text-meta font-semibold text-ink">
               Assessor (optional)
             </label>
             <input id="assessor_name" name="assessor_name" type="text" placeholder="Name" className={field} />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="assessor_email" className="text-[13px] font-semibold text-ink">
+            <label htmlFor="assessor_email" className="text-meta font-semibold text-ink">
               Assessor email
             </label>
             <input id="assessor_email" name="assessor_email" type="email" placeholder="assessor@cambridge.org" className={field} />
@@ -376,7 +376,7 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-bold text-primary-foreground disabled:opacity-60"
+            className="rounded-[6px] bg-primary px-[15px] py-2 text-meta font-bold text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Launching…" : "Launch course"}
           </button>

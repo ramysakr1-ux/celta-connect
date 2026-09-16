@@ -58,7 +58,7 @@ export function RunningOrderPanel({
         <div className="sheet flex flex-col gap-3.5 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
+              <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">
                 {formatCalendarDate(nextDate, { weekday: "long", day: "numeric", month: "long" })} · half{" "}
                 {halfLabel}
               </p>
@@ -93,7 +93,7 @@ export function RunningOrderPanel({
                   key={m.traineeId}
                   className={`flex items-center gap-3.5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
                 >
-                  <span className="flex size-[26px] shrink-0 items-center justify-center rounded-[7px] bg-ink text-[13px] font-bold text-card">
+                  <span className="flex size-[26px] shrink-0 items-center justify-center rounded-[7px] bg-ink text-meta font-bold text-card">
                     {position}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -105,14 +105,14 @@ export function RunningOrderPanel({
                   </div>
                   {plan?.aimType ? (
                     <span
-                      className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                      className="shrink-0 rounded-full px-2 py-0.5 text-micro font-semibold"
                       style={{ background: AIM_TYPE_STYLE[plan.aimType].bg, color: AIM_TYPE_STYLE[plan.aimType].ink }}
                     >
                       {AIM_TYPE_LABELS[plan.aimType]}
                     </span>
                   ) : null}
                   {plan?.classGrouping === "one_to_one_or_small_group" ? (
-                    <span className="pill pill-info shrink-0 text-[10px]">1-to-1 / small group</span>
+                    <span className="pill pill-info shrink-0 text-micro">1-to-1 / small group</span>
                   ) : null}
                   <span className={`shrink-0 text-xs font-semibold ${status.cls}`}>{status.label}</span>
                   {!plan && hasSchedule && !withdrawn ? <AssignButton subgroupId={subgroupId} tpNumber={tpNumber} /> : null}
@@ -155,7 +155,7 @@ function FairnessCheck({ members, allPlans }: { members: RunningOrderMember[]; a
 
   return (
     <div className="sheet flex flex-col gap-2.5 p-4">
-      <p className="text-[10px] font-semibold tracking-[0.1em] text-muted uppercase">Fairness check</p>
+      <p className="text-micro font-semibold tracking-[0.1em] text-muted uppercase">Fairness check</p>
       <div className="flex flex-col">
         {members.map((m, i) => {
           const counts = new Array(members.length).fill(0);
@@ -173,12 +173,12 @@ function FairnessCheck({ members, allPlans }: { members: RunningOrderMember[]; a
           return (
             <div key={m.traineeId} className={`flex items-center justify-between gap-3 py-1.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
               <span className="truncate text-xs text-ink">{m.fullName}</span>
-              <span className="shrink-0 text-[11px] tabular-nums text-muted">{spread}</span>
+              <span className="shrink-0 text-label tabular-nums text-muted">{spread}</span>
             </div>
           );
         })}
       </div>
-      <p className="text-[11px] leading-[1.5] text-muted">
+      <p className="text-label leading-[1.5] text-muted">
         Turns don&apos;t always divide evenly across the six rounds — this shows who carries which position, rather than leaving it to be counted by eye.
       </p>
     </div>

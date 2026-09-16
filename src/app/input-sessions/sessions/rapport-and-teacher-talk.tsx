@@ -165,7 +165,7 @@ export default function RapportAndTeacherTalkSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">1 · The teacher you remember · 5 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Think of one teacher — any subject, any language — whose classes you actually wanted to be in. In pairs: what
           did they <em>do</em>? Not what they were like. What did they do.
         </p>
@@ -223,7 +223,7 @@ export default function RapportAndTeacherTalkSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 2 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Back to the board. Which of the things your remembered teacher <em>did</em> are on this page? And one sentence
           each: the one thing you will do differently in your next TP — a rapport move, or a place you will stop talking.
         </p>
@@ -314,7 +314,7 @@ function TalkCount() {
                       setChecked(false);
                       setMarks((m) => ({ ...m, [i]: s }));
                     }}
-                    className={`size-6 rounded-full text-[11px] font-bold ${
+                    className={`size-6 rounded-full text-label font-bold ${
                       mark === s ? "bg-primary text-primary-foreground" : "border border-border text-muted"
                     }`}
                   >
@@ -322,7 +322,7 @@ function TalkCount() {
                   </button>
                 ))}
               </span>
-              <span className="text-[12.5px] leading-relaxed text-ink">{line.text}</span>
+              <span className="text-meta leading-relaxed text-ink">{line.text}</span>
             </div>
           );
         })}
@@ -333,7 +333,7 @@ function TalkCount() {
           type="button"
           onClick={() => setChecked(true)}
           disabled={!allMarked}
-          className={`rounded-full px-4 py-1.5 text-[11.5px] font-semibold ${
+          className={`rounded-full px-4 py-1.5 text-label font-semibold ${
             allMarked ? "bg-primary text-primary-foreground" : "border border-border text-muted"
           }`}
         >
@@ -350,10 +350,10 @@ function TalkCount() {
             <span style={{ flex: teacherWords, background: RED }} />
             <span style={{ flex: studentWords, background: TEAL }} />
           </div>
-          <p className="text-[11.5px]" style={{ color: MUTED }}>
+          <p className="text-label" style={{ color: MUTED }}>
             {teacherWords} teacher words · {studentWords} student words, in three minutes of a speaking activity.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Nothing here is unkind or incompetent. She is warm, she recasts both errors accurately, she encourages. That
             is exactly why this is worth looking at — from inside the lesson it felt like good teaching, and the learners
             said fourteen words.

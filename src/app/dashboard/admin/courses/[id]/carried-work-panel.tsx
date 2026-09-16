@@ -46,7 +46,7 @@ export function CarriedWorkPanel({
   return (
     <div className="card card-amber flex flex-col gap-4 p-5">
       <div>
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Carried work waiting to be linked</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Carried work waiting to be linked</h2>
         <p className="mt-1 text-sm text-muted">
           {transfers.length === 1 ? "A candidate was" : `${transfers.length} candidates were`}{" "}
           marked for a restart or a deferral on an earlier course, and what they had already done is being held. Once they have joined this
@@ -71,7 +71,7 @@ export function CarriedWorkPanel({
 
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-sm font-semibold text-ink">{t.sourceName}</p>
-            <span className="rounded-full border border-border bg-card px-2.5 py-0.5 text-[11px] font-semibold text-muted">
+            <span className="rounded-full border border-border bg-card px-2.5 py-0.5 text-label font-semibold text-muted">
               {t.kind === "restart" ? "Restart" : "Deferral"}
             </span>
           </div>

@@ -64,10 +64,10 @@ export function toneForName(name: string): string {
 }
 
 const SIZE_CLASS = {
-  xs: "size-7 text-[10px] rounded-[8px]",
-  sm: "size-9 text-[12.5px] rounded-[10px]",
-  md: "size-11 text-[15px] rounded-[12px]",
-  lg: "size-14 text-[18px] rounded-[16px]",
+  xs: "size-7 text-micro rounded-[8px]",
+  sm: "size-9 text-meta rounded-[10px]",
+  md: "size-11 text-lede rounded-[12px]",
+  lg: "size-14 text-h3 rounded-[16px]",
 } as const;
 
 export type AvatarSize = keyof typeof SIZE_CLASS;

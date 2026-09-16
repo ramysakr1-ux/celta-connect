@@ -55,14 +55,14 @@ export function AttendanceRegisterGrid({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border">
-            <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Volunteer</th>
+            <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Volunteer</th>
             {dates.map((date) => (
-              <th key={date} className="w-[56px] px-0.5 py-2 text-center align-bottom text-[10px] leading-[1.25] font-semibold whitespace-nowrap text-muted">
-                <span className="block text-[9px] font-bold tracking-[0.08em] uppercase">{dateHeader(date).weekday}</span>
+              <th key={date} className="w-[56px] px-0.5 py-2 text-center align-bottom text-micro leading-[1.25] font-semibold whitespace-nowrap text-muted">
+                <span className="block text-micro font-bold tracking-[0.08em] uppercase">{dateHeader(date).weekday}</span>
                 <span className="block">{dateHeader(date).dayMonth}</span>
               </th>
             ))}
-            <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Sessions</th>
+            <th className="px-4 py-2.5 text-center text-micro font-semibold uppercase tracking-[0.12em] text-muted">Sessions</th>
           </tr>
         </thead>
         <tbody>

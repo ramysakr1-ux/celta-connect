@@ -24,11 +24,11 @@ function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item
           muted and set off by a rule, so it reads as context rather than as
           part of the question being asked. */}
       {item.lead_in ? (
-        <p className="mb-1 whitespace-pre-wrap border-l-2 border-border pl-3 text-[13px] leading-relaxed text-muted">{item.lead_in}</p>
+        <p className="mb-1 whitespace-pre-wrap border-l-2 border-border pl-3 text-meta leading-relaxed text-muted">{item.lead_in}</p>
       ) : null}
       <div className="flex items-baseline gap-2">
-        {item.task_number ? <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Task {item.task_number}</p> : null}
-        {answered ? <span className="text-[11px] font-semibold text-primary">Answered</span> : null}
+        {item.task_number ? <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Task {item.task_number}</p> : null}
+        {answered ? <span className="text-label font-semibold text-primary">Answered</span> : null}
       </div>
       <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
       <TaskAnswerBox itemId={item.id} initialResponse={response} readOnly={!isEditable} shape={parseTaskShape(item.shape)} />
@@ -74,7 +74,7 @@ function SectionBlock({
   return (
     <div className="sheet flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{section.title}</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{section.title}</p>
         {items.length > 0 ? (
           <span className="shrink-0 text-xs tabular-nums text-muted">
             {answered} of {items.length}

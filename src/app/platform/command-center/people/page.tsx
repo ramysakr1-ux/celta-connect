@@ -44,7 +44,7 @@ export default async function CommandCenterPeoplePage() {
   if (accessibleCenterIds.length === 0) {
     return (
       <div className="card p-5">
-        <h2 className="mb-2 font-serif text-[17px] font-semibold text-ink">People, across your centres</h2>
+        <h2 className="mb-2 font-serif text-h3 font-semibold text-ink">People, across your centres</h2>
         <p className="text-sm text-muted">You don&apos;t currently have Owner or Invited access to any centre.</p>
       </div>
     );
@@ -127,7 +127,7 @@ export default async function CommandCenterPeoplePage() {
           question, so it is on the People page. */}
       <div className="card flex flex-col gap-3.5 p-5">
         <div>
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Change a user&apos;s role</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Change a user&apos;s role</h2>
           <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
         </div>
         <ChangeRoleForm />
@@ -136,18 +136,18 @@ export default async function CommandCenterPeoplePage() {
       <div className="grid grid-cols-4 gap-3">
         {kpis.map((stat, i) => (
           <div key={stat.label} className={`card flex flex-col gap-1.5 px-[18px] py-4`}>
-            <div className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted">{stat.label}</div>
-            <div className="font-serif text-[26px] font-semibold text-ink tabular-nums">{stat.value}</div>
-            <div className="text-[11px] text-muted">{stat.sub}</div>
+            <div className="text-micro font-bold uppercase tracking-[0.08em] text-muted">{stat.label}</div>
+            <div className="font-serif text-h1 font-semibold text-ink tabular-nums">{stat.value}</div>
+            <div className="text-label text-muted">{stat.sub}</div>
           </div>
         ))}
       </div>
 
       <div className="card !p-0">
-        <h2 className="px-5 pt-[18px] pb-1.5 font-serif text-[17px] font-semibold text-ink">By course</h2>
+        <h2 className="px-5 pt-[18px] pb-1.5 font-serif text-h3 font-semibold text-ink">By course</h2>
         <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] border-b border-rule-gold">
           {["Centre / course", "Status", "Trainees", "Trainers", "Volunteer attendance"].map((h) => (
-            <div key={h} className="px-5 py-4 text-[10.5px] font-bold uppercase tracking-wide text-muted">
+            <div key={h} className="px-5 py-4 text-micro font-bold uppercase tracking-wide text-muted">
               {h}
             </div>
           ))}
@@ -170,18 +170,18 @@ export default async function CommandCenterPeoplePage() {
               key={c.id}
               className="hover-ring grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
             >
-              <div className="px-5 py-[13px] text-[13px] font-semibold text-ink">
+              <div className="px-5 py-[13px] text-meta font-semibold text-ink">
                 {centerNameById.get(c.center_id) ?? "Unknown centre"}
-                <div className="text-[11px] font-normal text-muted">{c.name}</div>
+                <div className="text-label font-normal text-muted">{c.name}</div>
               </div>
               <div className="px-5 py-[13px]">
                 <span className={`status-pill ${running ? "status-pill-on-track" : ended ? "bg-status-neutral-bg text-muted" : "status-pill-pending"}`}>
                   {running ? "Running" : ended ? "Ended" : "Upcoming"}
                 </span>
               </div>
-              <div className="px-5 py-[13px] text-[13px] tabular-nums text-ink">{traineeCountByCourse.get(c.id) ?? 0}</div>
-              <div className="px-5 py-[13px] text-[13px] tabular-nums text-ink">{trainerCountByCourse.get(c.id) ?? 0}</div>
-              <div className="px-5 py-[13px] text-[13px] text-ink">
+              <div className="px-5 py-[13px] text-meta tabular-nums text-ink">{traineeCountByCourse.get(c.id) ?? 0}</div>
+              <div className="px-5 py-[13px] text-meta tabular-nums text-ink">{trainerCountByCourse.get(c.id) ?? 0}</div>
+              <div className="px-5 py-[13px] text-meta text-ink">
                 {volunteerCount === 0 ? (
                   <span className="text-muted">No volunteers</span>
                 ) : attendancePct === null ? (

@@ -21,7 +21,7 @@ function AimChip({ aim }: { aim: AimType | null }) {
   if (!aim) return null;
   const style = AIM_TYPE_STYLE[aim];
   return (
-    <span className="rounded-[4px] px-1.5 py-[2px] text-[10px] font-bold whitespace-nowrap" style={{ background: style.bg, color: style.ink }}>
+    <span className="rounded-[4px] px-1.5 py-[2px] text-micro font-bold whitespace-nowrap" style={{ background: style.bg, color: style.ink }}>
       {AIM_TYPE_LABELS[aim]}
     </span>
   );
@@ -56,9 +56,9 @@ function DeskRow({
   tone?: "amber" | "red";
 }) {
   return (
-    <div className="flex items-center gap-2.5 text-[11.5px]">
+    <div className="flex items-center gap-2.5 text-label">
       <span
-        className="flex size-4 shrink-0 items-center justify-center rounded-[3px] border text-[9px] font-bold text-primary-foreground"
+        className="flex size-4 shrink-0 items-center justify-center rounded-[3px] border text-micro font-bold text-primary-foreground"
         style={
           filled === "ink"
             ? { background: "var(--color-ink)", borderColor: "var(--color-ink)" }
@@ -86,11 +86,11 @@ export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: s
     <div className="flex flex-col overflow-hidden rounded-[6px] border border-border bg-card transition-colors" style={{ boxShadow: `inset 0 3px 0 ${edge}` }}>
       <div className="flex flex-col gap-3 px-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-2">
-          <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+          <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">
             TP{lesson.tpNumber} · {dateLabel}
           </span>
           <span
-            className="inline-flex h-[22px] shrink-0 items-center rounded-full px-2 text-[11px] font-bold whitespace-nowrap"
+            className="inline-flex h-[22px] shrink-0 items-center rounded-full px-2 text-label font-bold whitespace-nowrap"
             style={
               lesson.isLate
                 ? { background: "oklch(94% 0.043 25)", color: RED }
@@ -102,30 +102,30 @@ export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: s
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-card-inset font-serif text-[13px] font-semibold text-ink-warm">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-card-inset font-serif text-meta font-semibold text-ink-warm">
             {initials(lesson.traineeName)}
           </span>
           <span className="flex min-w-0 flex-col">
-            <span className="truncate font-serif text-[20px] leading-tight font-semibold text-ink-warm">{lesson.traineeName}</span>
-            <span className="truncate text-[11px] text-muted">
+            <span className="truncate font-serif text-h2 leading-tight font-semibold text-ink-warm">{lesson.traineeName}</span>
+            <span className="truncate text-label text-muted">
               {lesson.groupName} · {lesson.yours ? "yours" : (lesson.tutorName ?? "another tutor")}
             </span>
           </span>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] text-ink">{lesson.point.title}</span>
+          <span className="text-meta text-ink">{lesson.point.title}</span>
           <span className="flex flex-wrap items-center gap-2">
             <AimChip aim={lesson.point.aimType} />
-            {meta ? <span className="text-[11px] text-muted">{meta}</span> : null}
+            {meta ? <span className="text-label text-muted">{meta}</span> : null}
           </span>
         </div>
       </div>
 
       <div className="flex flex-col gap-2 px-4 py-3" style={{ background: "color-mix(in oklab, var(--hub-accent) 6%, transparent)" }}>
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">On your desk</span>
-          <span className="text-[10px] text-muted">fills in by itself</span>
+          <span className="text-micro font-bold tracking-[0.08em] text-muted uppercase">On your desk</span>
+          <span className="text-micro text-muted">fills in by itself</span>
         </div>
         <DeskRow
           filled={lesson.notes.count > 0 ? "ink" : "none"}
@@ -152,12 +152,12 @@ export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: s
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border-faint px-4 py-3">
-        <span className="min-w-0 truncate text-[11px]" style={{ color: lesson.standingFlag ? RED : "var(--color-muted)" }}>
+        <span className="min-w-0 truncate text-label" style={{ color: lesson.standingFlag ? RED : "var(--color-muted)" }}>
           {lesson.standingFlag ?? (lesson.selfEval.receivedAt ? "Everything is in" : "Can start now; release waits for the self-eval")}
         </span>
         <Link
           href={`/portfolio/${lesson.traineeId}/tp/${lesson.tpNumber}`}
-          className="inline-flex h-8 shrink-0 items-center rounded-[6px] px-3.5 text-[12px] font-semibold text-primary-foreground transition-[filter] hover:brightness-110"
+          className="inline-flex h-8 shrink-0 items-center rounded-[6px] px-3.5 text-meta font-semibold text-primary-foreground transition-[filter] hover:brightness-110"
           style={{ background: "var(--hub-accent-deep)" }}
         >
           {lesson.draft ? "Continue draft" : "Write feedback"}
@@ -179,16 +179,16 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
         <>
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <span className="flex flex-wrap items-baseline gap-2.5">
-              <span className="text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--hub-accent)" }}>
+              <span className="text-label font-bold tracking-[0.08em] uppercase" style={{ color: "var(--hub-accent)" }}>
                 Today
               </span>
-              <span className="text-[13px] font-semibold text-ink">
+              <span className="text-meta font-semibold text-ink">
                 {formatCalendarDate(today.date, { weekday: "short", day: "numeric" })} · TP{today.tpNumber} · {today.groupName}
                 {today.level ? ` · ${today.level}` : ""}
                 {today.room ? ` · ${today.room}` : ""}
               </span>
             </span>
-            <span className="text-[12px] text-muted">
+            <span className="text-meta text-muted">
               {today.observerNames.length > 0 ? `Observing: ${today.observerNames.join(", ")}` : "No peer observers"}
               {today.peerTaskCriteria.length > 0 ? ` · peer task ${today.peerTaskCriteria.join(" ")}` : ""}
               {today.feedbackSessionAt ? ` · feedback session ${today.feedbackSessionAt}` : ""}
@@ -206,14 +206,14 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
                     style={{ background: s.state === "taught" ? "var(--color-ink)" : s.state === "now" ? "var(--hub-accent)" : "var(--color-card)", boxShadow: s.state === "next" ? "inset 0 0 0 1.5px var(--color-border)" : undefined }}
                   />
                   <span className="flex items-baseline gap-1.5">
-                    <span className="text-[12px] font-bold tabular-nums" style={{ color: s.state === "now" ? "var(--hub-accent)" : "var(--color-ink)" }}>
+                    <span className="text-meta font-bold tabular-nums" style={{ color: s.state === "now" ? "var(--hub-accent)" : "var(--color-ink)" }}>
                       {s.start ?? "--"}
                     </span>
-                    <span className="text-[10px] tracking-[0.06em] text-muted uppercase">{s.state === "now" ? "teaching now" : s.state}</span>
+                    <span className="text-micro tracking-[0.06em] text-muted uppercase">{s.state === "now" ? "teaching now" : s.state}</span>
                   </span>
-                  <span className="truncate text-[13px] font-semibold text-ink">{s.traineeName}</span>
-                  <span className="truncate text-[12px] text-muted">{s.point.title}</span>
-                  <span className="truncate text-[11px]" style={{ color: s.liveNotesCount > 0 && s.state === "now" ? "var(--hub-accent)" : "var(--color-muted)" }}>
+                  <span className="truncate text-meta font-semibold text-ink">{s.traineeName}</span>
+                  <span className="truncate text-meta text-muted">{s.point.title}</span>
+                  <span className="truncate text-label" style={{ color: s.liveNotesCount > 0 && s.state === "now" ? "var(--hub-accent)" : "var(--color-muted)" }}>
                     {s.inQueue
                       ? "In the queue above"
                       : s.state === "now"
@@ -227,12 +227,12 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
               <div className="flex flex-col gap-1.5">
                 <span className="block size-4 rounded-full border-2 border-card bg-card shadow-[inset_0_0_0_1.5px_var(--color-border)]" />
                 <span className="flex items-baseline gap-1.5">
-                  <span className="text-[12px] font-bold tabular-nums text-ink">{today.feedbackSessionAt ?? "--"}</span>
-                  <span className="text-[10px] tracking-[0.06em] text-muted uppercase">next</span>
+                  <span className="text-meta font-bold tabular-nums text-ink">{today.feedbackSessionAt ?? "--"}</span>
+                  <span className="text-micro tracking-[0.06em] text-muted uppercase">next</span>
                 </span>
-                <span className="truncate text-[13px] font-semibold text-ink">Feedback session</span>
-                <span className="truncate text-[12px] text-muted">All three{today.room ? `, ${today.room}` : ""}</span>
-                <span className="truncate text-[11px] text-muted">Reveal peer notes after</span>
+                <span className="truncate text-meta font-semibold text-ink">Feedback session</span>
+                <span className="truncate text-meta text-muted">All three{today.room ? `, ${today.room}` : ""}</span>
+                <span className="truncate text-label text-muted">Reveal peer notes after</span>
               </div>
             </div>
           </div>
@@ -241,20 +241,20 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
 
       {tomorrow ? (
         <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 ${today ? "border-t border-border-faint pt-3" : ""}`}>
-          <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">Tomorrow</span>
-          <span className="text-[12px] text-ink">
+          <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">Tomorrow</span>
+          <span className="text-meta text-ink">
             {formatCalendarDate(tomorrow.date, { weekday: "short", day: "numeric" })} · TP{tomorrow.tpNumber} · {tomorrow.groupName}
             {tomorrow.level ? ` · ${tomorrow.level}` : ""}
             {tomorrow.tutorName ? ` · ${tomorrow.tutorName}` : ""}
           </span>
           {tomorrow.slots.map((s) => (
-            <span key={s.traineeName} className="flex items-center gap-1.5 text-[12px] text-muted">
+            <span key={s.traineeName} className="flex items-center gap-1.5 text-meta text-muted">
               <span className="block size-1.5 rounded-full" style={{ background: s.planSubmitted ? "var(--color-ink)" : AMBER }} />
               {s.start ? `${s.start} ` : ""}
               {s.traineeName} · {s.planSubmitted ? "plan in" : `no plan yet, due ${s.planDueAt}`}
             </span>
           ))}
-          <span className="ml-auto text-[11px] text-muted">Same-day rule and slot lengths are centre settings.</span>
+          <span className="ml-auto text-label text-muted">Same-day rule and slot lengths are centre settings.</span>
         </div>
       ) : null}
     </div>

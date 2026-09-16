@@ -76,18 +76,18 @@ function ReceptiveOrderAndKey() {
                 }`}
               >
                 <span
-                  className={`flex size-5 flex-none items-center justify-center rounded-full text-[10.5px] font-bold ${
+                  className={`flex size-5 flex-none items-center justify-center rounded-full text-micro font-bold ${
                     isDone ? "bg-primary text-white" : "bg-accent text-muted"
                   }`}
                 >
                   {isDone ? idx + 1 : "?"}
                 </span>
-                <span className="text-[12.5px] font-semibold text-ink">{itemByKey[key].label}</span>
+                <span className="text-meta font-semibold text-ink">{itemByKey[key].label}</span>
               </button>
             );
           })}
         </div>
-        <p className="text-[11px] text-muted">
+        <p className="text-label text-muted">
           {done ? "All seven in order — that's the staging." : `${picked.length} of 7 placed — click the one that comes next.`}
         </p>
       </div>
@@ -110,12 +110,12 @@ function ReceptiveOrderAndKey() {
       ) : (
         <div className="flex flex-col gap-3.5 border-t border-border pt-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">All done — handout · answer key, to keep</p>
+            <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">All done — handout · answer key, to keep</p>
             <div className="flex gap-2" data-print-hide>
-              <button type="button" onClick={() => setRevealed(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+              <button type="button" onClick={() => setRevealed(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
                 Hide
               </button>
-              <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+              <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
                 Print
               </button>
             </div>
@@ -125,7 +125,7 @@ function ReceptiveOrderAndKey() {
             {TERMS.map((t) => (
               <div key={t.term} className="grid grid-cols-[220px_1fr] gap-2.5 border-b border-border-faint py-1">
                 <p className="font-serif text-xs font-semibold text-ink">{t.term}</p>
-                <p className="text-[11px] leading-snug text-muted">{t.definition}</p>
+                <p className="text-label leading-snug text-muted">{t.definition}</p>
               </div>
             ))}
           </div>
@@ -133,17 +133,17 @@ function ReceptiveOrderAndKey() {
             <p className="text-xs font-semibold text-ink">True or false</p>
             {DETAILS.map((d) => (
               <div key={d.q} className="grid grid-cols-[1fr_90px] gap-2.5 border-b border-border-faint py-1">
-                <p className="text-[11.5px] text-ink">{d.q}</p>
-                <p className="text-[11.5px] font-semibold text-muted">{d.a}</p>
+                <p className="text-label text-ink">{d.q}</p>
+                <p className="text-label font-semibold text-muted">{d.a}</p>
               </div>
             ))}
           </div>
           <div className="flex flex-col gap-1.5">
             <p className="text-xs font-semibold text-ink">Correct stage order</p>
-            <p className="text-[11.5px] leading-relaxed text-ink">{CORRECT_ORDER_LABEL}</p>
+            <p className="text-label leading-relaxed text-ink">{CORRECT_ORDER_LABEL}</p>
           </div>
           <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
               <span className="size-1.5 rounded-full bg-current" />
               Trainer only
             </p>
@@ -185,7 +185,7 @@ export default function ReceptiveSkillsSession() {
         { time: "43–45", spine: "var(--color-destructive)", title: "Trainer notes" },
       ]}
     >
-      <p className="-mt-4 text-[11px] text-muted">Pairs with: Speakout B2 TP1.1 — Identity &amp; personality</p>
+      <p className="-mt-4 text-label text-muted">Pairs with: Speakout B2 TP1.1 — Identity &amp; personality</p>
 
       <RunningThisSession>
         Don&apos;t name &quot;receptive skills&quot; until the debrief. Time the gist task honestly — a real time limit is
@@ -196,14 +196,14 @@ export default function ReceptiveSkillsSession() {
 
       <div className="flex flex-col gap-2">
         <MatchTermsExercise terms={TERMS} />
-        <p className="text-[11px] italic text-muted">These are the words you needed before reading — and the terms you&apos;ll teach with, from tomorrow on.</p>
+        <p className="text-label italic text-muted">These are the words you needed before reading — and the terms you&apos;ll teach with, from tomorrow on.</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-4">
-          <p className="text-[13px] text-ink">How do you think receptive skills lessons should be taught?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute.</p>
+          <p className="text-meta text-ink">How do you think receptive skills lessons should be taught?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute.</p>
         </div>
       </div>
 
@@ -211,25 +211,25 @@ export default function ReceptiveSkillsSession() {
         <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2.5 rounded-[8px] border border-border bg-card p-5">
           <p className="font-serif text-base font-semibold text-ink">Staging a receptive skills lesson</p>
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A receptive skills lesson never starts cold. It opens by creating interest in the topic — visuals,
             personalisation, brainstorming what the class already knows — because background knowledge is part of
             how anyone understands a text, not a shortcut around it. Only then does the lesson pre-teach vocabulary,
             and only the words essential to understanding.
           </p>
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             The gist task comes next, testing global understanding only. For reading, students read silently under a
             time limit, so they read quickly and concentrate on the gist rather than the detail; for listening, the
             recording plays once. Only once gist is secure does the lesson set a specific information or detail
             task, prompting closer reading or listening.
           </p>
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Peer checking before whole-class feedback plays a major role in a receptive skills lesson — it increases
             involvement, builds confidence by making correction feel safer than the teacher stepping in first,
             deepens understanding as students explain answers to each other, and builds the teamwork and
             communication skills that matter beyond the classroom.
           </p>
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             The lesson closes with a follow-up task based on something related to the text — a language focus, a
             discussion, a role play or a written task.
           </p>
@@ -239,7 +239,7 @@ export default function ReceptiveSkillsSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — look again at the text and answer these questions, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — look again at the text and answer these questions, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />

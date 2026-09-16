@@ -112,7 +112,7 @@ export function TaskAnswerBox({
     );
   }
 
-  const savedLabel = <span className="text-[11px] text-muted">{saved ? "Saved" : "Saving…"}</span>;
+  const savedLabel = <span className="text-label text-muted">{saved ? "Saved" : "Saving…"}</span>;
 
   // ---- open ------------------------------------------------------------
   if (!structured) {

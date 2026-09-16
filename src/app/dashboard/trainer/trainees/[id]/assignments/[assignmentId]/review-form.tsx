@@ -117,14 +117,14 @@ export function AssignmentReviewForm({
             FormData), this just keeps the cramped checklist off a phone. */}
         <div className="card hidden flex-col gap-3 p-5 md:flex">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
               Assessment criteria · {isResubmission ? "resubmission" : "1st submission"}
             </p>
             <a
               href={`/trainer/marking-guidance?type=${encodeURIComponent(assignmentType)}`}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 text-[11px] font-medium text-primary hover:underline"
+              className="shrink-0 text-label font-medium text-primary hover:underline"
             >
               Marking guidance
             </a>
@@ -138,7 +138,7 @@ export function AssignmentReviewForm({
                   <button
                     type="button"
                     onClick={() => setMarks((m) => ({ ...m, [c.key]: !met }))}
-                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-label font-semibold ${
                       met ? "bg-status-neutral-bg text-ink" : "bg-status-warning-bg text-status-warning-text"
                     }`}
                   >
@@ -148,7 +148,7 @@ export function AssignmentReviewForm({
               );
             })}
           </div>
-          <p className="text-[11px] italic text-muted">
+          <p className="text-label italic text-muted">
             Any criterion Not met on the first submission means Resubmission Needed. These are what the cover sheet prints.
           </p>
         </div>
@@ -203,7 +203,7 @@ export function AssignmentReviewForm({
                   </option>
                 ))}
               </select>
-              <p className="text-[11px] italic text-muted">Required whenever a resubmission is returned, pass or fail.</p>
+              <p className="text-label italic text-muted">Required whenever a resubmission is returned, pass or fail.</p>
             </div>
           ) : null}
 

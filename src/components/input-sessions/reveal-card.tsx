@@ -31,14 +31,14 @@ export function RevealCard({
               <span className="size-1.5 flex-none rounded-full bg-primary" />
               <p className="font-serif text-sm font-semibold text-ink">{question}</p>
             </div>
-            <p className="text-[13.5px] leading-relaxed text-primary">{answer}</p>
+            <p className="text-body leading-relaxed text-primary">{answer}</p>
           </>
         ) : (
           <>
             <div className="flex flex-1 items-center justify-center px-1 py-1.5 text-center">
               <p className="font-serif text-lg font-semibold leading-tight text-ink">{question}</p>
             </div>
-            <p className="text-center text-[10.5px] font-semibold text-primary">Click to reveal ▾</p>
+            <p className="text-center text-micro font-semibold text-primary">Click to reveal ▾</p>
           </>
         )}
       </button>
@@ -53,9 +53,9 @@ export function RevealCard({
     >
       <p className="text-xs text-ink">{question}</p>
       {open ? (
-        <p className="border-t border-border pt-1 text-[11.5px] italic leading-relaxed text-primary">{answer}</p>
+        <p className="border-t border-border pt-1 text-label italic leading-relaxed text-primary">{answer}</p>
       ) : (
-        <p className="text-[10.5px] font-semibold text-primary">Click to reveal ▾</p>
+        <p className="text-micro font-semibold text-primary">Click to reveal ▾</p>
       )}
     </button>
   );

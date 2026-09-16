@@ -31,7 +31,7 @@ export function EmailHistoryPanel({ emails, timeZone }: { emails: EmailRow[]; ti
   if (emails.length === 0) {
     return (
       <div className="card flex flex-col gap-1 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Email history</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Email history</h2>
         <p className="text-sm text-muted">No emails sent yet.</p>
       </div>
     );
@@ -39,7 +39,7 @@ export function EmailHistoryPanel({ emails, timeZone }: { emails: EmailRow[]; ti
 
   return (
     <div className="card flex flex-col gap-3 p-5">
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Email history</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Email history</h2>
       <ul className="flex flex-col gap-2.5">
         {emails.map((email) => (
           <li key={email.id} className="flex items-start justify-between gap-3 border-b border-border-faint pb-2.5 last:border-none last:pb-0 hover-ring">

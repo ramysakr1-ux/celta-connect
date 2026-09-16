@@ -24,7 +24,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
 
   return (
     <form action={updateDeliveryMode} className="sheet flex flex-col gap-3 px-6 py-5">
-      <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Delivery mode</h2>
+      <h2 className="font-serif text-h2 font-semibold text-ink-warm">Delivery mode</h2>
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="delivery_mode" value={mode} />
       <div className="flex gap-1.5 rounded-[10px] bg-card-inset p-1" role="radiogroup" aria-label="Delivery mode">
@@ -37,7 +37,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
               role="radio"
               aria-checked={active}
               onClick={() => setMode(o.value)}
-              className={`h-8 flex-1 rounded-[7px] text-[12.5px] font-semibold transition-colors ${
+              className={`h-8 flex-1 rounded-[7px] text-meta font-semibold transition-colors ${
                 active ? "bg-card text-ink shadow-[0_1px_2px_rgba(0,0,0,0.08)]" : "text-muted hover:text-ink"
               }`}
             >
@@ -46,7 +46,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
           );
         })}
       </div>
-      <p className="text-[12.5px] leading-[1.45] text-muted">{option.description}</p>
+      <p className="text-meta leading-[1.45] text-muted">{option.description}</p>
 
       {dirty ? (
         <>
@@ -55,25 +55,25 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
               impact.tone === "warning" ? "border-status-warning-text/40 bg-status-warning-bg" : "border-border bg-card-inset"
             }`}
           >
-            <p className={`text-[11px] font-semibold tracking-[0.09em] uppercase ${impact.tone === "warning" ? "text-status-warning-text" : "text-muted"}`}>
+            <p className={`text-label font-semibold tracking-[0.09em] uppercase ${impact.tone === "warning" ? "text-status-warning-text" : "text-muted"}`}>
               {impact.heading}
             </p>
             <div className="flex flex-col gap-1.5">
               {impact.rows.map((row) => (
                 <div key={row.what} className="flex items-start gap-2.5">
-                  <span className={`w-[100px] shrink-0 text-[11px] font-semibold ${TONE_CLASS[row.tone]}`}>{row.what}</span>
+                  <span className={`w-[100px] shrink-0 text-label font-semibold ${TONE_CLASS[row.tone]}`}>{row.what}</span>
                   <span className="text-xs leading-relaxed text-ink">{row.text}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="flex items-center justify-end gap-3">
-            <button type="button" onClick={() => setMode(savedMode)} className="text-[12.5px] text-muted hover:text-ink">
+            <button type="button" onClick={() => setMode(savedMode)} className="text-meta text-muted hover:text-ink">
               Cancel
             </button>
             <button
               type="submit"
-              className="inline-flex h-8 items-center rounded-[8px] px-3.5 text-[12.5px] font-semibold text-primary-foreground transition-[filter] hover:brightness-110"
+              className="inline-flex h-8 items-center rounded-[8px] px-3.5 text-meta font-semibold text-primary-foreground transition-[filter] hover:brightness-110"
               style={{ background: "var(--hub-accent)" }}
             >
               Save
@@ -81,7 +81,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
           </div>
         </>
       ) : (
-        <p className="text-[11px] text-muted">You can change this until the timetable is locked.</p>
+        <p className="text-label text-muted">You can change this until the timetable is locked.</p>
       )}
     </form>
   );

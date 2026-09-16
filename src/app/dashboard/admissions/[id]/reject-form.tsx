@@ -15,7 +15,7 @@ export function RejectForm({ applicantId }: { applicantId: string }) {
   return (
     <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Reject</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Reject</h2>
       <div className="flex gap-4 text-sm text-ink">
         <label className="flex items-center gap-2">
           <input

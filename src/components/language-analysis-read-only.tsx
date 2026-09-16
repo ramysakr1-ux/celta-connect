@@ -28,7 +28,7 @@ export function LanguageAnalysisReadOnly({
 }) {
   const isVocab = analysis.type === "vocab";
   const sheet = analysis.type === "grammar" || analysis.type === "function" ? ANALYSIS_SHEETS[analysis.type] : null;
-  const body = compact ? "text-[13px]" : "text-sm";
+  const body = compact ? "text-meta" : "text-sm";
 
   if (isVocab) {
     const rows = analysis.vocab_rows ?? [];
@@ -37,12 +37,12 @@ export function LanguageAnalysisReadOnly({
       <div className="flex flex-col gap-3">
         {analysis.context ? <p className={`${body} text-ink`}>{analysis.context}</p> : null}
         <div className="overflow-x-auto rounded-[8px] border border-border-faint">
-          <table className="w-full min-w-[820px] border-collapse text-[13px]">
+          <table className="w-full min-w-[820px] border-collapse text-meta">
             <thead>
               <tr className="bg-card">
                 {["Vocab item", "Definition", "How they'll convey it", "Clarification", "Form", "Problems & solutions"].map(
                   (h) => (
-                    <th key={h} className="border-b border-border-faint p-2 text-left text-[11.5px] font-semibold text-ink-warm">
+                    <th key={h} className="border-b border-border-faint p-2 text-left text-label font-semibold text-ink-warm">
                       {h}
                     </th>
                   )
@@ -99,10 +99,10 @@ export function LanguageAnalysisReadOnly({
                 if (real.length === 0) return null;
                 return (
                   <div key={String(field.key)}>
-                    <p className="text-[11.5px] font-semibold text-muted">{field.label}</p>
+                    <p className="text-label font-semibold text-muted">{field.label}</p>
                     <ul className="mt-0.5 flex flex-col gap-1">
                       {real.map((pair, pi) => (
-                        <li key={pi} className="text-[13px] text-ink">
+                        <li key={pi} className="text-meta text-ink">
                           {pair.problem} <span className="text-primary">→</span>{" "}
                           <span className="text-ink-warm">{pair.solution}</span>
                         </li>
@@ -116,8 +116,8 @@ export function LanguageAnalysisReadOnly({
               if (!text) return null;
               return (
                 <div key={String(field.key)}>
-                  <p className="text-[11.5px] font-semibold text-muted">{field.label}</p>
-                  <p className="text-[13px] whitespace-pre-line text-ink">{text}</p>
+                  <p className="text-label font-semibold text-muted">{field.label}</p>
+                  <p className="text-meta whitespace-pre-line text-ink">{text}</p>
                 </div>
               );
             })}

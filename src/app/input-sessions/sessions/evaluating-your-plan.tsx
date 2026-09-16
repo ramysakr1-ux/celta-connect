@@ -157,7 +157,7 @@ export default function EvaluatingYourPlanSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">1 · Whose fault was it? · 5 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           A lesson goes badly. In pairs, two lists: things the <strong>plan</strong> did, and things the{" "}
           <strong>teacher</strong> did. Two minutes, then read a few out.
         </p>
@@ -214,7 +214,7 @@ export default function EvaluatingYourPlanSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Wrap-up · 2 minutes</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Open your next lesson plan now, before you leave. Write one thing into it that came out of your last one — a
           timing, an instruction in full, an anticipated problem, an extension. One line, in the plan, today.
         </p>
@@ -270,8 +270,8 @@ function RewriteStage() {
       </div>
       {REWRITES.map((r, i) => (
         <div key={r.weak} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-          <p className="text-[13px] leading-relaxed text-ink">{r.weak}</p>
-          <p className="text-[11px] italic" style={{ color: GOLD }}>
+          <p className="text-meta leading-relaxed text-ink">{r.weak}</p>
+          <p className="text-label italic" style={{ color: GOLD }}>
             {r.why}
           </p>
           <textarea
@@ -279,12 +279,12 @@ function RewriteStage() {
             value={drafts[i] ?? ""}
             onChange={(e) => setDrafts((d) => ({ ...d, [i]: e.target.value }))}
             placeholder="Rewrite it — what the plan did, how you know, and what is different next time."
-            className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-[12.5px] leading-relaxed text-ink outline-none focus:border-primary"
+            className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-meta leading-relaxed text-ink outline-none focus:border-primary"
           />
           <RevealCard question="Compare with one that works" answer={r.strong} />
         </div>
       ))}
-      <p className="text-[12px] leading-relaxed text-ink">
+      <p className="text-meta leading-relaxed text-ink">
         Now the real one: open your own last self-evaluation and do the same to it.
       </p>
     </section>

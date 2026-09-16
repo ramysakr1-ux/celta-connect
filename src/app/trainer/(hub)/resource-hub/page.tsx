@@ -318,11 +318,11 @@ export default async function TrainerResourceHubPage() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Point</th>
-                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Release style</th>
-                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Round(s)</th>
-                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Source</th>
-                  <th className="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Usage</th>
+                  <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Point</th>
+                  <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Release style</th>
+                  <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Round(s)</th>
+                  <th className="px-4 py-2.5 text-left text-micro font-semibold uppercase tracking-[0.12em] text-muted">Source</th>
+                  <th className="px-4 py-2.5 text-right text-micro font-semibold uppercase tracking-[0.12em] text-muted">Usage</th>
                 </tr>
               </thead>
               <tbody>

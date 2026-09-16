@@ -209,12 +209,12 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
 
       <div className="flex max-w-[760px] flex-col gap-2">
         <p
-          className="border-l-4 pl-3 font-serif text-[28px] leading-[1.15] font-medium text-ink-warm"
+          className="border-l-4 pl-3 font-serif text-h1 leading-[1.15] font-medium text-ink-warm"
           style={{ borderColor: lateCount > 0 ? "oklch(45% 0.16 27)" : "var(--hub-accent)" }}
         >
           {debtLine}
         </p>
-        <p className="text-[13px] text-muted">
+        <p className="text-meta text-muted">
           {weekLabel ? `${weekLabel.charAt(0).toUpperCase()}${weekLabel.slice(1)} · ` : ""}
           feedback is due the same day · lessons leave this page once feedback is saved.
         </p>
@@ -228,12 +228,12 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
         </div>
       ) : (
         <div className="rounded-[6px] border border-border bg-card px-5 py-6">
-          <p className="font-serif text-[20px] text-muted italic">Nothing owed. Every taught lesson has your feedback.</p>
+          <p className="font-serif text-h2 text-muted italic">Nothing owed. Every taught lesson has your feedback.</p>
         </div>
       )}
 
       {queue.othersOwed.length > 0 ? (
-        <p className="flex items-center gap-2 text-[12px] text-muted">
+        <p className="flex items-center gap-2 text-meta text-muted">
           {queue.othersOwed.length} {queue.owed.length > 0 ? "more " : ""}owed by {otherTutor ?? "another tutor"}
           {otherGroup ? ` (${otherGroup})` : ""}
           <Link href={showOthers ? "/trainer/tp?others=0" : "/trainer/tp?others=1"} className="font-semibold hover:underline" style={{ color: "var(--hub-accent)" }}>

@@ -86,7 +86,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
         <h2 className="font-serif text-2xl text-ink">Cambridge&apos;s Pre-Course Task, plus your centre&apos;s supplement</h2>
         <p className="mt-1 text-sm text-muted">
           {demoReadOnly ? "On a real course you answer it here and it saves as you go. " : "You answer it here and it saves as you go. "}It is not graded and not counted as coursework, but your tutor

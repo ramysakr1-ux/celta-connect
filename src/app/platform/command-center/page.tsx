@@ -194,8 +194,8 @@ export default async function CommandCenterOverviewPage() {
     <>
       {myCourses.length > 0 ? (
         <div className="card flex flex-col gap-3.5 p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Your courses</h2>
-          <p className="text-[11.5px] text-muted">Courses you&apos;re staffed on directly — lift the normal trainer view, same as any tutor.</p>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Your courses</h2>
+          <p className="text-label text-muted">Courses you&apos;re staffed on directly — lift the normal trainer view, same as any tutor.</p>
           {myCourses.map((c) => (
             <Link
               key={c.tutorLinkId}
@@ -205,7 +205,7 @@ export default async function CommandCenterOverviewPage() {
               <span className="text-sm font-semibold text-ink">
                 {c.centerName} · {c.label} — {(c.role ?? "role not set").replace(/_/g, " ")}
               </span>
-              <span className="text-[11px] text-muted">{c.running ? "Running now" : "Not currently running"}</span>
+              <span className="text-label text-muted">{c.running ? "Running now" : "Not currently running"}</span>
             </Link>
           ))}
         </div>
@@ -215,7 +215,7 @@ export default async function CommandCenterOverviewPage() {
         <div className="flex flex-col gap-[22px]">
           <div className="card !p-0">
             <div className="flex items-center justify-between px-5 pt-[18px] pb-1.5">
-              <h2 className="font-serif text-[17px] font-semibold text-ink">Centres</h2>
+              <h2 className="font-serif text-h3 font-semibold text-ink">Centres</h2>
               <Link
                 href="/platform/command-center/centres/new"
                 className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90"
@@ -226,7 +226,7 @@ export default async function CommandCenterOverviewPage() {
             <div>
               <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-rule-gold">
                 {["Centre", "Active course", "Trainees", ""].map((h) => (
-                  <div key={h} className="px-5 py-4 text-[10.5px] font-bold uppercase tracking-wide text-muted">
+                  <div key={h} className="px-5 py-4 text-micro font-bold uppercase tracking-wide text-muted">
                     {h}
                   </div>
                 ))}
@@ -248,46 +248,46 @@ export default async function CommandCenterOverviewPage() {
                     key={c.id}
                     className="hover-ring grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
                   >
-                    <div className="px-5 py-[15px] text-[13.5px] font-semibold text-ink">
+                    <div className="px-5 py-[15px] text-body font-semibold text-ink">
                       {c.name}
-                      {c.is_demo ? <span className="ml-2 text-[11px] font-normal text-muted">(demo)</span> : null}
+                      {c.is_demo ? <span className="ml-2 text-label font-normal text-muted">(demo)</span> : null}
                     </div>
                     <div className="px-5 py-[15px]">
                       <span
-                        className={`inline-block rounded-full px-[11px] py-1 text-[11.5px] font-bold ${
+                        className={`inline-block rounded-full px-[11px] py-1 text-label font-bold ${
  running ? "bg-status-on-track-bg text-status-on-track-text" : "bg-surface-muted text-muted"
                         }`}
                       >
                         {running ? (courseLabelByCenterId.get(c.id) ?? "Active course now") : "No active course"}
                       </span>
                     </div>
-                    <div className="px-5 py-[15px] text-[13.5px] text-ink">
+                    <div className="px-5 py-[15px] text-body text-ink">
                       {access && traineeCountByCenterId.has(c.id) ? traineeCountByCenterId.get(c.id) : "—"}
                     </div>
                     <div className="px-5 py-[15px] text-right">
                       {access ? (
                         <>
-                          <span className={`mr-3 text-[11px] font-bold ${access === "Owner" ? "text-primary" : "text-muted"}`}>{access}</span>
-                          <Link href={access === "Owner" ? "/centre" : `/platform/command-center/enter/${c.id}`} className="text-[11px] font-bold text-primary">
+                          <span className={`mr-3 text-label font-bold ${access === "Owner" ? "text-primary" : "text-muted"}`}>{access}</span>
+                          <Link href={access === "Owner" ? "/centre" : `/platform/command-center/enter/${c.id}`} className="text-label font-bold text-primary">
                             Open
                           </Link>
                         </>
                       ) : (
-                        <span className="text-[11px] text-muted">No access</span>
+                        <span className="text-label text-muted">No access</span>
                       )}
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="border-t border-rule-gold px-5 py-4 text-[11px] text-muted">
+            <div className="border-t border-rule-gold px-5 py-4 text-label text-muted">
               Owner access is disclosed to the centre on their side. Centres you haven&apos;t been invited into show only what they&apos;ve chosen to make
               visible — no silent viewing.
             </div>
           </div>
 
           <div className="card card-red flex flex-col gap-3.5 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Needs your attention</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Needs your attention</h2>
             {needsAttentionCount === 0 ? (
               <p className="text-sm text-muted">Nothing needs you right now.</p>
             ) : (
@@ -334,27 +334,27 @@ export default async function CommandCenterOverviewPage() {
         <div className="flex flex-col gap-[22px]">
           <div className="card flex flex-col gap-3.5 p-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-[17px] font-semibold text-ink">Feedback &amp; support</h2>
+              <h2 className="font-serif text-h3 font-semibold text-ink">Feedback &amp; support</h2>
               {unreadSupportCount > 0 ? <span className="pill pill-warning">{unreadSupportCount} unread</span> : null}
             </div>
-            <div className="text-[11.5px] text-muted">
+            <div className="text-label text-muted">
               Synced automatically from support@celtaconnect.com.{" "}
               {(supportMessages ?? []).length === 0 ? "No email-ingestion source is connected yet, so this stays empty until one is." : ""}
             </div>
             {(supportMessages ?? []).length === 0 ? (
-              <p className="text-[12.5px] text-muted">Nothing yet.</p>
+              <p className="text-meta text-muted">Nothing yet.</p>
             ) : (
               (supportMessages ?? []).map((m) => (
                 <div key={m.id} className="hover-ring flex flex-col gap-0.5 border-t border-border-faint py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[7px]">
                       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${m.read_at ? "bg-border" : "bg-gold"}`} />
-                      <span className="text-[12.5px] font-bold text-ink">
+                      <span className="text-meta font-bold text-ink">
                         {m.from_name ?? m.from_email}
                         {m.center_id ? ` — ${centerNameById.get(m.center_id) ?? ""}` : ""}
                       </span>
                     </div>
-                    <span className="text-[11px] text-muted">{relativeTime(m.received_at)}</span>
+                    <span className="text-label text-muted">{relativeTime(m.received_at)}</span>
                   </div>
                   <div className="pl-[13px] text-xs text-muted">{m.snippet}</div>
                 </div>
@@ -363,14 +363,14 @@ export default async function CommandCenterOverviewPage() {
           </div>
 
           <div className="card flex flex-col gap-3.5 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Activity, platform-wide</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Activity, platform-wide</h2>
             {activity.length === 0 ? (
-              <p className="text-[12.5px] text-muted">Nothing yet.</p>
+              <p className="text-meta text-muted">Nothing yet.</p>
             ) : (
               activity.map((item, i) => (
                 <div key={i} className="lift flex items-baseline gap-2.5">
-                  <div className="w-11 shrink-0 text-[11px] text-muted">{relativeTime(item.at)}</div>
-                  <div className="text-[12.5px] text-ink">{item.label}</div>
+                  <div className="w-11 shrink-0 text-label text-muted">{relativeTime(item.at)}</div>
+                  <div className="text-meta text-ink">{item.label}</div>
                 </div>
               ))
             )}
@@ -378,7 +378,7 @@ export default async function CommandCenterOverviewPage() {
 
           <Link
             href="/platform/accounts"
-            className="wash rounded-[6px] border border-border px-4 py-3 text-center text-[12.5px] font-semibold text-primary"
+            className="wash rounded-[6px] border border-border px-4 py-3 text-center text-meta font-semibold text-primary"
           >
             Accounts, subscriptions &amp; invoices
           </Link>

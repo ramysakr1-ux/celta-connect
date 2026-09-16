@@ -217,7 +217,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
     return (
       <div className="sheet flex flex-col gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{topic.title} · review notes</p>
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">{topic.title} · review notes</p>
           <h2 className="mt-1 font-serif text-lg text-ink">Recap before the quiz</h2>
         </div>
         <div className="flex flex-col gap-2.5">
@@ -248,7 +248,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
     <div className="sheet flex flex-col gap-4">
       <p className="text-xs text-muted">Time on this task: {formatDuration(liveSeconds)}</p>
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Supervised review</p>
+        <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Supervised review</p>
         <h2 className="mt-1 font-serif text-xl text-ink">Pick this session&apos;s topic</h2>
       </div>
       <div className="flex flex-col gap-2.5">

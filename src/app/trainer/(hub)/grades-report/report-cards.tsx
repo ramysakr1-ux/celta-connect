@@ -28,7 +28,7 @@ export function CopyField({ value, label }: { value: string; label: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
       }}
-      className="wash shrink-0 rounded-full border border-border px-2 py-[1px] text-[10px] font-bold tracking-[0.04em] text-muted uppercase"
+      className="wash shrink-0 rounded-full border border-border px-2 py-[1px] text-micro font-bold tracking-[0.04em] text-muted uppercase"
       aria-label={`Copy ${label}`}
     >
       {copied ? "Copied" : "Copy"}
@@ -81,19 +81,19 @@ export function CriteriaList({
   return (
     <div className="flex flex-col gap-[7px]">
       <div className="flex items-baseline justify-between gap-2.5">
-        <span className={`text-[12px] font-semibold ${labelClass}`}>{label}</span>
+        <span className={`text-meta font-semibold ${labelClass}`}>{label}</span>
         <span className="flex items-center gap-2">
-          <span className="text-[10px] text-muted">{source}</span>
+          <span className="text-micro text-muted">{source}</span>
           <CopyField value={items.map((i) => i.label).join("\n")} label={label} />
         </span>
       </div>
 
       <div className="flex min-h-[34px] flex-col gap-[5px] rounded-[6px] border border-border bg-card-inset px-2.5 py-[9px]">
-        {items.length === 0 ? <span className="px-0.5 py-[3px] text-[11px] text-muted">None</span> : null}
+        {items.length === 0 ? <span className="px-0.5 py-[3px] text-label text-muted">None</span> : null}
         {items.map((item) => (
           <div
             key={item.code}
-            className="flex items-start gap-2 rounded-[6px] border border-border bg-card px-2.5 py-1 text-[11.5px] leading-[1.5] text-ink"
+            className="flex items-start gap-2 rounded-[6px] border border-border bg-card px-2.5 py-1 text-label leading-[1.5] text-ink"
           >
             <span className="flex-1">{item.label}</span>
             {editable ? (
@@ -102,7 +102,7 @@ export function CriteriaList({
                 <input type="hidden" name="list" value={list} />
                 <input type="hidden" name="code" value={item.code} />
                 <input type="hidden" name="op" value="remove" />
-                <button type="submit" className="shrink-0 text-[10px] text-muted opacity-50 hover:opacity-100" aria-label="Remove">
+                <button type="submit" className="shrink-0 text-micro text-muted opacity-50 hover:opacity-100" aria-label="Remove">
                   ✕
                 </button>
               </form>
@@ -115,7 +115,7 @@ export function CriteriaList({
             <button
               type="button"
               onClick={() => setPicking((v) => !v)}
-              className="text-[11px] font-medium text-primary hover:underline"
+              className="text-label font-medium text-primary hover:underline"
             >
               {picking ? "Cancel" : "+ add a criterion"}
             </button>
@@ -129,7 +129,7 @@ export function CriteriaList({
                     <input type="hidden" name="op" value="add" />
                     <button
                       type="submit"
-                      className="wash flex w-full items-start gap-2 rounded-[5px] px-2 py-1 text-left text-[11px] leading-[1.45] text-ink"
+                      className="wash flex w-full items-start gap-2 rounded-[5px] px-2 py-1 text-left text-label leading-[1.45] text-ink"
                     >
                       <span className="w-7 shrink-0 font-bold tabular-nums text-muted">{code}</span>
                       <span className="w-8 shrink-0 font-semibold text-muted">{ratings[code] ?? "—"}</span>
@@ -138,7 +138,7 @@ export function CriteriaList({
                   </form>
                 ))}
                 {options.length === 0 ? (
-                  <p className="px-2 py-1 text-[11px] text-muted">Every criterion for this half is already listed.</p>
+                  <p className="px-2 py-1 text-label text-muted">Every criterion for this half is already listed.</p>
                 ) : null}
               </div>
             ) : null}

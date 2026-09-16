@@ -111,14 +111,14 @@ export function AttachMenu({
             <Upload size={16} className="text-muted" />
             <span>
               Upload a file
-              <span className="block text-[11px] text-muted">PDF, Word, PowerPoint or an image</span>
+              <span className="block text-label text-muted">PDF, Word, PowerPoint or an image</span>
             </span>
           </button>
           <button type="button" role="menuitem" className={itemClass} onClick={() => setMode("link")}>
             <Link2 size={16} className="text-muted" />
             <span>
               Paste a link
-              <span className="block text-[11px] text-muted">Anything with a web address</span>
+              <span className="block text-label text-muted">Anything with a web address</span>
             </span>
           </button>
           {hasGoogleConnection ? (

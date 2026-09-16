@@ -107,7 +107,7 @@ export function TrajectoryBarInline({ value }: { value: Trajectory }) {
           style={{ left: `${MARKER_POSITION[value]}%`, transform: "translate(-50%, -50%)", backgroundColor: MARKER_COLOR[value] }}
         />
       </span>
-      <span className="text-[12.5px] font-semibold whitespace-nowrap text-ink">{STANDING_LABEL[value]}</span>
+      <span className="text-meta font-semibold whitespace-nowrap text-ink">{STANDING_LABEL[value]}</span>
     </span>
   );
 }

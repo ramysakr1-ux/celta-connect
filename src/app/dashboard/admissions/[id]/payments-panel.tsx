@@ -42,7 +42,7 @@ export function PaymentsPanel({
   return (
     <div className="card flex flex-col gap-4 p-5">
       <div>
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Payments</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Payments</h2>
         {sorted.length > 0 ? (
           <p className="mt-1 text-sm text-muted">
             {paidTotal} of {total} {sorted[0].currency} paid

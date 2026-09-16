@@ -30,7 +30,7 @@ export function DuplicateCourseForm({
   return (
     <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="source_course_id" value={courseId} />
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Duplicate this course</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Duplicate this course</h2>
       <p className="text-sm text-muted">
         Copies the timetable and any course-specific Resource Hub files onto a new course with
         new dates -- fully editable afterward. Your centre-wide TP Points Library and assignment

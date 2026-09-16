@@ -176,7 +176,7 @@ export default async function AdminSettingsPage({
 
         <div className="flex flex-col gap-5">
           <div id="centre-profile" className="card card-gold scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Centre profile</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Centre profile</h2>
             <p className="mt-2 text-muted">
               Your centre&apos;s name and Cambridge-assigned centre number -- shown on every course,
               the final report, and your own record pages.
@@ -195,7 +195,7 @@ export default async function AdminSettingsPage({
           </div>
 
           <div id="auto-tagging" className="card scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">TP feedback tagging</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">TP feedback tagging</h2>
             <p className="mt-2 text-muted">
               As a trainer types a feedback bullet, matching CELTA criteria codes land on it
               automatically -- no clicking through the criteria panel. On by default; the manual
@@ -213,7 +213,7 @@ export default async function AdminSettingsPage({
           </div>
 
           <div id="google-drive" className="card card-gold scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Google Drive</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Google Drive</h2>
             <p className="mt-2 text-muted">
               Connect your centre&apos;s Google Drive so CELTA5 records can be kept in sync with your
               official template document.
@@ -257,7 +257,7 @@ export default async function AdminSettingsPage({
           </div>
 
           <div id="feedback-style" className="card scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Feedback Style Examples</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Feedback Style Examples</h2>
             <p className="mt-2 text-muted">
               Real feedback snippets used to guide the AI tone-cleanup feature on trainer feedback
               fields. Added once, reused automatically on every rewrite.
@@ -268,7 +268,7 @@ export default async function AdminSettingsPage({
           </div>
 
           <div id="tutors" className="card card-gold scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Tutors</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
             <p className="mt-2 text-muted">
               Who&apos;s teaching each course at this centre, their role, trainer-in-training status, and
               (on online or mixed-mode courses) evidence of online teaching experience.
@@ -279,7 +279,7 @@ export default async function AdminSettingsPage({
           </div>
 
           <div id="malpractice-outcomes" className="card scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Malpractice outcomes</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Malpractice outcomes</h2>
             <p className="mt-2 text-muted">
               Handbook 9.2.4 requires your own internal policy on plagiarism/malpractice penalties --
               Connect never invents one. Add each outcome your policy names, and whether it fails the
@@ -292,7 +292,7 @@ export default async function AdminSettingsPage({
           </div>
 
           <div id="assignment-criteria" className="card card-gold scroll-mt-6 p-5">
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Assignment marking criteria</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Assignment marking criteria</h2>
             <p className="mt-2 text-muted">
               The fixed brief and word count stay as they are -- this is the grey area, where centres and tutors
               reasonably differ on what counts. Shipped with Cambridge&apos;s own defaults; add or deactivate to match

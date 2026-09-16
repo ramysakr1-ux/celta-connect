@@ -52,8 +52,8 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
     >
       <div className="flex flex-wrap items-center justify-between gap-3 px-[18px] pt-4 pb-2.5">
         <div className="flex items-baseline gap-2.5">
-          <h2 className="font-serif text-[24px] font-semibold text-ink-warm">Needs you</h2>
-          <span className="text-[12.5px] text-muted">
+          <h2 className="font-serif text-h1 font-semibold text-ink-warm">Needs you</h2>
+          <span className="text-meta text-muted">
             {alerts.length} &middot; all shown
           </span>
         </div>
@@ -62,7 +62,7 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
             usable width on a phone. The control itself must not wrap -- it is
             one object -- so it scrolls instead. */}
         {alerts.length > 0 ? (
-          <div className="inline-flex max-w-full flex-wrap items-center gap-2 text-[11.5px] text-muted">
+          <div className="inline-flex max-w-full flex-wrap items-center gap-2 text-label text-muted">
             <span>Show</span>
             <span className="scroll-row inline-flex max-w-full rounded-[7px] border border-border bg-card">
               <FilterButton active={show === "all"} onClick={() => setShow("all")} accent={accent}>
@@ -90,16 +90,16 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
               className="lift grid grid-cols-[40px_1fr_auto] items-center gap-3.5 rounded-[10px] px-3 py-[11px]"
             >
               <span
-                className="flex size-10 items-center justify-center rounded-[10px] text-[11.5px] font-bold tracking-[0.02em]"
+                className="flex size-10 items-center justify-center rounded-[10px] text-label font-bold tracking-[0.02em]"
                 style={{ background: KIND[a.kind].tone, color: KIND[a.kind].badgeInk }}
               >
                 {a.badge}
               </span>
               <span className="min-w-0">
-                <span className={`block text-[14px] font-semibold ${a.destructive ? "text-destructive" : "text-ink"}`}>{a.title}</span>
-                <span className="block truncate text-[12.5px] text-muted">{a.meta}</span>
+                <span className={`block text-body font-semibold ${a.destructive ? "text-destructive" : "text-ink"}`}>{a.title}</span>
+                <span className="block truncate text-meta text-muted">{a.meta}</span>
               </span>
-              <span className={`text-[12px] font-semibold whitespace-nowrap ${/^(now|today)$/i.test(a.due) ? "text-destructive" : "text-muted"}`}>
+              <span className={`text-meta font-semibold whitespace-nowrap ${/^(now|today)$/i.test(a.due) ? "text-destructive" : "text-muted"}`}>
                 {a.due}
               </span>
             </Link>
@@ -129,7 +129,7 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex h-7 items-center gap-1.5 border-r border-border px-[11px] text-[12px] font-semibold last:border-r-0 ${
+      className={`inline-flex h-7 items-center gap-1.5 border-r border-border px-[11px] text-meta font-semibold last:border-r-0 ${
         active ? "bg-frame" : "text-muted hover:bg-card-inset hover:text-ink"
       }`}
       style={active ? { color: accent, boxShadow: `inset 0 -2px 0 ${accent}` } : undefined}

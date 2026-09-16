@@ -73,7 +73,7 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
       // three lines reads as a squeezed control, and the whole point of this
       // row is that the branches look like something you are pleased to own.
       <div className="flex flex-wrap items-center gap-2">
-        <span className="shrink-0 text-[10.5px] font-bold tracking-[0.16em] text-muted uppercase">
+        <span className="shrink-0 text-micro font-bold tracking-[0.16em] text-muted uppercase">
           {shared > 0 ? branches[0].name.trim().split(/\s+/).slice(0, shared).join(" ") : "Your centres"}
         </span>
         {[{ id: null as string | null, name: "All branches", full: "All branches" }, ...branches.map((b) => ({ id: b.id, name: shortName(b), full: b.name }))].map((b) => {
@@ -84,7 +84,7 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
               type="button"
               onClick={() => set(b.id)}
               title={b.full}
-              className="shrink-0 rounded-[4px] border px-3.5 py-1.5 font-serif text-[13.5px] whitespace-nowrap transition-colors duration-150"
+              className="shrink-0 rounded-[4px] border px-3.5 py-1.5 font-serif text-body whitespace-nowrap transition-colors duration-150"
               style={
                 isActive
                   ? { background: garnet, borderColor: garnet, color: "oklch(98% 0.006 85)" }
@@ -104,7 +104,7 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
       <button
         type="button"
         onClick={() => set(null)}
-        className={`rounded-[5px] px-2.5 py-1 text-[11px] font-semibold ${
+        className={`rounded-[5px] px-2.5 py-1 text-label font-semibold ${
           !current ? "bg-primary text-primary-foreground" : "wash text-muted hover:text-ink"
         }`}
       >
@@ -118,7 +118,7 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
           // The centre number rides along in the title because "IT059" is
           // ambiguous across two cities.
           title={b.centerNumber ? `${b.name} · ${b.centerNumber}` : b.name}
-          className={`rounded-[5px] px-2.5 py-1 text-[11px] font-semibold ${
+          className={`rounded-[5px] px-2.5 py-1 text-label font-semibold ${
             current === b.id ? "bg-primary text-primary-foreground" : "wash text-muted hover:text-ink"
           }`}
         >

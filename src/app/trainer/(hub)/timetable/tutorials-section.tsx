@@ -20,10 +20,10 @@ const KIND_STYLE: Record<CellKind, React.CSSProperties> = {
   move: { background: "transparent", color: "var(--hub-accent)", borderColor: "var(--hub-accent)" },
   none: { background: "transparent", color: "var(--color-muted)", borderColor: "oklch(85% 0.012 82)", borderStyle: "dashed" },
 };
-const PILL = "inline-flex h-[26px] max-w-full items-center gap-1.5 rounded-full border-[1.5px] px-2.5 text-[12px] font-bold tabular-nums whitespace-nowrap";
-const INPUT = "h-9 rounded-[8px] border border-border bg-card px-3 text-[13px] text-ink outline-none focus:border-primary";
-const PRIMARY = "inline-flex h-[30px] items-center gap-1.5 rounded-[8px] px-3 text-[12.5px] font-semibold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60";
-const OUTLINE = "inline-flex h-7 items-center rounded-[8px] border-[1.5px] px-3 text-[12px] font-bold";
+const PILL = "inline-flex h-[26px] max-w-full items-center gap-1.5 rounded-full border-[1.5px] px-2.5 text-meta font-bold tabular-nums whitespace-nowrap";
+const INPUT = "h-9 rounded-[8px] border border-border bg-card px-3 text-meta text-ink outline-none focus:border-primary";
+const PRIMARY = "inline-flex h-[30px] items-center gap-1.5 rounded-[8px] px-3 text-meta font-semibold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60";
+const OUTLINE = "inline-flex h-7 items-center rounded-[8px] border-[1.5px] px-3 text-meta font-bold";
 
 function Pill({ kind, children, className = "" }: { kind: CellKind; children: React.ReactNode; className?: string }) {
   return (
@@ -86,11 +86,11 @@ function Stage2SheetForm({ groups, preselect, onDone }: { groups: { scope: strin
       <button type="submit" disabled={pending} className={PRIMARY} style={{ background: "var(--hub-accent)", height: 36 }}>
         {pending ? "Placing…" : "Place sheet"}
       </button>
-      <p className="text-[11.5px] text-muted sm:col-span-4">Positions of 15 minutes, in order. One announcement goes to the group when the sheet is placed.</p>
-      <button type="button" onClick={onDone} className="justify-self-end text-[12px] text-muted hover:text-ink">
+      <p className="text-label text-muted sm:col-span-4">Positions of 15 minutes, in order. One announcement goes to the group when the sheet is placed.</p>
+      <button type="button" onClick={onDone} className="justify-self-end text-meta text-muted hover:text-ink">
         Close
       </button>
-      {state.error ? <p className="text-[12px] text-destructive sm:col-span-5">{state.error}</p> : null}
+      {state.error ? <p className="text-meta text-destructive sm:col-span-5">{state.error}</p> : null}
     </form>
   );
 }
@@ -111,7 +111,7 @@ function ConsultationBlockForm({ data, onDone }: { data: TutorialsSectionData; o
           ))}
         </select>
       ) : (
-        <span className="flex h-9 items-center text-[13px] text-ink">{data.viewerName}</span>
+        <span className="flex h-9 items-center text-meta text-ink">{data.viewerName}</span>
       )}
       <input type="hidden" name="tutor_name" value={tutorName} />
       <input name="event_date" type="date" required aria-label="Date" className={INPUT} />
@@ -120,7 +120,7 @@ function ConsultationBlockForm({ data, onDone }: { data: TutorialsSectionData; o
       <button type="submit" disabled={pending} className={PRIMARY} style={{ background: "var(--hub-accent)", height: 36 }}>
         {pending ? "Adding…" : "Add block"}
       </button>
-      <p className="text-[11.5px] text-muted sm:col-span-4">
+      <p className="text-label text-muted sm:col-span-4">
         Consultation sits at the end of the teaching day, so the time opens on {data.dayEndsAt}. Any candidate may book before an
         assignment&apos;s first submission; after it, only with their own tutor. Connect applies that at booking.
       </p>
@@ -130,15 +130,15 @@ function ConsultationBlockForm({ data, onDone }: { data: TutorialsSectionData; o
           to an input session (walked 14 Sep 2026). Refused, not blocked --
           the tutor can still say go ahead. */}
       {state.error?.includes("already has") ? (
-        <label className="flex items-center gap-1.5 text-[11.5px] text-ink sm:col-span-4">
+        <label className="flex items-center gap-1.5 text-label text-ink sm:col-span-4">
           <input type="checkbox" name="allow_clash" value="yes" />
           Add it anyway
         </label>
       ) : null}
-      <button type="button" onClick={onDone} className="justify-self-end text-[12px] text-muted hover:text-ink">
+      <button type="button" onClick={onDone} className="justify-self-end text-meta text-muted hover:text-ink">
         Close
       </button>
-      {state.error ? <p className="text-[12px] text-destructive sm:col-span-5">{state.error}</p> : null}
+      {state.error ? <p className="text-meta text-destructive sm:col-span-5">{state.error}</p> : null}
     </form>
   );
 }
@@ -148,7 +148,7 @@ function InviteForm({ invite, onDone }: { invite: InviteAction; onDone: () => vo
   const label = invite.stage === "stage1" ? "Stage 1" : "Stage 3";
   return (
     <div className="mt-1 flex flex-col gap-2 rounded-[10px] border border-border bg-card p-3 shadow-[0_8px_24px_oklch(30%_0.04_58_/_0.1)]" onClick={(e) => e.stopPropagation()}>
-      <p className="text-[12px] text-muted">
+      <p className="text-meta text-muted">
         {invite.inviteId ? `Reschedule ${invite.traineeName}'s ${label} tutorial` : `Invite ${invite.traineeName} to a ${label} tutorial`} -- they confirm from their Today page.
       </p>
       <form action={action} className="flex flex-wrap items-center gap-2">
@@ -160,19 +160,19 @@ function InviteForm({ invite, onDone }: { invite: InviteAction; onDone: () => vo
         <button type="submit" disabled={pending} className={PRIMARY} style={{ background: "var(--hub-accent)" }}>
           {pending ? "Saving…" : invite.inviteId ? "Reschedule" : "Invite"}
         </button>
-        <button type="button" onClick={onDone} className="text-[12px] text-muted hover:text-ink">
+        <button type="button" onClick={onDone} className="text-meta text-muted hover:text-ink">
           Close
         </button>
       </form>
       {invite.inviteId ? (
         <form action={cancelIndividualTutorialInvite}>
           <input type="hidden" name="invite_id" value={invite.inviteId} />
-          <button type="submit" className="text-[12px] text-destructive hover:underline">
+          <button type="submit" className="text-meta text-destructive hover:underline">
             Cancel this invite
           </button>
         </form>
       ) : null}
-      {state.error ? <p className="text-[12px] text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-meta text-destructive">{state.error}</p> : null}
     </div>
   );
 }
@@ -218,8 +218,8 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
     <section className="group-frame flex flex-col gap-4 p-5 sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex max-w-[760px] flex-col gap-1.5">
-          <h2 className="font-serif text-[28px] leading-[1.1] font-semibold text-ink-warm">Tutorials and consultations</h2>
-          <p className="text-[13.5px] leading-[1.5] text-muted">
+          <h2 className="font-serif text-h1 leading-[1.1] font-semibold text-ink-warm">Tutorials and consultations</h2>
+          <p className="text-body leading-[1.5] text-muted">
             Where every candidate stands, one row each. A cell is the state and the door: click it to invite, open a sheet, or see the booking.{" "}
             {isMct ? "You see every group." : "You see every group; you can act on your own."}
           </p>
@@ -242,10 +242,10 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
         >
           <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
             <div className="flex items-baseline gap-2.5">
-              <span className="text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(32% 0.05 195)" }}>
+              <span className="text-label font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(32% 0.05 195)" }}>
                 Tutorials
               </span>
-              <span className="text-[12px] text-muted">{stageSub[stage]}</span>
+              <span className="text-meta text-muted">{stageSub[stage]}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex gap-[3px] rounded-[8px] bg-black/[0.06] p-[3px]" role="tablist">
@@ -256,7 +256,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                     role="tab"
                     aria-selected={stage === n}
                     onClick={() => setStage(n)}
-                    className={`flex h-6 items-center gap-[5px] rounded-[6px] px-2.5 text-[11.5px] font-bold whitespace-nowrap ${stage === n ? "bg-card text-ink shadow-[0_1px_2px_rgba(0,0,0,0.08)]" : "text-muted"}`}
+                    className={`flex h-6 items-center gap-[5px] rounded-[6px] px-2.5 text-label font-bold whitespace-nowrap ${stage === n ? "bg-card text-ink shadow-[0_1px_2px_rgba(0,0,0,0.08)]" : "text-muted"}`}
                   >
                     <span className="block size-1.5 rounded-full" style={{ background: stageDot[n] }} />
                     Stage {n}
@@ -265,25 +265,25 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
               </div>
               {stage === 2 && ownGroups.length > 0 ? (
                 <button type="button" onClick={() => setSheetForm({ open: !sheetForm.open, preselect: null })} className={PRIMARY} style={{ background: "var(--hub-accent)" }}>
-                  <span className="text-[15px] leading-none">+</span>Add sheet
+                  <span className="text-lede leading-none">+</span>Add sheet
                 </button>
               ) : null}
             </div>
           </div>
 
-          {data.groups.length === 0 ? <p className="py-2 text-[12.5px] text-muted">No TP groups set up yet.</p> : null}
+          {data.groups.length === 0 ? <p className="py-2 text-meta text-muted">No TP groups set up yet.</p> : null}
           {data.groups.map((g) => (
             <div key={g.scope} className="grid grid-cols-[120px_1fr_150px] items-center gap-3.5 border-t border-border-faint py-2.5">
               <div className="flex min-w-0 items-center gap-2.5">
                 <Avatar name={g.name} size="xs" />
                 <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-[13.5px] font-semibold text-ink">{g.name}</span>
-                  {g.own && !isMct ? <span className="text-[10px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--hub-accent)" }}>Yours</span> : null}
+                  <span className="truncate text-body font-semibold text-ink">{g.name}</span>
+                  {g.own && !isMct ? <span className="text-micro font-bold tracking-[0.06em] uppercase" style={{ color: "var(--hub-accent)" }}>Yours</span> : null}
                 </div>
               </div>
               {stage === 1 ? (
                 <>
-                  <span className="text-[12.5px] text-ink/80">
+                  <span className="text-meta text-ink/80">
                     {g.stage1.notInvited === g.stage1.total ? "No invites sent yet -- invite from the grid below" : `${g.stage1.total - g.stage1.notInvited} of ${g.stage1.total} invited`}
                   </span>
                   <span className={`${PILL} justify-self-end`} style={g.stage1.filed === g.stage1.total && g.stage1.total > 0 ? KIND_STYLE.done : g.stage1.pending > 0 ? KIND_STYLE.waiting : KIND_STYLE.done}>
@@ -295,14 +295,14 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                 g.stage2 ? (
                   <>
                     <button type="button" onClick={() => setSheet({ kind: "stage2", id: g.stage2!.blockId })} className="flex min-w-0 flex-col gap-[5px] text-left hover:underline">
-                      <span className="text-[12.5px] whitespace-nowrap text-ink/80 tabular-nums">{g.stage2.when}</span>
+                      <span className="text-meta whitespace-nowrap text-ink/80 tabular-nums">{g.stage2.when}</span>
                       <Segments booked={g.stage2.booked} total={g.stage2.total} max={34} />
                     </button>
                     <CountPill booked={g.stage2.booked} total={g.stage2.total} />
                   </>
                 ) : (
                   <>
-                    <span className="text-[12.5px] text-muted italic">No sheet placed yet</span>
+                    <span className="text-meta text-muted italic">No sheet placed yet</span>
                     {g.own || isMct ? (
                       <button
                         type="button"
@@ -313,13 +313,13 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                         Place sheet
                       </button>
                     ) : (
-                      <span className="justify-self-end text-[12px] text-muted">view only</span>
+                      <span className="justify-self-end text-meta text-muted">view only</span>
                     )}
                   </>
                 )
               ) : g.stage3.flagged.length === 0 ? (
                 <>
-                  <span className="text-[12.5px] text-muted">Nobody flagged</span>
+                  <span className="text-meta text-muted">Nobody flagged</span>
                   <span className={`${PILL} justify-self-end`} style={KIND_STYLE.done}>
                     <span className="block size-1.5 rounded-full bg-current" />
                     nothing due
@@ -327,7 +327,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                 </>
               ) : (
                 <>
-                  <span className="truncate text-[12.5px] text-ink/80">
+                  <span className="truncate text-meta text-ink/80">
                     {g.stage3.flagged.length} flagged · {g.stage3.flagged.map((f) => f.name).join(", ")}
                   </span>
                   <span className={`${PILL} justify-self-end`} style={g.stage3.flagged.every((f) => f.invited) ? KIND_STYLE.booked : KIND_STYLE.move}>
@@ -350,17 +350,17 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
         >
           <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
             <div className="flex items-baseline gap-2.5">
-              <span className="text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(40% 0.09 68)" }}>
+              <span className="text-label font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(40% 0.09 68)" }}>
                 Consultation blocks
               </span>
-              <span className="text-[12px] text-muted">{isMct ? "one line per tutor · click to open their blocks" : "every tutor's blocks · yours highlighted · others view only"}</span>
+              <span className="text-meta text-muted">{isMct ? "one line per tutor · click to open their blocks" : "every tutor's blocks · yours highlighted · others view only"}</span>
             </div>
             <button type="button" onClick={() => setBlockForm((v) => !v)} className={PRIMARY} style={{ background: "var(--hub-accent)" }}>
-              <span className="text-[15px] leading-none">+</span>Add block
+              <span className="text-lede leading-none">+</span>Add block
             </button>
           </div>
 
-          {data.blocks.length === 0 ? <p className="py-2 text-[12.5px] text-muted">No blocks yet.</p> : null}
+          {data.blocks.length === 0 ? <p className="py-2 text-meta text-muted">No blocks yet.</p> : null}
           {isMct
             ? [...byTutor.entries()].map(([tutorId, blocks]) => {
                 const booked = blocks.reduce((n, b) => n + b.booked, 0);
@@ -371,10 +371,10 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                     <button type="button" onClick={() => setOpenTutor(open ? null : tutorId)} className="grid w-full grid-cols-[150px_1fr_150px] items-center gap-3.5 py-2.5 text-left hover:bg-[color-mix(in_oklab,var(--hub-accent)_5%,transparent)]">
                       <span className="flex min-w-0 items-center gap-2.5">
                         <Avatar name={blocks[0].tutorName} size="xs" />
-                        <span className="truncate text-[13.5px] font-semibold text-ink">{blocks[0].tutorName}</span>
+                        <span className="truncate text-body font-semibold text-ink">{blocks[0].tutorName}</span>
                       </span>
                       <span className="flex min-w-0 flex-col gap-[5px]">
-                        <span className="text-[12.5px] text-ink/80">
+                        <span className="text-meta text-ink/80">
                           {blocks.length} block{blocks.length === 1 ? "" : "s"} this course
                         </span>
                         <Segments booked={booked} total={total} max={22} />
@@ -384,9 +384,9 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                     {open
                       ? blocks.map((b) => (
                           <button key={b.id} type="button" onClick={() => setSheet({ kind: "consultation", id: b.id })} className="grid w-full grid-cols-[150px_1fr_150px] items-center gap-3.5 border-t border-border-faint py-2 pl-9 text-left hover:bg-[color-mix(in_oklab,var(--hub-accent)_5%,transparent)]">
-                            <span className="text-[12.5px] text-muted">{sheet?.id === b.id ? "Open below" : "Open sheet"}</span>
+                            <span className="text-meta text-muted">{sheet?.id === b.id ? "Open below" : "Open sheet"}</span>
                             <span className="flex min-w-0 flex-col gap-[5px]">
-                              <span className="text-[12.5px] whitespace-nowrap text-ink/80 tabular-nums">{b.when}</span>
+                              <span className="text-meta whitespace-nowrap text-ink/80 tabular-nums">{b.when}</span>
                               <Segments booked={b.booked} total={b.total} max={34} />
                             </span>
                             <CountPill booked={b.booked} total={b.total} />
@@ -407,12 +407,12 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                   <span className="flex min-w-0 items-center gap-2.5">
                     <Avatar name={b.tutorName} size="xs" />
                     <span className="flex min-w-0 flex-col">
-                      <span className="truncate text-[13.5px] font-semibold text-ink">{b.tutorName}</span>
-                      {b.mine ? <span className="text-[10px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--hub-accent)" }}>Yours</span> : null}
+                      <span className="truncate text-body font-semibold text-ink">{b.tutorName}</span>
+                      {b.mine ? <span className="text-micro font-bold tracking-[0.06em] uppercase" style={{ color: "var(--hub-accent)" }}>Yours</span> : null}
                     </span>
                   </span>
                   <span className="flex min-w-0 flex-col gap-[5px]">
-                    <span className="text-[12.5px] whitespace-nowrap text-ink/80 tabular-nums">{b.when}</span>
+                    <span className="text-meta whitespace-nowrap text-ink/80 tabular-nums">{b.when}</span>
                     <Segments booked={b.booked} total={b.total} max={34} />
                   </span>
                   <CountPill booked={b.booked} total={b.total} />
@@ -425,7 +425,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
       {/* The candidate grid -- the section's one shadowed card. */}
       <div className="overflow-x-auto rounded-[12px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
         <div className="min-w-[960px]">
-          <div className="grid grid-cols-[260px_repeat(4,minmax(0,1fr))] items-end gap-x-3 border-b border-border px-5 pt-3.5 pb-2.5 text-[10.5px] font-bold tracking-[0.08em] text-muted uppercase">
+          <div className="grid grid-cols-[260px_repeat(4,minmax(0,1fr))] items-end gap-x-3 border-b border-border px-5 pt-3.5 pb-2.5 text-micro font-bold tracking-[0.08em] text-muted uppercase">
             <div>Candidate</div>
             <div>Stage 1</div>
             <div>Stage 2</div>
@@ -442,13 +442,13 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
               <div className="flex min-w-0 items-center gap-3">
                 <Avatar name={r.name} size="sm" />
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <Link href={`/portfolio/${r.id}`} className="truncate text-[14px] font-semibold text-ink hover:text-[var(--hub-accent-deep)]">
+                  <Link href={`/portfolio/${r.id}`} className="truncate text-body font-semibold text-ink hover:text-[var(--hub-accent-deep)]">
                     {r.name}
                   </Link>
-                  <span className="flex items-center gap-1.5 truncate text-[12px] text-muted">
+                  <span className="flex items-center gap-1.5 truncate text-meta text-muted">
                     {r.groupName} · {r.tutorName}
                     {r.own && !isMct ? (
-                      <span className="rounded-full px-1.5 py-px text-[10px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in oklab, var(--hub-accent) 14%, transparent)", color: "var(--hub-accent)" }}>
+                      <span className="rounded-full px-1.5 py-px text-micro font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in oklab, var(--hub-accent) 14%, transparent)", color: "var(--hub-accent)" }}>
                         Yours
                       </span>
                     ) : null}
@@ -468,14 +468,14 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         <OpenedSheet data={data} sheet={sheet} isMct={isMct} />
         <div className="flex flex-col gap-2 rounded-[12px] border px-6 py-5" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, borderColor: `color-mix(in oklab, ${GOLD_BAR} 40%, transparent)` }}>
-          <p className="text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(40% 0.09 68)" }}>
+          <p className="text-label font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(40% 0.09 68)" }}>
             Booking rule
           </p>
-          <p className="text-[13px] leading-[1.5] text-ink">
+          <p className="text-meta leading-[1.5] text-ink">
             Before an assignment&apos;s first submission a candidate may book consultation with any tutor. Once they have submitted it, consultation on that assignment is with
             their own tutor only. Connect applies this when the candidate books, against the assignment they name.
           </p>
-          {data.ruleExample ? <p className="text-[12.5px] leading-[1.5] text-muted">{data.ruleExample}</p> : null}
+          {data.ruleExample ? <p className="text-meta leading-[1.5] text-muted">{data.ruleExample}</p> : null}
         </div>
       </div>
     </section>
@@ -512,8 +512,8 @@ function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet
   if (!title) {
     return (
       <div className="rounded-[12px] border border-border bg-card px-6 py-5">
-        <p className="font-serif text-[20px] font-semibold text-ink-warm">Sheet</p>
-        <p className="mt-1 text-[12.5px] text-muted">Click a block above, or a booked cell, and its sheet lift here.</p>
+        <p className="font-serif text-h2 font-semibold text-ink-warm">Sheet</p>
+        <p className="mt-1 text-meta text-muted">Click a block above, or a booked cell, and its sheet lift here.</p>
       </div>
     );
   }
@@ -530,14 +530,14 @@ function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2.5">
-            <h3 className="font-serif text-[20px] font-semibold text-ink-warm">{title}</h3>
+            <h3 className="font-serif text-h2 font-semibold text-ink-warm">{title}</h3>
             {mine ? (
-              <span className="rounded-full px-[7px] py-[2px] text-[10px] font-bold tracking-[0.06em] text-primary-foreground uppercase" style={{ background: "var(--hub-accent)" }}>
+              <span className="rounded-full px-[7px] py-[2px] text-micro font-bold tracking-[0.06em] text-primary-foreground uppercase" style={{ background: "var(--hub-accent)" }}>
                 Yours
               </span>
             ) : null}
           </div>
-          <p className="text-[12.5px] text-muted">{sub}</p>
+          <p className="text-meta text-muted">{sub}</p>
         </div>
         <span className={`${PILL} shrink-0`} style={full ? KIND_STYLE.booked : booked === 0 ? KIND_STYLE.done : KIND_STYLE.waiting}>
           <span className="block size-1.5 rounded-full bg-current" />
@@ -547,33 +547,33 @@ function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet
       <div className="flex flex-col">
         {slots.map((x) => (
           <div key={x.position} className="grid grid-cols-[44px_56px_1fr_auto] items-center gap-3.5 border-t border-border-faint py-2.5">
-            <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">{ordinalLabel(x.position)}</span>
-            <span className="text-[14px] font-semibold tabular-nums text-ink">{x.time}</span>
+            <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">{ordinalLabel(x.position)}</span>
+            <span className="text-body font-semibold tabular-nums text-ink">{x.time}</span>
             {x.traineeName ? (
               <span className="flex items-center gap-2.5">
                 <Avatar name={x.traineeName} size="xs" />
-                <span className="text-[13.5px] font-semibold text-ink">{x.traineeName}</span>
-                {x.about ? <span className="text-[12px] text-muted">· about {x.about}</span> : null}
+                <span className="text-body font-semibold text-ink">{x.traineeName}</span>
+                {x.about ? <span className="text-meta text-muted">· about {x.about}</span> : null}
               </span>
             ) : (
               <span className="flex items-center gap-2.5">
                 <span className="block size-7 rounded-[8px] border-[1.5px] border-dashed border-[oklch(80%_0.014_82)]" />
-                <span className="text-[13.5px] text-muted italic">Open</span>
+                <span className="text-body text-muted italic">Open</span>
               </span>
             )}
-            <span className="inline-flex h-6 items-center gap-1.5 rounded-full px-[9px] text-[11px] font-bold" style={x.traineeId ? KIND_STYLE.booked : KIND_STYLE.done}>
+            <span className="inline-flex h-6 items-center gap-1.5 rounded-full px-[9px] text-label font-bold" style={x.traineeId ? KIND_STYLE.booked : KIND_STYLE.done}>
               <span className="block size-1.5 rounded-full bg-current" />
               {x.traineeId ? "Booked" : "Open"}
             </span>
           </div>
         ))}
-        {slots.length === 0 ? <p className="py-2 text-[12.5px] text-muted">No positions yet.</p> : null}
+        {slots.length === 0 ? <p className="py-2 text-meta text-muted">No positions yet.</p> : null}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-faint pt-3">
-        <p className="text-[11.5px] text-muted">
+        <p className="text-label text-muted">
           {sheet?.kind === "stage2" ? "One booking each: " : "Same sheet as Stage 2: "}the candidate books the next open position, the sheet is the source of truth, nothing pings per booking.
         </p>
-        <Link href={href} className="text-[12px] font-semibold text-primary hover:underline">
+        <Link href={href} className="text-meta font-semibold text-primary hover:underline">
           Full page and length
         </Link>
       </div>
@@ -591,7 +591,7 @@ function GridCellView({ cell, open, onToggle, onOpenSheet }: { cell: GridCell; o
   const body = (
     <>
       <Pill kind={cell.kind}>{cell.main}</Pill>
-      <span className="max-w-full truncate pl-0.5 text-[11.5px]" style={{ color: cell.kind === "move" && !cell.viewOnly ? "var(--hub-accent)" : "var(--color-muted)" }}>
+      <span className="max-w-full truncate pl-0.5 text-label" style={{ color: cell.kind === "move" && !cell.viewOnly ? "var(--hub-accent)" : "var(--color-muted)" }}>
         {cell.sub}
       </span>
     </>

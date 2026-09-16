@@ -31,7 +31,7 @@ export function TraineeEyebrowLabel({ isStaff, readOnly }: { isStaff: boolean; r
   const searchParams = useSearchParams();
   if (isStaff && !isPreviewingAsTrainee(searchParams)) return null;
   return (
-    <p className="text-[10px] tracking-[0.1em] text-muted uppercase">
+    <p className="text-micro tracking-[0.1em] text-muted uppercase">
       Trainee Workspace{readOnly ? " · read-only" : ""}
     </p>
   );

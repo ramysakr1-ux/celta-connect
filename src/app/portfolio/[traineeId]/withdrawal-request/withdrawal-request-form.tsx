@@ -105,7 +105,7 @@ export function WithdrawalRequestForm({
             <label htmlFor="note" className="text-xs text-muted">
               Anything you would like the centre to know
             </label>
-            <span className="text-[11px] text-muted">optional</span>
+            <span className="text-label text-muted">optional</span>
           </div>
           <textarea
             id="note"
@@ -118,7 +118,7 @@ export function WithdrawalRequestForm({
             }
             className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
-          <p className="text-[11px] text-muted italic">
+          <p className="text-label text-muted italic">
             This is read by the centre only. It does not affect your record, and nothing you write here reaches Cambridge.
           </p>
         </div>
@@ -160,7 +160,7 @@ export function WithdrawalRequestForm({
         ) : null}
 
         <div className="flex flex-col gap-2 border-t border-border-faint pt-4">
-          <p className="text-[10px] font-semibold tracking-[0.1em] text-muted uppercase">Please confirm</p>
+          <p className="text-micro font-semibold tracking-[0.1em] text-muted uppercase">Please confirm</p>
           {confirmations.map((text, i) => (
             <label key={text} className="flex items-start gap-2.5 text-sm text-ink">
               <input

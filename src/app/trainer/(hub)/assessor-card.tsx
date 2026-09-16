@@ -58,7 +58,7 @@ export function AssessorCard({
     >
       <div className="flex items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Assessor</p>
+          <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Assessor</p>
           <p className="text-xs leading-[1.5] text-muted text-pretty">
             Shared with Course Admin -- whichever side sets this first is what the other sees.
           </p>
@@ -74,7 +74,7 @@ export function AssessorCard({
             }
             setEditing((v) => !v);
           }}
-          className="wash h-8 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
+          className="wash h-8 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-meta font-medium text-ink"
         >
           {editing ? "Cancel" : "Edit"}
         </button>
@@ -83,7 +83,7 @@ export function AssessorCard({
       {editing ? (
         <form action={formAction} className="flex flex-col gap-2.5">
           <div className="flex flex-col gap-1">
-            <label htmlFor="mct_assessor_name" className="text-[11px] text-muted">
+            <label htmlFor="mct_assessor_name" className="text-label text-muted">
               Name
             </label>
             <input
@@ -92,11 +92,11 @@ export function AssessorCard({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-meta text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="mct_assessor_email" className="text-[11px] text-muted">
+            <label htmlFor="mct_assessor_email" className="text-label text-muted">
               Email
             </label>
             <input
@@ -105,11 +105,11 @@ export function AssessorCard({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-meta text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="mct_assessor_visit_date" className="text-[11px] text-muted">
+            <label htmlFor="mct_assessor_visit_date" className="text-label text-muted">
               Visit date (if known)
             </label>
             <input
@@ -118,11 +118,11 @@ export function AssessorCard({
               type="date"
               value={visitDate}
               onChange={(e) => setVisitDate(e.target.value)}
-              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-meta text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="mct_assessment_kind" className="text-[11px] text-muted">
+            <label htmlFor="mct_assessment_kind" className="text-label text-muted">
               Which kind of assessment
             </label>
             <select
@@ -130,14 +130,14 @@ export function AssessorCard({
               name="assessment_kind"
               value={assessmentKind}
               onChange={(e) => setAssessmentKind(e.target.value as "regular" | "two_yearly")}
-              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-meta text-ink outline-none focus:border-primary"
             >
               <option value="regular">Regular — two portfolios read in full</option>
               <option value="two_yearly">Two-yearly — four portfolios minimum, plus every Fail</option>
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="mct_appian_reference" className="text-[11px] text-muted">
+            <label htmlFor="mct_appian_reference" className="text-label text-muted">
               Appian course notification reference
             </label>
             <input
@@ -147,9 +147,9 @@ export function AssessorCard({
               value={appianReference}
               onChange={(e) => setAppianReference(e.target.value)}
               placeholder="From CELTA Admin's course approval email"
-              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-meta text-ink outline-none focus:border-primary"
             />
-            <p className="text-[11px] leading-[1.45] text-muted">
+            <p className="text-label leading-[1.45] text-muted">
               The assessor cannot open their Assessor Report without this. Handbook 14.1 has you give it to them 2&ndash;3 days
               before the visit; once it is here, it appears on their landing page for them to copy.
             </p>
@@ -159,14 +159,14 @@ export function AssessorCard({
             <button
               type="submit"
               disabled={pending}
-              className="h-[30px] rounded-[6px] bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
+              className="h-[30px] rounded-[6px] bg-primary px-3.5 text-meta font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Saving…" : "Save"}
             </button>
           </div>
         </form>
       ) : (
-        <div className="flex flex-col gap-1 text-[12.5px] leading-[1.5]">
+        <div className="flex flex-col gap-1 text-meta leading-[1.5]">
           <p className="text-ink">{name || <span className="text-muted italic">Not set yet</span>}</p>
           {email ? <p className="text-muted">{email}</p> : null}
           {/* Written the way a person says it, not "2026-09-14": the date

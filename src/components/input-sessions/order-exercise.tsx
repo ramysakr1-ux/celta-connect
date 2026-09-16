@@ -52,18 +52,18 @@ export function OrderExercise({
               }`}
             >
               <span
-                className={`flex size-5 flex-none items-center justify-center rounded-full text-[10.5px] font-bold ${
+                className={`flex size-5 flex-none items-center justify-center rounded-full text-micro font-bold ${
                   isDone ? "bg-primary text-white" : "bg-accent text-muted"
                 }`}
               >
                 {isDone ? idx + 1 : "?"}
               </span>
-              <span className="text-[12.5px] font-semibold text-ink">{label}</span>
+              <span className="text-meta font-semibold text-ink">{label}</span>
             </button>
           );
         })}
       </div>
-      <p className="text-[11px] text-muted">
+      <p className="text-label text-muted">
         {done ? `All ${correctOrder.length} in order — that's the staging.` : `${picked.length} of ${correctOrder.length} placed — click the one that comes next.`}
       </p>
     </div>

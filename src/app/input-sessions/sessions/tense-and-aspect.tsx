@@ -56,7 +56,7 @@ function ChooseAspect() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Choose the aspect the context needs</p>
-      <p className="text-[11.5px] text-muted">Each situation only works with one option — click your answer, then check.</p>
+      <p className="text-label text-muted">Each situation only works with one option — click your answer, then check.</p>
       {CHOOSE_ITEMS.map((item, ci) => {
         const pick = picked[ci];
         return (
@@ -71,7 +71,7 @@ function ChooseAspect() {
                     key={opt}
                     type="button"
                     onClick={() => setPicked((p) => ({ ...p, [ci]: opt }))}
-                    className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
+                    className={`rounded-full border-[1.5px] px-3 py-1.5 text-label font-semibold ${
                       isCorrectPick
                         ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
@@ -84,7 +84,7 @@ function ChooseAspect() {
                 );
               })}
             </div>
-            {pick ? <p className="text-[11.5px] leading-relaxed text-muted">{item.feedback}</p> : null}
+            {pick ? <p className="text-label leading-relaxed text-muted">{item.feedback}</p> : null}
           </div>
         );
       })}
@@ -123,7 +123,7 @@ function SortByAspect() {
                 key={item.s}
                 type="button"
                 onClick={() => setPicked((p) => ({ ...p, [item.s]: key }))}
-                className={`rounded-[6px] border-[1.5px] px-2.5 py-1.5 text-left text-[11.5px] ${
+                className={`rounded-[6px] border-[1.5px] px-2.5 py-1.5 text-left text-label ${
                   shown
                     ? isCorrect
                       ? "border-primary bg-primary/10 text-primary"
@@ -144,7 +144,7 @@ function SortByAspect() {
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
         <p className="text-xs font-bold text-ink">Sort by aspect</p>
-        <p className="text-[11.5px] text-muted">Same idea, different tense. Click each sentence into Simple or Continuous.</p>
+        <p className="text-label text-muted">Same idea, different tense. Click each sentence into Simple or Continuous.</p>
       </div>
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
         {column("Simple aspect", "simple")}
@@ -178,8 +178,8 @@ function StagingExample() {
           <div className="overflow-hidden rounded-[6px] border border-border">
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[150px_1fr] border-b border-border-faint last:border-b-0">
-                <p className="bg-accent px-3 py-2 text-[11px] font-semibold text-ink">{r.label}</p>
-                <p className="px-3 py-2 text-[11.5px] leading-relaxed text-muted">{r.value}</p>
+                <p className="bg-accent px-3 py-2 text-label font-semibold text-ink">{r.label}</p>
+                <p className="px-3 py-2 text-label leading-relaxed text-muted">{r.value}</p>
               </div>
             ))}
           </div>
@@ -213,7 +213,7 @@ export default function TenseAndAspectSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             &quot;I&apos;ve read three books this month&quot; and &quot;I&apos;ve been reading a book about Istanbul all
             month.&quot; Both present perfect. What&apos;s different, and it isn&apos;t tense?
           </p>
@@ -229,16 +229,16 @@ export default function TenseAndAspectSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Discuss: these pairs</p>
-          <p className="text-[11.5px] text-muted">
+          <p className="text-label text-muted">
             Same idea, two aspects. With a partner, agree what changes in meaning — not just which is &quot;more
             correct.&quot;
           </p>
         </div>
         {DISCUSS_PAIRS.map((p) => (
           <div key={p.a} className="flex flex-col gap-1.5 rounded-[8px] border border-border bg-card p-4">
-            <p className="font-serif text-[13px] font-semibold text-ink">{p.a}</p>
-            <p className="font-serif text-[13px] font-semibold text-ink">{p.b}</p>
-            <p className="text-[11.5px] italic text-muted">{p.prompt}</p>
+            <p className="font-serif text-meta font-semibold text-ink">{p.a}</p>
+            <p className="font-serif text-meta font-semibold text-ink">{p.b}</p>
+            <p className="text-label italic text-muted">{p.prompt}</p>
           </div>
         ))}
       </div>

@@ -16,8 +16,8 @@ export function AgendaStrip({ items }: { items: AgendaItem[] }) {
     >
       {items.map((a, i) => (
         <div key={i} className="flex flex-col gap-1 rounded-[6px] border border-border bg-card p-2.5" style={{ borderLeft: `3px solid ${a.spine}` }}>
-          <p className="text-[9.5px] font-bold tracking-[0.03em] text-muted">{a.time}</p>
-          <p className="text-[11px] font-semibold leading-tight text-ink">{a.title}</p>
+          <p className="text-micro font-bold tracking-[0.03em] text-muted">{a.time}</p>
+          <p className="text-label font-semibold leading-tight text-ink">{a.title}</p>
         </div>
       ))}
     </div>

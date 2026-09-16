@@ -25,7 +25,7 @@ export function ChoiceScenarioCard({ scenario }: { scenario: ChoiceScenario }) {
         !answered ? "border-border bg-card" : correct ? "border-primary/40 bg-primary/10" : "border-destructive/40 bg-destructive/5"
       }`}
     >
-      <p className="text-[12.5px] leading-relaxed text-ink">{scenario.text}</p>
+      <p className="text-meta leading-relaxed text-ink">{scenario.text}</p>
       {!answered ? (
         <div className="flex flex-wrap gap-2">
           {scenario.choices.map((choice, i) => (
@@ -33,14 +33,14 @@ export function ChoiceScenarioCard({ scenario }: { scenario: ChoiceScenario }) {
               key={i}
               type="button"
               onClick={() => setPicked(i)}
-              className="flex h-7 items-center rounded-full border border-border px-3.5 text-[11px] font-semibold text-ink hover:border-primary"
+              className="flex h-7 items-center rounded-full border border-border px-3.5 text-label font-semibold text-ink hover:border-primary"
             >
               {choice}
             </button>
           ))}
         </div>
       ) : (
-        <p className={`text-[11.5px] leading-relaxed ${correct ? "text-primary" : "text-destructive"}`}>
+        <p className={`text-label leading-relaxed ${correct ? "text-primary" : "text-destructive"}`}>
           {correct ? "✓ " : "✗ "}
           {scenario.feedback}
         </p>

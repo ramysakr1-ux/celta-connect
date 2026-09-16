@@ -49,7 +49,7 @@ export function FilmedObservationBreaksForm({
         <input type="hidden" name="session_id" value={sessionId} />
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
-            <label htmlFor="timestamp_seconds" className="text-[11px] text-muted">
+            <label htmlFor="timestamp_seconds" className="text-label text-muted">
               At (seconds)
             </label>
             <input
@@ -62,7 +62,7 @@ export function FilmedObservationBreaksForm({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="duration_seconds" className="text-[11px] text-muted">
+            <label htmlFor="duration_seconds" className="text-label text-muted">
               Countdown (seconds)
             </label>
             <input
@@ -76,7 +76,7 @@ export function FilmedObservationBreaksForm({
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="prompt" className="text-[11px] text-muted">
+          <label htmlFor="prompt" className="text-label text-muted">
             Discussion prompt
           </label>
           <input

@@ -30,7 +30,7 @@ const TEAL_BAR = "oklch(45% 0.07 195)";
 const GOLD_BAR = "oklch(63% 0.096 72)";
 const RED_BAR = "oklch(52% 0.19 32)";
 
-const PILL = "inline-flex h-[26px] w-fit items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-bold tabular-nums whitespace-nowrap";
+const PILL = "inline-flex h-[26px] w-fit items-center gap-1.5 rounded-full px-2.5 text-meta font-bold tabular-nums whitespace-nowrap";
 
 function MoveEarlierControl({ traineeId, stage }: { traineeId: string; stage: "stage2" | "stage3" }) {
   const [open, setOpen] = useState(false);
@@ -45,7 +45,7 @@ function MoveEarlierControl({ traineeId, stage }: { traineeId: string; stage: "s
           e.stopPropagation();
           setOpen(true);
         }}
-        className="text-[11px] text-primary hover:underline"
+        className="text-label text-primary hover:underline"
       >
         Move earlier
       </button>
@@ -60,14 +60,14 @@ function MoveEarlierControl({ traineeId, stage }: { traineeId: string; stage: "s
         name="reason"
         required
         placeholder="Reason for moving earlier"
-        className="h-7 w-40 rounded-[6px] border border-border bg-card px-2 text-[11px] text-ink outline-none focus:border-primary"
+        className="h-7 w-40 rounded-[6px] border border-border bg-card px-2 text-label text-ink outline-none focus:border-primary"
       />
-      {state.error ? <p className="text-[11px] text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="text-label text-destructive">{state.error}</p> : null}
       <div className="flex items-center gap-2">
-        <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground disabled:opacity-60">
+        <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-2 py-0.5 text-label font-semibold text-primary-foreground disabled:opacity-60">
           {pending ? "Saving…" : "Confirm"}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="text-[11px] text-muted hover:text-ink">
+        <button type="button" onClick={() => setOpen(false)} className="text-label text-muted hover:text-ink">
           Cancel
         </button>
       </div>
@@ -96,8 +96,8 @@ const CELTA5_SIGNOFF_LONG: Record<RosterRow["celta5SignoffStatus"], string> = {
 function Cell({ label, warn = false, first = false, children }: { label: string; warn?: boolean; first?: boolean; children: React.ReactNode }) {
   return (
     <div className={`flex min-h-10 min-w-0 flex-col items-center justify-center gap-1 px-1.5 ${first ? "" : "border-l border-black/[0.08]"}`}>
-      <span className="text-[9.5px] font-bold tracking-[0.08em] whitespace-nowrap text-muted uppercase">{label}</span>
-      <span className={`text-[12.5px] font-semibold tabular-nums whitespace-nowrap ${warn ? "text-status-warning-text" : "text-ink"}`}>{children}</span>
+      <span className="text-micro font-bold tracking-[0.08em] whitespace-nowrap text-muted uppercase">{label}</span>
+      <span className={`text-meta font-semibold tabular-nums whitespace-nowrap ${warn ? "text-status-warning-text" : "text-ink"}`}>{children}</span>
     </div>
   );
 }
@@ -248,7 +248,7 @@ function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
 function ContactCell({ row, courseCode, show }: { row: RosterRow; courseCode: string; show: boolean }) {
   if (!show) return <div />;
   return (
-    <div className="flex justify-end gap-2.5 text-[12.5px] font-medium" onClick={stop}>
+    <div className="flex justify-end gap-2.5 text-meta font-medium" onClick={stop}>
       <a href={`mailto:${row.email}?subject=${encodeURIComponent(courseCode)}`} className="text-primary hover:underline">
         Email
       </a>
@@ -278,7 +278,7 @@ function AssignmentTiles({ row }: { row: RosterRow }) {
         <span
           key={t.type}
           title={`${t.type}: ${TILE_STATE[t.state].words}`}
-          className="flex size-[26px] items-center justify-center rounded-[7px] border-[1.5px] text-[10px] font-bold"
+          className="flex size-[26px] items-center justify-center rounded-[7px] border-[1.5px] text-micro font-bold"
           style={TILE_STATE[t.state].style}
         >
           {t.short}
@@ -354,22 +354,22 @@ export function RosterRowView({
           <Avatar name={row.name} size="sm" />
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex items-center gap-2">
-              <Link href={`/portfolio/${row.id}`} onClick={stop} className="text-[14px] font-semibold whitespace-nowrap text-ink hover:text-[var(--hub-accent-deep)]">
+              <Link href={`/portfolio/${row.id}`} onClick={stop} className="text-body font-semibold whitespace-nowrap text-ink hover:text-[var(--hub-accent-deep)]">
                 {row.name}
               </Link>
               {row.courseStatus === "extension" ? (
-                <span className="rounded-full px-2 py-px text-[10.5px] font-bold whitespace-nowrap" style={TONE.blue}>
+                <span className="rounded-full px-2 py-px text-micro font-bold whitespace-nowrap" style={TONE.blue}>
                   Extension
                 </span>
               ) : null}
             </div>
-            <p className="truncate text-[12px] text-muted">{sub}</p>
+            <p className="truncate text-meta text-muted">{sub}</p>
           </div>
         </div>
 
         {frozen ? (
           <div className="col-span-7 text-center">
-            <span className="rounded-full px-2.5 py-[3px] text-[11px] font-semibold" style={{ background: "oklch(93.5% 0.008 85)", color: "oklch(44% 0.014 70)" }}>
+            <span className="rounded-full px-2.5 py-[3px] text-label font-semibold" style={{ background: "oklch(93.5% 0.008 85)", color: "oklch(44% 0.014 70)" }}>
               {COURSE_STATUS_LABEL[row.courseStatus]}
             </span>
           </div>
@@ -388,7 +388,7 @@ export function RosterRowView({
                   />
                 ))}
               </span>
-              <span className="text-[12.5px] font-semibold tabular-nums text-ink">{row.tpsPassed}</span>
+              <span className="text-meta font-semibold tabular-nums text-ink">{row.tpsPassed}</span>
             </div>
             <div>
               <span className={PILL} style={hoursTone} title={`${row.assessedHrs.toFixed(2)} of the 6 assessed hours`}>
@@ -401,7 +401,7 @@ export function RosterRowView({
               <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.07]">
                 <span className="absolute inset-y-0 left-0 block rounded-full" style={{ width: `${row.criteriaPct}%`, background: criteriaBar }} />
               </span>
-              <span className="w-[34px] text-right text-[12.5px] font-semibold tabular-nums text-ink">{row.criteriaPct}%</span>
+              <span className="w-[34px] text-right text-meta font-semibold tabular-nums text-ink">{row.criteriaPct}%</span>
             </div>
             <div>
               <span className={PILL} style={attendanceTone}>
@@ -412,19 +412,19 @@ export function RosterRowView({
             <div>
               {row.provisionalLabel ? (
                 <span
-                  className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-[12px] font-bold tracking-[0.02em] whitespace-nowrap"
+                  className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-meta font-bold tracking-[0.02em] whitespace-nowrap"
                   style={provisionalStyle(row)}
                   title={row.provisionalSlashed ? "Provisional grade not yet settled between two grades" : "Provisional grade"}
                 >
                   {row.provisionalLabel}
                 </span>
               ) : (
-                <span className="text-[12.5px] text-muted">Not set</span>
+                <span className="text-meta text-muted">Not set</span>
               )}
             </div>
             <div className="flex flex-wrap gap-1" onClick={stop}>
               {flags.map((f) => (
-                <span key={f.label} title={f.title} className="inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-[11px] font-semibold whitespace-nowrap" style={f.tone}>
+                <span key={f.label} title={f.title} className="inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-label font-semibold whitespace-nowrap" style={f.tone}>
                   <span className="block size-1.5 rounded-full bg-current" />
                   {f.label}
                 </span>

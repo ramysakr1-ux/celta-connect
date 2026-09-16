@@ -10,7 +10,7 @@ export function ScavengerHuntPanel({ foundKeys }: { foundKeys: Set<string> }) {
   return (
     <div className="sheet flex flex-col gap-3 border-l-4 border-l-[oklch(63%_0.096_72)]">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-[oklch(60%_0.11_70)] uppercase">Find your way around</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-[oklch(60%_0.11_70)] uppercase">Find your way around</p>
         <p className="text-xs text-muted">
           {found} of {total} found
         </p>

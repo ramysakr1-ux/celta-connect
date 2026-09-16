@@ -49,8 +49,8 @@ export function SecondMarkingPanel({
   return (
     <div className={`sheet flex flex-col gap-1.5 ${garnet ? "sheet-garnet" : ""}`}>
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Double-marking</p>
-        <span className="text-[10px] font-semibold text-muted tabular-nums">§9.2.3</span>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Double-marking</p>
+        <span className="text-micro font-semibold text-muted tabular-nums">§9.2.3</span>
       </div>
       {done ? (
         <p className="text-sm text-ink">

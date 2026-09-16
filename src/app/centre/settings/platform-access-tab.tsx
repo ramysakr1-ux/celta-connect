@@ -39,7 +39,7 @@ export function PlatformAccessTab({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Connect access</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Connect access</h2>
         <p className="mt-1 text-sm text-muted">
           Connect&apos;s platform owner has no standing access to your centre&apos;s data unless you invite them in. If you do, every visit is
           logged here, permanently.

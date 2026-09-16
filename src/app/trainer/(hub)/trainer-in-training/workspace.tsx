@@ -156,7 +156,7 @@ export async function TitWorkspace({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Trainer-in-Training</p>
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Trainer-in-Training</p>
           <h2 className="font-serif text-xl text-ink">{tutorProfile?.full_name ?? "Unknown"}</h2>
           <p className="mt-1 text-sm text-muted">
             {titRecord.scheme === "external" ? "External scheme" : "Internal scheme"} · verified{" "}
@@ -188,7 +188,7 @@ export async function TitWorkspace({
         />
         <StatCard label="TP / feedback observed" pct={stats.tpObservedPct} detail={`${stats.tpObservedCount} of ${stats.tpTotalCount}`} />
         <div className="rounded-[6px] border border-border p-3">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Sessions delivered</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Sessions delivered</p>
           <p className="mt-1 font-serif text-2xl text-ink">
             {(deliveredSessions ?? []).length} <span className="text-sm text-muted">/ {MIN_DELIVERED_SESSIONS} min</span>
           </p>
@@ -197,7 +197,7 @@ export async function TitWorkspace({
 
       {/* Pre-course tasks */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Pre-course tasks</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Pre-course tasks</h3>
         <div className="mt-2">
           <PreCourseChecklist
             tasks={(preCourseTasks ?? []).map((t) => ({
@@ -211,7 +211,7 @@ export async function TitWorkspace({
 
       {/* Observed sessions */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Input sessions observed (min {HEADLINE_MIN_PCT}%)</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Input sessions observed (min {HEADLINE_MIN_PCT}%)</h3>
         <div className="mt-2 divide-y divide-border-faint">
           {inputEvents.length === 0 ? (
             <p className="text-sm text-muted">No input sessions on the timetable yet.</p>
@@ -232,7 +232,7 @@ export async function TitWorkspace({
           )}
         </div>
 
-        <h3 className="mt-4 text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">TP and feedback observed (min {HEADLINE_MIN_PCT}%, never asynchronous)</h3>
+        <h3 className="mt-4 text-label font-semibold tracking-[0.08em] text-muted uppercase">TP and feedback observed (min {HEADLINE_MIN_PCT}%, never asynchronous)</h3>
         <div className="mt-2 divide-y divide-border-faint">
           {tpEvents.length === 0 ? (
             <p className="text-sm text-muted">No TP on the timetable yet.</p>
@@ -256,7 +256,7 @@ export async function TitWorkspace({
 
       {/* Task Twelve */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Task Twelve, Stage 1 -- pre-session handouts ({(task12Stage1 ?? []).length} of {TASK12_STAGE1_REQUIRED})
         </h3>
         <p className="mt-1 text-xs text-muted">For two existing sessions taught by other tutors -- you design the prep material, never the session.</p>
@@ -276,7 +276,7 @@ export async function TitWorkspace({
       </section>
 
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Task Twelve, Stage 2 -- sessions you delivered ({(deliveredSessions ?? []).length} of {MIN_DELIVERED_SESSIONS} min)
         </h3>
         <p className="mt-1 text-xs text-muted">Fully self-designed, never reused from the centre&apos;s own Resource Hub library.</p>
@@ -307,7 +307,7 @@ export async function TitWorkspace({
 
       {/* Task Thirteen */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Task Thirteen -- TP feedback you gave</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Task Thirteen -- TP feedback you gave</h3>
         <p className="mt-1 text-xs text-muted">A private working copy for each -- your own draft, then discussion, then feedback on how you delivered it. None of this ever reaches a candidate.</p>
         <div className="mt-2">
           <AddFeedbackSessionForm titRecordId={titRecord.id} trainees={(courseTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }))} />
@@ -339,7 +339,7 @@ export async function TitWorkspace({
 
       {/* Candidates followed */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Candidates followed start to end ({(candidatesFollowed ?? []).length} of {CANDIDATES_TO_FOLLOW})
         </h3>
         {(candidatesFollowed ?? []).length < CANDIDATES_TO_FOLLOW ? (
@@ -365,7 +365,7 @@ export async function TitWorkspace({
 
       {/* Shadow marking */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Shadow marking -- always double-marked by your supervisor</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Shadow marking -- always double-marked by your supervisor</h3>
         <div className="mt-2">
           <AddShadowMarkingForm titRecordId={titRecord.id} assignments={(courseAssignments ?? []).map((a) => ({ id: a.id, label: assignmentLabelById.get(a.id) ?? "Assignment" }))} />
         </div>
@@ -385,7 +385,7 @@ export async function TitWorkspace({
 
       {/* Mode-shadow restriction */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
           Mode shadowing -- must shadow {SHADOW_DAYS_REQUIRED} days before tutoring in a mode you didn&apos;t train in
         </h3>
         <div className="mt-2">
@@ -400,7 +400,7 @@ export async function TitWorkspace({
 
       {/* Task Record */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">16-item Task Record (Handbook §7) -- signed by both</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">16-item Task Record (Handbook §7) -- signed by both</h3>
         <div className="mt-2">
           {(taskRecordItems ?? []).map((r) => (
             <TaskRecordItemRow
@@ -413,7 +413,7 @@ export async function TitWorkspace({
 
       {/* Reflective essay */}
       <section>
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Post-course reflective essay</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Post-course reflective essay</h3>
         <div className="mt-2">
           <ReflectiveEssayForm titRecordId={titRecord.id} essay={titRecord.reflective_essay} submittedAt={titRecord.reflective_essay_submitted_at} />
         </div>
@@ -422,7 +422,7 @@ export async function TitWorkspace({
       {/* Extra assessor day */}
       {requiresAssessorDay ? (
         <section>
-          <h3 className="text-[11px] font-semibold tracking-[0.08em] text-status-warning-text uppercase">
+          <h3 className="text-label font-semibold tracking-[0.08em] text-status-warning-text uppercase">
             Extra assessor day -- {titRecord.scheme === "external" ? "external scheme" : "internal scheme, different centre"}
           </h3>
           <div className="mt-2">
@@ -438,7 +438,7 @@ export async function TitWorkspace({
 
       {/* Outcome */}
       <section className="border-t border-border pt-4">
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Outcome</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Outcome</h3>
         <div className="mt-2">
           <OutcomeForm titRecordId={titRecord.id} outcome={titRecord.outcome} note={titRecord.outcome_note} />
         </div>
@@ -451,7 +451,7 @@ function StatCard({ label, pct, detail, warning }: { label: string; pct: number;
   const met = pct >= HEADLINE_MIN_PCT;
   return (
     <div className="rounded-[6px] border border-border p-3">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{label}</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{label}</p>
       <p className={`mt-1 font-serif text-2xl ${met ? "text-primary" : "text-ink"}`}>{pct}%</p>
       <p className="text-xs text-muted">{detail}</p>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-muted">

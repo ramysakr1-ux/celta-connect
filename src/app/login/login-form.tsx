@@ -65,7 +65,7 @@ export function LoginForm({ next }: { next?: string }) {
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Or</span>
+        <span className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Or</span>
         <div className="h-px flex-1 bg-border" />
       </div>
 

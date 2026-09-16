@@ -18,8 +18,8 @@ export function FilmingConsentCard({ candidates }: { candidates: ConsentCandidat
         className="flex min-w-[220px] flex-col gap-0.5"
         title="Signed forms are on paper, kept with the class register -- this just tracks who's handed one in."
       >
-        <span className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Filming consent</span>
-        <span className="text-[12.5px] text-muted">
+        <span className="text-label font-bold tracking-[0.1em] text-muted uppercase">Filming consent</span>
+        <span className="text-meta text-muted">
           {signed} of {candidates.length} handed in ·{" "}
           <a href="/api/filming-consent.pdf" className="font-semibold text-primary hover:underline">
             Download blank form
@@ -34,7 +34,7 @@ export function FilmingConsentCard({ candidates }: { candidates: ConsentCandidat
             <button
               type="submit"
               title={`${c.name} -- ${c.confirmed ? "click to mark as not yet collected" : "click to mark as collected"}`}
-              className="wash inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium"
+              className="wash inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-meta font-medium"
               style={
                 c.confirmed
                   ? { background: "oklch(93% 0.019 190)", color: "oklch(32% 0.05 195)", borderColor: "transparent" }

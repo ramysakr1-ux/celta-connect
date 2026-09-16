@@ -87,8 +87,8 @@ function ClosingOutCard({
       style={{ background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)" }}
     >
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
-        <h3 className="font-serif text-[20px] font-semibold text-ink-warm">What remains</h3>
-        <span className="text-[12.5px] text-muted">{remaining === 0 ? "All done" : `${remaining} of ${items.length} left`}</span>
+        <h3 className="font-serif text-h2 font-semibold text-ink-warm">What remains</h3>
+        <span className="text-meta text-muted">{remaining === 0 ? "All done" : `${remaining} of ${items.length} left`}</span>
       </div>
       <div className="flex flex-col px-2.5 pb-2">
         {items.map((it) => (
@@ -102,13 +102,13 @@ function ClosingOutCard({
               style={it.done ? { background: accent, borderColor: accent } : { borderColor: "var(--color-muted)" }}
             />
             <span className="min-w-0">
-              <span className={`text-[13.5px] ${it.done ? "text-muted" : "font-semibold text-ink"}`}>{it.label}</span>
-              <span className="block text-[11.5px] text-muted">{it.status}</span>
+              <span className={`text-body ${it.done ? "text-muted" : "font-semibold text-ink"}`}>{it.label}</span>
+              <span className="block text-label text-muted">{it.status}</span>
             </span>
           </Link>
         ))}
       </div>
-      <p className="border-t border-border-faint px-[18px] py-2.5 text-[11.5px] text-muted">
+      <p className="border-t border-border-faint px-[18px] py-2.5 text-label text-muted">
         Handbook 14.4, then close-out. Each line opens where it is done.
       </p>
     </section>
@@ -960,12 +960,12 @@ export default async function TodayPage() {
     <div className="flex flex-col gap-[18px]">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">
+          <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">
             {courseFinished
               ? [trainer?.full_name, course?.name, "course finished", todayHeading].filter(Boolean).join(" · ")
               : overline}
           </p>
-          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">
+          <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">
             {courseFinished ? (
               "Closing out"
             ) : (
@@ -1003,17 +1003,17 @@ export default async function TodayPage() {
         </div>
         {trainer ? (
           <div className="hidden flex-wrap items-center gap-2 md:flex">
-            <Link href="/trainer/capture" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
+            <Link href="/trainer/capture" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-meta font-medium text-ink">
               Capture a point
             </Link>
             {canAnnounce ? (
-              <Link href="/trainer/announcements" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
+              <Link href="/trainer/announcements" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-meta font-medium text-ink">
                 Post announcement
               </Link>
             ) : null}
             <Link
               href="/trainer/tp"
-              className="flex h-10 items-center rounded-[8px] px-[18px] text-[13.5px] font-bold text-primary-foreground transition-[filter] hover:brightness-110"
+              className="flex h-10 items-center rounded-[8px] px-[18px] text-body font-bold text-primary-foreground transition-[filter] hover:brightness-110"
               style={{ background: accent }}
             >
               Write TP feedback
@@ -1029,13 +1029,13 @@ export default async function TodayPage() {
           className="flex flex-wrap items-center gap-3.5 rounded-[10px] px-[18px] py-3.5 text-primary-foreground transition-[filter] hover:brightness-110"
           style={{ background: accent }}
         >
-          <span className="rounded-[5px] bg-white/[0.18] px-2 py-1 text-[10.5px] font-bold tracking-[0.08em] uppercase whitespace-nowrap">{pr.tag}</span>
-          <span className="flex-1 text-[14px] font-semibold">{pr.message}</span>
+          <span className="rounded-[5px] bg-white/[0.18] px-2 py-1 text-micro font-bold tracking-[0.08em] uppercase whitespace-nowrap">{pr.tag}</span>
+          <span className="flex-1 text-body font-semibold">{pr.message}</span>
           {/* No whitespace-nowrap. pr.detail is a list of names -- "Aoife
               Byrne, Leila Haddad, ..." came out 419px wide and pushed the
               whole page sideways on a phone. The row already wraps; this was
               the one thing in it refusing to. */}
-          <span className="min-w-0 text-[12.5px] opacity-80">
+          <span className="min-w-0 text-meta opacity-80">
             {pr.detail} &middot; &sect;{pr.cite}
           </span>
         </Link>
@@ -1049,12 +1049,12 @@ export default async function TodayPage() {
             <section className="flex flex-col rounded-[12px] border border-border bg-frame">
               <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
                 <div className="flex items-baseline gap-2.5">
-                  <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Flagged candidates</h3>
-                  <span className="text-[12.5px] text-muted">
+                  <h3 className="font-serif text-h2 font-semibold text-ink-warm">Flagged candidates</h3>
+                  <span className="text-meta text-muted">
                     {flagged.length} of {rows.filter((r) => inScope(r.id)).length}
                   </span>
                 </div>
-                <Link href="/trainer/roster" className="text-[12.5px] text-muted hover:underline">
+                <Link href="/trainer/roster" className="text-meta text-muted hover:underline">
                   Full roster
                 </Link>
               </div>
@@ -1067,9 +1067,9 @@ export default async function TodayPage() {
                   >
                     <Avatar name={f.name} size="sm" />
                     <span className="min-w-0">
-                      <span className="block text-[13.5px] font-semibold text-ink">{f.name}</span>
+                      <span className="block text-body font-semibold text-ink">{f.name}</span>
                       {f.reasons.map((rs) => (
-                        <span key={rs.text} className={`block truncate text-[12px] ${rs.tone === "red" ? "text-destructive" : "text-status-warning-text"}`}>
+                        <span key={rs.text} className={`block truncate text-meta ${rs.tone === "red" ? "text-destructive" : "text-status-warning-text"}`}>
                           {rs.text}
                         </span>
                       ))}
@@ -1081,7 +1081,7 @@ export default async function TodayPage() {
           ) : null}
 
           {assignmentsWithFindings > 0 || materialsOverlapCount > 0 ? (
-            <p className="px-1 text-[12px] text-muted">
+            <p className="px-1 text-meta text-muted">
               {assignmentsWithFindings > 0 ? `${assignmentsWithFindings} assignment${assignmentsWithFindings === 1 ? "" : "s"} have scanner findings` : null}
               {assignmentsWithFindings > 0 && materialsOverlapCount > 0 ? " · " : null}
               {materialsOverlapCount > 0 ? `${materialsOverlapCount} share wording with a TP's materials` : null}
@@ -1106,7 +1106,7 @@ export default async function TodayPage() {
               className="flex flex-col gap-1.5 rounded-[12px] px-[18px] py-4 text-[oklch(96%_0.008_85)] transition-[filter] hover:brightness-[1.13]"
               style={{ background: "var(--color-ink-warm)" }}
             >
-              <span className="flex justify-between text-[10.5px] font-bold tracking-[0.11em] text-gold uppercase">
+              <span className="flex justify-between text-micro font-bold tracking-[0.11em] text-gold uppercase">
                 <span>Assessor visit</span>
                 <span>
                   {(() => {
@@ -1115,15 +1115,15 @@ export default async function TodayPage() {
                   })()}
                 </span>
               </span>
-              <span className="font-serif text-[18px] font-semibold">
+              <span className="font-serif text-h3 font-semibold">
                 {formatCalendarDate(course.assessor_visit_date, { weekday: "short", day: "numeric", month: "short" })}
                 {course.assessor_name ? ` · ${course.assessor_name}` : ""}
               </span>
-              <span className="text-[12px] opacity-80">
+              <span className="text-meta opacity-80">
                 {centrePreparation.length} preparation item{centrePreparation.length === 1 ? "" : "s"}
                 {preparationDeadline ? ` · ready by ${formatCalendarDate(preparationDeadline, { day: "numeric", month: "short" })}` : ""}
               </span>
-              <span className="text-[12.5px] font-semibold text-gold">Open the Assessor tab</span>
+              <span className="text-meta font-semibold text-gold">Open the Assessor tab</span>
             </Link>
           ) : null}
 

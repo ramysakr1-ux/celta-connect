@@ -96,7 +96,7 @@ export function AssignmentResultSignature({
           >
             {pending ? "Saving…" : `Sign as ${viewerSignatureName}`}
           </button>
-          <span className="text-[11px] text-muted">
+          <span className="text-label text-muted">
             Signing records that you were shown the result. It is not agreement, and it does not affect your right to
             query the grade.
           </span>

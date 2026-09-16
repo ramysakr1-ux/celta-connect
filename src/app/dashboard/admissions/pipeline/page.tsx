@@ -236,7 +236,7 @@ function HeadStat({ label, value, tone }: { label: string; value: string | numbe
   return (
     <div className="flex flex-col items-end gap-0.5">
       <span className={`font-serif text-2xl leading-none ${tone ?? "text-ink"}`}>{value}</span>
-      <span className="text-[10px] font-semibold tracking-[0.05em] text-muted uppercase">{label}</span>
+      <span className="text-micro font-semibold tracking-[0.05em] text-muted uppercase">{label}</span>
     </div>
   );
 }

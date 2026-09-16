@@ -418,7 +418,7 @@ export default async function CourseStreamPage({
       <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6">
           <div className={`sheet-accent h-fit ${garnetAt(thisWeekIndex) ? "sheet-garnet" : ""}`}>
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
             {(timetableEvents ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col">
                 {(timetableEvents ?? []).map((event, i) => {
@@ -454,7 +454,7 @@ export default async function CourseStreamPage({
 
           {isRegisteredTutor ? (
             <div className={`sheet-accent h-fit ${garnetAt(outsideConnectIndex) ? "sheet-garnet" : ""}`}>
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
+              <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
               <p className="mt-1 text-xs text-muted">
                 Everything else belongs in the app, where it&apos;s on the record and the whole group sees it.
               </p>
@@ -477,7 +477,7 @@ export default async function CourseStreamPage({
           ) : null}
 
           <div className={`sheet-accent h-fit ${garnetAt(courseTutorsIndex) ? "sheet-garnet" : ""}`}>
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
             {(tutors ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col gap-2">
                 {(tutors ?? []).map((tutor, i) => (
@@ -516,7 +516,7 @@ export default async function CourseStreamPage({
             />
           ) : isStaff && trainee.course_status !== "active" ? (
             <div className={`sheet-accent h-fit ${garnetAt(statusIndex) ? "sheet-garnet" : ""}`}>
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
+              <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
               <p className="mt-2 text-sm font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
               {trainee.course_status_set_at ? (
                 <p className="mt-0.5 text-xs text-muted">

@@ -74,7 +74,7 @@ export default async function CriteriaGlossaryPage() {
       <BackLink href={profile.role === "trainer" ? "/trainer" : "/centre"} label={profile.role === "trainer" ? "Today" : "Centre"} />
 
       <div className="sheet p-6">
-        <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
+        <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">
           {centre?.name ?? "Your centre"} · criteria glossary
         </p>
         <h1 className="mt-1 font-serif text-2xl text-ink">The words that tag a criterion</h1>

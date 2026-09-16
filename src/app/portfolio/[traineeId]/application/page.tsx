@@ -115,8 +115,8 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
         <Section title="Selection task — language awareness">
           {languageAwareness.map((item, i) => (
             <div key={i}>
-              <p className="text-[12.5px] font-semibold text-ink">{item.question ?? `Item ${i + 1}`}</p>
-              <p className="mt-0.5 text-[12.5px] whitespace-pre-line text-muted">{item.answer || "No answer given"}</p>
+              <p className="text-meta font-semibold text-ink">{item.question ?? `Item ${i + 1}`}</p>
+              <p className="mt-0.5 text-meta whitespace-pre-line text-muted">{item.answer || "No answer given"}</p>
             </div>
           ))}
         </Section>
@@ -137,12 +137,12 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
           return (
             <div key={label} className="flex flex-col gap-0.5">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="text-[12.5px] font-semibold text-ink">{label}</p>
-                <p className="shrink-0 text-[11.5px] font-semibold" style={{ color: MUTED }}>
+                <p className="text-meta font-semibold text-ink">{label}</p>
+                <p className="shrink-0 text-label font-semibold" style={{ color: MUTED }}>
                   {band ? (BAND_LABEL[band] ?? band) : "—"}
                 </p>
               </div>
-              {note ? <p className="text-[12px] whitespace-pre-line text-muted">{note}</p> : null}
+              {note ? <p className="text-meta whitespace-pre-line text-muted">{note}</p> : null}
             </div>
           );
         })}
@@ -160,10 +160,10 @@ export default async function CandidateApplicationPage({ params }: { params: Pro
       >
         {[...fixedQuestions, ...drawnQuestions].map((q: { question_text?: string; answer_text?: string; drawn_reason?: string }, i) => (
           <div key={i}>
-            <p className="text-[12.5px] font-semibold text-ink">{q.question_text ?? `Question ${i + 1}`}</p>
-            <p className="mt-0.5 text-[12.5px] whitespace-pre-line text-muted">{q.answer_text || "No answer recorded"}</p>
+            <p className="text-meta font-semibold text-ink">{q.question_text ?? `Question ${i + 1}`}</p>
+            <p className="mt-0.5 text-meta whitespace-pre-line text-muted">{q.answer_text || "No answer recorded"}</p>
             {q.drawn_reason ? (
-              <p className="mt-0.5 text-[11px]" style={{ color: FAINT }}>
+              <p className="mt-0.5 text-label" style={{ color: FAINT }}>
                 Asked because: {q.drawn_reason}
               </p>
             ) : null}
@@ -185,11 +185,11 @@ function Section({ title, caption, children }: { title: string; caption?: string
   return (
     <div className="card flex flex-col gap-3 p-5">
       <div>
-        <p className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: MUTED }}>
+        <p className="text-label font-bold tracking-[0.1em] uppercase" style={{ color: MUTED }}>
           {title}
         </p>
         {caption ? (
-          <p className="mt-0.5 text-[11.5px]" style={{ color: FAINT }}>
+          <p className="mt-0.5 text-label" style={{ color: FAINT }}>
             {caption}
           </p>
         ) : null}
@@ -203,10 +203,10 @@ function Field({ label, value, empty }: { label: string; value: string | null; e
   if (!value && !empty) return null;
   return (
     <div>
-      <p className="text-[10px] font-semibold tracking-[0.08em] uppercase" style={{ color: MUTED }}>
+      <p className="text-micro font-semibold tracking-[0.08em] uppercase" style={{ color: MUTED }}>
         {label}
       </p>
-      <p className="mt-0.5 text-[12.5px] whitespace-pre-line" style={{ color: value ? INK : FAINT }}>
+      <p className="mt-0.5 text-meta whitespace-pre-line" style={{ color: value ? INK : FAINT }}>
         {value || empty}
       </p>
     </div>

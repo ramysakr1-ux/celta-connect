@@ -172,7 +172,7 @@ export const MessageThread = forwardRef<
               return (
                 <div key={m.id} className="flex items-start gap-2.5">
                   <div
-                    className={`flex size-6 shrink-0 items-center justify-center rounded-[8px] text-[9px] font-semibold ${
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-[8px] text-micro font-semibold ${
                       mine ? "bg-surface-muted text-ink" : "bg-accent text-accent-foreground"
                     }`}
                   >
@@ -181,11 +181,11 @@ export const MessageThread = forwardRef<
                   <div className="min-w-0 flex-1">
                     <p className="flex items-baseline gap-1.5 text-xs font-semibold text-ink">
                       {!mine && isGroup ? (nameById.get(m.sender_id) ?? "Unknown") : mine ? "You" : null}
-                      <span className="text-[10px] font-normal text-muted">
+                      <span className="text-micro font-normal text-muted">
                         {formatTime(m.created_at, timeZone)}
                       </span>
                     </p>
-                    <p className="text-[13px] leading-[1.45] text-ink/85 text-pretty">{m.body}</p>
+                    <p className="text-meta leading-[1.45] text-ink/85 text-pretty">{m.body}</p>
                   </div>
                 </div>
               );

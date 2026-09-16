@@ -52,7 +52,7 @@ function JoinChip({ event, now, timeZone }: { event: TimetableEvent; now: Date; 
       href={event.zoom_url}
       target="_blank"
       rel="noreferrer"
-      className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
+      className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-micro font-semibold uppercase tracking-[0.06em] text-primary-foreground"
     >
       <span className="size-[5px] shrink-0 rounded-full bg-primary-foreground" />
       <CameraIcon />
@@ -86,19 +86,19 @@ function EventRow({
   return (
     <div className={divider ? "mt-1.5 border-t border-border-faint pt-1.5" : ""}>
       <div className="flex items-start justify-between gap-1">
-        <span className="text-[12px] font-medium text-ink">{event.title}</span>
+        <span className="text-meta font-medium text-ink">{event.title}</span>
         {!locked ? <DeleteEventButton eventId={event.id} compact /> : null}
       </div>
       {showTime(event) && event.event_time ? (
-        <span className="mt-0.5 block text-[10px] text-muted">{event.event_time.slice(0, 5)}</span>
+        <span className="mt-0.5 block text-micro text-muted">{event.event_time.slice(0, 5)}</span>
       ) : null}
       {event.tag && category === "rm" ? (
-        <span className="mt-0.5 block text-[10px] text-muted">{event.tag}</span>
+        <span className="mt-0.5 block text-micro text-muted">{event.tag}</span>
       ) : null}
       <JoinChip event={event} now={now} timeZone={timeZone} />
       {!locked ? (
         <details className="mt-1">
-          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+          <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             {event.detail ? `Subtitle: ${event.detail}` : "Set subtitle"}
           </summary>
           <form action={setEventDetail} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
@@ -116,11 +116,11 @@ function EventRow({
           </form>
         </details>
       ) : event.detail ? (
-        <span className="mt-0.5 block text-[10px] text-muted">{event.detail}</span>
+        <span className="mt-0.5 block text-micro text-muted">{event.detail}</span>
       ) : null}
       {event.type === "input_session" ? (
         <details className="mt-1">
-          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+          <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             {event.input_session_criteria.length > 0 ? `Criteria: ${event.input_session_criteria.join(", ")}` : "Set criteria"}
           </summary>
           <form action={setInputSessionCriteria} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
@@ -140,7 +140,7 @@ function EventRow({
       ) : null}
       {event.type === "tp" && mixedMode ? (
         <details className="mt-1">
-          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+          <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
           </summary>
           <form action={setTpEventMode} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
@@ -162,7 +162,7 @@ function EventRow({
       ) : null}
       {event.type === "tp" && volunteers.length > 0 ? (
         <details className="mt-1">
-          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+          <summary className="cursor-pointer text-micro font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
             Attendance {attendedIds.size}/{volunteers.length}
           </summary>
           <form action={setAttendance} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">

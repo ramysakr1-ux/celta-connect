@@ -191,7 +191,7 @@ export function FilmedObservationWatchScreen({
             {present.slice(0, 6).map((name, i) => (
               <div
                 key={`${name}-${i}`}
-                className="flex size-7 items-center justify-center rounded-full border-2 border-card bg-accent text-[10px] font-semibold text-accent-foreground"
+                className="flex size-7 items-center justify-center rounded-full border-2 border-card bg-accent text-micro font-semibold text-accent-foreground"
                 title={name}
               >
                 {name.slice(0, 2).toUpperCase()}
@@ -269,7 +269,7 @@ export function FilmedObservationWatchScreen({
 
           {activeBreak ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink/92 px-6 text-center text-card">
-              <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-card/70">
+              <p className="text-label font-semibold tracking-[0.1em] uppercase text-card/70">
                 Break {activeBreak.break_number} of {breaks.length}
               </p>
               <p className="max-w-md text-base leading-relaxed">{activeBreak.prompt}</p>
@@ -306,7 +306,7 @@ export function FilmedObservationWatchScreen({
           // page turns those stamps into click-to-seek links. It is for
           // catching a moment before you know which prompt it answers.
           <div className="card card-garnet p-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
             <p className="mt-1 text-xs text-muted">
               Saved with the exact moment you wrote them, so you can jump straight back to it later.
             </p>

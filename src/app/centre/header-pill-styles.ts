@@ -19,7 +19,7 @@
 // move between sections.
 
 const BASE =
-  "shrink-0 rounded-[5px] border px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] uppercase transition-colors duration-150";
+  "shrink-0 rounded-[5px] border px-2.5 py-1 text-label font-bold tracking-[0.1em] uppercase transition-colors duration-150";
 
 // Wears whichever room it is in -- garnet in Course Admin, teal in Centre
 // Management -- and falls back to teal where no room colour is set, which is

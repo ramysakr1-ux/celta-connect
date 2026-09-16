@@ -109,7 +109,7 @@ export default async function DemoApplyPage({
     <div className="entry-ground flex min-h-screen flex-1 flex-col items-center justify-center gap-3 p-8">
       <div className="w-full max-w-xl rounded-[8px] border border-gold bg-card px-4 py-3">
         <p className="text-sm font-semibold text-ink">This one you can submit.</p>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted">
+        <p className="mt-1 text-meta leading-relaxed text-muted">
           The real form, the real recorder, the real server action — pointed at {center.name} instead of a live centre. Record yourself, submit
           it, and watch the acknowledgement, the transcription and the staff notifications fire exactly as they do for a real applicant. What
           you write here lands in the demo pipeline and is wiped on the next rebuild.

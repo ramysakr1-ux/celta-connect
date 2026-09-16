@@ -85,7 +85,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
               value={link}
               onFocus={(e) => e.currentTarget.select()}
               aria-label="Assessor link"
-              className="mt-1.5 h-8 w-full rounded-[6px] border border-border bg-card-inset px-2 font-mono text-[11px] text-ink"
+              className="mt-1.5 h-8 w-full rounded-[6px] border border-border bg-card-inset px-2 font-mono text-label text-ink"
             />
             <p className="mt-1.5 text-muted">Select it and copy.</p>
             <button type="button" onClick={() => setState("idle")} className="mt-2 text-primary hover:underline">
@@ -113,7 +113,7 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
               <button
                 type="button"
                 onClick={() => handleClick(true)}
-                className="rounded-[5px] px-2.5 py-1 text-[11.5px] font-semibold text-primary-foreground"
+                className="rounded-[5px] px-2.5 py-1 text-label font-semibold text-primary-foreground"
                 style={{ background: "var(--hub-accent)" }}
               >
                 Share anyway

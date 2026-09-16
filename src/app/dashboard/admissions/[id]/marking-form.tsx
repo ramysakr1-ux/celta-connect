@@ -25,7 +25,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
   return (
     <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="applicant_id" value={applicant.id} />
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Marking scheme -- selection task</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Marking scheme -- selection task</h2>
       <p className="text-sm text-muted">Same shape as the Standard of English criterion on the assignment cover sheets.</p>
 
       <div className="flex flex-col gap-3">
@@ -85,7 +85,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
 
         {applicant.task_feedback_ai_suggestion ? (
           <div className="mt-1 rounded-[6px] border border-border bg-surface-muted p-3">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Suggested — not sent</p>
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Suggested — not sent</p>
             <p className="mt-1 text-sm text-ink">{applicant.task_feedback_ai_suggestion}</p>
           </div>
         ) : null}

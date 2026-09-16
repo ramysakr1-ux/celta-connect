@@ -54,7 +54,7 @@ export function TutorToneTextarea({ enabled, ...props }: VoiceTextareaProps & { 
           type="button"
           disabled={isPending}
           onClick={() => handleCleanup("direct")}
-          className="text-[11.5px] text-muted hover:text-ink disabled:opacity-60"
+          className="text-label text-muted hover:text-ink disabled:opacity-60"
         >
           {isPending && activeTone === "direct" ? "Rewriting…" : "Direct tone"}
         </button>
@@ -62,7 +62,7 @@ export function TutorToneTextarea({ enabled, ...props }: VoiceTextareaProps & { 
           type="button"
           disabled={isPending}
           onClick={() => handleCleanup("supportive")}
-          className="text-[11.5px] text-muted hover:text-ink disabled:opacity-60"
+          className="text-label text-muted hover:text-ink disabled:opacity-60"
         >
           {isPending && activeTone === "supportive" ? "Rewriting…" : "Supportive tone"}
         </button>

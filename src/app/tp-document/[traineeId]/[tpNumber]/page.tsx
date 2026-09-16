@@ -157,7 +157,7 @@ export default async function AssembledDocumentPage({
 
       <div className="doc-chrome flex flex-wrap items-center justify-between gap-3 px-5 py-4">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.16em] uppercase" style={{ color: MUTED }}>
+          <p className="text-label font-bold tracking-[0.16em] uppercase" style={{ color: MUTED }}>
             Assembled document
           </p>
           <p className="text-sm" style={{ color: INK }}>

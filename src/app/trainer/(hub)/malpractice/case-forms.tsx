@@ -13,7 +13,7 @@ export function CandidateAccountForm({ caseId }: { caseId: string }) {
   return (
     <form action={action} className="sheet flex flex-col gap-3">
       <input type="hidden" name="case_id" value={caseId} />
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate&apos;s account</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate&apos;s account</p>
       <p className="text-xs text-muted">
         Put to the candidate in person, not by a status changing overnight. Record what they said, in their own
         words -- a case cannot be decided without it.
@@ -53,7 +53,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
     <form action={action} className="sheet flex flex-col gap-3">
       <input type="hidden" name="case_id" value={caseId} />
       <input type="hidden" name={hasOptions ? "outcome_option_id" : "outcome"} value={selected} />
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Decision</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Decision</p>
       <p className="text-xs text-muted">
         The decision comes from your own malpractice policy -- Connect never invents a penalty.
       </p>

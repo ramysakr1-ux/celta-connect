@@ -71,7 +71,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
       <div className="pointer-events-auto flex w-full max-w-[840px] flex-col gap-2" onKeyDown={handleKeyDown}>
         {pickerOpen && rooms.length > 1 ? (
           <div className="w-[300px] self-start rounded-[16px] border border-border bg-card p-2 shadow-lg">
-            <p className="px-3 pb-2 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Choose a branch</p>
+            <p className="px-3 pb-2 pt-2.5 text-micro font-semibold uppercase tracking-[0.12em] text-muted">Choose a branch</p>
             {rooms.map((r) => (
               <button
                 key={r.channelId}
@@ -85,13 +85,13 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
                 }`}
               >
                 <span
-                  className={`flex size-[26px] shrink-0 items-center justify-center rounded-[8px] text-[9px] font-semibold ${
+                  className={`flex size-[26px] shrink-0 items-center justify-center rounded-[8px] text-micro font-semibold ${
                     r.channelId === selected.channelId ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
                   }`}
                 >
                   {initials(r.name)}
                 </span>
-                <span className="flex-1 truncate text-[13px] font-medium text-ink">{r.name}</span>
+                <span className="flex-1 truncate text-meta font-medium text-ink">{r.name}</span>
               </button>
             ))}
           </div>
@@ -99,7 +99,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
 
         {threadOpen ? (
           <div className="max-h-[260px] overflow-y-auto rounded-[20px] border border-border bg-card p-4 shadow-lg">
-            <p className="mb-2 text-[11px] text-muted">
+            <p className="mb-2 text-label text-muted">
               Admins only — this reaches no tutor and no candidate. To reach a tutor, use their contact details on the roster.
               <span className="ml-1 font-semibold text-ink">Permanent — never resets.</span>
             </p>
@@ -126,10 +126,10 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
               rooms.length <= 1 ? "cursor-default" : ""
             }`}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-[9px] font-semibold text-primary-foreground">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-micro font-semibold text-primary-foreground">
               {initials(selected.name)}
             </span>
-            <span className="max-w-[70px] truncate text-[13px] font-semibold text-ink sm:max-w-[130px]">{selected.name}</span>
+            <span className="max-w-[70px] truncate text-meta font-semibold text-ink sm:max-w-[130px]">{selected.name}</span>
             {rooms.length > 1 ? <ChevronDown className="size-[9px] shrink-0 text-muted" aria-hidden="true" /> : null}
           </button>
 
@@ -155,7 +155,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
 
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
             <span className="size-[5px] shrink-0 rounded-full bg-muted" aria-hidden="true" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">Permanent</span>
+            <span className="text-micro font-semibold uppercase tracking-[0.06em] text-muted">Permanent</span>
           </div>
 
           <button

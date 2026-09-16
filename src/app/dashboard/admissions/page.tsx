@@ -240,7 +240,7 @@ export default async function AdmissionsPage({
                       // "A tutor is notified... in-app flag, not push/email"
                       // -- this table is the surface a tutor or admissions
                       // handler actually scans, so the flag lives here.
-                      <span className="ml-2 rounded-full border border-destructive/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-destructive">
+                      <span className="ml-2 rounded-full border border-destructive/40 px-2 py-0.5 text-micro font-semibold uppercase tracking-[0.05em] text-destructive">
                         Task reading: read directly
                       </span>
                     ) : null}
@@ -271,7 +271,7 @@ export default async function AdmissionsPage({
       </div>
 
       <div className="card p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Interview availability</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Interview availability</h2>
         <p className="mt-1 text-sm text-muted">Slots are generated from a rule, not typed in every week.</p>
         <div className="mt-4">
           <InterviewAvailabilityPanel interviewers={interviewerOptions} patterns={patterns} blocks={blocks} settings={generationSettings} />
@@ -279,7 +279,7 @@ export default async function AdmissionsPage({
       </div>
 
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Open interview slots</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Open interview slots</h2>
         {/* Handbook §7.2: "Online interviews, using the centre's teaching
             platform, should be arranged for candidates who are enrolling in
             a course with an online TP element, as this will assist in
@@ -357,7 +357,7 @@ export default async function AdmissionsPage({
 
       {marketingByCourse.size > 0 ? (
         <div className="card flex flex-col gap-4 p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">How they heard about us</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">How they heard about us</h2>
           <p className="text-sm text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
           <ul className="flex flex-col gap-4">
             {Array.from(marketingByCourse.entries()).map(([courseId, { name, total, counts }]) => (
@@ -385,7 +385,7 @@ export default async function AdmissionsPage({
 
       {waitingByIntake.size > 0 ? (
         <div className="card flex flex-col gap-4 p-5">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Waiting lists</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Waiting lists</h2>
           <p className="text-sm text-muted">
             When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever&apos;s next -- the app
             picks who, not you.

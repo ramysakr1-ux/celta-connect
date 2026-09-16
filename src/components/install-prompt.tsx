@@ -183,7 +183,7 @@ export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "
           Keep this on your home screen
         </button>
         {showIosSteps ? (
-          <p className="max-w-[46ch] text-center text-[11px] leading-[1.5] text-muted">
+          <p className="max-w-[46ch] text-center text-label leading-[1.5] text-muted">
             {route === "ios" ? (
               <>
                 Tap <span className="font-semibold text-ink">Share</span>, then{" "}

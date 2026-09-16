@@ -45,7 +45,7 @@ export function SupervisedSessionsPanel({
 
   return (
     <div className="sheet flex flex-col gap-3">
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Supervised review / writing</p>
+      <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Supervised review / writing</p>
       <div className="flex flex-col">
         {events.map((event, i) => {
           const completion = completionByEventId.get(event.id);

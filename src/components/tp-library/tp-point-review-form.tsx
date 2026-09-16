@@ -35,13 +35,13 @@ export function TpPointReviewForm({
         <div className="flex items-center gap-2">
           {point.aim_type ? (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold"
               style={{ background: AIM_TYPE_STYLE[point.aim_type].bg, color: AIM_TYPE_STYLE[point.aim_type].ink }}
             >
               {AIM_TYPE_LABELS[point.aim_type]}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 px-2.5 py-0.5 text-label font-semibold text-destructive">
               Aim type not set
             </span>
           )}

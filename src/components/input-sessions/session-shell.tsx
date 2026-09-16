@@ -31,7 +31,7 @@ export function SessionShell({
           teaching, and decoration would compete with the content. */}
       <div className="flex flex-col gap-3">
         <span aria-hidden className="h-[3px] w-10 rounded-full bg-primary" />
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{eyebrow}</p>
+        <p className="text-label font-bold uppercase tracking-[0.14em] text-muted">{eyebrow}</p>
         <h1 className="font-serif text-3xl font-semibold leading-tight text-ink">{title}</h1>
         <p className="text-sm leading-relaxed text-muted">{intro}</p>
       </div>

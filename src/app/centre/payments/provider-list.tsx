@@ -56,18 +56,18 @@ export function ProviderList({
                   fail, so "selected" is never mistaken for "working". */}
               {p.key === connectedKey ? (
                 live && credentialsPresent ? (
-                  <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold text-primary">
+                  <span className="flex shrink-0 items-center gap-1.5 text-label font-semibold text-primary">
                     <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
                     Working
                   </span>
                 ) : (
-                  <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold text-destructive">
+                  <span className="flex shrink-0 items-center gap-1.5 text-label font-semibold text-destructive">
                     <span className="size-2 rounded-full bg-destructive" aria-hidden="true" />
                     {live ? "Not working" : "Not connected"}
                   </span>
                 )
               ) : !p.adapter ? (
-                <span className="shrink-0 text-[11px] text-muted">No integration yet</span>
+                <span className="shrink-0 text-label text-muted">No integration yet</span>
               ) : null}
             </button>
           );

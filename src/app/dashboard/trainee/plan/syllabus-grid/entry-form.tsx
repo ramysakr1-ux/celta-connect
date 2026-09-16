@@ -66,7 +66,7 @@ export function SyllabusEntryForm({
           ))}
         </select>
         {allowedAimTypes && allowedAimTypes.length > 0 ? (
-          <p className="text-[11px] text-muted">Your trainer has restricted this TP to these types.</p>
+          <p className="text-label text-muted">Your trainer has restricted this TP to these types.</p>
         ) : null}
       </div>
       <div className="flex flex-col gap-1">

@@ -32,7 +32,7 @@ function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolea
             // Not a control: a derived answer is a reading, and a checkbox
             // here would invite someone to overrule the data with a click.
             <span
-              className="mt-[1px] inline-flex size-[13px] shrink-0 items-center justify-center rounded-[3px] border text-[8px] font-bold"
+              className="mt-[1px] inline-flex size-[13px] shrink-0 items-center justify-center rounded-[3px] border text-micro font-bold"
               style={
                 ready
                   ? { background: TEAL, borderColor: TEAL, color: "var(--color-primary-foreground)" }
@@ -52,21 +52,21 @@ function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolea
               aria-label={`Mark ${item.label} as ready`}
             />
           )}
-          <span className="text-[13px] font-semibold text-ink">
+          <span className="text-meta font-semibold text-ink">
             {item.label}
-            {item.conditional ? <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
+            {item.conditional ? <span className="ml-2 text-micro font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
           </span>
         </span>
-        <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
+        <span className="shrink-0 text-micro font-semibold text-muted tabular-nums">§{item.cite}</span>
       </div>
       <p className="pl-[21px] text-xs text-muted">{item.detail}</p>
       {item.evidence ? (
-        <p className="pl-[21px] text-[11px] font-medium" style={{ color: tone }}>
+        <p className="pl-[21px] text-label font-medium" style={{ color: tone }}>
           {item.evidence}
         </p>
       ) : null}
       {item.markedByName && ready ? (
-        <p className="pl-[21px] text-[11px] text-muted">
+        <p className="pl-[21px] text-label text-muted">
           Confirmed by {item.markedByName}
           {item.markedAt ? ` · ${formatDate(item.markedAt, timeZone)}` : ""}
         </p>
@@ -95,7 +95,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
     >
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
+          <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
           <p className="max-w-[70ch] text-sm text-muted">
             Administration Handbook §14.1.{" "}
             {deadline
@@ -104,7 +104,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
           </p>
         </div>
         <span
-          className="rounded-full px-3 py-1 text-[11.5px] font-semibold whitespace-nowrap"
+          className="rounded-full px-3 py-1 text-label font-semibold whitespace-nowrap"
           style={
             allReady
               ? { background: `color-mix(in oklab, ${TEAL} 14%, var(--color-card))`, color: TEAL }
@@ -121,7 +121,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
         ))}
       </ul>
 
-      <p className="border-t hub-hairline pt-3 text-[11.5px] text-muted">
+      <p className="border-t hub-hairline pt-3 text-label text-muted">
         Ticks are yours and Course Admin&apos;s — whoever prepared the thing can say it is ready, and their name goes on it.
         The items Connect can see for itself have no tick: the reading underneath each one is what it looked at.
       </p>

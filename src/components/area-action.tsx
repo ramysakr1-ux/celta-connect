@@ -38,7 +38,7 @@ export function AreaAction({
       <div className="flex flex-col gap-1">
         {children}
         {verdict.kind === "act_covering" ? (
-          <p className="text-[11px] text-muted">
+          <p className="text-label text-muted">
             {verdict.holder.name} handles this — anything you do here will be recorded as covering.
           </p>
         ) : null}
@@ -86,7 +86,7 @@ export function ActionAttribution({
   if (!at) return null;
   const when = formatDateTime(at, timeZone, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   return (
-    <p className="text-[11px] text-muted">
+    <p className="text-label text-muted">
       {verb} by {actorName}
       {coveringArea ? `, covering ${coveringArea}` : ""} &middot; {when}
     </p>

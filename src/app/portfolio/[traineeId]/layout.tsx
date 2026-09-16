@@ -449,21 +449,21 @@ export default async function PortfolioLayout({
               )}
               <span className="h-5 w-px shrink-0 bg-border" />
               <Avatar name={trainee.full_name} size="sm" />
-              <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
+              <h1 className="truncate font-serif text-h3 text-ink">{trainee.full_name}</h1>
               {isCourseStatusReadOnly(trainee.course_status) ? (
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-label font-semibold text-destructive">
                   <span className="size-1.5 shrink-0 rounded-full bg-current" />
                   {COURSE_STATUS_LABEL[trainee.course_status]}
                 </span>
               ) : trainee.course_status === "extension" ? (
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-0.5 text-label font-semibold text-primary">
                   <span className="size-1.5 shrink-0 rounded-full bg-current" />
                   Extension
                 </span>
               ) : null}
               {trajectory ? (
                 <HideDuringPreview>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-warning-text">
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-label font-semibold text-status-warning-text">
                     <span className="size-1.5 shrink-0 rounded-full bg-current" />
                     Tracking {STANDING_LABEL[trajectory]}
                   </span>
@@ -496,7 +496,7 @@ export default async function PortfolioLayout({
                       themselves, which are the operational part. */}
                   <span
                     title={viewer?.role === "trainer" ? (trainee.special_consideration ?? undefined) : undefined}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-ink"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-label font-semibold text-ink"
                   >
                     <span className="size-1.5 shrink-0 rounded-full bg-current" />
                     Special consideration declared

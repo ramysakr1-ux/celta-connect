@@ -115,11 +115,11 @@ export function DayBar({
   const clockBlock = (
     <span className="flex flex-none items-baseline gap-1.5">
       {/* min-width so the row does not shift as the digits change. */}
-      <span className="min-w-[42px] text-[12px] font-bold tabular-nums" style={{ color: clockInk }}>
+      <span className="min-w-[42px] text-meta font-bold tabular-nums" style={{ color: clockInk }}>
         {mounted ? clock : ""}
       </span>
       {zoneNote ? (
-        <span className="text-[10.5px] whitespace-nowrap" style={{ color: label }}>
+        <span className="text-micro whitespace-nowrap" style={{ color: label }}>
           {zoneNote}
         </span>
       ) : null}
@@ -137,7 +137,7 @@ export function DayBar({
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
-      <span className="flex-none text-[10.5px] font-bold tracking-[0.12em] tabular-nums uppercase" style={{ color: label }}>
+      <span className="flex-none text-micro font-bold tracking-[0.12em] tabular-nums uppercase" style={{ color: label }}>
         {dayLabel ? `${dayLabel} · ` : ""}
         {hhmm(windowStart)}
       </span>
@@ -173,7 +173,7 @@ export function DayBar({
         ) : null}
       </div>
 
-      <span className="flex-none text-[10.5px] font-bold tracking-[0.12em] tabular-nums uppercase" style={{ color: label }}>
+      <span className="flex-none text-micro font-bold tracking-[0.12em] tabular-nums uppercase" style={{ color: label }}>
         {hhmm(windowEnd)}
       </span>
 

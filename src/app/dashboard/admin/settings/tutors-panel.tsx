@@ -229,7 +229,7 @@ export function TutorsPanel({
             </div>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">
+                <tr className="border-b border-border text-left text-micro font-semibold uppercase tracking-[0.1em] text-muted">
                   <th className="pb-2 font-semibold">Name</th>
                   <th className="pb-2 font-semibold">Role</th>
                   <th className="pb-2 font-semibold">Trainer in training</th>

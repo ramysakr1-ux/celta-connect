@@ -137,7 +137,7 @@ export function VolunteerImportWizard({
               }`}
             >
               <span className={`font-serif text-lg ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
-              <span className={`text-[13px] font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
+              <span className={`text-meta font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
             </div>
           );
         })}
@@ -146,7 +146,7 @@ export function VolunteerImportWizard({
       {currentStep === "connect" ? (
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
-            <h2 className="font-serif text-[22px] text-ink">Point Connect at the file you already have</h2>
+            <h2 className="font-serif text-h2 text-ink">Point Connect at the file you already have</h2>
             <p className="mt-1 text-sm text-muted">
               Nothing is written anywhere yet. This is a one-time read, not a live link -- your spreadsheet keeps
               working exactly as it did, and nothing here changes when somebody edits it afterwards.
@@ -203,7 +203,7 @@ export function VolunteerImportWizard({
       {currentStep === "map" ? (
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
-            <h2 className="font-serif text-[22px] text-ink">Their column names, our fields</h2>
+            <h2 className="font-serif text-h2 text-ink">Their column names, our fields</h2>
             <p className="mt-1 text-sm text-muted">Connect guesses from the headings -- check each one before moving on.</p>
           </div>
 
@@ -256,7 +256,7 @@ export function VolunteerImportWizard({
       {currentStep === "preview" ? (
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
-            <h2 className="font-serif text-[22px] text-ink">
+            <h2 className="font-serif text-h2 text-ink">
               {rows.length} row{rows.length === 1 ? "" : "s"}, and what each will become
             </h2>
             <p className="mt-1 text-sm text-muted">Nothing has been written yet.</p>
@@ -270,7 +270,7 @@ export function VolunteerImportWizard({
             ].map((t) => (
               <div key={t.k} className="flex flex-col gap-0.5">
                 <span className={`font-serif text-2xl ${t.cls}`}>{t.v}</span>
-                <span className="text-[11px] tracking-[0.08em] text-muted uppercase">{t.k}</span>
+                <span className="text-label tracking-[0.08em] text-muted uppercase">{t.k}</span>
               </div>
             ))}
           </div>
@@ -327,7 +327,7 @@ export function VolunteerImportWizard({
       {currentStep === "after" ? (
         <div className="sheet flex flex-col gap-4" style={{ borderTop: "3px solid var(--vol-sage)" }}>
           <div>
-            <h2 className="font-serif text-[22px] text-ink">Imported, and nobody has been emailed</h2>
+            <h2 className="font-serif text-h2 text-ink">Imported, and nobody has been emailed</h2>
             <p className="mt-1 text-sm text-muted">
               {state.imported} more volunteer{state.imported === 1 ? "" : "s"} now on the course, each with a real join link. Not one of them has
               heard from Connect.

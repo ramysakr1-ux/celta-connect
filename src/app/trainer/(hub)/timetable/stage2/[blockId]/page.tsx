@@ -59,15 +59,15 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Positions</h2>
+            <h2 className="font-serif text-h2 font-semibold text-ink-warm">Positions</h2>
             {mine ? (
-              <span className="rounded-full px-[7px] py-[2px] text-[10px] font-bold tracking-[0.06em] text-primary-foreground uppercase" style={{ background: "var(--hub-accent)" }}>
+              <span className="rounded-full px-[7px] py-[2px] text-micro font-bold tracking-[0.06em] text-primary-foreground uppercase" style={{ background: "var(--hub-accent)" }}>
                 Yours
               </span>
             ) : null}
           </div>
           <span
-            className="inline-flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-[12px] font-bold whitespace-nowrap"
+            className="inline-flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-meta font-bold whitespace-nowrap"
             style={full ? { background: "oklch(93% 0.019 190)", color: "oklch(32% 0.05 195)" } : booked === 0 ? { background: "oklch(93.5% 0.008 85)", color: "oklch(38% 0.014 70)" } : { background: "oklch(93% 0.05 80)", color: "oklch(40% 0.09 68)" }}
           >
             <span className="block size-1.5 rounded-full bg-current" />
@@ -77,21 +77,21 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
         <div className="flex flex-col">
           {(slots ?? []).map((s) => (
             <div key={s.id} className="grid grid-cols-[44px_56px_1fr_auto] items-center gap-3.5 border-t border-border-faint py-2.5">
-              <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">{ordinal(s.position)}</span>
-              <span className="text-[14px] font-semibold tabular-nums text-ink">{timeAt(s.position)}</span>
+              <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">{ordinal(s.position)}</span>
+              <span className="text-body font-semibold tabular-nums text-ink">{timeAt(s.position)}</span>
               {s.trainee_id ? (
                 <span className="flex items-center gap-2.5">
                   <Avatar name={nameById.get(s.trainee_id) ?? "?"} size="xs" />
-                  <span className="text-[13.5px] font-semibold text-ink">{nameById.get(s.trainee_id) ?? "Unknown"}</span>
+                  <span className="text-body font-semibold text-ink">{nameById.get(s.trainee_id) ?? "Unknown"}</span>
                 </span>
               ) : (
                 <span className="flex items-center gap-2.5">
                   <span className="block size-7 rounded-[8px] border-[1.5px] border-dashed border-[oklch(80%_0.014_82)]" />
-                  <span className="text-[13.5px] text-muted italic">Open</span>
+                  <span className="text-body text-muted italic">Open</span>
                 </span>
               )}
               <span
-                className="inline-flex h-6 items-center gap-1.5 rounded-full px-[9px] text-[11px] font-bold"
+                className="inline-flex h-6 items-center gap-1.5 rounded-full px-[9px] text-label font-bold"
                 style={s.trainee_id ? { background: "oklch(93% 0.019 190)", color: "oklch(32% 0.05 195)" } : { background: "oklch(93.5% 0.008 85)", color: "oklch(38% 0.014 70)" }}
               >
                 <span className="block size-1.5 rounded-full bg-current" />
@@ -104,8 +104,8 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
       </div>
 
       <div className="sheet flex flex-col gap-2 px-6 py-5">
-        <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Adjust length</h2>
-        <p className="text-[12.5px] text-muted">Too short? Lengthen it -- unbooked positions regenerate, anyone already booked keeps their position.</p>
+        <h2 className="font-serif text-h2 font-semibold text-ink-warm">Adjust length</h2>
+        <p className="text-meta text-muted">Too short? Lengthen it -- unbooked positions regenerate, anyone already booked keeps their position.</p>
         <form action={updateStage2Duration} className="mt-1 flex items-center gap-2">
           <input type="hidden" name="block_id" value={blockId} />
           <input
@@ -114,9 +114,9 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
             min={15}
             step={15}
             defaultValue={total * slotMinutes}
-            className="h-9 w-32 rounded-[8px] border border-border bg-card px-3 text-[13px] text-ink outline-none focus:border-primary"
+            className="h-9 w-32 rounded-[8px] border border-border bg-card px-3 text-meta text-ink outline-none focus:border-primary"
           />
-          <button type="submit" className="wash h-9 rounded-[8px] border border-border bg-card px-3.5 text-[12.5px] font-semibold text-ink">
+          <button type="submit" className="wash h-9 rounded-[8px] border border-border bg-card px-3.5 text-meta font-semibold text-ink">
             Update
           </button>
         </form>

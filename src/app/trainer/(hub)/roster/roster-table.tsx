@@ -113,10 +113,10 @@ export function RosterTable({
               boxShadow: filter === t.key ? "inset 0 0 0 1px var(--hub-accent), 0 1px 2px oklch(0% 0 0 / 0.04)" : "0 1px 2px oklch(0% 0 0 / 0.04)",
             }}
           >
-            <span className="font-serif text-[30px] leading-none font-semibold tabular-nums">{t.n}</span>
+            <span className="font-serif text-display leading-none font-semibold tabular-nums">{t.n}</span>
             <span className="flex flex-col gap-0.5">
-              <span className="text-[13px] font-bold">{t.label}</span>
-              <span className="text-[11.5px] text-muted">{t.sub}</span>
+              <span className="text-meta font-bold">{t.label}</span>
+              <span className="text-label text-muted">{t.sub}</span>
             </span>
           </button>
         ))}
@@ -130,7 +130,7 @@ export function RosterTable({
           aria-checked={showDetail}
           onClick={toggle}
           title="TP stages, observation hours, stage sign-offs, FOL, standing"
-          className={`wash inline-flex h-8 items-center gap-2 rounded-full border border-border px-3.5 text-[12.5px] font-semibold ${
+          className={`wash inline-flex h-8 items-center gap-2 rounded-full border border-border px-3.5 text-meta font-semibold ${
             showDetail ? "text-ink" : "bg-card text-muted"
           }`}
           style={showDetail ? { background: "color-mix(in oklab, var(--hub-accent) 8%, var(--color-card))" } : undefined}
@@ -145,7 +145,7 @@ export function RosterTable({
       {/* The only shadowed card on the page (handoff, "Roster table"). */}
       <div className="overflow-x-auto rounded-[12px] border border-border bg-card" style={{ boxShadow: "0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}>
         <div className="min-w-[1120px]">
-          <div className={`${ROSTER_COLS} items-end border-b border-border px-4 pt-3.5 pb-2.5 text-[10.5px] leading-[1.2] font-bold tracking-[0.08em] text-muted uppercase`}>
+          <div className={`${ROSTER_COLS} items-end border-b border-border px-4 pt-3.5 pb-2.5 text-micro leading-[1.2] font-bold tracking-[0.08em] text-muted uppercase`}>
             <Th>Candidate</Th>
             <Th>TPs passed · of 8</Th>
             <Th>Assessed hrs</Th>

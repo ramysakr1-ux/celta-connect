@@ -14,7 +14,7 @@ export function EntryNotice({ heading, children }: { heading: string; children: 
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>
-          <h1 className="mt-4 font-serif text-[21px] leading-[1.25] font-semibold text-ink">{heading}</h1>
+          <h1 className="mt-4 font-serif text-h2 leading-[1.25] font-semibold text-ink">{heading}</h1>
           <p className="mt-2 text-sm text-muted">{children}</p>
         </div>
       </div>

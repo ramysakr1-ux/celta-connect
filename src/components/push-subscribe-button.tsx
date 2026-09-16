@@ -132,7 +132,7 @@ export function PushSubscribeButton({
 
     if (permission === "denied") {
       return (
-        <p className="max-w-[42ch] text-[11px] leading-[1.55] text-muted">
+        <p className="max-w-[42ch] text-label leading-[1.55] text-muted">
           Notifications are turned off for this site in your browser. Only your browser can turn them back
           on &mdash; use the icon at the left of the address bar, set Notifications to Allow, then reload
           this page.
@@ -151,7 +151,7 @@ export function PushSubscribeButton({
           {pending ? "Enabling..." : "Enable notifications"}
         </button>
         {dismissed ? (
-          <p className="text-[11px] text-muted">You closed your browser&apos;s prompt. Click again if you&apos;d like these on.</p>
+          <p className="text-label text-muted">You closed your browser&apos;s prompt. Click again if you&apos;d like these on.</p>
         ) : null}
         {error ? <p className="text-xs text-destructive">{error}</p> : null}
       </div>

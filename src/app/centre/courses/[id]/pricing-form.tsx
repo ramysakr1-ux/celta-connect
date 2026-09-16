@@ -25,31 +25,31 @@ export function PricingForm({
     <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="course_id" value={courseId} />
       <div>
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Pricing</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Pricing</h2>
         <p className="mt-1 text-xs text-muted">The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-[14px] sm:grid-cols-4">
         <div className="flex flex-col gap-1">
-          <label htmlFor="fee_amount" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="fee_amount" className="text-meta font-semibold text-ink">
             Fee
           </label>
           <input id="fee_amount" name="fee_amount" type="number" min="0" step="0.01" defaultValue={feeAmount ?? ""} className={field} />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="deposit_amount" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="deposit_amount" className="text-meta font-semibold text-ink">
             Deposit
           </label>
           <input id="deposit_amount" name="deposit_amount" type="number" min="0" step="0.01" defaultValue={depositAmount ?? ""} className={field} />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="fee_currency" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="fee_currency" className="text-meta font-semibold text-ink">
             Currency
           </label>
           <input id="fee_currency" name="fee_currency" type="text" maxLength={3} defaultValue={feeCurrency ?? ""} className={`${field} uppercase`} />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="deposit_due_days" className="text-[13px] font-semibold text-ink">
+          <label htmlFor="deposit_due_days" className="text-meta font-semibold text-ink">
             Deposit due (days)
           </label>
           <input id="deposit_due_days" name="deposit_due_days" type="number" min="1" defaultValue={depositDueDays ?? ""} className={field} />

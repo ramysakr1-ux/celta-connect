@@ -12,7 +12,7 @@ const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5
 export function WaiverForm({ applicant }: { applicant: Applicant }) {
   return (
     <div className="card flex flex-col gap-3 p-5">
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Waiver / discount</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Waiver / discount</h2>
       {applicant.waiver_note ? (
         <p className="text-sm text-ink">
           {applicant.waiver_note} -- agreed by {applicant.waiver_agreed_role ?? "staff"}

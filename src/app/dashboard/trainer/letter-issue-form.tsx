@@ -62,7 +62,7 @@ export function LetterIssueForm({
       {relatedDeferralTransferId ? <input type="hidden" name="related_deferral_transfer_id" value={relatedDeferralTransferId} /> : null}
 
       <div className="rounded-[6px] border border-border-faint bg-surface-muted/40 p-3">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{draft.docTitle}</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{draft.docTitle}</p>
         <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
           {draft.facts.map((f) => (
             <div key={f.label} className="contents">

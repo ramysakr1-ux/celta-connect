@@ -112,7 +112,7 @@ export default async function CentreRolesPage() {
       <RoleStrip holders={holders} overrides={ctx.overrides} customRoles={ctx.customRoles} customCapabilities={ctx.customCapabilities} />
 
       <div className="card px-5 py-4">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Areas of responsibility</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Areas of responsibility</h2>
         <p className="mt-1 text-xs text-muted">
           A role says what someone is capable of; an area says what is actually their job. Everyone sees every area —
           only its holder can act in it, and everyone else sees their name instead of the button.
@@ -122,7 +122,7 @@ export default async function CentreRolesPage() {
             const h = areaHolders.get(a);
             return (
               <div key={a} className="hover-ring flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/60 px-3 py-2">
-                <span className="text-[13px] text-ink">{AREA_LABELS[a]}</span>
+                <span className="text-meta text-ink">{AREA_LABELS[a]}</span>
                 <span className="shrink-0 text-xs text-muted">
                   {h ? (
                     <>
@@ -144,7 +144,7 @@ export default async function CentreRolesPage() {
         </div>
         {mayAppoint ? (
           <div className="mt-4 border-t border-border-faint pt-3">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Assign an area</p>
+            <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Assign an area</p>
             <p className="mt-1 mb-2 text-xs text-muted">
               Nobody assigns their own. An end date makes it temporary cover that lapses on its own.
             </p>
@@ -156,7 +156,7 @@ export default async function CentreRolesPage() {
       {/* Absent, not disabled, for anyone who isn't an owner. */}
       {mayAppoint ? (
         <div className="card card-gold px-5 py-4">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Appoint someone</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Appoint someone</h2>
           <p className="mt-1 text-xs text-muted">
             Roles are appointed, never chosen — nobody promotes their own account. They need an account in this
             centre already; appointing gives a role to an existing person. Inviting someone who doesn&apos;t have
@@ -168,7 +168,7 @@ export default async function CentreRolesPage() {
 
           {(grants ?? []).length > 0 ? (
             <div className="mt-4 border-t border-border-faint pt-3">
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Remove a role</p>
+              <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Remove a role</p>
               <div className="mt-2 flex flex-col gap-1.5">
                 {(grants ?? []).map((g) => (
                   <div key={g.id} className="flex items-center justify-between gap-3">
@@ -190,7 +190,7 @@ export default async function CentreRolesPage() {
 
       {mayAppoint ? (
         <div className="card px-5 py-4">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Invite a new admin</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Invite a new admin</h2>
           <p className="mt-1 text-xs text-muted">
             For someone who has no account here at all. The link opens the centre, not a course — they set up their
             account and accept the centre agreement in one step, and their access lasts for as long as the centre
@@ -202,7 +202,7 @@ export default async function CentreRolesPage() {
 
           {(invites ?? []).length > 0 ? (
             <div className="mt-4 border-t border-border-faint pt-3">
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
+              <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
               <div className="mt-2 flex flex-col gap-1.5">
                 {(invites ?? []).map((inv) => {
                   const deliveryStatus = inv.email ? deliveryStatusByEmail.get(inv.email.toLowerCase()) : null;
@@ -227,7 +227,7 @@ export default async function CentreRolesPage() {
 
       {mayAppoint && (log ?? []).length > 0 ? (
         <div className="rounded-[10px] border border-destructive/25 bg-destructive/5 px-5 py-4">
-          <h2 className="font-serif text-[17px] font-semibold text-ink">Owner actions</h2>
+          <h2 className="font-serif text-h3 font-semibold text-ink">Owner actions</h2>
           <p className="mt-0.5 text-xs text-muted">
             Every intervention an owner makes is recorded — visible logging, not silent senior access.
           </p>

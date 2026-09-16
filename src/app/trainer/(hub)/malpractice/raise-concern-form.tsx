@@ -51,7 +51,7 @@ export function RaiseConcernForm({
   if (noteState.saved) {
     return (
       <div className="sheet flex flex-col gap-1">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Concern noted</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Concern noted</p>
         <p className="text-sm text-muted">
           Saved against this assignment. No case was opened, and nothing else changed.
         </p>
@@ -66,7 +66,7 @@ export function RaiseConcernForm({
       <input type="hidden" name="kind" value={kind} />
 
       <div className="flex flex-col gap-1">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Raise a concern</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Raise a concern</p>
         <p className="text-xs text-muted">Most concerns turn out to be nothing -- save a note if you're not sure, or open a case if you are.</p>
       </div>
 
@@ -98,7 +98,7 @@ export function RaiseConcernForm({
       </div>
 
       <div className="flex flex-col gap-1.5 rounded-[6px] border border-border-faint bg-surface-muted/40 p-3">
-        <p className="text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">Evidence</p>
+        <p className="text-micro font-semibold tracking-[0.08em] text-muted uppercase">Evidence</p>
         <p className="text-xs text-ink">{ownSubmissionLabel}</p>
         <p className="text-xs text-ink">AI declaration: {aiDeclared ? "used" : "not used"}</p>
       </div>

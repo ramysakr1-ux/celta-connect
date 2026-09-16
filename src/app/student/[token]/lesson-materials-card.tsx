@@ -35,10 +35,10 @@ export function LessonMaterialsCard({
         onClick={() => setOpen((v) => !v)}
         className="wash flex w-full flex-col items-start gap-0.5 rounded-[10px] border border-border px-3.5 py-2.5 text-left"
       >
-        <p className="text-[13px] font-semibold text-ink">
+        <p className="text-meta font-semibold text-ink">
           {label} — {teacherName}
         </p>
-        {topic ? <p className="truncate text-[11px] text-muted">{topic}</p> : null}
+        {topic ? <p className="truncate text-label text-muted">{topic}</p> : null}
       </button>
       {open ? (
         <div className="absolute left-0 z-10 mt-1.5 flex w-full min-w-[220px] flex-col gap-1 rounded-[8px] border border-border bg-card p-2 shadow-lg">
@@ -51,7 +51,7 @@ export function LessonMaterialsCard({
               className="flex items-center justify-between gap-2 truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink wash"
             >
               <span className="truncate">{m.name}</span>
-              {m.sizeLabel ? <span className="shrink-0 text-[11px] text-muted">{m.sizeLabel}</span> : null}
+              {m.sizeLabel ? <span className="shrink-0 text-label text-muted">{m.sizeLabel}</span> : null}
             </a>
           ))}
         </div>

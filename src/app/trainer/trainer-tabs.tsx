@@ -119,7 +119,7 @@ export function TrainerTabs({
           <Link
             key={tab.href}
             href={href}
-            className={`shrink-0 rounded-[6px] px-[11px] py-[7px] text-[13px] whitespace-nowrap transition-colors duration-150 ${
+            className={`shrink-0 rounded-[6px] px-[11px] py-[7px] text-meta whitespace-nowrap transition-colors duration-150 ${
               active ? "bg-card-inset font-bold" : "font-medium text-muted hover:bg-card-inset hover:text-ink"
             }`}
             style={active ? { color: "var(--hub-accent-deep)" } : undefined}

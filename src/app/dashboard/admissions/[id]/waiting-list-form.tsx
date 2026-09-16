@@ -7,7 +7,7 @@ export function WaitingListForm({ applicantId }: { applicantId: string }) {
     <form action={addToWaitingList} className="card flex flex-wrap items-end gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
       <div>
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Waiting list</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Waiting list</h2>
         <p className="mt-1 text-sm text-muted">
           For when the intake is full. Their task and interview stay on file -- they never repeat them.
         </p>

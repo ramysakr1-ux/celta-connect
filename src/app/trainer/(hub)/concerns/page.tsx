@@ -39,8 +39,8 @@ export default async function ConcernsInboxPage() {
     <div className="flex flex-col gap-6">
       <div className="sheet">
         <p className="text-xs text-muted">{(concerns ?? []).length} total</p>
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Concerns</h1>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Today</p>
+        <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Concerns</h1>
         <p className="mt-1 text-sm text-muted">
           Concerns candidates raised with a tutor or with you. Every one gets a reply.
         </p>
@@ -70,7 +70,7 @@ export default async function ConcernsInboxPage() {
 
               {c.response ? (
                 <div className="mt-1 rounded-[6px] bg-surface-muted/40 p-3">
-                  <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+                  <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
                     Replied {c.responded_at ? formatDate(c.responded_at, timeZone) : ""}
                   </p>
                   <p className="mt-1 text-sm text-ink">{c.response}</p>

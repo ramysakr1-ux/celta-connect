@@ -50,7 +50,7 @@ function AimTypeCheckboxes({ name, label, defaultValue }: { name: string; label:
           </label>
         ))}
       </div>
-      <p className="text-[11px] text-muted">None checked = every type offered.</p>
+      <p className="text-label text-muted">None checked = every type offered.</p>
     </div>
   );
 }

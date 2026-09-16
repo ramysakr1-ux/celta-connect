@@ -36,7 +36,7 @@ export function MaterialPoolShelf({ items, readOnly = false }: { items: Material
 
       {baseline.length > 0 ? (
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Baseline library</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Baseline library</p>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {baseline.map((item) => (
               <ItemCard key={item.id} item={item} removable={false} />
@@ -46,7 +46,7 @@ export function MaterialPoolShelf({ items, readOnly = false }: { items: Material
       ) : null}
 
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This centre&apos;s own scans</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">This centre&apos;s own scans</p>
         {own.length > 0 ? (
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {own.map((item) => (

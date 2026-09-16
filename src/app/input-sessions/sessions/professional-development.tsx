@@ -96,8 +96,8 @@ export default function ProfessionalDevelopmentSession() {
               onClick={() => setIdx(i)}
               className={`flex flex-col gap-1 rounded-[8px] border px-3.5 py-3 text-left ${i === idx ? "border-primary bg-card" : "border-border bg-transparent"}`}
             >
-              <p className={`text-[9.5px] font-bold uppercase tracking-[0.06em] ${c.accent ? "text-destructive" : "text-muted"}`}>{c.tag}</p>
-              <p className="text-[12.5px] font-semibold leading-tight text-ink">{c.title}</p>
+              <p className={`text-micro font-bold uppercase tracking-[0.06em] ${c.accent ? "text-destructive" : "text-muted"}`}>{c.tag}</p>
+              <p className="text-meta font-semibold leading-tight text-ink">{c.title}</p>
             </button>
           ))}
         </div>
@@ -106,33 +106,33 @@ export default function ProfessionalDevelopmentSession() {
       <div className="flex flex-col gap-3.5 rounded-[10px] border border-border bg-card p-5">
         <div className="flex items-baseline justify-between">
           <p className="font-serif text-xl font-semibold text-ink">{active.title}</p>
-          <p className="text-[10.5px] text-muted">Card {idx + 1} of 4</p>
+          <p className="text-micro text-muted">Card {idx + 1} of 4</p>
         </div>
         <p className="text-xs leading-relaxed text-muted">{active.intro}</p>
         <div className="flex flex-col gap-2">
           {active.items.map((item) => (
             <div key={item.name} className="flex flex-col gap-0.5 rounded-[6px] bg-accent px-3.5 py-2.5">
-              <p className="text-[12.5px] font-semibold text-ink">{item.name}</p>
-              <p className="text-[11.5px] leading-snug text-muted">{item.note}</p>
+              <p className="text-meta font-semibold text-ink">{item.name}</p>
+              <p className="text-label leading-snug text-muted">{item.note}</p>
             </div>
           ))}
         </div>
         <div className="flex flex-col gap-0.5 border-t border-border pt-1">
-          <p className="text-[11px] font-bold text-muted">Bring back to the room</p>
+          <p className="text-label font-bold text-muted">Bring back to the room</p>
           <p className="text-xs text-ink">{active.prompt}</p>
         </div>
         <div className="flex gap-2 pt-1">
           <button
             type="button"
             onClick={() => setIdx((i) => (i - 1 + CARDS.length) % CARDS.length)}
-            className="flex h-7 items-center rounded-full border border-border px-3.5 text-[11px] font-semibold text-ink"
+            className="flex h-7 items-center rounded-full border border-border px-3.5 text-label font-semibold text-ink"
           >
             ← Previous
           </button>
           <button
             type="button"
             onClick={() => setIdx((i) => (i + 1) % CARDS.length)}
-            className="flex h-7 items-center rounded-full border border-border px-3.5 text-[11px] font-semibold text-ink"
+            className="flex h-7 items-center rounded-full border border-border px-3.5 text-label font-semibold text-ink"
           >
             Next →
           </button>
@@ -142,7 +142,7 @@ export default function ProfessionalDevelopmentSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Whole-group share-back · ~10 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Each group: one thing worth telling the room, one question you couldn&apos;t answer. See if another group&apos;s card
             answers it.
           </p>
@@ -152,24 +152,24 @@ export default function ProfessionalDevelopmentSession() {
       <div className="border-t border-border" />
 
       <div className="flex flex-col gap-0.5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">Take-away resource sheet — everything above, on one page</p>
-        <p className="text-[11.5px] text-muted">Print this section, or scroll it on your own device. No login, no course-specific info — just links.</p>
+        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Take-away resource sheet — everything above, on one page</p>
+        <p className="text-label text-muted">Print this section, or scroll it on your own device. No login, no course-specific info — just links.</p>
       </div>
 
       {CARDS.map((c) => (
         <div key={c.title} className="flex flex-col gap-2">
-          <p className="text-[13px] font-bold text-ink">{c.title}</p>
+          <p className="text-meta font-bold text-ink">{c.title}</p>
           {c.items.map((item) => (
             <div key={item.name} className="flex items-baseline gap-2.5 border-b border-border-faint py-2">
-              <p className="min-w-[190px] text-[12.5px] font-semibold text-ink">{item.name}</p>
-              <p className="flex-1 text-[11.5px] leading-snug text-muted">{item.note}</p>
+              <p className="min-w-[190px] text-meta font-semibold text-ink">{item.name}</p>
+              <p className="flex-1 text-label leading-snug text-muted">{item.note}</p>
             </div>
           ))}
         </div>
       ))}
 
       <div className="flex flex-col gap-1 rounded-[8px] border border-destructive/25 bg-destructive/5 p-3.5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">A general caution, not specific to any site above</p>
+        <p className="text-label font-bold uppercase tracking-[0.08em] text-destructive">A general caution, not specific to any site above</p>
         <p className="text-xs leading-relaxed text-ink">
           A legitimate school pays your salary — it never asks you to pay it for a job, a visa, or a &quot;placement fee&quot;
           upfront. Get any contract reviewed before signing, and don&apos;t hand over an original passport or degree
@@ -177,7 +177,7 @@ export default function ProfessionalDevelopmentSession() {
         </p>
       </div>
 
-      <p className="text-center text-[10.5px] text-muted">
+      <p className="text-center text-micro text-muted">
         This list points to third-party websites Connect doesn&apos;t control — check details directly with each one, rules
         and fees change.
       </p>

@@ -39,7 +39,7 @@ export function CourseSwitcher({ courses, activeCourseId }: { courses: SwitcherC
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={pending}
-        className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground disabled:opacity-70"
+        className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-label font-semibold text-primary-foreground disabled:opacity-70"
       >
         {/* Truncated below sm so the badge stays on screen without owning it:
             "the active course code stays shown in the header badge at all
@@ -50,7 +50,7 @@ export function CourseSwitcher({ courses, activeCourseId }: { courses: SwitcherC
 
       {open ? (
         <div className="absolute right-0 z-20 mt-1.5 w-56 rounded-[8px] border border-border bg-card p-1.5 shadow-lg">
-          <p className="px-2 py-1 text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">Your courses</p>
+          <p className="px-2 py-1 text-micro font-semibold tracking-[0.08em] text-muted uppercase">Your courses</p>
           {courses.map((c) => (
             <button
               key={c.id}
@@ -62,7 +62,7 @@ export function CourseSwitcher({ courses, activeCourseId }: { courses: SwitcherC
                 {c.id === activeCourseId ? <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" /> : null}
                 {c.label}
               </span>
-              <span className="text-[10px] text-muted">{c.isPartTime ? "Part-time" : "Full-time"}</span>
+              <span className="text-micro text-muted">{c.isPartTime ? "Part-time" : "Full-time"}</span>
             </button>
           ))}
           {error ? <p className="px-2 py-1 text-xs text-destructive">{error}</p> : null}

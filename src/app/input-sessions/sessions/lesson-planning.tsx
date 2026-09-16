@@ -140,7 +140,7 @@ function QuestionCard({ question, answers }: { question: string; answers: string
             {answers.map((a) => (
               <div key={a} className="flex items-start gap-2">
                 <span className="mt-[7px] size-1 flex-none rounded-full bg-primary" />
-                <p className="text-[12.5px] leading-relaxed text-ink">{a}</p>
+                <p className="text-meta leading-relaxed text-ink">{a}</p>
               </div>
             ))}
           </div>
@@ -150,7 +150,7 @@ function QuestionCard({ question, answers }: { question: string; answers: string
           <div className="flex flex-1 items-center justify-center px-1 py-1.5 text-center">
             <p className="font-serif text-lg font-semibold leading-tight text-ink">{question}</p>
           </div>
-          <p className="text-center text-[10.5px] font-semibold text-primary">Click to reveal ▾</p>
+          <p className="text-center text-micro font-semibold text-primary">Click to reveal ▾</p>
         </>
       )}
     </button>
@@ -174,14 +174,14 @@ function AfterCard({ question, answer, note }: { question: string; answer: strin
             <p className="font-serif text-sm font-semibold text-ink">{question}</p>
           </div>
           <p className="font-serif text-xl font-semibold text-muted">{answer}</p>
-          <p className="text-[11.5px] leading-relaxed text-muted">{note}</p>
+          <p className="text-label leading-relaxed text-muted">{note}</p>
         </>
       ) : (
         <>
           <div className="flex flex-1 items-center justify-center px-1 py-1.5 text-center">
             <p className="font-serif text-lg font-semibold leading-tight text-ink">{question}</p>
           </div>
-          <p className="text-center text-[10.5px] font-semibold text-muted">Click to reveal ▾</p>
+          <p className="text-center text-micro font-semibold text-muted">Click to reveal ▾</p>
         </>
       )}
     </button>
@@ -235,7 +235,7 @@ function JargonMatch() {
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <p className="font-serif text-lg font-semibold text-ink">Now, the jargon</p>
-        <p className="text-[12.5px] text-muted">A plan is only clear to someone else if it uses shared terms correctly. Click a term, then its meaning.</p>
+        <p className="text-meta text-muted">A plan is only clear to someone else if it uses shared terms correctly. Click a term, then its meaning.</p>
       </div>
       <div className="flex items-center gap-2">
         {(["abbr", "terms"] as const).map((c) => (
@@ -243,7 +243,7 @@ function JargonMatch() {
             key={c}
             type="button"
             onClick={() => switchCat(c)}
-            className={`h-[34px] rounded-[7px] border px-3.5 text-[12.5px] font-semibold ${
+            className={`h-[34px] rounded-[7px] border px-3.5 text-meta font-semibold ${
               cat === c ? "border-primary bg-primary text-white" : "border-border bg-transparent text-muted"
             }`}
           >
@@ -251,7 +251,7 @@ function JargonMatch() {
           </button>
         ))}
         <div className="flex-1" />
-        <p className="text-[11.5px] text-muted">{`${matchedCount} of ${total} matched`}</p>
+        <p className="text-label text-muted">{`${matchedCount} of ${total} matched`}</p>
       </div>
       <div className="flex gap-4 rounded-[8px] border border-border bg-card p-5">
         <div className="flex flex-1 flex-col gap-2">
@@ -321,7 +321,7 @@ function JargonMatch() {
         >
           ← Previous
         </button>
-        <p className="text-[11.5px] text-muted">{`Batch ${batch + 1} of ${batches.length}`}</p>
+        <p className="text-label text-muted">{`Batch ${batch + 1} of ${batches.length}`}</p>
         <button
           type="button"
           onClick={() => setBatch((b) => Math.min(batches.length - 1, b + 1))}
@@ -349,12 +349,12 @@ function JargonMatch() {
       ) : (
         <div className="flex flex-col gap-3 border-t border-border pt-4">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">All matched — handout · answer key, to keep</p>
+            <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">All matched — handout · answer key, to keep</p>
             <div className="flex gap-2" data-print-hide>
-              <button type="button" onClick={() => setRevealed(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+              <button type="button" onClick={() => setRevealed(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
                 Hide
               </button>
-              <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+              <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
                 Print
               </button>
             </div>
@@ -365,22 +365,22 @@ function JargonMatch() {
               { title: "Terminology", rows: TERMS },
             ].map((h) => (
               <div key={h.title} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-                <p className="font-serif text-[15px] font-semibold text-ink">{h.title}</p>
+                <p className="font-serif text-h3 font-semibold text-ink">{h.title}</p>
                 {h.rows.map((row) => (
                   <div key={row.term} className="grid grid-cols-[96px_1fr] gap-2.5 border-b border-border-faint py-1">
                     <p className="font-serif text-xs font-semibold text-ink">{row.term}</p>
-                    <p className="text-[11px] leading-snug text-muted">{row.def}</p>
+                    <p className="text-label leading-snug text-muted">{row.def}</p>
                   </div>
                 ))}
               </div>
             ))}
           </div>
           <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
               <span className="size-1.5 rounded-full bg-current" />
               Trainer only — trainer notes
             </p>
-            <p className="text-[12.5px] leading-relaxed text-ink">
+            <p className="text-meta leading-relaxed text-ink">
               Don&apos;t let anyone get stuck rewriting the jargon match by hand — the point is speed and shared
               vocabulary, not memorisation. The real work is the last thirty-five minutes; keep the room moving there.
             </p>
@@ -413,7 +413,7 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example — a completed procedure section</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[130px_90px_55px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[130px_90px_55px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Interaction</p>
               <p>Time</p>
@@ -421,14 +421,14 @@ function StagingExample() {
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[130px_90px_55px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.interaction}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.interaction}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-muted">This is one stage written in full — this is the standard your one modelled stage should meet by minute 40.</p>
+          <p className="text-label text-muted">This is one stage written in full — this is the standard your one modelled stage should meet by minute 40.</p>
         </div>
       ) : null}
     </div>
@@ -448,13 +448,13 @@ function LessonPlanDraft() {
           {AIM_FIELDS.map((f, i) => (
             <div key={f.label} className="flex flex-col gap-1">
               <p className="text-xs text-muted">{f.label}</p>
-              <p className="text-[11px] italic leading-snug text-muted">{f.hint}</p>
+              <p className="text-label italic leading-snug text-muted">{f.hint}</p>
               <textarea
                 placeholder={f.prompt}
                 value={aims[i] || ""}
                 onChange={(e) => setAims((a) => ({ ...a, [i]: e.target.value }))}
                 style={{ minHeight: f.h }}
-                className="box-border resize-y rounded-[6px] border border-border bg-card px-2.5 py-2 text-[11.5px] leading-relaxed text-ink outline-none placeholder:text-muted"
+                className="box-border resize-y rounded-[6px] border border-border bg-card px-2.5 py-2 text-label leading-relaxed text-ink outline-none placeholder:text-muted"
               />
             </div>
           ))}
@@ -462,7 +462,7 @@ function LessonPlanDraft() {
 
         <div className="flex flex-col gap-2.5 rounded-[6px] border border-border bg-card p-4">
           <p className="text-xs font-bold text-ink">Anticipated Problems &amp; Solutions</p>
-          <p className="text-[11px] italic leading-snug text-muted">Think classroom management, not language — that&apos;s tomorrow&apos;s session.</p>
+          <p className="text-label italic leading-snug text-muted">Think classroom management, not language — that&apos;s tomorrow&apos;s session.</p>
           {[0, 1].map((i) => (
             <div key={i} className="flex flex-col gap-1.5 border-b border-dashed border-border-faint pb-2.5 last:border-b-0">
               <input
@@ -470,14 +470,14 @@ function LessonPlanDraft() {
                 placeholder="A problem with the materials or task."
                 value={probs[`${i}:p`] || ""}
                 onChange={(e) => setProbs((p) => ({ ...p, [`${i}:p`]: e.target.value }))}
-                className="box-border rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-[11px] text-ink outline-none placeholder:text-muted"
+                className="box-border rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-label text-ink outline-none placeholder:text-muted"
               />
               <input
                 type="text"
                 placeholder="What you will do about it."
                 value={probs[`${i}:s`] || ""}
                 onChange={(e) => setProbs((p) => ({ ...p, [`${i}:s`]: e.target.value }))}
-                className="ml-3.5 box-border rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-[11px] text-ink outline-none placeholder:text-muted"
+                className="ml-3.5 box-border rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-label text-ink outline-none placeholder:text-muted"
               />
             </div>
           ))}
@@ -488,46 +488,46 @@ function LessonPlanDraft() {
         <div className="flex items-end justify-between gap-4">
           <div className="flex flex-col gap-0.5">
             <p className="font-serif text-base font-semibold text-ink">Procedure — stages come from your framework</p>
-            <p className="text-[11px] italic text-muted">TP2 is Full script: stage names are set, you write timing and instructions.</p>
+            <p className="text-label italic text-muted">TP2 is Full script: stage names are set, you write timing and instructions.</p>
           </div>
           <div className="flex h-8 w-[180px] flex-none items-center justify-between rounded-[6px] border border-border bg-accent px-2.5 text-xs text-ink">
             <span>Full script</span>
-            <span className="text-[9px] text-muted">▾</span>
+            <span className="text-micro text-muted">▾</span>
           </div>
         </div>
         <div className="overflow-hidden rounded-[6px] border border-border">
           <div className="grid grid-cols-[168px_92px_62px_1fr] bg-accent px-2.5 py-2">
             {["Stage", "Interaction", "Time", "Procedure"].map((h) => (
-              <p key={h} className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted">{h}</p>
+              <p key={h} className="text-micro font-bold uppercase tracking-[0.1em] text-muted">{h}</p>
             ))}
           </div>
           {STAGE_ROWS.map((r, i) => (
             <div key={r.stage} className="grid grid-cols-[168px_92px_62px_1fr] items-start gap-2 border-b border-border-faint p-2.5 last:border-b-0">
-              <div className="rounded-[5px] border border-border bg-accent px-2 py-1.5 text-[11px] font-semibold text-ink">{r.stage}</div>
+              <div className="rounded-[5px] border border-border bg-accent px-2 py-1.5 text-label font-semibold text-ink">{r.stage}</div>
               <input
                 type="text"
                 placeholder="interaction"
                 value={stages[`${i}:i`] || ""}
                 onChange={(e) => setStages((s) => ({ ...s, [`${i}:i`]: e.target.value }))}
-                className="box-border w-full rounded-[5px] border border-border bg-card px-2 py-1.5 text-[11px] text-ink outline-none placeholder:text-muted"
+                className="box-border w-full rounded-[5px] border border-border bg-card px-2 py-1.5 text-label text-ink outline-none placeholder:text-muted"
               />
               <input
                 type="text"
                 placeholder="min"
                 value={stages[`${i}:t`] || ""}
                 onChange={(e) => setStages((s) => ({ ...s, [`${i}:t`]: e.target.value }))}
-                className="box-border w-full rounded-[5px] border border-border bg-card px-2 py-1.5 text-center text-[11px] text-ink outline-none placeholder:text-muted"
+                className="box-border w-full rounded-[5px] border border-border bg-card px-2 py-1.5 text-center text-label text-ink outline-none placeholder:text-muted"
               />
               <textarea
                 placeholder={r.prompt}
                 value={stages[`${i}:p`] || ""}
                 onChange={(e) => setStages((s) => ({ ...s, [`${i}:p`]: e.target.value }))}
-                className="box-border w-full min-h-[32px] resize-y rounded-[5px] border border-border bg-card px-2 py-1.5 text-[11px] leading-relaxed text-ink outline-none placeholder:text-muted"
+                className="box-border w-full min-h-[32px] resize-y rounded-[5px] border border-border bg-card px-2 py-1.5 text-label leading-relaxed text-ink outline-none placeholder:text-muted"
               />
             </div>
           ))}
         </div>
-        <p className="text-[11px] text-muted">By minute 40 every trainee has stage names in, timings estimated, and one stage&apos;s procedure written in full as a model for the rest.</p>
+        <p className="text-label text-muted">By minute 40 every trainee has stage names in, timings estimated, and one stage&apos;s procedure written in full as a model for the rest.</p>
       </div>
     </div>
   );
@@ -558,7 +558,7 @@ export default function LessonPlanningSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: has anyone here ever taught, or tried to teach, without writing anything down first?
             How did it go?
           </p>
@@ -580,19 +580,19 @@ export default function LessonPlanningSession() {
 
       <div className="flex flex-col gap-2.5">
         <p className="text-xs font-bold text-ink">TP2 · three points per teaching group, however many groups the cohort needs</p>
-        <p className="max-w-[1000px] text-[11.5px] leading-relaxed text-muted">
+        <p className="max-w-[1000px] text-label leading-relaxed text-muted">
           A shared input session, not a per-group one. Each group runs ABC on Thursday and DEF on Friday from its own
           three points, at its own level and coursebook. The cards below are stand-ins to show the shape only — every
           trainee opens their own real point.
         </p>
         {GROUPS.map((g) => (
           <div key={g.label} className="flex flex-col gap-2">
-            <p className="text-[11px] font-semibold text-muted">{g.label}</p>
+            <p className="text-label font-semibold text-muted">{g.label}</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {g.points.map((p) => (
                 <div key={p.title} className="flex flex-col gap-2.5 rounded-[6px] border border-border bg-card p-4">
                   <div className="flex flex-col gap-0.5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-muted">
+                    <p className="text-micro font-bold uppercase tracking-[0.06em] text-muted">
                       {p.who} · {p.aim}
                     </p>
                   </div>
@@ -610,7 +610,7 @@ export default function LessonPlanningSession() {
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
           <p className="font-serif text-lg font-semibold text-ink">What comes after</p>
-          <p className="text-[12.5px] text-muted">Two more questions before they leave — elicit first, then reveal.</p>
+          <p className="text-meta text-muted">Two more questions before they leave — elicit first, then reveal.</p>
         </div>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {AFTER_CARDS.map((c) => (
@@ -620,7 +620,7 @@ export default function LessonPlanningSession() {
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only
         </p>

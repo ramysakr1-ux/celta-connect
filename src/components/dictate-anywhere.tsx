@@ -278,7 +278,7 @@ export function WakeWordToggle() {
             ? "The microphone is open, waiting for “Hey Connect”. Nothing is written until it hears it."
             : "Open the microphone for this lesson and wait for “Hey Connect”. Nothing is recorded or written until you say it."
         }
-        className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold"
+        className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-meta font-semibold"
         style={
           armed
             ? { borderColor: DESTRUCTIVE, background: `color-mix(in oklab, ${DESTRUCTIVE} 10%, transparent)`, color: DESTRUCTIVE }
@@ -297,7 +297,7 @@ export function WakeWordToggle() {
         {armed ? (listening ? "Hey Connect — writing" : "Hey Connect — waiting") : "Hey Connect"}
       </button>
       {armed ? (
-        <span className="text-[11px] leading-tight" style={{ color: "var(--color-muted)", maxWidth: 190 }}>
+        <span className="text-label leading-tight" style={{ color: "var(--color-muted)", maxWidth: 190 }}>
           Microphone open for this lesson. Nothing is written until you say it.
         </span>
       ) : null}
@@ -351,7 +351,7 @@ function InlineDictate() {
         <span aria-hidden>{listening ? "●" : "🎙"}</span>
         {listening ? "Stop" : "Dictate"}
       </button>
-      <p className="text-[11px] leading-tight text-muted">
+      <p className="text-label leading-tight text-muted">
         {error ? (
           <span className="text-destructive">{error}</span>
         ) : listening ? (

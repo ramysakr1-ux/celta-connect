@@ -36,8 +36,8 @@ export function OwnedAssignmentsControl({
           title={variant === "chips" ? `${type} -- click to ${owned.includes(type) ? "stop" : "start"} marking this assignment` : undefined}
           className={
             variant === "chips"
-              ? "cursor-pointer rounded-[6px] border border-dashed border-border px-2 py-[3px] text-[10.5px] font-bold whitespace-nowrap text-muted/70 has-[:checked]:border-transparent has-[:checked]:bg-card-inset has-[:checked]:text-[oklch(44%_0.014_70)]"
-              : "flex items-center gap-1 text-[11px] text-muted"
+              ? "cursor-pointer rounded-[6px] border border-dashed border-border px-2 py-[3px] text-micro font-bold whitespace-nowrap text-muted/70 has-[:checked]:border-transparent has-[:checked]:bg-card-inset has-[:checked]:text-[oklch(44%_0.014_70)]"
+              : "flex items-center gap-1 text-label text-muted"
           }
         >
           <input

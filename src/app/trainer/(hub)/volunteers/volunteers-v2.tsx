@@ -168,7 +168,7 @@ function Segments({ row, size = 16, sessionHours }: { row: VolunteerRowData; siz
 const CHIP: Record<TodayState, { style: React.CSSProperties; ring: React.ReactNode; tag: string; tagColor: string }> = {
   in_room: {
     style: { background: `color-mix(in oklab, ${TEAL} 14%, var(--color-card))`, borderColor: TEAL },
-    ring: <span className="flex size-3.5 items-center justify-center rounded-full text-[9px] font-bold text-primary-foreground" style={{ background: TEAL }}>✓</span>,
+    ring: <span className="flex size-3.5 items-center justify-center rounded-full text-micro font-bold text-primary-foreground" style={{ background: TEAL }}>✓</span>,
     tag: "in the room",
     tagColor: TEAL,
   },
@@ -180,7 +180,7 @@ const CHIP: Record<TodayState, { style: React.CSSProperties; ring: React.ReactNo
   },
   cant: {
     style: { background: "var(--color-card)", borderColor: `color-mix(in oklab, ${RED} 45%, transparent)` },
-    ring: <span className="flex size-3.5 items-center justify-center rounded-full text-[9px] font-bold" style={{ background: "oklch(94% 0.043 25)", color: RED }}>—</span>,
+    ring: <span className="flex size-3.5 items-center justify-center rounded-full text-micro font-bold" style={{ background: "oklch(94% 0.043 25)", color: RED }}>—</span>,
     tag: "can't come",
     tagColor: RED,
   },
@@ -202,16 +202,16 @@ const CHIP: Record<TodayState, { style: React.CSSProperties; ring: React.ReactNo
 
 function AddRow({ classes, onDone }: { classes: ClassLabel[]; onDone: () => void }) {
   const [state, action, pending] = useActionState(addVolunteerStudent, initialForm);
-  const input = "h-9 rounded-[8px] border border-border bg-card px-3 text-[13px] text-ink outline-none focus:border-primary";
+  const input = "h-9 rounded-[8px] border border-border bg-card px-3 text-meta text-ink outline-none focus:border-primary";
   const known = new Set(classes.map((c) => c.level).filter(Boolean));
   return (
     <form action={action} className="flex flex-wrap items-end gap-3 rounded-[10px] border bg-card p-3.5" style={{ borderColor: TEAL }}>
       <div className="flex min-w-[160px] flex-1 flex-col gap-1">
-        <label className="text-[11px] font-semibold text-muted">Name</label>
+        <label className="text-label font-semibold text-muted">Name</label>
         <input name="name" type="text" required className={input} />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-[11px] font-semibold text-muted">Class</label>
+        <label className="text-label font-semibold text-muted">Class</label>
         <select name="level" defaultValue="" className={input}>
           <option value="">Not set</option>
           {[...known, ...LEVEL_OPTIONS.filter((l) => !known.has(l))].map((l) => (
@@ -222,17 +222,17 @@ function AddRow({ classes, onDone }: { classes: ClassLabel[]; onDone: () => void
         </select>
       </div>
       <div className="flex min-w-[200px] flex-1 flex-col gap-1">
-        <label className="text-[11px] font-semibold text-muted">Email</label>
+        <label className="text-label font-semibold text-muted">Email</label>
         <input name="email" type="email" className={input} />
-        <span className="text-[10.5px] text-muted">matches them to hours already on file</span>
+        <span className="text-micro text-muted">matches them to hours already on file</span>
       </div>
       <button type="submit" disabled={pending} className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
         {pending ? "Adding…" : "Add and send link"}
       </button>
-      <button type="button" onClick={onDone} className="text-[12px] text-muted hover:text-ink">
+      <button type="button" onClick={onDone} className="text-meta text-muted hover:text-ink">
         Cancel
       </button>
-      {state.error ? <p className="w-full text-[12px] text-destructive">{state.error}</p> : null}
+      {state.error ? <p className="w-full text-meta text-destructive">{state.error}</p> : null}
     </form>
   );
 }
@@ -244,10 +244,10 @@ function ShareClassButton({ level }: { level: string | null }) {
       <input type="hidden" name="level" value={level ?? ""} />
       {/* Ramy, 5 Sep 2026: "Share with class" read like sharing materials
           -- the button delivers each student their own Connect link. */}
-      <button type="submit" disabled={pending} title="Emails every student in this class their own Connect link" className="text-[11px] font-semibold hover:underline" style={{ color: TEAL }}>
+      <button type="submit" disabled={pending} title="Emails every student in this class their own Connect link" className="text-label font-semibold hover:underline" style={{ color: TEAL }}>
         {pending ? "Sending…" : state.sentCount !== null ? (state.sentCount > 0 ? `Emailed ${state.sentCount}` : "Nobody to email") : "Email everyone their link"}
       </button>
-      {state.error ? <span className="text-[11px] text-destructive">{state.error}</span> : null}
+      {state.error ? <span className="text-label text-destructive">{state.error}</span> : null}
     </form>
   );
 }
@@ -263,7 +263,7 @@ function CopyButton({ url, small = false }: { url: string; small?: boolean }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className={small ? "text-[11px] font-medium hover:underline" : "wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink"}
+      className={small ? "text-label font-medium hover:underline" : "wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-meta font-semibold text-ink"}
       style={small ? { color: TEAL } : undefined}
     >
       {copied ? "Copied!" : "Copy"}
@@ -311,10 +311,10 @@ export function VolunteersV2({
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="flex max-w-[700px] flex-col gap-[5px]">
           <div className="flex items-center gap-2.5">
-            <h1 className="font-serif text-[22px] leading-tight font-semibold text-ink-warm">Volunteer students</h1>
-            <span className="rounded-[5px] border border-border bg-card px-2 py-[3px] text-[11px] font-bold tracking-[0.08em] text-muted">{roleLabel}</span>
+            <h1 className="font-serif text-h2 leading-tight font-semibold text-ink-warm">Volunteer students</h1>
+            <span className="rounded-[5px] border border-border bg-card px-2 py-[3px] text-label font-bold tracking-[0.08em] text-muted">{roleLabel}</span>
           </div>
-          <p className="text-[13px] leading-[1.55] text-muted">
+          <p className="text-meta leading-[1.55] text-muted">
             Each student has a no-login link to their materials and hours. Present means {rule.need} of a session&apos;s {rule.lessons} lessons and banks the whole{" "}
             {fractionHours(rule.sessionHours)} h; certificate at {rule.target} h across all courses.
           </p>
@@ -341,15 +341,15 @@ export function VolunteersV2({
         <div className="sheet flex flex-col gap-1 !p-0">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-faint px-4 py-2.5">
             <div className="flex flex-wrap items-baseline gap-2.5">
-              <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: TEAL }}>
+              <span className="text-label font-bold tracking-[0.1em] uppercase" style={{ color: TEAL }}>
                 {todayInfo.isToday ? "Today" : "Next class"}
               </span>
-              <span className="text-[13px] font-semibold text-ink">
+              <span className="text-meta font-semibold text-ink">
                 {todayInfo.dateLabel} · Class {todayInfo.classNumber} of {todayInfo.totalClasses}
               </span>
-              <span className="text-[12px] text-muted">Replies come from the confirmation email; presence is logged from Zoom by the timetable. Nothing to enter here.</span>
+              <span className="text-meta text-muted">Replies come from the confirmation email; presence is logged from Zoom by the timetable. Nothing to enter here.</span>
             </div>
-            <span className="text-[12px] font-semibold text-ink tabular-nums">
+            <span className="text-meta font-semibold text-ink tabular-nums">
               {coming} of {rows.length} said coming · {cant} can&apos;t · {noReply} no reply{todayInfo.underway ? ` · ${inRoom} in the room` : ""}
             </span>
           </div>
@@ -361,13 +361,13 @@ export function VolunteersV2({
             return (
               <div key={c.label} className="grid grid-cols-1 items-center gap-3 border-b border-border-faint px-4 py-2 last:border-b-0 lg:grid-cols-[280px_1fr_auto]">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[13px] font-semibold text-ink">{c.label}</span>
+                  <span className="text-meta font-semibold text-ink">{c.label}</span>
                   {todayInfo.startTime ? (
-                    <span className="text-[11px] text-muted">
+                    <span className="text-label text-muted">
                       {todayInfo.startTime} · Class {todayInfo.classNumber}
                     </span>
                   ) : null}
-                  <span className="text-[12px] font-semibold text-ink">
+                  <span className="text-meta font-semibold text-ink">
                     {todayInfo.underway ? `${cInRoom} in the room · ${cComing} said they were coming` : `${cComing} coming · ${cCant} can't · ${cNoReply} no reply`}
                   </span>
                 </div>
@@ -380,15 +380,15 @@ export function VolunteersV2({
                     return (
                       <span key={r.id} title={`${r.name} — ${chip.tag}`} className="inline-flex h-[30px] items-center gap-1.5 rounded-full border px-2.5" style={chip.style}>
                         {chip.ring}
-                        <span className={`text-[12.5px] font-medium ${r.todayState === "cant" ? "text-muted" : "text-ink"}`}>{r.name}</span>
-                        <span className="text-[10px] font-semibold" style={{ color: chip.tagColor }}>
+                        <span className={`text-meta font-medium ${r.todayState === "cant" ? "text-muted" : "text-ink"}`}>{r.name}</span>
+                        <span className="text-micro font-semibold" style={{ color: chip.tagColor }}>
                           {chip.tag}
                         </span>
                       </span>
                     );
                   })}
                 </div>
-                <span className="text-[11px] whitespace-nowrap text-muted">
+                <span className="text-label whitespace-nowrap text-muted">
                   {todayInfo.underway
                     ? `Underway · present at ${rule.need} of ${todayInfo.lessonsToday} lesson${todayInfo.lessonsToday === 1 ? "" : "s"}`
                     : todayInfo.startTime
@@ -424,12 +424,12 @@ export function VolunteersV2({
               <div key={c.label} className="sheet overflow-hidden !p-0">
                 <div className="flex flex-wrap items-center justify-between gap-2 bg-card-inset px-4 py-2.5">
                   <div className="flex flex-wrap items-baseline gap-2.5">
-                    <span className="text-[13px] font-bold text-ink">{c.label}</span>
-                    <span className="text-[11.5px] text-muted">{meta}</span>
+                    <span className="text-meta font-bold text-ink">{c.label}</span>
+                    <span className="text-label text-muted">{meta}</span>
                   </div>
                   <ShareClassButton level={c.level} />
                 </div>
-                <div className="grid grid-cols-[minmax(0,1.2fr)_196px_150px_112px_44px] items-end gap-x-3.5 border-b border-border px-4 pt-2.5 pb-1.5 text-[10px] font-bold tracking-[0.08em] text-muted uppercase">
+                <div className="grid grid-cols-[minmax(0,1.2fr)_196px_150px_112px_44px] items-end gap-x-3.5 border-b border-border px-4 pt-2.5 pb-1.5 text-micro font-bold tracking-[0.08em] text-muted uppercase">
                   <span>Student</span>
                   <span>This course · {rows[0]?.totalDays ?? 12} classes</span>
                   <span>Hours banked · of {rule.target}</span>
@@ -468,9 +468,9 @@ export function VolunteersV2({
                       <span className="flex min-w-0 items-center gap-2.5">
                         <Avatar name={r.name} size="xs" />
                         <span className="flex min-w-0 flex-col">
-                          <span className="truncate text-[13px] font-medium text-ink">{r.name}</span>
+                          <span className="truncate text-meta font-medium text-ink">{r.name}</span>
                           {drift ? (
-                            <span className="truncate text-[11px]" style={{ color: drift.color }}>
+                            <span className="truncate text-label" style={{ color: drift.color }}>
                               {drift.text}
                             </span>
                           ) : null}
@@ -479,8 +479,8 @@ export function VolunteersV2({
                       <Segments row={r} sessionHours={rule.sessionHours} />
                       <span className="flex flex-col gap-1">
                         <span className="flex items-baseline gap-1.5">
-                          <span className="text-[13px] font-bold text-ink tabular-nums">{totalHours % 1 === 0 ? totalHours : totalHours.toFixed(2)} h</span>
-                          <span className="text-[10px] text-muted">
+                          <span className="text-meta font-bold text-ink tabular-nums">{totalHours % 1 === 0 ? totalHours : totalHours.toFixed(2)} h</span>
+                          <span className="text-micro text-muted">
                             {nextMilestone ? `${(nextMilestone - totalHours) % 1 === 0 ? nextMilestone - totalHours : (nextMilestone - totalHours).toFixed(2)} h to ${nextMilestone}` : "Certificate earned"}
                           </span>
                         </span>
@@ -488,7 +488,7 @@ export function VolunteersV2({
                           <span className="block h-1 rounded-full" style={{ width: `${Math.min(100, (totalHours / rule.target) * 100)}%`, background: GOLD_BAR }} />
                         </span>
                       </span>
-                      <span className="flex items-center gap-1.5 text-[12px]" style={{ color: r.lastOpenedAt ? TEAL : AMBER }}>
+                      <span className="flex items-center gap-1.5 text-meta" style={{ color: r.lastOpenedAt ? TEAL : AMBER }}>
                         <span className="block size-1.5 rounded-full bg-current" />
                         {r.lastOpenedAt ? `Opened ${stampLabel(r.lastOpenedAt, timeZone).toLowerCase()}` : r.token ? "Never opened" : "No link yet"}
                       </span>
@@ -500,7 +500,7 @@ export function VolunteersV2({
             );
           })}
           {byClass.length > 0 ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-muted">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-label text-muted">
               <span className="flex flex-wrap items-center gap-3.5">
                 <span className="flex items-center gap-1.5"><span className="block h-3 w-[13px] rounded-[3px]" style={{ background: INK }} /> Present · {hoursLabel} h banked</span>
                 <span className="flex items-center gap-1.5"><span className="block h-3 w-[13px] rounded-[3px] border border-ink" style={{ background: `linear-gradient(to top, ${INK} 50%, transparent 50%)` }} /> One lesson · recorded, nothing banked</span>
@@ -545,8 +545,8 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
         <div className="flex items-center gap-3">
           <Avatar name={row.name} size="md" />
           <div className="flex flex-col gap-0.5">
-            <span className="font-serif text-[20px] leading-tight font-semibold text-ink-warm">{row.name}</span>
-            <span className="text-[11px] text-muted">
+            <span className="font-serif text-h2 leading-tight font-semibold text-ink-warm">{row.name}</span>
+            <span className="text-label text-muted">
               {[row.level, `joined ${shortDay(row.joinedAt)}`, row.email].filter(Boolean).join(" · ")}
             </span>
           </div>
@@ -558,7 +558,7 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
           }}
         >
           <input type="hidden" name="volunteer_id" value={row.id} />
-          <button type="submit" className="h-[30px] rounded-[6px] border px-3 text-[12px] font-semibold" style={{ borderColor: `color-mix(in oklab, ${RED} 30%, transparent)`, color: RED }}>
+          <button type="submit" className="h-[30px] rounded-[6px] border px-3 text-meta font-semibold" style={{ borderColor: `color-mix(in oklab, ${RED} 30%, transparent)`, color: RED }}>
             Remove
           </button>
         </form>
@@ -566,23 +566,23 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
 
       <div className="flex flex-col gap-2 rounded-[10px] border px-4 py-3.5" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 9%, var(--color-card))`, borderColor: `color-mix(in oklab, ${GOLD_BAR} 30%, transparent)` }}>
         <div className="flex items-baseline justify-between">
-          <span className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: AMBER }}>
+          <span className="text-micro font-bold tracking-[0.1em] uppercase" style={{ color: AMBER }}>
             Hours toward certificate
           </span>
-          <span className="text-[18px] font-bold text-ink tabular-nums">
+          <span className="text-h3 font-bold text-ink tabular-nums">
             {fmt(total)} h of {rule.target}
           </span>
         </div>
         <span className="relative block h-1.5 overflow-hidden rounded-full bg-card">
           <span className="absolute inset-y-0 left-0 block rounded-full" style={{ width: `${Math.min(100, (total / rule.target) * 100)}%`, background: GOLD_BAR }} />
         </span>
-        <span className="flex justify-between text-[9.5px] text-muted tabular-nums">
+        <span className="flex justify-between text-micro text-muted tabular-nums">
           <span>0</span>
           {milestones.map((m) => (
             <span key={m}>{m}</span>
           ))}
         </span>
-        <p className="text-[12px] leading-[1.5]" style={{ color: AMBER }}>
+        <p className="text-meta leading-[1.5]" style={{ color: AMBER }}>
           {nextMilestone
             ? `${fmt(row.hoursPrior)} h from ${row.priorCourses} earlier course${row.priorCourses === 1 ? "" : "s"} + ${fmt(row.hoursHere)} h here. ${fmt(gap)} h to the ${nextMilestone}-hour ${nextMilestone === rule.target ? "certificate" : "milestone"} — ${classesToGo} more class${classesToGo === 1 ? "" : "es"}.`
             : "Certificate earned. Hours keep accruing on the record."}
@@ -591,19 +591,19 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
 
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between">
-          <span className="text-[10.5px] font-bold tracking-[0.1em] text-muted uppercase">This course</span>
-          <span className="text-[12px] font-semibold text-ink tabular-nums">
+          <span className="text-micro font-bold tracking-[0.1em] text-muted uppercase">This course</span>
+          <span className="text-meta font-semibold text-ink tabular-nums">
             {presentN} present · {partialN} one-lesson · {absentN} absent · {toCome} to come
           </span>
         </div>
         <Segments row={row} size={22} sessionHours={rule.sessionHours} />
         <div className="flex flex-col">
           {held.map((s) => (
-            <div key={s.date} className="grid grid-cols-[16px_1fr_auto_auto] items-center gap-2.5 border-t border-border-faint py-2 text-[12px]">
+            <div key={s.date} className="grid grid-cols-[16px_1fr_auto_auto] items-center gap-2.5 border-t border-border-faint py-2 text-meta">
               <span className="block h-4 w-4 rounded-[3px]" style={markStyle(s)} />
               <span className="text-ink">Class {s.dayNumber}</span>
               <span
-                className="text-[11px]"
+                className="text-label"
                 style={{
                   color: s.isToday
                     ? s.inRoomNow
@@ -632,25 +632,25 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
                       ? "One lesson · nothing banked"
                       : "Absent"}
               </span>
-              <span className="text-[11px] text-muted">{shortDay(s.date)}</span>
+              <span className="text-label text-muted">{shortDay(s.date)}</span>
             </div>
           ))}
-          {held.length === 0 ? <p className="py-2 text-[12px] text-muted">No classes held yet.</p> : null}
+          {held.length === 0 ? <p className="py-2 text-meta text-muted">No classes held yet.</p> : null}
         </div>
-        <p className="text-[10.5px] leading-[1.5] text-muted">
+        <p className="text-micro leading-[1.5] text-muted">
           Presence is Zoom join-to-leave time, summed across rejoins. Handouts appear on the student&apos;s link when the lesson is marked taught, attended or not.
         </p>
       </div>
 
       <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10.5px] font-bold tracking-[0.1em] text-muted uppercase">Their link</span>
+          <span className="text-micro font-bold tracking-[0.1em] text-muted uppercase">Their link</span>
           <span className="flex items-center gap-2">
             {url ? <CopyButton url={url} /> : null}
             {row.email && url ? (
               <form action={emailAction}>
                 <input type="hidden" name="volunteer_id" value={row.id} />
-                <button type="submit" disabled={emailing} className="wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60">
+                <button type="submit" disabled={emailing} className="wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-meta font-semibold text-ink disabled:opacity-60">
                   {emailing ? "Sending…" : emailState.sent ? "Sent!" : "Email it"}
                 </button>
               </form>
@@ -662,16 +662,16 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
               }}
             >
               <input type="hidden" name="volunteer_id" value={row.id} />
-              <button type="submit" disabled={reissuing} className="wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60">
+              <button type="submit" disabled={reissuing} className="wash h-7 rounded-[6px] border border-border bg-card px-2.5 text-meta font-semibold text-ink disabled:opacity-60">
                 {reissuing ? "Re-issuing…" : "Re-issue"}
               </button>
             </form>
           </span>
         </div>
-        {reissueState.error ? <p className="text-[11px] text-destructive">{reissueState.error}</p> : null}
-        {emailState.error ? <p className="text-[11px] text-destructive">{emailState.error}</p> : null}
-        {url ? <p className="truncate rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-[11px] text-muted">{url}</p> : <p className="text-[11px] text-destructive">No link on file — re-issue one.</p>}
-        <div className="grid grid-cols-[1fr_auto] gap-y-1 text-[11.5px]">
+        {reissueState.error ? <p className="text-label text-destructive">{reissueState.error}</p> : null}
+        {emailState.error ? <p className="text-label text-destructive">{emailState.error}</p> : null}
+        {url ? <p className="truncate rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-label text-muted">{url}</p> : <p className="text-label text-destructive">No link on file — re-issue one.</p>}
+        <div className="grid grid-cols-[1fr_auto] gap-y-1 text-label">
           {row.todayState ? (
             <>
               <span className="text-muted">Today&apos;s reply</span>
@@ -690,13 +690,13 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
           <span className="text-right font-semibold text-ink">{courseEndDate ? `${shortDay(courseEndDate)} (course end)` : "Course end"}</span>
         </div>
         {!row.lastOpenedAt && url ? (
-          <p className="rounded-[6px] px-2.5 py-2 text-[11px]" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, color: AMBER }}>
+          <p className="rounded-[6px] px-2.5 py-2 text-label" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, color: AMBER }}>
             Never opened — the link probably didn&apos;t arrive. Re-issue and hand it over in class.
           </p>
         ) : null}
         {row.audioUrl ? (
           <div className="flex flex-col gap-1 border-t border-border-faint pt-2">
-            <span className="text-[10.5px] font-bold tracking-[0.1em] text-muted uppercase">Listen · their sign-up recording</span>
+            <span className="text-micro font-bold tracking-[0.1em] text-muted uppercase">Listen · their sign-up recording</span>
             {/* preload none -- eight prompts of audio shouldn't download for
                 every card click, only when Listen is actually pressed. */}
             <audio src={row.audioUrl} controls preload="none" className="h-9 w-full" />
@@ -710,17 +710,17 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
               required
               rows={1}
               placeholder="No transcript yet — listen to their recording and paste one here (for Focus on the Learner)"
-              className="w-full flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-[11px] text-ink outline-none focus:border-primary"
+              className="w-full flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-label text-ink outline-none focus:border-primary"
             />
-            <button type="submit" className="wash shrink-0 rounded-[6px] border border-border px-2 py-1 text-[11px] text-ink">
+            <button type="submit" className="wash shrink-0 rounded-[6px] border border-border px-2 py-1 text-label text-ink">
               Save
             </button>
           </form>
         ) : null}
-        {row.transcript ? <p className="text-[10.5px] text-muted">Transcript on file (for Focus on the Learner).</p> : null}
+        {row.transcript ? <p className="text-micro text-muted">Transcript on file (for Focus on the Learner).</p> : null}
       </div>
 
-      <p className="border-t border-border-faint pt-2.5 text-[10.5px] leading-[1.5] text-muted">
+      <p className="border-t border-border-faint pt-2.5 text-micro leading-[1.5] text-muted">
         Students see their own hours and a plain count of classes — no percentage, no threshold. They never see lesson plans, tutor feedback, grades, other students, or the portfolio.
       </p>
     </div>

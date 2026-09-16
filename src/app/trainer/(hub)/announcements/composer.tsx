@@ -79,7 +79,7 @@ export function AnnouncementComposer({
           hub card has a dark header (Today's assessor card is a dark tile,
           not a bar). */}
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
-        <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Write an announcement</h2>
+        <h2 className="font-serif text-h2 font-semibold text-ink-warm">Write an announcement</h2>
       </div>
       <div className="flex flex-col gap-3 px-[18px]">
 
@@ -286,7 +286,7 @@ export function AnnouncementComposer({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-10 items-center rounded-[8px] px-[18px] text-[13.5px] font-bold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60"
+          className="inline-flex h-10 items-center rounded-[8px] px-[18px] text-body font-bold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60"
           style={{ background: "var(--hub-accent)" }}
         >
           {pending ? "Saving…" : timing === "anchored" ? "Schedule" : "Post announcement"}

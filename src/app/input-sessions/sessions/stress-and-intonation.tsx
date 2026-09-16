@@ -101,7 +101,7 @@ function IntonationSection({ voiceIdx }: { voiceIdx: number }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-bold text-ink">Intonation — question or statement?</p>
-      <p className="text-[11.5px] text-muted">
+      <p className="text-label text-muted">
         The words don&apos;t change, only the tune does. &quot;You&apos;re coming.&quot; falling means a statement;
         rising means a question — click each line to hear the tune, then guess before revealing.
       </p>
@@ -117,11 +117,11 @@ function IntonationSection({ voiceIdx }: { voiceIdx: number }) {
               <path d="M8 5v14l11-7z" />
             </svg>
           </button>
-          <p className="flex-1 text-[13px] text-ink">&quot;{it.text}&quot;</p>
+          <p className="flex-1 text-meta text-ink">&quot;{it.text}&quot;</p>
           {revealed[i] ? (
-            <p className={`text-[11.5px] font-semibold ${it.rising ? "text-primary" : "text-muted"}`}>{it.answer}</p>
+            <p className={`text-label font-semibold ${it.rising ? "text-primary" : "text-muted"}`}>{it.answer}</p>
           ) : (
-            <button type="button" data-print-hide onClick={() => setRevealed((r) => ({ ...r, [i]: true }))} className="text-[11px] font-semibold text-primary">
+            <button type="button" data-print-hide onClick={() => setRevealed((r) => ({ ...r, [i]: true }))} className="text-label font-semibold text-primary">
               Reveal
             </button>
           )}
@@ -136,7 +136,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-bold text-ink">Marking stress for LRT</p>
-      <p className="text-[11.5px] text-muted">
+      <p className="text-label text-muted">
         The convention: a bold syllable, or a small mark before it — <strong className="font-semibold">re</strong>
         cord vs re<strong className="font-semibold">cord</strong>. Click a word to hear it, then click the syllable
         you think carries the stress.
@@ -181,7 +181,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
                 );
               })}
             </div>
-            <p className={`w-16 flex-none text-right text-[11px] font-semibold ${picked === w.stressed ? "text-primary" : "text-destructive"}`}>
+            <p className={`w-16 flex-none text-right text-label font-semibold ${picked === w.stressed ? "text-primary" : "text-destructive"}`}>
               {picked !== undefined ? (picked === w.stressed ? "Correct" : "Try again") : ""}
             </p>
           </div>
@@ -200,7 +200,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-bold text-ink">Primary and secondary stress</p>
-      <p className="text-[11.5px] text-muted">
+      <p className="text-label text-muted">
         Longer words often carry two stresses, not one — a strong primary stress and a weaker secondary stress. Click
         the speaker to hear the word said naturally (the synthesised voice can&apos;t fake syllable-level stress
         convincingly — listen for it yourself, or say the word aloud). Click each circle once for secondary stress,
@@ -249,7 +249,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
                 if (done) return;
                 setRevealed((r) => ({ ...r, [wi]: !r[wi] }));
               }}
-              className={`w-16 flex-none text-right text-[11px] font-semibold ${done ? "text-primary" : isRevealed ? "text-muted" : "text-primary"}`}
+              className={`w-16 flex-none text-right text-label font-semibold ${done ? "text-primary" : isRevealed ? "text-muted" : "text-primary"}`}
             >
               {done ? "Correct" : isRevealed ? "Hide" : "Reveal"}
             </button>
@@ -266,7 +266,7 @@ function ContrastiveStress() {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-bold text-ink">Extension, if there&apos;s time — stress carries attitude</p>
-      <p className="text-[11.5px] text-muted">Same sentence, same words — the stressed word changes what&apos;s actually meant. Read the context, then click the word you&apos;d stress in the reply.</p>
+      <p className="text-label text-muted">Same sentence, same words — the stressed word changes what&apos;s actually meant. Read the context, then click the word you&apos;d stress in the reply.</p>
       {CONTRASTIVE.map((c, ci) => {
         const words = c.reply.split(" ");
         const pick = picks[ci];
@@ -291,13 +291,13 @@ function ContrastiveStress() {
                 type="button"
                 data-print-hide
                 onClick={() => setRevealed((r) => ({ ...r, [ci]: !r[ci] }))}
-                className="w-16 flex-none text-right text-[11px] font-semibold text-primary"
+                className="w-16 flex-none text-right text-label font-semibold text-primary"
               >
                 {isRevealed ? "Hide" : "Reveal"}
               </button>
             </div>
             {isRevealed && pick !== undefined ? (
-              <p className="border-t border-border pt-2 text-[11.5px] text-ink">
+              <p className="border-t border-border pt-2 text-label text-ink">
                 {c.explains[pick] || "Try one of the words with an explanation below — not every word carries a distinct attitude here."}
               </p>
             ) : null}
@@ -331,17 +331,17 @@ function TrainerScript() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
       <div className="flex items-center justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — stage-by-stage script
         </p>
-        <button type="button" onClick={() => setOpen(false)} className="text-[10.5px] font-semibold text-destructive">
+        <button type="button" onClick={() => setOpen(false)} className="text-micro font-semibold text-destructive">
           Hide
         </button>
       </div>
       {TRAINER_SCRIPT.map((t) => (
         <div key={t.step} className="flex gap-2.5">
-          <p className="w-14 flex-none pt-px text-[10.5px] font-bold text-destructive">{t.time}</p>
+          <p className="w-14 flex-none pt-px text-micro font-bold text-destructive">{t.time}</p>
           <div className="flex flex-col gap-0.5">
             <p className="text-xs font-semibold text-ink">{t.step}</p>
             <p className="text-xs leading-relaxed text-ink">{t.note}</p>
@@ -369,11 +369,11 @@ export default function StressAndIntonationSession() {
       ]}
     >
       <div className="flex flex-col gap-1.5 rounded-[8px] border border-primary/25 bg-primary/5 p-4">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-primary">
           <span className="size-1.5 rounded-full bg-current" />
           Where this feeds back in
         </p>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           FOL asks you to record and analyse a learner&apos;s pronunciation errors — stress and intonation are two of
           the categories you&apos;ll be sorting those errors into. LRT asks you to analyse language for teaching,
           including its phonological features — the word-stress marking convention practised here is the one your

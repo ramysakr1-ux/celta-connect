@@ -82,7 +82,7 @@ export function AdminRoster({
               <p className="truncate text-xs text-muted">{row.email}</p>
             </div>
             <span
-              className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${ROLE_PILL_CLASS[row.role as CentreRole] ?? DEFAULT_ROLE_PILL_CLASS}`}
+              className={`shrink-0 rounded-full border px-2.5 py-0.5 text-label font-semibold ${ROLE_PILL_CLASS[row.role as CentreRole] ?? DEFAULT_ROLE_PILL_CLASS}`}
             >
               {roleLabel(row.role, customRoles)}
             </span>
@@ -96,7 +96,7 @@ export function AdminRoster({
 
       {invites.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
           {invites.map((inv) => (
             <div key={inv.id} className="hover-ring flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2">
               <span className="text-sm text-ink">{roleLabel(inv.role, customRoles)}</span>

@@ -240,8 +240,8 @@ export function DragBoard({
                     }}
                   >
                     <div className="flex items-baseline gap-1.5">
-                      <span className="font-serif text-[15px] text-ink">{day.dayOfMonth}</span>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted">{day.weekday}</span>
+                      <span className="font-serif text-h3 text-ink">{day.dayOfMonth}</span>
+                      <span className="text-micro font-semibold uppercase tracking-[0.08em] text-muted">{day.weekday}</span>
                     </div>
                     <div className="flex flex-col gap-1">
                       {day.events.map((event) => {
@@ -272,22 +272,22 @@ export function DragBoard({
                           >
                             <div className="flex items-center gap-1">
                               {event.zoom_url ? <CameraIcon /> : null}
-                              <span className="truncate text-[11px] font-medium text-ink">{event.title}</span>
+                              <span className="truncate text-label font-medium text-ink">{event.title}</span>
                             </div>
-                            {event.event_time ? <span className="text-[9px] text-muted">{event.event_time.slice(0, 5)}</span> : null}
+                            {event.event_time ? <span className="text-micro text-muted">{event.event_time.slice(0, 5)}</span> : null}
                             {live && event.zoom_url ? (
                               <a
                                 href={event.zoom_url}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="mt-1 inline-flex items-center gap-1 self-start rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
+                                className="mt-1 inline-flex items-center gap-1 self-start rounded-full bg-primary px-1.5 py-0.5 text-micro font-semibold uppercase tracking-[0.06em] text-primary-foreground"
                               >
                                 <span className="size-[4px] shrink-0 rounded-full bg-primary-foreground" />
                                 Join
                               </a>
                             ) : live ? (
-                              <span className="mt-1 inline-flex w-fit items-center gap-1 self-start rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-primary">
+                              <span className="mt-1 inline-flex w-fit items-center gap-1 self-start rounded-full bg-primary/15 px-1.5 py-0.5 text-micro font-semibold uppercase tracking-[0.06em] text-primary">
                                 <span className="size-[4px] shrink-0 rounded-full bg-primary" />
                                 Live
                               </span>
@@ -304,7 +304,7 @@ export function DragBoard({
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-4 text-[11px] text-muted">
+      <div className="flex flex-wrap gap-4 text-label text-muted">
         {LEGEND.map((item) => (
           <span key={item.category} className="flex items-center gap-1.5">
             <span className="inline-block size-2.5 rounded-[3px]" style={{ background: TILE_COLOR[item.category] }} />
@@ -430,7 +430,7 @@ function DetailPanel({
           14 Sep 2026. */}
       {canEdit && !locked ? (
         <details className="mt-1" open={Boolean(event.detail)}>
-          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+          <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
             {event.detail ? `Subtitle: ${event.detail}` : "Set subtitle"}
           </summary>
           <form action={setEventDetail} className="mt-2 flex flex-col gap-1.5">
@@ -446,18 +446,18 @@ function DetailPanel({
               <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs wash">
                 Save
               </button>
-              <span className="text-[11px] text-muted">Leave it empty to remove the subtitle.</span>
+              <span className="text-label text-muted">Leave it empty to remove the subtitle.</span>
             </div>
           </form>
         </details>
       ) : event.detail ? (
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">Subtitle: {event.detail}</p>
+        <p className="text-label font-semibold uppercase tracking-[0.1em] text-muted">Subtitle: {event.detail}</p>
       ) : null}
 
       {event.type === "input_session" ? (
         canEdit ? (
           <details className="mt-1" open>
-            <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+            <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
               {event.input_session_criteria.length > 0 ? `Criteria: ${event.input_session_criteria.join(", ")}` : "Set criteria"}
             </summary>
             <form action={setInputSessionCriteria} className="mt-2 flex flex-col gap-1.5">
@@ -475,7 +475,7 @@ function DetailPanel({
             </form>
           </details>
         ) : event.input_session_criteria.length > 0 ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+          <p className="text-label font-semibold uppercase tracking-[0.1em] text-muted">
             Criteria: {event.input_session_criteria.join(", ")}
           </p>
         ) : null
@@ -491,12 +491,12 @@ function DetailPanel({
           const chosen = INPUT_SESSIONS.find((s) => s.slug === effective);
           if (!canEdit) {
             return chosen ? (
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">Opens: {chosen.title}</p>
+              <p className="text-label font-semibold uppercase tracking-[0.1em] text-muted">Opens: {chosen.title}</p>
             ) : null;
           }
           return (
             <details className="mt-1">
-              <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+              <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
                 {chosen ? `Opens: ${chosen.title}` : "No interactive session"}
               </summary>
               <form action={setEventRegistrySlug} className="mt-2 flex flex-col gap-1.5">
@@ -517,7 +517,7 @@ function DetailPanel({
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] leading-snug text-muted">
+                <p className="text-label leading-snug text-muted">
                   What this slot opens on a candidate&apos;s Resources tab. Leave it on the first option to keep
                   matching by title.
                 </p>
@@ -533,7 +533,7 @@ function DetailPanel({
       {event.type === "tp" && mixedMode ? (
         canEdit ? (
           <details className="mt-1" open>
-            <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+            <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
               {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
             </summary>
             <form action={setTpEventMode} className="mt-2 flex flex-col gap-1.5">
@@ -553,7 +553,7 @@ function DetailPanel({
             </form>
           </details>
         ) : event.mode ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+          <p className="text-label font-semibold uppercase tracking-[0.1em] text-muted">
             Mode: {event.mode === "f2f" ? "Face-to-face" : "Online"}
           </p>
         ) : null
@@ -561,7 +561,7 @@ function DetailPanel({
 
       {event.type === "tp" && volunteers.length > 0 ? (
         <details className="mt-1" open>
-          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+          <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
             Attendance {attendedIds.size}/{volunteers.length}
           </summary>
           <form action={setAttendance} className="mt-2 flex flex-col gap-1.5">
@@ -571,7 +571,7 @@ function DetailPanel({
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attendedIds.has(v.id)} />
                 {v.name}
                 {attendanceSource.get(v.id) === "zoom" ? (
-                  <span className="pill pill-neutral text-[9px]">via Zoom</span>
+                  <span className="pill pill-neutral text-micro">via Zoom</span>
                 ) : null}
               </label>
             ))}
@@ -584,7 +584,7 @@ function DetailPanel({
 
       {event.type === "tp" && unmatched.length > 0 ? (
         <details className="mt-1" open>
-          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-status-warning-text hover:text-ink">
+          <summary className="cursor-pointer text-label font-semibold uppercase tracking-[0.1em] text-status-warning-text hover:text-ink">
             Needs review {unmatched.length}
           </summary>
           <p className="mt-1 text-xs text-muted">

@@ -18,7 +18,7 @@ import { formatDateTime } from "@/lib/format-date";
 function Row({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="flex flex-col gap-1 border-t border-border-faint py-3 first:border-none first:pt-0 sm:flex-row sm:items-baseline sm:gap-4">
-      <span className="w-[210px] shrink-0 text-[11px] font-bold tracking-[0.08em] text-muted uppercase">{label}</span>
+      <span className="w-[210px] shrink-0 text-label font-bold tracking-[0.08em] text-muted uppercase">{label}</span>
       <div className="flex flex-col gap-0.5">
         <span className="text-sm text-ink">{value}</span>
         {note ? <span className="text-xs text-muted">{note}</span> : null}

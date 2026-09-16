@@ -72,7 +72,7 @@ export function FilmedObservationChat({
 
   return (
     <div className="flex h-full flex-col card">
-      <p className="border-b border-border px-3.5 py-2.5 text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Group chat</p>
+      <p className="border-b border-border px-3.5 py-2.5 text-label font-semibold tracking-[0.08em] text-muted uppercase">Group chat</p>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-2.5" role="log" aria-live="polite">
         {messages.length === 0 ? (
           <p className="text-sm text-muted">No messages yet.</p>
@@ -83,20 +83,20 @@ export function FilmedObservationChat({
               return (
                 <div key={m.id} className="flex items-start gap-2">
                   <div
-                    className={`flex size-5 shrink-0 items-center justify-center rounded-[7px] text-[8px] font-semibold ${
+                    className={`flex size-5 shrink-0 items-center justify-center rounded-[7px] text-micro font-semibold ${
                       mine ? "bg-surface-muted text-ink" : "bg-accent text-accent-foreground"
                     }`}
                   >
                     {(mine ? "Me" : (nameById.get(m.author_id) ?? "?")).slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-baseline gap-1.5 text-[11px] font-semibold text-ink">
+                    <p className="flex items-baseline gap-1.5 text-label font-semibold text-ink">
                       {mine ? "You" : (nameById.get(m.author_id) ?? "Unknown")}
-                      <span className="text-[10px] font-normal text-muted">
+                      <span className="text-micro font-normal text-muted">
                         {formatTime(m.created_at, timeZone)}
                       </span>
                     </p>
-                    <p className="text-[12.5px] leading-[1.45] text-ink/85 text-pretty">{m.body}</p>
+                    <p className="text-meta leading-[1.45] text-ink/85 text-pretty">{m.body}</p>
                   </div>
                 </div>
               );
@@ -109,9 +109,9 @@ export function FilmedObservationChat({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Message"
-          className="flex-1 rounded-full border border-border bg-card-inset px-3 py-1.5 text-[13px] text-ink outline-none focus:border-primary"
+          className="flex-1 rounded-full border border-border bg-card-inset px-3 py-1.5 text-meta text-ink outline-none focus:border-primary"
         />
-        <button type="submit" className="rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-foreground">
+        <button type="submit" className="rounded-full bg-primary px-3.5 py-1.5 text-meta font-medium text-primary-foreground">
           Send
         </button>
       </form>

@@ -56,7 +56,7 @@ export function PipelineFunnel({
                 {s.dropPct !== null ? <span className="text-xs font-bold text-muted">{s.dropPct}%</span> : null}
               </div>
               <span className={`text-xs font-semibold ${on ? "text-primary" : "text-ink"}`}>{s.label}</span>
-              <span className="text-[10.5px] leading-tight text-muted">{s.sub}</span>
+              <span className="text-micro leading-tight text-muted">{s.sub}</span>
             </button>
           );
         })}

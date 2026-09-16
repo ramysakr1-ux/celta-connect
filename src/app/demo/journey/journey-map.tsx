@@ -59,7 +59,7 @@ function JourneyDiagram({
 
   return (
     <figure className="m-0 flex flex-col gap-2">
-      <figcaption className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{title}</figcaption>
+      <figcaption className="text-label font-semibold tracking-[0.08em] text-muted uppercase">{title}</figcaption>
       <div className="overflow-x-auto rounded-[6px] border border-border bg-card p-3">
         <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label={title} style={{ maxWidth: "100%", height: "auto" }}>
           <defs>

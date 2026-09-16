@@ -25,7 +25,7 @@ export function OfferForm({
   return (
     <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <h2 className="font-serif text-[17px] font-semibold text-ink">Offer</h2>
+      <h2 className="font-serif text-h3 font-semibold text-ink">Offer</h2>
       <p className="text-sm text-muted">
         States the fee and an accept-by date, records the offer, and emails the applicant automatically.
       </p>

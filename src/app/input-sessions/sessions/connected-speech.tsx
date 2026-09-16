@@ -102,16 +102,16 @@ function HomophoneLines() {
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-xs font-bold text-ink">Lead-in, alternative · read these aloud</p>
-      <p className="text-[11.5px] text-muted">Sound out each line fast — they&apos;re homophone strings, not real sentences on the page.</p>
+      <p className="text-label text-muted">Sound out each line fast — they&apos;re homophone strings, not real sentences on the page.</p>
       {HOMOPHONE_LINES.map((h, i) => (
         <div key={h.line} className="flex items-center gap-3 rounded-[8px] border border-border bg-card px-3.5 py-3">
           <p className="flex-1 font-serif text-sm italic text-ink">{h.line}</p>
-          {shown[i] ? <p className="text-[11.5px] text-muted">{h.answer}</p> : null}
+          {shown[i] ? <p className="text-label text-muted">{h.answer}</p> : null}
           <button
             type="button"
             data-print-hide
             onClick={() => setShown((s) => ({ ...s, [i]: !s[i] }))}
-            className="flex-none text-[10.5px] font-semibold text-primary"
+            className="flex-none text-micro font-semibold text-primary"
           >
             {shown[i] ? "Hide" : "Reveal"}
           </button>
@@ -137,7 +137,7 @@ function FeatureExample({ ex, tone, voiceIdx }: { ex: Example; tone: string; voi
             <path d="M8 5v14l11-7z" />
           </svg>
         </button>
-        <p className="flex-1 text-[13px] text-ink">{ex.label}</p>
+        <p className="flex-1 text-meta text-ink">{ex.label}</p>
       </div>
       <div className="flex flex-wrap gap-2 pl-[46px]">
         {ex.options.map((opt, oi) => {
@@ -197,17 +197,17 @@ function TrainerScript() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
       <div className="flex items-center justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — stage-by-stage script
         </p>
-        <button type="button" onClick={() => setOpen(false)} className="text-[10.5px] font-semibold text-destructive">
+        <button type="button" onClick={() => setOpen(false)} className="text-micro font-semibold text-destructive">
           Hide
         </button>
       </div>
       {TRAINER_SCRIPT.map((t) => (
         <div key={t.step} className="flex gap-2.5">
-          <p className="w-14 flex-none pt-px text-[10.5px] font-bold text-destructive">{t.time}</p>
+          <p className="w-14 flex-none pt-px text-micro font-bold text-destructive">{t.time}</p>
           <div className="flex flex-col gap-0.5">
             <p className="text-xs font-semibold text-ink">{t.step}</p>
             <p className="text-xs leading-relaxed text-ink">{t.note}</p>
@@ -238,11 +238,11 @@ export default function ConnectedSpeechSession() {
       ]}
     >
       <div className="flex flex-col gap-1.5 rounded-[8px] border border-primary/25 bg-primary/5 p-4">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-primary">
           <span className="size-1.5 rounded-full bg-current" />
           Where this feeds back in
         </p>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           FOL&apos;s listening-comprehension section is where connected speech usually shows up: a learner who reads a
           script fine but can&apos;t follow the same words spoken naturally. LRT&apos;s phonological analysis should note
           where a text&apos;s natural pronunciation departs from its spelling — these five terms are the vocabulary for
@@ -265,7 +265,7 @@ export default function ConnectedSpeechSession() {
               <path d="M8 5v14l11-7z" />
             </svg>
           </button>
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Listen: &quot;gonna.&quot; Now try writing what you heard using only words from a dictionary. There isn&apos;t
             one — that&apos;s the session.
           </p>
@@ -277,14 +277,14 @@ export default function ConnectedSpeechSession() {
       <MatchTermsExercise terms={MATCH_TERMS} />
 
       <div className="flex flex-col gap-4">
-        <p className="text-[11.5px] text-muted">For each feature below: listen to the clip, then choose the answer that matches what you heard.</p>
+        <p className="text-label text-muted">For each feature below: listen to the clip, then choose the answer that matches what you heard.</p>
         {SECTIONS.map((sec, si) => (
           <div key={sec.title} className="flex flex-col gap-2">
             <div className="flex items-baseline gap-2.5">
               <p className="font-serif text-lg font-semibold text-ink">
                 {si + 1}. {sec.title}
               </p>
-              <p className="text-[11px] text-muted">{sec.def}</p>
+              <p className="text-label text-muted">{sec.def}</p>
             </div>
             {sec.examples.map((ex) => (
               <FeatureExample key={ex.label} ex={ex} tone={sec.tone} voiceIdx={voiceIdx} />

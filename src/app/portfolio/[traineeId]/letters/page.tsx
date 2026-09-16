@@ -92,28 +92,28 @@ export default async function CandidateLettersPage({ params }: { params: Promise
           className="lift card flex items-start justify-between gap-4 p-5 no-underline"
         >
           <span>
-            <span className="block text-[13.5px] font-semibold text-ink">
+            <span className="block text-body font-semibold text-ink">
               {LETTER_TITLE[l.letter_type] ?? l.letter_type}
             </span>
-            <span className="mt-0.5 block text-[12.5px] text-muted">
+            <span className="mt-0.5 block text-meta text-muted">
               Issued {longDate(l.issued_at, timeZone)}.{" "}
               {l.acknowledged_at ? `Acknowledged by the candidate ${longDate(l.acknowledged_at, timeZone)}.` : "Not yet acknowledged."}
             </span>
           </span>
-          <span className="shrink-0 pt-0.5 text-[11px] font-semibold text-primary">Open</span>
+          <span className="shrink-0 pt-0.5 text-label font-semibold text-primary">Open</span>
         </Link>
       ))}
 
       {(cases ?? []).map((c) => (
         <div key={c.id} className="card p-5">
-          <p className="text-[13.5px] font-semibold text-ink">Malpractice case</p>
-          <p className="mt-0.5 text-[12.5px] text-muted">
+          <p className="text-body font-semibold text-ink">Malpractice case</p>
+          <p className="mt-0.5 text-meta text-muted">
             Opened {longDate(c.opened_at, timeZone)} on the {c.assignment_round === "resubmission" ? "resubmission" : "first submission"}.{" "}
             {c.candidate_account_recorded_at
               ? "The candidate's own account is on the record."
               : "The candidate's account has not been recorded yet."}
           </p>
-          <p className="mt-2 text-[11.5px] text-muted">
+          <p className="mt-2 text-label text-muted">
             The full case, including the outcome, is on the course&apos;s malpractice screen in the pack.
           </p>
         </div>

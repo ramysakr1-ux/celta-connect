@@ -84,7 +84,7 @@ export default async function AdmissionsSettingsPage() {
       </div>
 
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">AI reading of the selection task</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">AI reading of the selection task</h2>
         <p className="text-sm text-muted">
           Reads the written task against the marking scheme below and sorts it into three lanes -- clear books an
           interview automatically, borderline queues for a human, clear problems flags a tutor. It never writes a
@@ -132,7 +132,7 @@ export default async function AdmissionsSettingsPage() {
       </div>
 
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Extended writing task prompts</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Extended writing task prompts</h2>
         <p className="text-sm text-muted">
           The centre defines three or four -- one narrative, one descriptive, one argumentative. The applicant picks
           one; marking criteria don&apos;t change with the prompt.
@@ -178,7 +178,7 @@ export default async function AdmissionsSettingsPage() {
       </div>
 
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Speaking task prompts</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Speaking task prompts</h2>
         <p className="text-sm text-muted">
           Short, everyday topics -- a commute, cooking something familiar, explaining something to someone. The point
           is fluency and clarity, not content difficulty. Match the writing task&apos;s count (three or four).
@@ -217,7 +217,7 @@ export default async function AdmissionsSettingsPage() {
       </div>
 
       <div className="card flex flex-col gap-4 p-5">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Interview question bank</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Interview question bank</h2>
         <p className="text-sm text-muted">
           Seven fixed questions is the usual shape. Two more are drawn per applicant from the weak areas their task
           reading flagged.

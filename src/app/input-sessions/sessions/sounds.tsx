@@ -102,9 +102,9 @@ function MatchTerms() {
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Terminology — match it up</p>
-        <p className="text-[11.5px] text-muted">{solved.size ? `${solved.size} of ${MATCH_PAIRS.length} matched` : ""}</p>
+        <p className="text-label text-muted">{solved.size ? `${solved.size} of ${MATCH_PAIRS.length} matched` : ""}</p>
       </div>
-      <p className="text-[11.5px] text-muted">Click a term, then click the definition you think it goes with.</p>
+      <p className="text-label text-muted">Click a term, then click the definition you think it goes with.</p>
       <div className="grid grid-cols-2 gap-5">
         <div className="flex flex-col gap-1.5">
           {MATCH_PAIRS.map((p, i) => {
@@ -115,7 +115,7 @@ function MatchTerms() {
                 key={p.term}
                 type="button"
                 onClick={() => pickTerm(i)}
-                className={`rounded-[6px] border-[1.5px] px-3.5 py-2.5 text-left text-[12.5px] font-bold ${
+                className={`rounded-[6px] border-[1.5px] px-3.5 py-2.5 text-left text-meta font-bold ${
                   isSolved
                     ? "border-primary bg-primary/10 text-primary"
                     : isSel
@@ -138,7 +138,7 @@ function MatchTerms() {
                 key={p.term}
                 type="button"
                 onClick={() => pickDef(i)}
-                className={`rounded-[6px] border-[1.5px] px-3.5 py-2.5 text-left text-[12px] leading-snug ${
+                className={`rounded-[6px] border-[1.5px] px-3.5 py-2.5 text-left text-meta leading-snug ${
                   isSolved
                     ? "border-primary bg-primary/10 text-primary"
                     : isWrong
@@ -180,9 +180,9 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Now try it yourself — clap for what you heard</p>
-        <p className="text-[11.5px] text-muted">{answered ? `${correctCount} of ${answered} correct` : ""}</p>
+        <p className="text-label text-muted">{answered ? `${correctCount} of ${answered} correct` : ""}</p>
       </div>
-      <p className="text-[11.5px] text-muted">
+      <p className="text-label text-muted">
         The same drill, from the student&apos;s seat. Hit replay for a fresh random word each time, then clap the pad
         you heard — the technique you&apos;d run live with a class.
       </p>
@@ -227,7 +227,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
                 );
               })}
             </div>
-            <p className={`w-16 flex-none text-right text-[11px] font-semibold ${picked === "correct" ? "text-primary" : "text-destructive"}`}>
+            <p className={`w-16 flex-none text-right text-label font-semibold ${picked === "correct" ? "text-primary" : "text-destructive"}`}>
               {picked ? (picked === "correct" ? "Correct" : "Try again") : ""}
             </p>
           </div>
@@ -242,7 +242,7 @@ function Dictation({ voiceIdx }: { voiceIdx: number }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-bold text-ink">Dictation — sound to spelling</p>
-      <p className="text-[11.5px] text-muted">English spelling doesn&apos;t reliably show pronunciation. Listen and pick the word that matches the sound, not the sound that matches the usual spelling.</p>
+      <p className="text-label text-muted">English spelling doesn&apos;t reliably show pronunciation. Listen and pick the word that matches the sound, not the sound that matches the usual spelling.</p>
       {DICTATION.map((d, di) => {
         const picked = picks[di];
         const opts = [d.correct, ...d.distractors];
@@ -267,7 +267,7 @@ function Dictation({ voiceIdx }: { voiceIdx: number }) {
                     key={opt}
                     type="button"
                     onClick={() => setPicks((s) => ({ ...s, [di]: opt }))}
-                    className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
+                    className={`rounded-full border-[1.5px] px-3 py-1.5 text-label font-semibold ${
                       isCorrectPick
                         ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
@@ -310,17 +310,17 @@ function TrainerScript() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
       <div className="flex items-center justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — trainer notes
         </p>
-        <button type="button" onClick={() => setOpen(false)} className="text-[10.5px] font-semibold text-destructive">
+        <button type="button" onClick={() => setOpen(false)} className="text-micro font-semibold text-destructive">
           Hide
         </button>
       </div>
       {TRAINER_SCRIPT.map((t) => (
         <div key={t.step} className="flex gap-2.5">
-          <p className="w-14 flex-none pt-px text-[10.5px] font-bold text-destructive">{t.time}</p>
+          <p className="w-14 flex-none pt-px text-micro font-bold text-destructive">{t.time}</p>
           <div className="flex flex-col gap-0.5">
             <p className="text-xs font-semibold text-ink">{t.step}</p>
             <p className="text-xs leading-relaxed text-ink">{t.note}</p>
@@ -348,8 +348,8 @@ export default function SoundsSession() {
       ]}
     >
       <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-accent p-3.5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-muted">What you&apos;re actually learning to teach</p>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-label font-bold uppercase tracking-[0.06em] text-muted">What you&apos;re actually learning to teach</p>
+        <p className="text-meta leading-relaxed text-ink">
           Hearing &quot;ship&quot; and &quot;sheep&quot; apart is the easy part — you already can. The job is teaching a
           student who genuinely can&apos;t yet: knowing why they can&apos;t, what to do with your mouth to show the
           difference, and which pairs are worth drilling for their L1. That&apos;s what the next two sections are for.
@@ -374,7 +374,7 @@ export default function SoundsSession() {
               <path d="M8 5v14l11-7z" />
             </svg>
           </button>
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Listen: &quot;ship&quot; then &quot;sheep.&quot; Same spelling pattern almost, one letter of difference on
             the page. Can you hear which is which without seeing the words?
           </p>
@@ -385,7 +385,7 @@ export default function SoundsSession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">Where the sound is made</p>
-        <p className="text-[11.5px] text-muted">Click each sound to hear it, then say it back yourself and notice where your own tongue, lips or teeth move.</p>
+        <p className="text-label text-muted">Click each sound to hear it, then say it back yourself and notice where your own tongue, lips or teeth move.</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="text-xs leading-relaxed text-ink">
             Consonants are formed when airflow from the lungs is obstructed by the moveable parts of the mouth —
@@ -401,7 +401,7 @@ export default function SoundsSession() {
                   speakWithVoice(s.symbol, 0.92, voiceIdx);
                   setTimeout(() => speakWithVoice(s.word, 0.92, voiceIdx), 700);
                 }}
-                className="rounded-full border-[1.5px] border-border bg-accent px-3 py-1.5 font-serif text-[12.5px] font-semibold text-ink"
+                className="rounded-full border-[1.5px] border-border bg-accent px-3 py-1.5 font-serif text-meta font-semibold text-ink"
               >
                 /{s.symbol}/ <span className="font-sans font-normal text-muted">— {s.place}</span>
               </button>
@@ -412,7 +412,7 @@ export default function SoundsSession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">The phonemic chart, spoken</p>
-        <p className="text-[11.5px] text-muted">Click any symbol to hear the sound in isolation, then in a real word.</p>
+        <p className="text-label text-muted">Click any symbol to hear the sound in isolation, then in a real word.</p>
         <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
           {CHART.map((c) => (
             <button
@@ -425,8 +425,8 @@ export default function SoundsSession() {
               }}
               className="flex flex-col items-center gap-0.5 rounded-[6px] border-[1.5px] border-border bg-card px-1.5 py-2.5"
             >
-              <p className="font-serif text-[15px] font-semibold text-ink">/{c.symbol}/</p>
-              <p className="text-[9.5px] text-muted">{c.example}</p>
+              <p className="font-serif text-h3 font-semibold text-ink">/{c.symbol}/</p>
+              <p className="text-micro text-muted">{c.example}</p>
             </button>
           ))}
         </div>
@@ -434,7 +434,7 @@ export default function SoundsSession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">Articulation — how to physically produce it</p>
-        <p className="text-[11.5px] text-muted">
+        <p className="text-label text-muted">
           A learner can&apos;t copy a written symbol — they need to see the mouth move. On the site below, click each
           of these four sounds on the real IPA chart and watch the video, then write down what you actually see —
           tongue, lips, teeth — before checking it against the summary underneath.
@@ -465,7 +465,7 @@ export default function SoundsSession() {
                 <path d="M8 5v14l11-7z" />
               </svg>
             </span>
-            <span className="w-12 flex-none font-serif text-[15px] font-semibold text-ink">/{a.symbol}/</span>
+            <span className="w-12 flex-none font-serif text-h3 font-semibold text-ink">/{a.symbol}/</span>
             <span className="flex-1 text-xs leading-relaxed text-muted">{a.how}</span>
           </button>
         ))}
@@ -473,12 +473,12 @@ export default function SoundsSession() {
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold text-ink">Where learners typically struggle</p>
-        <p className="text-[11.5px] text-muted">The same four pairs from the clap game — each is a known trouble spot for a common set of L1 backgrounds.</p>
+        <p className="text-label text-muted">The same four pairs from the clap game — each is a known trouble spot for a common set of L1 backgrounds.</p>
         {STRUGGLES.map((s) => (
           <div key={s.pair} className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
             <div className="flex items-baseline gap-2.5">
               <p className="font-serif text-sm font-semibold text-ink">{s.pair}</p>
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.04em] text-muted">{s.who}</p>
+              <p className="text-micro font-bold uppercase tracking-[0.04em] text-muted">{s.who}</p>
             </div>
             <p className="text-xs leading-relaxed text-muted">{s.note}</p>
           </div>

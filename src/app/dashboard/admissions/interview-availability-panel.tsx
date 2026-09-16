@@ -57,7 +57,7 @@ export function InterviewAvailabilityPanel({
     <div className="flex flex-col gap-5">
       {/* Generation rule */}
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">The rule that makes the slots</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">The rule that makes the slots</p>
         <form action={updateInterviewGenerationSettings} className="mt-2 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1">
             <span className="text-xs text-muted">Interview length (min)</span>
@@ -83,7 +83,7 @@ export function InterviewAvailabilityPanel({
 
       {/* Pattern editor */}
       <div className="border-t border-border pt-4">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Weekly pattern -- who interviews when</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Weekly pattern -- who interviews when</p>
         <div className="mt-2 flex flex-col gap-1.5">
           {patterns.length === 0 ? (
             <p className="text-sm text-muted">No pattern set yet.</p>
@@ -135,7 +135,7 @@ export function InterviewAvailabilityPanel({
 
       {/* Blocking */}
       <div className="border-t border-border pt-4">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Block a day out</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Block a day out</p>
         <p className="mt-1 text-xs text-muted">
           Leave interviewer blank for a centre-wide closure -- set once for everybody, not by each interviewer separately.
         </p>

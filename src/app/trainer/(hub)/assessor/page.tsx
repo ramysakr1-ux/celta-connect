@@ -375,20 +375,20 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">
           {course?.name ?? "Course"} &middot; Assessor visit
         </p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Assessor</h1>
+        <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Assessor</h1>
         <p className="max-w-[62ch] text-sm text-muted">
           Who is coming, which candidates they will see, and what the centre owes them before they arrive. Administration Handbook §14.
         </p>
       </div>
 
       {visitDayProblem ? (
-        <div className="flex items-center gap-3 rounded-[10px] bg-destructive px-4 py-3 text-[13px] text-primary-foreground">
-          <span className="rounded-full bg-[color-mix(in_oklab,white_22%,transparent)] px-2 py-[2px] text-[10px] font-bold tracking-[0.08em] uppercase">Visit day</span>
+        <div className="flex items-center gap-3 rounded-[10px] bg-destructive px-4 py-3 text-meta text-primary-foreground">
+          <span className="rounded-full bg-[color-mix(in_oklab,white_22%,transparent)] px-2 py-[2px] text-micro font-bold tracking-[0.08em] uppercase">Visit day</span>
           <span className="flex-1 font-semibold">{visitDayProblem}</span>
-          <Link href="/trainer/timetable?mode=edit" className="text-[12px] whitespace-nowrap underline">
+          <Link href="/trainer/timetable?mode=edit" className="text-meta whitespace-nowrap underline">
             Nothing to observe &middot; §14.2
           </Link>
         </div>
@@ -397,10 +397,10 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           day. 14.2 lets the assessor observe an earlier session's feedback,
           so the visit stands -- it is just better with one (12 Sep 2026). */}
       {!visitDayProblem && visitDayNote ? (
-        <div className="flex items-center gap-3 rounded-[10px] border border-border bg-card px-4 py-3 text-[13px] text-muted">
-          <span className="rounded-full bg-frame px-2 py-[2px] text-[10px] font-bold tracking-[0.08em] text-ink uppercase">Visit day</span>
+        <div className="flex items-center gap-3 rounded-[10px] border border-border bg-card px-4 py-3 text-meta text-muted">
+          <span className="rounded-full bg-frame px-2 py-[2px] text-micro font-bold tracking-[0.08em] text-ink uppercase">Visit day</span>
           <span className="flex-1">{visitDayNote}</span>
-          <Link href="/trainer/timetable?mode=edit" className="text-[12px] whitespace-nowrap text-primary underline">
+          <Link href="/trainer/timetable?mode=edit" className="text-meta whitespace-nowrap text-primary underline">
             Open the timetable
           </Link>
         </div>
@@ -412,16 +412,16 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           style={{ background: "var(--color-ink-warm)" }}
         >
           <div className="flex flex-col gap-1">
-            <span className="text-[10.5px] font-bold tracking-[0.11em] text-gold uppercase">
+            <span className="text-micro font-bold tracking-[0.11em] text-gold uppercase">
               {daysToVisit !== null && daysToVisit < 0 ? "Visited" : daysToVisit === 0 ? "Today" : `In ${daysToVisit} day${daysToVisit === 1 ? "" : "s"}`}
             </span>
-            <span className="font-serif text-[24px] font-semibold">
+            <span className="font-serif text-h1 font-semibold">
               {fmtDate(visitDate, { weekday: "long", day: "numeric", month: "long" })}
               {course?.assessor_name ? ` · ${course.assessor_name}` : ""}
             </span>
-            {course?.assessor_email ? <span className="text-[12.5px] opacity-80">{course.assessor_email}</span> : null}
+            {course?.assessor_email ? <span className="text-meta opacity-80">{course.assessor_email}</span> : null}
           </div>
-          <div className="flex flex-col items-end gap-2.5 text-right text-[12.5px]">
+          <div className="flex flex-col items-end gap-2.5 text-right text-meta">
             {/* Ramy, 6 Sep 2026: the Appian link belongs on the banner, in the
                 MCT's own garnet rather than a translucent tint -- brown on
                 brown had it disappearing. Lifted off --hub-accent so it still
@@ -432,7 +432,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
               href={appianHref(null)}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-8 items-center rounded-[6px] border px-[13px] text-[12.5px] font-semibold no-underline transition-[filter] duration-150 hover:brightness-125"
+              className="inline-flex h-8 items-center rounded-[6px] border px-[13px] text-meta font-semibold no-underline transition-[filter] duration-150 hover:brightness-125"
               style={{ background: "oklch(46% 0.15 27)", borderColor: "oklch(58% 0.16 27)", color: "oklch(96% 0.008 85)" }}
             >
               Open Appian
@@ -512,7 +512,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           centre has to get ready before they arrive. The tools are all still
           here, just after the answer instead of in front of it. */}
       <div className="flex flex-col gap-1 pt-2">
-        <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Before they arrive</p>
+        <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Before they arrive</p>
         <p className="max-w-[70ch] text-sm text-muted">
           Setting the visit up, handing the pack over, and the Handbook&apos;s own list of what the centre owes them.
           {prep.outstanding.length > 0 ? (
@@ -544,7 +544,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
 
         <section className="flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
             <div className="flex flex-col gap-[3px]">
-              <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Hand over the pack</p>
+              <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Hand over the pack</p>
               <p className="text-sm text-muted">
                 {/* "every portfolio on the course", not "every selected portfolio":
                     computeAssessorReadiness gates on every active candidate, and

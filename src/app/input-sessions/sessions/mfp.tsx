@@ -77,16 +77,16 @@ function WriteCcq() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Write a CCQ — meaning</p>
-      <p className="text-[11.5px] text-muted">For each target item, write one CCQ that isolates the tricky part of the meaning. Compare with the model once you&apos;ve tried.</p>
+      <p className="text-label text-muted">For each target item, write one CCQ that isolates the tricky part of the meaning. Compare with the model once you&apos;ve tried.</p>
       {CCQ_ITEMS.map((c, i) => (
         <div key={c.item} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">{c.item}</p>
-          <p className="text-[11.5px] text-muted">{c.trap}</p>
+          <p className="text-label text-muted">{c.trap}</p>
           <button
             type="button"
             data-print-hide
             onClick={() => setOpen((o) => ({ ...o, [i]: !o[i] }))}
-            className="self-start flex h-7 items-center rounded-full border border-primary/40 bg-primary/10 px-3 text-[11px] font-semibold text-primary"
+            className="self-start flex h-7 items-center rounded-full border border-primary/40 bg-primary/10 px-3 text-label font-semibold text-primary"
           >
             {open[i] ? "Hide model CCQ" : "Compare with a model CCQ"}
           </button>
@@ -106,7 +106,7 @@ function AnalyseForm() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Analyse the form</p>
-      <p className="text-[11.5px] text-muted">Click the piece of each pattern that&apos;s most likely to trip students up.</p>
+      <p className="text-label text-muted">Click the piece of each pattern that&apos;s most likely to trip students up.</p>
       {FORM_ITEMS.map((fm, fi) => {
         const picked = picks[fi];
         const answered = picked !== undefined;
@@ -133,7 +133,7 @@ function AnalyseForm() {
                 );
               })}
             </div>
-            {answered ? <p className="max-w-[260px] text-[11.5px] text-muted">{fm.feedback}</p> : null}
+            {answered ? <p className="max-w-[260px] text-label text-muted">{fm.feedback}</p> : null}
           </div>
         );
       })}
@@ -148,16 +148,16 @@ function QuickFire() {
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Meaning, form, pron, or appropriacy? Quick fire</p>
-        <p className="text-[11.5px] text-muted">{`${correctCount} of ${MF_ITEMS.length} correct`}</p>
+        <p className="text-label text-muted">{`${correctCount} of ${MF_ITEMS.length} correct`}</p>
       </div>
-      <p className="text-[11.5px] text-muted">For each task type, click which of the four it&apos;s checking.</p>
+      <p className="text-label text-muted">For each task type, click which of the four it&apos;s checking.</p>
       {MF_ITEMS.map((it, i) => {
         const picked = picks[i];
         return (
           <div key={it.example} className="flex flex-wrap items-center justify-between gap-3.5 rounded-[6px] border border-border bg-card px-3.5 py-2.5">
             <div className="min-w-[220px] flex-1">
-              <p className="text-[12.5px] font-semibold text-ink">&quot;{it.example}&quot;</p>
-              <p className="mt-0.5 text-[11px] italic text-muted">{it.note}</p>
+              <p className="text-meta font-semibold text-ink">&quot;{it.example}&quot;</p>
+              <p className="mt-0.5 text-label italic text-muted">{it.note}</p>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {MF_OPTIONS.map((opt) => {
@@ -168,7 +168,7 @@ function QuickFire() {
                     key={opt}
                     type="button"
                     onClick={() => setPicks((p) => ({ ...p, [i]: opt }))}
-                    className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-[11px] font-semibold ${
+                    className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-label font-semibold ${
                       isCorrectPick
                         ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
@@ -193,7 +193,7 @@ function WeakForms() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Transcribe the weak forms</p>
-      <p className="text-[11.5px] text-muted">Listen for how each phrase is actually said in fast speech, not how it&apos;s spelled. Click your guess, then check.</p>
+      <p className="text-label text-muted">Listen for how each phrase is actually said in fast speech, not how it&apos;s spelled. Click your guess, then check.</p>
       {WEAK_FORM_ITEMS.map((w, i) => {
         const picked = picks[i];
         return (
@@ -208,7 +208,7 @@ function WeakForms() {
                     key={opt}
                     type="button"
                     onClick={() => setPicks((p) => ({ ...p, [i]: oi }))}
-                    className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-[11.5px] font-semibold ${
+                    className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-label font-semibold ${
                       isCorrectPick
                         ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
@@ -233,13 +233,13 @@ function MarkStress() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Mark the sentence — stress and weak forms</p>
-      <p className="text-[11.5px] text-muted">Click the word you think carries the main sentence stress in each example.</p>
+      <p className="text-label text-muted">Click the word you think carries the main sentence stress in each example.</p>
       {STRESS_ITEMS.map((item, si) => {
         const picked = picks[si];
         const answered = picked !== undefined;
         return (
           <div key={si} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-            <div className="flex flex-wrap gap-1.5 font-serif text-[15px]">
+            <div className="flex flex-wrap gap-1.5 font-serif text-h3">
               {item.words.map((w, wi) => {
                 const isPicked = wi === picked;
                 const isCorrect = wi === item.stressed;
@@ -260,7 +260,7 @@ function MarkStress() {
                 );
               })}
             </div>
-            {answered ? <p className="text-[11.5px] leading-relaxed text-muted">{item.note}</p> : null}
+            {answered ? <p className="text-label leading-relaxed text-muted">{item.note}</p> : null}
           </div>
         );
       })}
@@ -273,7 +273,7 @@ function Appropriacy() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Appropriacy — which register?</p>
-      <p className="text-[11.5px] text-muted">Same meaning, different register. Click who you&apos;d actually say each one to.</p>
+      <p className="text-label text-muted">Same meaning, different register. Click who you&apos;d actually say each one to.</p>
       {APPROPRIACY_ITEMS.map((ap, ai) => {
         const picked = picks[ai];
         return (
@@ -288,7 +288,7 @@ function Appropriacy() {
                     key={opt}
                     type="button"
                     onClick={() => setPicks((p) => ({ ...p, [ai]: oi }))}
-                    className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-[11px] font-semibold ${
+                    className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-label font-semibold ${
                       isCorrectPick
                         ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
@@ -313,7 +313,7 @@ function SpotTheFlaw() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Spot the flaw — MFPA done badly</p>
-      <p className="text-[11.5px] text-muted">Each mini-plan skips part of MFP. Click to reveal what&apos;s missing.</p>
+      <p className="text-label text-muted">Each mini-plan skips part of MFP. Click to reveal what&apos;s missing.</p>
       {FLAWS.map((f, i) => (
         <div key={f.title} className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">{f.title}</p>
@@ -322,7 +322,7 @@ function SpotTheFlaw() {
             type="button"
             data-print-hide
             onClick={() => setOpen((o) => ({ ...o, [i]: !o[i] }))}
-            className="self-start flex h-7 items-center rounded-full border border-destructive/40 bg-destructive/10 px-3 text-[11px] font-semibold text-destructive"
+            className="self-start flex h-7 items-center rounded-full border border-destructive/40 bg-destructive/10 px-3 text-label font-semibold text-destructive"
           >
             {open[i] ? "Hide the fix" : "What's missing?"}
           </button>
@@ -360,31 +360,31 @@ function MfpAnswerKey() {
   return (
     <div className="flex flex-col gap-3.5 border-t border-border pt-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
+        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
         <div className="flex gap-2" data-print-hide>
-          <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+          <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Hide
           </button>
-          <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink">
+          <button type="button" onClick={() => window.print()} className="flex h-7 items-center gap-1.5 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Print
           </button>
         </div>
       </div>
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-        <p className="font-serif text-[15px] font-semibold text-ink">Meaning, form or pronunciation?</p>
+        <p className="font-serif text-h3 font-semibold text-ink">Meaning, form or pronunciation?</p>
         {MF_ITEMS.map((row) => (
           <div key={row.example} className="grid grid-cols-[1fr_130px] gap-2.5 border-b border-border-faint py-1">
-            <p className="text-[11.5px] text-ink">{row.example}</p>
-            <p className="text-[11px] font-semibold text-muted">{row.answer}</p>
+            <p className="text-label text-ink">{row.example}</p>
+            <p className="text-label font-semibold text-muted">{row.answer}</p>
           </div>
         ))}
       </div>
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-        <p className="font-serif text-[15px] font-semibold text-ink">Model CCQs</p>
+        <p className="font-serif text-h3 font-semibold text-ink">Model CCQs</p>
         {CCQ_ITEMS.map((row) => (
           <div key={row.item} className="flex flex-col gap-0.5 border-b border-border-faint py-1">
-            <p className="text-[11.5px] text-ink">{row.item}</p>
-            <p className="text-[11px] italic text-muted">{row.model}</p>
+            <p className="text-label text-ink">{row.item}</p>
+            <p className="text-label italic text-muted">{row.model}</p>
           </div>
         ))}
       </div>
@@ -414,14 +414,14 @@ function StagingExample() {
         <div className="flex flex-col gap-2.5">
           <p className="font-serif text-lg font-semibold text-ink">Example — clarifying &quot;used to,&quot; fully MFP&apos;d</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[110px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[110px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Focus</p>
               <p>What the teacher does</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.label} className="grid grid-cols-[110px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold" style={{ color: r.color }}>{r.label}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold" style={{ color: r.color }}>{r.label}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -457,7 +457,7 @@ export default function MfpSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: has anyone taught a grammar point perfectly, then watched students say it
             unintelligibly out loud? What went missing?
           </p>
@@ -469,7 +469,7 @@ export default function MfpSession() {
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {PILLARS.map((p) => (
             <div key={p.label} className="rounded-[8px] border border-t-[3px] bg-card p-3.5" style={{ borderTopColor: p.color, borderColor: "var(--color-border)" }}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: p.color }}>{p.label}</p>
+              <p className="text-micro font-bold uppercase tracking-[0.08em]" style={{ color: p.color }}>{p.label}</p>
               <p className="mt-1.5 text-xs leading-relaxed text-ink">{p.text}</p>
             </div>
           ))}

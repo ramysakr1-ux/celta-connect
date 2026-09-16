@@ -70,7 +70,7 @@ export function FilmedObservationTaskPanel({
   if (!taskId) {
     return (
       <div className="card p-4">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
         <p className="mt-2 text-sm text-muted">Your tutor hasn&apos;t attached a task to this recording yet.</p>
       </div>
     );
@@ -79,7 +79,7 @@ export function FilmedObservationTaskPanel({
   return (
     <div className="card card-garnet flex flex-col gap-3 p-4">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
         {criteriaLine ? <p className="mt-1 text-sm text-ink">{criteriaLine}</p> : null}
         <p className="mt-1 text-xs text-muted">
           Answer as you watch — it saves as you go, and the video pauses to let you catch up.
@@ -95,7 +95,7 @@ export function FilmedObservationTaskPanel({
       <div className="flex flex-col gap-3">
         {prompts.map((prompt, i) => (
           <div key={i} className="flex flex-col gap-1">
-            <label className="text-[13px] leading-[1.45] text-ink">
+            <label className="text-meta leading-[1.45] text-ink">
               <span className="mr-1.5 text-xs tabular-nums text-muted">{i + 1}</span>
               {prompt}
             </label>
@@ -112,7 +112,7 @@ export function FilmedObservationTaskPanel({
 
         {ratingLabel && ratingOptions.length > 0 ? (
           <div className="flex flex-col gap-1.5">
-            <p className="text-[13px] leading-[1.45] text-ink">{ratingLabel}</p>
+            <p className="text-meta leading-[1.45] text-ink">{ratingLabel}</p>
             <div className="flex flex-wrap gap-1.5">
               {ratingOptions.map((opt) => {
                 const on = values["rating"] === opt;
@@ -137,7 +137,7 @@ export function FilmedObservationTaskPanel({
       </div>
 
       <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
-        <span className="text-[11px] text-muted">{saved ? "Saved" : "Saving…"}</span>
+        <span className="text-label text-muted">{saved ? "Saved" : "Saving…"}</span>
         {!completedAt ? (
           <form action={formAction} className="flex flex-col gap-1">
             <input type="hidden" name="task_id" value={taskId} />
@@ -150,7 +150,7 @@ export function FilmedObservationTaskPanel({
             >
               {pending ? "Saving…" : "Mark as complete"}
             </button>
-            <span className="text-[11px] text-muted">This is what logs the hour toward your six.</span>
+            <span className="text-label text-muted">This is what logs the hour toward your six.</span>
           </form>
         ) : null}
       </div>

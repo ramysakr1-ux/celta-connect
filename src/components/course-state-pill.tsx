@@ -36,7 +36,7 @@ export function CourseStatePill({
   detail?: string;
 }) {
   return (
-    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${COURSE_STATE_TINT[state]}`}>
+    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-label font-semibold ${COURSE_STATE_TINT[state]}`}>
       {label ?? COURSE_STATE_LABEL[state]}
       {detail ? ` · ${detail}` : ""}
     </span>

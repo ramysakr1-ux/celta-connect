@@ -41,7 +41,7 @@ export default async function ClosedCoursesPage({
     <div className="flex flex-col gap-6">
       <div>
         <BackLink href="/dashboard/admin" label="Courses" />
-        <h1 className="mt-2 font-serif text-[24px] font-semibold text-ink">Closed courses</h1>
+        <h1 className="mt-2 font-serif text-h1 font-semibold text-ink">Closed courses</h1>
       </div>
 
       {closedCourses.length > 0 ? (

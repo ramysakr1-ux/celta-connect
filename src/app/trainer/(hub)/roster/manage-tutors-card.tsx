@@ -30,10 +30,10 @@ export interface PendingTutorInvite {
   tutorRole: string | null;
 }
 
-const SELECT = "rounded-[6px] border border-border bg-card px-2.5 text-[12.5px] font-medium text-ink outline-none focus:border-primary disabled:opacity-60";
-const INPUT = "h-9 rounded-[8px] border border-border bg-card px-3 text-[13px] text-ink outline-none placeholder:text-[oklch(60%_0.015_70)] focus:border-primary";
+const SELECT = "rounded-[6px] border border-border bg-card px-2.5 text-meta font-medium text-ink outline-none focus:border-primary disabled:opacity-60";
+const INPUT = "h-9 rounded-[8px] border border-border bg-card px-3 text-meta text-ink outline-none placeholder:text-[oklch(60%_0.015_70)] focus:border-primary";
 const RULE = "border-t border-border-faint pt-3";
-const EYEBROW = "text-[11px] font-bold tracking-[0.08em] text-muted uppercase";
+const EYEBROW = "text-label font-bold tracking-[0.08em] text-muted uppercase";
 
 // "Also at this centre": one chip per same-centre tutor not on this course.
 // assign-tutor-actions.ts's own comment: "adding a trainer to a second
@@ -47,10 +47,10 @@ function AssignChip({ courseId, trainer }: { courseId: string; trainer: Assignab
     <form action={action} className="flex flex-col gap-1">
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="profile_id" value={trainer.id} />
-      <div className="flex h-9 items-center gap-2.5 rounded-[8px] border border-border pr-1.5 pl-3 text-[13px] text-ink">
+      <div className="flex h-9 items-center gap-2.5 rounded-[8px] border border-border pr-1.5 pl-3 text-meta text-ink">
         {trainer.name}
-        <span className="text-[12px] text-muted">{trainer.currentCourseLabel ?? "no course"}</span>
-        <select name="tutor_role" value={tutorRole} onChange={(e) => setTutorRole(e.target.value)} aria-label="Role on this course" className={`h-[26px] ${SELECT} text-[12px]`}>
+        <span className="text-meta text-muted">{trainer.currentCourseLabel ?? "no course"}</span>
+        <select name="tutor_role" value={tutorRole} onChange={(e) => setTutorRole(e.target.value)} aria-label="Role on this course" className={`h-[26px] ${SELECT} text-meta`}>
           {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
             <option key={k} value={k}>
               {v}
@@ -60,7 +60,7 @@ function AssignChip({ courseId, trainer }: { courseId: string; trainer: Assignab
         <button
           type="submit"
           disabled={pending}
-          className="wash inline-flex h-[26px] items-center rounded-[6px] bg-card-inset px-2.5 text-[12px] font-semibold text-ink disabled:opacity-60"
+          className="wash inline-flex h-[26px] items-center rounded-[6px] bg-card-inset px-2.5 text-meta font-semibold text-ink disabled:opacity-60"
         >
           {pending ? "Adding…" : "Add to course"}
         </button>
@@ -96,8 +96,8 @@ export function ManageTutorsCard({
   return (
     <div className="sheet flex flex-col gap-3.5 px-6 py-5">
       <div className="flex flex-wrap items-baseline gap-2.5">
-        <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Tutors</h2>
-        <p className="text-[12.5px] text-muted">Invite by name, or hand off a role -- including the MCT itself.</p>
+        <h2 className="font-serif text-h2 font-semibold text-ink-warm">Tutors</h2>
+        <p className="text-meta text-muted">Invite by name, or hand off a role -- including the MCT itself.</p>
       </div>
 
       <div className="flex flex-col">
@@ -106,17 +106,17 @@ export function ManageTutorsCard({
             <div className="flex min-w-0 items-center gap-3">
               <Avatar name={t.name} size="sm" />
               <div className="flex min-w-0 flex-col gap-px">
-                <p className="text-[14px] font-semibold text-ink">
+                <p className="text-body font-semibold text-ink">
                   {t.name}
-                  {t.isSecondary ? <span className="ml-1.5 text-[12px] font-normal text-muted">(second course)</span> : null}
-                  {!t.joined ? <span className="ml-1.5 text-[12px] font-normal text-muted">(invited)</span> : null}
+                  {t.isSecondary ? <span className="ml-1.5 text-meta font-normal text-muted">(second course)</span> : null}
+                  {!t.joined ? <span className="ml-1.5 text-meta font-normal text-muted">(invited)</span> : null}
                 </p>
-                <p className="truncate text-[12px] text-muted">{t.email}</p>
+                <p className="truncate text-meta text-muted">{t.email}</p>
               </div>
             </div>
             <OwnedAssignmentsControl courseTutorId={t.courseTutorId} courseId={courseId} owned={t.ownedAssignmentTypes} variant="chips" />
             <TutorRoleControl courseTutorId={t.courseTutorId} courseId={courseId} current={t.role} selectClassName={`h-[30px] ${SELECT}`} />
-            <div className="w-[52px] text-right text-[12px]">
+            <div className="w-[52px] text-right text-meta">
               {t.isSecondary ? (
                 <form action={leaveSecondaryCourse}>
                   <input type="hidden" name="course_id" value={courseId} />
@@ -138,7 +138,7 @@ export function ManageTutorsCard({
         <input type="hidden" name="role" value="trainer" />
         <input name="full_name" type="text" placeholder="Name" aria-label="Name" className={`${INPUT} min-w-[160px] flex-1`} />
         <input name="email" type="email" placeholder="Email" aria-label="Email" required className={`${INPUT} min-w-[200px] flex-[1.4]`} />
-        <select name="tutor_role" defaultValue={DEFAULT_INVITE_TUTOR_ROLE} aria-label="Role on this course" className={`h-9 ${SELECT} rounded-[8px] text-[13px] font-normal`}>
+        <select name="tutor_role" defaultValue={DEFAULT_INVITE_TUTOR_ROLE} aria-label="Role on this course" className={`h-9 ${SELECT} rounded-[8px] text-meta font-normal`}>
           {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
             <option key={k} value={k}>
               {v}
@@ -148,7 +148,7 @@ export function ManageTutorsCard({
         <button
           type="submit"
           disabled={inviting}
-          className="inline-flex h-9 items-center rounded-[8px] px-4 text-[13px] font-semibold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60"
+          className="inline-flex h-9 items-center rounded-[8px] px-4 text-meta font-semibold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60"
           style={{ background: "var(--hub-accent)" }}
         >
           {inviting ? "Inviting…" : "Invite"}
@@ -161,7 +161,7 @@ export function ManageTutorsCard({
           <p className={EYEBROW}>Invited, not yet joined</p>
           {revokeState.error ? <p className="text-xs text-destructive">{revokeState.error}</p> : null}
           {pendingInvites.map((inv) => (
-            <div key={inv.id} className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+            <div key={inv.id} className="flex flex-wrap items-center justify-between gap-2 text-meta">
               <span className="text-ink">
                 {inv.fullName ?? inv.email}
                 <span className="text-muted">
@@ -171,7 +171,7 @@ export function ManageTutorsCard({
               <form action={revokeAction}>
                 <input type="hidden" name="invitation_id" value={inv.id} />
                 <input type="hidden" name="course_id" value={courseId} />
-                <button type="submit" disabled={revoking} className="text-[12px] text-muted underline disabled:opacity-60">
+                <button type="submit" disabled={revoking} className="text-meta text-muted underline disabled:opacity-60">
                   Withdraw
                 </button>
               </form>
@@ -183,7 +183,7 @@ export function ManageTutorsCard({
       {assignable.length > 0 ? (
         <div className={`${RULE} flex flex-col gap-2`}>
           <p className={EYEBROW}>Also at this centre</p>
-          <p className="text-[12.5px] text-muted">
+          <p className="text-meta text-muted">
             Adding a trainer to a second course adds to their assignments -- it doesn&apos;t remove them from the first.
           </p>
           <div className="flex flex-wrap gap-2">

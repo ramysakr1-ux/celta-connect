@@ -39,12 +39,12 @@ export function RoomHead({
           <BackLink href={back.href} label={back.label} />
         </div>
       ) : null}
-      {eyebrow ? <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">{eyebrow}</p> : null}
+      {eyebrow ? <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">{eyebrow}</p> : null}
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-serif text-[28px] leading-[1.15] font-semibold text-ink">{title}</h1>
+        <h1 className="font-serif text-h1 leading-[1.15] font-semibold text-ink">{title}</h1>
         {children ? <div className="flex shrink-0 flex-wrap items-center gap-2">{children}</div> : null}
       </div>
-      {lede ? <p className="mt-1 max-w-[68ch] text-[13.5px] leading-relaxed text-muted">{lede}</p> : null}
+      {lede ? <p className="mt-1 max-w-[68ch] text-body leading-relaxed text-muted">{lede}</p> : null}
     </div>
   );
 }

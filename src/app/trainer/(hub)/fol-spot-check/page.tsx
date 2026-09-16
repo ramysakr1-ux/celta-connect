@@ -83,8 +83,8 @@ export default async function FolSpotCheckPage() {
       <div className="sheet flex flex-col gap-2 p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Focus on the Learner · Days 2–9</p>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
-          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">FOL pool by class</h1>
+          <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
+          <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">FOL pool by class</h1>
           <p className="text-sm text-muted">
             {dayProgress ? `Day ${dayProgress.currentDay} of ${dayProgress.totalDays}` : null}
             {dayProgress && daysUntilDivergence !== null ? " · " : null}

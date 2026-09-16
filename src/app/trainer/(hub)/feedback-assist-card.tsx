@@ -57,7 +57,7 @@ export function FeedbackAssistCard({
     <div className="flex flex-col gap-4 rounded-[8px] border border-border border-t-[3px] border-t-gold bg-card px-[22px] py-5">
       <div className="flex items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Feedback assist — yours</p>
+          <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Feedback assist — yours</p>
           <p className="text-xs leading-[1.5] text-muted text-pretty">
             Starts from the course default the MCT set, then it&apos;s yours — edit it or turn it off, on your own
             feedback only.
@@ -87,7 +87,7 @@ export function FeedbackAssistCard({
                 }
                 setEditing((v) => !v);
               }}
-              className="wash h-8 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
+              className="wash h-8 rounded-[6px] border border-border bg-card px-3.5 text-meta font-medium text-ink"
             >
               {editing ? "Cancel" : "Edit"}
             </button>
@@ -115,7 +115,7 @@ export function FeedbackAssistCard({
                 <button
                   type="submit"
                   disabled={savePending}
-                  className="h-[30px] rounded-[6px] bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
+                  className="h-[30px] rounded-[6px] bg-primary px-3.5 text-meta font-semibold text-primary-foreground disabled:opacity-60"
                 >
                   {savePending ? "Saving…" : "Save"}
                 </button>
@@ -133,7 +133,7 @@ export function FeedbackAssistCard({
           )}
         </div>
       ) : (
-        <p className="text-[12.5px] text-muted">Off — the tone icon won&apos;t appear on your feedback forms.</p>
+        <p className="text-meta text-muted">Off — the tone icon won&apos;t appear on your feedback forms.</p>
       )}
     </div>
   );
@@ -154,7 +154,7 @@ function ExampleRow({
 }) {
   return (
     <div className="flex items-baseline gap-2">
-      <span className="w-[78px] shrink-0 pt-2 text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: ink }}>
+      <span className="w-[78px] shrink-0 pt-2 text-micro font-bold tracking-[0.06em] uppercase" style={{ color: ink }}>
         {label}
       </span>
       <textarea
@@ -162,7 +162,7 @@ function ExampleRow({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={2}
-        className="min-h-[34px] flex-1 rounded-[6px] border border-border bg-card px-2.5 py-[7px] text-[12.5px] leading-[1.4] text-ink outline-none focus:border-primary"
+        className="min-h-[34px] flex-1 rounded-[6px] border border-border bg-card px-2.5 py-[7px] text-meta leading-[1.4] text-ink outline-none focus:border-primary"
       />
     </div>
   );
@@ -170,8 +170,8 @@ function ExampleRow({
 
 function DisplayRow({ label, ink, text }: { label: string; ink: string; text: string }) {
   return (
-    <div className="flex items-baseline gap-2 text-[12.5px] leading-[1.5]">
-      <span className="w-[78px] shrink-0 text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: ink }}>
+    <div className="flex items-baseline gap-2 text-meta leading-[1.5]">
+      <span className="w-[78px] shrink-0 text-micro font-bold tracking-[0.06em] uppercase" style={{ color: ink }}>
         {label}
       </span>
       <span className="text-ink">{text || <span className="text-muted italic">Not set yet</span>}</span>

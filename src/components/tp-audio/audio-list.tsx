@@ -101,7 +101,7 @@ export function AudioList({ rows }: { rows: AudioRow[] }) {
 
         return (
           <div key={level}>
-            <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">{level}</h3>
+            <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">{level}</h3>
             <div className="mt-2 flex flex-col gap-4">
               {books.map((book) => (
                 <div key={book}>

@@ -66,16 +66,16 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example lesson — past continuous for interrupted actions</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -113,14 +113,14 @@ function DebriefWithTrainerNotes() {
           type="button"
           onClick={() => setOpen(false)}
           data-print-hide
-          className="h-7 rounded-[6px] border border-border bg-card px-3 text-[11px] font-semibold text-ink"
+          className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink"
         >
           Hide
         </button>
       </div>
       <OrderExercise correctOrder={CORRECT_ORDER} shuffled={SHUFFLED} />
       <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — trainer notes
         </p>
@@ -161,7 +161,7 @@ export default function GuidedDiscoverySession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: who worked out a grammar rule for themselves at school, rather than being told it?
             Did it stick better?
           </p>
@@ -179,8 +179,8 @@ export default function GuidedDiscoverySession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">How do you think a guided discovery lesson should be staged?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
+          <p className="text-meta text-ink">How do you think a guided discovery lesson should be staged?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
         </div>
       </div>
 
@@ -188,7 +188,7 @@ export default function GuidedDiscoverySession() {
         <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">Staging a guided discovery lesson</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A guided discovery lesson starts with the target language already sitting inside a context — a short
             text, a story, a listening — never on the board in isolation. From that context the teacher lifts one or
             two marker sentences that contain the target form. Students don&apos;t get a rule yet; instead the teacher
@@ -208,7 +208,7 @@ export default function GuidedDiscoverySession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — answer these from the text, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />

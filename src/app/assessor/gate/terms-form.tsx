@@ -46,7 +46,7 @@ export function AssessorTermsForm() {
       }}
       className="flex flex-col gap-4"
     >
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Terms of access</p>
+      <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Terms of access</p>
       <div className="flex flex-col gap-3">
         {TERMS.map((text, i) => (
           <label key={i} className="flex items-start gap-2.5 text-sm text-ink">

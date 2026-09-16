@@ -27,11 +27,11 @@ export function ChatRetentionCard({
 
   return (
     <form action={updateChatRetentionDays} className="sheet flex flex-col gap-3 px-6 py-5">
-      <h2 className="font-serif text-[20px] font-semibold text-ink-warm">Chat retention</h2>
+      <h2 className="font-serif text-h2 font-semibold text-ink-warm">Chat retention</h2>
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="chat_retention_mode" value={mode} />
       <input type="hidden" name="chat_retention_days" value={days} />
-      <div className="flex flex-col gap-2 text-[13px]">
+      <div className="flex flex-col gap-2 text-meta">
         <label className={`flex cursor-pointer items-center gap-2.5 ${mode === "days" ? "text-ink" : "text-muted"}`}>
           <input
             type="radio"
@@ -49,7 +49,7 @@ export function ChatRetentionCard({
             onFocus={() => setMode("days")}
             onChange={(e) => setDays(Math.max(1, Number(e.target.value) || 1))}
             aria-label="Days to keep messages"
-            className="h-[30px] w-[54px] rounded-[6px] border border-border bg-card text-center text-[13px] text-ink tabular-nums outline-none focus:border-primary"
+            className="h-[30px] w-[54px] rounded-[6px] border border-border bg-card text-center text-meta text-ink tabular-nums outline-none focus:border-primary"
           />
           <span>{days === 1 ? "day" : "days"}</span>
         </label>
@@ -66,7 +66,7 @@ export function ChatRetentionCard({
         </label>
       </div>
       {retaining ? (
-        <p className="text-[11.5px] leading-[1.5] text-muted">
+        <p className="text-label leading-[1.5] text-muted">
           Retained chat is discoverable in a complaint or an appeal -- that cuts both ways: it protects a tutor accused of
           something they did not say, and it exposes an off-hand remark.
           {mode === "course" ? " Cleared when this course closes out, along with everything else." : ""}
@@ -75,7 +75,7 @@ export function ChatRetentionCard({
       <div className="flex justify-end">
         <button
           type="submit"
-          className="wash inline-flex h-8 items-center rounded-[8px] border border-border bg-card px-3.5 text-[12.5px] font-semibold text-ink"
+          className="wash inline-flex h-8 items-center rounded-[8px] border border-border bg-card px-3.5 text-meta font-semibold text-ink"
         >
           Save
         </button>

@@ -257,7 +257,7 @@ export function DeliveredSessionCard({
       <p className="text-xs text-muted">{row.deliveredAt}</p>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Your self-evaluation</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Your self-evaluation</p>
           {row.selfEvaluation ? (
             <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.selfEvaluation}</p>
           ) : (
@@ -272,7 +272,7 @@ export function DeliveredSessionCard({
           )}
         </div>
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Supervisor&apos;s feedback</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Supervisor&apos;s feedback</p>
           {row.supervisorFeedback ? (
             <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.supervisorFeedback}</p>
           ) : (
@@ -287,7 +287,7 @@ export function DeliveredSessionCard({
           )}
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-muted">Neither document is countersigned or shown to candidates.</p>
+      <p className="mt-2 text-label text-muted">Neither document is countersigned or shown to candidates.</p>
     </div>
   );
 }
@@ -349,8 +349,8 @@ export function FeedbackSessionCard({
       </div>
 
       <div className="mt-2">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Your private draft assessment (Task 13)</p>
-        <p className="text-[11px] text-muted">Written before seeing the supervisor&apos;s own view. Never reaches the candidate.</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Your private draft assessment (Task 13)</p>
+        <p className="text-label text-muted">Written before seeing the supervisor&apos;s own view. Never reaches the candidate.</p>
         {row.privateDraft ? (
           <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.privateDraft}</p>
         ) : (
@@ -367,7 +367,7 @@ export function FeedbackSessionCard({
 
       {row.privateDraft && !row.finalizedAt ? (
         <form action={finalAction} className="mt-2 flex flex-col gap-1.5 border-t border-border-faint pt-2">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Discuss with your supervisor</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Discuss with your supervisor</p>
           <input type="hidden" name="id" value={row.id} />
           <textarea name="supervisor_discussion_notes" rows={2} placeholder="What the discussion covered" className={textareaClass} />
           <button type="submit" disabled={finalPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink wash disabled:opacity-60">
@@ -377,14 +377,14 @@ export function FeedbackSessionCard({
         </form>
       ) : row.finalizedAt ? (
         <div className="mt-2 border-t border-border-faint pt-2">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Discussion</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Discussion</p>
           <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.supervisorDiscussionNotes}</p>
         </div>
       ) : null}
 
       <div className="mt-2 border-t border-border-faint pt-2">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Feedback on how you gave feedback</p>
-        <p className="text-[11px] text-muted">Not what it said -- how you delivered it. Private, discussed straight after.</p>
+        <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Feedback on how you gave feedback</p>
+        <p className="text-label text-muted">Not what it said -- how you delivered it. Private, discussed straight after.</p>
         {row.feedbackOnFeedbackNotes ? (
           <p className="mt-1 text-xs whitespace-pre-wrap text-ink">{row.feedbackOnFeedbackNotes}</p>
         ) : (
@@ -431,7 +431,7 @@ function CandidateNoteField({ id, stage, label, value }: { id: string; stage: "b
     <form action={action} className="flex flex-col gap-1">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="stage" value={stage} />
-      <label className="text-[11px] font-semibold tracking-[0.05em] text-muted uppercase">{label}</label>
+      <label className="text-label font-semibold tracking-[0.05em] text-muted uppercase">{label}</label>
       <textarea name="notes" defaultValue={value ?? ""} rows={2} className={textareaClass} />
       <button type="submit" disabled={pending} className="self-start text-xs font-semibold text-primary hover:underline disabled:opacity-60">
         {pending ? "Saving…" : "Save"}

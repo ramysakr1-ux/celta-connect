@@ -43,7 +43,7 @@ export function VolunteerPoolRow({
             <NextClassStatusTag status={primary.nextClassStatus} />
           </div>
           {members.length > 1 ? (
-            <button type="button" onClick={() => setExpanded((v) => !v)} className="text-left text-[11px] font-semibold text-primary hover:underline">
+            <button type="button" onClick={() => setExpanded((v) => !v)} className="text-left text-label font-semibold text-primary hover:underline">
               Linked &middot; {members.length} courses {expanded ? "▲" : "▼"}
             </button>
           ) : null}
@@ -80,7 +80,7 @@ export function VolunteerPoolRow({
                       await unlinkVolunteerAction(fd);
                     });
                   }}
-                  className="text-[11px] font-semibold text-destructive hover:underline disabled:opacity-50"
+                  className="text-label font-semibold text-destructive hover:underline disabled:opacity-50"
                 >
                   {pending ? "…" : "Unlink"}
                 </button>
@@ -97,9 +97,9 @@ function LevelTag({ level, courseName }: { level: string | null; courseName: str
   return (
     <div className="flex items-center gap-[7px]">
       {level ? (
-        <span className={`rounded-[4px] px-1.5 py-px text-[10px] font-bold ${levelPillClass(level)}`}>{extractLevelCode(level)}</span>
+        <span className={`rounded-[4px] px-1.5 py-px text-micro font-bold ${levelPillClass(level)}`}>{extractLevelCode(level)}</span>
       ) : null}
-      <span className="text-[11px] text-muted">{courseName}</span>
+      <span className="text-label text-muted">{courseName}</span>
     </div>
   );
 }
@@ -117,7 +117,7 @@ function NextClassStatusTag({ status }: { status: "coming" | "declined" | "no_re
         ? "var(--color-status-at-risk-text)"
         : "var(--color-muted)";
   return (
-    <span className="text-[11px] font-semibold" style={{ color: colour }}>
+    <span className="text-label font-semibold" style={{ color: colour }}>
       {status === "coming" ? "Coming next class" : status === "declined" ? "Can't make next class" : "No reply yet"}
     </span>
   );

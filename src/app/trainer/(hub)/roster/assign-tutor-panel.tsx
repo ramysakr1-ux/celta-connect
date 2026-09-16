@@ -39,7 +39,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
         <input type="hidden" name="course_id" value={courseId} />
 
         <div className="flex flex-1 min-w-[220px] flex-col gap-1">
-          <label className="text-[11px] font-medium text-muted">Tutor</label>
+          <label className="text-label font-medium text-muted">Tutor</label>
           <select
             name="profile_id"
             required
@@ -57,7 +57,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] font-medium text-muted">Role on this course</label>
+          <label className="text-label font-medium text-muted">Role on this course</label>
           <select
             name="tutor_role"
             value={tutorRole}

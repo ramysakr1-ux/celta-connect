@@ -240,7 +240,7 @@ export default async function AdminDashboardPage({
         <div className="flex items-start gap-[11px] rounded-[6px] border border-[color-mix(in_oklab,oklch(30%_0.042_58)_30%,transparent)] bg-[color-mix(in_oklab,oklch(30%_0.042_58)_9%,var(--color-card))] px-[15px] py-[13px]">
           <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[oklch(30%_0.042_58)]" />
           <div className="flex flex-col gap-[3px]">
-            <p className="text-[13px] font-semibold text-ink">Centre number set — {center.center_number}</p>
+            <p className="text-meta font-semibold text-ink">Centre number set — {center.center_number}</p>
             <p className="text-xs leading-relaxed text-muted">Prints on every final report and cover sheet.</p>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default async function AdminDashboardPage({
               {groups.map((group, groupIndex) => (
                 <div key={group.group} className="flex flex-col gap-2">
                   <div className="flex items-baseline gap-2.5">
-                    <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">{GROUP_LABEL[group.group]}</p>
+                    <p className="text-micro font-semibold tracking-[0.12em] text-muted uppercase">{GROUP_LABEL[group.group]}</p>
                     <p className="text-xs text-muted">
                       {group.courses.length} course{group.courses.length === 1 ? "" : "s"}
                     </p>
@@ -325,7 +325,7 @@ export default async function AdminDashboardPage({
 
               {closedCourses.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Closed</p>
+                  <p className="text-micro font-semibold tracking-[0.12em] text-muted uppercase">Closed</p>
                   <Link
                     href="/dashboard/admin/courses/closed"
                     className="wash card flex items-center justify-between gap-4 px-5 py-4 transition-colors duration-150"
@@ -353,7 +353,7 @@ export default async function AdminDashboardPage({
         <div className="flex flex-col gap-6">
         <div className="card flex flex-col gap-3 p-5">
           <div>
-            <h2 className="font-serif text-[17px] font-semibold text-ink">Centre material</h2>
+            <h2 className="font-serif text-h3 font-semibold text-ink">Centre material</h2>
             <p className="mt-0.5 text-xs text-muted">Shared by every course at this centre. Built once, carried forward.</p>
           </div>
           <div className="flex flex-col">
@@ -380,7 +380,7 @@ export default async function AdminDashboardPage({
           {/* The one sentence worth keeping from the deleted "Course material"
               card. It belongs here, next to the shared library it is about,
               rather than under a heading that implied a choice to make. */}
-          <p className="text-[11px] leading-relaxed text-muted">
+          <p className="text-label leading-relaxed text-muted">
             Want a head start closer to a specific past course? Use &quot;Duplicate this course&quot; from that
             course&apos;s own page. TP points and assignment briefs are already shared centre-wide, so there is
             nothing to copy there.

@@ -42,7 +42,7 @@ export function DeliveryModePicker({
                   muted, 3px apart. The label does NOT change colour when
                   selected in the design -- the ring and the fill carry that. */}
               <span className="flex flex-1 flex-col gap-[3px]">
-                <span className="text-[13px] font-semibold text-ink">{option.label}</span>
+                <span className="text-meta font-semibold text-ink">{option.label}</span>
                 <span className="text-xs text-muted">{option.description}</span>
               </span>
             </button>
@@ -55,19 +55,19 @@ export function DeliveryModePicker({
           impact.tone === "warning" ? "border-status-warning-text/40 bg-status-warning-bg" : "border-primary/30 bg-primary/5"
         }`}
       >
-        <p className={`text-[11px] font-semibold uppercase tracking-[0.09em] ${impact.tone === "warning" ? "text-status-warning-text" : "text-primary"}`}>
+        <p className={`text-label font-semibold uppercase tracking-[0.09em] ${impact.tone === "warning" ? "text-status-warning-text" : "text-primary"}`}>
           {impact.heading}
         </p>
         <div className="flex flex-col gap-1.5">
           {impact.rows.map((row) => (
             <div key={row.what} className="flex items-start gap-2.5">
-              <span className={`w-[110px] shrink-0 text-[11px] font-semibold ${TONE_CLASS[row.tone]}`}>{row.what}</span>
+              <span className={`w-[110px] shrink-0 text-label font-semibold ${TONE_CLASS[row.tone]}`}>{row.what}</span>
               <span className="text-xs leading-relaxed text-ink">{row.text}</span>
             </div>
           ))}
         </div>
       </div>
-      <p className="text-[11px] text-muted">You can change this until the timetable is locked.</p>
+      <p className="text-label text-muted">You can change this until the timetable is locked.</p>
     </div>
   );
 }

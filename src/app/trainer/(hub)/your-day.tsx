@@ -67,8 +67,8 @@ export function YourDay({ slots, serverNowMs, accent }: { slots: DaySlot[]; serv
       }}
     >
       <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
-        <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Your day</h3>
-        <span className="text-[12.5px] text-muted">
+        <h3 className="font-serif text-h2 font-semibold text-ink-warm">Your day</h3>
+        <span className="text-meta text-muted">
           {slots.length === 0 ? "Nothing of yours today" : `Named on ${slots.length} today`}
         </span>
       </div>
@@ -92,37 +92,37 @@ export function YourDay({ slots, serverNowMs, accent }: { slots: DaySlot[]; serv
                       : { borderColor: "var(--color-muted)" }
                 }
               />
-              <span className="text-[12px] font-semibold tabular-nums" style={{ color: strong ? accent : "var(--color-muted)" }}>
+              <span className="text-meta font-semibold tabular-nums" style={{ color: strong ? accent : "var(--color-muted)" }}>
                 {s.time}
               </span>
               <span className="min-w-0">
-                <span className="text-[13.5px]" style={strong ? { color: accent, fontWeight: 700 } : undefined}>
+                <span className="text-body" style={strong ? { color: accent, fontWeight: 700 } : undefined}>
                   {s.title}
                 </span>
                 {st === "now" ? (
                   <span
-                    className="ml-2 rounded-full px-1.5 py-[2px] text-[9.5px] font-bold tracking-[0.08em] uppercase"
+                    className="ml-2 rounded-full px-1.5 py-[2px] text-micro font-bold tracking-[0.08em] uppercase"
                     style={{ background: accent, color: "var(--color-primary-foreground)" }}
                   >
                     Now
                   </span>
                 ) : st === "next" ? (
-                  <span className="ml-2 rounded-full bg-card-inset px-1.5 py-[2px] text-[9.5px] font-bold tracking-[0.08em] text-muted uppercase">
+                  <span className="ml-2 rounded-full bg-card-inset px-1.5 py-[2px] text-micro font-bold tracking-[0.08em] text-muted uppercase">
                     Next
                   </span>
                 ) : null}
                 {st === "now" && s.zoomUrl ? (
-                  <a href={s.zoomUrl} target="_blank" rel="noreferrer" className="ml-2 text-[11.5px] font-semibold underline" style={{ color: accent }}>
+                  <a href={s.zoomUrl} target="_blank" rel="noreferrer" className="ml-2 text-label font-semibold underline" style={{ color: accent }}>
                     Join
                   </a>
                 ) : null}
-                {s.sub ? <span className="block text-[11.5px] text-muted">{s.sub}</span> : null}
+                {s.sub ? <span className="block text-label text-muted">{s.sub}</span> : null}
               </span>
             </div>
           );
         })}
       </div>
-      <p className="border-t border-border-faint px-[18px] py-2.5 text-[11.5px] text-muted">
+      <p className="border-t border-border-faint px-[18px] py-2.5 text-label text-muted">
         Only sessions you are named on.{" "}
         <a href="/trainer/timetable" className="underline hover:text-ink">
           Full timetable

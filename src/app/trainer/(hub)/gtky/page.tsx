@@ -47,8 +47,8 @@ export default async function GtkyPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Getting to know you</h1>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
+        <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Getting to know you</h1>
         <p className="mt-1 text-sm text-muted">
           {gtkyEvent?.event_date
             ? `Timetabled ${formatCalendarDate(gtkyEvent.event_date, { weekday: "long", month: "long" })}${gtkyEvent.event_time ? ` at ${gtkyEvent.event_time.slice(0, 5)}` : ""} ("${gtkyEvent.title}"). `

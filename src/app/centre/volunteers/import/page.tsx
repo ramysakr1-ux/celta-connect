@@ -25,7 +25,7 @@ export default async function VolunteerImportPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Volunteer pool</p>
+          <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Volunteer pool</p>
           <h1 className="font-serif text-2xl text-ink">Import volunteers from a spreadsheet</h1>
         </div>
         <Link href="/centre/volunteers" className="text-sm text-muted hover:text-ink">

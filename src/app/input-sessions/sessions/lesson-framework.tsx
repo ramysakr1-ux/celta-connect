@@ -53,20 +53,20 @@ function DecisionTree() {
       <div className="h-5 w-[1.5px] bg-border" />
       <div className="grid w-full grid-cols-2 gap-10">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">Language</p>
+          <p className="text-micro font-bold uppercase tracking-[0.08em] text-primary">Language</p>
           <p className="text-center text-xs text-muted">Does the target language arise from a text?</p>
           <div className="flex w-full gap-2">
-            <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/5 p-2 text-center text-[11.5px] font-semibold text-primary">No → PPP / TTT</div>
-            <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/10 p-2 text-center text-[11.5px] font-semibold text-primary">Yes → Text-Based</div>
+            <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/5 p-2 text-center text-label font-semibold text-primary">No → PPP / TTT</div>
+            <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/10 p-2 text-center text-label font-semibold text-primary">Yes → Text-Based</div>
           </div>
-          <div className="w-full rounded-[6px] border border-muted/25 bg-muted/10 p-2 text-center text-[11.5px] font-semibold text-muted">Practice only → Language Practice</div>
+          <div className="w-full rounded-[6px] border border-muted/25 bg-muted/10 p-2 text-center text-label font-semibold text-muted">Practice only → Language Practice</div>
         </div>
         <div className="flex flex-col items-center gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-destructive">Skills</p>
+          <p className="text-micro font-bold uppercase tracking-[0.08em] text-destructive">Skills</p>
           <p className="text-center text-xs text-muted">Is it listening or reading?</p>
           <div className="flex w-full gap-2">
-            <div className="flex-1 rounded-[6px] border border-destructive/25 bg-destructive/5 p-2 text-center text-[11.5px] font-semibold text-destructive">Yes → Receptive Skills</div>
-            <div className="flex-1 rounded-[6px] border border-border bg-accent p-2 text-center text-[11.5px] font-semibold text-muted">No → Productive Skills</div>
+            <div className="flex-1 rounded-[6px] border border-destructive/25 bg-destructive/5 p-2 text-center text-label font-semibold text-destructive">Yes → Receptive Skills</div>
+            <div className="flex-1 rounded-[6px] border border-border bg-accent p-2 text-center text-label font-semibold text-muted">No → Productive Skills</div>
           </div>
         </div>
       </div>
@@ -94,9 +94,9 @@ function CardSort() {
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Card sort — pin each stage to its shape</p>
-        <p className="text-[11.5px] text-muted">{`${Object.keys(placed).length} of ${STAGES.length} pinned`}</p>
+        <p className="text-label text-muted">{`${Object.keys(placed).length} of ${STAGES.length} pinned`}</p>
       </div>
-      <p className="text-[11.5px] text-muted">Click a stage, then the shape you think it belongs to.</p>
+      <p className="text-label text-muted">Click a stage, then the shape you think it belongs to.</p>
       <div className="flex flex-wrap gap-2">
         {STAGES.map((s, i) => {
           const isPlaced = !!placed[i];
@@ -127,8 +127,8 @@ function CardSort() {
                 filled ? "border-primary bg-primary/10" : "border-border bg-accent"
               }`}
             >
-              <p className="font-serif text-[12.5px] font-semibold text-ink">{name}</p>
-              {filled ? <p className="text-center text-[10.5px] font-semibold text-primary">{STAGES[Number(filledIdx)].text}</p> : null}
+              <p className="font-serif text-meta font-semibold text-ink">{name}</p>
+              {filled ? <p className="text-center text-micro font-semibold text-primary">{STAGES[Number(filledIdx)].text}</p> : null}
             </button>
           );
         })}
@@ -170,7 +170,7 @@ function BuildSequence() {
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Build the sequence — pick a shape</p>
-        <p className="text-[11.5px] text-muted">
+        <p className="text-label text-muted">
           {done ? (allCorrect ? "Correct order!" : "Not quite — click a slot to remove it and retry") : `${built.length} of ${correct.length} placed`}
         </p>
       </div>
@@ -180,7 +180,7 @@ function BuildSequence() {
             key={fw}
             type="button"
             onClick={() => switchFw(fw)}
-            className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-[11.5px] font-semibold ${
+            className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-label font-semibold ${
               fw === seqFw ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-ink"
             }`}
           >
@@ -195,7 +195,7 @@ function BuildSequence() {
             type="button"
             disabled={used.has(stage)}
             onClick={() => pickChip(stage)}
-            className={`rounded-[6px] border-[1.5px] border-border bg-card px-3 py-1.5 text-[11.5px] font-semibold text-ink ${used.has(stage) ? "opacity-25" : ""}`}
+            className={`rounded-[6px] border-[1.5px] border-border bg-card px-3 py-1.5 text-label font-semibold text-ink ${used.has(stage) ? "opacity-25" : ""}`}
           >
             {stage}
           </button>
@@ -215,13 +215,13 @@ function BuildSequence() {
               }`}
             >
               <span
-                className={`flex size-[18px] flex-none items-center justify-center rounded-full text-[10px] font-bold ${
+                className={`flex size-[18px] flex-none items-center justify-center rounded-full text-micro font-bold ${
                   bad ? "bg-destructive text-white" : isCorrect ? "bg-primary text-white" : "bg-accent text-muted"
                 }`}
               >
                 {i + 1}
               </span>
-              <span className="text-[11.5px] font-semibold text-ink">{stage}</span>
+              <span className="text-label font-semibold text-ink">{stage}</span>
             </button>
           );
         })}
@@ -237,11 +237,11 @@ function NameThatFramework() {
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-bold text-ink">Name that framework</p>
-        <p className="text-[11.5px] text-muted">{`${count} of ${SCENARIOS.length} correct`}</p>
+        <p className="text-label text-muted">{`${count} of ${SCENARIOS.length} correct`}</p>
       </div>
       {SCENARIOS.map((s, si) => (
         <div key={s.text} className="flex flex-col gap-2.5 rounded-[8px] border border-border bg-card p-4">
-          <p className="text-[12.5px] leading-relaxed text-ink">{s.text}</p>
+          <p className="text-meta leading-relaxed text-ink">{s.text}</p>
           <div className="flex flex-wrap gap-1.5">
             {s.options.map((opt) => {
               const show = solved[si] && opt === s.correct;
@@ -252,7 +252,7 @@ function NameThatFramework() {
                   onClick={() => {
                     if (opt === s.correct) setSolved((sv) => ({ ...sv, [si]: true }));
                   }}
-                  className={`rounded-full border-[1.5px] px-2.5 py-1 text-[11.5px] font-semibold ${
+                  className={`rounded-full border-[1.5px] px-2.5 py-1 text-label font-semibold ${
                     show ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-ink"
                   }`}
                 >
@@ -299,13 +299,13 @@ function StageTimer() {
               }}
               className="w-14 rounded-[5px] border-[1.5px] border-border px-1.5 py-1 text-center text-xs text-ink outline-none"
             />
-            <p className="text-[11.5px] text-muted">min</p>
+            <p className="text-label text-muted">min</p>
           </div>
         </div>
       ))}
-      <p className={`rounded-[6px] px-4 py-2.5 text-center font-serif text-[15px] ${totalCls}`}>Total: {total} / 45 min</p>
+      <p className={`rounded-[6px] px-4 py-2.5 text-center font-serif text-h3 ${totalCls}`}>Total: {total} / 45 min</p>
       <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
-        <p className="text-[12.5px] font-semibold text-ink">
+        <p className="text-meta font-semibold text-ink">
           If your Lead-in &amp; Text Reading stage runs 5 minutes over, which stage do you trim without destroying the
           lesson aim?
         </p>
@@ -313,7 +313,7 @@ function StageTimer() {
           type="button"
           data-print-hide
           onClick={() => setRevealed((r) => !r)}
-          className="self-start flex h-[30px] items-center rounded-full border border-primary/40 bg-primary/10 px-3.5 text-[11.5px] font-semibold text-primary"
+          className="self-start flex h-[30px] items-center rounded-full border border-primary/40 bg-primary/10 px-3.5 text-label font-semibold text-primary"
         >
           Reveal the answer
         </button>
@@ -357,7 +357,7 @@ export default function LessonFrameworkSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: when you plan a lesson, what&apos;s the first decision you make — the language point,
             the skill, or the activity?
           </p>
@@ -372,13 +372,13 @@ export default function LessonFrameworkSession() {
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">The six shapes, stage by stage</p>
-          <p className="text-[11.5px] text-muted">Study these for a couple of minutes before the card sort below — you&apos;ll need them.</p>
+          <p className="text-label text-muted">Study these for a couple of minutes before the card sort below — you&apos;ll need them.</p>
         </div>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {SHAPES.map((sh) => (
             <div key={sh.name} className="rounded-[8px] border border-t-[3px] bg-card p-3" style={{ borderTopColor: sh.spine, borderColor: "var(--color-border)" }}>
-              <p className="font-serif text-[13.5px] font-semibold text-ink">{sh.name}</p>
-              <p className="mt-1.5 text-[10.5px] leading-relaxed text-muted">{sh.stages}</p>
+              <p className="font-serif text-body font-semibold text-ink">{sh.name}</p>
+              <p className="mt-1.5 text-micro leading-relaxed text-muted">{sh.stages}</p>
             </div>
           ))}
         </div>

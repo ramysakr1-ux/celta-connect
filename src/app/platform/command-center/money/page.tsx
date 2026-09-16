@@ -78,13 +78,13 @@ export default async function CommandCenterMoneyPage() {
   return (
     <div className="card flex max-w-[720px] flex-col gap-3.5 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Billing &amp; payments</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Billing &amp; payments</h2>
         {/* A10: Accounts was reachable from nowhere but a saved URL. Money is
             its parent, so Money is its door. */}
-        <Link href="/platform/accounts" className="text-[11px] font-bold text-primary hover:underline">
+        <Link href="/platform/accounts" className="text-label font-bold text-primary hover:underline">
           Accounts, across every centre
         </Link>
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted">
+        <div className="flex items-center gap-1.5 text-label font-bold text-muted">
           <div className="h-1.5 w-1.5 rounded-full bg-muted" />
           Not connected
         </div>
@@ -92,13 +92,13 @@ export default async function CommandCenterMoneyPage() {
 
       <div className="grid grid-cols-2 gap-2.5">
         <div className="flex flex-col gap-0.5 rounded-[6px] bg-card-inset px-3.5 py-3">
-          <div className="text-[10.5px] font-bold uppercase tracking-[0.06em] text-muted">Collected this month</div>
+          <div className="text-micro font-bold uppercase tracking-[0.06em] text-muted">Collected this month</div>
           <div className="font-serif text-xl font-semibold text-ink">
             {collectedThisMonth.size === 0 ? "—" : [...collectedThisMonth.entries()].map(([c, a]) => money(a, c)).join(" · ")}
           </div>
         </div>
         <div className="callout-gold flex flex-col gap-0.5 rounded-[6px] border border-gold/25 px-3.5 py-3">
-          <div className="text-[10.5px] font-bold uppercase tracking-[0.06em] text-gold">Outstanding</div>
+          <div className="text-micro font-bold uppercase tracking-[0.06em] text-gold">Outstanding</div>
           <div className="font-serif text-xl font-semibold text-ink">
             {outstanding.size === 0 ? "—" : [...outstanding.entries()].map(([c, a]) => money(a, c)).join(" · ")}
           </div>
@@ -106,21 +106,21 @@ export default async function CommandCenterMoneyPage() {
       </div>
 
       <div className="flex flex-col">
-        <div className="pb-2 text-[10.5px] font-bold uppercase tracking-[0.06em] text-muted">Recent transactions</div>
+        <div className="pb-2 text-micro font-bold uppercase tracking-[0.06em] text-muted">Recent transactions</div>
         {recent.length === 0 ? (
-          <p className="text-[12.5px] text-muted">Nothing recorded yet.</p>
+          <p className="text-meta text-muted">Nothing recorded yet.</p>
         ) : (
           recent.map((inv) => {
             const isOverdue = inv.status === "outstanding" && inv.due_date && new Date(inv.due_date) < overdueCutoff;
             return (
               <div key={inv.id} className="hover-ring flex items-center justify-between gap-2.5 border-t border-border py-[9px]">
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <div className="text-[12.5px] font-semibold text-ink">{centerNameById.get(inv.center_id) ?? "Unknown centre"}</div>
-                  <div className="text-[11px] text-muted">{inv.note ?? (inv.status === "paid" ? "Course fee" : "Invoice")}</div>
+                  <div className="text-meta font-semibold text-ink">{centerNameById.get(inv.center_id) ?? "Unknown centre"}</div>
+                  <div className="text-label text-muted">{inv.note ?? (inv.status === "paid" ? "Course fee" : "Invoice")}</div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-0.5">
-                  <div className="text-[12.5px] font-bold text-ink">{money(inv.amount, inv.currency)}</div>
-                  <div className={`text-[10.5px] font-bold ${inv.status === "paid" ? "text-primary" : isOverdue ? "text-destructive" : "text-muted"}`}>
+                  <div className="text-meta font-bold text-ink">{money(inv.amount, inv.currency)}</div>
+                  <div className={`text-micro font-bold ${inv.status === "paid" ? "text-primary" : isOverdue ? "text-destructive" : "text-muted"}`}>
                     {inv.status === "paid" ? "PAID" : isOverdue ? "OVERDUE" : inv.status.toUpperCase()}
                   </div>
                 </div>
@@ -130,7 +130,7 @@ export default async function CommandCenterMoneyPage() {
         )}
       </div>
 
-      <p className="text-[11.5px] leading-normal text-muted">
+      <p className="text-label leading-normal text-muted">
         No Stripe (or other payment processor) connection exists for platform billing yet — invoices above are recorded by hand.
       </p>
       <button
@@ -141,7 +141,7 @@ export default async function CommandCenterMoneyPage() {
       >
         Connect to Stripe
       </button>
-      <Link href="/platform/accounts" className="text-[11px] font-semibold text-muted hover:underline">
+      <Link href="/platform/accounts" className="text-label font-semibold text-muted hover:underline">
         Manage subscriptions &amp; invoices
       </Link>
     </div>

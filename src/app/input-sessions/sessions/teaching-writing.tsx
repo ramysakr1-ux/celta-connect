@@ -134,8 +134,8 @@ export default function TeachingWritingSession() {
       ]}
     >
       <div className="flex items-start gap-3 rounded-[8px] border border-border bg-card p-4">
-        <span className="flex-none rounded-[5px] bg-primary px-2 py-1 text-[11px] font-bold text-primary-foreground">3b</span>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <span className="flex-none rounded-[5px] bg-primary px-2 py-1 text-label font-bold text-primary-foreground">3b</span>
+        <p className="text-meta leading-relaxed text-ink">
           Helping learners to produce written language — staged, purposeful writing tasks. Cambridge combines writing and
           speaking as one criterion (3b), not two.
         </p>
@@ -155,7 +155,7 @@ export default function TeachingWritingSession() {
           </p>
         </div>
         <VideoReveal embedUrl="https://www.youtube-nocookie.com/embed/w4NsjnL4ieA?end=95" />
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           What was his attitude to writing? Have you ever felt exactly like that?
         </p>
         <p className="text-xs italic text-muted">Quick discussion, a minute.</p>
@@ -163,7 +163,7 @@ export default function TeachingWritingSession() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-serif text-lg font-semibold text-ink">Stage 2 · Preparing to write</h2>
-        <p className="text-[12.5px] leading-relaxed text-ink">
+        <p className="text-meta leading-relaxed text-ink">
           Think of the last piece of writing you did that actually mattered — a job application, a difficult email, a
           complaint. Did you write it once, or several times, changing it along the way?
         </p>
@@ -198,24 +198,24 @@ export default function TeachingWritingSession() {
         </h2>
         <article className="flex flex-col gap-3 rounded-[8px] border border-border bg-card p-5">
           <h3 className="font-serif text-base font-semibold text-ink">Product versus process</h3>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A product approach treats writing as the end result. Learners study a model text, notice its features and
             organisation, then produce their own version closely following that model — the focus is on the finished piece
             matching a known format, like a formal email or a for-and-against essay.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A process approach treats writing as a series of stages the writer moves through, not a single pass:
             generating ideas, planning or outlining, drafting, getting feedback, then redrafting based on that feedback
             before a final version. The focus shifts from the finished product to what happens on the way there.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Most real writing lessons on this course blend both. A model text still supplies useful language and
             structure, borrowed from the product approach, but learners plan, draft and redraft rather than writing once
             and stopping, borrowed from process. Peer feedback between drafts does real work here — it increases
             involvement, lets writers see their draft through another reader’s eyes, and builds confidence by making
             revision feel normal rather than a correction.
           </p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             Feedback at the end still splits in two: first, whether the task was achieved — did the letter actually
             persuade, did the email cover everything asked — then delayed language feedback on accuracy, dealt with once
             the writing is finished rather than mid-draft.

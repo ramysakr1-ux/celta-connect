@@ -53,12 +53,12 @@ function RankByFormality() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs font-bold text-ink">Rank these exponents, most to least formal</p>
-      <p className="text-[11.5px] text-muted">Function: making a suggestion. Click each in order, most formal first.</p>
+      <p className="text-label text-muted">Function: making a suggestion. Click each in order, most formal first.</p>
       <div className="flex flex-col gap-1.5">
         {picked.map((item, i) => (
           <div
             key={item}
-            className={`flex h-[38px] items-center rounded-[6px] border-[1.5px] px-3.5 text-[12.5px] font-semibold text-ink ${
+            className={`flex h-[38px] items-center rounded-[6px] border-[1.5px] px-3.5 text-meta font-semibold text-ink ${
               wrong ? "border-destructive bg-destructive/10" : "border-primary bg-primary/10"
             }`}
           >
@@ -70,17 +70,17 @@ function RankByFormality() {
             key={item}
             type="button"
             onClick={() => setPicked((p) => [...p, item])}
-            className="flex h-[38px] items-center rounded-[6px] border border-border bg-card px-3.5 text-left text-[12.5px] text-ink"
+            className="flex h-[38px] items-center rounded-[6px] border border-border bg-card px-3.5 text-left text-meta text-ink"
           >
             {item}
           </button>
         ))}
       </div>
-      {wrong ? <p className="text-[11.5px] text-destructive">Not the order most people would rank these — reset and try again.</p> : null}
+      {wrong ? <p className="text-label text-destructive">Not the order most people would rank these — reset and try again.</p> : null}
       <button
         type="button"
         onClick={() => setPicked([])}
-        className="self-start flex h-7 items-center rounded-[6px] border border-border px-3 text-[11.5px] font-semibold text-ink"
+        className="self-start flex h-7 items-center rounded-[6px] border border-border px-3 text-label font-semibold text-ink"
       >
         Reset
       </button>
@@ -110,16 +110,16 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example lesson — making suggestions</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -152,7 +152,7 @@ export default function FunctionalLanguageSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Lead-in · 2 minutes</p>
         <div className="rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">
+          <p className="text-meta text-ink">
             Quick show of hands: how many different ways can you think of, right now, to ask someone to close a
             window?
           </p>
@@ -170,8 +170,8 @@ export default function FunctionalLanguageSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
-          <p className="text-[13px] text-ink">How do you think a functional language lesson should be staged?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
+          <p className="text-meta text-ink">How do you think a functional language lesson should be staged?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
         </div>
       </div>
 
@@ -179,7 +179,7 @@ export default function FunctionalLanguageSession() {
         <p className="text-xs font-bold text-ink">Stage 3 · Read the text and check if your ideas were right or wrong</p>
         <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card p-4">
           <p className="font-serif text-sm font-semibold text-ink">Staging a functional language lesson</p>
-          <p className="text-[12.5px] leading-relaxed text-ink">
+          <p className="text-meta leading-relaxed text-ink">
             A functional lesson doesn&apos;t clarify one grammar structure — it teaches a set of exponents that all
             achieve the same social function, such as suggesting, complaining, or apologising. It usually opens with
             a situation or short dialogue that makes the function&apos;s context obvious. From that context the
@@ -197,7 +197,7 @@ export default function FunctionalLanguageSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — answer these from the text, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — answer these from the text, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />

@@ -70,7 +70,7 @@ export default async function FilmedObservationTaskPage({
 
       {task.criteria_codes.length > 0 ? (
         <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Input session this week</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Input session this week</p>
           <p className="text-sm text-ink">
             {task.criteria_codes.map((c) => `${c} · ${CRITERIA_LABELS[c] ?? c}`).join(" · ")}
           </p>
@@ -94,7 +94,7 @@ export default async function FilmedObservationTaskPage({
         />
 
         <div className="border-t border-border-faint pt-4">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
           {notes.length === 0 ? (
             <p className="mt-1.5 text-sm text-muted">Add quick notes while you watch — they&apos;ll show up here.</p>
           ) : (
@@ -106,7 +106,7 @@ export default async function FilmedObservationTaskPage({
                   <li key={i} className="flex items-start gap-2.5">
                     <Link
                       href={`/portfolio/${traineeId}/filmed-observation/${sessionId}?t=${n.timestamp_seconds}`}
-                      className="shrink-0 rounded-[4px] bg-surface-muted px-1.5 py-0.5 font-mono text-[11px] text-primary hover:underline"
+                      className="shrink-0 rounded-[4px] bg-surface-muted px-1.5 py-0.5 font-mono text-label text-primary hover:underline"
                     >
                       {formatClock(n.timestamp_seconds)}
                     </Link>

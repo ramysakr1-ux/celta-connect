@@ -40,7 +40,7 @@ export function TransactionsPanel({ transactions, timeZone }: { transactions: Tr
   return (
     <div className="card">
       <div className="border-b border-border px-5 py-4">
-        <h2 className="font-serif text-[17px] font-semibold text-ink">Recent provider activity</h2>
+        <h2 className="font-serif text-h3 font-semibold text-ink">Recent provider activity</h2>
         <p className="mt-0.5 text-xs text-muted">Every Stripe event received, most recent first.</p>
       </div>
       <ul className="flex flex-col">

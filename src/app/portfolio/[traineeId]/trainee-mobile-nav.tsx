@@ -28,7 +28,7 @@ export function TraineeMobileNav({ traineeId }: { traineeId: string }) {
           <Link
             key={tab.href}
             href={href}
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 text-center text-[10px] leading-tight font-medium ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 text-center text-micro leading-tight font-medium ${
               active ? "text-primary" : "text-muted"
             }`}
           >

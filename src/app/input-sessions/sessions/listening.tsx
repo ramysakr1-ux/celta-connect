@@ -166,25 +166,25 @@ function DialoguePlayer() {
             )}
           </button>
           <div className="flex-1">
-            <p className="text-[12.5px] font-semibold text-ink">Zoe asks Marcus — &quot;Staging a listening lesson&quot;</p>
-            <p className="text-[11px] text-muted">
+            <p className="text-meta font-semibold text-ink">Zoe asks Marcus — &quot;Staging a listening lesson&quot;</p>
+            <p className="text-label text-muted">
               {played === 0 ? "Not played yet" : `Played ${played} time${played > 1 ? "s" : ""}`} · browser text-to-speech, two voices
             </p>
           </div>
         </div>
         {currentLine ? (
           <div className="flex items-baseline gap-2 rounded-[6px] bg-accent px-3.5 py-2.5">
-            <p className={`flex-none text-[10.5px] font-bold uppercase tracking-[0.04em] ${currentLine.speaker === "Zoe" ? "text-[oklch(45%_0.09_260)]" : "text-primary"}`}>
+            <p className={`flex-none text-micro font-bold uppercase tracking-[0.04em] ${currentLine.speaker === "Zoe" ? "text-[oklch(45%_0.09_260)]" : "text-primary"}`}>
               {currentLine.speaker}
             </p>
-            <p className="text-[12.5px] text-ink">{currentLine.text}</p>
+            <p className="text-meta text-ink">{currentLine.text}</p>
           </div>
         ) : null}
         <button
           type="button"
           data-print-hide
           onClick={() => setTranscriptOpen((o) => !o)}
-          className="self-start text-[10.5px] font-semibold text-primary"
+          className="self-start text-micro font-semibold text-primary"
         >
           {transcriptOpen ? "Hide transcript" : "Show transcript"}
         </button>
@@ -192,7 +192,7 @@ function DialoguePlayer() {
           <div className="flex flex-col gap-1.5 border-t border-border pt-2.5">
             {DIALOGUE_LINES.map((ln, i) => (
               <div key={i} className="flex gap-2">
-                <p className="w-14 flex-none text-[10.5px] font-bold uppercase tracking-[0.04em] text-muted">{ln.speaker}</p>
+                <p className="w-14 flex-none text-micro font-bold uppercase tracking-[0.04em] text-muted">{ln.speaker}</p>
                 <p className="text-xs leading-relaxed text-ink">{ln.text}</p>
               </div>
             ))}
@@ -225,16 +225,16 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-lg font-semibold text-ink">Example lesson — a phone call about a delayed flight</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-[9px] font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
             </div>
             {EXAMPLE_ROWS.map((r) => (
               <div key={r.stage} className="grid grid-cols-[150px_60px_1fr] gap-2 border-b border-border-faint px-3 py-2 last:border-b-0">
-                <p className="text-[11px] font-bold text-ink">{r.stage}</p>
-                <p className="text-[11px] text-muted">{r.time}</p>
-                <p className="text-[11.5px] leading-relaxed text-muted">{r.text}</p>
+                <p className="text-label font-bold text-ink">{r.stage}</p>
+                <p className="text-label text-muted">{r.time}</p>
+                <p className="text-label leading-relaxed text-muted">{r.text}</p>
               </div>
             ))}
           </div>
@@ -271,8 +271,8 @@ export default function ListeningSession() {
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold text-ink">Stage 2</p>
         <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-4">
-          <p className="text-[13px] text-ink">How do you think a listening lesson should be staged?</p>
-          <p className="text-[11px] italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
+          <p className="text-meta text-ink">How do you think a listening lesson should be staged?</p>
+          <p className="text-label italic text-muted">Discuss with your partner, about a minute — no wrong answers yet.</p>
         </div>
       </div>
 
@@ -281,7 +281,7 @@ export default function ListeningSession() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-0.5">
           <p className="text-xs font-bold text-ink">Stage 4</p>
-          <p className="text-[11px] italic text-muted">More time now — answer these from the dialogue, then check with your partner.</p>
+          <p className="text-label italic text-muted">More time now — answer these from the dialogue, then check with your partner.</p>
         </div>
         {DETAILS.map((d) => (
           <RevealCard key={d.q} question={d.q} answer={d.a} />

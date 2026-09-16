@@ -67,7 +67,7 @@ export function CandidateStatusCard({
 
   return (
     <div className={`sheet-accent h-fit ${accent === "garnet" ? "sheet-garnet" : ""}`}>
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
+      <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
 
       {pendingRequest ? (
         <div className="mt-3 flex flex-col gap-1.5 rounded-[6px] border border-primary/30 bg-primary/5 p-3">

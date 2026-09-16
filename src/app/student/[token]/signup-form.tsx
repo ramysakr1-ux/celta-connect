@@ -131,7 +131,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <div className="flex flex-col gap-2.5">
             {t.consentLines.map((line, i) => (
               <div key={i} className="flex items-start gap-2.5 rounded-lg border border-border bg-card-inset p-3.5">
-                <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-primary text-[10px] text-primary-foreground">
+                <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-primary text-micro text-primary-foreground">
                   ✓
                 </span>
                 <p className="text-sm leading-relaxed text-ink">{line}</p>

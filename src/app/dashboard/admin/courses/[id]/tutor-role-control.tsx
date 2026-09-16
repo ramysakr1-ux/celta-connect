@@ -88,30 +88,30 @@ export function TutorRoleControl({
 
       {staged !== null ? (
         <div className="flex flex-col gap-1.5 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg/40 p-2">
-          <p className="text-[11.5px] leading-relaxed text-ink">
+          <p className="text-label leading-relaxed text-ink">
             This course is running.{" "}
             {staged === "main_course_tutor"
               ? `Make ${tutorName ?? "this tutor"} the main course tutor? The current main course tutor becomes an assistant course tutor.`
               : `Change ${tutorName ?? "this tutor"} to ${(TUTOR_ROLE_LABEL[staged as keyof typeof TUTOR_ROLE_LABEL] ?? "no role").toLowerCase()}?`}
           </p>
-          <p className="text-[11px] text-muted">Everyone teaching on this course is notified, and the change is recorded against your name.</p>
+          <p className="text-label text-muted">Everyone teaching on this course is notified, and the change is recorded against your name.</p>
           <div className="flex items-center gap-3">
             <button
               type="submit"
               disabled={pending}
               onClick={() => setStaged(null)}
-              className="rounded-[6px] border border-border px-2.5 py-1 text-[11.5px] text-ink wash disabled:opacity-60"
+              className="rounded-[6px] border border-border px-2.5 py-1 text-label text-ink wash disabled:opacity-60"
             >
               {pending ? "Changing..." : "Yes, change it"}
             </button>
-            <button type="button" onClick={cancel} className="text-[11px] text-muted hover:underline">
+            <button type="button" onClick={cancel} className="text-label text-muted hover:underline">
               Cancel
             </button>
           </div>
         </div>
       ) : null}
 
-      {state.error ? <span className="text-[11px] text-destructive">{state.error}</span> : null}
+      {state.error ? <span className="text-label text-destructive">{state.error}</span> : null}
     </form>
   );
 }

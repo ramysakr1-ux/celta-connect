@@ -33,8 +33,8 @@ export default async function TrainerSettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">{trainer.full_name ?? "Trainer"} &middot; This course</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Feedback wording</h1>
+        <p className="text-label font-bold tracking-[0.1em] text-muted uppercase">{trainer.full_name ?? "Trainer"} &middot; This course</p>
+        <h1 className="font-serif text-display leading-[1.08] font-semibold text-ink-warm">Feedback wording</h1>
         <p className="max-w-[62ch] text-sm text-muted">
           How your written feedback is phrased when Connect drafts it for you. Yours alone for this course &mdash; it changes nothing
           that candidates or other tutors see, and never what you actually say.

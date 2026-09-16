@@ -42,18 +42,18 @@ function ResourceItemCard({ resource, isEditableStaff, traineeId }: { resource: 
         </span>
         <div className="min-w-0 flex-1">
           <ResourceContentLink title={resource.title} fileUrl={resource.file_url} storagePath={resource.storage_path} contentType={resource.content_type} />
-          <p className="mt-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">{RESOURCE_TYPE_LABELS[resource.resource_type]}</p>
+          <p className="mt-0.5 text-micro font-semibold tracking-[0.06em] text-muted uppercase">{RESOURCE_TYPE_LABELS[resource.resource_type]}</p>
         </div>
       </div>
-      {resource.description ? <p className="text-[11px] leading-[1.4] text-muted">{resource.description}</p> : null}
+      {resource.description ? <p className="text-label leading-[1.4] text-muted">{resource.description}</p> : null}
       {!resource.visible_to_trainee && isEditableStaff ? (
-        <span className="self-start rounded-full border border-border bg-surface-muted px-2 py-[1px] text-[10px] font-semibold text-muted">Trainer only</span>
+        <span className="self-start rounded-full border border-border bg-surface-muted px-2 py-[1px] text-micro font-semibold text-muted">Trainer only</span>
       ) : null}
       {isEditableStaff ? (
         <form action={deleteResource}>
           <input type="hidden" name="resource_id" value={resource.id} />
           <input type="hidden" name="trainee_id" value={traineeId} />
-          <button type="submit" className="self-start text-[11px] text-destructive hover:underline">
+          <button type="submit" className="self-start text-label text-destructive hover:underline">
             Remove
           </button>
         </form>
@@ -108,8 +108,8 @@ function InputSessionCard({
           <Icon className="size-[15px]" style={{ color: openable ? "oklch(38% 0.072 195)" : "oklch(51% 0.017 70)" }} aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[13.5px] leading-[1.3] font-semibold text-ink">{session.title}</p>
-          <p className="mt-0.5 text-[10.5px] font-bold tracking-[0.06em] text-muted uppercase">{dateLabel}</p>
+          <p className="text-body leading-[1.3] font-semibold text-ink">{session.title}</p>
+          <p className="mt-0.5 text-micro font-bold tracking-[0.06em] text-muted uppercase">{dateLabel}</p>
         </div>
       </div>
       {canSeeTrainerOnly && session.criteria.length > 0 ? (
@@ -132,11 +132,11 @@ function InputSessionCard({
       ) : null}
       <div className="mt-auto pt-1">
         {openable ? (
-          <span className="text-[11px] font-bold" style={{ color: "oklch(38% 0.072 195)" }}>
+          <span className="text-label font-bold" style={{ color: "oklch(38% 0.072 195)" }}>
             Open session
           </span>
         ) : (
-          <span className="text-[11px] text-muted">On your timetable</span>
+          <span className="text-label text-muted">On your timetable</span>
         )}
       </div>
     </>
@@ -525,10 +525,10 @@ export default async function ResourceHubPage({
               rather than a caption. */}
           {/* The pill comes from PortfolioFocusRow now -- every room gets one,
               rather than only the page that happened to have been given one. */}
-          <h1 className="mt-1.5 font-serif text-[30px] font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>
+          <h1 className="mt-1.5 font-serif text-display font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>
             Resource Hub
           </h1>
-          <p className="mt-1 max-w-[52ch] text-[13px]" style={{ color: "oklch(99.2% 0.005 90 / 0.72)" }}>
+          <p className="mt-1 max-w-[52ch] text-meta" style={{ color: "oklch(99.2% 0.005 90 / 0.72)" }}>
             Everything the course gives you, in one place — your filmed observations, and the library of sessions, books
             and forms behind them.
           </p>
@@ -567,9 +567,9 @@ export default async function ResourceHubPage({
       {filmedSessions.length > 0 ? (
         <div className="flex flex-col gap-3.5 rounded-[8px] border border-border p-[20px_22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
           <div className="flex items-start justify-between gap-3">
-            <p className="font-serif text-[17px] font-semibold text-ink">Filmed Observations</p>
+            <p className="font-serif text-h3 font-semibold text-ink">Filmed Observations</p>
             <span
-              className="shrink-0 rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.05em]"
+              className="shrink-0 rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.05em]"
               style={{ background: "color-mix(in oklab, oklch(60% 0.11 70) 14%, oklch(99.2% 0.005 90))", color: "oklch(60% 0.11 70)" }}
             >
               Task-linked
@@ -586,7 +586,7 @@ export default async function ResourceHubPage({
               both cases -- if a centre later films its own cohort and
               consent genuinely is on record, bring the chip back driven by
               real data rather than hardcoded. */}
-          <p className="text-[12.5px] leading-[1.5] text-muted">
+          <p className="text-meta leading-[1.5] text-muted">
             Filmed lessons for you to observe — each tied to a slot on your timetable, with a task to complete after
             watching.
           </p>
@@ -604,7 +604,7 @@ export default async function ResourceHubPage({
                 }}
               />
             </div>
-            <span className="shrink-0 text-[11.5px] tabular-nums text-muted">
+            <span className="shrink-0 text-label tabular-nums text-muted">
               {filmedSessions.filter((s) => s.completed).length} of {filmedSessions.length} tasks done
             </span>
           </div>
@@ -643,17 +643,17 @@ export default async function ResourceHubPage({
                       </svg>
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="text-[10px] font-bold tracking-[0.06em] text-muted uppercase">
+                      <span className="text-micro font-bold tracking-[0.06em] text-muted uppercase">
                         {s.eventTitle ?? "Filmed observation"}
                         {dateLabel ? ` · ${dateLabel}` : ""}
                       </span>
-                      <p className="mt-[1px] text-[12.5px] font-semibold text-ink">
+                      <p className="mt-[1px] text-meta font-semibold text-ink">
                         {s.lessonTitle ?? (s.hasRecording ? "Filmed lesson — focus set by your tutor" : "Scheduled on your timetable")}
                       </p>
-                      <p className="mt-[1px] text-[11px] text-muted">{status.sub}</p>
+                      <p className="mt-[1px] text-label text-muted">{status.sub}</p>
                     </span>
                     <span
-                      className="shrink-0 rounded-full border px-2 py-[2px] text-[10px] font-semibold whitespace-nowrap"
+                      className="shrink-0 rounded-full border px-2 py-[2px] text-micro font-semibold whitespace-nowrap"
                       style={
                         status.tone === "done"
                           ? { background: "oklch(38% 0.072 195)", color: "oklch(99.2% 0.005 90)", borderColor: "oklch(38% 0.072 195)" }
@@ -671,27 +671,27 @@ export default async function ResourceHubPage({
                   </span>
                   {isActive ? (
                     <span className="flex flex-col gap-2 border-t p-[12px_13px]" style={{ borderColor: "color-mix(in srgb, oklch(88% 0.016 82) 60%, transparent)" }}>
-                      <span className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-muted">
+                      <span className="flex flex-wrap gap-x-4 gap-y-2 text-label text-muted">
                         {s.teacherName ? (<span><span className="font-semibold text-ink">Teacher</span> {s.teacherName}</span>) : null}
                         {s.level ? (<span><span className="font-semibold text-ink">Level</span> {s.level}</span>) : null}
                         {s.learnerCount ? (<span><span className="font-semibold text-ink">Learners</span> {s.learnerCount}</span>) : null}
                         {s.lengthMinutes ? (<span><span className="font-semibold text-ink">Length</span> {s.lengthMinutes} min</span>) : null}
                       </span>
                       {s.mainAim || s.subAim ? (
-                        <span className="text-[11px] leading-[1.5] text-muted">
+                        <span className="text-label leading-[1.5] text-muted">
                           {s.mainAim ? (<><span className="font-semibold text-ink">Main aim</span> — {s.mainAim}<br /></>) : null}
                           {s.subAim ? (<><span className="font-semibold text-ink">Sub aim</span> — {s.subAim}</>) : null}
                         </span>
                       ) : null}
                       {s.hasTask ? (
                         <span className="flex flex-wrap gap-1.5">
-                          <span className="rounded-full border border-border px-[7px] py-[1px] text-[10px] font-semibold text-muted">
+                          <span className="rounded-full border border-border px-[7px] py-[1px] text-micro font-semibold text-muted">
                             Observation task attached
                           </span>
                         </span>
                       ) : null}
                       <span
-                        className="self-start rounded-[6px] px-[14px] py-2 text-[12px] font-bold"
+                        className="self-start rounded-[6px] px-[14px] py-2 text-meta font-bold"
                         style={{ background: "oklch(30% 0.042 58)", color: "oklch(99.2% 0.005 90)" }}
                       >
                         Watch and answer the task
@@ -733,8 +733,8 @@ export default async function ResourceHubPage({
               borderColor: "color-mix(in oklab, oklch(60% 0.11 70) 30%, transparent)",
             }}
           >
-            <p className="text-[11px] font-bold" style={{ color: "oklch(60% 0.11 70)" }}>Note to trainees</p>
-            <p className="mt-[3px] text-[11.5px] leading-[1.5] text-muted">
+            <p className="text-label font-bold" style={{ color: "oklch(60% 0.11 70)" }}>Note to trainees</p>
+            <p className="mt-[3px] text-label leading-[1.5] text-muted">
               These recordings can run past 45 minutes. Use the player&apos;s own seek bar to skip ahead — you&apos;re not
               expected to watch every second, just enough to answer the task.
             </p>
@@ -745,7 +745,7 @@ export default async function ResourceHubPage({
       {visibleCategories.includes("input_sessions") ? (
         <div className="rounded-[10px] border border-border p-[22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
           <div className="mb-1 flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-[21px] font-semibold text-ink">Input Sessions</h2>
+            <h2 className="font-serif text-h2 font-semibold text-ink">Input Sessions</h2>
             <Link
               href={`/input-sessions?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
               className="shrink-0 text-xs font-semibold text-primary"
@@ -753,7 +753,7 @@ export default async function ResourceHubPage({
               Connect Native session library
             </Link>
           </div>
-          <p className="mb-4 text-[12.5px] text-muted">
+          <p className="mb-4 text-meta text-muted">
             Every input session on your course, in timetable order. The ones with an interactive version open here;
             the rest are on your timetable to attend.
           </p>
@@ -771,12 +771,12 @@ export default async function ResourceHubPage({
 
       <div className="rounded-[10px] border border-border p-[22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
         <div className="mb-1 flex items-baseline justify-between gap-3">
-          <h2 className="font-serif text-[21px] font-semibold text-ink">Library</h2>
+          <h2 className="font-serif text-h2 font-semibold text-ink">Library</h2>
           <p className="shrink-0 text-xs tabular-nums text-muted">
             {totalItems} items · {libraryCategories.length} categories
           </p>
         </div>
-        <p className="mb-4 text-[12.5px] text-muted">
+        <p className="mb-4 text-meta text-muted">
           Everything you can read, watch or download. Nothing here is collapsed — scroll to what you need, or search
           from the top of the page.
         </p>
@@ -849,15 +849,15 @@ export default async function ResourceHubPage({
                         <Stamp className="size-3.5" aria-hidden="true" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <Link href="/candidate-agreement" className="text-[13px] font-semibold text-ink hover:underline">
+                        <Link href="/candidate-agreement" className="text-meta font-semibold text-ink hover:underline">
                           Candidate Agreement
                         </Link>
-                        <p className="mt-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">
+                        <p className="mt-0.5 text-micro font-semibold tracking-[0.06em] text-muted uppercase">
                           Required by Cambridge
                         </p>
                       </div>
                     </div>
-                    <p className="text-[11px] leading-[1.4] text-muted">
+                    <p className="text-label leading-[1.4] text-muted">
                       What the centre expects of you and what you can expect back — attendance, plagiarism, deferrals,
                       and how to raise a complaint.
                     </p>
