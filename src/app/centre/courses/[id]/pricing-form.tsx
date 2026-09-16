@@ -22,10 +22,10 @@ export function PricingForm({
   const [state, action, pending] = useActionState(updateCoursePricing, initialState);
 
   return (
-    <form action={action} className="card flex flex-col gap-4 p-6">
+    <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="course_id" value={courseId} />
       <div>
-        <h2 className="font-serif text-base text-ink">Pricing</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Pricing</h2>
         <p className="mt-1 text-xs text-muted">The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises.</p>
       </div>
 

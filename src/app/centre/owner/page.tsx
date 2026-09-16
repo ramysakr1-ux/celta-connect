@@ -13,6 +13,7 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card";
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { UnownedCoursesCard } from "@/app/centre/owner/unowned-courses-card";
+import { BranchChip } from "@/components/branch-chip";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -278,9 +279,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
                 <span className="text-[11.5px] font-semibold" style={{ color: "var(--owner-garnet)" }}>
                   {roleLabel(g.role, customRoles ?? [])}
                 </span>
-                <span className="text-[11px]" style={{ color: "var(--owner-muted)" }}>
-                  {branchNameById.get(g.center_id) ?? ""}
-                </span>
+                <BranchChip name={branchNameById.get(g.center_id)} />
               </div>
             ))}
           </div>

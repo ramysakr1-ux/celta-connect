@@ -165,40 +165,45 @@ export default async function CommandCenterPage() {
           red) and stay untouched; only the one plain tile gets the side
           treatment. */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="card p-4">
+        <div className="card p-5">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Active centres</p>
-          <p className="mt-1.5 text-2xl font-bold text-ink">{centresList.length}</p>
+          <p className="mt-1.5 font-serif text-[28px] tabular-nums text-ink">{centresList.length}</p>
         </div>
-        <div className="card card-gold p-4">
+        <div className="card card-gold p-5">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">MRR</p>
-          <p className="mt-1.5 text-2xl font-bold text-ink">
+          <p className="mt-1.5 font-serif text-[28px] tabular-nums text-ink">
             {mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "—"}
           </p>
         </div>
-        <div className={`card p-4${renewalsDue.length ? " card-amber" : ""}`}>
+        <div className={`card p-5${renewalsDue.length ? " card-amber" : ""}`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Renewals due (30d)</p>
-          <p className="mt-1.5 text-2xl font-bold text-ink">{renewalsDue.length}</p>
+          <p className="mt-1.5 font-serif text-[28px] tabular-nums text-ink">{renewalsDue.length}</p>
         </div>
-        <div className={`card p-4${outstanding.length ? " card-red" : ""}`}>
+        <div className={`card p-5${outstanding.length ? " card-red" : ""}`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Outstanding invoices</p>
-          <p className="mt-1.5 text-2xl font-bold text-ink">
+          <p className="mt-1.5 font-serif text-[28px] tabular-nums text-ink">
             {outstanding.length} {outstandingByCurrency.length ? `(${outstandingByCurrency.map((m) => money(m.amount, m.currency)).join(" · ")})` : ""}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card p-4">
+        <div className="card p-5">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">Connect</p>
           <p className="mt-1.5 text-xl font-bold text-ink">{centresList.length} centres</p>
           <p className="mt-1 text-sm text-muted">{mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "£0"}/mo</p>
         </div>
-        <div className="card card-gold p-4 opacity-60">
+        {/* B7c: these two were dimmed to opacity-60 to say "illustrative".
+            Nothing in the building dims -- a dimmed card reads as disabled --
+            so they say it in words, on a dashed edge. */}
+        <div className="card card-gold border-dashed p-5">
+          <p className="mb-1 text-[10px] font-bold tracking-[0.1em] text-muted uppercase">Illustrative</p>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Connect Hub</p>
           <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
-        <div className="card card-amber p-4 opacity-60">
+        <div className="card card-amber border-dashed p-5">
+          <p className="mb-1 text-[10px] font-bold tracking-[0.1em] text-muted uppercase">Illustrative</p>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Affina</p>
           <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
@@ -206,8 +211,8 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="card">
-        <div className="border-b border-border-faint px-5 py-3.5">
-          <h2 className="font-serif text-lg text-ink">Accounts ({centresList.length})</h2>
+        <div className="border-b border-border-faint px-5 py-4">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Accounts ({centresList.length})</h2>
         </div>
         {centresList.length === 0 ? (
           <p className="px-5 py-4 text-sm text-muted">No centres yet.</p>
@@ -246,8 +251,8 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="card">
-        <div className="border-b border-border-faint px-5 py-3.5">
-          <h2 className="font-serif text-lg text-ink">Trainers ({trainerRows.length})</h2>
+        <div className="border-b border-border-faint px-5 py-4">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Trainers ({trainerRows.length})</h2>
           <p className="mt-0.5 text-xs text-muted">Who&apos;s working where, across every centre — owner-only.</p>
         </div>
         {trainerRows.length === 0 ? (
@@ -283,7 +288,7 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Set a centre&apos;s subscription</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Set a centre&apos;s subscription</h2>
         <p className="mt-1 text-sm text-muted">Hand-entered — no payment provider connected yet. One active plan per centre; saving again updates it.</p>
         <div className="mt-4">
           <SubscriptionForm centres={centresList} />
@@ -291,14 +296,14 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Record an invoice</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Record an invoice</h2>
         <div className="mt-4">
           <InvoiceForm centres={centresList} />
         </div>
       </div>
 
       <div className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Payments</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Payments</h2>
         <p className="mt-1 text-sm text-muted">
           No payment provider is connected for centre subscriptions. Wiring one (Stripe or equivalent — webhooks, checkout, invoice automation) is its
           own scoped piece of work.
@@ -309,8 +314,8 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="card">
-        <div className="border-b border-border-faint px-5 py-3.5">
-          <h2 className="font-serif text-lg text-ink">Activity</h2>
+        <div className="border-b border-border-faint px-5 py-4">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Activity</h2>
         </div>
         {activity.length === 0 ? (
           <p className="px-5 py-4 text-sm text-muted">Nothing yet.</p>

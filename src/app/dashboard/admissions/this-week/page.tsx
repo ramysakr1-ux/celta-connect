@@ -154,7 +154,7 @@ export default async function ThisWeeksInterviewsPage({
       </div>
 
       {waitingApplicants && waitingApplicants.length > 0 ? (
-        <div className="card flex items-start gap-3 border-destructive/30 bg-destructive/5 p-4">
+        <div className="card flex items-start gap-3 border-destructive/30 bg-destructive/5 p-5">
           <div className="mt-1.5 h-1.5 w-1.5 flex-none rounded-full bg-destructive" />
           <p className="text-sm text-ink">
             {waitingApplicants.length} applicant{waitingApplicants.length === 1 ? "" : "s"} waiting, no slots open

@@ -17,6 +17,7 @@ import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicat
 import { formatCalendarDate } from "@/lib/format-date";
 import { CourseStatePill, type CourseState } from "@/components/course-state-pill";
 import { RoomHead, ROOM_PRIMARY } from "@/components/room-head";
+import { BranchChip } from "@/components/branch-chip";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -275,7 +276,7 @@ export default async function AdminDashboardPage({
                       // an action inside a link.
                       <div
                         key={row.course.id}
-                        className="hover-ring flex items-center gap-3 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none wash"
+                        className="hover-ring flex items-center gap-3 border-b border-border-faint px-5 py-4 transition-colors duration-150 last:border-none wash"
                       >
                       <Link
                         href={`/dashboard/admin/courses/${row.course.id}`}
@@ -287,9 +288,7 @@ export default async function AdminDashboardPage({
                             {/* Which branch runs it. Shown only when more than
                                 one branch is in view -- naming it on every row
                                 of a single-branch centre is noise. */}
-                            {aggregated && nameById.get(row.course.center_id) ? (
-                              <span className="ml-2 text-[11px] font-normal text-muted">{nameById.get(row.course.center_id)}</span>
-                            ) : null}
+                            {aggregated ? <BranchChip name={nameById.get(row.course.center_id)} className="ml-2" /> : null}
                           </p>
                           <p className="mt-0.5 text-xs text-muted">
                             {courseDates(row.course.start_date, row.course.end_date)}
@@ -329,7 +328,7 @@ export default async function AdminDashboardPage({
                   <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Closed</p>
                   <Link
                     href="/dashboard/admin/courses/closed"
-                    className="wash card flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-150"
+                    className="wash card flex items-center justify-between gap-4 px-5 py-4 transition-colors duration-150"
                   >
                     <span className="text-sm text-ink">
                       {closedCourses.length} closed course{closedCourses.length === 1 ? "" : "s"}
@@ -354,7 +353,7 @@ export default async function AdminDashboardPage({
         <div className="flex flex-col gap-6">
         <div className="card flex flex-col gap-3 p-5">
           <div>
-            <h2 className="font-serif text-base text-ink">Centre material</h2>
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Centre material</h2>
             <p className="mt-0.5 text-xs text-muted">Shared by every course at this centre. Built once, carried forward.</p>
           </div>
           <div className="flex flex-col">

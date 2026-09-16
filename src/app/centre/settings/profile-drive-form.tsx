@@ -172,7 +172,7 @@ export function ProfileDriveForm({
         </div>
       </form>
 
-      <div className="card px-[22px] py-5">
+      <div className="card p-5">
         <h3 className="font-serif text-base text-ink">Google Drive</h3>
         <p className="mt-1 text-sm text-muted">
           Used for the one-time sheet import and for centres that keep their own copy of resource-hub documents.

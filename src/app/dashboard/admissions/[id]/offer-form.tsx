@@ -23,9 +23,9 @@ export function OfferForm({
   const gateObjected = Boolean(state.error?.startsWith("Before this offer goes out"));
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <h2 className="font-serif text-lg text-ink">Offer</h2>
+      <h2 className="font-serif text-[17px] font-semibold text-ink">Offer</h2>
       <p className="text-sm text-muted">
         States the fee and an accept-by date, records the offer, and emails the applicant automatically.
       </p>

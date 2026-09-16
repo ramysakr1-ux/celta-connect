@@ -44,9 +44,9 @@ export function CarriedWorkPanel({
   if (transfers.length === 0) return null;
 
   return (
-    <div className="card card-amber flex flex-col gap-4 p-6">
+    <div className="card card-amber flex flex-col gap-4 p-5">
       <div>
-        <h2 className="font-serif text-lg text-ink">Carried work waiting to be linked</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Carried work waiting to be linked</h2>
         <p className="mt-1 text-sm text-muted">
           {transfers.length === 1 ? "A candidate was" : `${transfers.length} candidates were`}{" "}
           marked for a restart or a deferral on an earlier course, and what they had already done is being held. Once they have joined this

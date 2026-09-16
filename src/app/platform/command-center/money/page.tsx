@@ -78,7 +78,7 @@ export default async function CommandCenterMoneyPage() {
   return (
     <div className="card flex max-w-[720px] flex-col gap-3.5 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-lg text-ink">Billing &amp; payments</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Billing &amp; payments</h2>
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted">
           <div className="h-1.5 w-1.5 rounded-full bg-muted" />
           Not connected

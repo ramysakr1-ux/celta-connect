@@ -50,7 +50,7 @@ export default async function ClosedCoursesPage({
             <Link
               key={course.id}
               href={`/dashboard/admin/courses/${course.id}`}
-              className="lift flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none wash"
+              className="lift flex items-center justify-between gap-4 border-b border-border-faint px-5 py-4 transition-colors duration-150 last:border-none wash"
             >
               <p className="truncate text-sm font-semibold text-ink">{course.name}</p>
               <span className="shrink-0 text-xs text-muted">Ended {calendarDay(course.end_date)}</span>

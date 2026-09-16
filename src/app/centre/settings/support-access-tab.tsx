@@ -49,7 +49,7 @@ export function SupportAccessTab({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-lg text-ink">Platform support access</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Platform support access</h2>
         <p className="mt-1 text-sm text-muted">
           support@celtaconnect.com has no standing access to this centre&apos;s data. Access exists only as
           time-boxed grants, scoped to exactly what&apos;s needed and logged permanently, including grants declined

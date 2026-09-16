@@ -94,7 +94,7 @@ export default async function EmailDeliveryPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="card flex items-center justify-between p-6">
+      <div className="card flex items-center justify-between p-5">
         <div>
           <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Connect · Admissions</p>
           <h1 className="mt-1 font-serif text-xl text-ink">Delivery, not just sent</h1>

@@ -112,7 +112,7 @@ export default async function CentreRolesPage() {
       <RoleStrip holders={holders} overrides={ctx.overrides} customRoles={ctx.customRoles} customCapabilities={ctx.customCapabilities} />
 
       <div className="card px-5 py-4">
-        <h2 className="font-serif text-base text-ink">Areas of responsibility</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Areas of responsibility</h2>
         <p className="mt-1 text-xs text-muted">
           A role says what someone is capable of; an area says what is actually their job. Everyone sees every area —
           only its holder can act in it, and everyone else sees their name instead of the button.
@@ -156,7 +156,7 @@ export default async function CentreRolesPage() {
       {/* Absent, not disabled, for anyone who isn't an owner. */}
       {mayAppoint ? (
         <div className="card card-gold px-5 py-4">
-          <h2 className="font-serif text-base text-ink">Appoint someone</h2>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Appoint someone</h2>
           <p className="mt-1 text-xs text-muted">
             Roles are appointed, never chosen — nobody promotes their own account. They need an account in this
             centre already; appointing gives a role to an existing person. Inviting someone who doesn&apos;t have
@@ -190,7 +190,7 @@ export default async function CentreRolesPage() {
 
       {mayAppoint ? (
         <div className="card px-5 py-4">
-          <h2 className="font-serif text-base text-ink">Invite a new admin</h2>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Invite a new admin</h2>
           <p className="mt-1 text-xs text-muted">
             For someone who has no account here at all. The link opens the centre, not a course — they set up their
             account and accept the centre agreement in one step, and their access lasts for as long as the centre
@@ -227,7 +227,7 @@ export default async function CentreRolesPage() {
 
       {mayAppoint && (log ?? []).length > 0 ? (
         <div className="rounded-[10px] border border-destructive/25 bg-destructive/5 px-5 py-4">
-          <h2 className="font-serif text-base text-ink">Owner actions</h2>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Owner actions</h2>
           <p className="mt-0.5 text-xs text-muted">
             Every intervention an owner makes is recorded — visible logging, not silent senior access.
           </p>

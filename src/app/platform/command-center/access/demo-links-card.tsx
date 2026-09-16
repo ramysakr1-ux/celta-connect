@@ -61,7 +61,7 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
   return (
     <div className="card flex max-w-[720px] flex-col gap-3.5 p-5">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-serif text-lg text-ink">Demo login links</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Demo login links</h2>
         <div className="text-[11px] text-muted">24h expiry</div>
       </div>
       <div className="text-[11.5px] leading-normal text-muted">

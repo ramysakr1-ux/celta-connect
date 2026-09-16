@@ -238,7 +238,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
+      <div className="card p-5">
         <BackLink href="/dashboard/admissions" label="Admissions" />
         <div className="mt-2 flex items-center justify-between">
           <div>
@@ -259,14 +259,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       </div>
 
       {isRejected ? (
-        <div className="card p-6">
+        <div className="card p-5">
           <p className="text-sm font-semibold text-ink">Rejected {formatDate(applicant.rejected_at, timeZone, { year: "numeric" })}</p>
           <p className="mt-1 text-sm text-ink">{applicant.rejection_reason}</p>
         </div>
       ) : null}
 
-      <div className="card flex flex-col gap-3 p-6">
-        <h2 className="font-serif text-lg text-ink">Application</h2>
+      <div className="card flex flex-col gap-3 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Application</h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-muted">Date of birth</dt>
@@ -333,8 +333,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <AcknowledgementsGiven applicant={applicant} timeZone={timeZone} />
       </div>
 
-      <div className="card flex flex-col gap-3 p-6">
-        <h2 className="font-serif text-lg text-ink">Extended writing task</h2>
+      <div className="card flex flex-col gap-3 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Extended writing task</h2>
         {prompt ? (
           <p className="text-xs text-muted">
             {prompt.prompt_type[0].toUpperCase() + prompt.prompt_type.slice(1)}: {prompt.prompt_text}
@@ -390,8 +390,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         ) : null}
       </div>
 
-      <div className="card flex flex-col gap-2 p-6">
-        <h2 className="font-serif text-lg text-ink">Course commitments and code of conduct</h2>
+      <div className="card flex flex-col gap-2 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Course commitments and code of conduct</h2>
         {applicant.commitments_accepted_at ? (
           <>
             <p className="text-sm text-ink">
@@ -416,14 +416,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       {canDecide ? (
         <MarkingForm applicant={applicant} />
       ) : (
-        <div className="card flex flex-col gap-1 p-6">
-          <h2 className="font-serif text-lg text-ink">Marking scheme -- selection task</h2>
+        <div className="card flex flex-col gap-1 p-5">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Marking scheme -- selection task</h2>
           <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can mark this.</p>
         </div>
       )}
 
-      <div className="card flex flex-col gap-4 p-6">
-        <h2 className="font-serif text-lg text-ink">Interview</h2>
+      <div className="card flex flex-col gap-4 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Interview</h2>
         {bookedSlot ? (
           <p className="text-sm text-ink">
             Booked: {formatCalendarDate(bookedSlot.slot_date, { weekday: "short" })} at {bookedSlot.slot_time.slice(0, 5)} ({bookedSlot.mode === "online" ? "Online" : "Face to face"}
@@ -531,15 +531,15 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {hasOffer ? (
         <>
-          <div className="card p-6">
-            <h2 className="font-serif text-lg text-ink">Offer</h2>
+          <div className="card p-5">
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Offer</h2>
             <p className="mt-1 text-sm text-ink">
               Sent {formatDate(applicant.offer_sent_at, timeZone, { year: "numeric" })}, accept by {formatCalendarDate(applicant.offer_accept_by, { year: "numeric" })}.
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
-          <div className="card p-6">
-            <h2 className="font-serif text-lg text-ink">Deposit</h2>
+          <div className="card p-5">
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Deposit</h2>
             <p className="mt-1 text-sm text-muted">
               {paymentState.label}
               {paymentState.outstanding !== null ? ` \u00b7 ${paymentState.outstanding} outstanding` : ""}
@@ -580,8 +580,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       ) : null}
 
       {isWaitingList ? (
-        <div className="card p-6">
-          <h2 className="font-serif text-lg text-ink">Waiting list</h2>
+        <div className="card p-5">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Waiting list</h2>
           <p className="mt-1 text-sm text-ink">
             Position {applicant.waiting_list_position}. Will hear by {formatCalendarDate(applicant.waiting_list_hear_by, { year: "numeric" })}.
           </p>
@@ -601,8 +601,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <RejectForm applicantId={applicant.id} />
           <ReferForm applicantId={applicant.id} destinations={referDestinations} />
           {existingRequest ? (
-            <div className="card flex flex-col gap-1 p-6">
-              <h2 className="font-serif text-lg text-ink">Referral request</h2>
+            <div className="card flex flex-col gap-1 p-5">
+              <h2 className="font-serif text-[17px] font-semibold text-ink">Referral request</h2>
               <p className="text-sm text-ink">
                 {existingRequest.status === "pending"
                   ? `Waiting on ${existingRequest.toCenterName} to accept or decline.`

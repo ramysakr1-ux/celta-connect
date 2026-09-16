@@ -23,9 +23,9 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
   );
 
   return (
-    <form action={action} className="card flex flex-col gap-4 p-6">
+    <form action={action} className="card flex flex-col gap-4 p-5">
       <input type="hidden" name="applicant_id" value={applicant.id} />
-      <h2 className="font-serif text-lg text-ink">Marking scheme -- selection task</h2>
+      <h2 className="font-serif text-[17px] font-semibold text-ink">Marking scheme -- selection task</h2>
       <p className="text-sm text-muted">Same shape as the Standard of English criterion on the assignment cover sheets.</p>
 
       <div className="flex flex-col gap-3">

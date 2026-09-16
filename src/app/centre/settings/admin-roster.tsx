@@ -59,7 +59,7 @@ export function AdminRoster({
       </div>
 
       {mayAppoint && showInvite ? (
-        <div className="flex flex-col gap-4 card px-[22px] py-5">
+        <div className="flex flex-col gap-4 card p-5">
           <div>
             <h3 className="font-serif text-sm text-ink">Appoint someone with an account already</h3>
             <GrantRoleForm />
@@ -75,7 +75,7 @@ export function AdminRoster({
         {rows.map((row, i) => (
           <div
             key={row.grantId}
-            className={`hover-ring flex items-center justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
+            className={`hover-ring flex items-center justify-between gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-ink">{row.name}</p>

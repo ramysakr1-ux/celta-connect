@@ -40,9 +40,9 @@ export function PaymentsPanel({
   const paidTotal = sorted.filter((p) => p.status === "paid").reduce((sum, p) => sum + p.amount, 0);
 
   return (
-    <div className="card flex flex-col gap-4 p-6">
+    <div className="card flex flex-col gap-4 p-5">
       <div>
-        <h2 className="font-serif text-lg text-ink">Payments</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Payments</h2>
         {sorted.length > 0 ? (
           <p className="mt-1 text-sm text-muted">
             {paidTotal} of {total} {sorted[0].currency} paid

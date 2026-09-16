@@ -51,7 +51,7 @@ export default async function PlatformPage() {
       </div>
 
       <div className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Create a centre</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Create a centre</h2>
         <p className="mt-1 text-sm text-muted">
           Sets up the centre and a one-time join link for its first centre owner -- they create their own account and
           password through it, same as any other centre-admin invite.
@@ -62,7 +62,7 @@ export default async function PlatformPage() {
       </div>
 
       <div className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Change a user's role</h2>
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Change a user's role</h2>
         <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
         <div className="mt-4">
           <ChangeRoleForm />
@@ -70,8 +70,8 @@ export default async function PlatformPage() {
       </div>
 
       <div className="card">
-        <div className="border-b border-border-faint px-5 py-3.5">
-          <h2 className="font-serif text-lg text-ink">Every centre ({(centers ?? []).length})</h2>
+        <div className="border-b border-border-faint px-5 py-4">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Every centre ({(centers ?? []).length})</h2>
         </div>
         {(centers ?? []).length === 0 ? (
           <p className="px-5 py-4 text-sm text-muted">No centres yet.</p>

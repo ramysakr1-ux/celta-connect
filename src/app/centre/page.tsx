@@ -12,6 +12,7 @@ import { CourseStatePill, computeCourseState } from "@/components/course-state-p
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { sumByCurrency, formatTotals, formatCurrency, isMixed } from "@/lib/money-by-currency";
 import { RoomHead, ROOM_BUTTON, ROOM_PRIMARY } from "@/components/room-head";
+import { BranchChip } from "@/components/branch-chip";
 
 // Centre Admin's Overview.
 //
@@ -315,8 +316,8 @@ export default async function CentreOverviewPage({
         <div className="flex flex-col gap-4">
       {/* The room's own object carries the room's colour (centre side A1). */}
       <div className="card card-accent !p-0">
-        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-3.5">
-          <h2 className="font-serif text-base text-ink">All courses</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">All courses</h2>
           <span className="text-xs text-muted">
             {/* for-claude-code-course-admin-final-scope.md: "how many, their
                 status." A per-status breakdown, not just a flat total. */}
@@ -330,17 +331,13 @@ export default async function CentreOverviewPage({
             const state = stateOf(c.start_date, c.end_date);
             const owed = owedByCourse.get(c.id) ?? 0;
             return (
-              <div key={c.id} className={`hover-ring flex flex-wrap items-center gap-4 px-5 py-3.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+              <div key={c.id} className={`hover-ring flex flex-wrap items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <Link href={`/centre/courses/${c.id}`} className="min-w-[13rem] flex-1 hover:text-primary">
                   <p className="text-sm font-semibold text-ink">
                     {c.name}
                     {/* "The branch always travels with the course code" -- a code
                         is ambiguous across two cities, so it never appears alone. */}
-                    {multiBranch ? (
-                      <span className="ml-2 rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-muted">
-                        {branchName.get(c.center_id)}
-                      </span>
-                    ) : null}
+                    {multiBranch ? <BranchChip name={branchName.get(c.center_id)} className="ml-2" /> : null}
                   </p>
                   <p className="text-xs text-muted">
                     {dateRange(c.start_date, c.end_date)}
@@ -367,12 +364,12 @@ export default async function CentreOverviewPage({
           into the course they've paid for. */}
       {(bounces ?? []).length > 0 ? (
         <div className="card card-red !p-0 border-destructive/25 bg-destructive/5">
-          <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-3.5">
-            <h2 className="font-serif text-base text-ink">Email couldn&apos;t be delivered</h2>
+          <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-4">
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Email couldn&apos;t be delivered</h2>
             <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
           </div>
           {(bounces ?? []).map((b, i) => (
-            <div key={b.id} className={`hover-ring px-5 py-2.5 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
+            <div key={b.id} className={`hover-ring px-5 py-4 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
               <div className="flex items-center justify-between gap-3">
                 {b.applicant_id ? (
                   <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-sm text-ink hover:underline">
@@ -397,9 +394,9 @@ export default async function CentreOverviewPage({
         <div className="flex flex-col gap-4">
         {canView(ctx.roles, "admissions.view", ctx.overrides) ? (
           <div className="card !p-0">
-            <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
+            <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
               <div className="flex items-center gap-2">
-                <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>
+                <h2 className="font-serif text-[17px] font-semibold text-ink">Admissions pipeline</h2>
                 <AdmissionsChangeIndicator centerIds={scope} initialUnread={(unreadAdmissionsCount ?? 0) > 0} />
               </div>
               <Link href="/dashboard/admissions" className="text-xs font-medium text-primary hover:underline">
@@ -410,7 +407,7 @@ export default async function CentreOverviewPage({
               <p className="px-5 py-4 text-sm text-muted">Nobody in the pipeline yet.</p>
             ) : (
               [...stageCounts.entries()].map(([stage, count], i) => (
-                <div key={stage} className={`hover-ring px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                <div key={stage} className={`hover-ring px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted capitalize">{stage.replace(/_/g, " ")}</span>
                     <span className="text-sm text-ink tabular-nums">{count}</span>
@@ -435,16 +432,17 @@ export default async function CentreOverviewPage({
               missed carries no edge at all. */}
           {canView(ctx.roles, "payments.view", ctx.overrides) ? (
             <div className={`card !p-0 ${missed.length > 0 ? "card-red" : ""}`}>
-              <div className="border-b border-border px-5 py-3.5">
-                <h2 className="font-serif text-base text-ink">Payments needing attention</h2>
+              <div className="border-b border-border px-5 py-4">
+                <h2 className="font-serif text-[17px] font-semibold text-ink">Payments needing attention</h2>
               </div>
               {missed.length === 0 ? (
                 <p className="px-5 py-4 text-sm text-muted">Nothing missed.</p>
               ) : (
                 missed.map((p, i) => (
-                  <div key={i} className={`hover-ring flex items-center justify-between px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                    <span className="text-sm text-destructive">
-                      Missed instalment{multiBranch ? ` · ${branchName.get(p.center_id)}` : ""}
+                  <div key={i} className={`hover-ring flex items-center justify-between px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                    <span className="flex items-center gap-2 text-sm text-destructive">
+                      Missed instalment
+                      {multiBranch ? <BranchChip name={branchName.get(p.center_id)} /> : null}
                     </span>
                     <span className="text-sm text-muted tabular-nums">
                       {/* Each row in its own currency, and a date written
@@ -463,10 +461,10 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "volunteers.view", ctx.overrides) ? (
             <Link
               href="/centre/volunteers"
-              className="wash card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
+              className="wash card flex items-center justify-between gap-3 px-5 py-4 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
-                <h2 className="font-serif text-base text-ink">Volunteer pool</h2>
+                <h2 className="font-serif text-[17px] font-semibold text-ink">Volunteer pool</h2>
                 <span className="text-xs text-muted">
                   {volunteerPersonCount} {volunteerPersonCount === 1 ? "person" : "people"} &middot;{" "}
                   {(volunteers ?? []).length} registrations
@@ -482,10 +480,10 @@ export default async function CentreOverviewPage({
           {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? (
             <Link
               href="/criteria-glossary"
-              className="wash card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
+              className="wash card flex items-center justify-between gap-3 px-5 py-4 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
-                <h2 className="font-serif text-base text-ink">Criteria glossary</h2>
+                <h2 className="font-serif text-[17px] font-semibold text-ink">Criteria glossary</h2>
                 <span className="text-xs text-muted">
                   The words that tag a CELTA 5 criterion as a tutor writes feedback
                 </span>
@@ -497,10 +495,10 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "courseAdmin.view", ctx.overrides) && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"
-              className="wash card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
+              className="wash card card-gold flex items-center justify-between gap-3 px-5 py-4 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
-                <h2 className="font-serif text-base text-ink">Assessor history</h2>
+                <h2 className="font-serif text-[17px] font-semibold text-ink">Assessor history</h2>
                 <span className="text-xs text-muted">
                   {assessorHistory.length} {assessorHistory.length === 1 ? "assessor" : "assessors"}
                   {assessorHistory.some((a) => a.flag)

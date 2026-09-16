@@ -45,9 +45,9 @@ export default async function AdminAssignmentBriefsPage() {
       {ASSIGNMENT_ORDER.map((type, index) => {
         const template = templateByType.get(type);
         return (
-          <div key={type} className={`card p-6`}>
+          <div key={type} className={`card p-5`}>
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-lg text-ink">{ASSIGNMENT_INFO[type].title}</h2>
+              <h2 className="font-serif text-[17px] font-semibold text-ink">{ASSIGNMENT_INFO[type].title}</h2>
               {template ? (
                 <span className="text-sm text-muted">{template.published_at ? "Published" : "Draft"}</span>
               ) : null}

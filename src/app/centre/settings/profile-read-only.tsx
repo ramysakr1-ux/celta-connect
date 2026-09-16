@@ -29,7 +29,7 @@ function Row({ label, value, note }: { label: string; value: string; note?: stri
 
 function Connection({ title, blurb, status }: { title: string; blurb: string; status: string }) {
   return (
-    <div className="card px-[22px] py-5">
+    <div className="card p-5">
       <h3 className="font-serif text-base text-ink">{title}</h3>
       <p className="mt-1 text-sm text-muted">{blurb}</p>
       <p className="mt-3 text-sm text-ink">{status}</p>
@@ -76,7 +76,7 @@ export function CentreProfileReadOnly({
         the Centre owner edits it.
       </p>
 
-      <div className="card flex flex-col px-[22px] py-5">
+      <div className="card flex flex-col p-5">
         <Row label="Centre name" value={name} />
         <Row label="Cambridge centre number" value={centerNumber} note="Set by Cambridge, not editable in Connect." />
         <Row label="Address" value={address || notSet} />

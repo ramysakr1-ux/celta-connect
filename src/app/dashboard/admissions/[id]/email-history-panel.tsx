@@ -30,16 +30,16 @@ function formatDate(iso: string, timeZone: string): string {
 export function EmailHistoryPanel({ emails, timeZone }: { emails: EmailRow[]; timeZone: string }) {
   if (emails.length === 0) {
     return (
-      <div className="card flex flex-col gap-1 p-6">
-        <h2 className="font-serif text-lg text-ink">Email history</h2>
+      <div className="card flex flex-col gap-1 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Email history</h2>
         <p className="text-sm text-muted">No emails sent yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="card flex flex-col gap-3 p-6">
-      <h2 className="font-serif text-lg text-ink">Email history</h2>
+    <div className="card flex flex-col gap-3 p-5">
+      <h2 className="font-serif text-[17px] font-semibold text-ink">Email history</h2>
       <ul className="flex flex-col gap-2.5">
         {emails.map((email) => (
           <li key={email.id} className="flex items-start justify-between gap-3 border-b border-border-faint pb-2.5 last:border-none last:pb-0 hover-ring">

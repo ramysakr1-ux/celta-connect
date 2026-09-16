@@ -138,7 +138,7 @@ export default async function AdmissionsPipelinePage({
         lede="A course fills in stages, and each stage leaks. This is where the leak is, while there's still time to do something about it."
       />
 
-      <div className="card flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ export default async function AdmissionsPipelinePage({
       </div>
 
       <div className="card card-accent overflow-hidden !p-0">
-        <p className="border-b border-border bg-surface-muted/60 px-5 py-3 text-sm font-semibold text-ink">Across all open courses</p>
+        <p className="border-b border-border bg-surface-muted/60 px-5 py-4 text-sm font-semibold text-ink">Across all open courses</p>
         <table className="table-plain w-full">
           <thead>
             <tr>

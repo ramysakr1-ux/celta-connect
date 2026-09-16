@@ -59,7 +59,7 @@ export function SettingsTabs({
           </RoomTabButton>
         ))}
       </RoomTabs>
-      <div className="card p-6">{content}</div>
+      <div className="card p-5">{content}</div>
     </div>
   );
 }

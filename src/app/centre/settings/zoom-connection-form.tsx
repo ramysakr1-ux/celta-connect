@@ -16,7 +16,7 @@ export function ZoomConnectionForm({
   timeZone: string;
 }) {
   return (
-    <div className="card px-[22px] py-5">
+    <div className="card p-5">
       <h3 className="font-serif text-base text-ink">Zoom</h3>
       <p className="mt-1 text-sm text-muted">
         Connects Zoom&apos;s webhook so joining/leaving a TP session&apos;s meeting fills in the attendance register

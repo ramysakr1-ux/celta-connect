@@ -56,7 +56,7 @@ export function AiReadingPanel({
     !applicant.interview_auto_send_sent_at;
 
   return (
-    <div className="card flex flex-col gap-3 border-dashed p-6">
+    <div className="card flex flex-col gap-3 border-dashed p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
         {lane ? (

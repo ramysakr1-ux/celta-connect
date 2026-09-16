@@ -11,6 +11,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate, formatCalendarDate } from "@/lib/format-date";
 import { RoomHead } from "@/components/room-head";
+import { BranchChip } from "@/components/branch-chip";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -234,9 +235,7 @@ export default async function AdmissionsPage({
                     {/* Which branch this person applied to. Only when more
                         than one is in view -- naming the branch on every row
                         of a single-branch centre is noise. */}
-                    {aggregated && nameById.get(a.center_id) ? (
-                      <span className="ml-2 text-[11px] text-muted">{nameById.get(a.center_id)}</span>
-                    ) : null}
+                    {aggregated ? <BranchChip name={nameById.get(a.center_id)} className="ml-2" /> : null}
                     {a.ai_reading_lane === "clear_problems" ? (
                       // "A tutor is notified... in-app flag, not push/email"
                       // -- this table is the surface a tutor or admissions
@@ -271,16 +270,16 @@ export default async function AdmissionsPage({
         </table>
       </div>
 
-      <div className="card p-6">
-        <h2 className="font-serif text-lg text-ink">Interview availability</h2>
+      <div className="card p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Interview availability</h2>
         <p className="mt-1 text-sm text-muted">Slots are generated from a rule, not typed in every week.</p>
         <div className="mt-4">
           <InterviewAvailabilityPanel interviewers={interviewerOptions} patterns={patterns} blocks={blocks} settings={generationSettings} />
         </div>
       </div>
 
-      <div className="card flex flex-col gap-4 p-6">
-        <h2 className="font-serif text-lg text-ink">Open interview slots</h2>
+      <div className="card flex flex-col gap-4 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Open interview slots</h2>
         {/* Handbook §7.2: "Online interviews, using the centre's teaching
             platform, should be arranged for candidates who are enrolling in
             a course with an online TP element, as this will assist in
@@ -357,8 +356,8 @@ export default async function AdmissionsPage({
       </div>
 
       {marketingByCourse.size > 0 ? (
-        <div className="card flex flex-col gap-4 p-6">
-          <h2 className="font-serif text-lg text-ink">How they heard about us</h2>
+        <div className="card flex flex-col gap-4 p-5">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">How they heard about us</h2>
           <p className="text-sm text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
           <ul className="flex flex-col gap-4">
             {Array.from(marketingByCourse.entries()).map(([courseId, { name, total, counts }]) => (
@@ -385,8 +384,8 @@ export default async function AdmissionsPage({
       ) : null}
 
       {waitingByIntake.size > 0 ? (
-        <div className="card flex flex-col gap-4 p-6">
-          <h2 className="font-serif text-lg text-ink">Waiting lists</h2>
+        <div className="card flex flex-col gap-4 p-5">
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Waiting lists</h2>
           <p className="text-sm text-muted">
             When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever&apos;s next -- the app
             picks who, not you.

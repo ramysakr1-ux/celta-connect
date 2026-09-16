@@ -210,10 +210,10 @@ export default async function CourseAdminDetailPage({
       />
 
       {/* Admissions pipeline */}
-      <div className={`card flex flex-col gap-4 p-6 ${belowMinimum ? "card-amber" : ""}`}>
+      <div className={`card flex flex-col gap-4 p-5 ${belowMinimum ? "card-amber" : ""}`}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="font-serif text-lg text-ink">Admissions pipeline</h2>
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Admissions pipeline</h2>
             <p className="mt-1 text-sm text-muted">
               Ongoing for as long as this course is still accepting applications -- interview notifications,
               acceptances, and invites all happen from here.
@@ -281,9 +281,9 @@ export default async function CourseAdminDetailPage({
       {/* Real semantic red when overdue; otherwise the decorative garnet
           alternation (matches the header card above it) rather than plain
           teal, since Tutors right below stays teal. */}
-      <div className={`card flex flex-col gap-4 p-6 ${entryFormOverdue ? "card-red" : ""}`}>
+      <div className={`card flex flex-col gap-4 p-5 ${entryFormOverdue ? "card-red" : ""}`}>
         <div>
-          <h2 className="font-serif text-lg text-ink">Entry form</h2>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Entry form</h2>
           <p className="mt-1 text-sm text-muted">
             Fixes the cohort and the candidates&apos; names as Cambridge holds them, and decides whether a later
             withdrawal is internal only or reportable. Submitted in Appian directly -- Connect only tracks whether
@@ -375,8 +375,8 @@ export default async function CourseAdminDetailPage({
       {/* Tutors -- view current MCT/ACT, replace if needed. No edit access
           to their in-course work (roster/subgroups/grades etc. are MCT
           territory, see the footnote). */}
-      <div className="card flex flex-col gap-4 p-6">
-        <h2 className="font-serif text-lg text-ink">Tutors</h2>
+      <div className="card flex flex-col gap-4 p-5">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Tutors</h2>
         {tutors.length === 0 ? (
           <p className="text-sm text-muted">No tutors have joined yet.</p>
         ) : (
@@ -410,9 +410,9 @@ export default async function CourseAdminDetailPage({
       {/* Assessor -- one shared field, not duplicated per side. Whichever
           side (Course Admin here, or the MCT once the course is running)
           sets it first is what the other sees. */}
-      <div className="card flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-5">
         <div>
-          <h2 className="font-serif text-lg text-ink">Assessor</h2>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Assessor</h2>
           <p className="mt-1 text-sm text-muted">
             Optional -- often not known this early. Name it now if you already know, or leave it for the MCT to set
             once the course is running. The MCT gets notified with this contact info as soon as it&apos;s set.

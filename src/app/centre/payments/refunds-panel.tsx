@@ -47,8 +47,8 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
 
   return (
     <div className="card card-gold">
-      <div className="border-b border-border px-5 py-3">
-        <h2 className="font-serif text-base text-ink">Refunds</h2>
+      <div className="border-b border-border px-5 py-4">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Refunds</h2>
         <p className="mt-0.5 text-xs text-muted">
           Agreed and not yet returned. These are the figure on your Overview.
         </p>
@@ -60,7 +60,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
         pending.map((r) => {
           const age = r.ageDays;
           return (
-            <div key={r.id} className="hover-ring flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+            <div key={r.id} className="hover-ring flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
               <div>
                 <p className="text-sm text-ink">
                   {money(r)}
@@ -157,7 +157,7 @@ export function RefundsPanel({ refunds, canEdit, timeZone }: { refunds: RefundRo
       {settleState.error ? <p className="px-5 pb-3 text-sm text-destructive">{settleState.error}</p> : null}
 
       {settled.length > 0 ? (
-        <div className="border-t border-border px-5 py-3">
+        <div className="border-t border-border px-5 py-4">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Settled</p>
           {settled.slice(0, 5).map((r) => (
             <p key={r.id} className="mt-1 text-xs text-muted">

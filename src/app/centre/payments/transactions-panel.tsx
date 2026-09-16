@@ -39,13 +39,13 @@ export function TransactionsPanel({ transactions, timeZone }: { transactions: Tr
 
   return (
     <div className="card">
-      <div className="border-b border-border px-5 py-3">
-        <h2 className="font-serif text-base text-ink">Recent provider activity</h2>
+      <div className="border-b border-border px-5 py-4">
+        <h2 className="font-serif text-[17px] font-semibold text-ink">Recent provider activity</h2>
         <p className="mt-0.5 text-xs text-muted">Every Stripe event received, most recent first.</p>
       </div>
       <ul className="flex flex-col">
         {transactions.map((t) => (
-          <li key={t.id} className="hover-ring flex items-center justify-between gap-3 px-5 py-3 border-b border-border-faint last:border-none">
+          <li key={t.id} className="hover-ring flex items-center justify-between gap-3 px-5 py-4 border-b border-border-faint last:border-none">
             <div>
               <span className={`status-pill ${EVENT_PILL_CLASS[t.eventType]}`}>{EVENT_LABEL[t.eventType]}</span>
               <p className="mt-1 text-xs text-muted">{when(t.receivedAt)}</p>

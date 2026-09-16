@@ -194,7 +194,7 @@ export default async function CommandCenterOverviewPage() {
     <>
       {myCourses.length > 0 ? (
         <div className="card flex flex-col gap-3.5 p-5">
-          <h2 className="font-serif text-lg text-ink">Your courses</h2>
+          <h2 className="font-serif text-[17px] font-semibold text-ink">Your courses</h2>
           <p className="text-[11.5px] text-muted">Courses you&apos;re staffed on directly — lift the normal trainer view, same as any tutor.</p>
           {myCourses.map((c) => (
             <Link
@@ -215,7 +215,7 @@ export default async function CommandCenterOverviewPage() {
         <div className="flex flex-col gap-[22px]">
           <div className="card !p-0">
             <div className="flex items-center justify-between px-5 pt-[18px] pb-1.5">
-              <h2 className="font-serif text-lg text-ink">Centres</h2>
+              <h2 className="font-serif text-[17px] font-semibold text-ink">Centres</h2>
               <Link href="/platform" className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90">
                 + Add a centre
               </Link>
@@ -223,7 +223,7 @@ export default async function CommandCenterOverviewPage() {
             <div>
               <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-rule-gold">
                 {["Centre", "Active course", "Trainees", ""].map((h) => (
-                  <div key={h} className="px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
+                  <div key={h} className="px-5 py-4 text-[10.5px] font-bold uppercase tracking-wide text-muted">
                     {h}
                   </div>
                 ))}
@@ -277,14 +277,14 @@ export default async function CommandCenterOverviewPage() {
                 );
               })}
             </div>
-            <div className="border-t border-rule-gold px-5 py-3 text-[11px] text-muted">
+            <div className="border-t border-rule-gold px-5 py-4 text-[11px] text-muted">
               Owner access is disclosed to the centre on their side. Centres you haven&apos;t been invited into show only what they&apos;ve chosen to make
               visible — no silent viewing.
             </div>
           </div>
 
           <div className="card card-red flex flex-col gap-3.5 p-5">
-            <h2 className="font-serif text-lg text-ink">Needs your attention</h2>
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Needs your attention</h2>
             {needsAttentionCount === 0 ? (
               <p className="text-sm text-muted">Nothing needs you right now.</p>
             ) : (
@@ -331,7 +331,7 @@ export default async function CommandCenterOverviewPage() {
         <div className="flex flex-col gap-[22px]">
           <div className="card flex flex-col gap-3.5 p-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-lg text-ink">Feedback &amp; support</h2>
+              <h2 className="font-serif text-[17px] font-semibold text-ink">Feedback &amp; support</h2>
               {unreadSupportCount > 0 ? <span className="pill pill-warning">{unreadSupportCount} unread</span> : null}
             </div>
             <div className="text-[11.5px] text-muted">
@@ -360,7 +360,7 @@ export default async function CommandCenterOverviewPage() {
           </div>
 
           <div className="card flex flex-col gap-3.5 p-5">
-            <h2 className="font-serif text-lg text-ink">Activity, platform-wide</h2>
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Activity, platform-wide</h2>
             {activity.length === 0 ? (
               <p className="text-[12.5px] text-muted">Nothing yet.</p>
             ) : (

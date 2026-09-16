@@ -30,9 +30,9 @@ export function ReferForm({
   if (destinations.length === 0) return null;
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <h2 className="font-serif text-lg text-ink">Refer to another branch</h2>
+      <h2 className="font-serif text-[17px] font-semibold text-ink">Refer to another branch</h2>
       <p className="text-xs text-muted">
         Everything they&apos;ve done moves with them -- application, marked task, interview notes, and their place
         in the pipeline. This record stays here, marked referred out. A paid deposit stays at this branch.

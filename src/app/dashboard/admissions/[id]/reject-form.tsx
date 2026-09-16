@@ -13,9 +13,9 @@ export function RejectForm({ applicantId }: { applicantId: string }) {
   const [stage, setStage] = useState<"rejected_before_interview" | "rejected_after_interview">("rejected_before_interview");
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className="card flex flex-col gap-3 p-5">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <h2 className="font-serif text-lg text-ink">Reject</h2>
+      <h2 className="font-serif text-[17px] font-semibold text-ink">Reject</h2>
       <div className="flex gap-4 text-sm text-ink">
         <label className="flex items-center gap-2">
           <input

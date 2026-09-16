@@ -43,7 +43,7 @@ export default async function CommandCenterPeoplePage() {
   if (accessibleCenterIds.length === 0) {
     return (
       <div className="card p-5">
-        <h2 className="mb-2 font-serif text-lg text-ink">People, across your centres</h2>
+        <h2 className="mb-2 font-serif text-[17px] font-semibold text-ink">People, across your centres</h2>
         <p className="text-sm text-muted">You don&apos;t currently have Owner or Invited access to any centre.</p>
       </div>
     );
@@ -132,10 +132,10 @@ export default async function CommandCenterPeoplePage() {
       </div>
 
       <div className="card !p-0">
-        <h2 className="px-5 pt-[18px] pb-1.5 font-serif text-lg text-ink">By course</h2>
+        <h2 className="px-5 pt-[18px] pb-1.5 font-serif text-[17px] font-semibold text-ink">By course</h2>
         <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] border-b border-rule-gold">
           {["Centre / course", "Status", "Trainees", "Trainers", "Volunteer attendance"].map((h) => (
-            <div key={h} className="px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
+            <div key={h} className="px-5 py-4 text-[10.5px] font-bold uppercase tracking-wide text-muted">
               {h}
             </div>
           ))}

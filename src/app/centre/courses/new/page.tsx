@@ -114,7 +114,7 @@ export default async function NewCoursePage() {
 
         <div className="flex flex-col gap-4">
           <div className="card p-5">
-            <h2 className="font-serif text-base text-ink">Asked once, read everywhere</h2>
+            <h2 className="font-serif text-[17px] font-semibold text-ink">Asked once, read everywhere</h2>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
               The timetable, rotation, observation log, pre-course pack and assessor pack all read the delivery
               mode. Changing it after setup means rebuilding the timetable, so it is asked here rather than left
@@ -122,7 +122,7 @@ export default async function NewCoursePage() {
             </p>
           </div>
           <div className="card card-gold p-5">
-            <h2 className="font-serif text-base text-ink">What comes next</h2>
+            <h2 className="font-serif text-[17px] font-semibold text-ink">What comes next</h2>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
               Five steps in all. These two settle what the course is and how teaching practice is delivered; the
               rest — assigning a first tutor and reviewing before launch — follow once the course exists.
