@@ -67,13 +67,16 @@ function StatusPill({ attended, awaitingRegister }: { attended: boolean | null; 
       </span>
     );
   }
+  // Volunteer spec A5, 16 Sep 2026: this was an inline blue, and blue
+  // appears nowhere else in the app. The on-track pair now, with the dot
+  // hollow -- the same colour as Attended, not yet filled in.
   if (attended === null) {
     return (
       <span
         className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-        style={{ background: "oklch(93% 0.045 235)", color: "oklch(42% 0.095 250)" }}
+        style={{ background: "var(--color-status-on-track-bg)", color: "var(--color-status-on-track-text)" }}
       >
-        <span className="size-1.5 rounded-full bg-current" />
+        <span className="size-1.5 rounded-full border border-current" />
         Upcoming
       </span>
     );

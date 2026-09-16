@@ -214,7 +214,7 @@ export function VolunteerRecorder({
 
       {status === "idle" || status === "requesting" || status === "error" ? (
         <div className="flex flex-col gap-3">
-          <label className="flex items-start gap-2.5 rounded-lg border border-[#eddfc4] bg-white p-3.5 text-sm text-[#3a2e18]">
+          <label className="flex items-start gap-2.5 rounded-lg border border-border bg-card p-3.5 text-sm text-ink">
             <input
               type="checkbox"
               checked={consented}
@@ -227,21 +227,21 @@ export function VolunteerRecorder({
             type="button"
             onClick={startRecording}
             disabled={!consented || status === "requesting"}
-            className="self-start rounded-lg bg-[#a8432e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="self-start rounded-lg bg-destructive px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
           >
             {status === "requesting" ? "Requesting microphone…" : "Start recording"}
           </button>
-          {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+          {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
         </div>
       ) : null}
 
       {status === "recording" ? (
         <div className="flex flex-col items-center gap-4">
-          <div className="w-full rounded-lg border border-[#eddfc4] bg-[#fbf3e3] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a6a2f]">
+          <div className="w-full rounded-lg border border-border bg-card-inset p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-muted">
               Question {promptIndex + 1} of {prompts.length}
             </p>
-            <p className="mt-1 text-lg text-[#3a2e18]">{current.question}</p>
+            <p className="mt-1 text-lg text-ink">{current.question}</p>
           </div>
 
           {/* Ramy, 25 Aug 2026: "it should be like a play pause sort of
@@ -254,34 +254,34 @@ export function VolunteerRecorder({
             type="button"
             onClick={togglePause}
             aria-label={paused ? "Resume recording" : "Pause recording"}
-            className="flex size-16 items-center justify-center rounded-full bg-[#a8432e] transition-transform"
+            className="flex size-16 items-center justify-center rounded-full bg-destructive transition-transform"
             style={{ boxShadow: paused ? "none" : `0 0 0 ${6 + level * 10}px rgba(168,67,46,0.14)` }}
           >
             {paused ? (
               <div className="ml-0.5 size-0 border-y-[9px] border-l-[14px] border-y-transparent border-l-white" />
             ) : (
               <div className="flex gap-1.5">
-                <div className="h-5 w-1.5 rounded-[2px] bg-white" />
-                <div className="h-5 w-1.5 rounded-[2px] bg-white" />
+                <div className="h-5 w-1.5 rounded-[2px] bg-card" />
+                <div className="h-5 w-1.5 rounded-[2px] bg-card" />
               </div>
             )}
           </button>
 
           <div className="flex items-center gap-2">
-            <span className={`size-1.5 rounded-full bg-[#a8432e] ${paused ? "" : "animate-pulse"}`} />
-            <span className="text-sm font-semibold text-[#a8432e]">
+            <span className={`size-1.5 rounded-full bg-destructive ${paused ? "" : "animate-pulse"}`} />
+            <span className="text-sm font-semibold text-destructive">
               {paused ? "Paused" : "Recording"} · {formatTime(elapsedSeconds)}
             </span>
           </div>
 
-          <p className="text-center text-xs text-[#8a6a2f]">
+          <p className="text-center text-xs text-muted">
             The recording keeps going on its own -- click &quot;Next question&quot; when you&apos;re done talking.
           </p>
 
           <button
             type="button"
             onClick={nextQuestion}
-            className="w-full max-w-xs rounded-lg bg-[#3a2e18] px-5 py-3 text-sm font-semibold text-white"
+            className="w-full max-w-xs rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
           >
             {isLast ? "Stop and finish" : "Next question"}
           </button>
@@ -293,13 +293,13 @@ export function VolunteerRecorder({
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <audio src={audioUrl} controls className="w-full" />
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#8a6a2f]">
+            <span className="text-xs text-muted">
               {formatTime(elapsedSeconds)} recorded
               {promptIndex + 1 >= prompts.length
                 ? `, all ${prompts.length} questions`
                 : `, ${promptIndex + 1} of ${prompts.length} questions`}
             </span>
-            <button type="button" onClick={retake} className="ml-auto text-xs font-medium text-[#a8432e] hover:underline">
+            <button type="button" onClick={retake} className="ml-auto text-xs font-medium text-destructive hover:underline">
               Record again
             </button>
           </div>

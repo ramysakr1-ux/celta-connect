@@ -9,7 +9,7 @@ import { VolunteerRecorder } from "@/app/student/[token]/volunteer-recorder";
 const initialState: VolunteerSignupState = { error: null };
 
 const inputClass =
-  "rounded-lg border border-[#eddfc4] bg-white px-3 py-2 text-sm text-[#3a2e18] outline-none focus:border-[#1a5c5e]";
+  "rounded-lg border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
 
 type Step = "language" | "consent" | "questions" | "recording";
 const STEPS: Step[] = ["language", "consent", "questions", "recording"];
@@ -70,7 +70,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <button
             type="button"
             onClick={goBack}
-            className="flex items-center gap-1 text-sm font-medium text-[#8a6a2f] hover:text-[#3a2e18]"
+            className="flex items-center gap-1 text-sm font-medium text-muted hover:text-ink"
           >
             ← Back
           </button>
@@ -81,7 +81,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
         {STEPS.map((s, i) => (
           <div
             key={s}
-            className={`h-1 flex-1 rounded-full ${i <= stepIndex ? "bg-[#1a5c5e]" : "bg-[#eddfc4]"}`}
+            className={`h-1 flex-1 rounded-full ${i <= stepIndex ? "bg-primary" : "bg-border"}`}
           />
         ))}
       </div>
@@ -89,8 +89,8 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "language" ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-[#3a2e18]">Welcome</h2>
-            <p className="mt-1 text-sm text-[#8a6a2f]">Which language would you like to read in?</p>
+            <h2 className="font-serif text-xl text-ink">Welcome</h2>
+            <p className="mt-1 text-sm text-muted">Which language would you like to read in?</p>
           </div>
           <div className="flex flex-col gap-2">
             {SIGNUP_LANGUAGES.map((l) => (
@@ -99,23 +99,23 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
                 type="button"
                 onClick={() => setLang(l.code)}
                 className={`wash flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left ${
-                  lang === l.code ? "border-[#1a5c5e] bg-[#fbf3e3]" : "border-[#eddfc4] bg-white"
+                  lang === l.code ? "border-primary bg-card-inset" : "border-border bg-card"
                 }`}
               >
                 <div>
-                  <p className="text-sm font-semibold text-[#3a2e18]">{l.native}</p>
-                  <p className="text-xs text-[#8a6a2f]">{l.english}</p>
+                  <p className="text-sm font-semibold text-ink">{l.native}</p>
+                  <p className="text-xs text-muted">{l.english}</p>
                 </div>
-                {lang === l.code ? <span className="text-[#1a5c5e]">✓</span> : null}
+                {lang === l.code ? <span className="text-primary">✓</span> : null}
               </button>
             ))}
           </div>
-          {t ? <p className="text-xs text-[#8a6a2f]">{t.languageSub}</p> : null}
+          {t ? <p className="text-xs text-muted">{t.languageSub}</p> : null}
           <button
             type="button"
             onClick={goNext}
             disabled={!lang}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
           >
             {t?.continueLabel ?? "Continue"}
           </button>
@@ -125,16 +125,16 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "consent" && t ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-[#3a2e18]">{t.consentHeading}</h2>
-            <p className="mt-1 text-sm text-[#8a6a2f]">{t.consentIntro}</p>
+            <h2 className="font-serif text-xl text-ink">{t.consentHeading}</h2>
+            <p className="mt-1 text-sm text-muted">{t.consentIntro}</p>
           </div>
           <div className="flex flex-col gap-2.5">
             {t.consentLines.map((line, i) => (
-              <div key={i} className="flex items-start gap-2.5 rounded-lg border border-[#eddfc4] bg-[#fbf3e3] p-3.5">
-                <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-[#1a5c5e] text-[10px] text-white">
+              <div key={i} className="flex items-start gap-2.5 rounded-lg border border-border bg-card-inset p-3.5">
+                <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-primary text-[10px] text-primary-foreground">
                   ✓
                 </span>
-                <p className="text-sm leading-relaxed text-[#3a2e18]">{line}</p>
+                <p className="text-sm leading-relaxed text-ink">{line}</p>
               </div>
             ))}
           </div>
@@ -144,7 +144,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               setConsented(true);
               goNext();
             }}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+            className="self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             {t.agreeLabel}
           </button>
@@ -154,14 +154,14 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "questions" ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-[#3a2e18]">About you</h2>
-            <p className="mt-1 text-sm text-[#8a6a2f]">
+            <h2 className="font-serif text-xl text-ink">About you</h2>
+            <p className="mt-1 text-sm text-muted">
               Six short questions. Answer in English -- anything you can manage is fine. Nothing here is marked.
             </p>
           </div>
           {questions.map((question, i) => (
             <div key={i} className="flex flex-col gap-1.5">
-              <label htmlFor={`answer_${i}`} className="text-sm text-[#8a6a2f]">
+              <label htmlFor={`answer_${i}`} className="text-sm text-muted">
                 {question}
               </label>
               <textarea
@@ -176,7 +176,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <button
             type="button"
             onClick={goNext}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+            className="self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             Next
           </button>
@@ -186,8 +186,8 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {step === "recording" ? (
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-xl text-[#3a2e18]">Now just talk</h2>
-            <p className="mt-1 text-sm text-[#8a6a2f]">
+            <h2 className="font-serif text-xl text-ink">Now just talk</h2>
+            <p className="mt-1 text-sm text-muted">
               Eight questions. Answer out loud in English. Stop when you want -- two to three minutes altogether.
             </p>
           </div>
@@ -196,12 +196,12 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             recordingConsentLine={t?.recordingConsentLine ?? "I agree to being recorded, in sound or on video, during this sign-up and in lessons, for teacher-training purposes only."}
             onStatusChange={setRecorderStatus}
           />
-          {state.error ? <p className="text-sm text-red-700">{state.error}</p> : null}
+          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           {recorderStatus === "reviewing" ? (
             <button
               type="submit"
               disabled={pending}
-              className="flex items-center gap-2 self-start rounded-lg bg-[#3a2e18] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="flex items-center gap-2 self-start rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? (
                 <>
