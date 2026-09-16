@@ -147,7 +147,7 @@ export default async function AdmissionsPipelinePage({
           plain cards -- same treatment as the Centre Management pilot
           (src/app/centre/page.tsx). None of these carry a status of their
           own. */}
-      <div className="card card-garnet flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
@@ -176,7 +176,7 @@ export default async function AdmissionsPipelinePage({
         <PipelineFunnel stages={activeFunnel} peopleByStage={peopleByStage} alerts={activeAlerts} />
       </div>
 
-      <div className="card overflow-hidden !p-0">
+      <div className="card card-accent overflow-hidden !p-0">
         <p className="border-b border-border bg-surface-muted/60 px-5 py-3 text-sm font-semibold text-ink">Across all open courses</p>
         <table className="table-plain w-full">
           <thead>

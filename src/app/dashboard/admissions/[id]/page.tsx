@@ -235,41 +235,10 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   const isSettled = isRejected || hasOffer || isWaitingList || applicant.stage === "not_this_time" || applicant.stage === "withdrawn_application";
   const canDecideOpen = canDecide && !isSettled;
 
-  // Ramy, 27 Aug 2026: purely decorative teal/garnet alternation down this
-  // page's stack of cards -- same treatment as the Centre Management pilot
-  // (src/app/centre/page.tsx), extended here to every plain card on this
-  // page including the ones owned by child components (AiReadingPanel,
-  // MarkingForm, PaymentsPanel, EmailHistoryPanel, WaiverForm, OfferForm,
-  // WaitingListForm, RejectForm, ReferForm, RequestReferralForm). Computed
-  // from real render position, not a literal index, so it still alternates
-  // correctly however many of the mutually-exclusive/conditional cards
-  // above actually render for a given applicant.
-  let cardIndex = 0;
-  const garnetAt = (i: number) => i % 2 === 1;
-  const headerGarnet = garnetAt(cardIndex++);
-  const rejectedGarnet = isRejected ? garnetAt(cardIndex++) : false;
-  const applicationGarnet = garnetAt(cardIndex++);
-  const writingTaskGarnet = garnetAt(cardIndex++);
-  const commitmentsGarnet = garnetAt(cardIndex++);
-  const aiReadingGarnet = applicant.ai_reading_generated_at ? garnetAt(cardIndex++) : false;
-  const markingGarnet = garnetAt(cardIndex++);
-  const interviewGarnet = garnetAt(cardIndex++);
-  const offerGarnet = hasOffer ? garnetAt(cardIndex++) : false;
-  const depositGarnet = hasOffer ? garnetAt(cardIndex++) : false;
-  const paymentsGarnet = hasOffer ? garnetAt(cardIndex++) : false;
-  const emailHistoryGarnet = hasOffer ? garnetAt(cardIndex++) : false;
-  const waiverGarnet = hasOffer ? garnetAt(cardIndex++) : false;
-  const waitingListGarnet = isWaitingList ? garnetAt(cardIndex++) : false;
-  const offerFormGarnet = canDecideOpen ? garnetAt(cardIndex++) : false;
-  const waitingListFormGarnet = canDecideOpen ? garnetAt(cardIndex++) : false;
-  const rejectFormGarnet = canDecideOpen ? garnetAt(cardIndex++) : false;
-  const referFormGarnet = canDecideOpen && referDestinations.length > 0 ? garnetAt(cardIndex++) : false;
-  const referralRequestGarnet =
-    canDecideOpen && (existingRequest || requestDestinations.length > 0) ? garnetAt(cardIndex++) : false;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className={`card p-6 ${headerGarnet ? "card-garnet" : ""}`}>
+      <div className="card p-6">
         <BackLink href="/dashboard/admissions" label="Admissions" />
         <div className="mt-2 flex items-center justify-between">
           <div>
@@ -290,13 +259,13 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       </div>
 
       {isRejected ? (
-        <div className={`card p-6 ${rejectedGarnet ? "card-garnet" : ""}`}>
+        <div className="card p-6">
           <p className="text-sm font-semibold text-ink">Rejected {formatDate(applicant.rejected_at, timeZone, { year: "numeric" })}</p>
           <p className="mt-1 text-sm text-ink">{applicant.rejection_reason}</p>
         </div>
       ) : null}
 
-      <div className={`card flex flex-col gap-3 p-6 ${applicationGarnet ? "card-garnet" : ""}`}>
+      <div className="card flex flex-col gap-3 p-6">
         <h2 className="font-serif text-lg text-ink">Application</h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
@@ -364,7 +333,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <AcknowledgementsGiven applicant={applicant} timeZone={timeZone} />
       </div>
 
-      <div className={`card flex flex-col gap-3 p-6 ${writingTaskGarnet ? "card-garnet" : ""}`}>
+      <div className="card flex flex-col gap-3 p-6">
         <h2 className="font-serif text-lg text-ink">Extended writing task</h2>
         {prompt ? (
           <p className="text-xs text-muted">
@@ -421,7 +390,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         ) : null}
       </div>
 
-      <div className={`card flex flex-col gap-2 p-6 ${commitmentsGarnet ? "card-garnet" : ""}`}>
+      <div className="card flex flex-col gap-2 p-6">
         <h2 className="font-serif text-lg text-ink">Course commitments and code of conduct</h2>
         {applicant.commitments_accepted_at ? (
           <>
@@ -442,18 +411,18 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         )}
       </div>
 
-      <AiReadingPanel applicant={applicant} garnet={aiReadingGarnet} timeZone={timeZone} />
+      <AiReadingPanel applicant={applicant} timeZone={timeZone} />
 
       {canDecide ? (
-        <MarkingForm applicant={applicant} garnet={markingGarnet} />
+        <MarkingForm applicant={applicant} />
       ) : (
-        <div className={`card flex flex-col gap-1 p-6 ${markingGarnet ? "card-garnet" : ""}`}>
+        <div className="card flex flex-col gap-1 p-6">
           <h2 className="font-serif text-lg text-ink">Marking scheme -- selection task</h2>
           <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can mark this.</p>
         </div>
       )}
 
-      <div className={`card flex flex-col gap-4 p-6 ${interviewGarnet ? "card-garnet" : ""}`}>
+      <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Interview</h2>
         {bookedSlot ? (
           <p className="text-sm text-ink">
@@ -562,14 +531,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {hasOffer ? (
         <>
-          <div className={`card p-6 ${offerGarnet ? "card-garnet" : ""}`}>
+          <div className="card p-6">
             <h2 className="font-serif text-lg text-ink">Offer</h2>
             <p className="mt-1 text-sm text-ink">
               Sent {formatDate(applicant.offer_sent_at, timeZone, { year: "numeric" })}, accept by {formatCalendarDate(applicant.offer_accept_by, { year: "numeric" })}.
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
-          <div className={`card p-6 ${depositGarnet ? "card-garnet" : ""}`}>
+          <div className="card p-6">
             <h2 className="font-serif text-lg text-ink">Deposit</h2>
             <p className="mt-1 text-sm text-muted">
               {paymentState.label}
@@ -589,8 +558,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               </AreaAction>
             </div>
           </div>
-          <PaymentsPanel applicant={applicant} payments={payments ?? []} garnet={paymentsGarnet} timeZone={timeZone} />
-          <EmailHistoryPanel emails={emailHistory ?? []} garnet={emailHistoryGarnet} timeZone={timeZone} />
+          <PaymentsPanel applicant={applicant} payments={payments ?? []} timeZone={timeZone} />
+          <EmailHistoryPanel emails={emailHistory ?? []} timeZone={timeZone} />
           {/* The green light sits with the money, because that is what informs
               it -- but it is a separate decision, which is the whole point of
               the gate. */}
@@ -606,12 +575,12 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               specialRequirements={applicant.special_requirements}
             />
           </AreaAction>
-          <WaiverForm applicant={applicant} garnet={waiverGarnet} />
+          <WaiverForm applicant={applicant} />
         </>
       ) : null}
 
       {isWaitingList ? (
-        <div className={`card p-6 ${waitingListGarnet ? "card-garnet" : ""}`}>
+        <div className="card p-6">
           <h2 className="font-serif text-lg text-ink">Waiting list</h2>
           <p className="mt-1 text-sm text-ink">
             Position {applicant.waiting_list_position}. Will hear by {formatCalendarDate(applicant.waiting_list_hear_by, { year: "numeric" })}.
@@ -626,14 +595,13 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               applicantId={applicant.id}
               hasDeposit={Boolean(applicant.deposit_paid_at)}
               hasMarkedTask={Boolean(applicant.writing_task_submission) && Boolean(applicant.marked_at)}
-              garnet={offerFormGarnet}
             />
           </AreaAction>
-          <WaitingListForm applicantId={applicant.id} garnet={waitingListFormGarnet} />
-          <RejectForm applicantId={applicant.id} garnet={rejectFormGarnet} />
-          <ReferForm applicantId={applicant.id} destinations={referDestinations} garnet={referFormGarnet} />
+          <WaitingListForm applicantId={applicant.id} />
+          <RejectForm applicantId={applicant.id} />
+          <ReferForm applicantId={applicant.id} destinations={referDestinations} />
           {existingRequest ? (
-            <div className={`card flex flex-col gap-1 p-6 ${referralRequestGarnet ? "card-garnet" : ""}`}>
+            <div className="card flex flex-col gap-1 p-6">
               <h2 className="font-serif text-lg text-ink">Referral request</h2>
               <p className="text-sm text-ink">
                 {existingRequest.status === "pending"
@@ -647,7 +615,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               </p>
             </div>
           ) : (
-            <RequestReferralForm applicantId={applicant.id} destinations={requestDestinations} garnet={referralRequestGarnet} />
+            <RequestReferralForm applicantId={applicant.id} destinations={requestDestinations} />
           )}
         </>
       ) : null}

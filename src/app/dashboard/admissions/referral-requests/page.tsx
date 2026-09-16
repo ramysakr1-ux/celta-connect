@@ -79,10 +79,9 @@ export default async function ReferralRequestsPage({
         </p>
       </div>
 
-      {/* Purely decorative teal/garnet alternation by list position within
-          each of the three lists below -- same treatment as the Centre
-          Management pilot (src/app/centre/page.tsx). None of these carry a
-          status of their own. */}
+      {/* Plain cards: none of these carries a status of its own, and a card's
+          edge inside a room carries the room's colour or nothing (centre
+          side A1, 16 Sep 2026). */}
       <div className="flex flex-col gap-3">
         <h2 className="font-serif text-lg text-ink">Waiting on you ({pendingIncoming.length})</h2>
         {pendingIncoming.length === 0 ? (
@@ -101,7 +100,6 @@ export default async function ReferralRequestsPage({
                 requestedAt: r.requested_at,
               }}
               courses={(courses ?? []).map((c) => ({ id: c.id, name: c.name }))}
-              garnet={i % 2 === 1}
             />
           ))
         )}
@@ -111,7 +109,7 @@ export default async function ReferralRequestsPage({
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-lg text-ink">Already decided</h2>
           {decidedIncoming.map((r, i) => (
-            <div key={r.id} className={`card p-4 text-sm text-ink hover-ring ${i % 2 === 1 ? "card-garnet" : ""}`}>
+            <div key={r.id} className={`card p-4 text-sm text-ink hover-ring`}>
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} from{" "}
               {centerNameById.get(r.from_center_id) ?? "another branch"} --{" "}
               <span className={r.status === "accepted" ? "text-primary" : "text-muted"}>{r.status}</span>
@@ -124,7 +122,7 @@ export default async function ReferralRequestsPage({
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-lg text-ink">Sent by this branch</h2>
           {(sent ?? []).map((r, i) => (
-            <div key={r.id} className={`card p-4 text-sm text-ink hover-ring ${i % 2 === 1 ? "card-garnet" : ""}`}>
+            <div key={r.id} className={`card p-4 text-sm text-ink hover-ring`}>
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} to{" "}
               {centerNameById.get(r.to_center_id) ?? "another branch"} --{" "}
               <span className={r.status === "accepted" ? "text-primary" : r.status === "declined" ? "text-destructive" : "text-muted"}>

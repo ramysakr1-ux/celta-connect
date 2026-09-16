@@ -19,7 +19,7 @@ export function PulseStrip({ stats }: { stats: PulseStripStats }) {
   return (
     <div className="grid grid-cols-4 gap-3">
       {cards.map((stat, i) => (
-        <div key={stat.label} className={`card ${i % 2 === 0 ? "card-side-teal" : "card-side-garnet"} flex flex-col gap-1.5 px-[18px] py-4`}>
+        <div key={stat.label} className={`card flex flex-col gap-1.5 px-[18px] py-4`}>
           <div className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted">{stat.label}</div>
           <div className="font-serif text-[26px] font-semibold text-ink tabular-nums">{stat.value}</div>
           {stat.sub ? <div className="text-[11px] text-muted">{stat.sub}</div> : null}

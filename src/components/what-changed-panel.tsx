@@ -7,7 +7,7 @@ export function WhatChangedPanel({ changes, timeZone }: { changes: RecentChange[
     // material" card it stacks directly beneath on Course Admin's overview
     // (src/app/dashboard/admin/page.tsx) -- this panel currently has no
     // other caller, so the pairing is the only place its color is seen.
-    <div className="card card-garnet p-4">
+    <div className="card p-4">
       <h2 className="font-serif text-sm text-ink">What changed</h2>
       {changes.length === 0 ? (
         <p className="mt-2 text-xs text-muted">Nothing recent.</p>

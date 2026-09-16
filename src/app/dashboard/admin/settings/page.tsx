@@ -165,7 +165,7 @@ export default async function AdminSettingsPage({
           AdminTabs nav that used to link here is gone -- see dashboard/
           admin/page.tsx). A real way back, so this can't be a dead end. */}
       <BackLink href="/dashboard/admin" label={"Courses"} />
-      <div className="card card-garnet p-6">
+      <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">Settings</h1>
         <p className="mt-2 text-muted">Centre-level integrations and configuration.</p>
       </div>
@@ -255,7 +255,7 @@ export default async function AdminSettingsPage({
             )}
           </div>
 
-          <div id="feedback-style" className="card card-garnet scroll-mt-6 p-6">
+          <div id="feedback-style" className="card scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Feedback Style Examples</h2>
             <p className="mt-2 text-muted">
               Real feedback snippets used to guide the AI tone-cleanup feature on trainer feedback

@@ -28,12 +28,10 @@ const STATUS_PILL_CLASS: Record<Payment["status"], string> = {
 export function PaymentsPanel({
   applicant,
   payments,
-  garnet = false,
   timeZone,
 }: {
   applicant: Applicant;
   payments: Payment[];
-  garnet?: boolean;
   /** The centre's zone -- paid_at is an instant, written the way a person says it. */
   timeZone: string;
 }) {
@@ -42,7 +40,7 @@ export function PaymentsPanel({
   const paidTotal = sorted.filter((p) => p.status === "paid").reduce((sum, p) => sum + p.amount, 0);
 
   return (
-    <div className={`card flex flex-col gap-4 p-6 ${garnet ? "card-garnet" : ""}`}>
+    <div className="card flex flex-col gap-4 p-6">
       <div>
         <h2 className="font-serif text-lg text-ink">Payments</h2>
         {sorted.length > 0 ? (

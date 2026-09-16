@@ -103,7 +103,7 @@ export default async function CourseAdminDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card card-garnet flex items-start justify-between gap-4 p-6">
+      <div className="card flex items-start justify-between gap-4 p-6">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
             {calendarDay(course.start_date)} &ndash; {calendarDay(course.end_date)}
@@ -199,7 +199,7 @@ export default async function CourseAdminDetailPage({
       {/* Real semantic red when overdue; otherwise the decorative garnet
           alternation (matches the header card above it) rather than plain
           teal, since Tutors right below stays teal. */}
-      <div className={`card flex flex-col gap-4 p-6 ${entryFormOverdue ? "card-red" : "card-garnet"}`}>
+      <div className={`card flex flex-col gap-4 p-6 ${entryFormOverdue ? "card-red" : ""}`}>
         <div>
           <h2 className="font-serif text-lg text-ink">Entry form</h2>
           <p className="mt-1 text-sm text-muted">
@@ -326,7 +326,7 @@ export default async function CourseAdminDetailPage({
       {/* Assessor -- one shared field, not duplicated per side. Whichever
           side (Course Admin here, or the MCT once the course is running)
           sets it first is what the other sees. */}
-      <div className="card card-garnet flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-6">
         <div>
           <h2 className="font-serif text-lg text-ink">Assessor</h2>
           <p className="mt-1 text-sm text-muted">

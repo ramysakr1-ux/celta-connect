@@ -87,7 +87,7 @@ export default async function AdmissionsSettingsPage() {
           plain cards -- same treatment as the Centre Management pilot
           (src/app/centre/page.tsx). None of these carry a status of their
           own. */}
-      <div className="card card-garnet flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">AI reading of the selection task</h2>
         <p className="text-sm text-muted">
           Reads the written task against the marking scheme below and sorts it into three lanes -- clear books an
@@ -181,7 +181,7 @@ export default async function AdmissionsSettingsPage() {
         </form>
       </div>
 
-      <div className="card card-garnet flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Speaking task prompts</h2>
         <p className="text-sm text-muted">
           Short, everyday topics -- a commute, cooking something familiar, explaining something to someone. The point

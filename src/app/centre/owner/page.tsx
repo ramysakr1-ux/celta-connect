@@ -361,7 +361,10 @@ function StatCard({ label, value, suffix, accent }: { label: string; value: stri
   return (
     <div
       className="owner-card px-5 py-[18px]"
-      style={{ borderTop: "1px solid var(--owner-line)", borderLeft: "3px solid var(--owner-garnet)" }}
+      // B3 (centre side, 16 Sep 2026): the garnet rides the top like every
+      // other owner card, not the left edge -- the only left edge left in
+      // the building after A1.
+      style={{ borderTop: "3px solid var(--owner-garnet)" }}
     >
       <p className="owner-eyebrow" style={{ color: "var(--owner-muted)" }}>
         {label}

@@ -17,9 +17,9 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 // Migrated onto the shared .card design system 27 Aug 2026 -- was hand-built
 // inline styles (CARD/TEAL/GOLD/RED literals) copied straight from
 // command-center-visual-reference.html. The KPI row previously carried one
-// hardcoded teal left-border on every tile; now alternates .card-side-teal/
-// .card-side-garnet like every other KPI row in the app (see pulse-strip.tsx
-// and src/app/platform/accounts/page.tsx). The per-course Status pill reuses
+// hardcoded teal left-border on every tile, then a decorative teal/garnet
+// alternation; since the centre side's A1 (16 Sep 2026) the tiles are plain
+// cards -- a figure carries no edge. The per-course Status pill reuses
 // the same Running/Ended/Upcoming semantics -- and colors -- as
 // src/app/centre/page.tsx's courseState() (teal/grey/gold), via the shared
 // .status-pill component this time instead of a hand-rolled color-mix.
@@ -123,7 +123,7 @@ export default async function CommandCenterPeoplePage() {
     <div className="flex flex-col gap-[22px]">
       <div className="grid grid-cols-4 gap-3">
         {kpis.map((stat, i) => (
-          <div key={stat.label} className={`card ${i % 2 === 0 ? "card-side-teal" : "card-side-garnet"} flex flex-col gap-1.5 px-[18px] py-4`}>
+          <div key={stat.label} className={`card flex flex-col gap-1.5 px-[18px] py-4`}>
             <div className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted">{stat.label}</div>
             <div className="font-serif text-[26px] font-semibold text-ink tabular-nums">{stat.value}</div>
             <div className="text-[11px] text-muted">{stat.sub}</div>

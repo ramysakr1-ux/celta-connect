@@ -215,7 +215,7 @@ export default async function AdmissionsPage({
           plain cards -- same treatment as the Centre Management pilot
           (src/app/centre/page.tsx). None of these carry a status of their
           own. */}
-      <div className="card card-garnet overflow-hidden !p-0">
+      <div className="card overflow-hidden !p-0">
         <table className="table-plain w-full">
           <thead>
             <tr>
@@ -283,7 +283,7 @@ export default async function AdmissionsPage({
         </div>
       </div>
 
-      <div className="card card-garnet flex flex-col gap-4 p-6">
+      <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Open interview slots</h2>
         {/* Handbook §7.2: "Online interviews, using the centre's teaching
             platform, should be arranged for candidates who are enrolling in
@@ -389,7 +389,7 @@ export default async function AdmissionsPage({
       ) : null}
 
       {waitingByIntake.size > 0 ? (
-        <div className="card card-garnet flex flex-col gap-4 p-6">
+        <div className="card flex flex-col gap-4 p-6">
           <h2 className="font-serif text-lg text-ink">Waiting lists</h2>
           <p className="text-sm text-muted">
             When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever&apos;s next -- the app

@@ -252,7 +252,7 @@ export default async function CommandCenterOverviewPage() {
                     <div className="px-5 py-[15px]">
                       <span
                         className={`inline-block rounded-full px-[11px] py-1 text-[11.5px] font-bold ${
-                          running ? "bg-status-on-track-bg text-status-on-track-text" : "bg-surface-muted text-muted"
+ running ? "bg-status-on-track-bg text-status-on-track-text" : "bg-surface-muted text-muted"
                         }`}
                       >
                         {running ? (courseLabelByCenterId.get(c.id) ?? "Active course now") : "No active course"}
@@ -329,7 +329,7 @@ export default async function CommandCenterOverviewPage() {
         </div>
 
         <div className="flex flex-col gap-[22px]">
-          <div className="card card-garnet flex flex-col gap-3.5 p-5">
+          <div className="card flex flex-col gap-3.5 p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-serif text-lg text-ink">Feedback &amp; support</h2>
               {unreadSupportCount > 0 ? <span className="pill pill-warning">{unreadSupportCount} unread</span> : null}

@@ -267,7 +267,7 @@ export default async function AdminDashboardPage({
                       status meaning of its own, so "running"'s opacity-80
                       de-emphasis stacks on top of whichever color lands here. */}
                   <div
-                    className={`card overflow-hidden !p-0 ${groupIndex % 2 === 1 ? "card-garnet" : ""} ${group.group === "running" ? "opacity-80" : ""}`}
+                    className={`card card-accent overflow-hidden !p-0 ${group.group === "running" ? "opacity-80" : ""}`}
                   >
                     {group.courses.map((row) => (
                       // Ramy, 31 Aug 2026: "just duplicate courses from

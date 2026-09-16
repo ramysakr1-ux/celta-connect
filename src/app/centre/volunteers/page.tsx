@@ -182,7 +182,8 @@ export default async function CentreVolunteersPage({
           ) : null}
         </div>
 
-        <div className="card rounded-[9px] border-t-[var(--vol-sage)]">
+        {/* The room's own object carries the room's colour (centre side A1); B3: the card radius, not 9px. */}
+        <div className="card card-accent">
           <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
             <h2 className="font-serif text-base text-ink">
               {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"}

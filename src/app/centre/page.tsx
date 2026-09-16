@@ -308,7 +308,7 @@ export default async function CentreOverviewPage({
           {metrics.map((m, i) => (
             <div
               key={m.label}
-              className={`card px-5 py-4 ${m.alert ? "card-side-amber" : i % 2 === 0 ? "card-side-teal" : "card-side-garnet"}`}
+              className={`card px-5 py-4 ${m.alert ? "card-side-amber" : ""}`}
             >
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
               <p className={`mt-1 font-serif text-[28px] ${m.alert ? "text-destructive" : "text-ink"}`}>{m.value}</p>
@@ -323,7 +323,8 @@ export default async function CentreOverviewPage({
           settings in that order. */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="flex flex-col gap-4">
-      <div className="card !p-0">
+      {/* The room's own object carries the room's colour (centre side A1). */}
+      <div className="card card-accent !p-0">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-3.5">
           <h2 className="font-serif text-base text-ink">All courses</h2>
           <span className="text-xs text-muted">
@@ -405,7 +406,7 @@ export default async function CentreOverviewPage({
 
         <div className="flex flex-col gap-4">
         {canView(ctx.roles, "admissions.view", ctx.overrides) ? (
-          <div className="card card-garnet !p-0">
+          <div className="card !p-0">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>

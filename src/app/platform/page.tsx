@@ -32,7 +32,7 @@ export default async function PlatformPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="platform-room container py-8">
       <div className="frame flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -64,7 +64,7 @@ export default async function PlatformPage() {
         </div>
       </div>
 
-      <div className="card card-garnet p-5">
+      <div className="card p-5">
         <h2 className="font-serif text-lg text-ink">Change a user's role</h2>
         <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
         <div className="mt-4">
