@@ -16,6 +16,9 @@ import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
 import { holdsCentre } from "@/lib/branch-scope";
 import { RoomHead } from "@/components/room-head";
+import { CarriedWorkPanel, type PendingTransfer } from "@/app/dashboard/admin/courses/[id]/carried-work-panel";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
@@ -45,6 +48,14 @@ export default async function CourseAdminDetailPage({
   // uses the COURSE's -- the Appian link and the clock belong to the branch
   // the course runs at, not to wherever the admin's own record lives.
   if (!course || !(await holdsCentre(admin, course.center_id))) notFound();
+
+  // The destination side of a restart or a deferral (build-spec §3). Both
+  // transfer tables are the centre's, not the course's -- the person has not
+  // joined this course yet when the row is written -- so these read every
+  // unlinked row at the course's centre and the panel offers this course's
+  // own candidates to link them to.
+  const ctx = await getCentreRoleContext(admin);
+  const mayLinkTransfers = can(ctx.roles, "admissions.manage", ctx.overrides);
 
   const [{ data: center }, { data: tutorRows }, { data: applicants }] = await Promise.all([
     // single-centre: the Appian URL of the centre this course belongs to
@@ -92,6 +103,70 @@ export default async function CourseAdminDetailPage({
   // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
   // reached from says "17 Aug – 11 Sept" (audit, 6 Sep 2026).
   const calendarDay = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" });
+
+  const [{ data: restartRows }, { data: deferralRows }, { data: courseTrainees }] = mayLinkTransfers
+    ? await Promise.all([
+        supabase
+          .from("restart_transfers")
+          .select("id, source_trainee_id, source_course_id, carried_assignments, note, created_at")
+          // single-centre: a transfer belongs to the centre that holds both courses
+          .eq("center_id", course.center_id)
+          .is("destination_trainee_id", null),
+        supabase
+          .from("deferral_transfers")
+          .select("id, source_trainee_id, source_course_id, carried_assignments, carried_tps, carried_celta5_record, note, created_at")
+          // single-centre: a transfer belongs to the centre that holds both courses
+          .eq("center_id", course.center_id)
+          .is("destination_trainee_id", null),
+        supabase.from("profiles").select("id, full_name").eq("course_id", id).eq("role", "trainee").order("full_name"),
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }];
+
+  const transferSourceIds = [...new Set([...(restartRows ?? []), ...(deferralRows ?? [])].map((r) => r.source_trainee_id))];
+  const transferCourseIds = [...new Set([...(restartRows ?? []), ...(deferralRows ?? [])].map((r) => r.source_course_id))];
+  const [{ data: sourcePeople }, { data: sourceCourses }] = transferSourceIds.length
+    ? await Promise.all([
+        supabase.from("profiles").select("id, full_name").in("id", transferSourceIds),
+        supabase.from("courses").select("id, name, delivery_mode").in("id", transferCourseIds),
+      ])
+    : [{ data: [] }, { data: [] }];
+  const sourceName = new Map((sourcePeople ?? []).map((p) => [p.id, p.full_name]));
+  const sourceCourse = new Map((sourceCourses ?? []).map((c) => [c.id, c]));
+
+  const pendingTransfers: PendingTransfer[] = [
+    ...(restartRows ?? []).map((r) => ({
+      id: r.id,
+      kind: "restart" as const,
+      sourceName: sourceName.get(r.source_trainee_id) ?? "A candidate",
+      sourceCourseName: sourceCourse.get(r.source_course_id)?.name ?? "an earlier course",
+      markedOn: calendarDay(r.created_at.slice(0, 10)),
+      note: r.note,
+      carries: `${(r.carried_assignments ?? []).length} assignment${(r.carried_assignments ?? []).length === 1 ? "" : "s"}`,
+      modeChanged: false,
+      sourceMode: null,
+      destinationMode: null,
+    })),
+    ...(deferralRows ?? []).map((r) => {
+      const from = sourceCourse.get(r.source_course_id);
+      const parts = [
+        `${(r.carried_assignments ?? []).length} assignment${(r.carried_assignments ?? []).length === 1 ? "" : "s"}`,
+        `${(r.carried_tps ?? []).length} taught TP${(r.carried_tps ?? []).length === 1 ? "" : "s"}`,
+      ];
+      if (r.carried_celta5_record) parts.push("CELTA 5");
+      return {
+        id: r.id,
+        kind: "deferral" as const,
+        sourceName: sourceName.get(r.source_trainee_id) ?? "A candidate",
+        sourceCourseName: from?.name ?? "an earlier course",
+        markedOn: calendarDay(r.created_at.slice(0, 10)),
+        note: r.note,
+        carries: parts.join(" · "),
+        modeChanged: Boolean(from && from.delivery_mode !== course.delivery_mode),
+        sourceMode: from?.delivery_mode ?? null,
+        destinationMode: course.delivery_mode ?? null,
+      };
+    }),
+  ];
   const courseState = computeCourseState(course.start_date, course.end_date, today);
   const weekOf = courseState === "running" ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
@@ -323,6 +398,8 @@ export default async function CourseAdminDetailPage({
           <TutorInviteForm courseId={course.id} />
         </div>
       </div>
+
+      <CarriedWorkPanel courseId={course.id} transfers={pendingTransfers} trainees={courseTrainees ?? []} />
 
       {/* Assessor -- one shared field, not duplicated per side. Whichever
           side (Course Admin here, or the MCT once the course is running)
