@@ -331,7 +331,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
         .owner-serif { font-family: var(--font-serif, "Newsreader", Georgia, serif); }
         .owner-pill {
           display: inline-flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 3px;
-          background: var(--owner-garnet); color: oklch(98% 0.006 85); font-size: 11px; font-weight: 700;
+          background: var(--owner-garnet); color: oklch(98% 0.006 85); font-size: var(--text-label); font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
         }
         /* A person's name is not a label: dropping the caps and the tracking,
