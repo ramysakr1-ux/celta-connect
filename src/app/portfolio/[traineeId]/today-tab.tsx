@@ -7,32 +7,15 @@ import { toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
 import { formatCalendarDate } from "@/lib/format-date";
 import { computeWeekOf } from "@/lib/course-progress";
 import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
-import { getTpCardStatus } from "@/lib/tp-plan-content";
-import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 import { getTraineeStreamDayOrNext } from "@/lib/trainee-day";
 import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
 import { StreamHero } from "@/app/portfolio/[traineeId]/stream-hero";
-import { ordinal } from "@/lib/stage2-tutorials";
+import { buildHeroState, type TeachingOn } from "@/app/portfolio/[traineeId]/stream-hero-state";
+import { buildWaitingList, type WaitingItem } from "@/app/portfolio/[traineeId]/waiting-list";
 import { classLessons, levelKey } from "@/lib/volunteer-class-session";
 
-// "1 of 2 coming" once somebody has replied; "nobody has replied yet" when
-// nobody has. Silence is not a yes, and a bare "0 of 2 coming" would read
-// as a refusal rather than as no answer.
-function volunteerLine(v: { expected: number; total: number }): string {
-  const noun = v.total === 1 ? "volunteer" : "volunteers";
-  if (v.expected === 0) return `${v.total} ${noun} · nobody has replied yet`;
-  return `${v.expected} of ${v.total} ${noun} coming`;
-}
-
-
-const TP_LESSON_LENGTH_MINUTES = 45;
-// Matches celta5/page.tsx's own local OBSERVATION_HOURS_REQUIRED -- kept as
-// a separate constant rather than a shared import to avoid pulling that
-// large staff/trainee-shared page's whole module graph into this one just
-// for a single fixed CELTA number.
-const OBSERVATION_HOURS_REQUIRED = 6;
 
 // Same pattern as fol-spot-check/page.tsx's own local relativeTime -- kept
 // page-local rather than shared, matching that precedent, for a 6-line helper.
@@ -54,35 +37,6 @@ function addDaysIso(iso: string, days: number): string {
   const d = new Date(`${iso}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
-}
-
-const LETTER_LABEL: Record<string, string> = {
-  fail_risk: "A formal notice about your progress",
-  assignment_warning: "A formal notice about an assignment",
-  deferral: "Your deferral letter",
-};
-
-interface WaitingItem {
-  label: string;
-  detail: string;
-  href: string;
-  /** What sort of thing this is, which is what the Catch up badge colours by:
-   *  garnet for something overdue, teal for an action someone is waiting on,
-   *  gold for a figure that is simply progressing. They were all one colour
-   *  until 9 Sep 2026, which made the list read as uniformly urgent. */
-  kind?: "overdue" | "scheduled" | "progress" | "assignment";
-  isLetter?: boolean;
-  // Ramy, 28 Aug 2026: matches the real mockup's row() pill fields --
-  // "Assignment 3 due today" and "Book your Stage 1 tutorial slot" both
-  // carry a due-by pill (amber), while self-eval/observation rows don't --
-  // only date-bound urgency gets one. Reuses the sitewide .pill system
-  // (pill-warning/pill-danger), not a new color invention.
-  pill?: string;
-  pillClass?: "pill-warning" | "pill-danger";
-  // "urgent items never get bumped off this list even when more pile up" --
-  // previously only formal letters had this guarantee; extended to any
-  // date-bound urgent item (assignment due today/overdue), same reasoning.
-  urgent?: boolean;
 }
 
 // for-claude-code-trainee-interface.md's Today tab -- the new landing
@@ -314,22 +268,6 @@ export async function TodayTab({
   // it can answer "today" first and, only if that's empty, "tomorrow" --
   // Ramy, 28 Aug 2026: the hero card should say "you teach tomorrow" on a
   // day the trainee isn't teaching, not disappear.
-  type TeachingOn = {
-    date: string;
-    tpNumber: number;
-    title: string;
-    teachingOrder: number;
-    groupSize: number;
-    /** The timetable row itself -- Course Stream's day track needs to know
-     *  which block on the day is this trainee's own, to give it the gold. */
-    eventId: string;
-    zoomUrl: string | null;
-    eventTime: string | null;
-    groupName: string | null;
-    joinable: boolean;
-    level: string | null;
-    volunteers: { expected: number; total: number } | null;
-  };
   async function computeTeachingFor(dateIso: string): Promise<TeachingOn | null> {
     if (!subgroupMember) return null;
     const subgroup = subgroupRow;
@@ -497,81 +435,27 @@ export async function TodayTab({
   // now: today's TP, tomorrow's TP, or the day-one GTKY pick, which is why
   // GTKY itself doesn't get its own item here anymore -- it already has a
   // home on the hero card).
-  const waiting: WaitingItem[] = [];
-  if (preCourse && precourseSectionsDone < precourseSectionsTotal) {
-    waiting.push({
-      label: "Finish your pre-course task",
-      detail: `${precourseSectionsDone} of ${precourseSectionsTotal} tasks answered`,
-      href: `/portfolio/${traineeId}/pre-course-task`,
-    });
-  }
-  if (preCourse && !scavengerDone) {
-    waiting.push({
-      label: "Find your way around Connect",
-      kind: "progress",
-      detail: `${huntFoundCount} of ${SCAVENGER_HUNT_QUESTIONS.length} found`,
-      href: `/portfolio/${traineeId}/pre-course-task`,
-    });
-  }
-  for (const a of assignments ?? []) {
-    if (a.first_status === "not_submitted" && a.due_date && a.due_date <= today) {
-      waiting.push({
-        // Ramy, 10 Sep 2026: "the assignments avatar will be garnet and the
-        // assignment itself -- LRT or FOL -- will be written in the same
-        // colour. Just let it pop a little bit. It's too bland."
-        label: `${ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type} due`,
-        kind: "assignment",
-        // A date-only column, said the way a person says it -- "due 3 Sept",
-        // not "due 2026-09-03" (seen on a finished course, 12 Sep 2026).
-        detail: formatCalendarDate(a.due_date),
-        href: `/portfolio/${traineeId}/assignments/${a.id}`,
-        pill: a.due_date === today ? "Today" : "Overdue",
-        pillClass: a.due_date === today ? "pill-warning" : "pill-danger",
-        urgent: true,
-      });
-    }
-  }
-  if (filmedObservationReminder) waiting.push(filmedObservationReminder);
-  for (const letter of unacknowledgedLetters ?? []) {
-    waiting.push({
-      label: LETTER_LABEL[letter.letter_type] ?? "A formal letter",
-      detail: "Please read and acknowledge it",
-      href: `/portfolio/${traineeId}/letters/${letter.id}`,
-      isLetter: true,
-    });
-  }
-  for (const invite of tutorialInvites ?? []) {
-    const event = tutorialEventById.get(invite.timetable_event_id);
-    const stageLabel = invite.stage === "stage1" ? "Stage 1" : "Stage 3";
-    waiting.push({
-      label: `Confirm your ${stageLabel} tutorial`,
-      kind: "scheduled",
-      detail: event ? `${formatCalendarDate(event.event_date)}${event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}` : "Time set by your tutor",
-      href: `/portfolio/${traineeId}/individual-tutorial/${invite.id}`,
-    });
-  }
-  for (const [tpNumber, plan] of planByTpNumber) {
-    if (!plan.taught_at) continue;
-    const status = getTpCardStatus({
-      planSubmitted: Boolean(tpPlanByTpNumber.get(tpNumber)?.submitted_at),
-      taught: true,
-      selfEvalSubmitted: Boolean(selfEvalByTpNumber.get(tpNumber)?.submitted_at),
-      feedbackSubmitted: Boolean(feedbackByTpNumber.get(tpNumber)?.submitted_at),
-      grade: feedbackByTpNumber.get(tpNumber)?.grade,
-    });
-    if (status.label === "Self-evaluation due") {
-      waiting.push({ label: `TP${tpNumber} self-evaluation`, detail: "Write it before feedback opens", href: `/portfolio/${traineeId}/tp/${tpNumber}` });
-    }
-  }
-  const observedMinutes = (observations ?? []).reduce((sum, o) => sum + (o.length_minutes ?? 0), 0);
-  if (observedMinutes / 60 < OBSERVATION_HOURS_REQUIRED) {
-    waiting.push({
-      label: "Observation hours",
-      kind: "progress",
-      detail: `${(observedMinutes / 60).toFixed(1)} of ${OBSERVATION_HOURS_REQUIRED} hrs logged`,
-      href: `/portfolio/${traineeId}/celta5`,
-    });
-  }
+  // The list, its order and the reasons for that order live in
+  // waiting-list.ts (trainee spec C4).
+  const waiting = buildWaitingList({
+    traineeId,
+    today,
+    preCourse,
+    precourseSectionsDone,
+    precourseSectionsTotal,
+    scavengerDone,
+    huntFoundCount,
+    assignments,
+    filmedObservationReminder,
+    unacknowledgedLetters,
+    tutorialInvites,
+    tutorialEventById,
+    planByTpNumber,
+    tpPlanByTpNumber,
+    selfEvalByTpNumber,
+    feedbackByTpNumber,
+    observations,
+  });
   // design_handoff_trainee_landing: "Catch up is never truncated. If nothing
   // is outstanding, drop the column rather than showing an empty state." The
   // old three-slot cap -- and the letter/urgent guarantee that existed only to
@@ -661,140 +545,20 @@ export async function TodayTab({
   // schedule to check in the first place. "All your TPs are taught" must
   // only fire when the half schedule was actually found and confirmed
   // exhausted, not whenever the lookup comes back empty for any reason.
-  const hasTeachingSchedule = Boolean(subgroupMember && subgroupRow?.half_order);
-
-  type HeroContent = { label: string; big: string; bigSub: string; ctaHref: string; ctaLabel: string };
-  const heroKind:
-    | "teaching"
-    | "teaching_tomorrow"
-    | "teaching_next"
-    | "teaching_unrecorded"
-    | "teaching_done"
-    | "teaching_unscheduled"
-    | "course_finished"
-    | "precourse_gtky" = postCourse
-    ? "course_finished"
-    : preCourse
-    ? "precourse_gtky"
-    : teachingToday
-      ? "teaching"
-      : teachingTomorrow
-        ? "teaching_tomorrow"
-        : teachingNext
-          ? "teaching_next"
-          : unrecordedLabel
-            ? "teaching_unrecorded"
-            : hasTeachingSchedule
-              ? "teaching_done"
-              : "teaching_unscheduled";
-  const genericHero: HeroContent | null =
-    heroKind === "course_finished"
-      ? {
-          label: "Course complete",
-          big: "That's your course finished",
-          // Deliberately says nothing about the outcome. A trainee never sees
-          // their grade in Connect -- it is Cambridge's to give, after the
-          // assessor and the awarding process -- so a landing that implied one
-          // either way would be inventing news. What it CAN do is point at the
-          // record they own and tell them where the result actually comes from.
-          bigSub: "Your record stays here. Your result comes from Cambridge through your centre.",
-          ctaHref: `/portfolio/${traineeId}/celta5`,
-          ctaLabel: "Your record",
-        }
-      : heroKind === "precourse_gtky"
-      ? !gtkyAssignment
-        ? {
-            label: "Before day one",
-            big: "Your day-one activity",
-            bigSub: "Ready once your teaching groups are set -- check back closer to the start.",
-            ctaHref: `/portfolio/${traineeId}/pre-course-task`,
-            ctaLabel: "Pre-course task",
-          }
-        : !gtkyAssignment.chosen_slug
-          ? {
-              label: "Before day one",
-              big: "Pick your day-one activity",
-              bigSub: "Three options, unassessed -- pick one before your first morning.",
-              ctaHref: `/portfolio/${traineeId}/gtky`,
-              ctaLabel: "Choose your activity",
-            }
-          : {
-              label: "Before day one",
-              big: "You're set for day one",
-              bigSub: "Your day-one activity is picked -- see you Monday.",
-              ctaHref: `/portfolio/${traineeId}/gtky`,
-              ctaLabel: "View your pick",
-            }
-      : heroKind === "teaching_tomorrow" && teachingTomorrow
-        ? {
-            label: "You teach tomorrow",
-            big: `TP${teachingTomorrow.tpNumber} — ${teachingTomorrow.title}`,
-            bigSub: [
-              teachingTomorrow.eventTime ? teachingTomorrow.eventTime.slice(0, 5) : null,
-              teachingTomorrow.level,
-              `${ordinal(teachingTomorrow.teachingOrder)} of ${teachingTomorrow.groupSize} tomorrow`,
-              `${TP_LESSON_LENGTH_MINUTES} min`,
-              teachingTomorrow.groupName ? `Group ${teachingTomorrow.groupName}` : null,
-              teachingTomorrow.volunteers ? volunteerLine(teachingTomorrow.volunteers) : null,
-            ]
-              .filter(Boolean)
-              .join(" · "),
-            ctaHref: `/portfolio/${traineeId}/tp/${teachingTomorrow.tpNumber}`,
-            ctaLabel: "Open your plan",
-          }
-        : heroKind === "teaching_next" && teachingNext
-          ? {
-              // Same "You teach {day}" pattern as today/tomorrow, just with
-              // the actual weekday name once it's further out than tomorrow.
-              label: `You teach ${formatCalendarDate(teachingNext.date, { weekday: "long" })}`,
-              big: `TP${teachingNext.tpNumber} — ${teachingNext.title}`,
-              bigSub: [
-                formatCalendarDate(teachingNext.date, { day: "numeric", month: "long" }),
-                teachingNext.eventTime ? teachingNext.eventTime.slice(0, 5) : null,
-                teachingNext.level,
-                `${ordinal(teachingNext.teachingOrder)} of ${teachingNext.groupSize}`,
-                `${TP_LESSON_LENGTH_MINUTES} min`,
-                teachingNext.groupName ? `Group ${teachingNext.groupName}` : null,
-                teachingNext.volunteers ? volunteerLine(teachingNext.volunteers) : null,
-              ]
-                .filter(Boolean)
-                .join(" · "),
-              // Ramy, 28 Aug 2026: "when they click on my plan, it will open
-              // the plan for the coming TP" -- same direct link as today
-              // and tomorrow, not a detour through the timetable page.
-              ctaHref: `/portfolio/${traineeId}/tp/${teachingNext.tpNumber}`,
-              ctaLabel: "Open your plan",
-            }
-          : heroKind === "teaching_unrecorded" && unrecordedLabel
-            ? {
-                label: "Teaching practice",
-                big: `${unrecordedLabel} ${unrecordedTps.length === 1 ? "isn't" : "aren't"} recorded yet`,
-                // Deliberately not "nothing for you to do": most of the time
-                // the tutor simply hasn't written it up, but a deferred or
-                // missed lesson looks identical from here, and this screen
-                // cannot tell the two apart. So it says who writes it and what
-                // to do if it stays open, and claims nothing else.
-                bigSub: "Your tutor logs the outcome after the lesson -- ask them if it stays open.",
-                ctaHref: `/portfolio/${traineeId}/tp`,
-                ctaLabel: "My teaching",
-              }
-          : heroKind === "teaching_done"
-            ? {
-                label: "Teaching practice",
-                big: "All your TPs are taught",
-                bigSub: "Nothing left to teach -- see My teaching for the full record.",
-                ctaHref: `/portfolio/${traineeId}/tp`,
-                ctaLabel: "My teaching",
-              }
-            : heroKind === "teaching_unscheduled"
-              ? {
-                  label: "Teaching practice",
-                  big: "Your teaching schedule isn't set up yet",
-                  bigSub: "Nothing to show here until your tutor puts you in a TP group.",
-                  ctaHref: `/portfolio/${traineeId}/tp`,
-                  ctaLabel: "My teaching",
-                }
-              : null;
+  // The eight-state hero ladder and its copy live in stream-hero-state.ts
+  // (trainee spec C4).
+  const { kind: heroKind, generic: genericHero } = buildHeroState({
+    traineeId,
+    preCourse,
+    postCourse,
+    teachingToday,
+    teachingTomorrow,
+    teachingNext,
+    unrecordedLabel,
+    unrecordedTps,
+    hasTeachingSchedule: Boolean(subgroupMember && subgroupRow?.half_order),
+    gtkyAssignment,
+  });
 
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
@@ -908,6 +672,10 @@ export async function TodayTab({
           be the only thing on it not wearing the timetable's glass. The
           eyebrow stays above it, as the spec asks. */}
       <StreamEyebrow firstName={firstName} dateLabel={dateLabel} serverNowMs={serverNowMs} timeZone={timeZone} />
+      {/* Trainee spec C5: the landing's panels rise in on first paint, in the
+          motion rule's own stagger (0 / 60 / 80 / 140ms). Nothing else on the
+          candidate side animates on arrival. */}
+      <div className="rise">
       <StreamHero
         day={streamDay}
         serverNowMs={serverNowMs}
@@ -951,7 +719,9 @@ export async function TodayTab({
             : null
         }
       />
+      </div>
 
+      <div className="rise-1">
       <StreamDayTrack
         day={streamDay}
         serverNowMs={serverNowMs}
@@ -963,11 +733,13 @@ export async function TodayTab({
         }}
       />
 
+      </div>
+
       {/* Two columns, and a column with nothing in it is dropped rather than
           rendered as an empty state -- the handoff is explicit about that. */}
       <div className="grid items-start gap-[26px] md:grid-cols-[1.4fr_1fr]">
         {waiting.length > 0 ? (
-          <section className="flex flex-col">
+          <section className="rise-2 flex flex-col">
             <div className="mb-1 flex items-baseline gap-2.5">
               <h2 className="font-serif text-h2 font-semibold text-ink-warm">Catch up</h2>
               <span className="text-meta text-muted">{waiting.length} · all shown</span>
@@ -1015,7 +787,7 @@ export async function TodayTab({
         ) : null}
 
         {broadcastsCapped.length > 0 ? (
-          <section className="flex flex-col">
+          <section className="rise-3 flex flex-col">
             <div className="mb-1 flex items-baseline gap-2.5">
               <h2 className="font-serif text-h2 font-semibold text-ink-warm">From your tutors</h2>
               <span className="text-meta text-muted">{broadcastsCapped.length}</span>

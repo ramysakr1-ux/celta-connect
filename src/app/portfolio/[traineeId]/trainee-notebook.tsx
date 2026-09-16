@@ -251,9 +251,16 @@ export function TraineeNotebook({
         onClick={() => (open ? close() : setOpen(true))}
         aria-label={open ? "Close your notebook" : "Open your notebook"}
         title="Your notebook (Ctrl/Cmd + Shift + N)"
-        // Above the mobile nav and the chat pill below md, same offsets the
-        // form submit bar uses so nothing in the corner overlaps.
-        className="fixed right-4 bottom-40 z-40 flex size-12 items-center justify-center rounded-full shadow-[0_8px_24px_oklch(23.5%_0.017_65_/_0.22)] transition-transform hover:scale-105 md:right-5 md:bottom-2"
+        // Above the mobile nav and the chat pill, same offsets the form submit
+        // bar uses so nothing in the corner overlaps.
+        //
+        // Trainee spec C3 asked for this to be confirmed at 1280, and it is
+        // clear there (152px of daylight) -- but measuring the band underneath
+        // found a real collision: the pen dropped to bottom-2 at `md`, while
+        // the chat pill only stops reaching the right-hand corner near 1024.
+        // At 768 the pill ran 12-756 and the pen sat at 700-748, on top of its
+        // send button. It drops at `lg` now, where the gap is real.
+        className="fixed right-4 bottom-40 z-40 flex size-12 items-center justify-center rounded-full shadow-[0_8px_24px_oklch(23.5%_0.017_65_/_0.22)] transition-transform hover:scale-105 lg:right-5 lg:bottom-2"
         style={{ background: open ? INK : p.bg, color: open ? "oklch(98.5% 0.006 90)" : INK, border: `1.5px solid ${open ? INK : p.edge}` }}
       >
         {open ? <X size={18} /> : <PenLine size={19} />}

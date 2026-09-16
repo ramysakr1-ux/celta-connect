@@ -199,7 +199,10 @@ export function StreamDayTrack({
                     ? { href: s.zoomUrl!, target: "_blank", rel: "noreferrer", title: `Join ${s.title}` }
                     : {})}
                   className={`flex min-w-0 items-center gap-3 overflow-hidden rounded-[10px] px-3 py-2.5 lg:h-[104px] lg:flex-col lg:items-stretch lg:gap-[3px] ${
-                    joinable ? "cursor-pointer transition-shadow hover:brightness-[1.04]" : ""
+                    // Trainee spec C5: a Your-day box lifts only while it is
+                    // joinable -- the lift is the app's "this opens", and for
+                    // the rest of the day these boxes open nothing.
+                    joinable ? "lift cursor-pointer hover:brightness-[1.04]" : ""
                   }`}
                   style={{
                     // The same glass card as the 4-week timetable grid: a

@@ -413,7 +413,7 @@ export interface TpCardStatus {
 
 // Not imported from src/lib/supabase/types.ts (StandardRating) to avoid a
 // circular import -- that file already imports several types from this one.
-type StandardRatingValue = "above_standard" | "to_standard" | "not_to_standard";
+export type StandardRatingValue = "above_standard" | "to_standard" | "not_to_standard";
 
 export function getTpCardStatus(input: {
   planSubmitted: boolean;
