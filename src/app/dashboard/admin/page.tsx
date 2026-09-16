@@ -15,6 +15,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { formatCalendarDate } from "@/lib/format-date";
+import { CourseStatePill, type CourseState } from "@/components/course-state-pill";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -41,10 +42,15 @@ function courseDates(start: string | null, end: string | null): string {
   const fmt = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
   return start && end ? `${fmt(start)} – ${fmt(end)}` : "Dates not set";
 }
-const GROUP_PILL_CLASS: Record<LandingGroup, string> = {
-  interviewing: "status-pill bg-primary/10 text-primary",
-  launching: "status-pill bg-primary/10 text-primary",
-  running: "status-pill bg-surface-muted text-muted",
+// A3, 16 Sep 2026: these three used to be their own pill -- and gave a
+// RUNNING course the grey the Centre overview uses for a closed one, while
+// the two upcoming sub-states wore teal, the overview's colour for running.
+// Both landings say the same thing in the same colours now; Interviewing and
+// Launching are sub-states of Upcoming, so they share its gold.
+const GROUP_STATE: Record<LandingGroup, CourseState> = {
+  interviewing: "upcoming",
+  launching: "upcoming",
+  running: "running",
 };
 const ENTRY_FORM_WARNING_WINDOW_DAYS = 14;
 
@@ -261,14 +267,11 @@ export default async function AdminDashboardPage({
                       {group.courses.length} course{group.courses.length === 1 ? "" : "s"}
                     </p>
                   </div>
-                  {/* Purely decorative teal/garnet alternation between the
-                      group cards -- Ramy, 27 Aug 2026, same treatment as the
-                      Centre Management pilot (src/app/centre/page.tsx). No
-                      status meaning of its own, so "running"'s opacity-80
-                      de-emphasis stacks on top of whichever color lands here. */}
-                  <div
-                    className={`card card-accent overflow-hidden !p-0 ${group.group === "running" ? "opacity-80" : ""}`}
-                  >
+                  {/* The room's own object, so it carries the room's colour
+                      (centre side A1). A3: the running group used to be dimmed to opacity-80.
+                      A card that "needs nothing from you" is not a disabled
+                      card, and the row already says so in words. */}
+                  <div className="card card-accent overflow-hidden !p-0">
                     {group.courses.map((row) => (
                       // Ramy, 31 Aug 2026: "just duplicate courses from
                       // here. I didn't see a duplicate courses option here."
@@ -320,7 +323,7 @@ export default async function AdminDashboardPage({
                         {group.group === "running" ? (
                           <span className="hidden shrink-0 text-xs text-muted sm:inline">Nothing needed from you</span>
                         ) : null}
-                        <span className={GROUP_PILL_CLASS[group.group]}>{GROUP_LABEL[group.group]}</span>
+                        <CourseStatePill state={GROUP_STATE[group.group]} label={GROUP_LABEL[group.group]} />
                       </Link>
                       {mayCreateCourses ? (
                         <DuplicateCourseForm courseId={row.course.id} suggestedName={`${row.course.name} (copy)`} />

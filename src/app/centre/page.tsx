@@ -8,6 +8,7 @@ import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
 import { AdmissionsChangeIndicator } from "@/app/centre/admissions-change-indicator";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { formatCalendarDate } from "@/lib/format-date";
+import { CourseStatePill, computeCourseState } from "@/components/course-state-pill";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { sumByCurrency, formatTotals, formatCurrency, isMixed } from "@/lib/money-by-currency";
 
@@ -124,10 +125,15 @@ export default async function CentreOverviewPage({
   const courseOfPlan = new Map((plans ?? []).map((p) => [p.id, p.course_id]));
   const owedRowsByCourse = new Map<string, { amount: number; currency: string | null }[]>();
   const owedByCourse = new Map<string, number>();
+  // A2: one vocabulary for money -- red is a promise broken (an instalment
+  // whose date has passed unpaid), amber is owed but not yet late, and money
+  // fully paid says nothing at all. A course's row needs to know which.
+  const missedByCourse = new Set<string>();
   for (const p of payments ?? []) {
     if (p.status !== "pending" && p.status !== "missed") continue;
     const cid = courseOfPlan.get(p.payment_plan_id);
     if (!cid) continue;
+    if (p.status === "missed") missedByCourse.add(cid);
     owedByCourse.set(cid, (owedByCourse.get(cid) ?? 0) + Number(p.amount));
     owedRowsByCourse.set(cid, [...(owedRowsByCourse.get(cid) ?? []), { amount: Number(p.amount), currency: p.currency }]);
   }
@@ -193,27 +199,17 @@ export default async function CentreOverviewPage({
     const fmt = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short" });
     return a && b ? `${fmt(a)} – ${fmt(b)}` : "Dates not set";
   };
-  // Centre Admin.dc.html gives each state its own tint, and they aren't
-  // interchangeable: Upcoming is gold (something is coming that needs
-  // preparing), Running is teal, Closed is grey and deliberately inert.
-  // "Running" previously used bg-accent -- the pale green wash Ramy retired
-  // on 16 Aug 2026 -- and "Upcoming" was the same grey as a finished course,
-  // which lost the distinction the design draws.
-  const courseState = (start: string | null, end: string | null) => {
-    const today = new Date().toISOString().slice(0, 10);
-    if (start && today < start) {
-      return { label: "Upcoming", cls: "bg-[color-mix(in_oklab,oklch(60%_0.11_70)_14%,transparent)] text-[oklch(60%_0.11_70)]" };
-    }
-    if (end && today > end) return { label: "Closed", cls: "bg-surface-muted text-muted" };
-    return { label: "Running", cls: "bg-[color-mix(in_oklab,oklch(38%_0.072_195)_12%,transparent)] text-primary" };
-  };
+  // A3: the tints live in CourseStatePill now, and the state comes from the
+  // shared computeCourseState. The old inline copy read the date off
+  // `new Date().toISOString()` -- the SERVER's UTC day, on a page that
+  // already knows the centre's own (localToday) -- so a course could read
+  // Upcoming for hours after it had started.
+  const stateOf = (start: string | null, end: string | null) =>
+    computeCourseState(start ?? localToday, end ?? localToday, localToday);
 
   const courseStateCounts = (courses ?? []).reduce(
     (acc, c) => {
-      const label = courseState(c.start_date, c.end_date).label;
-      if (label === "Upcoming") acc.upcoming += 1;
-      else if (label === "Closed") acc.closed += 1;
-      else acc.running += 1;
+      acc[stateOf(c.start_date, c.end_date)] += 1;
       return acc;
     },
     { running: 0, upcoming: 0, closed: 0 }
@@ -232,7 +228,7 @@ export default async function CentreOverviewPage({
       label: "Collected this month",
       value: formatTotals(collectedTotals, currencyCode),
       note: `${paid.length} confirmed payment${paid.length === 1 ? "" : "s"}${isMixed(collectedTotals) ? ", two currencies" : ""}`,
-      alert: false,
+      tone: "none" as const,
     },
     {
       label: "Outstanding balance",
@@ -241,13 +237,14 @@ export default async function CentreOverviewPage({
         owingCourseCount > 0
           ? `across ${owingCourseCount} course${owingCourseCount === 1 ? "" : "s"}${isMixed(outstandingTotals) ? ", two currencies" : ""}`
           : "nothing owed",
-      alert: outstanding > 0,
+      // Owed, not late: the panel below is where a MISSED instalment shows.
+      tone: outstanding > 0 ? ("owed" as const) : ("none" as const),
     },
     {
       label: "Deposits held",
       value: formatTotals(depositTotals, currencyCode),
       note: `${withDeposit.length} place${withDeposit.length === 1 ? "" : "s"}, not yet fully paid`,
-      alert: false,
+      tone: "none" as const,
     },
     // "Refunds pending" -- agreed but not yet returned. Alerts on any amount
     // at all, unlike the others: a refund somebody was promised and never
@@ -258,7 +255,8 @@ export default async function CentreOverviewPage({
       note: pendingRefunds.length
         ? `${pendingRefunds.length} awaiting payout`
         : "Nothing awaiting action",
-      alert: refundsPending > 0,
+      // The centre owes this one out; still owed rather than overdue.
+      tone: refundsPending > 0 ? ("owed" as const) : ("none" as const),
     },
   ];
 
@@ -308,10 +306,10 @@ export default async function CentreOverviewPage({
           {metrics.map((m, i) => (
             <div
               key={m.label}
-              className={`card px-5 py-4 ${m.alert ? "card-side-amber" : ""}`}
+              className={`card px-5 py-4 ${m.tone === "owed" ? "card-side-amber" : ""}`}
             >
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
-              <p className={`mt-1 font-serif text-[28px] ${m.alert ? "text-destructive" : "text-ink"}`}>{m.value}</p>
+              <p className={`mt-1 font-serif text-[28px] ${m.tone === "owed" ? "text-status-warning-text" : "text-ink"}`}>{m.value}</p>
               <p className="mt-0.5 text-xs text-muted">{m.note}</p>
             </div>
           ))}
@@ -337,7 +335,7 @@ export default async function CentreOverviewPage({
           <p className="px-5 py-4 text-sm text-muted">No courses yet.</p>
         ) : (
           (courses ?? []).map((c, i) => {
-            const state = courseState(c.start_date, c.end_date);
+            const state = stateOf(c.start_date, c.end_date);
             const owed = owedByCourse.get(c.id) ?? 0;
             return (
               <div key={c.id} className={`hover-ring flex flex-wrap items-center gap-4 px-5 py-3.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
@@ -358,11 +356,11 @@ export default async function CentreOverviewPage({
                   </p>
                 </Link>
                 {canView(ctx.roles, "payments.view", ctx.overrides) ? (
-                  <span className={`w-28 shrink-0 text-sm ${owed > 0 ? "text-destructive" : "text-muted"}`}>
+                  <span className={`w-28 shrink-0 text-sm ${owed > 0 ? (missedByCourse.has(c.id) ? "text-destructive" : "text-status-warning-text") : "text-muted"}`}>
                     {owed > 0 ? `${formatTotals(sumByCurrency(owedRowsByCourse.get(c.id) ?? [], currencyCode), currencyCode)} due` : "Fully paid"}
                   </span>
                 ) : null}
-                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${state.cls}`}>{state.label}</span>
+                <CourseStatePill state={state} />
                 {/* "Duplicate-course lives on this overview (the course
                     list), not inside an individual course's detail." */}
                 {can(ctx.roles, "course.create", ctx.overrides) ? <DuplicateCourseForm courseId={c.id} suggestedName={`${c.name} (copy)`} /> : null}
@@ -441,8 +439,10 @@ export default async function CentreOverviewPage({
           </div>
         ) : null}
 
+          {/* A2: a missed instalment is the one red thing here; nothing
+              missed carries no edge at all. */}
           {canView(ctx.roles, "payments.view", ctx.overrides) ? (
-            <div className={`card !p-0 ${missed.length > 0 ? "card-amber" : "card-gold"}`}>
+            <div className={`card !p-0 ${missed.length > 0 ? "card-red" : ""}`}>
               <div className="border-b border-border px-5 py-3.5">
                 <h2 className="font-serif text-base text-ink">Payments needing attention</h2>
               </div>

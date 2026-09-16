@@ -5,13 +5,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext, canViewAtCentre, canAtCentre } from "@/lib/auth/centre-roles";
 import { canView, can } from "@/lib/auth/centre-permissions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
+import { CourseStatePill } from "@/components/course-state-pill";
 import { formatCalendarDate } from "@/lib/format-date";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
 import { PricingForm } from "@/app/centre/courses/[id]/pricing-form";
 
-const STATE_LABEL: Record<string, string> = { running: "Running", upcoming: "Upcoming", closed: "Closed" };
 
 // for-claude-code-course-admin-final-scope.md: "A view-only drill-in to any
 // one course, showing only: whether tutors have joined, who's the MCT, who's
@@ -99,9 +99,9 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
               {courseDay(course.start_date)} &rarr; {courseDay(course.end_date)}
             </p>
           </div>
-          <span className="shrink-0 rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-semibold text-ink">
-            {STATE_LABEL[state]} &middot; {standing}
-          </span>
+          {/* A3: one pill, the same three tints as both landings -- this was
+              grey whatever the course was doing. */}
+          <CourseStatePill state={state} detail={standing} />
         </div>
       </div>
 
