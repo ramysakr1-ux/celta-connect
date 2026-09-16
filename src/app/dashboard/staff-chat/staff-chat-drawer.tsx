@@ -83,7 +83,9 @@ export function StaffChatDrawer({
   // above it there, not underneath. Only ever true from the real trainee's
   // own (non-preview) render, since that's the only context the tab bar
   // itself renders in -- see portfolio/[traineeId]/layout.tsx.
-  raiseForMobileNav?: boolean;
+  // "phone-only" (the trainer hub, 16 Sep 2026): raised above the phone bar
+  // below md, and at its usual bottom-6 on a laptop.
+  raiseForMobileNav?: boolean | "phone-only";
 }) {
   const [channels, setChannels] = useState(initialChannels);
   const [selectedId, setSelectedId] = useState<string | null>(initialChannels[0]?.id ?? null);
@@ -244,7 +246,7 @@ export function StaffChatDrawer({
         // Ramy, 12 Sep 2026, on the trainee's pages: "the pill needs to go
         // down a bit, closer to the bottom of the screen." Below md it still
         // has to clear the mobile nav.
-        raiseForMobileNav ? "bottom-20 py-3 md:bottom-2" : "bottom-6"
+        raiseForMobileNav === "phone-only" ? "bottom-20 py-3 md:bottom-6 md:py-0" : raiseForMobileNav ? "bottom-20 py-3 md:bottom-2" : "bottom-6"
       }`}
       // Ramy, 2026-08-24: "the frame, the border where the pill sits" gets
       // Connect's own off-white -- the pill itself keeps its normal bg-card

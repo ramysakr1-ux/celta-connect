@@ -1002,7 +1002,7 @@ export default async function TodayPage() {
           ) : null}
         </div>
         {trainer ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden flex-wrap items-center gap-2 md:flex">
             <Link href="/trainer/capture" className="wash flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
               Capture a point
             </Link>

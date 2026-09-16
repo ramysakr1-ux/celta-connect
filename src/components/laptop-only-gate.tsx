@@ -5,7 +5,11 @@ import { Laptop } from "lucide-react";
 // Say so on the phone rather than shipping a cramped version." Pure CSS
 // breakpoint swap (no client JS/media-query hook needed) -- `children` only
 // ever renders at `md:` and above; below that, a plain message takes its
-// place. Server component, works from any page.
+// place. Works from any page, server or client.
+//
+// "Laptop", not "laptop or tablet" (high-traffic audit 16 Sep 2026, A8): the
+// gate is md (768px), so a tablet passes through it -- the message is only
+// ever read on a phone, and Ramy's assessor call was "laptop".
 export function LaptopOnlyGate({
   task,
   skip = false,
@@ -26,7 +30,7 @@ export function LaptopOnlyGate({
       <div className="flex flex-col items-center gap-3 py-16 text-center md:hidden">
         <Laptop className="size-8 text-muted" aria-hidden="true" />
         <p className="max-w-[280px] text-sm text-muted">
-          {task} needs more room than a phone screen -- open this on a laptop or tablet.
+          {task} needs more room than a phone screen – open this on a laptop.
         </p>
       </div>
     </>

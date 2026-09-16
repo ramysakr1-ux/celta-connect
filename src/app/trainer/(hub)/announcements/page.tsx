@@ -213,6 +213,9 @@ export default async function AnnouncementsPage() {
           old three grey boxes: "still looks the same kind of bland paper." */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
         {canCompose ? (
+          /* Read-only on a phone (A7): the composer is the laptop's. md:contents
+             keeps it a direct grid child on a laptop. */
+          <div className="hidden md:contents">
           <AnnouncementComposer
             timetableEvents={composerEvents}
             showAssessorTemplate={showAssessorTemplate && isMct}
@@ -222,6 +225,7 @@ export default async function AnnouncementsPage() {
             groups={composerGroups}
             cohortAllowed={isMct}
           />
+          </div>
         ) : (
           /* A4, live audit 15 Sep 2026: the hover ring means "this opens".
              None of the three announcement surfaces that carried it is a

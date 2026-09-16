@@ -85,15 +85,13 @@ export function TrainerTabs({
   rosterOnly = false,
   tourMode = false,
   mct = false,
-  tint = false,
-}: {
+  tint = false, hideBelowMd = false }: {
   rosterOnly?: boolean;
   tourMode?: boolean;
   /** Main course tutor on the open course: adds the Assessor tab. */
   mct?: boolean;
   /** This person may see the course's trainer-in-training record. */
-  tint?: boolean;
-}) {
+  tint?: boolean; /** The phone bar is the nav below md for a real staff session. */ hideBelowMd?: boolean }) {
   const pathname = usePathname();
   const tabs = rosterOnly
     ? [TABS[0], ATTENDANCE_REGISTER_TAB, ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB]
@@ -105,7 +103,7 @@ export function TrainerTabs({
     // scroll-row, not overflow-hidden: the tabs that do not fit are still
     // reachable. See globals.css -- this row has quietly eaten its last tab
     // twice now, and shortening labels only postpones it.
-    <div className="scroll-row flex min-w-0 flex-1 items-center gap-1">
+    <div className={`scroll-row flex min-w-0 flex-1 items-center gap-1 ${hideBelowMd ? "max-md:hidden" : ""}`}>
       {tabs.map((tab) => {
         const href = `/trainer${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];

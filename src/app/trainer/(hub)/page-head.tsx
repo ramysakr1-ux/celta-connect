@@ -32,7 +32,8 @@ export function PageHead({
         <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{title}</h1>
         {lede ? <p className="mt-1 max-w-[70ch] text-sm text-muted">{lede}</p> : null}
       </div>
-      {children ? <div className="flex flex-wrap items-center gap-2">{children}</div> : null}
+      {/* A phone reads; the actions are the laptop's (build-spec §7, A7). */}
+      {children ? <div className="hidden flex-wrap items-center gap-2 md:flex">{children}</div> : null}
     </div>
   );
 }

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
 import { HeaderCredit } from "@/components/designer-credit";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
+import { TrainerMobileNav } from "@/app/trainer/(hub)/trainer-mobile-nav";
+import { HubPhoneGate } from "@/app/trainer/(hub)/hub-phone-gate";
 import { isActPreview } from "@/lib/act-preview";
 import { enterActPreview, exitActPreview } from "@/app/trainer/(hub)/act-preview-actions";
 import { showWholeCourse, showMyGroup } from "@/app/trainer/(hub)/scope-actions";
@@ -134,6 +136,10 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // session, which v4 does not restyle, keeps Connect's teal as its accent.
   const accent = !isRealStaff ? HUB_TEAL : isMct ? HUB_GARNET : HUB_GOLD;
   const accentDeep = !isRealStaff ? HUB_TEAL : isMct ? HUB_GARNET_DEEP : HUB_GOLD_DEEP;
+  // The hub's phone posture applies to a real member of staff, not to an
+  // assessor touring it (build-spec §7 grants assessors reading on a phone).
+  const phoneBar = isRealStaff && !isAssessor;
+
   const hubVars = {
     "--hub-accent": accent,
     "--hub-accent-deep": accentDeep,
@@ -228,7 +234,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               Assessor pack
             </Link>
           ) : null}
-          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} />
+          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} hideBelowMd={phoneBar} />
           <div className="flex shrink-0 items-center gap-[11px]">
             {isRealStaff && isMctReal ? (
               // The pill is the preview toggle for a real MCT -- one click
@@ -313,13 +319,28 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           always-present collapsed state this reserves space for. Only
           added when the bar actually renders below, so a session with no
           chat (assessor view) doesn't carry the extra space for nothing. */}
-      <div className={`container flex-1 pt-8 ${profile && staffChat ? "pb-28" : "pb-8"}`}>
-        <div className="frame hub-v4 p-6">{children}</div>
+      {/* Below md the phone bar (56px) and the chat pill raised above it
+          need their own room at the foot -- the same reservation the
+          trainee's footer makes. */}
+      <div className={`container flex-1 pt-8 ${profile && staffChat ? "pb-28" : "pb-8"} ${phoneBar ? "max-md:pb-40" : ""}`}>
+        <div className="frame hub-v4 p-6">
+          <HubPhoneGate skip={!phoneBar}>{children}</HubPhoneGate>
+        </div>
       </div>
 
       {profile && staffChat ? (
-        <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />
+        <StaffChatDrawer
+          profileId={profile.id}
+          initialChannels={staffChat.channels}
+          coworkers={staffChat.coworkers}
+          raiseForMobileNav={phoneBar ? "phone-only" : false}
+        />
       ) : null}
+
+      {/* High-traffic audit 16 Sep 2026, A7: the tutor's four phone doors.
+          A real trainer or admin session only -- an assessor touring the hub
+          keeps the tab strip and reads. */}
+      {phoneBar ? <TrainerMobileNav /> : null}
     </div>
     </CentreTimeZoneProvider>
   );
