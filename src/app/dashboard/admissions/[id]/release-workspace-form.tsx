@@ -116,7 +116,10 @@ export function ReleaseWorkspaceForm({
         <button
           type="submit"
           disabled={pending}
-          className="mt-1 rounded-[6px] bg-ink-warm px-4 py-2 text-body font-semibold text-card disabled:opacity-60"
+          // Remainder pass A3: was bg-ink-warm, the login button's colour, on
+          // a page whose other two primaries are bg-primary. One primary in
+          // the Admissions room; destructive stays outlined red.
+          className="mt-1 rounded-[6px] bg-primary px-4 py-2 text-body font-semibold text-primary-foreground disabled:opacity-60"
         >
           {pending ? "Sending…" : "Release workspace access"}
         </button>

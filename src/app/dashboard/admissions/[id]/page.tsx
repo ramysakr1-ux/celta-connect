@@ -38,7 +38,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   // Held, not home -- see holdsCentre (audit, 6 Sep 2026).
   if (!applicant || !(await holdsCentre(staff, applicant.center_id))) notFound();
   // Every timestamp on this page is written in the applicant's centre's zone.
-  const timeZone = (await getCachedCenter(applicant.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const centre = await getCachedCenter(applicant.center_id);
+  const timeZone = centre?.time_zone ?? DEFAULT_TIMEZONE;
 
   const [
     { data: intake },
@@ -595,6 +596,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               applicantId={applicant.id}
               hasDeposit={Boolean(applicant.deposit_paid_at)}
               hasMarkedTask={Boolean(applicant.writing_task_submission) && Boolean(applicant.marked_at)}
+              centreCurrency={centre?.currency ?? null}
             />
           </AreaAction>
           <WaitingListForm applicantId={applicant.id} />

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { sendOffer, type FormState } from "@/app/dashboard/admissions/actions";
+import { currencyChoices } from "@/lib/currency-options";
 
 const initialState: FormState = { error: null };
 const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-body text-ink outline-none focus:border-primary";
@@ -10,17 +11,21 @@ export function OfferForm({
   applicantId,
   hasDeposit,
   hasMarkedTask,
+  centreCurrency,
 }: {
   applicantId: string;
   hasDeposit: boolean;
   /** A written task is on file AND has been marked -- Handbook §7.2's half of selection. */
   hasMarkedTask: boolean;
+  /** The centre's own currency, which the select opens on (remainder pass A4). */
+  centreCurrency: string | null;
 }) {
   const [state, action, pending] = useActionState(sendOffer, initialState);
   // Both overrides appear together once the server has objected to either:
   // the boxes are checkboxes on the same form, and a box that unmounted
   // between two tries would have its objection come straight back.
   const gateObjected = Boolean(state.error?.startsWith("Before this offer goes out"));
+  const choices = currencyChoices(centreCurrency);
 
   return (
     <form action={action} className="card flex flex-col gap-3 p-5">
@@ -40,7 +45,15 @@ export function OfferForm({
           <label htmlFor="fee_currency" className="text-label text-muted">
             Currency
           </label>
-          <input id="fee_currency" name="fee_currency" type="text" placeholder="GBP" maxLength={3} className={inputClass} />
+          {/* Remainder pass A4: was a free-text 3-char box, one slip from
+              pricing an offer in "GPB". Opens on the centre's own currency. */}
+          <select id="fee_currency" name="fee_currency" defaultValue={choices[0]} className={inputClass}>
+            {choices.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="offer_accept_by" className="text-label text-muted">
