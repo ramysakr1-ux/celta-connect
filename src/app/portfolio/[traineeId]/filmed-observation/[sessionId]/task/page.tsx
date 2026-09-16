@@ -59,7 +59,7 @@ export default async function FilmedObservationTaskPage({
     <div className="flex flex-col gap-4">
       <BackLink href={`/portfolio/${traineeId}/filmed-observation/${sessionId}`} label={"Back to the session"} />
 
-      <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
+      <div className={`sheet flex flex-col gap-1`}>
         <h1 className="font-serif text-h2 text-ink">{fSession.lesson_title ?? "Filmed lesson"}</h1>
         <p className="text-body text-muted">
           {[fSession.level, fSession.learner_count ? `${fSession.learner_count} learners` : null, fSession.length_minutes ? `${fSession.length_minutes} min` : null]
@@ -69,7 +69,7 @@ export default async function FilmedObservationTaskPage({
       </div>
 
       {task.criteria_codes.length > 0 ? (
-        <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
+        <div className={`sheet flex flex-col gap-1`}>
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Input session this week</p>
           <p className="text-body text-ink">
             {task.criteria_codes.map((c) => `${c} · ${CRITERIA_LABELS[c] ?? c}`).join(" · ")}
@@ -77,7 +77,7 @@ export default async function FilmedObservationTaskPage({
         </div>
       ) : null}
 
-      <div className={`sheet flex flex-col gap-4 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
+      <div className={`sheet flex flex-col gap-4`}>
         <TaskResponseForm
           taskId={task.id}
           prompt1={task.prompt_1}

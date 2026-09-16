@@ -62,7 +62,7 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
         </p>
       </div>
 
-      <div className="sheet sheet-garnet">
+      <div className="sheet">
         <div className="flex flex-col">
           {(slots ?? []).map((s, i) => {
             const isMine = s.trainee_id === myProfileId;

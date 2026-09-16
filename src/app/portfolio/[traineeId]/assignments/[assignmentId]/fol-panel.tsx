@@ -111,7 +111,7 @@ export function FolPanel({
         </form>
       </div>
 
-      <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
+      <div className="sheet flex flex-col gap-2 p-6">
         <h2 className="font-serif text-h3 text-ink">The pool -- {poolEntries.length} logged so far</h2>
         {poolEntries.length === 0 ? (
           <p className="text-body text-muted">Nothing logged yet -- yours will be the first.</p>
@@ -183,7 +183,7 @@ export function FolPanel({
       )}
 
       {myClaims.length > 0 ? (
-        <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
+        <div className="sheet flex flex-col gap-2 p-6">
           <h2 className="font-serif text-h3 text-ink">Your claims</h2>
           <ul className="flex flex-col gap-1.5">
             {myClaims.map((c) => (

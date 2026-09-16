@@ -639,7 +639,7 @@ export default async function PortfolioCelta5Page({
                   </div>
                   <span
                     className={`pill ${
-                      !stage3IsExpected ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"
+ !stage3IsExpected ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"
                     }`}
                   >
                     {!stage3IsExpected ? "N/A so far" : record.stage3_finalized_at ? "Filed" : "Pending"}
@@ -1285,7 +1285,7 @@ export default async function PortfolioCelta5Page({
       {/* Decorative teal/garnet alternation -- shared by both the assessor
           and trainer-edit views below, since this block renders once and is
           reused in both branches. */}
-      <div className="sheet sheet-garnet mt-3 overflow-hidden !p-0">
+      <div className="sheet mt-3 overflow-hidden !p-0">
         {observations && observations.length > 0 ? (
           <table className="table-plain w-full">
             <thead>
@@ -1793,7 +1793,7 @@ export default async function PortfolioCelta5Page({
       ) : null}
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-        <div className="sheet sheet-garnet flex items-center justify-between gap-3">
+        <div className="sheet flex items-center justify-between gap-3">
           <p className="text-ink">Final report ready to download.</p>
           <a
             href={`/api/celta5/${traineeId}/final-report`}

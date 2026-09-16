@@ -10,6 +10,7 @@ import {
   ASSIGNMENT_STATUS_PILL_CLASS as STATUS_PILL_CLASS,
   ASSIGNMENT_STATUS_LABEL as STATUS_LABEL,
   resolveAssignmentResult,
+  ASSIGNMENT_ACCENT,
 } from "@/lib/assignment-info";
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -149,7 +150,7 @@ export default async function AssignmentsPage({
               traineeId={traineeId}
               assignment={a}
               eyebrow={`Assignment ${i + 1}`}
-              accentClass={(Math.floor(i / 2) + (i % 2)) % 2 === 0 ? "border-t-[oklch(38%_0.085_155)]" : "border-t-[oklch(42%_0.13_27)]"}
+              accentClass={ASSIGNMENT_ACCENT[a.assignment_type]}
               opensOn={releaseFor(a.assignment_type)}
               today={today}
               timeZone={timeZone}
@@ -173,7 +174,7 @@ export default async function AssignmentsPage({
                 traineeId={traineeId}
                 assignment={a}
                 eyebrow="Plagiarism case"
-                accentClass="border-border"
+                accentClass={ASSIGNMENT_ACCENT["Plagiarism Reflection"]}
                 today={today}
                 timeZone={timeZone}
                 feedbackPreview={feedbackPreview.get(a.id) ?? null}
@@ -215,7 +216,7 @@ function AssignmentCard({
   return (
     <Link
       href={`/portfolio/${traineeId}/assignments/${a.id}`}
-      className={`sheet lift group flex h-full flex-col rounded-[9px] border-t-[3px] p-5 ${notYetOpen ? "border-dashed" : ""} ${accentClass ?? "border-t-[var(--trainee-plum)]"}`}
+      className={`sheet lift group flex h-full flex-col rounded-[9px] border-t-[3px] p-5 ${notYetOpen ? "border-dashed" : ""} ${accentClass ?? "border-t-ink"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>

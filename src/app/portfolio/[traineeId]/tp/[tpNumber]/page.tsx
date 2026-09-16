@@ -163,7 +163,7 @@ export default async function TpDetailPage({
         </div>
         {/* Decorative teal/garnet alternation against the header sheet
             above -- no status meaning of its own, same rule as elsewhere. */}
-        <div className="sheet sheet-garnet p-6">
+        <div className="sheet p-6">
           {!sheet || !sheet.revealed_at ? (
             <PeerNoteForm
               traineeId={traineeId}
@@ -457,7 +457,7 @@ export default async function TpDetailPage({
       {/* Decorative teal/garnet alternation down this stack of plain
           content sheets ("Brief" above stays teal) -- no status
           meaning of its own, same rule as everywhere else. */}
-      <div id="plan" className="sheet sheet-garnet scroll-mt-20 p-6">
+      <div id="plan" className="sheet scroll-mt-20 p-6">
         <h2 className="font-serif text-h3 text-ink">What they planned</h2>
         {!plan ? (
           <p className="mt-2 text-body text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
@@ -553,7 +553,7 @@ export default async function TpDetailPage({
       ) : null}
 
       {materials && materials.length > 0 ? (
-        <div id="materials" className="sheet sheet-garnet scroll-mt-20 p-6">
+        <div id="materials" className="sheet scroll-mt-20 p-6">
           <h2 className="font-serif text-h3 text-ink">Materials</h2>
           <ul className="mt-2 flex flex-col gap-2 text-body text-ink">
             {materials.map((m) => {
@@ -569,7 +569,7 @@ export default async function TpDetailPage({
                       <button
                         type="submit"
                         className={`rounded-full border px-2.5 py-1 text-label font-medium ${
-                          shared
+ shared
                             ? "border-border bg-status-neutral-bg text-ink"
                             : "border-border text-muted wash hover:text-primary"
                         }`}
@@ -798,7 +798,7 @@ export default async function TpDetailPage({
                 level={coursebook?.level ?? null}
               />
             ) : plan ? (
-              <div className="sheet sheet-garnet p-6">
+              <div className="sheet p-6">
                 <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
                 <p className="mt-2 text-body text-muted">Not yet submitted.</p>
               </div>
@@ -831,7 +831,7 @@ export default async function TpDetailPage({
                   tpNumber={tpNumber}
                 />
               ) : (
-                <div className="sheet rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+                <div className="sheet rounded-[9px] border-t-ink p-6">
                   <h2 className="font-serif text-h3 text-ink">Materials</h2>
                   <p className="mt-2 text-body text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
                 </div>

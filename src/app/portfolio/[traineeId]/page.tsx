@@ -265,11 +265,8 @@ export default async function CourseStreamPage({
   // whichever of the two mutually-exclusive status branches renders, and
   // whether or not the isRegisteredTutor-only "Outside Connect" panel does.
   let sidebarSheetIndex = 0;
-  const thisWeekIndex = sidebarSheetIndex++;
   const outsideConnectIndex = isRegisteredTutor ? sidebarSheetIndex++ : -1;
-  const courseTutorsIndex = sidebarSheetIndex++;
   const statusIndex = sidebarSheetIndex++;
-  const garnetAt = (i: number) => i % 2 === 1;
 
   // An assessor gets the portfolio, not the candidate's news feed. Ramy, 29
   // Aug 2026, on landing here from a candidate card: "it kind of takes you to
@@ -345,7 +342,7 @@ export default async function CourseStreamPage({
               // Decorative teal/garnet alternation down this repeating list --
               // same purely-decorative rule as e.g. dashboard/admin's course
               // groups, no status meaning of its own.
-              <div key={b.id} className={`sheet ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
+              <div key={b.id} className={`sheet`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted">
@@ -417,7 +414,7 @@ export default async function CourseStreamPage({
 
       <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6">
-          <div className={`sheet-accent h-fit ${garnetAt(thisWeekIndex) ? "sheet-garnet" : ""}`}>
+          <div className={`sheet-accent h-fit`}>
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
             {(timetableEvents ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col">
@@ -453,7 +450,7 @@ export default async function CourseStreamPage({
           </div>
 
           {isRegisteredTutor ? (
-            <div className={`sheet-accent h-fit ${garnetAt(outsideConnectIndex) ? "sheet-garnet" : ""}`}>
+            <div className={`sheet-accent h-fit`}>
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
               <p className="mt-1 text-label text-muted">
                 Everything else belongs in the app, where it&apos;s on the record and the whole group sees it.
@@ -476,7 +473,7 @@ export default async function CourseStreamPage({
             </div>
           ) : null}
 
-          <div className={`sheet-accent h-fit ${garnetAt(courseTutorsIndex) ? "sheet-garnet" : ""}`}>
+          <div className={`sheet-accent h-fit`}>
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
             {(tutors ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col gap-2">
@@ -512,10 +509,9 @@ export default async function CourseStreamPage({
               }
               hoursAttended={hoursAttended}
               pendingRequest={pendingWithdrawalRequest}
-              accent={garnetAt(statusIndex) ? "garnet" : "teal"}
             />
           ) : isStaff && trainee.course_status !== "active" ? (
-            <div className={`sheet-accent h-fit ${garnetAt(statusIndex) ? "sheet-garnet" : ""}`}>
+            <div className={`sheet-accent h-fit`}>
               <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
               <p className="mt-2 text-body font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
               {trainee.course_status_set_at ? (

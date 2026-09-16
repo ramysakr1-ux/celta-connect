@@ -89,7 +89,7 @@ export default async function TraineeSessionMaterialsPage({
       {(events ?? []).length === 0 ? <p className="text-body text-muted">No non-TP sessions on the timetable yet.</p> : null}
 
       {selectedEvent ? (
-        <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+        <div className="card rounded-[9px] border-t-ink p-6">
           <h2 className="font-serif text-h3 text-ink">{selectedEvent.title}</h2>
           <p className="mt-1 mb-4 text-body text-muted">{dateLabel(selectedEvent.event_date)}</p>
           <SessionMaterialsSection

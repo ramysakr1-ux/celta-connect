@@ -29,6 +29,18 @@ export const ASSIGNMENT_WORD_COUNT = "750-1,000 words";
 // "Focus on Learner", "LRT", "LfC", "Skills" alphabetically, which is wrong).
 export const ASSIGNMENT_ORDER: AssignmentType[] = ["Focus on Learner", "LRT", "Skills", "LfC"];
 
+// The warm/ink family for the four Cambridge assignments, garnet for the
+// centre's own sanction (trainee workspace A5, 16 Sep 2026). The cards used
+// to alternate two colours by list position, which said nothing and clashed
+// with garnet's real meaning on the same screens.
+export const ASSIGNMENT_ACCENT: Record<AssignmentType, string> = {
+  "Focus on Learner": "border-t-[oklch(38%_0.085_155)]",
+  LRT: "border-t-[oklch(44%_0.095_68)]",
+  Skills: "border-t-[oklch(30%_0.042_58)]",
+  LfC: "border-t-[oklch(37.5%_0.058_195)]",
+  "Plagiarism Reflection": "border-t-[oklch(42%_0.13_27)]",
+};
+
 export const ASSIGNMENT_INFO: Record<AssignmentType, { title: string; description: string }> = {
   "Focus on Learner": {
     title: "Focus on the Learner",

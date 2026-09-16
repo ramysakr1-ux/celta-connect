@@ -364,7 +364,7 @@ export default async function TpHubPage({
           // Decorative teal/garnet alternation against "Your lessons" beside
           // it -- no status meaning of its own (the warning-colored eyebrow
           // text inside is untouched).
-          <div className="sheet sheet-garnet flex flex-col gap-2.5">
+          <div className="sheet flex flex-col gap-2.5">
             <p className="text-label font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
             <p className="text-label text-muted">
               Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan

@@ -42,7 +42,7 @@ export function SelfEvaluationSection({
   // not a lesson you can reflect on having taught.
   if (!plan.submitted_at) {
     return (
-      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+      <div className="card rounded-[9px] border-t-ink p-6">
         <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
         <p className="mt-2 text-body text-muted">Opens once you have submitted your lesson plan.</p>
       </div>
@@ -51,7 +51,7 @@ export function SelfEvaluationSection({
 
   if (!taught) {
     return (
-      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+      <div className="card rounded-[9px] border-t-ink p-6">
         <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
         {/* Ramy, 12 Sep 2026: "the self-evaluation should unlock when the
             lesson date passes." It used to wait for the tutor to log the
@@ -84,7 +84,7 @@ export function SelfEvaluationSection({
 
   return (
     <>
-      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+      <div className="card rounded-[9px] border-t-ink p-6">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-h3 text-ink">Self-evaluation</h2>
           <span className="status-pill status-pill-on-track">Submitted -- locked</span>
@@ -100,7 +100,7 @@ export function SelfEvaluationSection({
       </div>
 
       {feedback?.submitted_at ? (
-        <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+        <div className="card rounded-[9px] border-t-ink p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
             {feedback.grade ? <StandardRatingPill rating={feedback.grade} /> : null}
@@ -125,7 +125,7 @@ export function SelfEvaluationSection({
           </div>
         </div>
       ) : (
-        <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+        <div className="card rounded-[9px] border-t-ink p-6">
           <h2 className="font-serif text-h3 text-ink">Tutor feedback</h2>
           <p className="mt-2 text-body text-muted">Not yet released by your trainer.</p>
         </div>

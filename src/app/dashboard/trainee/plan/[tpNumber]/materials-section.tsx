@@ -100,7 +100,7 @@ export function MaterialsSection({
   }
 
   return (
-    <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+    <div className="card rounded-[9px] border-t-ink p-6">
       <h2 className="font-serif text-h3 text-ink">Materials</h2>
       <p className="mt-1 text-body text-muted">
         Handouts, worksheets or slides -- anything you or the learners will need. Share one with the students and it

@@ -85,7 +85,7 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
       ) : null}
       <GtkyPickForm activities={activities} chosenSlug={assignment.chosen_slug} readOnly={isDemo} />
 
-      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+      <div className="card rounded-[9px] border-t-ink p-6">
         <h2 className="font-serif text-h3 text-ink">Materials</h2>
         <p className="mt-1 mb-4 text-body text-muted">
           Anything you&apos;d like the volunteer students to see beforehand -- a handout, a slide, whatever you&apos;re using.
