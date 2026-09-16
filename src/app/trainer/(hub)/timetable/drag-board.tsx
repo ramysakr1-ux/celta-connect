@@ -14,6 +14,7 @@ import {
   setTpEventMode,
   resolveZoomParticipant,
 } from "@/app/trainer/(hub)/timetable/actions";
+import { dependentsOf, ruleBreak, type AnchoredAnnouncement } from "@/lib/timetable-dependents";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
 import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
@@ -144,8 +145,13 @@ export function DragBoard({
   canEdit,
   timeZone,
   timeBands,
+  anchoredAnnouncements = [],
+  candidateCount = 0,
 }: {
   events: TimetableEvent[];
+  /** Broadcasts hanging off a timetable event -- §4's real dependency edge. */
+  anchoredAnnouncements?: AnchoredAnnouncement[];
+  candidateCount?: number;
   locked: boolean;
   volunteers: Volunteer[];
   attendedByEvent: Map<string, Set<string>>;
@@ -184,6 +190,17 @@ export function DragBoard({
 
   const handleDrop = (isoDate: string) => {
     if (!draggingEventId || draggingOriginDate === isoDate) return;
+    // §4: "Drop is refused on a garnet chip, per the existing validation
+    // rule." The strip has been saying so the whole time you were dragging.
+    const dragged = events.find((e) => e.id === draggingEventId);
+    const broken = dragged ? ruleBreak(dragged, isoDate, events) : null;
+    if (broken) {
+      setDraggingEventId(null);
+      setDraggingOriginDate(null);
+      setDragOverDate(null);
+      setMoveError(`That move breaks the assignment schedule rule -- ${broken}.`);
+      return;
+    }
     const eventId = draggingEventId;
     setDraggingEventId(null);
     setDraggingOriginDate(null);
@@ -194,8 +211,78 @@ export function DragBoard({
     });
   };
 
+  // §4's consequence strip. The selected tile is the one whose dependents are
+  // listed; while a drag is in flight the dates follow the day you are hovering
+  // over, so you read the consequence before you let go rather than after.
+  const stripEvent = draggingEventId ? (events.find((e) => e.id === draggingEventId) ?? selectedEvent) : selectedEvent;
+  const stripDate = draggingEventId ? (dragOverDate ?? stripEvent?.event_date ?? "") : (stripEvent?.event_date ?? "");
+  const dependents = stripEvent && stripDate
+    ? dependentsOf(stripEvent, stripDate, events, anchoredAnnouncements, candidateCount)
+    : [];
+
   return (
     <div className="flex flex-col gap-4">
+      {stripEvent ? (
+        <div
+          className="sticky top-2 z-20 flex flex-col gap-2 rounded-[10px] px-4 py-3"
+          style={{ background: "oklch(30% 0.042 58)", color: "oklch(97% 0.008 88)" }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-micro font-bold tracking-[0.12em] uppercase" style={{ color: "oklch(78% 0.03 75)" }}>
+                Moving this moves
+              </p>
+              <p className="mt-0.5 truncate text-body font-semibold">
+                {stripEvent.title}
+                <span style={{ color: "oklch(78% 0.03 75)" }}>
+                  {" · "}
+                  {dependents.length === 0
+                    ? "nothing else on record"
+                    : `${dependents.length} thing${dependents.length === 1 ? "" : "s"}`}
+                </span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedEvent(null)}
+              aria-label="Clear selection"
+              className="shrink-0 rounded px-1.5 text-h3 leading-none"
+              style={{ color: "oklch(78% 0.03 75)" }}
+            >
+              ×
+            </button>
+          </div>
+          {dependents.length === 0 ? (
+            /* Honest rather than empty: moveTimetableEvent re-syncs assignment
+               due dates and moves anchored announcements, and nothing else in
+               this codebase follows a session. Saying "nothing else on record"
+               is the truth; inventing chips for a cascade that does not run
+               would be the pack's amber problem again. */
+            <p className="text-label" style={{ color: "oklch(78% 0.03 75)" }}>
+              Nothing in Connect hangs off this session, so moving it moves only the session.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {dependents.map((d) => (
+                <span
+                  key={d.id}
+                  title={d.breaks ? `This move is refused -- ${d.breaks}` : d.detail}
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-label font-semibold"
+                  style={
+                    d.breaks
+                      ? { background: "color-mix(in oklab, var(--color-garnet) 75%, transparent)", color: "oklch(97% 0.008 88)" }
+                      : { background: "color-mix(in oklab, oklch(97% 0.008 88) 14%, transparent)", color: "oklch(97% 0.008 88)" }
+                  }
+                >
+                  {d.label}
+                  <span style={{ opacity: 0.75 }}>· {d.detail}</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : null}
+
       {moveError ? (
         <div className="flex items-center justify-between rounded-[6px] border border-destructive/30 bg-destructive/10 px-3 py-2 text-body text-destructive">
           {moveError}
@@ -262,12 +349,30 @@ export function DragBoard({
                               setDraggingOriginDate(null);
                               setDragOverDate(null);
                             }}
-                            onClick={() => setSelectedEvent(event)}
-                            className="cursor-pointer rounded-[6px] border-l-[3px] px-2 py-1 text-left"
+                            // §4: clicking selects (and opens the detail panel
+                            // it always opened); clicking the selected tile
+                            // again clears the selection.
+                            onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
+                            className={`rounded-[6px] border-l-[3px] px-2 py-1 text-left transition-[transform,opacity,box-shadow] duration-200 ${
+                              !locked && canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+                            } hover:-translate-y-0.5 hover:scale-[1.02]`}
                             style={{
                               borderLeftColor: spine,
                               background: `color-mix(in oklab, ${spine} 12%, white)`,
-                              opacity: draggingEventId === event.id ? 0.4 : 1,
+                              // Dragging fades the tile itself; a selection
+                              // fades every OTHER tile to 55%, so the one whose
+                              // consequences the strip is listing is the one
+                              // you are looking at.
+                              opacity:
+                                draggingEventId === event.id
+                                  ? 0.4
+                                  : selectedEvent && selectedEvent.id !== event.id
+                                    ? 0.55
+                                    : 1,
+                              boxShadow:
+                                selectedEvent?.id === event.id
+                                  ? "0 0 0 2px var(--color-primary)"
+                                  : undefined,
                             }}
                           >
                             <div className="flex items-center gap-1">

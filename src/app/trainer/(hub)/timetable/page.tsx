@@ -165,6 +165,7 @@ export default async function TrainerTimetablePage({
     { data: invites },
     { data: consultationBlocks },
     { data: traineeAssignments },
+    { data: anchoredBroadcasts },
   ] = await Promise.all([
     tpEventIds.length > 0
       ? supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id, source").in("timetable_event_id", tpEventIds)
@@ -190,6 +191,14 @@ export default async function TrainerTimetablePage({
     // Consultation blocks (migration 0275) -- the tutorials section below.
     supabase.from("consultation_blocks").select("id, tutor_profile_id, timetable_event_id, slot_length_minutes").eq("course_id", courseId),
     supabase.from("assignments").select("trainee_id, assignment_type, first_submitted_at").eq("course_id", courseId),
+    // Polish pass §4: the announcements hanging off a timetable event, so the
+    // drag board can say what a move takes with it before the drop.
+    supabase
+      .from("course_broadcasts")
+      .select("title, anchor_event_id, anchor_offset_days")
+      .eq("course_id", courseId)
+      .is("sent_at", null)
+      .not("anchor_event_id", "is", null),
   ]);
   // Wave 3: the positions behind every sheet, and the tutors' names.
   const stage2BlockIds = (blocks ?? []).map((b) => b.id);
@@ -662,6 +671,12 @@ export default async function TrainerTimetablePage({
                 canEdit={isMct}
                 timeZone={timeZone}
                 timeBands={timeBands}
+                anchoredAnnouncements={(anchoredBroadcasts ?? []).map((b) => ({
+                  eventId: b.anchor_event_id as string,
+                  title: b.title,
+                  offsetDays: b.anchor_offset_days ?? 0,
+                }))}
+                candidateCount={(activeTrainees ?? []).length}
               />
             </div>
           ) : (
