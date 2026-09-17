@@ -18,6 +18,7 @@ import { HeaderClock } from "@/components/header-clock";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { InstallPrompt } from "@/components/install-prompt";
+import { DemoDayTag } from "@/components/demo-day-tag";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -136,7 +137,11 @@ export default async function CentreLayout({ children }: { children: React.React
             picking one course and presenting it as the centre's. The time is
             never ambiguous, and the zone note names it for anyone reading
             from another country. */}
-        <div className="flex min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+          {/* No day counter here (see above), so the demo clock's tag is the
+              only thing saying that a ?day= link has moved what this shell
+              calls today. Renders nothing on the real clock. */}
+          <DemoDayTag />
           <HeaderClock supabase={createAdminClient()} timeZone={centreTimeZone} accent="var(--color-primary)" tone="light" />
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home
