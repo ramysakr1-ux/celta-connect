@@ -32,6 +32,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
       theme_color: r.theme,
       icons: roleShortcutIcons(role),
     },
-    { headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=3600" } }
+    {
+      headers: {
+        "Content-Type": "application/manifest+json",
+        // Revalidate every time, like the generic manifest. A one-hour
+        // max-age kept Ramy's Chrome on the pre-scope copy for the rest of
+        // the afternoon after the fix had shipped (17 Sep 2026).
+        "Cache-Control": "public, max-age=0, must-revalidate",
+      },
+    }
   );
 }
