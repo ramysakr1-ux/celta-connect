@@ -52,10 +52,7 @@ export function AssessorCard({
   // the ACT will get theirs". --hub-accent is garnet for an MCT and gold for an
   // ACT, so this follows the person rather than being a fixed colour.
   return (
-    <div
-      className="hover-ring flex flex-col gap-4 rounded-[8px] border border-border bg-card px-[22px] py-5"
-      style={{ borderTop: "3px solid var(--hub-accent)" }}
-    >
+    <div className="hover-ring flex flex-col gap-4 rounded-[8px] border border-border bg-card px-[22px] py-5">
       <div className="flex items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">Assessor</p>

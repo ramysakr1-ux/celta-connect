@@ -43,7 +43,7 @@ function Card({ c, muted = false }: { c: RecommendedCandidate; muted?: boolean }
   return (
     <div
       className="flex flex-col gap-2 rounded-[8px] border border-border bg-card px-4 py-3"
-      style={muted ? { opacity: 0.72, background: "var(--color-card-inset)" } : { boxShadow: "inset 0 3px 0 var(--hub-accent)" }}
+      style={muted ? { opacity: 0.72, background: "var(--color-card-inset)" } : undefined}
     >
       <div className="flex items-start justify-between gap-2">
         <span className="flex min-w-0 flex-col">
@@ -109,7 +109,7 @@ export function RecommendationPanel({
     setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : prev.length >= 2 ? [prev[1], id] : [...prev, id]));
 
   return (
-    <section className="flex flex-col gap-1 rounded-[12px] border border-border bg-card px-[22px] py-5" style={{ borderTop: "3px solid var(--hub-accent)" }}>
+    <section className="flex flex-col gap-1 rounded-[12px] border border-border bg-card px-[22px] py-5">
       <p className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
         What Connect suggests
       </p>

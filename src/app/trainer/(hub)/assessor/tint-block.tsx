@@ -67,7 +67,7 @@ function TintEmpty() {
     // click target in its entirety, so the heading and the pill toggled it
     // too. They sit outside the summary now, and only the affordance opens
     // it -- lifted to the corner so the row still reads as one line.
-    <div className="group-frame-inner hover-ring relative rounded-[12px] bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
+    <div className="group-frame-inner relative rounded-[12px] bg-card px-[22px] py-4">
       <div className="flex flex-wrap items-center gap-3 pr-0 sm:pr-40">
         <span className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit &middot; trainer-in-training
@@ -150,10 +150,7 @@ function TintPresent({
   return (
     // Same split as the empty state: the heading and the person's name are
     // not a control, only the toggle is.
-    <div
-      className="group-frame-inner hover-ring relative flex flex-col gap-4 rounded-[12px] bg-card px-[22px] py-5"
-      style={{ borderTop: "3px solid var(--hub-accent)" }}
-    >
+    <div className="group-frame-inner relative flex flex-col gap-4 rounded-[12px] bg-card px-[22px] py-5">
       <div className="flex flex-wrap items-center gap-3 pr-0 sm:pr-24">
         <span className="text-label font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit · trainer-in-training

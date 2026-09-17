@@ -89,10 +89,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
   const allReady = summary.outstanding.length === 0;
 
   return (
-    <section
-      className="hover-ring flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5"
-      style={{ borderTop: "3px solid var(--hub-accent)" }}
-    >
+    <section className="hover-ring flex flex-col gap-4 rounded-[12px] border border-border bg-card px-[22px] py-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
