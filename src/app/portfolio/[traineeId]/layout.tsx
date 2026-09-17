@@ -456,7 +456,6 @@ export default async function PortfolioLayout({
           the right. Attendance hours (previously a StatBar) has no slot in this
           layout and isn't shown here any more -- still visible on the
           roster table and Today's "Needs you" alerts. */}
-      {showTraineeNav ? <InstallPrompt landingPath={`/portfolio/${trainee.id}`} /> : null}
 
       {showTraineeNav ? (
         // Ramy, 2026-08-24: "think of this as one big sheet of paper... it
@@ -514,6 +513,7 @@ export default async function PortfolioLayout({
                 <div className="min-w-0 flex-1 md:hidden" />
                 <div className="flex shrink-0 items-center gap-2.5 md:order-3">
                   <DemoDayTag tone="dark" />
+                  {showTraineeNav ? <InstallPrompt variant="pill" tone="dark" /> : null}
                   <TraineeHeaderCorner
                     traineeId={trainee.id}
                     traineeName={trainee.full_name}

@@ -123,7 +123,6 @@ export default async function DashboardLayout({
           17 Sep 2026: "why only trainees and volunteers? Everyone should be
           able to have quick access to the platform"). Landing only, and "Not
           now" snoozes it for a week, same as the candidate's. */}
-      <InstallPrompt landingPath={["/dashboard/admin", "/dashboard/admissions"]} />
       {/* The rule is per AREA now, not per role. Applying it on
           `role === "admin"` -- which is what shipped on 31 Aug -- was wrong:
           that condition is true across this entire layout, so Course Admin,
@@ -186,7 +185,8 @@ export default async function DashboardLayout({
           {/* Ramy, 10 Sep 2026: a clock on every landing. The clock only --
               this header sits over every course this administrator touches,
               not one of them, so there is no single teaching day to draw. */}
-          <div className="flex min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+            <InstallPrompt variant="pill" />
             <HeaderClock supabase={createAdminClient()} timeZone={dashboardTimeZone} accent="var(--color-primary)" tone="light" />
           </div>
           </div>

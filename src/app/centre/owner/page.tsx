@@ -215,8 +215,8 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
     <div className="owner-surface -m-6 flex flex-col">
       {/* The owner gets the same quick access as everyone else (Ramy, 17 Sep
           2026). This screen IS the owner's landing, so no landingPath. */}
-      <InstallPrompt />
       <div className="owner-header flex items-start justify-between gap-6 px-11 py-9">
+        <div className="order-last ml-auto self-start"><InstallPrompt variant="pill" tone="dark" /></div>
         <div>
           <p className="owner-eyebrow" style={{ color: "oklch(78% 0.03 75)" }}>
             {aggregated

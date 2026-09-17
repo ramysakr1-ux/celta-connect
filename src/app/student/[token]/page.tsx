@@ -690,7 +690,6 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           route in is a link in an email from weeks ago. An icon on the home
           screen IS their copy of that link. */}
       <div className="w-full max-w-[860px]">
-        <InstallPrompt />
       </div>
       {/* volunteer-view-full-spec.md 1a/1b: the whole page -- header AND
           body -- lives inside ONE bordered/rounded shell floating on the

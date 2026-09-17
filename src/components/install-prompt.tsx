@@ -81,8 +81,11 @@ const subscribeNothing = () => () => {};
 export function InstallPrompt({
   variant = "banner",
   landingPath,
+  tone = "light",
 }: {
-  variant?: "banner" | "inline";
+  variant?: "banner" | "inline" | "pill";
+  /** The pill on a dark header band takes the band's own light ink. */
+  tone?: "light" | "dark";
   /** One path, or several -- /dashboard wraps Course Admin and Admissions. */
   landingPath?: string | string[];
 }) {
@@ -163,6 +166,68 @@ export function InstallPrompt({
     setSnoozedNow(true);
   }
 
+  const gesture =
+    route === "ios" ? (
+      <>
+        Tap <span className="font-semibold text-ink">Share</span>, then{" "}
+        <span className="font-semibold text-ink">Add to Home Screen</span>.
+      </>
+    ) : route === "android" ? (
+      <>
+        Open your browser&apos;s menu, then <span className="font-semibold text-ink">Add to Home screen</span>.
+      </>
+    ) : (
+      <>
+        In Chrome or Edge, use the install icon at the right of the address bar, or the browser menu then{" "}
+        <span className="font-semibold text-ink">Install page as app</span>. In Safari, use{" "}
+        <span className="font-semibold text-ink">File &rsaquo; Add to Dock</span>.
+      </>
+    );
+
+  // The pill: a small, permanent door in every shell's header (Ramy, 17 Sep
+  // 2026, having looked for the banner twice and found it snoozed: "should
+  // probably design something small and apparent"). Never snoozed, never
+  // nags, gone only once the app is installed. Same shape as the demo-clock
+  // tag it sits beside; .eyebrow takes the shell's own tracking. The click
+  // fires the real prompt when the browser has one and otherwise opens a
+  // small note with the gesture, under the pill so the header never jumps.
+  if (variant === "pill") {
+    if (!onClient || standalone) return null;
+    const dark = tone === "dark";
+    return (
+      <div className="relative flex-none">
+        <button
+          type="button"
+          onClick={handleInstallClick}
+          aria-expanded={showIosSteps}
+          aria-label="Add Connect to your home screen"
+          className="eyebrow wash inline-flex h-[26px] items-center gap-1.5 rounded-full border px-2.5 text-micro whitespace-nowrap"
+          style={
+            dark
+              ? { borderColor: "oklch(78% 0.02 80 / 0.35)", color: "oklch(78% 0.02 80)" }
+              : { borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-ink)" }
+          }
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <path d="M12 7v6m0 0 2.5-2.5M12 13l-2.5-2.5" />
+          </svg>
+          <span className="hidden sm:inline">Add to home screen</span>
+          <span className="sm:hidden">Install</span>
+        </button>
+        {showIosSteps ? (
+          <div
+            role="note"
+            className="absolute top-[32px] right-0 z-30 w-[300px] rounded-[10px] border border-border bg-card p-3 text-left text-label leading-[1.5] text-muted"
+            style={{ boxShadow: "var(--shadow-lift)" }}
+          >
+            {gesture}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   // A quiet, permanent way in -- sits with the other footer actions, is
   // never snoozed, and never nags.
   //
@@ -194,7 +259,7 @@ export function InstallPrompt({
         <button
           type="button"
           onClick={handleInstallClick}
-          className="wash inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-label font-medium whitespace-nowrap text-ink hover:border-primary"
+          className="wash inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-label font-medium whitespace-nowrap text-ink"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <rect x="5" y="2" width="14" height="20" rx="2" />
@@ -202,27 +267,7 @@ export function InstallPrompt({
           </svg>
           Keep this on your home screen
         </button>
-        {showIosSteps ? (
-          <p className="max-w-[46ch] text-center text-label leading-[1.5] text-muted">
-            {route === "ios" ? (
-              <>
-                Tap <span className="font-semibold text-ink">Share</span>, then{" "}
-                <span className="font-semibold text-ink">Add to Home Screen</span>.
-              </>
-            ) : route === "android" ? (
-              <>
-                Open your browser&apos;s menu, then{" "}
-                <span className="font-semibold text-ink">Add to Home screen</span>.
-              </>
-            ) : (
-              <>
-                In Chrome or Edge, use the install icon at the right of the address bar, or the browser menu
-                then <span className="font-semibold text-ink">Install page as app</span>. In Safari, use{" "}
-                <span className="font-semibold text-ink">File &rsaquo; Add to Dock</span>.
-              </>
-            )}
-          </p>
-        ) : null}
+        {showIosSteps ? <p className="max-w-[46ch] text-center text-label leading-[1.5] text-muted">{gesture}</p> : null}
       </div>
     );
   }

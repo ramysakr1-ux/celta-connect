@@ -113,7 +113,6 @@ export default async function CentreLayout({ children }: { children: React.React
           17 Sep 2026: "why only trainees and volunteers? Everyone should be
           able to have quick access to the platform"). Landing only, and "Not
           now" snoozes it for a week, same as the candidate's. */}
-      <InstallPrompt landingPath="/centre" />
       {/* Header: 32px mark + wordmark, the credit, a hairline divider, then
           the pill. Two rows on the right (Ramy, 23 Aug 2026): row 2 carries
           the branch filter, name and sign out. The headroom row 1 used to
@@ -146,6 +145,7 @@ export default async function CentreLayout({ children }: { children: React.React
               only thing saying that a ?day= link has moved what this shell
               calls today. Renders nothing on the real clock. */}
           <DemoDayTag />
+          <InstallPrompt variant="pill" />
           <HeaderClock supabase={createAdminClient()} timeZone={centreTimeZone} accent="var(--color-primary)" tone="light" />
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home

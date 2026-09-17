@@ -217,7 +217,6 @@ export async function TrainerHubChrome({
           17 Sep 2026: "why only trainees and volunteers? Everyone should be
           able to have quick access to the platform"). Landing only, and "Not
           now" snoozes it for a week, same as the candidate's. */}
-      <InstallPrompt landingPath="/trainer" />
       {/* design_handoff_trainer_homepage_v4 README, "Header (56px, white,
           1px bottom border)": one row -- mark, tab row, then the right
           cluster (role pill in the accent, name, Settings). Replaces the
@@ -269,6 +268,7 @@ export async function TrainerHubChrome({
             {/* The demo clock, if one is pinned -- it moves what this whole
                 shell calls today, so it is named beside the role pill. */}
             <DemoDayTag />
+            <InstallPrompt variant="pill" />
             {isRealStaff && isMctReal ? (
               // The pill is the preview toggle for a real MCT -- one click
               // into the ACT view, one click back (Ramy, 5 Sep 2026).
