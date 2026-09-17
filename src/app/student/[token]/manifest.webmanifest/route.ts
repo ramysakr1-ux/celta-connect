@@ -42,7 +42,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       description: "Your classes, materials and hours.",
       start_url: `/student/${token}`,
       scope: `/student/${token}`,
-      display: "minimal-ui",
+      // standalone, with minimal-ui asked for on top. Chrome on macOS will not
+      // install a plain minimal-ui manifest at all -- no address-bar icon, no
+      // install event -- which is what stopped every "add to home screen" on
+      // Ramy's Mac on 17 Sep 2026 (found by bisecting with three test pages).
+      // display_override keeps the address bar he wants in the installed
+      // window, on browsers that honour it.
+      display: "standalone",
+      display_override: ["minimal-ui"],
       background_color: SPLASH_BACKGROUND,
       // The student shortcut (design_handoff_role_shortcuts): teal ground,
       // "S" badge -- the volunteer student's own icon, not the generic mark.

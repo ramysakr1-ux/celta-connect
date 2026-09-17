@@ -25,9 +25,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
       // install event, no dialog, the pill left showing the gesture note
       // (Ramy, 17 Sep 2026: "still getting the tutorial").
       scope: "/",
-      // minimal-ui, not the handoff's standalone: Ramy, 17 Sep 2026, wants
-      // the address visible in the installed window.
-      display: "minimal-ui",
+      // standalone, with minimal-ui asked for on top. Chrome on macOS will not
+      // install a plain minimal-ui manifest at all -- no address-bar icon, no
+      // install event -- which is what stopped every "add to home screen" on
+      // Ramy's Mac on 17 Sep 2026 (found by bisecting with three test pages).
+      // display_override keeps the address bar he wants in the installed
+      // window, on browsers that honour it.
+      display: "standalone",
+      display_override: ["minimal-ui"],
       background_color: SPLASH_BACKGROUND,
       theme_color: r.theme,
       icons: roleShortcutIcons(role),

@@ -13,7 +13,14 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Connect",
     description: "CELTA course administration, built for centers.",
     start_url: "/",
-    display: "minimal-ui",
+    // standalone, with minimal-ui asked for on top. Chrome on macOS will not
+    // install a plain minimal-ui manifest at all -- no address-bar icon, no
+    // install event -- which is what stopped every "add to home screen" on
+    // Ramy's Mac on 17 Sep 2026 (found by bisecting with three test pages).
+    // display_override keeps the address bar he wants in the installed
+    // window, on browsers that honour it.
+    display: "standalone",
+    display_override: ["minimal-ui"],
     // --color-background, oklch(92.5% 0.012 85), through Oklab. Was "#faf7f2"
     // with a comment naming 97.8% -- the ground the app stopped using on 16
     // Aug 2026, so every splash screen opened a shade lighter than the app.

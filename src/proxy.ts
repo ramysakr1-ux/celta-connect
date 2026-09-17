@@ -159,11 +159,7 @@ export async function proxy(request: NextRequest) {
     // reason: the browser fetches a manifest without credentials, so one
     // behind the sign-in wall is never read. The route validates the slug
     // and carries nothing personal.
-    /^\/shortcuts\/[a-z-]+\/manifest\.webmanifest$/.test(request.nextUrl.pathname) ||
-    // Two static pages that exist only to ask Chrome what it objects to in a
-    // manifest (17 Sep 2026, while the install pill would not install on
-    // Ramy's Mac). Nothing behind them; remove when the answer is in.
-    request.nextUrl.pathname.startsWith("/install-test/");
+    /^\/shortcuts\/[a-z-]+\/manifest\.webmanifest$/.test(request.nextUrl.pathname);
 
   // An assessor carries no real Supabase user at all -- just the
   // assessor_token cookie set by /assessor/[token] (migration 0030). This
