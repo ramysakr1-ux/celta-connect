@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -162,7 +163,7 @@ export async function joinCourse(
   if (profileError) {
     // The message below is what the person reads; this is what we read.
     console.error("[join/[token]:joinCourse]", profileError);
-    return { error: "Could not finish setting up your account. Try again." };
+    return { error: demoOr(profileError, "Could not finish setting up your account. Try again.") };
 }
 
   if (role === "trainer") {

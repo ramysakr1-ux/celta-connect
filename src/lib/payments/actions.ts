@@ -10,7 +10,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import type { Database } from "@/lib/supabase/types";
-import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { refuseIfDemoCentre, demoOr } from "@/lib/demo-guard";
 
 export interface PaymentFormState {
   error: string | null;
@@ -100,7 +100,7 @@ export async function createPaymentPlan(_prevState: PaymentFormState, formData: 
   if (paymentsError) {
     // The message above is what the person reads; this is what we read.
     console.error("[src/lib/payments:createPaymentPlan]", paymentsError);
-    return { error: "Plan created, but could not create its instalments. Contact support." };
+    return { error: demoOr(paymentsError, "Plan created, but could not create its instalments. Contact support.") };
   }
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { esc } from "@/lib/email-layout";
@@ -220,7 +221,7 @@ export async function rescheduleInterview(_prevState: RescheduleState, formData:
     .update({ booked_applicant_id: null })
     .eq("id", slot.id)
     .eq("booked_applicant_id", applicant.id);
-  if (freeError) return { error: "Could not release your slot. Please try again." };
+  if (freeError) return { error: demoOr(freeError, "Could not release your slot. Please try again.") };
 
   // Back to the stage the picker serves from, and the stamp that spends
   // their one change.

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { logManagementAction, tutorRoleLabel } from "@/lib/activity-log";
@@ -169,7 +170,7 @@ export async function revokeInvitation(_prev: InviteState, formData: FormData): 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:revokeInvitation]", error);
-    return { error: "Could not withdraw the invitation." };
+    return { error: demoOr(error, "Could not withdraw the invitation.") };
   }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
@@ -243,7 +244,7 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
     if (demoteError) {
       // The message above is what the person reads; this is what we read.
       console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:changeTutorRole]", demoteError);
-      return { error: "Could not move the main course tutor role. Nothing was changed." };
+      return { error: demoOr(demoteError, "Could not move the main course tutor role. Nothing was changed.") };
     }
 
     // Logged as its own entry: the outgoing MCT was changed too, and reading
@@ -271,7 +272,7 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:changeTutorRole]", error);
-    return { error: "Could not change the role. Try again." };
+    return { error: demoOr(error, "Could not change the role. Try again.") };
   }
 
   await logManagementAction({

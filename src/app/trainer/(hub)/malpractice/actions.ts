@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -72,7 +73,7 @@ export async function openCase(_prevState: FormState, formData: FormData): Promi
   if (pauseError) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/malpractice:openCase]", pauseError);
-    return { error: "Case was opened but the assignment could not be paused. Refresh and check." };
+    return { error: demoOr(pauseError, "Case was opened but the assignment could not be paused. Refresh and check.") };
   }
 
   if (typeof findingId === "string" && findingId) {
@@ -103,7 +104,7 @@ export async function recordCandidateAccount(_prevState: FormState, formData: Fo
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/malpractice:recordCandidateAccount]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/trainer/malpractice/${caseId}`);
@@ -192,7 +193,7 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
     if (failError) {
       // The message above is what the person reads; this is what we read.
       console.error("[trainer/(hub)/malpractice:decideCase]", failError);
-      return { error: "Could not update the linked assignment. Try again." };
+      return { error: demoOr(failError, "Could not update the linked assignment. Try again.") };
     }
 
     // Ensure this centre has the Plagiarism Reflection type + a published
@@ -268,7 +269,7 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
   if (decideError) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/malpractice:decideCase]", decideError);
-    return { error: "Could not record the decision. Try again." };
+    return { error: demoOr(decideError, "Could not record the decision. Try again.") };
   }
 
   revalidatePath(`/trainer/malpractice/${caseId}`);
@@ -330,7 +331,7 @@ export async function saveConcernNote(_prevState: FormState, formData: FormData)
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/malpractice:saveConcernNote]", error);
-    return { error: "Could not save the note. Try again." };
+    return { error: demoOr(error, "Could not save the note. Try again.") };
   }
 
   revalidatePath(`/portfolio/${assignment.trainee_id}/assignments/${assignmentId}`);

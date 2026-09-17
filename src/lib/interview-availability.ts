@@ -1,3 +1,4 @@
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
@@ -143,7 +144,7 @@ export async function regenerateSlotsForInterviewer(
     .eq("interviewer_id", interviewerId)
     .is("booked_applicant_id", null)
     .gte("slot_date", todayIso);
-  if (deleteError) return { error: "Could not clear the old unbooked slots. Try again." };
+  if (deleteError) return { error: demoOr(deleteError, "Could not clear the old unbooked slots. Try again.") };
 
   const settings: GenerationSettings = {
     slotMinutes: center.interview_slot_minutes,
@@ -172,6 +173,6 @@ export async function regenerateSlotsForInterviewer(
 
   if (rows.length === 0) return { created: 0 };
   const { error: insertError } = await supabase.from("interview_slots").insert(rows);
-  if (insertError) return { error: "Could not create the new slots. Try again." };
+  if (insertError) return { error: demoOr(insertError, "Could not create the new slots. Try again.") };
   return { created: rows.length };
 }

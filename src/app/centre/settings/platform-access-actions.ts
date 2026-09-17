@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext, canAtCentre } from "@/lib/auth/centre-roles";
@@ -33,7 +34,7 @@ export async function invitePlatformOwner(_prev: PlatformAccessFormState, formDa
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[centre/settings/platform-access-actions.ts:invitePlatformOwner]", error);
-    return { error: "Could not send the invite. Try again." };
+    return { error: demoOr(error, "Could not send the invite. Try again.") };
   }
 
   revalidatePath("/centre/settings");

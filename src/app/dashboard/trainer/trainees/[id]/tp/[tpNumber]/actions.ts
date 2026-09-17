@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -76,7 +77,7 @@ async function saveFeedback(formData: FormData, lock: boolean): Promise<FormStat
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/trainees/[id]/tp/[tpNumber]:action]", error);
-    return { error: "Could not save the feedback. Try again." };
+    return { error: demoOr(error, "Could not save the feedback. Try again.") };
 }
 
   // Released feedback fills the candidate's CELTA 5 record of assessed

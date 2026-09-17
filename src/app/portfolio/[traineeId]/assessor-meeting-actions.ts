@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -50,7 +51,7 @@ export async function requestAssessorMeeting(
     if (error) {
       // The message above is what the person reads; this is what we read.
       console.error("[portfolio/[traineeId]/assessor-meeting-actions.ts:requestAssessorMeeting]", error);
-      return { error: "Could not withdraw the request. Try again." };
+      return { error: demoOr(error, "Could not withdraw the request. Try again.") };
     }
   } else {
     // upsert, because the unique constraint is (course_id, trainee_id): asking
@@ -67,7 +68,7 @@ export async function requestAssessorMeeting(
     if (error) {
       // The message above is what the person reads; this is what we read.
       console.error("[portfolio/[traineeId]/assessor-meeting-actions.ts:requestAssessorMeeting]", error);
-      return { error: "Could not send the request. Try again." };
+      return { error: demoOr(error, "Could not send the request. Try again.") };
     }
   }
 

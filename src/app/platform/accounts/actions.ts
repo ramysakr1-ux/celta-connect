@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -51,7 +52,7 @@ export async function upsertSubscription(_prev: UpsertSubscriptionState, formDat
     },
     { onConflict: "center_id" },
   );
-  if (error) return { error: `Could not save that subscription: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not save that subscription: ${error.message}`) };
 
   revalidatePath("/platform/accounts");
   return { notice: "Subscription saved." };
@@ -87,7 +88,7 @@ export async function recordInvoice(_prev: RecordInvoiceState, formData: FormDat
     note,
     marked_by: profile.id,
   });
-  if (error) return { error: `Could not record that invoice: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not record that invoice: ${error.message}`) };
 
   revalidatePath("/platform/accounts");
   return { notice: "Invoice recorded." };

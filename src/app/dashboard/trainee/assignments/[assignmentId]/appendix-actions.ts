@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -71,7 +72,7 @@ export async function removeAppendix(input: {
   const { error } = await db.from("assignment_appendices").delete().eq("id", input.appendixId);
   if (error) {
     console.error("[trainee/assignments/appendix-actions:removeAppendix]", error);
-    return { error: "Could not remove that -- this assignment may already be submitted." };
+    return { error: demoOr(error, "Could not remove that -- this assignment may already be submitted.") };
   }
   if (row?.storage_path) await db.storage.from(APPENDIX_BUCKET).remove([row.storage_path as string]);
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -90,7 +91,7 @@ export async function createConsultationBlock(_prevState: FormState, formData: F
   });
   if (rpcError) {
     console.error("[trainer/(hub)/timetable/consultation-actions.ts:createConsultationBlock]", rpcError);
-    return { error: "Could not generate booking positions." };
+    return { error: demoOr(rpcError, "Could not generate booking positions.") };
   }
 
   // One announcement when the block is placed, never per booking -- the
@@ -196,7 +197,7 @@ export async function bookConsultationSlot(_prevState: BookState, formData: Form
     .is("trainee_id", null);
   if (error) {
     console.error("[trainer/(hub)/timetable/consultation-actions.ts:bookConsultationSlot]", error);
-    return { error: "Could not book -- try again." };
+    return { error: demoOr(error, "Could not book -- try again.") };
   }
   if (count === 0) return { error: "Someone just took that position -- try again." };
 

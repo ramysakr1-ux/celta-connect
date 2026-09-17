@@ -1,3 +1,4 @@
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { FeedbackTone } from "@/lib/supabase/types";
@@ -83,7 +84,7 @@ export async function saveFeedbackAssistExamples(
     .delete()
     .eq("course_id", courseId)
     .eq("profile_id", profileId);
-  if (deleteError) return { error: "Could not save your examples. Try again." };
+  if (deleteError) return { error: demoOr(deleteError, "Could not save your examples. Try again.") };
 
   const rows = [
     ...direct.filter((t) => t.trim()).map((example_text) => ({ course_id: courseId, profile_id: profileId, tone: "direct" as FeedbackTone, example_text: example_text.trim() })),
@@ -91,13 +92,13 @@ export async function saveFeedbackAssistExamples(
   ];
   if (rows.length > 0) {
     const { error: insertError } = await supabase.from("feedback_assist_examples").insert(rows);
-    if (insertError) return { error: "Could not save your examples. Try again." };
+    if (insertError) return { error: demoOr(insertError, "Could not save your examples. Try again.") };
   }
 
   const { error: settingsError } = await supabase
     .from("feedback_assist_settings")
     .upsert({ course_id: courseId, profile_id: profileId, customized_at: new Date().toISOString() }, { onConflict: "course_id,profile_id" });
-  if (settingsError) return { error: "Could not save your examples. Try again." };
+  if (settingsError) return { error: demoOr(settingsError, "Could not save your examples. Try again.") };
 
   return { error: null };
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -189,7 +190,7 @@ export async function addCriteriaTag(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer:addCriteriaTag]", error);
-    return { error: "Could not save the tag. Try again." };
+    return { error: demoOr(error, "Could not save the tag. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
@@ -215,7 +216,7 @@ export async function removeCriteriaTag(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer:removeCriteriaTag]", error);
-    return { error: "Could not remove the tag. Try again." };
+    return { error: demoOr(error, "Could not remove the tag. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
@@ -269,7 +270,7 @@ export async function updateAssignment(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer:updateAssignment]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);

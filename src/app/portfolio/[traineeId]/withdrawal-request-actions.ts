@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -67,7 +68,7 @@ export async function submitWithdrawalRequest(_prevState: WithdrawalRequestFormS
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/withdrawal-request-actions.ts:submitWithdrawalRequest]", error);
-    return { error: "Could not send. Try again." };
+    return { error: demoOr(error, "Could not send. Try again.") };
   }
 
   revalidatePath(`/portfolio/${traineeId}/withdrawal-request`);

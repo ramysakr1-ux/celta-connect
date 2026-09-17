@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
@@ -59,7 +60,7 @@ export async function generateDemoLoginLink(_prev: GenerateLinkState, formData: 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[platform/command-center/access:generateDemoLoginLink]", error);
-    return { error: "Could not generate the link. Try again." };
+    return { error: demoOr(error, "Could not generate the link. Try again.") };
   }
 
   revalidatePath("/platform/command-center/access");
@@ -73,7 +74,7 @@ export async function revokeDemoLoginLink(linkId: string): Promise<{ error: stri
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[platform/command-center/access:revokeDemoLoginLink]", error);
-    return { error: "Could not revoke the link. Try again." };
+    return { error: demoOr(error, "Could not revoke the link. Try again.") };
   }
   revalidatePath("/platform/command-center/access");
   return { error: null };

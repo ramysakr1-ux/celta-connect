@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -74,7 +75,7 @@ export async function withdrawTrainee(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/status-actions.ts:withdrawTrainee]", error);
-    return { error: "Could not withdraw this candidate. Try again." };
+    return { error: demoOr(error, "Could not withdraw this candidate. Try again.") };
 }
 
   // Marks the candidate's own self-serve request (if this withdrawal
@@ -425,7 +426,7 @@ export async function grantExtension(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/status-actions.ts:grantExtension]", error);
-    return { error: "Could not record the extension. Try again." };
+    return { error: demoOr(error, "Could not record the extension. Try again.") };
 }
 
   revalidatePath(`/portfolio/${traineeId}`);
@@ -477,7 +478,7 @@ export async function reportOwnAbsence(_prevState: AbsenceFormState, formData: F
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/status-actions.ts:reportOwnAbsence]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/portfolio/${trainee.id}/celta5`);
@@ -552,7 +553,7 @@ export async function signAssignmentOutcome(_prevState: AbsenceFormState, formDa
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/status-actions.ts:signAssignmentOutcome]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
@@ -604,7 +605,7 @@ export async function confirmCelta5Section(_prevState: AbsenceFormState, formDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/status-actions.ts:confirmCelta5Section]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/portfolio/${trainee.id}/celta5`);

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -121,7 +122,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable:addTimetableEvent]", error);
-    return { error: "Could not save the event. It may already be locked." };
+    return { error: demoOr(error, "Could not save the event. It may already be locked.") };
   }
 
   // A due event on the timetable IS the due date (Ramy, 12 Sep 2026).
@@ -341,7 +342,7 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable:generateTimetableSkeleton]", error);
-    return { error: "Could not generate the skeleton. It may already be locked." };
+    return { error: demoOr(error, "Could not generate the skeleton. It may already be locked.") };
   }
 
   // The one point in the app where full-time vs part-time is ever actually
@@ -376,7 +377,7 @@ export async function moveTimetableEvent(eventId: string, newDate: string): Prom
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable:moveTimetableEvent]", error);
-    return { error: "Could not move the event -- the timetable may be locked." };
+    return { error: demoOr(error, "Could not move the event -- the timetable may be locked.") };
   }
   if (moved?.type === "assignment_due") await syncAssignmentDueDates(supabase, trainer.course_id);
 
@@ -556,7 +557,7 @@ export async function setTimeBands(_prevState: FormState, formData: FormData): P
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable:setTimeBands]", error);
-    return { error: "Could not save the time bands." };
+    return { error: demoOr(error, "Could not save the time bands.") };
   }
 
   revalidatePath("/trainer/timetable");

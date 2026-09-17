@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -241,7 +242,7 @@ export async function undoImport(_prev: UndoImportState, formData: FormData): Pr
     .delete()
     .eq("import_id", importId)
     .eq("center_id", profile.center_id);
-  if (deleteError) return { error: `Could not undo: ${deleteError.message}` };
+  if (deleteError) return { error: demoOr(deleteError, `Could not undo: ${deleteError.message}`) };
 
   await supabase
     .from("spreadsheet_imports")

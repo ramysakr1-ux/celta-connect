@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -141,7 +142,7 @@ export async function savePeerNote(_prevState: PeerNoteFormState, formData: Form
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/tp/[tpNumber]/peer-observation-actions.ts:savePeerNote]", error);
-    return { error: "Could not save your note. Try again." };
+    return { error: demoOr(error, "Could not save your note. Try again.") };
 }
 
   revalidatePath(`/portfolio/${observedTraineeId}/tp/${tpNumber}`);

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -57,7 +58,7 @@ export async function updateCoursePricing(_prevState: FormState, formData: FormD
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[centre/courses/[id]:updateCoursePricing]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/centre/courses/${courseId}`);

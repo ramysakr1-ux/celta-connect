@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -64,7 +65,7 @@ export async function saveFilmedObservationSession(_prevState: FormState, formDa
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable/filmed-observation-actions.ts:saveFilmedObservationSession]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/trainer/timetable/filmed-observation/${eventId}`);
@@ -115,7 +116,7 @@ export async function addFilmedObservationBreak(_prevState: FormState, formData:
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable/filmed-observation-actions.ts:addFilmedObservationBreak]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/timetable/filmed-observation");
@@ -190,7 +191,7 @@ export async function saveFilmedObservationTask(_prevState: FormState, formData:
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable/filmed-observation-actions.ts:saveFilmedObservationTask]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/timetable/filmed-observation");

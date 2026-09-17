@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -34,14 +35,14 @@ export async function createCentreAndFirstAdmin(_prev: CreateCentreState, formDa
     .insert({ name, center_number: centerNumber })
     .select("id")
     .single();
-  if (centerErr) return { error: `Could not create that centre: ${centerErr.message}` };
+  if (centerErr) return { error: demoOr(centerErr, `Could not create that centre: ${centerErr.message}`) };
 
   const { data: invite, error: inviteErr } = await admin
     .from("centre_admin_invites")
     .insert({ center_id: center.id, role: "centre_owner", created_by: profile.id })
     .select("token")
     .single();
-  if (inviteErr) return { error: `Centre created, but the invite failed: ${inviteErr.message}` };
+  if (inviteErr) return { error: demoOr(inviteErr, `Centre created, but the invite failed: ${inviteErr.message}`) };
 
   revalidatePath("/platform/command-center");
   return { createdToken: invite.token, centerName: name };
@@ -76,7 +77,7 @@ export async function changeUserRole(_prev: ChangeRoleState, formData: FormData)
   if (target.id === profile.id) return { error: "Change your own role from a different account, not this one." };
 
   const { error } = await admin.from("profiles").update({ role }).eq("id", target.id);
-  if (error) return { error: `Could not change that role: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not change that role: ${error.message}`) };
 
   revalidatePath("/platform/command-center");
   return { notice: `${target.full_name} is now ${role}.` };

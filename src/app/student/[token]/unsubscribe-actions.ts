@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -36,7 +37,7 @@ async function setRemindersOptedOut(token: string, optedOut: boolean): Promise<U
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[student/[token]/unsubscribe-actions.ts:action]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   return { error: null, done: true, optedOut };

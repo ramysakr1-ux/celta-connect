@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -57,7 +58,7 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
   if (tokenError) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/volunteers:addVolunteerStudent]", tokenError);
-    return { error: "Added the student, but could not create their link. Try again." };
+    return { error: demoOr(tokenError, "Added the student, but could not create their link. Try again.") };
   }
 
   // v2's button is "Add and send link" -- when an email was given, the
@@ -103,7 +104,7 @@ export async function reissueVolunteerLink(_prevState: ReissueState, formData: F
   });
   if (error) {
     console.error("[trainer/(hub)/volunteers:reissueVolunteerLink]", error);
-    return { error: "Could not create the new link. Try again.", done: false };
+    return { error: demoOr(error, "Could not create the new link. Try again."), done: false };
   }
 
   revalidatePath("/trainer/volunteers");

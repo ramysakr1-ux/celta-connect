@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
@@ -31,7 +32,7 @@ export async function uploadMaterialPoolItem(_prevState: MaterialPoolState, form
   if (uploadError) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/resource-hub/material-pool-actions.ts:uploadMaterialPoolItem]", uploadError);
-    return { error: "Could not upload the file. Try again." };
+    return { error: demoOr(uploadError, "Could not upload the file. Try again.") };
   }
 
   const { error } = await admin.from("tp_material_pool_items").insert({
@@ -45,7 +46,7 @@ export async function uploadMaterialPoolItem(_prevState: MaterialPoolState, form
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/resource-hub/material-pool-actions.ts:uploadMaterialPoolItem]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/resource-hub");

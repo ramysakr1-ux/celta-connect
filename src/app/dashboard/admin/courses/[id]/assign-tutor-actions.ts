@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -119,7 +120,7 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admin/courses/[id]/assign-tutor-actions.ts:assignExistingTutor]", error);
-    return { error: "Could not assign them to this course. Try again." };
+    return { error: demoOr(error, "Could not assign them to this course. Try again.") };
   }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);

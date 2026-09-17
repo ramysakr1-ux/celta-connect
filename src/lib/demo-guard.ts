@@ -37,3 +37,21 @@ export async function refuseIfDemoCourse(courseId: string | null | undefined): P
   const { data: course } = await createAdminClient().from("courses").select("center_id").eq("id", courseId).maybeSingle();
   return refuseIfDemoCentre(course?.center_id);
 }
+
+/**
+ * The demo's own words for a refused write, else the form's usual message.
+ *
+ * The guarded admin client (src/lib/supabase/admin.ts) answers a demo
+ * viewer's write with a trigger-shaped error. Forms that pass `error.message`
+ * through already say "This is a shared demo -- changes are not saved"; the
+ * ones that map every failure to their own sentence ("Could not post the
+ * announcement.") were telling a demo visitor something had gone wrong when
+ * nothing had. Ramy, 17 Sep 2026: "fix the demo wording on those forms."
+ */
+export function demoOr(error: unknown, fallback: string): string {
+  if (error && typeof error === "object") {
+    const e = error as { code?: unknown; message?: unknown };
+    if (e.code === "DEMO_READ_ONLY" || e.message === DEMO_REFUSAL) return DEMO_REFUSAL;
+  }
+  return fallback;
+}

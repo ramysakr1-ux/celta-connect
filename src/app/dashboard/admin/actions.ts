@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -137,7 +138,7 @@ export async function createCourse(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin:createCourse]", error);
-    return { error: "Could not create the course. Try again." };
+    return { error: demoOr(error, "Could not create the course. Try again.") };
 }
 
   // Step 5's tutor invitation, sent through the same named-invitation path the

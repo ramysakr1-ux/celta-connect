@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
@@ -83,7 +84,7 @@ export async function updateAssignmentTemplateSections(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[trainer/(hub)/assignment-briefs:updateAssignmentTemplateSections]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/trainer/assignment-briefs/${templateId}`);

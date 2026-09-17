@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -51,7 +52,7 @@ export async function toggleObservedSession(_prevState: FormState, formData: For
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:toggleObservedSession]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -84,7 +85,7 @@ export async function addTask12Stage1(_prevState: FormState, formData: FormData)
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:addTask12Stage1]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -120,7 +121,7 @@ export async function addDeliveredSession(_prevState: FormState, formData: FormD
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:addDeliveredSession]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -140,7 +141,7 @@ export async function updateDeliveredSessionSelfEval(_prevState: FormState, form
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:updateDeliveredSessionSelfEval]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -175,7 +176,7 @@ export async function updateDeliveredSessionSupervisorFeedback(_prevState: FormS
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:updateDeliveredSessionSupervisorFeedback]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -203,7 +204,7 @@ export async function addFeedbackSession(_prevState: FormState, formData: FormDa
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:addFeedbackSession]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -223,7 +224,7 @@ export async function saveFeedbackDraft(_prevState: FormState, formData: FormDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:saveFeedbackDraft]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -247,7 +248,7 @@ export async function finalizeFeedbackSession(_prevState: FormState, formData: F
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:finalizeFeedbackSession]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -269,7 +270,7 @@ export async function saveFeedbackOnFeedback(_prevState: FormState, formData: Fo
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:saveFeedbackOnFeedback]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -317,7 +318,7 @@ export async function updateCandidateNotes(_prevState: FormState, formData: Form
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:updateCandidateNotes]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -343,7 +344,7 @@ export async function addShadowMarking(_prevState: FormState, formData: FormData
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:addShadowMarking]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -367,7 +368,7 @@ export async function addShadowDay(_prevState: FormState, formData: FormData): P
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:addShadowDay]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -384,7 +385,7 @@ export async function updateTaskRecordItem(_prevState: FormState, formData: Form
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:updateTaskRecordItem]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -433,7 +434,7 @@ export async function updateReflectiveEssay(_prevState: FormState, formData: For
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:updateReflectiveEssay]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -464,7 +465,7 @@ export async function submitReflectiveEssay(_prevState: FormState, formData: For
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:submitReflectiveEssay]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };
@@ -546,7 +547,7 @@ export async function setOutcome(_prevState: FormState, formData: FormData): Pro
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/trainer-in-training:setOutcome]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidateWorkspace();
   return { error: null };

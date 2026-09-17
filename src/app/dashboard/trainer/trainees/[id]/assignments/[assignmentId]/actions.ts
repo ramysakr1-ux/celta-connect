@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -236,7 +237,7 @@ async function returnAssignment(
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/trainees/[id]/assignments/[assignmentId]:action]", error);
-    return { error: "Could not update the assignment. Try again." };
+    return { error: demoOr(error, "Could not update the assignment. Try again.") };
   }
 
   // for-claude-code-announcements-list.md table B (system-event, personal
@@ -376,7 +377,7 @@ export async function saveMarkingDraft(_prevState: FormState, formData: FormData
     .eq("id", assignmentId);
   if (error) {
     console.error("[assignments:saveMarkingDraft]", error);
-    return { error: "Could not save your marks. Try again." };
+    return { error: demoOr(error, "Could not save your marks. Try again.") };
   }
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
@@ -417,7 +418,7 @@ export async function sendToSecondMarker(_prevState: FormState, formData: FormDa
     .eq("id", assignmentId);
   if (error) {
     console.error("[assignments:sendToSecondMarker]", error);
-    return { error: "Could not send it on. Try again." };
+    return { error: demoOr(error, "Could not send it on. Try again.") };
   }
   revalidatePath("/trainer/assignments");
   revalidatePath("/trainer/assignments/[assignmentId]", "page");
@@ -455,7 +456,7 @@ export async function recordBlindSecondMark(_prevState: FormState, formData: For
     .eq("id", assignmentId);
   if (error) {
     console.error("[assignments:recordBlindSecondMark]", error);
-    return { error: "Could not record your second mark. Try again." };
+    return { error: demoOr(error, "Could not record your second mark. Try again.") };
   }
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
@@ -499,7 +500,7 @@ export async function settleAndInitial(_prevState: FormState, formData: FormData
   const { error } = await supabase.from("assignments").update(update).eq("id", assignmentId);
   if (error) {
     console.error("[assignments:settleAndInitial]", error);
-    return { error: "Could not record your initials. Try again." };
+    return { error: demoOr(error, "Could not record your initials. Try again.") };
   }
   revalidatePath(`/portfolio/[traineeId]`, "layout");
   revalidatePath("/trainer/assignments");
@@ -528,7 +529,7 @@ export async function returnUnmarked(_prevState: FormState, formData: FormData):
     .insert({ assignment_id: assignmentId, round, returned_by: marker.id, reason });
   if (logError) {
     console.error("[assignments:returnUnmarked]", logError);
-    return { error: "Could not send it back. Try again." };
+    return { error: demoOr(logError, "Could not send it back. Try again.") };
   }
 
   // The round goes back to not_submitted so the candidate can edit and hand
@@ -545,7 +546,7 @@ export async function returnUnmarked(_prevState: FormState, formData: FormData):
     .eq("id", assignmentId);
   if (error) {
     console.error("[assignments:returnUnmarked]", error);
-    return { error: "Could not send it back. Try again." };
+    return { error: demoOr(error, "Could not send it back. Try again.") };
   }
 
   const { data: a } = await supabase.from("assignments").select("course_id, trainee_id, assignment_type").eq("id", assignmentId).maybeSingle();

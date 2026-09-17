@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -62,7 +63,7 @@ async function saveSelfEval(formData: FormData, lock: boolean): Promise<FormStat
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainee/plan/[tpNumber]/self-evaluation-actions.ts:action]", error);
-    return { error: "Could not save your self-evaluation -- it may not be unlocked yet, or is already submitted." };
+    return { error: demoOr(error, "Could not save your self-evaluation -- it may not be unlocked yet, or is already submitted.") };
 }
 
   revalidatePath(`/dashboard/trainee/plan/${tpNumber}`);

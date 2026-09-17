@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -28,7 +29,7 @@ export async function acknowledgeFormalLetter(_prevState: AcknowledgeLetterState
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/letters-actions.ts:acknowledgeFormalLetter]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/portfolio/[traineeId]/letters/[letterId]", "page");
@@ -63,7 +64,7 @@ export async function signDeferralLetter(_prevState: AcknowledgeLetterState, for
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/letters-actions.ts:signDeferralLetter]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/portfolio/[traineeId]/letters/[letterId]", "page");

@@ -12,7 +12,7 @@ import { sendApplicantEmail } from "@/lib/admissions-email";
 import { signOut } from "@/app/login/actions";
 import { ensureCourseArchived } from "@/lib/course-close-out/export";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
-import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { refuseIfDemoCentre, demoOr } from "@/lib/demo-guard";
 
 export interface FormState {
   error: string | null;
@@ -60,7 +60,7 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[centre/settings:updateCentreProfile]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/centre/settings");
@@ -187,7 +187,7 @@ export async function requestCentreDeleteCode(_prevState: RequestDeleteCodeState
   const { error: insertError } = await admin
     .from("centre_delete_codes")
     .insert({ center_id: centerId, requested_by: profile.id, code, expires_at: expiresAt });
-  if (insertError) return { error: "Could not send a code. Try again.", sent: false };
+  if (insertError) return { error: demoOr(insertError, "Could not send a code. Try again."), sent: false };
 
   // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
   // send() call, untracked. Routed through sendApplicantEmail; this one
@@ -206,7 +206,7 @@ export async function requestCentreDeleteCode(_prevState: RequestDeleteCodeState
   if (sendError) {
     // The message below is what the person reads; this is what we read.
     console.error("[centre/settings:requestCentreDeleteCode]", sendError);
-    return { error: "Could not send the email. Try again.", sent: false };
+    return { error: demoOr(sendError, "Could not send the email. Try again."), sent: false };
 }
 
   return { error: null, sent: true };
@@ -294,7 +294,7 @@ export async function deleteCentre(_prevState: DeleteCentreState, formData: Form
   // accounts. Migration 0251; scoped to this centre's own profiles.
   const { error: releaseError } = await admin.rpc("centre_release_profile_references", { p_center_id: centerId });
   if (releaseError) {
-    return { error: `Could not prepare the centre for deletion (${releaseError.message}). Nothing was touched.` };
+    return { error: demoOr(releaseError, `Could not prepare the centre for deletion (${releaseError.message}). Nothing was touched.`) };
   }
 
   const { data: allProfiles } = await admin.from("profiles").select("id").eq("center_id", centerId);
@@ -309,7 +309,7 @@ export async function deleteCentre(_prevState: DeleteCentreState, formData: Form
 
   const { error: rpcError } = await admin.rpc("centre_hard_delete", { p_center_id: centerId });
   if (rpcError) {
-    return { error: `Accounts were removed, but the rest of the delete failed (${rpcError.message}). Run delete again.` };
+    return { error: demoOr(rpcError, `Accounts were removed, but the rest of the delete failed (${rpcError.message}). Run delete again.`) };
   }
 
   // The owner's own account is now gone -- their session is no longer

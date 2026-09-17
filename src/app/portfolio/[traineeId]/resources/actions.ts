@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -109,7 +110,7 @@ export async function updateCoursebookAccessNotes(_prevState: FormState, formDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/resources:updateCoursebookAccessNotes]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/resource-hub");

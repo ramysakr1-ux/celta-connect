@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
@@ -129,7 +130,7 @@ export async function recordCertificateGrade(_prevState: FormState, formData: Fo
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/grades-report/close-out-actions.ts:recordCertificateGrade]", error);
-    return { error: "Could not record the certificate grade." };
+    return { error: demoOr(error, "Could not record the certificate grade.") };
   }
 
   revalidatePath("/trainer/grades-report");

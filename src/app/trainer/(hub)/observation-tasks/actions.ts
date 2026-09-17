@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -28,7 +29,7 @@ export async function createObservationTask(_prevState: FormState, formData: For
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/observation-tasks:createObservationTask]", error);
-    return { error: "Could not save the task." };
+    return { error: demoOr(error, "Could not save the task.") };
   }
 
   revalidatePath("/trainer/observation-tasks");

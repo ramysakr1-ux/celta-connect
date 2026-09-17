@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { computeStage3Status } from "@/lib/stage3-status";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
@@ -62,7 +63,7 @@ export async function updateAttendance(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateAttendance]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -109,7 +110,7 @@ export async function addAbsence(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:addAbsence]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -234,7 +235,7 @@ export async function updateStage1(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateStage1]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   if (completed && trainer.course_id) await checkStage1RecordsMilestone(supabase, trainer.course_id, trainer.id);
@@ -283,7 +284,7 @@ export async function setStage1Release(_prevState: FormState, formData: FormData
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:setStage1Release]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   if (release) await announceStageReady(supabase, "stage1", traineeId, trainer.id);
@@ -377,7 +378,7 @@ export async function updateStage2Overall(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateStage2Overall]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   if (completed) await announceStageReady(supabase, "stage2", traineeId, trainer.id);
@@ -467,7 +468,7 @@ export async function updateStage3Overall(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateStage3Overall]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   if (finalized) await announceStageReady(supabase, "stage3", traineeId, trainer.id);
@@ -514,7 +515,7 @@ export async function updateAdminGrant(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateAdminGrant]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -573,7 +574,7 @@ export async function finalizeRecord(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:finalizeRecord]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -640,7 +641,7 @@ export async function updateFinalGrade(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateFinalGrade]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   if (grade && trainer.course_id) await checkFinalGradeMilestone(supabase, trainer.course_id, trainer.id);
@@ -746,7 +747,7 @@ export async function updateProvisionalGrade(
   if (provisionalError) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateProvisionalGrade]", provisionalError);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(provisionalError, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -813,7 +814,7 @@ export async function setAssignmentFailOverride(_prev: FormState, formData: Form
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:setAssignmentFailOverride]", error);
-    return { error: "Could not save the override. Try again." };
+    return { error: demoOr(error, "Could not save the override. Try again.") };
   }
 
   revalidatePath("/trainer/grades-report");
@@ -850,7 +851,7 @@ export async function approveProvisionalGrade(formData: FormData): Promise<FormS
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:approveProvisionalGrade]", error);
-    return { error: "Could not approve. Try again." };
+    return { error: demoOr(error, "Could not approve. Try again.") };
   }
 
   revalidatePath("/trainer/grades-report");
@@ -879,7 +880,7 @@ export async function setProvisionalGradesDueDate(_prevState: FormState, formDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:setProvisionalGradesDueDate]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/grades-report");
@@ -919,7 +920,7 @@ export async function moveStage2Earlier(_prevState: FormState, formData: FormDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:moveStage2Earlier]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/roster");
@@ -954,7 +955,7 @@ export async function moveStage3Earlier(_prevState: FormState, formData: FormDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:moveStage3Earlier]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/roster");
@@ -986,7 +987,7 @@ export async function updateUpgradeConditions(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateUpgradeConditions]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -1055,7 +1056,7 @@ export async function updateFinalReportFields(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateFinalReportFields]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   if (grade && trainer.course_id) await checkFinalGradeMilestone(supabase, trainer.course_id, trainer.id);
@@ -1089,7 +1090,7 @@ export async function updateGradeReviewComments(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:updateGradeReviewComments]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -1169,7 +1170,7 @@ export async function releaseAllFinalReports(_prevState: FormState, formData: Fo
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:releaseAllFinalReports]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/trainer/grades-report");
@@ -1216,7 +1217,7 @@ export async function releaseFinalReport(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainer/celta5-actions.ts:releaseFinalReport]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);

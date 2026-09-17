@@ -1,3 +1,4 @@
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApplicantEmail, referralEmailHtml } from "@/lib/admissions-email";
@@ -128,7 +129,7 @@ export async function referApplicant(input: {
       referred_by: input.byProfileId,
     })
     .eq("id", applicant.id);
-  if (markError) return { error: "Referred, but the originating record could not be marked." };
+  if (markError) return { error: demoOr(markError, "Referred, but the originating record could not be marked.") };
 
   // "The candidate gets one email that asks them for nothing and never uses
   // the words referred or transferred." Sent here, not by each caller, so
@@ -276,7 +277,7 @@ export async function acceptBranchReferralRequest(input: {
       resulting_applicant_id: result.newApplicantId,
     })
     .eq("id", request.id);
-  if (updateError) return { error: "Referred, but the request record could not be updated." };
+  if (updateError) return { error: demoOr(updateError, "Referred, but the request record could not be updated.") };
 
   return { newApplicantId: result.newApplicantId };
 }
@@ -305,7 +306,7 @@ export async function declineBranchReferralRequest(input: {
       decline_reason: input.reason ?? null,
     })
     .eq("id", request.id);
-  if (updateError) return { error: "Could not decline the request." };
+  if (updateError) return { error: demoOr(updateError, "Could not decline the request.") };
 
   const { data: to } = await admin.from("centers").select("name").eq("id", request.to_center_id).maybeSingle();
   const declineMessage = `${to?.name ?? "The branch"} declined your referral request.`;

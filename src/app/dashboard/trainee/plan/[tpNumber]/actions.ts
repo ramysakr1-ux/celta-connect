@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -123,7 +124,7 @@ async function savePlan(formData: FormData, lock: boolean): Promise<FormState> {
     if (laError) {
       // The message above is what the person reads; this is what we read.
       console.error("[dashboard/trainee/plan/[tpNumber]:action]", laError);
-      return { error: "Could not save the language analysis. Try again." };
+      return { error: demoOr(laError, "Could not save the language analysis. Try again.") };
     }
   }
 
@@ -163,7 +164,7 @@ async function savePlan(formData: FormData, lock: boolean): Promise<FormState> {
   if (planError) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainee/plan/[tpNumber]:action]", planError);
-    return { error: "Could not save the lesson plan. It may already be locked." };
+    return { error: demoOr(planError, "Could not save the lesson plan. It may already be locked.") };
 }
 
   revalidatePath(`/dashboard/trainee/plan/${tpNumber}`);

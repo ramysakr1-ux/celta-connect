@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/auth/require-capability";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -100,7 +101,7 @@ export async function updateGoogleDriveTargets(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/settings:updateGoogleDriveTargets]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/dashboard/admin/settings");
@@ -154,7 +155,7 @@ export async function addStyleExample(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/settings:addStyleExample]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/dashboard/admin/settings");
@@ -183,7 +184,7 @@ export async function updateStyleExample(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/settings:updateStyleExample]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/dashboard/admin/settings");
@@ -256,7 +257,7 @@ export async function updateCourseTutor(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/settings:updateCourseTutor]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/dashboard/admin/settings");
@@ -301,7 +302,7 @@ export async function addMalpracticeOutcomeOption(
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admin/settings:addMalpracticeOutcomeOption]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/dashboard/admin/settings");
@@ -365,7 +366,7 @@ export async function addAssignmentCriterion(_prevState: FormState, formData: Fo
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admin/settings:addAssignmentCriterion]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/dashboard/admin/settings");

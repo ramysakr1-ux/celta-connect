@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -217,7 +218,7 @@ export async function undoVolunteerImport(_prev: UndoVolunteerImportState, formD
 
   await admin.from("course_access_tokens").delete().in("volunteer_student_id", ids);
   const { error: deleteError } = await admin.from("volunteer_students").delete().eq("import_id", importId);
-  if (deleteError) return { error: `Could not undo: ${deleteError.message}` };
+  if (deleteError) return { error: demoOr(deleteError, `Could not undo: ${deleteError.message}`) };
 
   await supabase
     .from("spreadsheet_imports")

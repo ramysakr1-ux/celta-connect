@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -120,7 +121,7 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
   if (profileError) {
     // The message above is what the person reads; this is what we read.
     console.error("[offer/[token]:acceptOffer]", profileError);
-    return { error: "Could not finish setting up your account. Try again." };
+    return { error: demoOr(profileError, "Could not finish setting up your account. Try again.") };
   }
 
   const assignmentTypes = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;

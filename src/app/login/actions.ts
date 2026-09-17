@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -111,7 +112,7 @@ export async function signIn(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[login:signIn]", error);
-    return { error: "Incorrect email or password." };
+    return { error: demoOr(error, "Incorrect email or password.") };
 }
 
   // Redirect straight to the real landing page instead of through

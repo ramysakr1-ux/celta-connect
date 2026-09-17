@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -89,7 +90,7 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
     if (eventError) {
       // The message above is what the person reads; this is what we read.
       console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:createOrUpdateIndividualTutorialInvite]", eventError);
-      return { error: "Could not move the timetable slot." };
+      return { error: demoOr(eventError, "Could not move the timetable slot.") };
     }
 
     const { error: inviteError } = await supabase
@@ -99,7 +100,7 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
     if (inviteError) {
       // The message above is what the person reads; this is what we read.
       console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:createOrUpdateIndividualTutorialInvite]", inviteError);
-      return { error: "Could not reschedule the invite." };
+      return { error: demoOr(inviteError, "Could not reschedule the invite.") };
     }
   } else {
     const { data: event, error: eventError } = await supabase
@@ -127,7 +128,7 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
     if (inviteError) {
       // The message above is what the person reads; this is what we read.
       console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:createOrUpdateIndividualTutorialInvite]", inviteError);
-      return { error: "Could not create the invite." };
+      return { error: demoOr(inviteError, "Could not create the invite.") };
     }
 
     // Personal, not group-scoped -- reuses the exact visible_to_trainee_id
@@ -225,7 +226,7 @@ export async function confirmIndividualTutorialInvite(_prevState: ConfirmState, 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:confirmIndividualTutorialInvite]", error);
-    return { error: "Could not confirm -- try again." };
+    return { error: demoOr(error, "Could not confirm -- try again.") };
   }
 
   revalidatePath("/portfolio/[traineeId]", "layout");

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -45,7 +46,7 @@ export async function createSubgroup(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:createSubgroup]", error);
-    return { error: "Could not create subgroup. Try again." };
+    return { error: demoOr(error, "Could not create subgroup. Try again.") };
 }
 
   revalidatePath("/trainer/rotation");
@@ -110,7 +111,7 @@ export async function addSubgroupMember(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:addSubgroupMember]", error);
-    return { error: "Could not add trainee. Are they already in a subgroup?" };
+    return { error: demoOr(error, "Could not add trainee. Are they already in a subgroup?") };
 }
 
   revalidatePath("/trainer/rotation");
@@ -258,7 +259,7 @@ export async function addTpGroupTutorAssignment(_prevState: FormState, formData:
   });
   if (error) {
     console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:addTpGroupTutorAssignment]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidatePath("/trainer/rotation");
   revalidatePath("/trainer", "layout");
@@ -297,7 +298,7 @@ export async function setTpGroupTutor(_prevState: FormState, formData: FormData)
   const { error } = await createAdminClient().from("course_tp_groups").update({ meeting_days: meetingDays }).eq("id", groupId).eq("course_id", courseId);
   if (error) {
     console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:setTpGroupTutor]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
   revalidatePath("/trainer/rotation");
   return { error: null };

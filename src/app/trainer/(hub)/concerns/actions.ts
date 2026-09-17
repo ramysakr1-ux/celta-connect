@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +31,7 @@ export async function replyToConcern(_prevState: FormState, formData: FormData):
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/concerns:replyToConcern]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/concerns");

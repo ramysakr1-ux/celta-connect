@@ -13,6 +13,7 @@
 //    sent, the same "generated but never sent automatically" rule the spec
 //    states explicitly.
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -152,7 +153,7 @@ export async function updateGradeQueryReplyDraft(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[trainer/(hub)/grade-query-reply:updateGradeQueryReplyDraft]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath(`/trainer/grade-query-reply/${traineeId}/${replyId}`);
@@ -196,7 +197,7 @@ export async function fileGradeQueryReply(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[trainer/(hub)/grade-query-reply:fileGradeQueryReply]", error);
-    return { error: "Could not file. Try again." };
+    return { error: demoOr(error, "Could not file. Try again.") };
 }
 
   revalidatePath(`/trainer/grade-query-reply/${traineeId}/${replyId}`);

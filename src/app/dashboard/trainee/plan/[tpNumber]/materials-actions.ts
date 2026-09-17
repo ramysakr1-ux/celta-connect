@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -58,7 +59,7 @@ export async function addSlidesLink(input: {
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/trainee/plan/[tpNumber]/materials-actions.ts:addSlidesLink]", error);
-    return { error: "Could not save the link. It may already be locked." };
+    return { error: demoOr(error, "Could not save the link. It may already be locked.") };
   }
 
   revalidatePath(`/dashboard/trainee/plan`);

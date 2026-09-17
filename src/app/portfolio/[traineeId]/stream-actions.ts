@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -144,7 +145,7 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/stream-actions.ts:postBroadcast]", error);
-    return { error: "Could not post the announcement." };
+    return { error: demoOr(error, "Could not post the announcement.") };
   }
 
   revalidateBroadcastPages();
@@ -270,7 +271,7 @@ export async function editBroadcast(_prevState: FormState, formData: FormData): 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/stream-actions.ts:editBroadcast]", error);
-    return { error: "Could not save the changes." };
+    return { error: demoOr(error, "Could not save the changes.") };
   }
   if (count === 0) return { error: "This announcement already sent -- it can no longer be edited." };
 

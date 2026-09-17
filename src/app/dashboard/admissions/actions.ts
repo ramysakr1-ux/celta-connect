@@ -20,7 +20,7 @@ import { interviewWhen } from "@/lib/interview-time";
 import { sendInterviewConfirmationToApplicant } from "@/lib/interview-confirmation";
 import { holdsCentre } from "@/lib/branch-scope";
 import { formatCalendarDate } from "@/lib/format-date";
-import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { refuseIfDemoCentre, demoOr } from "@/lib/demo-guard";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
 const ORDINAL_WORD: Record<number, string> = {
@@ -490,7 +490,7 @@ export async function addInterviewBlock(_prevState: RegenState, formData: FormDa
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:addInterviewBlock]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   // "Unbooked slots disappear from the applicant's view immediately" --
@@ -597,7 +597,7 @@ export async function saveMarkingScheme(_prevState: FormState, formData: FormDat
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:saveMarkingScheme]", error);
-    return { error: "Could not save the marking. Try again." };
+    return { error: demoOr(error, "Could not save the marking. Try again.") };
   }
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);
@@ -679,7 +679,7 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:saveInterviewRecord]", error);
-    return { error: "Could not save the interview record. Try again." };
+    return { error: demoOr(error, "Could not save the interview record. Try again.") };
   }
 
   await supabase.from("applicants").update({ stage: "interview_completed" }).eq("id", applicantId);
@@ -924,7 +924,7 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:rejectApplicant]", error);
-    return { error: "Could not save the decision. Try again." };
+    return { error: demoOr(error, "Could not save the decision. Try again.") };
   }
 
   let emailError: string | null = null;
@@ -1055,7 +1055,7 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:sendOffer]", error);
-    return { error: "Could not record the offer. Try again." };
+    return { error: demoOr(error, "Could not record the offer. Try again.") };
   }
 
   // "If the copies fail, the booking still happened" -- same principle
@@ -1300,7 +1300,7 @@ export async function recordDeposit(_prevState: FormState, formData: FormData): 
     if (error) {
       // The message above is what the person reads; this is what we read.
       console.error("[dashboard/admissions:recordDeposit]", error);
-      return { error: "Could not clear the deposit." };
+      return { error: demoOr(error, "Could not clear the deposit.") };
     }
     revalidatePath(`/dashboard/admissions/${applicantId}`);
     return { error: null };
@@ -1320,7 +1320,7 @@ export async function recordDeposit(_prevState: FormState, formData: FormData): 
     })
     .eq("id", applicantId)
     .eq("center_id", staff.center_id);
-  if (error) return { error: `Could not record the deposit: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not record the deposit: ${error.message}`) };
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   revalidatePath("/dashboard/admissions");
@@ -1388,7 +1388,7 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
     })
     .eq("id", applicantId)
     .eq("center_id", staff.center_id);
-  if (updateError) return { error: `Could not record the release: ${updateError.message}` };
+  if (updateError) return { error: demoOr(updateError, `Could not record the release: ${updateError.message}`) };
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();
@@ -1499,7 +1499,7 @@ export async function agreeRefund(_prevState: FormState, formData: FormData): Pr
     settlement,
     agreed_by: staff.id,
   });
-  if (error) return { error: `Could not record the refund: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not record the refund: ${error.message}`) };
 
   revalidatePath("/centre");
   revalidatePath("/centre/settings");
@@ -1542,7 +1542,7 @@ export async function settleRefund(_prevState: FormState, formData: FormData): P
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:settleRefund]", error);
-    return { error: "Could not update the refund. Try again." };
+    return { error: demoOr(error, "Could not update the refund. Try again.") };
   }
 
   revalidatePath("/centre");

@@ -8,7 +8,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, CENTRE_ROLES, roleLabel, type CentreRole } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS, type Area } from "@/lib/auth/areas";
 import { formatCalendarDate } from "@/lib/format-date";
-import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { refuseIfDemoCentre, demoOr } from "@/lib/demo-guard";
 
 // A role is valid to grant/invite either as one of the four built-in slugs,
 // or as a custom role the owner has already defined for this centre --
@@ -83,7 +83,7 @@ export async function grantCentreRole(_prev: GrantRoleState, formData: FormData)
       },
       { onConflict: "profile_id,center_id,role" }
     );
-  if (error) return { error: `Could not grant that role: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not grant that role: ${error.message}`) };
 
   await logOwnerAction(centerId, profile.id, "roles.grant", {
     target_email: targetEmail,
@@ -204,7 +204,7 @@ export async function revokeCentreAdminInvite(_prev: RevokeInviteState, formData
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[centre/roles:revokeCentreAdminInvite]", error);
-    return { error: "Could not withdraw that invite." };
+    return { error: demoOr(error, "Could not withdraw that invite.") };
   }
 
   await logOwnerAction(centerId, profile.id, "roles.invite.revoke", { role: invite.role });
@@ -260,7 +260,7 @@ export async function revokeCentreRole(_prev: RevokeRoleState, formData: FormDat
     .from("centre_roles")
     .update({ revoked_at: new Date().toISOString() })
     .eq("id", grantId);
-  if (error) return { error: `Could not remove that role: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not remove that role: ${error.message}`) };
 
   await logOwnerAction(centerId, profile.id, "roles.revoke", {
     target_profile_id: grant.profile_id,
@@ -359,7 +359,7 @@ export async function assignArea(_prev: AssignAreaState, formData: FormData): Pr
     },
     { onConflict: "center_id,area,profile_id" }
   );
-  if (error) return { error: `Could not assign that area: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not assign that area: ${error.message}`) };
 
   await logOwnerAction(centerId, profile.id, "areas.assign", { area: areaKey, target_email: email, ends_at: endsAt });
 

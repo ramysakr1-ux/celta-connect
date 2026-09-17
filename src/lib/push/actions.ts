@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -29,7 +30,7 @@ export async function subscribeSessionPush(input: SubscriptionInput): Promise<Pu
       { profile_id: session.profile.id, endpoint: input.endpoint, p256dh: input.p256dh, auth_key: input.authKey },
       { onConflict: "endpoint" }
     );
-  if (error) return { error: "Could not save. Try again.", subscribed: false };
+  if (error) return { error: demoOr(error, "Could not save. Try again."), subscribed: false };
   return { error: null, subscribed: true };
 }
 
@@ -69,7 +70,7 @@ export async function subscribeVolunteerPush(token: string, input: SubscriptionI
       },
       { onConflict: "endpoint" }
     );
-  if (error) return { error: "Could not save. Try again.", subscribed: false };
+  if (error) return { error: demoOr(error, "Could not save. Try again."), subscribed: false };
   return { error: null, subscribed: true };
 }
 

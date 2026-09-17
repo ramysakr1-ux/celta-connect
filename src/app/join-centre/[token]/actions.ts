@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -76,7 +77,7 @@ export async function joinCentre(_prevState: JoinCentreState, formData: FormData
   if (profileError) {
     // The message below is what the person reads; this is what we read.
     console.error("[join-centre/[token]:joinCentre]", profileError);
-    return { error: "Could not finish setting up your account. Try again." };
+    return { error: demoOr(profileError, "Could not finish setting up your account. Try again.") };
 }
 
   const { error: roleError } = await admin.from("centre_roles").insert({
@@ -88,7 +89,7 @@ export async function joinCentre(_prevState: JoinCentreState, formData: FormData
   if (roleError) {
     // The message below is what the person reads; this is what we read.
     console.error("[join-centre/[token]:joinCentre]", roleError);
-    return { error: "Could not finish setting up your role. Try again." };
+    return { error: demoOr(roleError, "Could not finish setting up your role. Try again.") };
 }
 
   await admin

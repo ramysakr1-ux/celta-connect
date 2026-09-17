@@ -1,3 +1,4 @@
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
@@ -57,7 +58,7 @@ export async function linkVolunteerPeople(
     .from("volunteer_students")
     .update({ volunteer_person_id: personId })
     .in("id", [params.volunteerStudentIdA, params.volunteerStudentIdB]);
-  if (updateError) return { error: "Could not link them. Try again." };
+  if (updateError) return { error: demoOr(updateError, "Could not link them. Try again.") };
 
   return { error: null };
 }
@@ -82,7 +83,7 @@ export async function unlinkVolunteer(
     .from("volunteer_students")
     .update({ volunteer_person_id: null })
     .eq("id", volunteerStudentId);
-  if (detachError) return { error: "Could not unlink. Try again." };
+  if (detachError) return { error: demoOr(detachError, "Could not unlink. Try again.") };
 
   const { data: remaining } = await supabase.from("volunteer_students").select("id").eq("volunteer_person_id", personId);
   if ((remaining ?? []).length === 1) {

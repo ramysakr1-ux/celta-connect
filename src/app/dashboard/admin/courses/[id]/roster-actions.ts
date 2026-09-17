@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { logManagementAction } from "@/lib/activity-log";
 import { syncAssessorMeetingEvent } from "@/lib/assessor-day";
@@ -350,7 +351,7 @@ export async function sendJoinLinkEmail(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/admin/courses/[id]/roster-actions.ts:sendJoinLinkEmail]", error);
-    return { error: "Could not send the email. Try copying the link instead.", sent: false };
+    return { error: demoOr(error, "Could not send the email. Try copying the link instead."), sent: false };
 }
   return { error: null, sent: true };
 }

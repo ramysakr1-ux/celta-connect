@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -54,7 +55,7 @@ export async function uploadCambridgeDocument(_prevState: CambridgeDocState, for
     if (uploadError) {
       // The message above is what the person reads; this is what we read.
       console.error("[trainer/(hub)/resource-hub/cambridge-actions.ts:uploadCambridgeDocument]", uploadError);
-      return { error: "Could not upload the file. Try again." };
+      return { error: demoOr(uploadError, "Could not upload the file. Try again.") };
     }
     storagePath = path;
     fileUrl = null;
@@ -77,7 +78,7 @@ export async function uploadCambridgeDocument(_prevState: CambridgeDocState, for
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/resource-hub/cambridge-actions.ts:uploadCambridgeDocument]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath("/trainer/resource-hub");

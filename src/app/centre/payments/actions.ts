@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { PAYMENT_PROVIDERS, providerByKey } from "@/lib/payments/providers";
-import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { refuseIfDemoCentre, demoOr } from "@/lib/demo-guard";
 
 export interface ConnectProviderState {
   error?: string;
@@ -64,7 +64,7 @@ export async function connectProvider(_prev: ConnectProviderState, formData: For
       payment_provider_connected_by: profile.id,
     })
     .eq("id", centerId);
-  if (error) return { error: `Could not save that: ${error.message}` };
+  if (error) return { error: demoOr(error, `Could not save that: ${error.message}`) };
 
   revalidatePath("/centre/settings");
   return { notice: `${provider.name} connected for this centre.` };
@@ -89,7 +89,7 @@ export async function disconnectProvider(_prev: ConnectProviderState, formData: 
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[centre/payments:disconnectProvider]", error);
-    return { error: "Could not disconnect." };
+    return { error: demoOr(error, "Could not disconnect.") };
   }
 
   revalidatePath("/centre/settings");

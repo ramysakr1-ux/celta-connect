@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
@@ -40,7 +41,7 @@ export async function submitConcern(_prevState: ConcernFormState, formData: Form
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[portfolio/[traineeId]/concern-actions.ts:submitConcern]", error);
-    return { error: "Could not send. Try again." };
+    return { error: demoOr(error, "Could not send. Try again.") };
   }
 
   return { error: null, sent: true };

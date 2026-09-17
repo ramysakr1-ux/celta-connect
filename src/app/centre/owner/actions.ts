@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { CENTRE_ROLES, type CentreRole, type GrantLevel } from "@/lib/auth/centre-permissions";
-import { refuseIfDemoCentre } from "@/lib/demo-guard";
+import { refuseIfDemoCentre, demoOr } from "@/lib/demo-guard";
 
 async function requireOwner() {
   const profile = await requireRole("admin");
@@ -161,7 +161,7 @@ export async function addCustomCapability(_prevState: OwnerActionState, formData
   if (overrideError) {
     // The message above is what the person reads; this is what we read.
     console.error("[centre/owner:addCustomCapability]", overrideError);
-    return { error: "Added the capability, but couldn't grant it -- try setting it from the table below." };
+    return { error: demoOr(overrideError, "Added the capability, but couldn't grant it -- try setting it from the table below.") };
   }
 
   await logOwnerAction(centerId, profile.id, "custom_capability.add", "centre_custom_capabilities", { capabilityKey, label, grantToRole });
@@ -263,7 +263,7 @@ export async function reassignUnownedCourse(_prev: ReassignState, formData: Form
   const { error } = await admin
     .from("course_administrator_scope")
     .insert({ centre_role_id: centreRoleId, course_id: courseId });
-  if (error) return { error: "Could not assign the course. Nothing was changed.", ok: null };
+  if (error) return { error: demoOr(error, "Could not assign the course. Nothing was changed."), ok: null };
 
   const { data: person } = await admin.from("profiles").select("full_name").eq("id", grant.profile_id).maybeSingle();
   await logOwnerAction(course.center_id, profile.id, "course.reassign_unowned", "course_administrator_scope", {

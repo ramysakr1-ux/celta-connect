@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -44,7 +45,7 @@ export async function declineClass(_prevState: DeclineState, formData: FormData)
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[student/[token]/decline-actions.ts:declineClass]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/student/${token}`);
@@ -88,7 +89,7 @@ export async function undoDeclineClass(_prevState: DeclineState, formData: FormD
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[student/[token]/decline-actions.ts:undoDeclineClass]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
   }
 
   revalidatePath(`/student/${token}`);

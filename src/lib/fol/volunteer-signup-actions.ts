@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -68,7 +69,7 @@ export async function submitVolunteerSignupProfile(_prevState: VolunteerSignupSt
   if (uploadError) {
     // The message above is what the person reads; this is what we read.
     console.error("[src/lib/fol/volunteer-signup-actions.ts:submitVolunteerSignupProfile]", uploadError);
-    return { error: "Could not upload the recording. Try again." };
+    return { error: demoOr(uploadError, "Could not upload the recording. Try again.") };
   }
 
   // Ramy, 25 Aug 2026: "why does it take so long?" -- transcription is a

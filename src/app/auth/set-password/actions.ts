@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,7 +42,7 @@ export async function setPassword(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[auth/set-password:setPassword]", error);
-    return { error: "Could not set your password. Try again." };
+    return { error: demoOr(error, "Could not set your password. Try again.") };
 }
 
   redirect("/dashboard");

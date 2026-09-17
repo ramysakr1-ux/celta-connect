@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -84,7 +85,7 @@ export async function createStage2Block(_prevState: FormState, formData: FormDat
   if (rpcError) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable/stage2-actions.ts:createStage2Block]", rpcError);
-    return { error: "Could not generate booking positions." };
+    return { error: demoOr(rpcError, "Could not generate booking positions.") };
   }
 
   const siteUrl = process.env.SITE_URL;
@@ -177,7 +178,7 @@ export async function bookStage2Slot(_prevState: BookState, formData: FormData):
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/timetable/stage2-actions.ts:bookStage2Slot]", error);
-    return { error: "Could not book -- try again." };
+    return { error: demoOr(error, "Could not book -- try again.") };
   }
   if (count === 0) return { error: "Someone just took that position -- try again." };
 

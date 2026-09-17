@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -48,7 +49,7 @@ export async function submitStage2SelfAssessment(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainee:submitStage2SelfAssessment]", error);
-    return { error: "Could not submit. Try again." };
+    return { error: demoOr(error, "Could not submit. Try again.") };
 }
 
   revalidatePath("/dashboard/trainee/celta5");
@@ -99,7 +100,7 @@ export async function signOffFinal(_prevState: FormState, formData: FormData): P
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainee:signOffFinal]", error);
-    return { error: "Could not sign off -- make sure all five confirmations are checked." };
+    return { error: demoOr(error, "Could not sign off -- make sure all five confirmations are checked.") };
 }
 
   revalidatePath("/dashboard/trainee/celta5");
@@ -146,7 +147,7 @@ export async function saveObservation(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[dashboard/trainee:saveObservation]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/dashboard/trainee/celta5");

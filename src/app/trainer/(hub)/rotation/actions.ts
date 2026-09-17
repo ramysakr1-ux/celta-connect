@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -43,7 +44,7 @@ export async function reorderSubgroup(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[trainer/(hub)/rotation:reorderSubgroup]", error);
-    return { error: "Could not save the new order. Try again." };
+    return { error: demoOr(error, "Could not save the new order. Try again.") };
 }
 
   revalidatePath("/trainer/rotation");
@@ -93,7 +94,7 @@ export async function setTpSchedule(
   if (error) {
     // The message below is what the person reads; this is what we read.
     console.error("[trainer/(hub)/rotation:setTpSchedule]", error);
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(error, "Could not save. Try again.") };
 }
 
   revalidatePath("/trainer/rotation");

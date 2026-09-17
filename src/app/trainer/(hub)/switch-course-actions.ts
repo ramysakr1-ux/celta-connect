@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -40,7 +41,7 @@ export async function switchActiveCourse(courseId: string): Promise<SwitchCourse
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[trainer/(hub)/switch-course-actions.ts:switchActiveCourse]", error);
-    return { error: "Could not switch courses. Try again." };
+    return { error: demoOr(error, "Could not switch courses. Try again.") };
   }
 
   revalidatePath("/trainer", "layout");
