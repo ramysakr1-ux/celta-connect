@@ -247,7 +247,7 @@ export default async function AdminDashboardPage({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-5">
           {groups.length > 0 || closedCourses.length > 0 ? (
             <>

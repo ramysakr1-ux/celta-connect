@@ -851,16 +851,6 @@ h6 {
     border-top-color: var(--color-bronze);
   }
 
-  /* Deprecated alias -- prefer .sheet-entry. */
-  .sheet-gold {
-    background-color: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-top: 3px solid var(--area-accent, var(--color-primary));
-    border-radius: var(--radius-card);
-    padding: 16px;
-    box-shadow: none;
-  }
-
   /* "Check your email" confirmation (magic-link/reset-link sent) -- the one
      entry card that keeps a deliberate accent, since red here isn't
      decoration: it's the same "needs your attention" meaning red carries
