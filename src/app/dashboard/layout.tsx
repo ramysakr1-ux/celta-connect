@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -19,6 +20,9 @@ import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+
+// Course Admin and Admissions are centre staff, so the centre shortcut (design_handoff_role_shortcuts, 17 Sep 2026).
+export const metadata: Metadata = { manifest: "/shortcuts/centre/manifest.webmanifest" };
 import { InstallPrompt } from "@/components/install-prompt";
 
 export default async function DashboardLayout({

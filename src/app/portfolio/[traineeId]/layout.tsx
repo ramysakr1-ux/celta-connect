@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { responseIsAnswered } from "@/lib/pre-course-task-shape";
@@ -44,6 +45,9 @@ import { computeCourseDayProgress } from "@/lib/course-day";
 import { Avatar } from "@/components/avatar";
 import { formatCalendarDate } from "@/lib/format-date";
 import { CentreTimeZoneProvider } from "@/components/centre-time-zone";
+
+// The candidate's shortcut: ink-warm ground, C badge, opens Course Stream (design_handoff_role_shortcuts, 17 Sep 2026).
+export const metadata: Metadata = { manifest: "/shortcuts/candidate/manifest.webmanifest" };
 import { demoToday, demoNow } from "@/lib/demo-clock";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can

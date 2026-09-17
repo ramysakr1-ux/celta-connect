@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ROLE_SHORTCUTS, SPLASH_BACKGROUND, roleShortcutIcons } from "@/lib/role-shortcuts";
 
 // A volunteer's own manifest, so an installed Connect opens on THEIR page.
 //
@@ -42,13 +43,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       start_url: `/student/${token}`,
       scope: `/student/${token}`,
       display: "minimal-ui",
-      background_color: "#faf7f2",
-      theme_color: "#3e2818",
-      icons: [
-        { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-        { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-        { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-      ],
+      background_color: SPLASH_BACKGROUND,
+      // The student shortcut (design_handoff_role_shortcuts): teal ground,
+      // "S" badge -- the volunteer student's own icon, not the generic mark.
+      theme_color: ROLE_SHORTCUTS.student.theme,
+      icons: roleShortcutIcons("student"),
     },
     {
       headers: {

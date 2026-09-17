@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -18,6 +19,9 @@ import { HeaderClock } from "@/components/header-clock";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { InstallPrompt } from "@/components/install-prompt";
+
+// The centre's shortcut: ink ground, B badge, opens Centre Admin (design_handoff_role_shortcuts, 17 Sep 2026).
+export const metadata: Metadata = { manifest: "/shortcuts/centre/manifest.webmanifest" };
 import { DemoDayTag } from "@/components/demo-day-tag";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
