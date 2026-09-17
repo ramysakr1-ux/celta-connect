@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { parseStoryStage } from "@/lib/admissions-story-stage";
+import { ScrollToRow } from "@/app/dashboard/admissions/scroll-to-row";
 import Link from "next/link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -33,7 +36,7 @@ const STAGE_LABEL: Record<string, string> = {
 export default async function AdmissionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ branch?: string }>;
+  searchParams: Promise<{ branch?: string; stage?: string }>;
 }) {
   const staff = await requireAdmissionsHandler();
   // Admissions ignored the ?branch filter that Centre Management has honoured
@@ -45,7 +48,7 @@ export default async function AdmissionsPage({
   // cannot express "every branch I hold". Isolation therefore has to be
   // enforced here instead -- every query below carries .in("center_id", scope),
   // and `scope` can only ever contain centres this person actually holds.
-  const { branch } = await searchParams;
+  const { branch, stage: stageParam } = await searchParams;
   const { scope, aggregated, nameById } = await resolveBranchScope(staff, branch);
   // The reader's own centre's zone. A list can span the branches this person
   // holds, but the "applied" day is read from where they sit.
@@ -184,6 +187,15 @@ export default async function AdmissionsPage({
     marketingByCourse.set(a.intake_course_id, entry);
   }
 
+  // ?stage=<stage>: the demo's story opens this room on the seeded applicant
+  // at that stage (for-claude-code-demo-clock.md §3). The newest at that
+  // stage is highlighted and scrolled to. An accepted applicant is no longer
+  // a row here -- they have a place, and the table is the people still in
+  // the funnel -- so that one opens the applicant's own file instead.
+  const storyStage = parseStoryStage(stageParam);
+  const focused = storyStage ? ((applicants ?? []).find((a) => a.stage === storyStage) ?? null) : null;
+  if (focused && storyStage === "accepted") redirect(`/dashboard/admissions/${focused.id}`);
+
   const stale = (applicants ?? []).filter(
     (a) => !["accepted", "rejected_before_interview", "rejected_after_interview", "not_this_time", "withdrawn_application"].includes(a.stage)
   );
@@ -212,6 +224,7 @@ export default async function AdmissionsPage({
         lede="The applicant pipeline for every course at your centre."
       />
 
+      {focused && storyStage !== "accepted" ? <ScrollToRow id={`applicant-${focused.id}`} /> : null}
       <div className="card overflow-hidden !p-0">
         <table className="table-plain w-full">
           <thead>
@@ -226,7 +239,7 @@ export default async function AdmissionsPage({
           <tbody>
             {stale.length > 0 ? (
               stale.map((a) => (
-                <tr key={a.id} className="lift">
+                <tr key={a.id} id={`applicant-${a.id}`} className={`lift ${focused?.id === a.id ? "stage-focus" : ""}`}>
                   <td>
                     <Link href={`/dashboard/admissions/${a.id}`} className="inline-flex items-center gap-2.5 font-medium text-ink hover:underline">
                       <Avatar name={a.full_name} size="sm" />

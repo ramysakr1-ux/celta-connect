@@ -827,6 +827,17 @@ h6 {
     letter-spacing: 0.12em;
   }
 
+  /* The applicant row a demo ?stage= link opened the room on. A <tr> in a
+     collapsed table paints no box-shadow of its own, so the tint and the
+     left bar sit on its cells. Room accent, because it is the room's own
+     object being pointed at. */
+  .stage-focus > td {
+    background: color-mix(in oklab, var(--area-accent, var(--color-primary)) 10%, var(--color-card));
+  }
+  .stage-focus > td:first-child {
+    box-shadow: inset 3px 0 0 var(--area-accent, var(--color-primary));
+  }
+
   .plain-card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
