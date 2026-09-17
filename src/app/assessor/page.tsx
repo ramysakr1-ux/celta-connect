@@ -1,3 +1,4 @@
+import { InstallPrompt } from "@/components/install-prompt";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -557,6 +558,7 @@ export default async function AssessorPage({
             just the time -- and it is the day they are here to moderate. */}
         <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
           <DemoDayTag courseId={courseId} tone="dark" />
+          <InstallPrompt variant="pill" tone="dark" />
           <HeaderClock supabase={admin} courseId={courseId} timeZone={timeZone} accent={GOLD} tone="dark" />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

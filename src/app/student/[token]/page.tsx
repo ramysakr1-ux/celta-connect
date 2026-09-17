@@ -234,6 +234,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           <HeaderCredit />
           <div className="flex min-w-0 flex-1">
             <DemoDayTag courseId={accessToken.course_id} />
+            <InstallPrompt variant="pill" />
             <HeaderClock
               supabase={admin}
               courseId={accessToken.course_id}
@@ -732,6 +733,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                   rather than their own. */}
               <div className="ml-6 flex min-w-0 flex-1">
                 <DemoDayTag courseId={accessToken.course_id} />
+                <InstallPrompt variant="pill" />
             <HeaderClock
                   supabase={admin}
                   courseId={accessToken.course_id}

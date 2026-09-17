@@ -1,3 +1,4 @@
+import { InstallPrompt } from "@/components/install-prompt";
 import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -86,6 +87,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             />
             <span style={{ fontSize: "var(--text-meta)", color: MUTED }}>{health.label}</span>
           </div>
+          <InstallPrompt variant="pill" />
           <ProductSwitcher connectHref={connectHref} />
           <CreateMenu />
         </div>
