@@ -198,7 +198,11 @@ export async function renderTpPdfBuffer(input: {
                 <Text style={{ fontSize: 9.5, fontFamily: "Helvetica-Bold", color: TEAL }}>{gradeLabel}</Text>
               </View>
             ) : null}
-            {tutorName ? <Text style={{ fontSize: 9.5, color: BANDS.feedback.eyebrow }}>Tutor: {tutorName}</Text> : null}
+            {tutorName || lessonTitle ? (
+              <Text style={{ fontSize: 9.5, color: BANDS.feedback.eyebrow }}>
+                {[tutorName ? `Tutor: ${tutorName}` : null, lessonTitle].filter(Boolean).join(" · ")}
+              </Text>
+            ) : null}
           </View>
         </Band>
         <View style={s.body}>

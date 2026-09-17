@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PDFDocument } from "pdf-lib";
 import { createClient } from "@/lib/supabase/server";
 import { renderTpPdfBuffer } from "@/lib/tp-pdf/document";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Auth is deliberately just "can this session's RLS-scoped client read this
 // row" -- trainee-owns-it and trainer/admin-in-course are already encoded
@@ -34,6 +35,17 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
     return NextResponse.json({ error: "The tutor feedback hasn't been submitted yet." }, { status: 409 });
   }
 
+  // The cover's sub-line, the same three facts the assembled document shows
+  // (Ramy, 17 Sep 2026: "add the tutor name and lesson title to the cover"):
+  // the tutor who wrote the feedback, the lesson as the TP point named it
+  // (else the plan's own main aim), and the day the plan went in.
+  const [{ data: tutor }, { data: assignment }] = await Promise.all([
+    feedback.trainer_id
+      ? supabase.from("profiles").select("full_name").eq("id", feedback.trainer_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.from("plan_assignments").select("main_lesson_aim").eq("trainee_id", plan.trainee_id).eq("tp_number", plan.tp_number).maybeSingle(),
+  ]);
+
   const baseBuffer = await renderTpPdfBuffer({
     traineeName: trainee?.full_name ?? "Trainee",
     tpNumber: plan.tp_number,
@@ -41,6 +53,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pla
     languageAnalysis: languageAnalysis ?? null,
     selfEvaluation,
     feedback,
+    tutorName: tutor?.full_name ?? null,
+    lessonTitle: assignment?.main_lesson_aim ?? plan.main_aims ?? null,
+    submittedOn: formatCalendarDate(plan.submitted_at.slice(0, 10), { day: "numeric", month: "long", year: "numeric" }),
   });
 
   const merged = await PDFDocument.load(baseBuffer);

@@ -420,6 +420,12 @@ for (const { tp_number } of taughtTps ?? []) {
   ]);
   if (!selfEvaluation?.submitted_at || !feedback?.submitted_at) continue;
 
+  // The cover's sub-line, as the download and the assembled document have it.
+  const [{ data: tutor }, { data: assignment }] = await Promise.all([
+    feedback.trainer_id ? admin.from("profiles").select("full_name").eq("id", feedback.trainer_id).maybeSingle() : Promise.resolve({ data: null }),
+    admin.from("plan_assignments").select("main_lesson_aim").eq("trainee_id", trainee.id).eq("tp_number", plan.tp_number).maybeSingle(),
+  ]);
+
   const base = await renderTpPdfBuffer({
     traineeName: trainee.full_name,
     tpNumber: plan.tp_number,
@@ -427,6 +433,9 @@ for (const { tp_number } of taughtTps ?? []) {
     languageAnalysis: languageAnalysis ?? null,
     selfEvaluation,
     feedback,
+    tutorName: tutor?.full_name ?? null,
+    lessonTitle: assignment?.main_lesson_aim ?? plan.main_aims ?? null,
+    submittedOn: formatCalendarDate(plan.submitted_at.slice(0, 10), { day: "numeric", month: "long", year: "numeric" }),
   });
   const { buffer: withMaterials, unmerged } = await buildTpRecordWithMaterials(admin, base, plan.id);
   files.push({ name: `TP${tp_number} record - ${safeName(trainee.full_name)}.pdf`, mimeType: "application/pdf", bytes: withMaterials });
