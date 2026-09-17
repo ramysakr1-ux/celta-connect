@@ -1730,7 +1730,7 @@ async function main() {
       // were due today. Confirmed wherever a grade exists; the one ungraded
       // candidate (Ruben) stays unconfirmed, which is the honest state of the
       // one case the grading meeting has not settled.
-      provisional_approved_at: def.grade || def.withdrawn ? (FULL ? atDay(18, "17:00") : new Date(nowMs() - 1 * 86400000).toISOString()) : null,
+      provisional_approved_at: def.grade || def.withdrawn ? (FULL ? atDay(17, "16:30") : new Date(nowMs() - 1 * 86400000).toISOString()) : null,
       };
     })
   );
@@ -2466,21 +2466,24 @@ async function main() {
     if (error) throw error;
   }
 
-  // --full: the close-out as the story tells it -- the Centre Grade form
-  // submitted on day 18, Cambridge's confirmation recorded on day 23. Both
-  // are the MCT's ticks; the course itself keeps its --stage dates.
+  // --full: the close-out -- the Centre Grade form submitted on day 17,
+  // Cambridge's confirmation recorded on day 23. Both are the MCT's ticks;
+  // the course itself keeps its --stage dates. Day 17, not the story's day
+  // 18: provisional grades are due two working days before a day-19 visit,
+  // i.e. day 17, and a grade form a day after its own deadline read "2 days
+  // overdue" on the pack.
   if (FULL) {
     const { error: closeErr } = await supabase
       .from("courses")
       .update({
-        grade_form_submitted_at: atDay(18, "17:30"),
+        grade_form_submitted_at: atDay(17, "17:00"),
         grade_form_submitted_by: trainerId,
         cambridge_grades_confirmed_at: atDay(23, "11:00"),
         cambridge_grades_confirmed_by: trainerId,
       })
       .eq("id", course.id);
     if (closeErr) throw closeErr;
-    console.log("--full: grade form (day 18) and Cambridge confirmation (day 23) recorded");
+    console.log("--full: grade form (day 17) and Cambridge confirmation (day 23) recorded");
   }
 
   // --- Plans for the assessor's visit day ---
