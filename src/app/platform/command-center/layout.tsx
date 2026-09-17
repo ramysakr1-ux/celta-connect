@@ -9,8 +9,6 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { adminHomePath } from "@/lib/auth/centre-permissions";
 import { getPlatformOwnerGreeting } from "@/lib/platform-owner-greeting";
 import { checkPlatformHealth } from "@/lib/platform-health";
-import { getPulseStripStats } from "@/app/platform/command-center/pulse-strip-data";
-import { PulseStrip } from "@/app/platform/command-center/pulse-strip";
 import { ProductSwitcher } from "@/app/platform/command-center/product-switcher";
 import { CreateMenu } from "@/app/platform/command-center/create-menu";
 import { SectionPills } from "@/app/platform/command-center/section-pills";
@@ -41,10 +39,9 @@ const MUTED = "var(--color-muted)";
 
 export default async function CommandCenterLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireRole("platform_owner");
-  const [greeting, health, pulseStats, centreCtx] = await Promise.all([
+  const [greeting, health, centreCtx] = await Promise.all([
     getPlatformOwnerGreeting(profile.full_name),
     checkPlatformHealth(),
-    getPulseStripStats(profile.id),
     // For the product switcher's "Connect" row. A platform owner may hold no
     // centre role at all, in which case /centre would bounce them to
     // /dashboard anyway -- so go there directly rather than through a redirect.
@@ -106,7 +103,11 @@ export default async function CommandCenterLayout({ children }: { children: Reac
 
       <div style={{ padding: "26px 40px 20px", display: "flex", flexDirection: "column", gap: 20, minWidth: 0 }}>
         {/* The greeting was the sidebar's only other job, so it becomes the
-            page's own heading rather than disappearing with it. */}
+            page's own heading rather than disappearing with it. It stays in
+            the shell -- cheap, and it reads as furniture. The pulse strip
+            does not: four platform-wide counters are Overview's summary, and
+            heading Demo links with them was a header the section never asked
+            for (CC audit B1, Ramy, 17 Sep 2026: "go with 2"). */}
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <div style={{ fontFamily: "Newsreader, serif", fontSize: "var(--text-h2)", fontWeight: 600, color: INK }}>
             Welcome back, {greeting.firstName}
@@ -114,7 +115,6 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <div style={{ fontSize: "var(--text-meta)", color: MUTED }}>{greeting.dateEyebrow}</div>
         </div>
 
-        <PulseStrip stats={pulseStats} />
         {children}
       </div>
 

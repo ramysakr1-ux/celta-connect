@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
+import { getPulseStripStats } from "@/app/platform/command-center/pulse-strip-data";
+import { PulseStrip } from "@/app/platform/command-center/pulse-strip";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCurrency } from "@/lib/money-by-currency";
@@ -46,6 +48,8 @@ const MUTED = "var(--color-muted)";
 
 export default async function CommandCenterOverviewPage() {
   const profile = await requireRole("platform_owner");
+  // Overview's own summary, moved here from the shell (CC audit B1).
+  const pulseStats = await getPulseStripStats(profile.id);
   const admin = createAdminClient();
 
   const [{ data: centers }, { data: ownerRoles }, { data: tutorLinks }, { data: invites }] = await Promise.all([
@@ -192,6 +196,7 @@ export default async function CommandCenterOverviewPage() {
 
   return (
     <>
+      <PulseStrip stats={pulseStats} />
       {myCourses.length > 0 ? (
         <div className="card flex flex-col gap-3.5 p-5">
           <h2 className="font-serif text-h3 font-semibold text-ink">Your courses</h2>
