@@ -193,6 +193,14 @@ const TP_COURSE_DAYS = {
   1: [2, 4, 6, 8, 11, 13, 16, 18],
   2: [3, 5, 7, 9, 12, 14, 17, 19],
 };
+// The assessor's visit: Thursday of week 4, a TP day in the last week as the
+// Handbook wants -- half 2's TP8 (Ramy, 17 Sep 2026: "move the assessor
+// visit to day 19", where the Course Story and the demo-clock spec put it).
+// Was day 16 (Monday, half 1's TP7). Everything that depends on which half
+// teaches that day derives from here.
+const ASSESSOR_VISIT_DAY = 19;
+const ASSESSOR_VISIT_HALF = TP_COURSE_DAYS[1].includes(ASSESSOR_VISIT_DAY) ? 1 : 2;
+const ASSESSOR_VISIT_TP = TP_COURSE_DAYS[ASSESSOR_VISIT_HALF].indexOf(ASSESSOR_VISIT_DAY) + 1;
 
 async function main() {
   console.log(`stage: ${STAGE}${UNLOGGED ? ` (last ${UNLOGGED} TP round(s) left unlogged)` : ""}`);
@@ -226,6 +234,10 @@ async function main() {
         ["tp_points", "created_by"],
         ["plan_assignments", "assigned_by"],
         ["profiles", "course_status_set_by"],
+        // The close-out ticks --full writes (17 Sep 2026): both name the MCT,
+        // and a course row still pointing at a profile blocks its deletion.
+        ["courses", "grade_form_submitted_by"],
+        ["courses", "cambridge_grades_confirmed_by"],
       ];
       for (const [table, column] of holders) {
         const { error } = await supabase.from(table).update({ [column]: null }).in(column, oldIds);
@@ -455,13 +467,12 @@ async function main() {
       total_hours: 120,
       delivery_mode: "f2f",
       accepting_applications: true,
-      // Monday of week 4 -- a half-1 TP day (start+21, TP7), which is where
-      // the Handbook puts the visit: the last week, on a day with teaching
-      // practice to observe. Without this the assessor pack's "On the day"
-      // panel reads "No assessor visit date set yet" and the new
-      // /assessor/lesson-plans page has no day to draw plans from, so the
-      // whole visit half of the pack demos as empty.
-      assessor_visit_date: isoOf(new Date(courseStart.getTime() + 21 * 86400000)),
+      // Thursday of week 4 (ASSESSOR_VISIT_DAY) -- a TP day in the last week,
+      // which is where the Handbook puts the visit. Without this the assessor
+      // pack's "On the day" panel reads "No assessor visit date set yet" and
+      // /assessor/lesson-plans has no day to draw plans from, so the whole
+      // visit half of the pack demos as empty.
+      assessor_visit_date: courseDay(startDate, ASSESSOR_VISIT_DAY),
       // Entry form went to Cambridge a few days into the course. This is what
       // makes a mid-course withdrawal reportable (see Marek below): once the
       // form is in, a withdrawal is recorded and reported as Withdrawn, which
@@ -860,10 +871,11 @@ async function main() {
   // pack's own §15.1 line tells the assessor to focus on the Fail/borderline
   // cases, so the sample is exactly those -- Ines (a terminal Fail), Kofi (the
   // upheld plagiarism case), Daniel (a resubmission outstanding, at risk), and
-  // Amara (a clean Pass B, for contrast and because she is one of the two the
-  // assessor watches teach on the day). All four also teach on the visit day,
-  // satisfying "read the portfolio of someone you watched teach".
-  const ASSESSOR_SAMPLE = new Set(["Ines Marchetti", "Kofi Mensah", "Daniel Kim", "Amara Okafor"]);
+  // Aoife (a clean Pass B, for contrast, and half 2 -- the half that teaches
+  // on the visit day, so "read the portfolio of someone you watched teach" is
+  // satisfied). She replaced Amara when the visit moved to day 19 (17 Sep
+  // 2026): Amara is half 1 and no longer teaches that day.
+  const ASSESSOR_SAMPLE = new Set(["Ines Marchetti", "Kofi Mensah", "Daniel Kim", "Aoife Byrne"]);
   for (const def of traineeDefs) {
     const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
       email: def.email,
@@ -2473,8 +2485,9 @@ async function main() {
 
   // --- Plans for the assessor's visit day ---
   //
-  // TP7 is taught on assessor_visit_date (start+21) by half 1 of BOTH groups
-  // running in parallel -- six candidates, the ones the assessor co-observes.
+  // ASSESSOR_VISIT_TP is taught on assessor_visit_date by ASSESSOR_VISIT_HALF
+  // of BOTH groups running in parallel -- the candidates the assessor
+  // co-observes (five: Marek, half 2 of Group B, withdrew in week 2).
   // These are the plans the assessor reads before observing (the pack's
   // "Lesson plans for the day" row, /assessor/lesson-plans), and the pack's
   // own "On the day" panel promises "all 6 carry a lesson plan", so all six
@@ -2487,10 +2500,12 @@ async function main() {
   //
   // Until 11 Sep 2026 only the three Group A plans existed -- a leftover from
   // when the demo had a single group -- so the other three read "No plan
-  // started for TP 7 yet", contradicting the panel one screen away.
+  // started for TP 7 yet", contradicting the panel one screen away. The names
+  // are half 2's since the visit moved to day 19; the plans are the same six
+  // lessons, one per candidate, Group A at B1+ and Group B at A2.
   const visitPlans = [
     {
-      name: "Amara Okafor",
+      name: "Leila Haddad",
       main: "Functional language: agreeing and disagreeing politely in a meeting",
       sub: "Fluency practice in a role-played team discussion",
       profile: "Twelve B1+ adults, mixed L1, used to working in pairs. Three are quiet in open class.",
@@ -2498,7 +2513,7 @@ async function main() {
       framework: "Test-teach-test",
     },
     {
-      name: "Daniel Kim",
+      name: "Tomas Novak",
       main: "Reading for detail: a short news article on remote work",
       sub: "Pre-teaching four items of topic vocabulary",
       profile: "Same B1+ group. Strong readers, but they tend to read every word rather than skim.",
@@ -2506,7 +2521,7 @@ async function main() {
       framework: "Receptive skills lesson",
     },
     {
-      name: "Priya Sharma",
+      name: "Sam Whitfield",
       main: "Grammar: used to for past habits",
       sub: "Controlled written practice before freer speaking",
       profile: "Same B1+ group. They have met the past simple but not used to.",
@@ -2514,7 +2529,7 @@ async function main() {
       framework: "Guided discovery into controlled practice",
     },
     {
-      name: "Ines Marchetti",
+      name: "Aoife Byrne",
       main: "Vocabulary: food and cooking, for an everyday A2 context",
       sub: "Personalised speaking about meals and habits",
       profile: "Twelve A2 adults, mixed L1. Confident speakers but a narrow everyday vocabulary.",
@@ -2522,20 +2537,12 @@ async function main() {
       framework: "Presentation, practice, production",
     },
     {
-      name: "Kofi Mensah",
+      name: "Ruben Ortiz",
       main: "Grammar: present continuous for actions happening now",
       sub: "Controlled oral practice with classroom mimes",
       profile: "Same A2 group. They know the present simple and confuse the two.",
       materials: "A short situational text and a set of mime cards of my own",
       framework: "Situational presentation into practice",
-    },
-    {
-      name: "Hana Sato",
-      main: "Listening for gist: a short dialogue about making plans",
-      sub: "Introducing functional language for suggestions",
-      profile: "Same A2 group. Anxious about listening; reassured by a clear first task.",
-      materials: "Coursebook audio with a gist task and a guided second-listen task",
-      framework: "Receptive skills lesson",
     },
   ];
   // --full: TP7 has been taught, so these plans already exist from the
@@ -2545,7 +2552,7 @@ async function main() {
     await supabase.from("tp_plans").insert({
       course_id: course.id,
       trainee_id: trainees[vp.name],
-      tp_number: 7,
+      tp_number: ASSESSOR_VISIT_TP,
       main_aims: vp.main,
       subsidiary_aims: vp.sub,
       class_profile: vp.profile,
