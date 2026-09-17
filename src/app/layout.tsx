@@ -59,6 +59,21 @@ export default function RootLayout({
       lang="en"
       className={`${newsreader.variable} ${karla.variable} ${instrumentSerif.variable} ${instrumentSans.variable} h-full antialiased`}
     >
+      <head>
+        {/* Chrome fires beforeinstallprompt once, early in the load -- often
+            before React has hydrated and the install pill has started
+            listening. Missed, it is gone, and the pill can only show the
+            gesture note. So it is caught here, before anything else loads,
+            and the pill picks it up on mount (install-prompt.tsx). Ramy,
+            17 Sep 2026: "I'm getting a tutorial instead of a home screen
+            button." */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__connectInstallPrompt=e;});",
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-ink font-sans">
         {children}
       </body>

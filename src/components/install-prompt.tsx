@@ -115,6 +115,13 @@ export function InstallPrompt({
       setDeferredEvent(e as BeforeInstallPromptEvent);
       setPromptFired(true);
     }
+    // The event usually fires before this effect runs. The root layout
+    // catches it in an inline script (app/layout.tsx) and parks it here.
+    const parked = (window as { __connectInstallPrompt?: BeforeInstallPromptEvent }).__connectInstallPrompt;
+    if (parked) {
+      setDeferredEvent(parked);
+      setPromptFired(true);
+    }
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   }, []);
@@ -155,6 +162,7 @@ export function InstallPrompt({
       return;
     }
     await deferredEvent.prompt();
+    (window as { __connectInstallPrompt?: BeforeInstallPromptEvent }).__connectInstallPrompt = undefined;
     const { outcome } = await deferredEvent.userChoice;
     if (outcome === "accepted") {
       try {
