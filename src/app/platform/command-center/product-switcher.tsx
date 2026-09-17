@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const DARK_ITEM = "oklch(0.2 0.014 60)";
-const CARD = "oklch(0.992 0.005 90)";
-const INK = "oklch(0.235 0.017 65)";
-const MUTED = "oklch(0.51 0.017 70)";
-const HOVER = "oklch(0.96 0.012 82)";
+// Tokens, not literals (CC audit C6, 17 Sep 2026). The product colours
+// below are each product's own brand and stay as they are.
+const DARK_ITEM = "var(--color-ink)";
+const CARD = "var(--color-card)";
+const INK = "var(--color-ink)";
+const MUTED = "var(--color-muted)";
+const HOVER = "var(--color-card-inset)";
 
 // command-center-full-spec.md: "Extensible for future projects."
 //
@@ -46,7 +48,7 @@ export function ProductSwitcher({ connectHref }: { connectHref: string }) {
         </svg>
       </div>
       {open ? (
-        <div style={{ position: "absolute", top: 42, right: 0, width: 210, background: CARD, borderRadius: 8, boxShadow: "0 4px 20px -4px rgba(0,0,0,0.35)", overflow: "hidden", zIndex: 30 }}>
+        <div style={{ position: "absolute", top: 42, right: 0, width: 210, background: CARD, borderRadius: 8, boxShadow: "var(--shadow-lift)", overflow: "hidden", zIndex: 30 }}>
           <div style={{ padding: "8px 14px", background: HOVER, fontSize: "var(--text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Your products</div>
           {products.map((p) => (
             <a

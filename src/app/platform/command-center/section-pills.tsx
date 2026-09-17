@@ -20,7 +20,7 @@ import { usePathname } from "next/navigation";
  * the colour reads as a column you are standing in rather than a decoration.
  */
 export const CC_SECTIONS = [
-  { label: "Overview", href: "/platform/command-center", colour: "oklch(62% 0.14 68)" },
+  { label: "Overview", href: "/platform/command-center", colour: "var(--color-rule-gold-base)" },
   { label: "People", href: "/platform/command-center/people", colour: "oklch(45% 0.10 227)" },
   { label: "Money", href: "/platform/command-center/money", colour: "oklch(45% 0.10 111)" },
   // "Demo links", not "Access". Ramy, 3 Sep 2026: "that's all it does. Demo
@@ -32,7 +32,7 @@ export const CC_SECTIONS = [
   { label: "Demo links", href: "/platform/command-center/access", colour: "oklch(44% 0.12 353)" },
 ] as const;
 
-const SAND = "oklch(93.5% 0.012 82)";
+const SAND = "var(--color-background)";
 
 function Rule({ activeHref }: { activeHref: string }) {
   return (
@@ -69,7 +69,7 @@ export function SectionPills() {
                 // border-only rather than tinted. The three-rule frame and
                 // the four colours are untouched.
                 style={{
-                  fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                  fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
                   padding: "5px 11px", borderRadius: 5, textDecoration: "none", whiteSpace: "nowrap",
                   border: `1px solid ${on ? s.colour : `color-mix(in oklab, ${s.colour} 30%, transparent)`}`,
                   color: on ? "oklch(99% 0.004 85)" : s.colour,

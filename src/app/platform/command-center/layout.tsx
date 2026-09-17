@@ -27,13 +27,17 @@ import { SectionPills } from "@/app/platform/command-center/section-pills";
 // which the pills now carry and the page now heads. His own question: "if I
 // have Overview, People, Money, Access on top, why do I need the side panel
 // with the same stuff?"
-const GOLD = "oklch(0.62 0.14 68)";
-const RED = "oklch(0.58 0.16 25)";
-const GREEN = "oklch(0.7 0.13 155)";
-const SAND = "oklch(0.935 0.012 82)";
-const BORDER = "oklch(0.895 0.012 82)";
-const INK = "oklch(0.235 0.017 65)";
-const MUTED = "oklch(0.51 0.017 70)";
+// Tokens, not literals (CC audit A3/A4, 17 Sep 2026): the shell used to
+// carry its own sand a shade off the app's ground and a second gold in a
+// notation nothing else uses. GOLD is the base of the gold rules, declared
+// once in globals.css so a retint cannot leave the logo tile behind.
+const GOLD = "var(--color-rule-gold-base)";
+const RED = "var(--color-destructive)";
+const GREEN = "oklch(70% 0.13 155)";
+const SAND = "var(--color-background)";
+const BORDER = "var(--color-border)";
+const INK = "var(--color-ink)";
+const MUTED = "var(--color-muted)";
 
 export default async function CommandCenterLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireRole("platform_owner");
@@ -71,7 +75,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           </div>
           <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: "var(--text-h3)", color: INK }}>Connect</div>
           <div style={{ width: 1, height: 18, background: BORDER }} />
-          <div style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
+          <div style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>Command center</div>
           {/* Landing only: this layout wraps people, money, centres, access
               and the enter screens too (Ramy, 16 Sep 2026). */}
           <HeaderCredit onDark landingPath="/platform/command-center" />

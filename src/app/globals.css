@@ -73,6 +73,7 @@
      (oklch(62% 0.14 68)), so a table reads as part of that section rather
      than as generic neutral chrome. Alpha rather than a lighter oklch so the
      rule tints whatever card sits behind it. */
+  --color-rule-gold-base: oklch(62% 0.14 68); /* the solid gold the rules are cut from -- Command Center's logo tile and Overview pill (CC audit A4, 17 Sep 2026) */
   --color-rule-gold: oklch(62% 0.14 68 / 0.55);
   --color-rule-gold-soft: oklch(62% 0.14 68 / 0.3);
   --color-bronze: oklch(50% 0.09 62); /* third accent, from the Centre Admin design system -- consultation-time timetable category, distinct from primary/gold/ink at a glance */

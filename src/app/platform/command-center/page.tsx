@@ -218,7 +218,7 @@ export default async function CommandCenterOverviewPage() {
               <h2 className="font-serif text-h3 font-semibold text-ink">Centres</h2>
               <Link
                 href="/platform/command-center/centres/new"
-                className="rounded-full bg-primary px-4 py-2 text-label font-bold text-primary-foreground hover:bg-primary/90"
+                className="wash rounded-full bg-primary px-4 py-2 text-label font-bold text-primary-foreground"
               >
                 + Add a centre
               </Link>
@@ -226,7 +226,7 @@ export default async function CommandCenterOverviewPage() {
             <div>
               <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-rule-gold">
                 {["Centre", "Active course", "Trainees", ""].map((h) => (
-                  <div key={h} className="px-5 py-4 text-micro font-bold uppercase tracking-wide text-muted">
+                  <div key={h} className="px-5 py-4 text-micro font-bold uppercase tracking-[0.08em] text-muted">
                     {h}
                   </div>
                 ))}
@@ -286,7 +286,7 @@ export default async function CommandCenterOverviewPage() {
             </div>
           </div>
 
-          <div className="card card-red flex flex-col gap-3.5 p-5">
+          <div className="card flex flex-col gap-3.5 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Needs your attention</h2>
             {needsAttentionCount === 0 ? (
               <p className="text-body text-muted">Nothing needs you right now.</p>
@@ -368,7 +368,7 @@ export default async function CommandCenterOverviewPage() {
               <p className="text-meta text-muted">Nothing yet.</p>
             ) : (
               activity.map((item, i) => (
-                <div key={i} className="lift flex items-baseline gap-2.5">
+                <div key={i} className="flex items-baseline gap-2.5">
                   <div className="w-11 shrink-0 text-label text-muted">{relativeTime(item.at)}</div>
                   <div className="text-meta text-ink">{item.label}</div>
                 </div>

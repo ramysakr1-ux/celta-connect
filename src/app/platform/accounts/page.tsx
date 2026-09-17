@@ -179,7 +179,7 @@ export default async function CommandCenterPage() {
           <p className="text-label font-semibold uppercase tracking-wide text-muted">Renewals due (30d)</p>
           <p className="mt-1.5 font-serif text-h1 tabular-nums text-ink">{renewalsDue.length}</p>
         </div>
-        <div className={`card p-5${outstanding.length ? " card-red" : ""}`}>
+        <div className="card p-5">
           <p className="text-label font-semibold uppercase tracking-wide text-muted">Outstanding invoices</p>
           <p className="mt-1.5 font-serif text-h1 tabular-nums text-ink">
             {outstanding.length} {outstandingByCurrency.length ? `(${outstandingByCurrency.map((m) => money(m.amount, m.currency)).join(" · ")})` : ""}
