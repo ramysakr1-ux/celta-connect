@@ -395,7 +395,7 @@ export default async function CommandCenterOverviewPage() {
 // red for malpractice, amber/gold for payment, neutral gray for stale
 // invite)" -- a light, tinted row, not the dark-card treatment the old
 // single-page build used before this section had its own top-rule red card
-// shell (.card-red, above). The tint color is picked per-item at runtime
+// shell. The tint color is picked per-item at runtime
 // (red/gold/muted), which a static Tailwind class can't express, so it
 // stays inline -- but against the real --color-destructive/--color-gold/
 // --color-muted tokens now, not duplicated oklch literals.

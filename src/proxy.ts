@@ -154,7 +154,12 @@ export async function proxy(request: NextRequest) {
     // to a login page is not a manifest, and Chrome silently drops the
     // install criteria when it cannot read one.
     request.nextUrl.pathname === "/sw.js" ||
-    request.nextUrl.pathname === "/manifest.webmanifest";
+    request.nextUrl.pathname === "/manifest.webmanifest" ||
+    // The per-role manifests (design_handoff_role_shortcuts) for the same
+    // reason: the browser fetches a manifest without credentials, so one
+    // behind the sign-in wall is never read. The route validates the slug
+    // and carries nothing personal.
+    /^\/shortcuts\/[a-z-]+\/manifest\.webmanifest$/.test(request.nextUrl.pathname);
 
   // An assessor carries no real Supabase user at all -- just the
   // assessor_token cookie set by /assessor/[token] (migration 0030). This
