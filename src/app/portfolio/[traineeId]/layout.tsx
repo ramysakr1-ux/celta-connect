@@ -462,13 +462,20 @@ export default async function PortfolioLayout({
         // will extend the width of the entire screen. Connect will have the
         // same color [as the sheet], but a line between the piece of paper
         // and Connect, and a line between Connect and the trainee's name."
-        // One full-bleed --color-frame surface holding the name banner, the
-        // Connect bar, and the sidebar+content row, divided only by hairline
-        // rules -- not three separately-colored pieces the way this used to
-        // be. The individual content cards inside {children} keep their own
-        // distinct --color-card tone; that contrast is the only place color
-        // actually changes.
-        <div className="flex min-h-0 flex-1 flex-col" style={{ background: "var(--color-frame)" }}>
+        // One full-bleed surface holding the name banner, the Connect bar, and
+        // the sidebar+content row, divided only by hairline rules -- not three
+        // separately-colored pieces the way this used to be.
+        //
+        // --color-background, not --color-frame, since 17 Sep 2026 (audit A5,
+        // Ramy: "trainee landing hero cards are just plain white"). The hero
+        // and every glass tile on this side are tinted with ALPHA -- the
+        // candidate's own TP is white at 0.92 -> 0.55 -- and --color-frame is
+        // the brightest value in the palette, so exactly the two tints meant
+        // to read as clear glass vanished into it while the coloured ones
+        // survived. The approved mock sits on the page ground, level 1; that
+        // 5.3% is the whole effect. Same rule the palette states: a card sits
+        // on the level below it, and a glass tile is a card.
+        <div className="flex min-h-0 flex-1 flex-col" style={{ background: "var(--color-background)" }}>
           <div className="border-t border-border" />
           {/* design_handoff_trainee_landing §1b, "Dark header + day bar".
               Ramy, 10 Sep 2026: "the colourful header and the clock on the
