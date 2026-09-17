@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Connect",
     description: "CELTA course administration, built for centers.",
     start_url: "/",
-    display: "standalone",
+    display: "minimal-ui",
     background_color: "#faf7f2", // --color-background, oklch(97.8% 0.008 85)
     theme_color: "#3e2818", // --color-ink-warm, same tile color as the app icon
     icons: [

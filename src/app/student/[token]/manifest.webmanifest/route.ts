@@ -41,7 +41,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       description: "Your classes, materials and hours.",
       start_url: `/student/${token}`,
       scope: `/student/${token}`,
-      display: "standalone",
+      display: "minimal-ui",
       background_color: "#faf7f2",
       theme_color: "#3e2818",
       icons: [
