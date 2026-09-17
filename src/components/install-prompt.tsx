@@ -38,9 +38,19 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// "Installed" means opened as its own window, whichever window Chrome chose
+// to draw. The manifests ask for minimal-ui on top of standalone (17 Sep
+// 2026), so an installed Connect reports display-mode minimal-ui -- and this
+// used to ask for standalone only, which is how the installed app kept
+// offering "Add to home screen" to a person already inside it.
+const INSTALLED_DISPLAY_MODES = ["standalone", "minimal-ui", "fullscreen", "window-controls-overlay"];
+
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true;
+  return (
+    INSTALLED_DISPLAY_MODES.some((mode) => window.matchMedia(`(display-mode: ${mode})`).matches) ||
+    (navigator as { standalone?: boolean }).standalone === true
+  );
 }
 
 function isIos(): boolean {
