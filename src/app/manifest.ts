@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 import { SPLASH_BACKGROUND } from "@/lib/role-shortcuts";
 
+// Apex redirects to www (it is what stripped the cron Authorization header
+// on 1 Sep 2026), so www is canonical here.
+const SITE_ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.celtaconnect.com").replace(/\/$/, "");
+
 // specs/build-spec.md §7: "Offer 'Add to Home Screen' for trainees only
 // (daily use for five weeks)." Next's manifest.ts file convention serves
 // this at /manifest.webmanifest and auto-injects the <link rel="manifest">
@@ -26,6 +30,13 @@ export default function manifest(): MetadataRoute.Manifest {
     // Aug 2026, so every splash screen opened a shade lighter than the app.
     background_color: SPLASH_BACKGROUND,
     theme_color: "#3e2818", // --color-ink-warm, same tile color as the app icon
+    // The manifest names itself, so a page can ask Chrome whether this app is
+    // already installed (navigator.getInstalledRelatedApps in
+    // install-prompt.tsx). No request object reaches this file convention, so
+    // the host comes from the environment; it must be the canonical one the
+    // app is served from, or the match silently fails and the pill simply
+    // keeps showing, as it did before.
+    related_applications: [{ platform: "webapp", url: `${SITE_ORIGIN}/manifest.webmanifest` }],
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },

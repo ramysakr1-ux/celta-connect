@@ -18,7 +18,7 @@ import { ROLE_SHORTCUTS, SPLASH_BACKGROUND, roleShortcutIcons } from "@/lib/role
 // whatever URL is on screen, which already carries the token -- so this is
 // specifically for the Chrome/Edge/Android install path, which does.
 
-export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const admin = createAdminClient();
 
@@ -42,6 +42,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       description: "Your classes, materials and hours.",
       start_url: `/student/${token}`,
       scope: `/student/${token}`,
+      // Named so a volunteer's page can ask whether this app is already
+      // installed -- see the note in the role manifest route.
+      related_applications: [{ platform: "webapp", url: new URL(request.url).href }],
       // standalone, with minimal-ui asked for on top. Chrome on macOS will not
       // install a plain minimal-ui manifest at all -- no address-bar icon, no
       // install event -- which is what stopped every "add to home screen" on

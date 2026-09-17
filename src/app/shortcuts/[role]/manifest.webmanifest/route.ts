@@ -9,10 +9,14 @@ import { ROLE_SHORTCUTS, SPLASH_BACKGROUND, isRoleShortcut, roleShortcutIcons } 
 // The segment is validated against the slug table and anything else is a
 // 404: start_url comes out of this table, never out of the URL, so there is
 // nothing here to point somewhere else.
-export async function GET(_request: Request, { params }: { params: Promise<{ role: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ role: string }> }) {
   const { role } = await params;
   if (!isRoleShortcut(role)) return new Response("Not found", { status: 404 });
   const r = ROLE_SHORTCUTS[role];
+  // This manifest's own absolute URL, taken from the request so it can never
+  // disagree with the host the page was served from (apex vs www would make
+  // the match below silently fail). See related_applications.
+  const selfUrl = new URL(request.url).href;
   return Response.json(
     {
       name: `Connect — ${r.label}`,
@@ -36,6 +40,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
       background_color: SPLASH_BACKGROUND,
       theme_color: r.theme,
       icons: roleShortcutIcons(role),
+      // The manifest names itself, which is what lets a PAGE ask Chrome
+      // whether this app is already installed (navigator.getInstalledRelatedApps
+      // in install-prompt.tsx). Without it there is no way to tell from an
+      // ordinary tab, and the pill kept offering "Add to home screen" to
+      // someone who already had the app -- clicking it then fell through to
+      // the gesture note. Ramy, 17 Sep 2026: "I'm getting a tutorial instead
+      // of a home screen button."
+      related_applications: [{ platform: "webapp", url: selfUrl }],
     },
     {
       headers: {

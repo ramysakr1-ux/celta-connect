@@ -113,6 +113,9 @@ export function InstallPrompt({
   const onClient = useSyncExternalStore(subscribeNothing, () => true, () => false);
 
   const [deferredEvent, setDeferredEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  // Chrome's answer to "is this app already installed?", asked from an
+  // ordinary tab. See the effect below.
+  const [alreadyInstalled, setAlreadyInstalled] = useState(false);
   const [promptFired, setPromptFired] = useState(false);
   const [showIosSteps, setShowIosSteps] = useState(false);
   const [snoozedNow, setSnoozedNow] = useState(false);
@@ -136,6 +139,37 @@ export function InstallPrompt({
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   }, []);
 
+  // Being INSIDE the installed window is easy to detect (display-mode, above).
+  // Being in an ordinary tab with the app already installed is not: Chrome
+  // fires no beforeinstallprompt for an installed app, which is
+  // indistinguishable from a browser that never fires one at all -- so the
+  // pill fell through to the gesture note and read as a tutorial for a door
+  // the person had already walked through (Ramy, 17 Sep 2026, four times).
+  //
+  // getInstalledRelatedApps is the one API that answers it. It only returns
+  // apps the manifest itself names, which is why every manifest now carries a
+  // related_applications entry pointing at its own URL. Chrome and Edge only;
+  // everywhere else this stays false and nothing changes.
+  useEffect(() => {
+    const nav = navigator as Navigator & {
+      getInstalledRelatedApps?: () => Promise<Array<{ platform?: string }>>;
+    };
+    if (typeof nav.getInstalledRelatedApps !== "function") return;
+    let cancelled = false;
+    nav
+      .getInstalledRelatedApps()
+      .then((apps) => {
+        if (!cancelled && apps.length > 0) setAlreadyInstalled(true);
+      })
+      .catch(() => {
+        // Not a secure context, in an iframe, or the call is unavailable --
+        // all of which mean "cannot tell", which is where we already were.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const standalone = onClient && isStandalone();
   const route = onClient ? manualRoute() : "desktop";
   const ios = onClient && isIos();
@@ -151,7 +185,7 @@ export function InstallPrompt({
   // So the banner is offered whenever the app is not already installed. The
   // click fires the real prompt when there is one and explains the gesture
   // when there is not, which is what the inline entry has done since the 6th.
-  const installable = onClient && !standalone;
+  const installable = onClient && !standalone && !alreadyInstalled;
   // The inline entry is never snoozed -- that is the whole point of it.
   const bannerSnoozed = variant === "banner" && (snoozedNow || (onClient && snoozed()));
 
@@ -196,7 +230,9 @@ export function InstallPrompt({
       </>
     ) : (
       <>
-        In Chrome or Edge, use the install icon at the right of the address bar, or the browser menu then{" "}
+        If the address bar shows <span className="font-semibold text-ink">Open in app</span>, Connect is already
+        installed. Otherwise, in Chrome or Edge use the install icon at the right of the address bar, or the browser menu
+        then{" "}
         <span className="font-semibold text-ink">Install page as app</span>. In Safari, use{" "}
         <span className="font-semibold text-ink">File &rsaquo; Add to Dock</span>.
       </>
