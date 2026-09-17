@@ -167,6 +167,14 @@ function cliArg(name) {
 }
 
 const STAGE = cliArg("stage") ?? process.env.SEED_STAGE ?? "week3";
+// --full: the RECORD runs to the end of the course whatever today is -- every
+// TP taught and written up, every assignment through its last round, both
+// stage records filed, the grade form in and Cambridge's confirmation dated
+// -- each on the calendar day it belongs to. The course's own dates still
+// come from --stage, so the demo's default view is unchanged; this is what the
+// demo clock (for-claude-code-demo-clock.md §2) reads on any day. Records
+// after today are therefore future-dated on purpose.
+const FULL = process.argv.includes("--full") || process.env.SEED_FULL === "1";
 if (!(STAGE in STAGE_WEEKS)) {
   console.error(`Unknown --stage "${STAGE}". One of: ${Object.keys(STAGE_WEEKS).join(", ")}`);
   process.exit(1);
@@ -355,13 +363,21 @@ async function main() {
   // would not have been.
   const endDate = courseDay(startDate, 20);
   const courseEnd = new Date(endDate);
+  // The record's own "now". Real today normally; with --full, the Monday after
+  // the last teaching day, so every gate below sees the whole course as past.
+  const recordNow = FULL ? new Date(`${courseDay(startDate, 21)}T09:00:00`) : new Date();
+  const nowMs = () => recordNow.getTime();
+  /** A timestamp on course day n (teaching days, 1-based), centre-local wall time. */
+  const atDay = (n, hhmm = "09:00") => new Date(`${courseDay(startDate, n)}T${hhmm}:00`).toISOString();
+  const beforeStart = (days, hhmm = "09:00") => new Date(new Date(`${startDate}T${hhmm}:00`).getTime() - days * 86400000).toISOString();
+  if (FULL) console.log(`--full: the record runs to ${endDate}; record clock ${isoOf(recordNow)}`);
   // Nothing that only happens once a course is under way should be written
   // into a course that has not begun. Teaching practice already respected
   // this (it derives from dates that have passed); written assignments and
   // observation hours did not, so --stage day1 and --stage precourse both
   // produced a course starting on Monday with two assignments already marked
   // Pass. Found 12 Sep 2026 on the first real day1 run.
-  const courseHasStarted = startDate <= isoOf(new Date());
+  const courseHasStarted = startDate <= isoOf(recordNow);
 
   // ---- the course's own calendar, which the seeded RECORD now follows ----
   //
@@ -374,7 +390,7 @@ async function main() {
   //
   // A lesson is taught on the day the timetable says it is taught. Everything
   // below derives from that, so the record is coherent at ANY stage.
-  const todayIso = isoOf(new Date());
+  const todayIso = isoOf(recordNow);
   const tpDateIso = (half, tpNumber) => courseDay(courseStart, TP_COURSE_DAYS[half][tpNumber - 1]);
   /** TP rounds this half has already been through -- strictly before today, so
    *  a lesson happening this morning is not yet in the book. */
@@ -450,7 +466,10 @@ async function main() {
       // makes a mid-course withdrawal reportable (see Marek below): once the
       // form is in, a withdrawal is recorded and reported as Withdrawn, which
       // is the case the assessor's §14.2 check actually examines.
-      entry_form_sent_at: new Date(courseStart.getTime() + 3 * 86400000).toISOString(),
+      // --full: two weeks before day one (Handbook: two to four weeks ahead),
+      // as the story tells it; otherwise a few days in, which is what makes a
+      // mid-course withdrawal reportable (see Marek below).
+      entry_form_sent_at: FULL ? beforeStart(14) : new Date(courseStart.getTime() + 3 * 86400000).toISOString(),
     })
     .select("id")
     .single();
@@ -481,7 +500,7 @@ async function main() {
     course_id: course.id,
     profile_id: trainerId,
     tutor_role: "main_course_tutor",
-    verified_at: new Date().toISOString(),
+    verified_at: new Date(nowMs()).toISOString(),
   });
   console.log("trainer:", trainerId);
 
@@ -510,7 +529,7 @@ async function main() {
     course_id: course.id,
     profile_id: trainer2Id,
     tutor_role: "assistant_course_tutor",
-    verified_at: new Date().toISOString(),
+    verified_at: new Date(nowMs()).toISOString(),
   });
   console.log("second trainer:", trainer2Id);
 
@@ -789,7 +808,7 @@ async function main() {
   await supabase.from("course_tutors").insert({
     course_id: course.id,
     profile_id: courseAdminId,
-    verified_at: new Date().toISOString(),
+    verified_at: new Date(nowMs()).toISOString(),
   });
   console.log("course admin:", courseAdminId);
 
@@ -859,7 +878,7 @@ async function main() {
       center_id: center.id,
       course_id: course.id,
       course_status: def.withdrawn ? "withdrawn" : "active",
-      course_status_set_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
+      course_status_set_at: def.withdrawn ? (FULL ? atDay(8, "12:00") : new Date(nowMs() - 9 * 86400000).toISOString()) : null,
       // A withdrawn candidate's letter is generated from these three fields
       // (see api/withdrawal-letter + letters/withdrawal.ts). The seed set the
       // status but left them null, so the letter came out nearly blank and the
@@ -877,7 +896,7 @@ async function main() {
       // the Assessor tab's §14.1 list flagged "1 withdrawal letter not
       // generated" as outstanding: a state no course can actually be in.
       // Same instant as the withdrawal, as the flow does.
-      withdrawal_letter_generated_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
+      withdrawal_letter_generated_at: def.withdrawn ? (FULL ? atDay(8, "12:30") : new Date(nowMs() - 9 * 86400000).toISOString()) : null,
       // Withdrawn candidates are not part of a moderation sample.
       selected_for_assessor_visit: !def.withdrawn && ASSESSOR_SAMPLE.has(def.name),
     });
@@ -1659,7 +1678,7 @@ async function main() {
       // timetable events but never the record, so the roster flagged all
       // twelve "Stage 1 unfiled"; this files it where it should be.
       const stage1Filed = !def.withdrawn && def.name !== "Daniel Kim";
-      const stage1At = new Date(Date.now() - 12 * 86400000).toISOString();
+      const stage1At = FULL ? atDay(5, "16:00") : new Date(nowMs() - 12 * 86400000).toISOString();
       return {
       course_id: course.id,
       trainee_id: trainees[def.name],
@@ -1699,7 +1718,7 @@ async function main() {
       // were due today. Confirmed wherever a grade exists; the one ungraded
       // candidate (Ruben) stays unconfirmed, which is the honest state of the
       // one case the grading meeting has not settled.
-      provisional_approved_at: def.grade || def.withdrawn ? new Date(Date.now() - 1 * 86400000).toISOString() : null,
+      provisional_approved_at: def.grade || def.withdrawn ? (FULL ? atDay(18, "17:00") : new Date(nowMs() - 1 * 86400000).toISOString()) : null,
       };
     })
   );
@@ -1798,7 +1817,7 @@ async function main() {
   // ============================================================
   {
     const cDay = (n) => courseDay(courseStart, n);
-    const daysAgoIso = (n) => new Date(Date.now() - n * 86400000).toISOString();
+    const daysAgoIso = (n) => new Date(nowMs() - n * 86400000).toISOString();
     const secondMarkerId = trainer2Id;
 
     // When each type is DUE -- what src/lib/assignment-due-dates.ts resolves
@@ -1893,6 +1912,19 @@ async function main() {
 
     // --- Who is where. Kofi's LRT is deliberately absent -- it is created by
     //     the malpractice flow further down, not as a plain state. ---
+    // --full: every round stamped on its calendar day rather than "n days
+    // ago" -- submitted the morning of the deadline (one candidate a day late,
+    // so the lateness gate has something to show), marked the next day, a
+    // resubmission four teaching days on and countersigned the day after.
+    const calendarise = (state, dueDay, name) => {
+      const out = {};
+      const late = name === "Tomas Novak" ? 1 : 0;
+      if (state.first_submitted_at) out.first_submitted_at = atDay(dueDay + late, late ? "14:10" : "09:30");
+      if (state.resubmission_submitted_at) out.resubmission_submitted_at = atDay(dueDay + 4, "09:30");
+      const signed = state.resubmission_submitted_at ? atDay(dueDay + 5, "17:00") : atDay(dueDay + 1, "17:00");
+      for (const k of ["second_marker_recorded_at", "first_initialled_at", "second_initialled_at"]) if (state[k]) out[k] = signed;
+      return out;
+    };
     const DEFAULT_PLAN = courseHasStarted
       ? {
           "Focus on Learner": passedFirst(9),
@@ -1983,6 +2015,14 @@ async function main() {
       const name = def.name;
       const base = { ...DEFAULT_PLAN, ...(PLAN[name] ?? {}) };
       if (name === "Kofi Mensah") delete base.LRT; // seeded by malpractice below
+      // --full: by the end of the course nothing is still not started or
+      // under review. Whatever the snapshot left open is a first-round pass;
+      // the resubmissions, the fail and the malpractice case keep their shape.
+      if (FULL) {
+        for (const t of Object.keys(base)) {
+          if (base[t].first_status === "not_submitted" || base[t].first_status === "submitted") base[t] = passedFirst(2);
+        }
+      }
       assignmentIds[name] = {};
       for (const [assignment_type, state] of Object.entries(base)) {
         // `notMet` drives the criteria marks below; it is not a column.
@@ -1995,6 +2035,7 @@ async function main() {
             assignment_type,
             due_date: cDay(DUE_DAY(assignment_type, def.half)),
             ...stateColumns,
+            ...(FULL ? calendarise(stateColumns, DUE_DAY(assignment_type, def.half), name) : {}),
             // A marked round carries its criteria. A first round that passed
             // meets all of them; one returned for resubmission fails the ones
             // the tutor's own feedback talks about. A resubmission that
@@ -2127,7 +2168,9 @@ async function main() {
         // most recent): a resubmission just marked is a day old; a first-round
         // LRT (set/due later than FoL) was marked a couple of days ago; a
         // first-round FoL was marked earlier in the course.
-        const sent = state.resubmission_status === "approved" ? daysAgoIso(1) : assignment_type === "LRT" ? daysAgoIso(2) : daysAgoIso(6);
+        const sent = FULL
+          ? atDay(DUE_DAY(assignment_type, def.half) + (state.resubmission_status === "approved" ? 5 : 1), "17:30")
+          : state.resubmission_status === "approved" ? daysAgoIso(1) : assignment_type === "LRT" ? daysAgoIso(2) : daysAgoIso(6);
         let bc = null;
         if (state.resubmission_status === "approved") {
           bc = { title: `${bTitle} feedback is ready`, body: "Open your Written Assignments tab to see the full feedback.", sent };
@@ -2303,7 +2346,7 @@ async function main() {
       sections: PLAGIARISM_REFLECTION_SECTIONS,
       format: "prose",
       generation_status: "completed",
-      published_at: new Date().toISOString(),
+      published_at: new Date(nowMs()).toISOString(),
     });
 
     const { data: reflection, error: reflErr } = await supabase
@@ -2411,6 +2454,23 @@ async function main() {
     if (error) throw error;
   }
 
+  // --full: the close-out as the story tells it -- the Centre Grade form
+  // submitted on day 18, Cambridge's confirmation recorded on day 23. Both
+  // are the MCT's ticks; the course itself keeps its --stage dates.
+  if (FULL) {
+    const { error: closeErr } = await supabase
+      .from("courses")
+      .update({
+        grade_form_submitted_at: atDay(18, "17:30"),
+        grade_form_submitted_by: trainerId,
+        cambridge_grades_confirmed_at: atDay(23, "11:00"),
+        cambridge_grades_confirmed_by: trainerId,
+      })
+      .eq("id", course.id);
+    if (closeErr) throw closeErr;
+    console.log("--full: grade form (day 18) and Cambridge confirmation (day 23) recorded");
+  }
+
   // --- Plans for the assessor's visit day ---
   //
   // TP7 is taught on assessor_visit_date (start+21) by half 1 of BOTH groups
@@ -2478,7 +2538,10 @@ async function main() {
       framework: "Receptive skills lesson",
     },
   ];
-  for (const vp of visitPlans) {
+  // --full: TP7 has been taught, so these plans already exist from the
+  // taught rounds above (with the self-evaluations and feedback that go with
+  // a taught lesson); writing them again would collide on the plan.
+  if (!FULL)   for (const vp of visitPlans) {
     await supabase.from("tp_plans").insert({
       course_id: course.id,
       trainee_id: trainees[vp.name],
@@ -2488,7 +2551,7 @@ async function main() {
       class_profile: vp.profile,
       materials_description: vp.materials,
       framework_used: vp.framework,
-      submitted_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+      submitted_at: new Date(nowMs() - 1 * 86400000).toISOString(),
     });
   }
 
@@ -2563,7 +2626,7 @@ async function main() {
   await supabase.from("assessor_meeting_requests").insert({
     course_id: course.id,
     trainee_id: trainees["Amara Okafor"],
-    requested_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+    requested_at: new Date(nowMs() - 1 * 86400000).toISOString(),
   });
 
   // --- Trainer-in-Training (TinT) -- an experienced teacher training to become
@@ -2574,7 +2637,7 @@ async function main() {
   // pack never showed the e-portfolio row. Elena Vasquez is the TinT here, on
   // the internal scheme, most of the way through her portfolio (Ramy, 11 Sep).
   {
-    const dAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
+    const dAgo = (n) => new Date(nowMs() - n * 86400000).toISOString();
     const { data: tintAuth, error: tintAuthErr } = await supabase.auth.admin.createUser({
       email: "demo-tint@celtaconnect.com",
       email_confirm: true,
@@ -3164,7 +3227,7 @@ async function main() {
   // "on track for 80%" state a submitted portfolio should show, rather than
   // the zero it read at first. ---
   {
-    const dAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
+    const dAgo = (n) => new Date(nowMs() - n * 86400000).toISOString();
     const { data: tintCt } = await supabase
       .from("course_tutors")
       .select("id")
@@ -3219,7 +3282,7 @@ async function main() {
   const tutorialAt = (n, band) => ({ event_date: courseDay(courseStart, n), event_time: BAND_TIMES[band - 1] });
   // Used by the Stage 1 invites below. It lived in the old Stage 2 block that
   // seedStage2Demo replaced, and went with it.
-  const stamp = new Date().toISOString();
+  const stamp = new Date(nowMs()).toISOString();
   // Stage 2 at the halfway point for the whole cohort -- sheets on the
   // ported day-9 events, everyone booked and seen, records complete. Replaces
   // a day-12 sheet for Group A alone with two of six booked (12 Sep 2026).
@@ -3229,7 +3292,7 @@ async function main() {
   // what a course with a moved start date actually needs.
   const stage2Date = courseDay(courseStart, 9);
   const stage3Date = courseDay(courseStart, 15);
-  const reached = (iso) => iso <= isoOf(new Date());
+  const reached = (iso) => iso <= isoOf(recordNow);
   if (reached(stage2Date)) {
   await seedStage2Demo(supabase, {
     courseId: course.id,
@@ -3414,7 +3477,7 @@ async function main() {
       course_id: course.id,
       name: "Emeka Nwosu",
       level: "Intermediate",
-      signup_completed_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+      signup_completed_at: FULL ? beforeStart(14, "18:00") : new Date(nowMs() - 18 * 86400000).toISOString(),
     })
     .select("id, level")
     .single();
@@ -3424,7 +3487,7 @@ async function main() {
       course_id: course.id,
       role: "volunteer_student",
       volunteer_student_id: volunteer.id,
-      expires_at: new Date(Date.now() + 5 * 365 * 86400000).toISOString(),
+      expires_at: new Date(nowMs() + 5 * 365 * 86400000).toISOString(),
     })
     .select("token")
     .single();
@@ -3461,7 +3524,7 @@ async function main() {
     course_id: course.id,
     role: "volunteer_student",
     volunteer_student_id: graceVolunteer.id,
-    expires_at: new Date(Date.now() + 5 * 365 * 86400000).toISOString(),
+    expires_at: new Date(nowMs() + 5 * 365 * 86400000).toISOString(),
   });
   console.log("volunteer signup demo: Grace Adeyemi seeded, not yet signed up");
 
@@ -3682,7 +3745,7 @@ async function main() {
   // later (migration 0093) and the card filters on it, so an announcement
   // without sent_at is invisible however good it looks in the table.
   {
-    const hoursAgo = (n) => new Date(Date.now() - n * 3600000).toISOString();
+    const hoursAgo = (n) => new Date(nowMs() - n * 3600000).toISOString();
     const posts = [
       { pinned: true, title: "Reading for tomorrow is chapter 4 only, not 4 and 5", body: "Apologies for the confusion in yesterday's handout. Chapter 4 only. If you have already read 5, no harm done.", h: 20 },
       { pinned: false, title: "Observation slots for Thursday are open", body: "Six slots, first come first served. Sign up on the timetable -- two of you still need a second observation before the end of week 3.", h: 3 },
@@ -3751,7 +3814,7 @@ async function main() {
         email: "demo-applicant-noor@celtaconnect.com",
         stage: "accepted",
         deposit_amount: 500,
-        deposit_paid_at: new Date(Date.now() - 40 * 86400000).toISOString(),
+        deposit_paid_at: new Date(nowMs() - 40 * 86400000).toISOString(),
       },
       {
         center_id: center.id,
@@ -3760,7 +3823,7 @@ async function main() {
         email: "demo-applicant-ben@celtaconnect.com",
         stage: "accepted",
         deposit_amount: 500,
-        deposit_paid_at: new Date(Date.now() - 35 * 86400000).toISOString(),
+        deposit_paid_at: new Date(nowMs() - 35 * 86400000).toISOString(),
       },
       // The applicant the JOURNEY walks is added below, not here -- it has to
       // check first. See the note on journeyApplicant.
@@ -3849,7 +3912,7 @@ async function main() {
     course_id: pastCourse.id,
     profile_id: trainerId,
     tutor_role: "main_course_tutor",
-    verified_at: new Date(Date.now() - 150 * 86400000).toISOString(),
+    verified_at: new Date(nowMs() - 150 * 86400000).toISOString(),
   });
   // Same assessor as the running course, deliberately: two consecutive
   // courses is exactly Handbook 13.3's limit, so Assessor History shows
@@ -3893,7 +3956,7 @@ async function main() {
   // to show on a walkthrough. ---
   await supabase.from("volunteer_students").update({ email: "demo-emeka@celtaconnect.com" }).eq("id", volunteer.id);
   await supabase.from("volunteer_students").update({ email: "demo-grace@celtaconnect.com" }).eq("id", graceVolunteer.id);
-  await supabase.from("course_access_tokens").update({ last_opened_at: new Date().toISOString() }).eq("volunteer_student_id", volunteer.id);
+  await supabase.from("course_access_tokens").update({ last_opened_at: new Date(nowMs()).toISOString() }).eq("volunteer_student_id", volunteer.id);
 
   // Emeka volunteered on the Spring course too: one identity, prior hours.
   const { data: emekaPerson } = await supabase
@@ -3978,10 +4041,10 @@ async function main() {
     audio_url: emekaAudioPath,
     transcript:
       "My name is Emeka. I come from Lagos, and I am living in New York since two years. I work in restaurant in evenings. I want practice my speaking, because I understand good, but when I speak, the words is coming slow. I hope the classes help me for talk with customers more easy.",
-    transcript_generated_at: new Date().toISOString(),
+    transcript_generated_at: new Date(nowMs()).toISOString(),
     l1_language: "Yoruba",
-    consent_given_at: new Date(Date.now() - 18 * 86400000).toISOString(),
-    recording_consent_given_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+    consent_given_at: FULL ? beforeStart(14, "18:05") : new Date(nowMs() - 18 * 86400000).toISOString(),
+    recording_consent_given_at: new Date(nowMs() - 18 * 86400000).toISOString(),
   });
   console.log("volunteer audio: Emeka's recording + transcript on file");
 
