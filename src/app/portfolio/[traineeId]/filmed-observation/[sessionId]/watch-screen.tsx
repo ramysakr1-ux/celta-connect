@@ -305,7 +305,7 @@ export function FilmedObservationWatchScreen({
           // with the second of the recording you were at, and the full task
           // page turns those stamps into click-to-seek links. It is for
           // catching a moment before you know which prompt it answers.
-          <div className="card card-garnet p-4">
+          <div className="plain-card p-4">
             <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
             <p className="mt-1 text-label text-muted">
               Saved with the exact moment you wrote them, so you can jump straight back to it later.

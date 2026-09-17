@@ -290,43 +290,6 @@ h6 {
   .card-red {
     border-top: 3px solid var(--color-destructive);
   }
-  /* Ramy, 27 Aug 2026: "the line on top... will alternate colors basically
-     just to make it colorful. So it's not all green [teal]." Purely
-     decorative alternation between the two colors he named, distinct from
-     the semantic gold/amber/red modifiers above -- reach for this on a big
-     card that has no status meaning of its own to convey, alternating with
-     plain (unmodified, teal) .card in whatever order reads best on that
-     page. */
-  /* --hub-decorative-accent is set per-role by the trainer (hub) layout
-     ONLY (gold for ACT, garnet for MCT) -- everywhere else in the app this
-     variable is simply unset, so the fallback (--color-garnet) applies and
-     nothing changes. Ramy, 27 Aug 2026: ACT's header/hover accent is
-     already garnet, so this purely-decorative alternation would otherwise
-     pile a second, unrelated reason for the same color onto ACT screens
-     specifically -- gold there instead gives ACT the same "not monotone"
-     effect without doubling up on its own role color. */
-  /* Ramy, 1 Sep 2026, on finding a teal card bar inside the garnet room:
-     "go with two" -- alternate between the room's own accent and a neutral,
-     rather than between teal and garnet.
-
-     The rhythm he asked for on 27 Aug ("so it's not all green") survives; what
-     stops is teal meaning Centre Management in the header and decoration
-     everywhere else. Outside a coloured room the pair falls back to the
-     original teal/garnet, so the trainer hub and the assessor screens are
-     untouched. */
-  /* Centre side A1, 16 Sep 2026: no longer used inside the four rooms, the
-     owner screen, Command Center or the applicant record -- there, garnet IS
-     the Course Admin room's colour, so a decorative garnet edge lied about
-     which room a card belonged to. Still carried by the trainer hub and the
-     candidate's shell until their own passes (trainee A5, hub ticket). */
-  .card-garnet {
-    border-top-color: var(--area-alt, var(--hub-decorative-accent, var(--color-garnet)));
-  }
-  /* .sheet-garnet itself is declared further down (after .sheet/.sheet-accent
-     and friends) -- .sheet's own border-top shorthand is declared below this
-     point in the file, and on equal specificity the later declaration in the
-     stylesheet wins regardless of class order in the markup, so a
-     "sheet sheet-garnet" element rendered teal if this rule sat here. */
   /* "The small ones" -- Ramy: smaller tile-style cards carry a semantic
      accent as a left-side bar instead of a top rule. The decorative
      teal/garnet pair that used to sit beside this (.card-side-teal /
@@ -560,9 +523,7 @@ h6 {
   }
   .hub-v4 .sheet,
   .hub-v4 .sheet-interactive,
-  .hub-v4 .card,
-  .hub-v4 .card-garnet,
-  .hub-v4 .sheet-garnet {
+  .hub-v4 .card {
     border-top: 1px solid var(--color-border);
     border-radius: 14px;
   }
@@ -934,19 +895,6 @@ h6 {
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
-  }
-
-  /* Decorative teal/garnet alternation for .sheet-based cards (see the
-     "27 Aug 2026" comment near .card-garnet above for the rationale --
-     same override, just for `.sheet`). Declared here, after every plain
-     .sheet* variant, on purpose: this and .sheet-accent etc. all set
-     border-top-color at equal (single-class) specificity, so whichever
-     rule is LAST in the stylesheet wins, independent of the order classes
-     are listed in the markup. A `sheet sheet-garnet` element rendered
-     plain teal when this lived up near .card-garnet, because .sheet's own
-     border-top shorthand came later in the file and silently won. */
-  .sheet-garnet {
-    border-top-color: var(--area-alt, var(--hub-decorative-accent, var(--color-garnet)));
   }
 
   .pill {

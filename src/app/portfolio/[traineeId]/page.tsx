@@ -340,9 +340,6 @@ export default async function CourseStreamPage({
               .toUpperCase();
 
             return (
-              // Decorative teal/garnet alternation down this repeating list --
-              // same purely-decorative rule as e.g. dashboard/admin's course
-              // groups, no status meaning of its own.
               <div key={b.id} className={`plain-card`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">

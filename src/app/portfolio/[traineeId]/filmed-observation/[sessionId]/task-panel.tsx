@@ -77,7 +77,7 @@ export function FilmedObservationTaskPanel({
   }
 
   return (
-    <div className="card card-garnet flex flex-col gap-3 p-4">
+    <div className="plain-card flex flex-col gap-3 p-4">
       <div>
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
         {criteriaLine ? <p className="mt-1 text-body text-ink">{criteriaLine}</p> : null}

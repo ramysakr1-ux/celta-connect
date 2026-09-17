@@ -26,7 +26,6 @@ export function SecondMarkingPanel({
   decided,
   failed,
   timeZone,
-  garnet = false,
 }: {
   assignmentId: string;
   traineeId: string;
@@ -41,13 +40,12 @@ export function SecondMarkingPanel({
   /** Fails must be in the sample (§9.2.3), so an un-double-marked fail is said louder. */
   failed: boolean;
   timeZone: string;
-  garnet?: boolean;
 }) {
   const isFirstMarker = Boolean(markerId) && markerId === viewerId;
   const done = Boolean(secondMarkerId && secondMarkerRecordedAt);
 
   return (
-    <div className={`sheet flex flex-col gap-1.5 ${garnet ? "sheet-garnet" : ""}`}>
+    <div className="sheet flex flex-col gap-1.5">
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Double-marking</p>
         <span className="text-micro font-semibold text-muted tabular-nums">§9.2.3</span>

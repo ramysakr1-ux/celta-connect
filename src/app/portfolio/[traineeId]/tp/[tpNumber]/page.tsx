@@ -165,8 +165,6 @@ export default async function TpDetailPage({
           eyebrow="Peer observation"
           title={`${trainee.full_name} — TP${tpNumber}`}
         />
-        {/* Decorative teal/garnet alternation against the header sheet
-            above -- no status meaning of its own, same rule as elsewhere. */}
         <div className="plain-card p-6">
           {!sheet || !sheet.revealed_at ? (
             <PeerNoteForm
@@ -456,9 +454,6 @@ export default async function TpDetailPage({
   const writerMounted = Boolean(plan) && isEditableStaff && !feedback?.submitted_at;
   const planSheets = (
     <>
-      {/* Decorative teal/garnet alternation down this stack of plain
-          content sheets ("Brief" above stays teal) -- no status
-          meaning of its own, same rule as everywhere else. */}
       <div id="plan" className="plain-card scroll-mt-20 p-6">
         <h2 className="font-serif text-h3 text-ink">What they planned</h2>
         {!plan ? (

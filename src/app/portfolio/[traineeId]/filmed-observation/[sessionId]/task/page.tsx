@@ -48,13 +48,6 @@ export default async function FilmedObservationTaskPage({
     : [];
   const completed = Boolean(response?.completed_at);
 
-  // Decorative teal/garnet alternation down this stack of plain sheets --
-  // no status meaning of its own, same rule as everywhere else. A counter
-  // (not a literal index) so it still alternates correctly whether or not
-  // the criteria-codes sheet below actually renders.
-  let sheetCounter = 0;
-  const nextSheetGarnet = () => sheetCounter++ % 2 === 1;
-
   return (
     <div className="flex flex-col gap-4">
       <BackLink href={`/portfolio/${traineeId}/filmed-observation/${sessionId}`} label={"Back to the session"} />

@@ -58,8 +58,6 @@ export default async function TraineeStage2TutorialPage({
         </p>
       </div>
 
-      {/* Decorative teal/garnet alternation against the header sheet above --
-          no status meaning of its own, same rule as everywhere else. */}
       <div className="plain-card">
         <div className="flex flex-col">
           {(slots ?? []).map((s, i) => {

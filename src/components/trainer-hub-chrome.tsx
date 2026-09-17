@@ -178,12 +178,6 @@ export async function TrainerHubChrome({
     // 27 Aug 2026: hover matches the role's own colour.
     "--hover-accent": accent,
     "--hover-fill": `color-mix(in oklab, ${accent} 20%, var(--color-card))`,
-    // Ramy, 27 Aug 2026: the decorative teal/garnet card alternation
-    // (.card-garnet/.sheet-garnet, unrelated to the role hover system
-    // above) would otherwise pile a second, unrelated reason for garnet
-    // onto ACT screens specifically -- gold instead gives ACT the same
-    // "not monotone" effect without doubling up on its own role colour.
-    "--hub-decorative-accent": isMct ? HUB_GARNET : "oklch(63% 0.096 72)",
   } as React.CSSProperties;
 
   let isDemo = false;

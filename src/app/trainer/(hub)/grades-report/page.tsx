@@ -251,7 +251,7 @@ export default async function GradesReportPage() {
         ) : null}
       </div>
 
-      <div className="sheet sheet-garnet">
+      <div className="sheet">
         {/* Rewritten 30 Aug 2026. Ramy: "provisional grades are submitted
             around the end of TP6... provisional grades are set by the trainer
             around stage two -- it's not correct. Final discussion is only
@@ -285,7 +285,7 @@ export default async function GradesReportPage() {
         <div className="sheet text-body text-muted">No candidates on this course yet.</div>
       ) : (
         <div className="flex flex-col gap-4">
-          {(trainees ?? []).map((trainee, traineeIndex) => {
+          {(trainees ?? []).map((trainee) => {
             const record = recordByTrainee.get(trainee.id) ?? null;
             const ratings = matrixByTrainee.get(trainee.id) ?? {};
             const derived = computeStrengthsAndActionPoints(ratings);
@@ -341,7 +341,7 @@ export default async function GradesReportPage() {
               <div
                 key={trainee.id}
                 id={`candidate-${trainee.id}`}
-                className={`sheet flex flex-col gap-4 scroll-mt-6 ${traineeIndex % 2 === 1 ? "sheet-garnet" : ""}`}
+                className="sheet flex flex-col gap-4 scroll-mt-6"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>

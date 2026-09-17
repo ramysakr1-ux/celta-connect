@@ -308,16 +308,6 @@ export default async function PortfolioCelta5Page({
     // the 6h requirement (same bug as the standalone Progress tab's card).
     const { hoursCounted: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
 
-
-    // Decorative teal/garnet alternation down this long vertical stack of
-    // plain sheets -- no status meaning of its own, same rule as everywhere
-    // else. "Course progress" just below stays plain teal (index 0); this
-    // counter starts at 1 and is called, in render order, only for each
-    // sheet that actually renders, so it still alternates correctly across
-    // this section's many mutually-exclusive branches.
-    let sheetCounter = 1;
-    const nextSheetGarnet = () => sheetCounter++ % 2 === 1;
-
     // ---- Booklet figures -------------------------------------------------
     // Everything below feeds the document-shaped view built from Ramy's
     // design file (see booklet/shell.tsx). All of it is derived from the
@@ -1286,9 +1276,6 @@ export default async function PortfolioCelta5Page({
           <div className="h-full bg-[oklch(46%_0.09_320)]" style={{ width: `${observationFilmedPct}%` }} />
         </div>
       </div>
-      {/* Decorative teal/garnet alternation -- shared by both the assessor
-          and trainer-edit views below, since this block renders once and is
-          reused in both branches. */}
       <div className="plain-card mt-3 overflow-hidden !p-0">
         {observations && observations.length > 0 ? (
           <table className="table-plain w-full">

@@ -46,10 +46,6 @@ export function FolPanel({
 }) {
   const [claimState, claimAction, claimPending] = useActionState(submitFolClaim, initialClaimState);
 
-  // Decorative teal/garnet alternation down this stack of plain sheets --
-  // no status meaning of its own, same rule as everywhere else. Fixed
-  // sequential positions (not reordered at runtime), so hardcoded per sheet
-  // rather than computed from a counter.
   return (
     <div className="flex flex-col gap-4">
       <div className="plain-card flex flex-col gap-3 p-6">

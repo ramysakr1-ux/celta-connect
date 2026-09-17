@@ -226,15 +226,14 @@ export default async function TrainerMarkAssignmentPage({
         decided={result === "pass_first" || result === "pass_resub" || result === "resubmission_required" || result === "fail"}
         failed={result === "fail"}
         timeZone={timeZone}
-        garnet
       />
 
       {!template ? (
-        <div className="sheet sheet-garnet p-6">
+        <div className="sheet p-6">
           <p className="text-muted">This assignment&apos;s brief hasn&apos;t been published yet.</p>
         </div>
       ) : assignment.open_case_id ? (
-        <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
+        <div className="sheet flex flex-col gap-2 p-6">
           <p className="pill pill-warning w-fit">Marking paused</p>
           <p className="text-muted">
             A malpractice case is open on this submission. No outcome can be recorded until it&apos;s decided.
@@ -250,7 +249,7 @@ export default async function TrainerMarkAssignmentPage({
         // "Nothing to review" only when there is genuinely nothing. A CLOSED
         // assignment has been submitted and marked, and a tutor opening it
         // should see the finished document read-only.
-        <div className="sheet sheet-garnet p-6">
+        <div className="sheet p-6">
           <p className="text-muted">
             Not yet submitted for this round — nothing to review until {trainee.full_name.split(" ")[0]} submits.
           </p>
@@ -260,7 +259,7 @@ export default async function TrainerMarkAssignmentPage({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="sheet sheet-garnet flex flex-col gap-1">
+          <div className="sheet flex flex-col gap-1">
             <p className="text-body text-ink">
               AI declaration: {aiDeclared ? "used" : "not used"}
               {aiDeclared && aiConversationUrl ? (

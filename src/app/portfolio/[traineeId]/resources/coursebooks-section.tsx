@@ -21,8 +21,8 @@ export function CoursebooksSection({
     <div>
       <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Coursebooks</h3>
       <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {coursebooks.map((book, i) => (
-          <CoursebookCard key={book.id} book={book} isEditableStaff={isEditableStaff} garnet={i % 2 === 1} />
+        {coursebooks.map((book) => (
+          <CoursebookCard key={book.id} book={book} isEditableStaff={isEditableStaff} />
         ))}
       </ul>
     </div>
@@ -32,13 +32,9 @@ export function CoursebooksSection({
 function CoursebookCard({
   book,
   isEditableStaff,
-  garnet,
 }: {
   book: { id: string; title: string; level: string; access_notes: string | null };
   isEditableStaff: boolean;
-  // Purely decorative teal/garnet alternation by grid position -- no status
-  // meaning of its own, same rule as everywhere else.
-  garnet: boolean;
 }) {
   const [state, action, pending] = useActionState(updateCoursebookAccessNotes, initialState);
 
