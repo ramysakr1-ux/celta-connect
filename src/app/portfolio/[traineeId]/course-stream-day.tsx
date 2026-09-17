@@ -52,7 +52,7 @@ export function StreamEyebrow({
   );
 
   return (
-    <p className="text-label font-bold tracking-[0.14em] text-muted uppercase">
+    <p className="text-label font-bold tracking-[0.12em] text-muted uppercase">
       {greeting}, {firstName} &middot; {dateLabel}
       {mounted ? <> &middot; <span className="tabular-nums">{clock}</span></> : null}
     </p>
@@ -137,7 +137,7 @@ export function StreamDayTrack({
   return (
     <section className="flex flex-col">
       <div className="mb-2.5 flex items-baseline justify-between gap-4">
-        <span className="text-micro font-bold tracking-[0.14em] text-muted uppercase">{heading}</span>
+        <span className="text-micro font-bold tracking-[0.12em] text-muted uppercase">{heading}</span>
         <span className="text-meta text-muted">
           {meta.lead}
           {countdown ? ` · ${countdown}` : null}

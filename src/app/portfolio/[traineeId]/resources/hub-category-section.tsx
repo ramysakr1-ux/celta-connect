@@ -20,7 +20,7 @@ export function HubCategorySection({
   return (
     <section className="rounded-[8px] border border-border p-[16px_18px]" style={{ background: "oklch(99.2% 0.005 90)" }}>
       <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h3 className="font-serif text-label font-bold tracking-[0.09em] text-ink uppercase">{label}</h3>
+        <h3 className="font-serif text-label font-bold tracking-[0.12em] text-ink uppercase">{label}</h3>
         <div className="flex shrink-0 items-baseline gap-2">
           {restricted ? (
             <span className="rounded-full border border-border bg-surface-muted px-2 py-[1px] text-micro font-semibold text-muted">

@@ -22,7 +22,7 @@ Nine steps. Two families (Karla sans for UI, Newsreader serif for titles and fig
 | `--text-h1` | 28 | serif 600 | 1.15 | Room head title; hero title; KPI figures (tabular) |
 | `--text-display` | 34 | serif 600 | 1.08 | Sentence titles (Concerns, New course, Assessor history); dark-band titles (owner, assessor pack); hero time is 44 = display × 1.3, the one exception |
 
-Weights: sans 400/600/700 only (no 500). Serif 600 only, italic 500 for quoted candidate text. Tracking: caps eyebrows 0.1em at label size, 0.12em at micro; nothing else tracked.
+Weights: sans 400/600/700 only (no 500). Serif 600 only, italic 500 for quoted candidate text. Tracking: caps eyebrows only, and the value follows the shell -- 0.08em in the centre rooms, the assessor pack, admissions, login and Command Center; 0.12em in the trainer hub, the candidate's shell and the input sessions (post-build audit B4, 17 Sep 2026: the platform settled on these two, and the rule follows the code). `.eyebrow` in globals.css carries both; use it on new work. Nothing else tracked.
 
 ## 2 · The mapping (mechanical)
 

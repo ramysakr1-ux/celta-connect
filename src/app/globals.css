@@ -810,6 +810,23 @@ h6 {
      glass tile (CATEGORY_STYLE) for anything that is a timetable event. No
      shadow, no coloured edge, 10px radius; colour on a card in the
      candidate's shell now always means something. */
+  /* The caps eyebrow. Two trackings, by shell -- post-build audit B4, 17 Sep
+     2026: the platform never adopted "0.1em at label, 0.12em at micro"; it
+     settled on 0.08em in the centre rooms, the assessor pack, admissions,
+     login and Command Center, and 0.12em in the trainer hub, the candidate's
+     shell and the input sessions. Nobody sees both shells side by side and
+     each reads right at its own size, so both stand. Declared here so the next
+     screen does not hand-type a third value; existing sites keep their
+     literal (retrofitting them is not worth a pass of its own). */
+  .eyebrow {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  :where(.hub-v4, .trainee-shell, .input-session) .eyebrow {
+    letter-spacing: 0.12em;
+  }
+
   .plain-card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);

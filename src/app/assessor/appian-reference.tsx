@@ -52,7 +52,7 @@ export function AppianReference({
           border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
         }}
       >
-        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
+        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
           No Appian reference yet
         </span>
         <span style={{ fontSize: "var(--text-meta)", color: "var(--color-ink)", flex: "1 1 240px", minWidth: 220 }}>
@@ -71,13 +71,13 @@ export function AppianReference({
         border: `1px solid color-mix(in oklab, ${GOLD} 32%, transparent)`,
       }}
     >
-      <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(43% 0.09 70)" }}>
+      <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(43% 0.09 70)" }}>
         Appian course reference
       </span>
 
       <code
         style={{
-          fontSize: "var(--text-lede)", fontWeight: 700, letterSpacing: "0.02em", color: "var(--color-ink)",
+          fontSize: "var(--text-lede)", fontWeight: 700, letterSpacing: "0.08em", color: "var(--color-ink)",
           fontVariantNumeric: "tabular-nums", userSelect: "all",
         }}
       >

@@ -90,7 +90,7 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
               className="lift grid grid-cols-[40px_1fr_auto] items-center gap-3.5 rounded-[10px] px-3 py-[11px]"
             >
               <span
-                className="flex size-10 items-center justify-center rounded-[10px] text-label font-bold tracking-[0.02em]"
+                className="flex size-10 items-center justify-center rounded-[10px] text-label font-bold"
                 style={{ background: KIND[a.kind].tone, color: KIND[a.kind].badgeInk }}
               >
                 {a.badge}

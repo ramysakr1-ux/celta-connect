@@ -1107,7 +1107,7 @@ export default async function TodayPage() {
               className="flex flex-col gap-1.5 rounded-[12px] px-[18px] py-4 text-[oklch(96%_0.008_85)] transition-[filter] hover:brightness-[1.13]"
               style={{ background: "var(--color-ink-warm)" }}
             >
-              <span className="flex justify-between text-micro font-bold tracking-[0.11em] text-gold uppercase">
+              <span className="flex justify-between text-micro font-bold tracking-[0.12em] text-gold uppercase">
                 <span>Assessor visit</span>
                 <span>
                   {(() => {

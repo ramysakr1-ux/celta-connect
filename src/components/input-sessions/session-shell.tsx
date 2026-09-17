@@ -49,7 +49,7 @@ export function SessionShell({
           teaching, and decoration would compete with the content. */}
       <div className="flex flex-col gap-3">
         <span aria-hidden className="h-[3px] w-10 rounded-full bg-primary" />
-        {line ? <p className="text-label font-bold uppercase tracking-[0.14em] text-muted">{line}</p> : null}
+        {line ? <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">{line}</p> : null}
         <h1 className="font-serif text-display font-semibold leading-tight text-ink">{title}</h1>
         <p className="text-body leading-relaxed text-muted">{intro}</p>
       </div>

@@ -413,7 +413,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           style={{ background: "var(--color-ink-warm)" }}
         >
           <div className="flex flex-col gap-1">
-            <span className="text-micro font-bold tracking-[0.11em] text-gold uppercase">
+            <span className="text-micro font-bold tracking-[0.12em] text-gold uppercase">
               {daysToVisit !== null && daysToVisit < 0 ? "Visited" : daysToVisit === 0 ? "Today" : `In ${daysToVisit} day${daysToVisit === 1 ? "" : "s"}`}
             </span>
             <span className="font-serif text-h1 font-semibold">

@@ -175,7 +175,7 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
             borderLeft: `3px solid ${AMBER}`,
           }}
         >
-          <p className="text-micro font-bold tracking-[0.09em] uppercase" style={{ color: AMBER }}>
+          <p className="text-micro font-bold tracking-[0.12em] uppercase" style={{ color: AMBER }}>
             Special arrangements in place
           </p>
           <p className="mt-1 text-meta" style={{ color: INK }}>

@@ -473,7 +473,7 @@ export default async function GradesReportPage() {
                     {wasSlashed ? (
                     <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card-inset p-3">
                       <div className="flex items-baseline justify-between gap-3">
-                        <span className="text-label font-bold tracking-[0.09em] text-muted uppercase">
+                        <span className="text-label font-bold tracking-[0.12em] text-muted uppercase">
                           Evidence needed for a pass/higher (if applicable)
                         </span>
                         {record?.provisional_upgrade_conditions ? (
@@ -632,7 +632,7 @@ export default async function GradesReportPage() {
 function StrengthsColumn({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <p className="text-label font-semibold tracking-[0.04em] text-muted uppercase">{title}</p>
+      <p className="text-label font-semibold tracking-[0.12em] text-muted uppercase">{title}</p>
       {items.length > 0 ? (
         <p className="mt-1 text-body text-ink">{items.join(", ")}</p>
       ) : (

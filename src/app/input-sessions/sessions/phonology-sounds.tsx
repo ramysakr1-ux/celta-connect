@@ -450,7 +450,7 @@ function Voicing({ say }: { say: (t: string) => void }) {
 function ChartBlock({ title, cells, columns, say }: { title: string; cells: Cell[]; columns: number; say: (t: string) => void }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">{title}</p>
+      <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">{title}</p>
       <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
         {cells.map((cell, i) =>
           cell === null ? (

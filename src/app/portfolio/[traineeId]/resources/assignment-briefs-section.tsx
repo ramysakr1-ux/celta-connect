@@ -42,7 +42,7 @@ export function AssignmentBriefsSection({ briefs }: { briefs: BriefRow[] }) {
 
   return (
     <div>
-      <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">Assignment Briefs</h3>
+      <h3 className="font-serif text-label font-bold tracking-[0.12em] text-muted uppercase">Assignment Briefs</h3>
       <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {briefs.map((brief) => (
           <BriefCard key={brief.id} brief={brief} />

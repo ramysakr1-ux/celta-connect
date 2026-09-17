@@ -424,7 +424,7 @@ export function RosterRowView({
               <div>
                 {row.provisionalLabel ? (
                   <span
-                    className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-meta font-bold tracking-[0.02em] whitespace-nowrap"
+                    className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-meta font-bold whitespace-nowrap"
                     style={provisionalStyle(row)}
                     title={row.provisionalSlashed ? "Provisional grade not yet settled between two grades" : "Provisional grade"}
                   >

@@ -143,7 +143,7 @@ export function StageRatingsForm({
                     ) : null}
                     {notYetTaught ? (
                       <span
-                        className="ml-2 rounded-[5px] border border-border px-1.5 py-0.5 text-micro font-semibold tracking-[0.04em] text-muted uppercase"
+                        className="ml-2 rounded-[5px] border border-border px-1.5 py-0.5 text-micro font-semibold tracking-[0.12em] text-muted uppercase"
                         title="Not yet formally in scope for this course's progress -- a blank rating here isn't a gap. Any rating given still counts as early evidence."
                       >
                         Not yet taught

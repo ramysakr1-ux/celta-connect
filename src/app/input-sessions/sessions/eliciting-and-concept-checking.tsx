@@ -291,7 +291,7 @@ function AnswerKey() {
   return (
     <div className="flex flex-col gap-3.5 border-t border-border pt-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
+        <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">Answer key — handout, to keep</p>
         <div className="flex gap-2" data-print-hide>
           <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Hide

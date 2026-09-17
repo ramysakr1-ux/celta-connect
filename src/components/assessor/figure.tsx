@@ -21,7 +21,7 @@ export function Figure({
     <div>
       <p
         style={{
-          fontSize: "var(--text-micro)", fontWeight: 600, letterSpacing: "0.05em",
+          fontSize: "var(--text-micro)", fontWeight: 600, letterSpacing: "0.08em",
           textTransform: "uppercase", color: MUTED,
         }}
       >

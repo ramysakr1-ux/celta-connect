@@ -27,13 +27,13 @@ function gradeStyle(label: string | null): React.CSSProperties {
 function Provenance({ kind }: { kind: "handbook" | "custom" }) {
   return kind === "handbook" ? (
     <span
-      className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase"
+      className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.12em] uppercase"
       style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}
     >
       Handbook
     </span>
   ) : (
-    <span className="rounded-full border px-2 py-[2px] text-micro font-bold tracking-[0.07em] text-primary uppercase" style={{ borderColor: "color-mix(in oklab, var(--color-primary) 45%, transparent)" }}>
+    <span className="rounded-full border px-2 py-[2px] text-micro font-bold tracking-[0.12em] text-primary uppercase" style={{ borderColor: "color-mix(in oklab, var(--color-primary) 45%, transparent)" }}>
       Common practice
     </span>
   );
@@ -70,7 +70,7 @@ function Heading({ title, cite, note }: { title: string; cite: string; note?: st
   return (
     <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b hub-hairline pb-1.5 first:mt-0">
       <h3 className="font-serif text-h3 font-semibold text-ink">{title}</h3>
-      <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+      <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.12em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
         {cite}
       </span>
       {note ? <span className="text-meta text-muted">{note}</span> : null}

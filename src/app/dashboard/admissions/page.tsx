@@ -240,7 +240,7 @@ export default async function AdmissionsPage({
                       // "A tutor is notified... in-app flag, not push/email"
                       // -- this table is the surface a tutor or admissions
                       // handler actually scans, so the flag lives here.
-                      <span className="ml-2 rounded-full border border-destructive/40 px-2 py-0.5 text-micro font-semibold uppercase tracking-[0.05em] text-destructive">
+                      <span className="ml-2 rounded-full border border-destructive/40 px-2 py-0.5 text-micro font-semibold uppercase tracking-[0.08em] text-destructive">
                         Task reading: read directly
                       </span>
                     ) : null}

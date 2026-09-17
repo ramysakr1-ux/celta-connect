@@ -67,7 +67,7 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-h3 font-semibold text-ink">Example lesson — past continuous for interrupted actions</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.12em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>
@@ -121,7 +121,7 @@ function DebriefWithTrainerNotes() {
       </div>
       <OrderExercise correctOrder={CORRECT_ORDER} shuffled={SHUFFLED} />
       <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.12em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — trainer notes
         </p>

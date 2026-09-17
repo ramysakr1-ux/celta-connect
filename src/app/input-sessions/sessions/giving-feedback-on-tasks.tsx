@@ -272,7 +272,7 @@ function LiveCard({ n, task, watch }: { n: number; task: string; watch: string }
         taken ? "border-primary/40 bg-primary/5" : "border-border bg-card"
       }`}
     >
-      <span className="text-micro font-bold uppercase tracking-[0.1em] text-muted">Task card {n}</span>
+      <span className="text-micro font-bold uppercase tracking-[0.12em] text-muted">Task card {n}</span>
       <span className="text-meta leading-relaxed text-ink">{task}</span>
       {taken ? (
         <span className="border-t border-border pt-1.5 text-label leading-relaxed text-primary">

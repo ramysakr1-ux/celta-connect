@@ -32,7 +32,7 @@ export default async function InputSessionPage({
   const backLabel = backHref === "/input-sessions" ? "Input sessions" : "Resource hub";
 
   return (
-    <div className="p-6 sm:p-10">
+    <div className="input-session p-6 sm:p-10">
       {/* The pill, not a bare arrow link. Ramy, 29 Aug 2026: "maybe we can
           have that pill we talked about when you go back instead of the
           arrow" -- the same BackLink used across the rest of the app, which

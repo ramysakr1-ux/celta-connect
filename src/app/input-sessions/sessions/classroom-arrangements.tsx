@@ -143,7 +143,7 @@ export default function ClassroomArrangementsSession() {
         <div className="flex flex-col gap-2">
           {STAGES.map((s) => (
             <div key={s.stage} className="flex flex-col gap-1.5">
-              <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">{s.stage}</p>
+              <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">{s.stage}</p>
               <ChoiceScenarioCard scenario={s} />
             </div>
           ))}

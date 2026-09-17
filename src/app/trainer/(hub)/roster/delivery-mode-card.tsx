@@ -55,7 +55,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
               impact.tone === "warning" ? "border-status-warning-text/40 bg-status-warning-bg" : "border-border bg-card-inset"
             }`}
           >
-            <p className={`text-label font-semibold tracking-[0.09em] uppercase ${impact.tone === "warning" ? "text-status-warning-text" : "text-muted"}`}>
+            <p className={`text-label font-semibold tracking-[0.12em] uppercase ${impact.tone === "warning" ? "text-status-warning-text" : "text-muted"}`}>
               {impact.heading}
             </p>
             <div className="flex flex-col gap-1.5">

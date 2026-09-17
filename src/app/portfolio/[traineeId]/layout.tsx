@@ -443,7 +443,7 @@ export default async function PortfolioLayout({
       {/* The trainee's paper (migration 0295): the neutral ladder re-hued on
           this surface only. Semantic colours are untouched -- see
           pagePaletteVars. */}
-      <div id="trainee-surface" className={`flex min-h-screen flex-col bg-background ${assessorCourseId ? "hover-assessor" : "hover-trainee"}`} style={ownNotebook ? (pagePaletteVars(pagePalette) as React.CSSProperties) : undefined}>
+      <div id="trainee-surface" className={`trainee-shell flex min-h-screen flex-col bg-background ${assessorCourseId ? "hover-assessor" : "hover-trainee"}`} style={ownNotebook ? (pagePaletteVars(pagePalette) as React.CSSProperties) : undefined}>
       {/* Checkpoint 2 (App Redesign.dc.html 1d -- not in the archive, see the
           note in trainer/(hub)/page.tsx) -- collapses the old 2-block
           header (14px wordmark bar + a separate .sheet identity block with

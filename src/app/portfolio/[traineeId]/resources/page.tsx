@@ -553,7 +553,7 @@ export default async function ResourceHubPage({
           <div className="flex items-start justify-between gap-3">
             <p className="font-serif text-h3 font-semibold text-ink">Filmed Observations</p>
             <span
-              className="shrink-0 rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.05em]"
+              className="shrink-0 rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.12em]"
               style={{ background: "color-mix(in oklab, oklch(60% 0.11 70) 14%, oklch(99.2% 0.005 90))", color: "oklch(60% 0.11 70)" }}
             >
               Task-linked

@@ -361,7 +361,7 @@ function MfpAnswerKey() {
   return (
     <div className="flex flex-col gap-3.5 border-t border-border pt-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Answer key — handout, to keep</p>
+        <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">Answer key — handout, to keep</p>
         <div className="flex gap-2" data-print-hide>
           <button type="button" onClick={() => setOpen(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
             Hide
@@ -415,7 +415,7 @@ function StagingExample() {
         <div className="flex flex-col gap-2.5">
           <p className="font-serif text-h3 font-semibold text-ink">Example — clarifying &quot;used to,&quot; fully MFP&apos;d</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[110px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[110px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.12em] text-muted">
               <p>Focus</p>
               <p>What the teacher does</p>
             </div>

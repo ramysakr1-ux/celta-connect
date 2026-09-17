@@ -153,7 +153,7 @@ export default function ProfessionalDevelopmentSession() {
       <div className="border-t border-border" />
 
       <div className="flex flex-col gap-0.5">
-        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">Take-away resource sheet — everything above, on one page</p>
+        <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">Take-away resource sheet — everything above, on one page</p>
         <p className="text-label text-muted">Print this section, or scroll it on your own device. No login, no course-specific info — just links.</p>
       </div>
 
@@ -170,7 +170,7 @@ export default function ProfessionalDevelopmentSession() {
       ))}
 
       <div className="flex flex-col gap-1 rounded-[8px] border border-destructive/25 bg-destructive/5 p-3.5">
-        <p className="text-label font-bold uppercase tracking-[0.1em] text-destructive">A general caution, not specific to any site above</p>
+        <p className="text-label font-bold uppercase tracking-[0.12em] text-destructive">A general caution, not specific to any site above</p>
         <p className="text-label leading-relaxed text-ink">
           A legitimate school pays your salary — it never asks you to pay it for a job, a visa, or a &quot;placement fee&quot;
           upfront. Get any contract reviewed before signing, and don&apos;t hand over an original passport or degree

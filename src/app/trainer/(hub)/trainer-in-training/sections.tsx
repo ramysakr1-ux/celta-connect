@@ -431,7 +431,7 @@ function CandidateNoteField({ id, stage, label, value }: { id: string; stage: "b
     <form action={action} className="flex flex-col gap-1">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="stage" value={stage} />
-      <label className="text-label font-semibold tracking-[0.05em] text-muted uppercase">{label}</label>
+      <label className="text-label font-semibold tracking-[0.12em] text-muted uppercase">{label}</label>
       <textarea name="notes" defaultValue={value ?? ""} rows={2} className={textareaClass} />
       <button type="submit" disabled={pending} className="self-start text-label font-semibold text-primary hover:underline disabled:opacity-60">
         {pending ? "Saving…" : "Save"}

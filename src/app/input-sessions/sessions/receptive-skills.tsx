@@ -111,7 +111,7 @@ function ReceptiveOrderAndKey() {
       ) : (
         <div className="flex flex-col gap-3.5 border-t border-border pt-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">All done — handout · answer key, to keep</p>
+            <p className="text-label font-bold uppercase tracking-[0.12em] text-muted">All done — handout · answer key, to keep</p>
             <div className="flex gap-2" data-print-hide>
               <button type="button" onClick={() => setRevealed(false)} className="h-7 rounded-[6px] border border-border bg-card px-3 text-label font-semibold text-ink">
                 Hide
@@ -144,7 +144,7 @@ function ReceptiveOrderAndKey() {
             <p className="text-label leading-relaxed text-ink">{CORRECT_ORDER_LABEL}</p>
           </div>
           <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
+            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.12em] text-destructive">
               <span className="size-1.5 rounded-full bg-current" />
               Trainer only
             </p>

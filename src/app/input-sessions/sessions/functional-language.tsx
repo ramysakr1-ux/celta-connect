@@ -111,7 +111,7 @@ function StagingExample() {
         <div className="flex flex-col gap-2">
           <p className="font-serif text-h3 font-semibold text-ink">Example lesson — making suggestions</p>
           <div className="overflow-hidden rounded-[6px] border border-border">
-            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.1em] text-muted">
+            <div className="grid grid-cols-[150px_60px_1fr] bg-accent px-3 py-2 text-micro font-bold uppercase tracking-[0.12em] text-muted">
               <p>Stage</p>
               <p>Time</p>
               <p>Procedure</p>

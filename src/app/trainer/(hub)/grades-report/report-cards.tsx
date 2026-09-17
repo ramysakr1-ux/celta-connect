@@ -28,7 +28,7 @@ export function CopyField({ value, label }: { value: string; label: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
       }}
-      className="wash shrink-0 rounded-full border border-border px-2 py-[1px] text-micro font-bold tracking-[0.04em] text-muted uppercase"
+      className="wash shrink-0 rounded-full border border-border px-2 py-[1px] text-micro font-bold tracking-[0.12em] text-muted uppercase"
       aria-label={`Copy ${label}`}
     >
       {copied ? "Copied" : "Copy"}

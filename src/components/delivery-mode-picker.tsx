@@ -55,7 +55,7 @@ export function DeliveryModePicker({
           impact.tone === "warning" ? "border-status-warning-text/40 bg-status-warning-bg" : "border-primary/30 bg-primary/5"
         }`}
       >
-        <p className={`text-label font-semibold uppercase tracking-[0.09em] ${impact.tone === "warning" ? "text-status-warning-text" : "text-primary"}`}>
+        <p className={`text-label font-semibold uppercase tracking-[0.12em] ${impact.tone === "warning" ? "text-status-warning-text" : "text-primary"}`}>
           {impact.heading}
         </p>
         <div className="flex flex-col gap-1.5">

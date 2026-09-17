@@ -48,7 +48,7 @@ export function TintBlock({
 function Pill({ label, tone }: { label: string; tone: "accent" | "muted" }) {
   return (
     <span
-      className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.07em] uppercase"
+      className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.12em] uppercase"
       style={
         tone === "accent"
           ? { background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }
@@ -89,7 +89,7 @@ function TintEmpty() {
           className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] border px-4 py-3"
           style={{ borderColor: `color-mix(in oklab, ${AMBER} 34%, transparent)`, background: `color-mix(in oklab, ${AMBER} 8%, var(--color-card))` }}
         >
-          <span className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: AMBER, color: "var(--color-primary-foreground)" }}>
+          <span className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.12em] uppercase" style={{ background: AMBER, color: "var(--color-primary-foreground)" }}>
             Usually an extra day
           </span>
           <span className="min-w-[280px] flex-1 text-meta leading-[1.55] text-ink">
@@ -99,7 +99,7 @@ function TintEmpty() {
         </div>
         <div className="hub-hairline flex flex-wrap items-baseline gap-x-3 border-b pb-1.5">
           <h3 className="font-serif text-h3 font-semibold text-ink">Whether it applies at all depends on the scheme</h3>
-          <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+          <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.12em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
             TinT Handbook &sect;5.1
           </span>
         </div>
@@ -116,7 +116,7 @@ function TintEmpty() {
         </ul>
         <div className="hub-hairline flex flex-wrap items-baseline gap-x-3 border-b pb-1.5">
           <h3 className="font-serif text-h3 font-semibold text-ink">And what the assessor would do with them</h3>
-          <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+          <span className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.12em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
             TinT Handbook &sect;5.2.2
           </span>
         </div>
@@ -179,7 +179,7 @@ function TintPresent({
         }}
       >
         <span
-          className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.07em] uppercase"
+          className="rounded-full px-2.5 py-[3px] text-micro font-bold tracking-[0.12em] uppercase"
           style={
             heavy
               ? { background: AMBER, color: "var(--color-primary-foreground)" }
@@ -204,7 +204,7 @@ function TintPresent({
           <div className="flex flex-wrap items-baseline gap-x-3 border-b hub-hairline pb-1.5">
             <h3 className="font-serif text-h3 font-semibold text-ink">What the assessor does with them</h3>
             <span
-              className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.07em] uppercase"
+              className="rounded-full px-2 py-[2px] text-micro font-bold tracking-[0.12em] uppercase"
               style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}
             >
               TinT Handbook §5.2.2

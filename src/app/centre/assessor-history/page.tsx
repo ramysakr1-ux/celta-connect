@@ -78,7 +78,7 @@ export default async function AssessorHistoryPage({
           out; a second one said it twice, in the wrong corner. */}
       <div className="flex items-end justify-between gap-4">
         <div className="flex max-w-[820px] flex-col gap-[13px]">
-          <p className="text-label font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
+          <p className="text-label font-bold tracking-[0.08em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
           <h1 className="font-serif text-display leading-[1.14] font-semibold text-ink">Assessor history</h1>
           <p className="text-body leading-[1.6] text-muted text-pretty">
             Handbook 13.3: the same assessor must not be used for more than two consecutive courses. Handbook 13.8: an assessor must not assess

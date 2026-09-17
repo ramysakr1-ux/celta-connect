@@ -25,7 +25,7 @@ export function MaterialPoolSection({ items, canClaim }: { items: MaterialPoolIt
 
   return (
     <div>
-      <h3 className="font-serif text-label font-bold tracking-[0.09em] text-muted uppercase">TP7/8 material pool</h3>
+      <h3 className="font-serif text-label font-bold tracking-[0.12em] text-muted uppercase">TP7/8 material pool</h3>
       <p className="mt-1 text-label text-muted">
         Deliberately not the course coursebook. Claim one for TP7 and one for TP8 -- once claimed, nobody else in
         your TP group can plan around the same material.
