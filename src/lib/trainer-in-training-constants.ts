@@ -6,6 +6,12 @@
 
 export const HEADLINE_MIN_PCT = 80;
 export const MIN_DELIVERED_SESSIONS = 4;
+// TinT Handbook 2026 §6.1.2 (printed p.15), Task Thirteen: "Conduct a minimum
+// of four teaching practice feedback sessions during the course. These should
+// be observed by the trainer-in-training supervisor." The number was in the
+// Handbook and in nobody's code until 17 Sep 2026 -- only Task Twelve's
+// four input sessions had a constant and a figure on the workspace.
+export const MIN_FEEDBACK_SESSIONS = 4;
 export const TASK12_STAGE1_REQUIRED = 2;
 export const CANDIDATES_TO_FOLLOW = 2;
 export const TASK_RECORD_ITEM_COUNT = 16;

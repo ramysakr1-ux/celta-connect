@@ -8,6 +8,7 @@ import {
   HEADLINE_MIN_PCT,
   INPUT_ASYNC_MAX_PCT,
   MIN_DELIVERED_SESSIONS,
+  MIN_FEEDBACK_SESSIONS,
   TASK12_STAGE1_REQUIRED,
   CANDIDATES_TO_FOLLOW,
   TIT_MODES,
@@ -175,7 +176,7 @@ export async function TitWorkspace({
       />
 
       {/* Headline stats */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Input observed"
           pct={stats.inputObservedPct}
@@ -191,6 +192,19 @@ export async function TitWorkspace({
           <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Sessions delivered</p>
           <p className="mt-1 font-serif text-h1 text-ink">
             {(deliveredSessions ?? []).length} <span className="text-body text-muted">/ {MIN_DELIVERED_SESSIONS} min</span>
+          </p>
+        </div>
+        {/* Task Thirteen's own number -- Handbook §6.1.2 asks for four TP
+            feedback sessions, observed by the supervisor, so the count is of
+            the observed ones. */}
+        <div className="rounded-[6px] border border-border p-3">
+          <p className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Feedback sessions</p>
+          <p className="mt-1 font-serif text-h1 text-ink">
+            {(feedbackSessions ?? []).filter((r) => r.observed_by_supervisor).length}{" "}
+            <span className="text-body text-muted">/ {MIN_FEEDBACK_SESSIONS} min</span>
+          </p>
+          <p className="mt-1 text-label text-muted">
+            observed by your supervisor · {(feedbackSessions ?? []).length} recorded
           </p>
         </div>
       </div>
@@ -307,7 +321,9 @@ export async function TitWorkspace({
 
       {/* Task Thirteen */}
       <section>
-        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Task Thirteen -- TP feedback you gave</h3>
+        <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">
+          Task Thirteen -- TP feedback you gave ({(feedbackSessions ?? []).filter((r) => r.observed_by_supervisor).length} of {MIN_FEEDBACK_SESSIONS} observed by your supervisor)
+        </h3>
         <p className="mt-1 text-label text-muted">A private working copy for each -- your own draft, then discussion, then feedback on how you delivered it. None of this ever reaches a candidate.</p>
         <div className="mt-2">
           <AddFeedbackSessionForm titRecordId={titRecord.id} trainees={(courseTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }))} />
