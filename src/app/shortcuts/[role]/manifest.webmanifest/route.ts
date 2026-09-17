@@ -19,6 +19,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ rol
       short_name: r.label,
       description: r.description,
       start_url: r.startUrl,
+      // Explicit, because a manifest's scope defaults to the directory it is
+      // served from -- /shortcuts/<role>/ -- and a start_url outside its scope
+      // makes the manifest invalid, which Chrome answers with silence: no
+      // install event, no dialog, the pill left showing the gesture note
+      // (Ramy, 17 Sep 2026: "still getting the tutorial").
+      scope: "/",
       // minimal-ui, not the handoff's standalone: Ramy, 17 Sep 2026, wants
       // the address visible in the installed window.
       display: "minimal-ui",
