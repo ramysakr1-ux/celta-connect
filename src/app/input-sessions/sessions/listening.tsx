@@ -175,7 +175,7 @@ function DialoguePlayer() {
         </div>
         {currentLine ? (
           <div className="flex items-baseline gap-2 rounded-[6px] bg-accent px-3.5 py-2.5">
-            <p className={`flex-none text-micro font-bold uppercase tracking-[0.04em] ${currentLine.speaker === "Zoe" ? "text-[oklch(45%_0.09_260)]" : "text-primary"}`}>
+            <p className={`flex-none text-micro font-bold uppercase tracking-[0.12em] ${currentLine.speaker === "Zoe" ? "text-[oklch(45%_0.09_260)]" : "text-primary"}`}>
               {currentLine.speaker}
             </p>
             <p className="text-meta text-ink">{currentLine.text}</p>
@@ -193,7 +193,7 @@ function DialoguePlayer() {
           <div className="flex flex-col gap-1.5 border-t border-border pt-2.5">
             {DIALOGUE_LINES.map((ln, i) => (
               <div key={i} className="flex gap-2">
-                <p className="w-14 flex-none text-micro font-bold uppercase tracking-[0.04em] text-muted">{ln.speaker}</p>
+                <p className="w-14 flex-none text-micro font-bold uppercase tracking-[0.12em] text-muted">{ln.speaker}</p>
                 <p className="text-label leading-relaxed text-ink">{ln.text}</p>
               </div>
             ))}

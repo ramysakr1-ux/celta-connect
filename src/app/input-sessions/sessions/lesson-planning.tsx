@@ -377,7 +377,7 @@ function JargonMatch() {
             ))}
           </div>
           <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
+            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
               <span className="size-1.5 rounded-full bg-current" />
               Trainer only — trainer notes
             </p>
@@ -593,7 +593,7 @@ export default function LessonPlanningSession() {
               {g.points.map((p) => (
                 <div key={p.title} className="flex flex-col gap-2.5 rounded-[6px] border border-border bg-card p-4">
                   <div className="flex flex-col gap-0.5">
-                    <p className="text-micro font-bold uppercase tracking-[0.06em] text-muted">
+                    <p className="text-micro font-bold uppercase tracking-[0.12em] text-muted">
                       {p.who} · {p.aim}
                     </p>
                   </div>
@@ -621,7 +621,7 @@ export default function LessonPlanningSession() {
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only
         </p>

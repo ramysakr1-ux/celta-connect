@@ -144,7 +144,7 @@ function ReceptiveOrderAndKey() {
             <p className="text-label leading-relaxed text-ink">{CORRECT_ORDER_LABEL}</p>
           </div>
           <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
-            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
+            <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
               <span className="size-1.5 rounded-full bg-current" />
               Trainer only
             </p>

@@ -276,7 +276,7 @@ export async function TrainerHubChrome({
                 <button
                   type="submit"
                   title={actPreview ? "Viewing as an ACT -- click to switch back to your MCT view" : "Click to preview the hub as an ACT sees it"}
-                  className="cursor-pointer rounded-full px-[9px] py-1 text-micro font-bold tracking-[0.09em] text-primary-foreground uppercase transition-[filter] hover:brightness-110"
+                  className="cursor-pointer rounded-full px-[9px] py-1 text-micro font-bold tracking-[0.12em] text-primary-foreground uppercase transition-[filter] hover:brightness-110"
                   style={{ background: accent }}
                 >
                   {actPreview ? "ACT · preview" : "MCT"}
@@ -284,7 +284,7 @@ export async function TrainerHubChrome({
               </form>
             ) : isRealStaff ? (
               <span
-                className="rounded-full px-[9px] py-1 text-micro font-bold tracking-[0.09em] text-primary-foreground uppercase"
+                className="rounded-full px-[9px] py-1 text-micro font-bold tracking-[0.12em] text-primary-foreground uppercase"
                 style={{ background: accent }}
               >
                 ACT

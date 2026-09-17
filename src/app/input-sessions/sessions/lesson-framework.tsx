@@ -54,7 +54,7 @@ function DecisionTree() {
       <div className="h-5 w-[1.5px] bg-border" />
       <div className="grid w-full grid-cols-2 gap-10">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-micro font-bold uppercase tracking-[0.08em] text-primary">Language</p>
+          <p className="text-micro font-bold uppercase tracking-[0.12em] text-primary">Language</p>
           <p className="text-center text-label text-muted">Does the target language arise from a text?</p>
           <div className="flex w-full gap-2">
             <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/5 p-2 text-center text-label font-semibold text-primary">No → PPP / TTT</div>
@@ -63,7 +63,7 @@ function DecisionTree() {
           <div className="w-full rounded-[6px] border border-muted/25 bg-muted/10 p-2 text-center text-label font-semibold text-muted">Practice only → Language Practice</div>
         </div>
         <div className="flex flex-col items-center gap-2">
-          <p className="text-micro font-bold uppercase tracking-[0.08em] text-destructive">Skills</p>
+          <p className="text-micro font-bold uppercase tracking-[0.12em] text-destructive">Skills</p>
           <p className="text-center text-label text-muted">Is it listening or reading?</p>
           <div className="flex w-full gap-2">
             <div className="flex-1 rounded-[6px] border border-destructive/25 bg-destructive/5 p-2 text-center text-label font-semibold text-destructive">Yes → Receptive Skills</div>

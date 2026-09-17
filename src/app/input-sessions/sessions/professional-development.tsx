@@ -97,7 +97,7 @@ export default function ProfessionalDevelopmentSession() {
               onClick={() => setIdx(i)}
               className={`flex flex-col gap-1 rounded-[8px] border px-3.5 py-3 text-left ${i === idx ? "border-primary bg-card" : "border-border bg-transparent"}`}
             >
-              <p className={`text-micro font-bold uppercase tracking-[0.06em] ${c.accent ? "text-destructive" : "text-muted"}`}>{c.tag}</p>
+              <p className={`text-micro font-bold uppercase tracking-[0.12em] ${c.accent ? "text-destructive" : "text-muted"}`}>{c.tag}</p>
               <p className="text-meta font-semibold leading-tight text-ink">{c.title}</p>
             </button>
           ))}
@@ -170,7 +170,7 @@ export default function ProfessionalDevelopmentSession() {
       ))}
 
       <div className="flex flex-col gap-1 rounded-[8px] border border-destructive/25 bg-destructive/5 p-3.5">
-        <p className="text-label font-bold uppercase tracking-[0.08em] text-destructive">A general caution, not specific to any site above</p>
+        <p className="text-label font-bold uppercase tracking-[0.1em] text-destructive">A general caution, not specific to any site above</p>
         <p className="text-label leading-relaxed text-ink">
           A legitimate school pays your salary — it never asks you to pay it for a job, a visa, or a &quot;placement fee&quot;
           upfront. Get any contract reviewed before signing, and don&apos;t hand over an original passport or degree

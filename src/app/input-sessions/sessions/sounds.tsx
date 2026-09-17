@@ -311,7 +311,7 @@ function TrainerScript() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
       <div className="flex items-center justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — trainer notes
         </p>
@@ -349,7 +349,7 @@ export default function SoundsSession() {
       ]}
     >
       <div className="flex flex-col gap-1 rounded-[8px] border border-border bg-accent p-3.5">
-        <p className="text-label font-bold uppercase tracking-[0.06em] text-muted">What you&apos;re actually learning to teach</p>
+        <p className="text-label font-bold uppercase tracking-[0.1em] text-muted">What you&apos;re actually learning to teach</p>
         <p className="text-meta leading-relaxed text-ink">
           Hearing &quot;ship&quot; and &quot;sheep&quot; apart is the easy part — you already can. The job is teaching a
           student who genuinely can&apos;t yet: knowing why they can&apos;t, what to do with your mouth to show the
@@ -479,7 +479,7 @@ export default function SoundsSession() {
           <div key={s.pair} className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
             <div className="flex items-baseline gap-2.5">
               <p className="font-serif text-body font-semibold text-ink">{s.pair}</p>
-              <p className="text-micro font-bold uppercase tracking-[0.04em] text-muted">{s.who}</p>
+              <p className="text-micro font-bold uppercase tracking-[0.12em] text-muted">{s.who}</p>
             </div>
             <p className="text-label leading-relaxed text-muted">{s.note}</p>
           </div>

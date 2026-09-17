@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GOLD } from "@/components/assessor/tokens";
 
 // The one thing the centre has to hand over by hand.
 //
@@ -18,7 +19,6 @@ import { useState } from "react";
 // Ramy, 30 Aug 2026: "make it clear when they land, so they can copy this
 // course number and use it to access the course on Appian."
 
-const GOLD = "oklch(60% 0.11 70)";
 
 // The "Open Appian" buttons that used to sit in this card are gone.
 //
@@ -52,7 +52,7 @@ export function AppianReference({
           border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
         }}
       >
-        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
+        <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
           No Appian reference yet
         </span>
         <span style={{ fontSize: "var(--text-meta)", color: "var(--color-ink)", flex: "1 1 240px", minWidth: 220 }}>
@@ -71,7 +71,7 @@ export function AppianReference({
         border: `1px solid color-mix(in oklab, ${GOLD} 32%, transparent)`,
       }}
     >
-      <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(43% 0.09 70)" }}>
+      <span style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(43% 0.09 70)" }}>
         Appian course reference
       </span>
 

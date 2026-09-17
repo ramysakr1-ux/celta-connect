@@ -48,7 +48,7 @@ export default async function InputSessionsIndexPage({ searchParams }: { searchP
         {backHref ? (
           <BackLink href={backHref} label={"Resource hub"} />
         ) : null}
-        <p className="mt-3 text-label font-bold uppercase tracking-[0.14em] text-muted">Resource hub</p>
+        <p className="mt-3 text-label font-bold uppercase tracking-[0.1em] text-muted">Resource hub</p>
         <h1 className="mt-1 font-serif text-h1 text-ink">Input sessions</h1>
         <p className="mt-2 text-body text-muted">Interactive versions of the centre&apos;s input sessions — the same content whether you&apos;re running one or working through it.</p>
       </div>

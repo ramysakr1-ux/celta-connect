@@ -470,7 +470,7 @@ export default function MfpSession() {
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {PILLARS.map((p) => (
             <div key={p.label} className="rounded-[8px] border border-t-[3px] bg-card p-3.5" style={{ borderTopColor: p.color, borderColor: "var(--color-border)" }}>
-              <p className="text-micro font-bold uppercase tracking-[0.08em]" style={{ color: p.color }}>{p.label}</p>
+              <p className="text-micro font-bold uppercase tracking-[0.12em]" style={{ color: p.color }}>{p.label}</p>
               <p className="mt-1.5 text-label leading-relaxed text-ink">{p.text}</p>
             </div>
           ))}

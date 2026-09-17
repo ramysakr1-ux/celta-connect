@@ -198,7 +198,7 @@ function TrainerScript() {
   return (
     <div className="flex flex-col gap-2.5 rounded-[8px] border border-destructive/25 bg-destructive/5 p-4">
       <div className="flex items-center justify-between gap-2.5">
-        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-destructive">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-destructive">
           <span className="size-1.5 rounded-full bg-current" />
           Trainer only — stage-by-stage script
         </p>
@@ -239,7 +239,7 @@ export default function ConnectedSpeechSession() {
       ]}
     >
       <div className="flex flex-col gap-1.5 rounded-[8px] border border-primary/25 bg-primary/5 p-4">
-        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-primary">
+        <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.1em] text-primary">
           <span className="size-1.5 rounded-full bg-current" />
           Where this feeds back in
         </p>
