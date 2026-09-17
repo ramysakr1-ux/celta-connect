@@ -246,7 +246,11 @@ export function InstallPrompt({
   // fires the real prompt when the browser has one and otherwise opens a
   // small note with the gesture, under the pill so the header never jumps.
   if (variant === "pill") {
-    if (!onClient || standalone) return null;
+    // `installable` is the whole gate: on the client, not inside the app
+    // window, and not already installed somewhere else in this browser.
+    // These two variants used to test only the first two, which is how the
+    // pill went on offering a door into an app the person already had.
+    if (!installable) return null;
     const dark = tone === "dark";
     return (
       <div className="relative flex-none">
@@ -295,7 +299,7 @@ export function InstallPrompt({
   // installed; the click uses the real prompt when there is one, and
   // explains the manual gesture when there is not.
   if (variant === "inline") {
-    if (!onClient || standalone) return null;
+    if (!installable) return null;
     return (
       <div className="flex w-full flex-col items-center gap-1.5">
         {/* A real control, not an 11px grey footnote.
