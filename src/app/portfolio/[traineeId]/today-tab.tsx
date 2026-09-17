@@ -728,6 +728,7 @@ export async function TodayTab({
         serverNowMs={serverNowMs}
         timeZone={timeZone}
         heading={streamHeading}
+        timetableHref={`/portfolio/${traineeId}/timetable`}
         meta={{
           lead: streamView.isToday ? metaLead : `Nothing on ${dateLabel.split(" ")[0]}`,
           countdownFor: teachingToday ? "mine" : null,

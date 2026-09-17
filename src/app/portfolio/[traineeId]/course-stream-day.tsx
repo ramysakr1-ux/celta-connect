@@ -2,6 +2,7 @@
 
 import { useServerNow } from "@/lib/use-server-now";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { StreamDay, StreamSlot } from "@/lib/course-stream-day";
 import { CATEGORY_STYLE } from "@/lib/timetable-category-style";
 
@@ -66,6 +67,7 @@ export function StreamDayTrack({
   timeZone,
   meta,
   heading = "Your day",
+  timetableHref,
 }: {
   day: StreamDay;
   serverNowMs: number;
@@ -77,6 +79,13 @@ export function StreamDayTrack({
   meta: { lead: string; countdownFor: string | null };
   /** "Your day" by default; "Your next day · Monday 14 September" when today has nothing on. */
   heading?: string;
+  /** The door to the whole timetable. Trainee A1 took Timetable out of the
+   *  rail because "Today itself" reaches it, and B4 then dropped the hero's
+   *  Timetable button because "the rail already reaches" it -- so on a desktop
+   *  the candidate had no door at all (Ramy, 17 Sep 2026: "how do I get to the
+   *  timetable from here?"). The phone bar kept its own. This is the desktop's:
+   *  Your day is the timetable's own today row, so the door sits on it. */
+  timetableHref?: string;
 }) {
   const [mounted, setMounted] = useState(false);
   const now = useServerNow(serverNowMs);
@@ -138,9 +147,20 @@ export function StreamDayTrack({
     <section className="flex flex-col">
       <div className="mb-2.5 flex items-baseline justify-between gap-4">
         <span className="text-micro font-bold tracking-[0.12em] text-muted uppercase">{heading}</span>
-        <span className="text-meta text-muted">
-          {meta.lead}
-          {countdown ? ` · ${countdown}` : null}
+        <span className="flex items-baseline gap-3 text-meta text-muted">
+          <span>
+            {meta.lead}
+            {countdown ? ` · ${countdown}` : null}
+          </span>
+          {timetableHref ? (
+            <Link
+              href={timetableHref}
+              className="wash rounded-[6px] px-2 py-0.5 font-medium text-ink"
+              style={{ border: "1px solid oklch(23.5% 0.017 65 / 0.15)" }}
+            >
+              Full timetable
+            </Link>
+          ) : null}
         </span>
       </div>
 
