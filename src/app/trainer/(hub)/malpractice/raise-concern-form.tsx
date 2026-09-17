@@ -78,7 +78,7 @@ export function RaiseConcernForm({
             type="button"
             onClick={() => setKind(k.value)}
             className={`flex flex-col gap-0.5 rounded-[6px] border p-3 text-left ${
-              kind === k.value ? "border-primary bg-accent/30" : "border-border hover:border-primary/50"
+              kind === k.value ? "border-primary bg-accent/30" : "border-border wash"
             }`}
           >
             <span className="text-body font-medium text-ink">{k.label}</span>

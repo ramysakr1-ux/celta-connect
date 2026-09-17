@@ -79,7 +79,7 @@ export default async function TraineeDetailPage({
         </div>
         <Link
           href={`/dashboard/trainer/trainees/${id}/celta5`}
-          className="rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
+          className="wash rounded-[6px] border border-border px-4 py-2 text-body text-ink"
         >
           CELTA 5 record
         </Link>

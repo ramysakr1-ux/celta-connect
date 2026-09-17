@@ -164,7 +164,7 @@ export function AttendanceForm({
         <button
           type="submit"
           disabled={absencePending}
-          className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
+          className="wash self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink disabled:opacity-60"
         >
           {absencePending ? "Saving..." : "Add absence"}
         </button>

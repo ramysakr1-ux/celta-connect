@@ -84,7 +84,7 @@ export default async function TrainerAssignmentReviewPage({
             {assignment.first_submitted_late ? " · first submission late" : ""}
           </p>
         </div>
-        <Link href={`/dashboard/trainer/trainees/${id}`} className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary">
+        <Link href={`/dashboard/trainer/trainees/${id}`} className="wash shrink-0 rounded-[6px] border border-border px-4 py-2 text-body text-ink">
           Back to {trainee.full_name}
         </Link>
       </div>
@@ -101,7 +101,7 @@ export default async function TrainerAssignmentReviewPage({
               className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-body text-ink outline-none focus:border-primary"
             />
           </div>
-          <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary">
+          <button type="submit" className="wash rounded-[6px] border border-border px-4 py-2 text-body text-ink">
             Save deadline
           </button>
         </form>

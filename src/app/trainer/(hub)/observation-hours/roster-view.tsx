@@ -56,7 +56,7 @@ export function ObservationHoursRoster({ rows, obsTasksTotal }: { rows: Candidat
             type="button"
             onClick={() => setFilter(f.value)}
             className={`rounded-full border px-3 py-1.5 text-label font-semibold ${
-              filter === f.value ? "border-primary bg-primary/10 text-primary" : "border-border text-muted hover:border-primary/40"
+              filter === f.value ? "border-primary bg-primary/10 text-primary" : "border-border text-muted wash"
             }`}
           >
             {f.label}

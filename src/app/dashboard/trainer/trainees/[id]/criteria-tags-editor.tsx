@@ -85,7 +85,7 @@ export function CriteriaTagsEditor({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] border border-border px-2 py-1 text-label text-ink hover:border-primary disabled:opacity-60"
+          className="wash rounded-[6px] border border-border px-2 py-1 text-label text-ink disabled:opacity-60"
         >
           {pending ? "Adding..." : "Add tag"}
         </button>

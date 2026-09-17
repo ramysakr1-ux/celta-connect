@@ -39,7 +39,7 @@ export function MarkingGuidanceTabs({
             className={`rounded-[6px] border px-3.5 py-2 text-body font-medium ${
               active === a.type
                 ? "border-primary bg-primary/10 text-primary"
-                : "border-border text-muted hover:border-primary/50 hover:text-ink"
+                : "border-border text-muted wash"
             }`}
           >
             {a.title}
@@ -117,7 +117,7 @@ function CriterionCard({
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] border border-border px-3.5 py-1.5 text-body text-ink hover:border-primary disabled:opacity-60"
+            className="wash rounded-[6px] border border-border px-3.5 py-1.5 text-body text-ink disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>

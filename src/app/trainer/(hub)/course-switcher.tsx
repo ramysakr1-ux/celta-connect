@@ -56,7 +56,7 @@ export function CourseSwitcher({ courses, activeCourseId }: { courses: SwitcherC
               key={c.id}
               type="button"
               onClick={() => pick(c.id)}
-              className="flex w-full items-center justify-between gap-2 rounded-[6px] px-2 py-1.5 text-left text-body text-ink hover:bg-accent"
+              className="flex w-full items-center justify-between gap-2 rounded-[6px] px-2 py-1.5 text-left text-body text-ink wash"
             >
               <span className="flex items-center gap-1.5">
                 {c.id === activeCourseId ? <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" /> : null}

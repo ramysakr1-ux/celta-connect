@@ -70,7 +70,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
                   ? option.fails_assignment
                     ? "border-destructive bg-destructive/10 text-ink"
                     : "border-primary bg-accent/30 text-ink"
-                  : "border-border text-ink hover:border-primary/50"
+                  : "border-border text-ink wash"
               }`}
             >
               {option.label}
@@ -88,7 +88,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
             type="button"
             onClick={() => setSelected("not_upheld")}
             className={`rounded-[6px] border p-3 text-left text-body font-medium ${
-              selected === "not_upheld" ? "border-primary bg-accent/30 text-ink" : "border-border text-ink hover:border-primary/50"
+              selected === "not_upheld" ? "border-primary bg-accent/30 text-ink" : "border-border text-ink wash"
             }`}
           >
             Not upheld
@@ -100,7 +100,7 @@ export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outco
             type="button"
             onClick={() => setSelected("upheld")}
             className={`rounded-[6px] border p-3 text-left text-body font-medium ${
-              selected === "upheld" ? "border-destructive bg-destructive/10 text-ink" : "border-border text-ink hover:border-primary/50"
+              selected === "upheld" ? "border-destructive bg-destructive/10 text-ink" : "border-border text-ink wash"
             }`}
           >
             Upheld

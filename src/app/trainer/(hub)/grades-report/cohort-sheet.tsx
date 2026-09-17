@@ -171,7 +171,7 @@ export function CohortSheet({
                 <Link
                   key={row.traineeId}
                   href={`#candidate-${row.traineeId}`}
-                  className="flex flex-col gap-1.5 px-4 py-3 hover:bg-accent/40"
+                  className="lift flex flex-col gap-1.5 px-4 py-3"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-body text-ink">{row.name}</span>
@@ -234,7 +234,7 @@ export function CohortSheet({
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.traineeId} className="border-b border-border-faint last:border-none hover:bg-accent/40">
+              <tr key={row.traineeId} className="hover-ring border-b border-border-faint last:border-none">
                 <td className="px-4 py-2.5">
                   <Link href={`#candidate-${row.traineeId}`} className="text-ink hover:text-primary">
                     {row.name}

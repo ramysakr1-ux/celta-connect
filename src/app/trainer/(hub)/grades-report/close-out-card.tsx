@@ -108,7 +108,7 @@ export function CloseOutCard({
             <button
               type="submit"
               disabled={extendPending}
-              className="wash rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
+              className="wash rounded-[6px] border border-border px-4 py-2 text-body text-ink disabled:opacity-60"
             >
               {extendPending ? "Saving..." : "Extend deletion date"}
             </button>
@@ -235,7 +235,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={verifyPending}
-                className="wash rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
+                className="wash rounded-[6px] border border-border px-4 py-2 text-body text-ink disabled:opacity-60"
               >
                 {verifyPending ? "Checking..." : status === "verify_failed" ? "Re-check" : "Run verification"}
               </button>

@@ -38,13 +38,13 @@ export function SignatureLedger({ rows, traineeId, timeZone }: { rows: Signature
             <>
               <a
                 href={`/api/portfolio/${traineeId}/celta5/booklet`}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-body text-ink hover:border-primary"
+                className="wash rounded-[6px] border border-border px-3 py-1.5 text-body text-ink"
               >
                 Export CELTA 5 booklet
               </a>
               <a
                 href={`/api/portfolio/${traineeId}/celta5/replica`}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-body text-ink hover:border-primary"
+                className="wash rounded-[6px] border border-border px-3 py-1.5 text-body text-ink"
                 title="The real Cambridge CELTA 5 document, unaltered, with this candidate's data filled in -- what actually gets submitted to Cambridge"
               >
                 Export real CELTA 5

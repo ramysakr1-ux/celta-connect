@@ -50,7 +50,7 @@ export function AdminGrantForm({ record, timeZone }: { record: Celta5Record; tim
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary disabled:opacity-60"
+        className="wash self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

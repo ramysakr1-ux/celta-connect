@@ -91,7 +91,7 @@ export function PipelineFunnel({
         </div>
         <div className="flex flex-col gap-2.5">
           {alerts.length === 0 ? (
-            <p className="sheet-interactive p-3 text-label text-muted">Nothing needs attention right now.</p>
+            <p className="plain-card p-3 text-label text-muted">Nothing needs attention right now.</p>
           ) : (
             alerts.map((a, i) => (
               <div key={i} className={`rounded-[6px] border border-border-faint border-l-[3px] bg-card p-3.5 ${ALERT_TONE_CLASS[a.tone]}`}>

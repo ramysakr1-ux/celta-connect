@@ -445,23 +445,6 @@ h6 {
       background-color 150ms ease;
   }
 
-  .sheet-interactive {
-    background-color: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-top: 3px solid var(--area-accent, var(--color-primary));
-    border-radius: var(--radius-card);
-    padding: 16px;
-    box-shadow: none;
-    transition:
-      border-color 150ms ease,
-      background-color 150ms ease;
-  }
-
-  .sheet-interactive:hover {
-    border-color: color-mix(in oklch, var(--color-primary) 40%, transparent);
-    background-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
-  }
-
   /* design_handoff_trainer_homepage_v4, Phase 4: "Panel weight: one shadowed
      card (Needs you); others flat with border. Drop the 3px top stripes."
      Scoped to the trainer hub's content column (.hub-v4, set by the (hub)
@@ -486,10 +469,6 @@ h6 {
   .hub-v4 .hover\:text-primary:hover {
     color: var(--hub-accent-deep) !important;
   }
-  .hub-v4 .sheet-interactive:hover {
-    border-color: color-mix(in oklab, var(--hub-accent) 55%, transparent);
-    background-color: color-mix(in oklab, var(--hub-accent) 7%, var(--color-card));
-  }
   .hub-v4 .bg-primary {
     background-color: var(--hub-accent) !important;
   }
@@ -511,7 +490,7 @@ h6 {
      of the malpractice option buttons.
 
      Two strengths, because they say different things: a hover is a pointer
-     passing over (7%, the value .sheet-interactive:hover already uses), a
+     passing over (7%), a
      selected fill is a decision that stays on screen (10%). Backgrounds only
      -- text links stay teal platform-wide, as on the resource hub. */
   .hub-v4 .hover\:bg-accent:hover,
@@ -522,7 +501,6 @@ h6 {
     background-color: color-mix(in oklab, var(--hub-accent) 10%, var(--color-card)) !important;
   }
   .hub-v4 .sheet,
-  .hub-v4 .sheet-interactive,
   .hub-v4 .card {
     border-top: 1px solid var(--color-border);
     border-radius: 14px;

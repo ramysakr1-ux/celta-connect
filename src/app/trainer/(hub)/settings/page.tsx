@@ -66,7 +66,7 @@ export default async function TrainerSettingsPage() {
         </p>
         <Link
           href="/criteria-glossary"
-          className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
+          className="wash mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-body text-ink"
         >
           Open the glossary
         </Link>

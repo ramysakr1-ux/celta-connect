@@ -52,7 +52,7 @@ export function RotationTabs({
             type="button"
             onClick={() => setActive(tab.id)}
             className={`shrink-0 rounded-[6px] px-3 py-2 text-left text-body font-medium transition-colors ${
-              active === tab.id ? "bg-primary text-primary-foreground" : "text-muted hover:bg-accent/40 hover:text-ink"
+              active === tab.id ? "bg-primary text-primary-foreground" : "text-muted wash"
             }`}
           >
             {tab.label}

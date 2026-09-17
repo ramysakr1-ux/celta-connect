@@ -133,7 +133,7 @@ export default async function TrainerTpCardPage({
       {plan.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at ? (
         <a
           href={`/api/tp-plans/${plan.id}/pdf`}
-          className="self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink hover:border-primary"
+          className="wash self-start rounded-[6px] border border-border px-4 py-2 text-body text-ink"
         >
           Download PDF record
         </a>

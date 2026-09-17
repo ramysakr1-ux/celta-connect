@@ -63,7 +63,7 @@ export default async function GradeQueryReplyListPage({
               <Link
                 key={r.id}
                 href={`/trainer/grade-query-reply/${traineeId}/${r.id}`}
-                className="flex items-center justify-between gap-3 px-6 py-3 hover:bg-accent/40"
+                className="lift flex items-center justify-between gap-3 px-6 py-3"
               >
                 <span className="text-body text-ink">
                   Generated {formatDateTime(r.generated_at, timeZone)}

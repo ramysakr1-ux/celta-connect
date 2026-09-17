@@ -254,7 +254,7 @@ function OutcomeOption({
       onClick={onSelect}
       disabled={disabled}
       className={`flex flex-col gap-1 rounded-[6px] border p-3 text-left disabled:cursor-not-allowed disabled:opacity-50 ${
-        selected ? "border-primary bg-accent/30" : "border-border hover:border-primary/50"
+        selected ? "border-primary bg-accent/30" : "border-border wash"
       }`}
     >
       <span className="flex items-center gap-2">

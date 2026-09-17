@@ -135,7 +135,7 @@ export default async function TrainerPreCourseTaskPage() {
                 const answeredTotal = orderedSections.reduce((n, s) => n + (answeredBySectionAndTrainee.get(`${t.id}:${s.id}`) ?? 0), 0);
                 const itemsTotal = orderedSections.reduce((n, s) => n + (itemCountBySection.get(s.id) ?? 0), 0);
                 return (
-                  <tr key={t.id} className="border-b border-border-faint last:border-none hover:bg-accent/40">
+                  <tr key={t.id} className="hover-ring border-b border-border-faint last:border-none">
                     <td className="px-4 py-2.5">
                       <Link href={`/portfolio/${t.id}/pre-course-task`} className="text-ink hover:text-primary">
                         {t.full_name}

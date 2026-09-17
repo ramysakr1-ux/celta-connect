@@ -44,7 +44,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
           <button
             type="submit"
             disabled={pending}
-            className="wash rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink hover:border-primary disabled:opacity-60"
+            className="wash rounded-[6px] border border-border px-3 py-1.5 text-label font-medium text-ink disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>
