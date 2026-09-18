@@ -1,5 +1,6 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
+import { demoDestination } from "@/lib/demo/demo-destination";
 
 // Same real demo trainee as /demo/trainee-precourse, landing straight on
 // the day-one GTKY activity pick (specs/for-claude-code-pre-course-task-
@@ -8,6 +9,10 @@ import { parseDemoDay } from "@/lib/demo-clock";
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
-  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
-  return mintDemoMagicLink("demo-amara@celtaconnect.com", (profileId) => `/portfolio/${profileId}/gtky`, day);
+  const url = new URL(request.url);
+  const day = parseDemoDay(url.searchParams.get("day"));
+  // ?to= may carry {me} for this candidate's own id, so a story card
+  // can name "/portfolio/{me}/tp/3" without knowing who the demo seeded.
+  const to = demoDestination(url.searchParams.get("to"), (profileId) => `/portfolio/${profileId}/gtky`);
+  return mintDemoMagicLink("demo-amara@celtaconnect.com", to, day);
 }

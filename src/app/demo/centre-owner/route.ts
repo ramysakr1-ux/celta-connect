@@ -1,6 +1,6 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
-import { safeRedirectPath } from "@/lib/safe-redirect";
+import { demoDestination } from "@/lib/demo/demo-destination";
 
 // Lands on the Centre Owner screen itself, not on Centre Management.
 //
@@ -23,7 +23,7 @@ import { safeRedirectPath } from "@/lib/safe-redirect";
 // Diane holds course.create as a centre owner, so /centre/courses/new is
 // hers to open. Ramy, 18 Sep 2026: "I click Create the course... it takes
 // me to the centre owner landing page." Restricted to same-origin paths by
-// safeRedirectPath, same guard the sign-in page uses for its own `next`.
+// demoDestination, which every demo route now shares.
 //
 // `?day=N` pins the demo clock before the magic-link hop
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
@@ -31,6 +31,6 @@ import { safeRedirectPath } from "@/lib/safe-redirect";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
-  const to = safeRedirectPath(url.searchParams.get("to"), "/centre/owner");
+  const to = demoDestination(url.searchParams.get("to"), "/centre/owner");
   return mintDemoMagicLink("demo-centre-admin@celtaconnect.com", to, day);
 }

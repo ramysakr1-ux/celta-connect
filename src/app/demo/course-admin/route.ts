@@ -1,5 +1,6 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
+import { demoDestination } from "@/lib/demo/demo-destination";
 
 // Seeded course_administrator grant, scoped to the shared demo course
 // (scripts/seed-demo.mjs). /dashboard resolves the actual landing
@@ -8,6 +9,9 @@ import { parseDemoDay } from "@/lib/demo-clock";
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
-  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
-  return mintDemoMagicLink("demo-course-admin@celtaconnect.com", "/dashboard", day);
+  const url = new URL(request.url);
+  const day = parseDemoDay(url.searchParams.get("day"));
+  // ?to= sends this account to a named screen instead of its landing.
+  const to = demoDestination(url.searchParams.get("to"), "/dashboard");
+  return mintDemoMagicLink("demo-course-admin@celtaconnect.com", to, day);
 }

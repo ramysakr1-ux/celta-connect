@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { pickDemoCourse } from "@/lib/demo-course";
 import { DEMO_DAY_COOKIE, parseDemoDay } from "@/lib/demo-clock";
+import { demoTokenDestination } from "@/lib/demo/demo-destination";
 
 // Volunteer students never get a real Supabase Auth account (migration
 // 0030) -- so unlike the other four demo entries, this one doesn't mint a
@@ -20,6 +21,8 @@ function withDemoDay(response: NextResponse, request: Request): NextResponse {
 
 export async function GET(request: Request) {
   const admin = createAdminClient();
+  // ?to= is a path under this volunteer's own token root (demo-destination.ts).
+  const to = new URL(request.url).searchParams.get("to");
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
 
@@ -59,5 +62,5 @@ export async function GET(request: Request) {
     .maybeSingle();
   if (!accessToken) return fallback();
 
-  return withDemoDay(NextResponse.redirect(new URL(`/student/${accessToken.token}`, siteUrl)), request);
+  return withDemoDay(NextResponse.redirect(new URL(demoTokenDestination(to, `/student/${accessToken.token}`), siteUrl)), request);
 }

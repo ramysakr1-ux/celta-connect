@@ -1,5 +1,6 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
+import { demoDestination } from "@/lib/demo/demo-destination";
 
 // Ramy, 28 Aug 2026: "it's not just about the email, it's about what they
 // see when they land inside their page" -- same real demo trainee /demo/
@@ -10,6 +11,10 @@ import { parseDemoDay } from "@/lib/demo-clock";
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
-  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
-  return mintDemoMagicLink("demo-amara@celtaconnect.com", (profileId) => `/portfolio/${profileId}/pre-course-task`, day);
+  const url = new URL(request.url);
+  const day = parseDemoDay(url.searchParams.get("day"));
+  // ?to= may carry {me} for this candidate's own id, so a story card
+  // can name "/portfolio/{me}/tp/3" without knowing who the demo seeded.
+  const to = demoDestination(url.searchParams.get("to"), (profileId) => `/portfolio/${profileId}/pre-course-task`);
+  return mintDemoMagicLink("demo-amara@celtaconnect.com", to, day);
 }

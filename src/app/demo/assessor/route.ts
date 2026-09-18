@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { pickDemoCourse } from "@/lib/demo-course";
 import { DEMO_DAY_COOKIE, parseDemoDay } from "@/lib/demo-clock";
+import { demoTokenDestination } from "@/lib/demo/demo-destination";
 
 // Sixth demo entry point (the original five -- centre-admin, course-admin,
 // volunteer, trainer, trainee -- didn't include this one). Assessors never
@@ -25,6 +26,10 @@ function withDemoDay(response: NextResponse, request: Request): NextResponse {
 
 export async function GET(request: Request) {
   const admin = createAdminClient();
+  // ?to= is a path UNDER this pack's token root, so a card can open the
+  // lesson plans or the marking guidance and can never point at another
+  // room (demo-destination.ts).
+  const to = new URL(request.url).searchParams.get("to");
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
 
@@ -64,7 +69,7 @@ export async function GET(request: Request) {
         .update({ terms_accepted_at: new Date().toISOString() })
         .eq("token", existing.token);
     }
-    return withDemoDay(NextResponse.redirect(new URL(`/assessor/${existing.token}`, siteUrl)), request);
+    return withDemoDay(NextResponse.redirect(new URL(demoTokenDestination(to, `/assessor/${existing.token}`), siteUrl)), request);
   }
 
   // Demo courses can have an end_date in the past (the "Closed" spring
@@ -90,5 +95,5 @@ export async function GET(request: Request) {
     .single();
   if (!created) return fallback();
 
-  return withDemoDay(NextResponse.redirect(new URL(`/assessor/${created.token}`, siteUrl)), request);
+  return withDemoDay(NextResponse.redirect(new URL(demoTokenDestination(to, `/assessor/${created.token}`), siteUrl)), request);
 }

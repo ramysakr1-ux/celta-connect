@@ -1,6 +1,7 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
 import { parseStoryStage } from "@/lib/admissions-story-stage";
+import { demoDestination } from "@/lib/demo/demo-destination";
 
 // Signs in as Priya Raman, who actually holds `centre_administrator` --
 // the role that displays as "Centre manager".
@@ -25,6 +26,10 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
   const stage = parseStoryStage(url.searchParams.get("stage"));
-  const next = stage ? `/dashboard/admissions?stage=${stage}` : "/dashboard";
+  // ?stage= is the admissions row to scroll to and still wins, since it is
+  // the more specific instruction; ?to= covers every other screen.
+  const next = stage
+    ? `/dashboard/admissions?stage=${stage}`
+    : demoDestination(url.searchParams.get("to"), "/dashboard");
   return mintDemoMagicLink("demo-centre-manager@celtaconnect.com", next, day);
 }
