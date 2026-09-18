@@ -278,9 +278,24 @@ export default async function AssignmentDetailPage({
             criteria={criteria.map((c) => ({
               key: c.key,
               text: c.text,
-              mark: (round === "resubmission"
-                ? (assignment.first_criteria_marks ?? {})[c.key]
-                : null) as "met" | "not_met" | null | undefined,
+              // Stored as a boolean per criterion -- that is what the
+              // marking screen writes (parseCriteriaMarks) and what every
+              // other reader expects (marksFor, the portfolio export, the
+              // warning letter). This page alone cast it to "met"/"not_met"
+              // and then compared it to those words, so `true` failed the
+              // test and EVERY criterion rendered "Not met · round 1" to a
+              // candidate on a resubmission -- including the ones they had
+              // passed. The same mistake in a different place as the empty
+              // marks that once printed a whole passed cover sheet as not
+              // met (assignment-criteria-keys.mjs says so). Found 18 Sep 2026.
+              mark:
+                round === "resubmission"
+                  ? (assignment.first_criteria_marks ?? {})[c.key] === undefined
+                    ? null
+                    : (assignment.first_criteria_marks ?? {})[c.key]
+                      ? ("met" as const)
+                      : ("not_met" as const)
+                  : null,
             }))}
             intro={ASSIGNMENT_INFO[assignment.assignment_type].description}
             sanction={assignment.assignment_type === "Plagiarism Reflection"}

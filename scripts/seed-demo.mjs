@@ -2082,6 +2082,35 @@ async function main() {
               state.resubmission_status === "approved"
                 ? criteriaMarks(assignment_type, state.resubmission_outcome === "fail" ? state.notMet : [])
                 : undefined,
+            // ...and when a round has marks it has a moment they were saved.
+            // Left null, a seeded assignment carried a full criteria grid
+            // that no tutor had ever saved -- the pair the marking screen
+            // always writes together, split apart (18 Sep 2026).
+            // The candidate's own acknowledgement of the outcome -- the
+            // eighth of the eight signatures the CELTA 5 needs, and the one
+            // the booklet export is gated on. Every seeded outcome was
+            // unsigned, so a demo candidate's export said the CELTA 5 was
+            // not ready and named a signature nobody had been able to give
+            // (18 Sep 2026). Signed the morning after the tutor released it;
+            // the name is the candidate's own, which is what the form
+            // requires typed twice.
+            first_outcome_signed_at:
+              state.first_status === "approved" || state.first_status === "resubmission_required"
+                ? atDay(DUE_DAY(assignment_type, def.half) + 2, "08:40")
+                : undefined,
+            first_outcome_signature_name:
+              state.first_status === "approved" || state.first_status === "resubmission_required" ? name : undefined,
+            resubmission_outcome_signed_at:
+              state.resubmission_status === "approved" ? atDay(DUE_DAY(assignment_type, def.half) + 6, "08:40") : undefined,
+            resubmission_outcome_signature_name: state.resubmission_status === "approved" ? name : undefined,
+            // Marked the day after the deadline, at the hour calendarise
+            // already uses for a tutor's own signing.
+            first_marks_saved_at:
+              state.first_status === "approved" || state.first_status === "resubmission_required"
+                ? atDay(DUE_DAY(assignment_type, def.half) + 1, "17:00")
+                : undefined,
+            resubmission_marks_saved_at:
+              state.resubmission_status === "approved" ? atDay(DUE_DAY(assignment_type, def.half) + 5, "17:00") : undefined,
             // The marking screen will not release a round without an overall
             // comment ("Write the overall comment" is a blocker), so a seeded
             // round that has been marked must carry one too -- otherwise the
