@@ -123,7 +123,10 @@ export default async function AdminDashboardPage({
       suffix: `of ${ASSIGNMENT_ORDER.length} uploaded`,
       href: "/dashboard/admin/assignment-briefs",
     },
-    { label: "Resource hub", count: resources.count ?? 0, suffix: "items", href: "/trainer/resource-hub" },
+    // Was /trainer/resource-hub -- the only tile in this row that opened the
+    // TUTOR hub, nav bar and all, for a course admin who does not work there
+    // (Ramy, 18 Sep 2026). The centre's own shelf lives here now.
+    { label: "Resource hub", count: resources.count ?? 0, suffix: "items", href: "/dashboard/admin/resource-hub" },
     { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "", href: "/dashboard/admin/settings#feedback-style" },
     // Coursebooks is a SECTION of the TP Points Library page, not a page of
     // its own -- so this row and the "TP points library" row above it led to
