@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Wordmark } from "@/components/wordmark";
 import { StoryArrows } from "@/app/demo/story/story-arrows";
 import { C, GLASS, L, laneOrder, phases, type LaneKey } from "@/app/demo/story/story-data";
+import { getDemoPeople } from "@/app/demo/story/demo-people";
 
 // The Course Story: one page, the whole course, every card a door into the
 // live demo as that person on that day (design_handoff_course_story, 17 Sep
@@ -30,6 +31,8 @@ const LANE_KEYS = new Set<string>(laneOrder);
 export default async function CourseStoryPage({ searchParams }: { searchParams: Promise<{ lane?: string }> }) {
   const { lane } = await searchParams;
   const focus: LaneKey | "all" = lane && LANE_KEYS.has(lane) ? (lane as LaneKey) : "all";
+  // Who each door signs you in as, read from the demo data itself.
+  const people = await getDemoPeople();
   const on = (k: LaneKey) => focus === "all" || focus === k;
 
   return (
@@ -210,6 +213,12 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
                         const spine = cyc ? cyc.colour : RULE;
                         const cycInk = cyc ? cyc.ink || cyc.colour : null;
                         const href = n.demo ? n.demo : lane.demo + (d.day !== null ? `?day=${d.day}` : "");
+                        // The name belongs to the door, so it is resolved from
+                        // where the card actually goes -- including the cards
+                        // with no demo of their own, which fall through to the
+                        // lane's. A /demo/journey/* card has no entry: those
+                        // are public screens with nobody signed in.
+                        const who = people[href.split("?")[0]] ?? null;
                         return (
                           <a
                             key={n.title + n.sub}
@@ -239,6 +248,22 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
                             <span className="text-meta font-bold" style={{ minWidth: 0, lineHeight: 1.25, color: INK }}>
                               {n.title}
                             </span>
+                            {who ? (
+                              <span
+                                className="text-micro"
+                                style={{ display: "flex", alignItems: "center", gap: 5, lineHeight: 1.3, color: MUTED, marginTop: -2 }}
+                              >
+                                <span
+                                  aria-hidden
+                                  style={{ width: 5, height: 5, borderRadius: 999, background: lane.colour, flex: "none" }}
+                                />
+                                <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>
+                                  <span style={{ fontWeight: 700, color: "oklch(38% 0.02 60)" }}>{who.name}</span>
+                                  {" · "}
+                                  {who.role}
+                                </span>
+                              </span>
+                            ) : null}
                             {cyc ? (
                               <span
                                 className="text-micro font-bold tracking-[0.12em] uppercase"
