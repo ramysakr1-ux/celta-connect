@@ -618,7 +618,12 @@ function SessionTile({
           otherwise time, group and letters. A second line pushed the join
           icon off the floor of a fixed tile. */}
       {event.detail ? (
-        <span className="line-clamp-2 text-micro leading-[1.3] text-muted">{event.detail}</span>
+        // A per-person booking keeps its time even when it has a subtitle:
+        // "14:15 · Bookable" is the whole point of the tile, and the subtitle
+        // used to win the one line and hide it (19 Sep 2026).
+        <span className="line-clamp-2 text-micro leading-[1.3] text-muted">
+          {[tileShowsOwnTime(event.tag) ? event.event_time?.slice(0, 5) : null, event.detail].filter(Boolean).join(" · ")}
+        </span>
       ) : letters || groupName || (event.event_time && tileShowsOwnTime(event.tag)) ? (
         // The time only where it is the tile's own fact -- a per-person
         // booking -- since the band already shows it; the same rule as the
