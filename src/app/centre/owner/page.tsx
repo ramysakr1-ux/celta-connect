@@ -216,7 +216,6 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
       {/* The owner gets the same quick access as everyone else (Ramy, 17 Sep
           2026). This screen IS the owner's landing, so no landingPath. */}
       <div className="owner-header flex items-start justify-between gap-6 px-11 py-9">
-        <div className="order-last ml-auto self-start"><InstallPrompt variant="pill" tone="dark" /></div>
         <div>
           <p className="owner-eyebrow" style={{ color: "oklch(78% 0.03 75)" }}>
             {aggregated
@@ -235,7 +234,16 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             'Centre owner' lying on the right inside the red pill, we keep
             the red pill, and we write down the centre owner's name."
             The role is the heading; the pill is who holds it. */}
-        <span className="owner-pill owner-pill-name owner-serif shrink-0">{profile.full_name}</span>
+        {/* The owner's name stays at the far right, where it has been since
+            1 Sep. The install pill sits just left of it in the same group --
+            it was a third flex child with ml-auto, which took the far-right
+            slot and left the name in the middle, and kept doing so as an
+            empty box once the pill hid itself for someone who already has
+            the app (Ramy, 18 Sep 2026). */}
+        <div className="flex shrink-0 items-center gap-3 self-start">
+          <InstallPrompt variant="pill" tone="dark" />
+          <span className="owner-pill owner-pill-name owner-serif shrink-0">{profile.full_name}</span>
+        </div>
       </div>
 
       <div className="flex flex-col gap-[30px] px-11 py-9">
