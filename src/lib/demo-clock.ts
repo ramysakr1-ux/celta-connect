@@ -62,7 +62,7 @@ export function dateForCourseDay(dates: string[], day: number): string | null {
 }
 
 /** Is this course's centre a demo one? Cached per request. */
-const courseIsDemo = cache(async (courseId: string): Promise<boolean> => {
+export const courseIsDemo = cache(async (courseId: string): Promise<boolean> => {
   const { data } = await createAdminClient()
     .from("courses")
     .select("centers(is_demo)")
@@ -72,7 +72,7 @@ const courseIsDemo = cache(async (courseId: string): Promise<boolean> => {
 });
 
 /** Is the signed-in viewer's own centre a demo one? Cached per request. */
-const viewerIsOnDemoCentre = cache(async (): Promise<boolean> => {
+export const viewerIsOnDemoCentre = cache(async (): Promise<boolean> => {
   const session = await getCurrentProfile();
   const centerId = session?.profile?.center_id;
   if (!centerId) return false;

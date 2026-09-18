@@ -24,6 +24,7 @@ import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 // Course Admin and Admissions are centre staff, so the centre shortcut (design_handoff_role_shortcuts, 17 Sep 2026).
 export const metadata: Metadata = { manifest: "/shortcuts/centre/manifest.webmanifest" };
 import { InstallPrompt } from "@/components/install-prompt";
+import { DemoDayTag } from "@/components/demo-day-tag";
 
 export default async function DashboardLayout({
   children,
@@ -186,6 +187,10 @@ export default async function DashboardLayout({
               this header sits over every course this administrator touches,
               not one of them, so there is no single teaching day to draw. */}
           <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+            {/* Course Admin and Admissions are demo doors of their own and had
+                no demo pill, so a Course Story card landed here with no way
+                back (Ramy, 18 Sep 2026). */}
+            <DemoDayTag />
             <InstallPrompt variant="pill" />
             <HeaderClock supabase={createAdminClient()} timeZone={dashboardTimeZone} accent="var(--color-primary)" tone="light" />
           </div>
