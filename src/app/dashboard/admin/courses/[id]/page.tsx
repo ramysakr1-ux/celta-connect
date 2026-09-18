@@ -38,10 +38,13 @@ import { demoToday } from "@/lib/demo-clock";
 
 export default async function CourseAdminDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ duplicated?: string; events?: string; resources?: string; announcements?: string }>;
 }) {
   const { id } = await params;
+  const copied = await searchParams;
   const admin = await requireRole("admin");
   const supabase = await createClient();
 
@@ -200,6 +203,38 @@ export default async function CourseAdminDetailPage({
             Course Admin's landing), and neither of the places you go to
             work ON one course does. Duplicating is a decision about the
             set of courses, not about the course you are standing in. */}
+      {/* Arriving from a duplicate. A second or two of inserts is too quick
+          for a progress bar, but landing silently left the reader inferring
+          both that it worked and which parts came across (Ramy, 18 Sep
+          2026). Counts are of rows actually written. It shows once, because
+          it lives in the URL rather than in a record. */}
+      {copied.duplicated ? (
+        <div className="card card-gold flex flex-col gap-1 p-5">
+          <h2 className="font-serif text-h3 font-semibold text-ink">
+            Copied from {copied.duplicated}
+          </h2>
+          <p className="text-body text-muted">
+            {[
+              `${copied.events ?? 0} timetable ${copied.events === "1" ? "slot" : "slots"}`,
+              Number(copied.resources ?? 0) > 0
+                ? `${copied.resources} Resource Hub ${copied.resources === "1" ? "file" : "files"}`
+                : null,
+              Number(copied.announcements ?? 0) > 0
+                ? `${copied.announcements} scheduled ${copied.announcements === "1" ? "announcement" : "announcements"}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+            . Everything here is editable.
+          </p>
+          <p className="text-label text-muted">
+            Not carried over, by design: trainees and their records, grades, registers, Zoom links, teaching
+            practice groups, and anything already sent to your centre&apos;s Drive. Your TP Points Library and
+            assignment briefs are shared centre-wide, so they needed no copying.
+          </p>
+        </div>
+      ) : null}
+
       <RoomHead
         eyebrow={
           <>

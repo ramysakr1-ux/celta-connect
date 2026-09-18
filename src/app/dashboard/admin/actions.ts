@@ -279,9 +279,14 @@ export async function duplicateCourse(
 
   const supabase = await createClient();
 
+  // What actually gets written, for the confirmation on arrival.
+  let copiedEvents = 0;
+  let copiedResources = 0;
+  let copiedAnnouncements = 0;
+
   const { data: source } = await supabase
     .from("courses")
-    .select("id, center_id, start_date, delivery_mode, time_bands")
+    .select("id, name, center_id, start_date, delivery_mode, time_bands")
     .eq("id", sourceCourseId)
     .maybeSingle();
   if (!source || !(await holdsCentre(admin, source.center_id))) {
@@ -362,6 +367,7 @@ export async function duplicateCourse(
       created_by: admin.id,
     }));
     const { data: newEvents } = await supabase.from("course_timetable_events").insert(rows).select("id");
+    copiedEvents = newEvents?.length ?? 0;
     if (newEvents) {
       events.forEach((e, i) => {
         if (newEvents[i]) newEventIdByOldId.set(e.id, newEvents[i].id);
@@ -420,6 +426,7 @@ export async function duplicateCourse(
 
   if (broadcastRows.length > 0) {
     await supabase.from("course_broadcasts").insert(broadcastRows);
+    copiedAnnouncements = broadcastRows.length;
   }
 
   // Resource Hub: only course-specific attachments need copying -- centre-
@@ -431,6 +438,7 @@ export async function duplicateCourse(
     .eq("course_id", source.id);
 
   if (resources && resources.length > 0) {
+    copiedResources = resources.length;
     await supabase.from("resources").insert(
       resources.map((r) => ({
         center_id: source.center_id,
@@ -446,5 +454,16 @@ export async function duplicateCourse(
   }
 
   revalidatePath("/dashboard/admin");
-  redirect(`/dashboard/admin/courses/${newCourse.id}`);
+  // Arrive saying what came across. Duplicating is a second or two of
+  // database inserts, so there is nothing to show a progress bar for -- but
+  // landing silently in a new course leaves the reader inferring that it
+  // worked, and inferring which parts (Ramy, 18 Sep 2026). The counts are of
+  // rows actually written, not of rows intended.
+  const copied = new URLSearchParams({
+    duplicated: source.name ?? "the previous course",
+    events: String(copiedEvents),
+    resources: String(copiedResources),
+    announcements: String(copiedAnnouncements),
+  });
+  redirect(`/dashboard/admin/courses/${newCourse.id}?${copied.toString()}`);
 }
