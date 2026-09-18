@@ -103,17 +103,21 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
         </p>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <PreCourseTaskSections
-          cambridgeSections={cambridgeSections}
-          supplementSections={supplementSections}
-          itemsBySection={itemsBySection}
-          answerKeyUnlocked={answerKeyUnlocked}
-          isEditable={isTraineeViewer && !demoReadOnly}
-          responsesByItemId={responsesByItemId}
-        />
-        <ScavengerHuntPanel foundKeys={huntFoundKeys} />
-      </div>
+      {/* The spec's screen 1a0 drew these as two side-by-side panels. Ramy,
+          19 Sep 2026, reading the task itself: the hunt "is taking half the
+          screen, so to just go through the pre-course task, it's just a lot
+          of scrolling." The task is the four-hour piece of work and the
+          hunt is six lines, so the hunt is a strip above it now and the task
+          has the width. A deliberate departure from the handoff, his call. */}
+      <ScavengerHuntPanel foundKeys={huntFoundKeys} />
+      <PreCourseTaskSections
+        cambridgeSections={cambridgeSections}
+        supplementSections={supplementSections}
+        itemsBySection={itemsBySection}
+        answerKeyUnlocked={answerKeyUnlocked}
+        isEditable={isTraineeViewer && !demoReadOnly}
+        responsesByItemId={responsesByItemId}
+      />
     </div>
   );
 }
