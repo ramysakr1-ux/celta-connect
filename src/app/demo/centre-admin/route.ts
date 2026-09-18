@@ -2,6 +2,7 @@ import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
 import { parseStoryStage } from "@/lib/admissions-story-stage";
 import { demoDestination } from "@/lib/demo/demo-destination";
+import { demoWouldReplaceRealSession } from "@/lib/demo/demo-session-guard";
 
 // Signs in as Priya Raman, who actually holds `centre_administrator` --
 // the role that displays as "Centre manager".
@@ -23,6 +24,10 @@ import { demoDestination } from "@/lib/demo/demo-destination";
 // Course Story's pre-course cards use it. Anything that is not one of the
 // five story stages is ignored and the link lands where it always did.
 export async function GET(request: Request) {
+  // One screen first if a real session is about to be replaced
+  // (demo-session-guard.ts).
+  const swap = await demoWouldReplaceRealSession(request);
+  if (swap) return swap;
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
   const stage = parseStoryStage(url.searchParams.get("stage"));

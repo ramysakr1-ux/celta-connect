@@ -1,6 +1,7 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
 import { demoDestination } from "@/lib/demo/demo-destination";
+import { demoWouldReplaceRealSession } from "@/lib/demo/demo-session-guard";
 
 // Pairs with /demo/trainer (the main course tutor, Jordan Blake) -- this one
 // signs in as the assistant course tutor instead, Marcus Webb
@@ -20,6 +21,10 @@ import { demoDestination } from "@/lib/demo/demo-destination";
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
+  // One screen first if a real session is about to be replaced
+  // (demo-session-guard.ts).
+  const swap = await demoWouldReplaceRealSession(request);
+  if (swap) return swap;
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
   // ?to= sends this account to a named screen instead of its landing.

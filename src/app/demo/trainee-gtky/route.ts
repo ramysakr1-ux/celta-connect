@@ -1,6 +1,7 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
 import { demoDestination } from "@/lib/demo/demo-destination";
+import { demoWouldReplaceRealSession } from "@/lib/demo/demo-session-guard";
 
 // Same real demo trainee as /demo/trainee-precourse, landing straight on
 // the day-one GTKY activity pick (specs/for-claude-code-pre-course-task-
@@ -9,6 +10,10 @@ import { demoDestination } from "@/lib/demo/demo-destination";
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
+  // One screen first if a real session is about to be replaced
+  // (demo-session-guard.ts).
+  const swap = await demoWouldReplaceRealSession(request);
+  if (swap) return swap;
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
   // ?to= may carry {me} for this candidate's own id, so a story card
