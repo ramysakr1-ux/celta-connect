@@ -9,7 +9,7 @@ opens)" with the button **Agree and open the pack**.
 3. I understand this material is confidential to the candidates and the centre.
 
 A fourth condition is stated in the spec's prose rather than as a tick:
-*understands access ends when the course closes.* The pack email and the
+*understands access ends when the centre clears the course from Connect.* The pack email and the
 banner both already say this, so it is information rather than a term.
 
 ## Superseded 29 August 2026
@@ -31,7 +31,7 @@ verbatim. The three below are grounded in the passages that are on point:
    Merges the original term 3 with Admin Handbook 2.4.6: "The assessor's
    report is the property of Cambridge, confidential, and must not be quoted
    from or used for advertising."
-3. *My access ends when the course closes.*
+3. *My access ends when the centre clears the course from Connect.*
    Promotes the fourth condition above from prose to a term.
 
 **Dropped:** "I will not attempt to copy, reverse engineer, or reuse how
@@ -61,3 +61,12 @@ for it:
 `Invitations.dc.html` is the current source for the invitation emails, and is
 what the templates are built from. Only these three terms were taken from this
 file.
+
+**Updated 18 Sep 2026.** The link used to expire two weeks after the course
+end -- the report window of Administration Handbook June 2025 §15. Ramy's
+ruling: that window is about when the report is due, not when access should
+stop, and the centre holds the pack as PDFs regardless, so nothing is lost by
+letting the link live until the course's working copy is deleted at close-out.
+`wipe.ts` already deletes every `course_access_tokens` row for the course, so
+the wipe is what ends it; the token still carries a 90-day backstop for a
+course whose close-out never runs.

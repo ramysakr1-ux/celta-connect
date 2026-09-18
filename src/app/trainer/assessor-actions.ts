@@ -36,7 +36,21 @@ export async function toggleAssessorSelection(formData: FormData): Promise<void>
 
 /** Handbook §15: the assessor's report is due within two weeks of the course
  *  end date, so the pack stays open that long after the course closes. */
-const ASSESSOR_REPORT_WINDOW_DAYS = 14;
+// The link ends when the centre's working copy of the course does.
+//
+// It used to die two weeks after the course end -- the report window
+// Administration Handbook June 2025 §15 gives an assessor. That window is
+// about when the REPORT is due, not when access should stop, and the pack is
+// gone from Connect at close-out anyway: wipe.ts deletes every
+// course_access_tokens row for the course along with the rest of the working
+// data. Ramy, 18 Sep 2026: "the link could expire with the migration of the
+// files or could expire with the termination of the course files on Connect...
+// they can always access the centre" -- the centre keeps the pack as PDFs, so
+// nothing is lost when this link goes.
+//
+// So the wipe is the real end, and this is only a backstop for a course whose
+// close-out never runs, where a token would otherwise have no end at all.
+const ASSESSOR_LINK_BACKSTOP_DAYS = 90;
 
 export interface AssessorTokenResult {
   token: string | null;
@@ -81,16 +95,12 @@ export async function getOrCreateAssessorToken(): Promise<AssessorTokenResult> {
   const { data: course } = await supabase.from("courses").select("end_date").eq("id", trainer.course_id).maybeSingle();
   if (!course) return { token: null, error: "Could not find your course.", readinessIssues: null };
 
-  // Two weeks past the course end, not the course end itself. Administration
-  // Handbook June 2025 §15 (p. 43): "The assessor's report should be completed
-  // at the end of the course after the final recommended grades have been
-  // discussed and agreed. Assessors should submit their report within two
-  // weeks of the course end date." A link that died at course close cut them
-  // off exactly while they were writing. Ramy, 12 Sep 2026: course end + 14
-  // days. (Email #18's "Access ends" line and the spec say the same now.)
+  // The backstop date only. In practice close-out ends this link earlier, by
+  // deleting the token with the rest of the course's working data -- see the
+  // constant above.
   const expiresAt = new Date(
     new Date(endOfCourseDay(course.end_date, (await getCachedCenter(trainer.center_id))?.time_zone)).getTime() +
-      ASSESSOR_REPORT_WINDOW_DAYS * 86400000
+      ASSESSOR_LINK_BACKSTOP_DAYS * 86400000
   ).toISOString();
   const { data: created, error } = await supabase
     .from("course_access_tokens")
@@ -148,9 +158,11 @@ export async function sendAssessorInviteEmail(
   const visitDateLabel = course.assessor_visit_date
     ? formatCalendarDate(course.assessor_visit_date, { weekday: "long", day: "numeric", month: "long" })
     : null;
-  // Same window the token is minted with, said the way a person says it.
-  const accessEndsLabel = `Two weeks after the course closes, ${formatCalendarDateObject(
-    new Date(new Date(`${course.end_date}T00:00:00`).getTime() + ASSESSOR_REPORT_WINDOW_DAYS * 86400000),
+  // Names the real trigger first, with the backstop date after it, because
+  // the honest answer is a event rather than a date: the centre exports the
+  // course to its own records and the working copy on Connect is deleted.
+  const accessEndsLabel = `When the centre's records are exported and this course is cleared from Connect \u2014 at the latest ${formatCalendarDateObject(
+    new Date(new Date(`${course.end_date}T00:00:00`).getTime() + ASSESSOR_LINK_BACKSTOP_DAYS * 86400000),
     { day: "numeric", month: "short" }
   )}`;
 

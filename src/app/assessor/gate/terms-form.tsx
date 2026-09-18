@@ -30,7 +30,7 @@ import { acceptAssessorTerms } from "@/app/assessor/gate/actions";
 const TERMS = [
   "I will use this material only to assess this course, and will not copy, share or retain it.",
   "This material is confidential to the candidates and the centre, and my report is confidential to Cambridge.",
-  "My access ends when the course closes.",
+  "My access ends when the centre clears the course from Connect.",
 ];
 
 export function AssessorTermsForm() {
@@ -60,10 +60,12 @@ export function AssessorTermsForm() {
           </label>
         ))}
       </div>
-      {/* This note used to say access ends when the course closes; that is now
-          the third tick, so it says what "closes" means instead of repeating it. */}
+      {/* The note says what the third tick MEANS rather than repeating it.
+          Reworded 18 Sep 2026 with the link's own rule: it used to end two
+          weeks after the course, and now ends when the working copy does. */}
       <p className="text-label text-muted">
-        The course closes once the centre submits final results to Cambridge. The link stops working then, and nothing here is available afterwards.
+        After the course the centre exports its records and the working copy here is deleted. The link stops working
+        then, and nothing here is available afterwards. The centre keeps the pack.
       </p>
       <button
         type="submit"
