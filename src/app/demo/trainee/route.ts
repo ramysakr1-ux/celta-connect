@@ -20,6 +20,8 @@ export async function GET(request: Request) {
   const day = parseDemoDay(url.searchParams.get("day"));
   // ?to= may carry {me} for this candidate's own id, so a story card
   // can name "/portfolio/{me}/tp/3" without knowing who the demo seeded.
-  const to = await demoDestination(url.searchParams.get("to"), (profileId) => `/portfolio/${profileId}`);
+  const to = await demoDestination(url.searchParams.get("to"), (profileId) => `/portfolio/${profileId}`, {
+    candidateEmail: "demo-amara@celtaconnect.com",
+  });
   return mintDemoMagicLink("demo-amara@celtaconnect.com", to, day);
 }
