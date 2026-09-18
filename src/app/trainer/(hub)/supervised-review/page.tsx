@@ -1,3 +1,4 @@
+import { supervisedReviewTopic } from "@/lib/supervised-quiz-content";
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import { requireRole } from "@/lib/auth/require-role";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
@@ -56,9 +57,21 @@ export default async function SupervisedReviewPage() {
     byTrainee.set(c.trainee_id, list);
   }
 
-  const sessions = (events ?? []).map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }));
+  // Only the real review sessions. type = "supervised_session" is every
+  // supervised slot on the course -- feedback, lesson planning, portfolio
+  // checks, demo lessons, the assessor meeting -- and this page was counting
+  // all thirty-six as review sessions (Ramy, 18 Sep 2026). The curated title
+  // list in supervised-quiz-content.ts is what says which three are real.
+  const sessions = (events ?? [])
+    .filter((e) => supervisedReviewTopic(e.title))
+    .map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }));
+  // Counted against the review sessions only. A candidate's completions row
+  // can belong to any supervised session, so once the list above was filtered
+  // this had to be too -- otherwise a submission against some other slot
+  // would have read as one of the three reviews being done.
+  const reviewSessionIds = new Set(sessions.map((x) => x.id));
   const outstanding = (roster ?? []).filter((p) => {
-    const done = (byTrainee.get(p.id) ?? []).filter((c) => c.submitted_at).length;
+    const done = (byTrainee.get(p.id) ?? []).filter((c) => c.submitted_at && reviewSessionIds.has(c.timetable_event_id)).length;
     return done < sessions.length;
   }).length;
 
@@ -69,7 +82,7 @@ export default async function SupervisedReviewPage() {
         title="Supervised review"
         lede={
           sessions.length === 0
-            ? "No supervised sessions are on this course's timetable yet."
+            ? "No supervised review sessions are on this course's timetable yet."
             : outstanding === 0
               ? "Everyone has submitted every session. Tick one off once you have read it."
               : `${outstanding} candidate${outstanding === 1 ? " has" : "s have"} a session still to submit.`

@@ -26,6 +26,36 @@ export interface QuizTopic {
   questions: QuizQuestion[];
 }
 
+/**
+ * Which timetable sessions are actually supervised REVIEW sessions.
+ *
+ * Nothing in the data says so. `type = "supervised_session"` covers every
+ * supervised slot on the course -- feedback, lesson planning, portfolio
+ * checks, the demo lessons, the assessor meeting -- so the tutor's Supervised
+ * review page was listing all thirty-six of them as review sessions while the
+ * three real ones sat among them (Ramy, 18 Sep 2026: "filter the page to the
+ * real review sessions"). The topic on a completion is no help either: the
+ * candidate chooses it when they submit, so it does not exist until someone
+ * has already done the task.
+ *
+ * Matched by title, and deliberately an explicit list rather than a fuzzy
+ * test -- the same reasoning as the input-session slug list: a loose match
+ * here would quietly pull an unrelated session into the one page a tutor uses
+ * to see who still owes the task. A session renamed off this list stops
+ * counting, which is the safe direction to fail.
+ */
+const SUPERVISED_REVIEW_TITLES: Record<string, QuizTopicKey> = {
+  "Supervised review \u2014 presenting language": "language",
+  "Supervised review \u2014 phonology": "phonology",
+  "Supervised review \u2014 classroom management": "classroom",
+};
+
+/** The review topic a session covers, or null if it is not a review session. */
+export function supervisedReviewTopic(title: string | null | undefined): QuizTopicKey | null {
+  if (!title) return null;
+  return SUPERVISED_REVIEW_TITLES[title.trim()] ?? null;
+}
+
 export const QUIZ_SECONDS = 12 * 60;
 
 export const SUPERVISED_QUIZ_TOPICS: Record<QuizTopicKey, QuizTopic> = {
