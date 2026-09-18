@@ -5,18 +5,25 @@ import { parseDemoDay } from "@/lib/demo-clock";
 // page (connect-multi-role-demo-spec-2026-08-22.md).
 //
 // The MCT entry, because /demo calls it "Trainer (MCT)". It signs in as
-// Marcus Webb (demo-trainer2@), who is the MAIN course tutor on the demo
-// course -- course_tutors.tutor_role, which is the only place the role is
-// never stale. Ramy, 16 Sep 2026: "MCT ACT lead to different pages."
+// Jordan Blake (demo-trainer@), who is the MAIN course tutor on the course
+// the demo actually opens -- "CELTA Demo Course", started 31 Aug 2026 --
+// per course_tutors.tutor_role, the only place the role is never stale.
+// Ramy, 16 Sep 2026: "MCT ACT lead to different pages."
 //
-// The two were the wrong way round: this link used demo-trainer@ (Jordan
-// Blake), who is the ASSISTANT course tutor on that course, so the MCT link
-// opened the ACT view and vice versa. Jordan is an MCT, but on the Spring
-// course, which is not the one the demo opens.
+// SWAPPED BACK 18 Sep 2026. A change on the 16th moved this link to
+// demo-trainer2@ (Marcus Webb) on the belief that Marcus was the main tutor
+// and Jordan only led the Spring course. The database says the opposite:
+// Jordan is main_course_tutor on BOTH the running demo course and the
+// Spring one, and Marcus is assistant_course_tutor on the running course --
+// which seed-demo.mjs agrees with, calling him "the ACT (Marcus Webb)".
+// So the MCT link had been opening the ACT's hub and vice versa, and the
+// per-role install manifest followed it. Read course_tutors before trusting
+// a name.
+//
 // `?day=N` pins the demo clock before the magic-link hop
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
   const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
-  return mintDemoMagicLink("demo-trainer2@celtaconnect.com", "/trainer", day);
+  return mintDemoMagicLink("demo-trainer@celtaconnect.com", "/trainer", day);
 }
