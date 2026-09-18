@@ -67,10 +67,34 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
   // the course instead -- it is the thing you just made and the thing you
   // are about to set up.
   useEffect(() => {
-    if (state.createdCourseId) router.push(`/dashboard/admin/courses/${state.createdCourseId}`);
+    // Straight to the course's Tutors section, which is where the next
+    // thing happens whether or not any were invited at step 4 (Ramy, 18 Sep
+    // 2026: "once you launch the course, then the page takes you to maybe
+    // the roster and then you can add tutors").
+    if (state.createdCourseId) router.push(`/dashboard/admin/courses/${state.createdCourseId}#tutors`);
   }, [state.createdCourseId, router]);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("f2f");
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  // Step 4 adds tutors one at a time rather than showing a stack of empty
+  // rows (Ramy, 18 Sep 2026: "confirm, add, confirm, add... instead of having
+  // like too many rows. Once you click on it, it gives you another option").
+  // They are queued, not sent: the course does not exist until launch, so the
+  // invitations go out with it, and the wording on screen says exactly that.
+  const [invites, setInvites] = useState<{ email: string; role: string }[]>([]);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<string>(DEFAULT_INVITE_TUTOR_ROLE);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
+  function addInvite() {
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email) return setInviteError("Type an email address first.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setInviteError("That does not look like an email address.");
+    if (invites.some((i) => i.email === email)) return setInviteError("That tutor is already on the list.");
+    setInvites((list) => [...list, { email, role: inviteRole }]);
+    setInviteEmail("");
+    setInviteRole(DEFAULT_INVITE_TUTOR_ROLE);
+    setInviteError(null);
+  }
   const [daysOff, setDaysOff] = useState<string[]>([]);
 
   // Step 5's review reads live field values without controlled inputs
@@ -285,22 +309,52 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
         </div>
       </div>
 
-      {/* Step 4 — assign tutors + optionally name an assessor */}
+      {/* Step 4 — invite tutors + optionally name an assessor */}
       <div className={step === 4 ? "flex flex-col gap-4" : "hidden"}>
-        {stepHeader(4, "Assign your first tutor", "Every course needs a Main Course Tutor before it can launch. Add more tutors any time afterwards from the roster.")}
+        {/* The old heading said "Every course needs a Main Course Tutor
+            before it can launch." Neither half was true: the field was
+            optional, the picker offered all six roles, and nothing checked
+            for a main course tutor at launch or in the compliance checks.
+            Ramy, 18 Sep 2026: "you can definitely set up a course and then
+            start looking for tutors." So the screen says what actually
+            happens. */}
+        {stepHeader(4, "Invite your tutors", "Add as many as you know now, or none at all — a course can be set up before its team is. Invitations are sent the moment you launch, and you can invite more at any time from the course roster.")}
 
         <div className="grid grid-cols-[1fr_auto] gap-[14px]">
           <div className="flex flex-col gap-1">
             <label htmlFor="invite_email" className="text-meta font-semibold text-ink">
               Email
             </label>
-            <input id="invite_email" name="invite_email" type="email" placeholder="tutor@email.com" className={field} />
+            <input
+              id="invite_email"
+              type="email"
+              placeholder="tutor@email.com"
+              value={inviteEmail}
+              onChange={(e) => {
+                setInviteEmail(e.target.value);
+                setInviteError(null);
+              }}
+              onKeyDown={(e) => {
+                // Enter inside a multi-step form would submit the whole
+                // thing, i.e. launch the course from step 4.
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addInvite();
+                }
+              }}
+              className={field}
+            />
           </div>
           <div className="flex flex-col gap-1">
             <label htmlFor="invite_tutor_role" className="text-meta font-semibold text-ink">
               Role
             </label>
-            <select id="invite_tutor_role" name="invite_tutor_role" defaultValue={DEFAULT_INVITE_TUTOR_ROLE} className={field}>
+            <select
+              id="invite_tutor_role"
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value)}
+              className={field}
+            >
               {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
                 <option key={k} value={k}>
                   {v}
@@ -309,7 +363,50 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             </select>
           </div>
         </div>
-        <p className="text-label text-muted">Same role picker as the roster — the role travels with the invitation.</p>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={addInvite}
+            className="wash rounded-[6px] border border-border px-[13px] py-2 text-meta font-semibold text-ink"
+          >
+            Add tutor
+          </button>
+          <p className="text-label text-muted">Same role picker as the roster — the role travels with the invitation.</p>
+        </div>
+        {inviteError ? <p className="text-label text-garnet">{inviteError}</p> : null}
+
+        {/* What has been added, and what will happen to it. Each row can go
+            again before launch, because a typo here is otherwise an email to
+            the wrong person. */}
+        {invites.length > 0 ? (
+          <div className="flex flex-col gap-2 rounded-[8px] border border-border bg-card-inset p-3">
+            {invites.map((inv) => (
+              <div key={inv.email} className="flex items-center justify-between gap-3">
+                <span className="min-w-0 text-body text-ink">
+                  <span className="font-semibold">{inv.email}</span>
+                  <span className="text-muted"> · {TUTOR_ROLE_LABEL[inv.role as keyof typeof TUTOR_ROLE_LABEL] ?? inv.role}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setInvites((list) => list.filter((i) => i.email !== inv.email))}
+                  className="wash shrink-0 rounded-[6px] px-2 py-1 text-label text-muted"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <p className="border-t border-border-faint pt-2 text-label text-muted">
+              {invites.length === 1 ? "This invitation is" : `These ${invites.length} invitations are`} sent when you
+              launch the course.
+            </p>
+          </div>
+        ) : null}
+
+        {/* The queue travels to the server as one field. The old single
+            invite_email/invite_tutor_role pair is still read there, so an
+            older form or a saved draft cannot silently lose its tutor. */}
+        <input type="hidden" name="invites" value={JSON.stringify(invites)} />
 
         {/* for-claude-code-course-admin-refinements.md: "name the assessor
             now, or decide later." Never a hard requirement -- nobody really
@@ -337,15 +434,14 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
           <button
             type="button"
             onClick={(e) => {
-              const form = e.currentTarget.form;
-              const el = form?.elements.namedItem("invite_email") as HTMLInputElement | null;
-              if (el) el.value = "";
-              captureStep(form);
+              setInvites([]);
+              setInviteEmail("");
+              captureStep(e.currentTarget.form);
               setStep(5);
             }}
             className="text-body text-muted underline"
           >
-            Skip — I&apos;ll assign a tutor later
+            Skip — I&apos;ll invite tutors later
           </button>
           {back(3)}
         </div>
@@ -361,7 +457,13 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
             ["Dates", summary.dates || "—"],
             ["Delivery", MODE_LABEL[deliveryMode]],
             ["Capacity", summary.cohort ? `${summary.cohort} candidates` : "—"],
-            ["Tutors", summary.inviteEmail ? `${summary.inviteEmail} — invited at launch` : "None yet — assign from the roster"],
+            [
+              "Tutors",
+              invites.length === 0
+                ? "None yet — invite them from the course roster"
+                : invites.map((i) => `${i.email} (${TUTOR_ROLE_LABEL[i.role as keyof typeof TUTOR_ROLE_LABEL] ?? i.role})`).join(", ") +
+                  ` — invited at launch`,
+            ],
             ["Assessor", summary.assessorName || "Not named yet -- the MCT can set this later"],
           ].map(([label, value]) => (
             <div key={label} className="grid grid-cols-[128px_1fr] gap-3 border-b border-border-faint px-4 py-3 text-body last:border-none">

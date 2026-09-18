@@ -78,8 +78,31 @@ export async function createCourse(
   const launch = formData.get("launch") === "1";
   // Step 4's tutor. Optional -- "Skip, I'll assign a tutor later" is a real
   // path -- but when given, the invitation is created and emailed at launch.
-  const inviteEmail = (formData.get("invite_email") as string | null)?.trim().toLowerCase() || null;
-  const inviteRole = (formData.get("invite_tutor_role") as string | null) || null;
+  // Step 4 queues tutors one at a time and sends them as one field (Ramy,
+  // 18 Sep 2026). The old single pair is still read, so a form from before
+  // this change, or a browser that lost the script, still invites its tutor
+  // rather than silently dropping them.
+  const invites: { email: string; role: string | null }[] = [];
+  const invitesRaw = formData.get("invites") as string | null;
+  if (invitesRaw) {
+    try {
+      const parsed: unknown = JSON.parse(invitesRaw);
+      if (Array.isArray(parsed)) {
+        for (const row of parsed) {
+          const email = typeof row?.email === "string" ? row.email.trim().toLowerCase() : "";
+          if (!email || invites.some((i) => i.email === email)) continue;
+          invites.push({ email, role: typeof row?.role === "string" ? row.role : null });
+        }
+      }
+    } catch {
+      // A malformed queue is not worth failing a launch over; the course is
+      // created and the tutors can be invited from the roster.
+    }
+  }
+  const legacyEmail = (formData.get("invite_email") as string | null)?.trim().toLowerCase() || null;
+  if (legacyEmail && !invites.some((i) => i.email === legacyEmail)) {
+    invites.push({ email: legacyEmail, role: (formData.get("invite_tutor_role") as string | null) || null });
+  }
   // Optional assessor, named now or left for the MCT to set later
   // (for-claude-code-course-admin-refinements.md).
   const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
@@ -145,7 +168,7 @@ export async function createCourse(
   // roster uses -- one code path, one email, one record. A failure here never
   // fails the launch: the course exists, and the invitation can be resent from
   // the roster.
-  if (inviteEmail) {
+  if (invites.length > 0) {
     try {
       const { data: created } = await supabase
         .from("courses")
@@ -157,15 +180,24 @@ export async function createCourse(
         .maybeSingle();
       if (created) {
         const { inviteToCourse } = await import("@/app/dashboard/admin/courses/[id]/invitation-actions");
-        const fd = new FormData();
-        fd.set("course_id", created.id);
-        fd.set("email", inviteEmail);
-        fd.set("role", "trainer");
-        if (inviteRole) fd.set("tutor_role", inviteRole);
-        await inviteToCourse({ error: null }, fd);
+        // One at a time, and one failing does not stop the rest: these are
+        // separate people, and a bounced address should not cost the others
+        // their invitation.
+        for (const invite of invites) {
+          const fd = new FormData();
+          fd.set("course_id", created.id);
+          fd.set("email", invite.email);
+          fd.set("role", "trainer");
+          if (invite.role) fd.set("tutor_role", invite.role);
+          try {
+            await inviteToCourse({ error: null }, fd);
+          } catch {
+            // Launch stands; this one can be re-sent from the roster.
+          }
+        }
       }
     } catch {
-      // Launch stands; the invitation can be sent from the roster.
+      // Launch stands; the invitations can be sent from the roster.
     }
   }
 

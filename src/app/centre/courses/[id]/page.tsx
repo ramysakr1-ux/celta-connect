@@ -10,6 +10,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
 import { PricingForm } from "@/app/centre/courses/[id]/pricing-form";
+import { CohortForm } from "@/app/centre/courses/[id]/cohort-form";
 import { RoomHead } from "@/components/room-head";
 import { demoToday } from "@/lib/demo-clock";
 
@@ -41,6 +42,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
   // "may read that branch's course record" (walked 15 Sep 2026).
   if (!(await canViewAtCentre(profile, "courseAdmin.view", course.center_id))) notFound();
   const mayEditPayments = await canAtCentre(profile, "payments.edit", course.center_id);
+  const mayEditRecord = await canAtCentre(profile, "course.editRecord", course.center_id);
 
   // Ramy, 27 Aug 2026 (round 2): getCachedCenter only needs `course`,
   // already resolved above -- it doesn't need tutorRows/traineeCount first,
@@ -130,6 +132,12 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
             This is a health check, not a management view -- roster, subgroups, and everything operational live
             inside the course itself, with the MCT.
           </p>
+          {/* Capacity is the one number here a centre changes as a course
+              fills, and it was asked once in the wizard and then fixed for
+              life while Admissions counted places against it (Ramy, 18 Sep
+              2026). Same capability that owns the course record; pricing
+              beneath is gated separately because it is money. */}
+          {mayEditRecord ? <CohortForm courseId={course.id} cohortSize={course.cohort_size} /> : null}
         </div>
       </div>
 

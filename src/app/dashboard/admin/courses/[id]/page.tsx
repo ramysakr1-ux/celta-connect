@@ -376,7 +376,7 @@ export default async function CourseAdminDetailPage({
       {/* Tutors -- view current MCT/ACT, replace if needed. No edit access
           to their in-course work (roster/subgroups/grades etc. are MCT
           territory, see the footnote). */}
-      <div className="card flex flex-col gap-4 p-5">
+      <div id="tutors" className="card flex flex-col gap-4 p-5 scroll-mt-6">
         <h2 className="font-serif text-h3 font-semibold text-ink">Tutors</h2>
         {tutors.length === 0 ? (
           <p className="text-body text-muted">No tutors have joined yet.</p>
