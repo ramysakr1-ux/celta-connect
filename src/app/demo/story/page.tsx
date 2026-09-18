@@ -212,13 +212,31 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
                         const cyc = n.cycle ? C[n.cycle] : null;
                         const spine = cyc ? cyc.colour : RULE;
                         const cycInk = cyc ? cyc.ink || cyc.colour : null;
-                        const href = n.demo ? n.demo : lane.demo + (d.day !== null ? `?day=${d.day}` : "");
+                        // Three shapes of destination, in order:
+                        //
+                        //   "/demo/..."  a door of its own, used whole (the
+                        //                public journey pages, and the one
+                        //                card that opens another lane's room)
+                        //   "/portfolio/{me}/tp/3"  a SCREEN: this lane's own
+                        //                door, on this day, carrying ?to= so
+                        //                the person lands on the screen the
+                        //                card names ({me} resolves to their
+                        //                own id inside the demo route)
+                        //   nothing      the lane's landing page, which is
+                        //                only right for cards whose subject
+                        //                IS that landing page
+                        const dayQ = d.day !== null ? `day=${d.day}` : "";
+                        const href = !n.demo
+                          ? lane.demo + (dayQ ? `?${dayQ}` : "")
+                          : n.demo.startsWith("/demo/")
+                            ? n.demo
+                            : `${lane.demo}?${[dayQ, `to=${encodeURIComponent(n.demo)}`].filter(Boolean).join("&")}`;
                         // The name belongs to the door, so it is resolved from
                         // where the card actually goes -- including the cards
                         // with no demo of their own, which fall through to the
                         // lane's. A /demo/journey/* card has no entry: those
                         // are public screens with nobody signed in.
-                        const who = people[href.split("?")[0]] ?? null;
+                        const who = people[(n.demo?.startsWith("/demo/") ? n.demo : lane.demo).split("?")[0]] ?? null;
                         return (
                           <a
                             key={n.title + n.sub}
