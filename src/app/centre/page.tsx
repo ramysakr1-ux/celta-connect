@@ -330,8 +330,11 @@ export default async function CentreOverviewPage({
           (courses ?? []).map((c, i) => {
             const state = stateOf(c.start_date, c.end_date);
             const owed = owedByCourse.get(c.id) ?? 0;
+            // lift alone rises with no colour, which is what Ramy saw on
+            // 19 Sep 2026 ("it's rising, but it's not changing color").
+            // Rows take the ring; Admissions' rows already did.
             return (
-              <div key={c.id} className={`lift flex flex-wrap items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+              <div key={c.id} className={`lift hover-ring flex flex-wrap items-center gap-4 px-5 py-4 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <Link href={`/centre/courses/${c.id}`} className="min-w-[13rem] flex-1 hover:text-primary">
                   <p className="text-body font-semibold text-ink">
                     {c.name}
@@ -372,7 +375,7 @@ export default async function CentreOverviewPage({
             <span className="text-label text-muted">{(bounces ?? []).length} to fix</span>
           </div>
           {(bounces ?? []).map((b, i) => (
-            <div key={b.id} className={`lift px-5 py-4 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
+            <div key={b.id} className={`lift hover-ring px-5 py-4 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
               <div className="flex items-center justify-between gap-3">
                 {b.applicant_id ? (
                   <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-body text-ink hover:underline">

@@ -36,8 +36,10 @@ export function VolunteerPoolRow({
   // once expanded.
   const primary = members[0];
 
+  // The ring without the rise -- the courses list on Centre home had the
+  // opposite half. Both take the whole motion rule now (19 Sep 2026).
   return (
-    <div className="hover-ring border-b border-border-faint px-5 py-4 last:border-none">
+    <div className="lift hover-ring border-b border-border-faint px-5 py-4 last:border-none">
       <div className="flex items-center justify-between gap-3">
         <Avatar name={name} size="sm" className="self-start" />
         <div className="flex flex-1 flex-col gap-[3px]">
