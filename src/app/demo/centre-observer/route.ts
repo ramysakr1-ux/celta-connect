@@ -19,6 +19,6 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
   // ?to= sends this account to a named screen instead of its landing.
-  const to = demoDestination(url.searchParams.get("to"), "/dashboard");
+  const to = await demoDestination(url.searchParams.get("to"), "/dashboard");
   return mintDemoMagicLink("demo-centre-observer@celtaconnect.com", to, day);
 }

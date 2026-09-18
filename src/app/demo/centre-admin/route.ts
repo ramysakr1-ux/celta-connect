@@ -35,6 +35,6 @@ export async function GET(request: Request) {
   // the more specific instruction; ?to= covers every other screen.
   const next = stage
     ? `/dashboard/admissions?stage=${stage}`
-    : demoDestination(url.searchParams.get("to"), "/dashboard");
+    : await demoDestination(url.searchParams.get("to"), "/dashboard");
   return mintDemoMagicLink("demo-centre-manager@celtaconnect.com", next, day);
 }

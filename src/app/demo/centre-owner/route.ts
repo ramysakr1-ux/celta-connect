@@ -36,6 +36,6 @@ export async function GET(request: Request) {
   if (swap) return swap;
   const url = new URL(request.url);
   const day = parseDemoDay(url.searchParams.get("day"));
-  const to = demoDestination(url.searchParams.get("to"), "/centre/owner");
+  const to = await demoDestination(url.searchParams.get("to"), "/centre/owner");
   return mintDemoMagicLink("demo-centre-admin@celtaconnect.com", to, day);
 }

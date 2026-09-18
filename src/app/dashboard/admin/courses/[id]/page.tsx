@@ -282,7 +282,7 @@ export default async function CourseAdminDetailPage({
       {/* Real semantic red when overdue; otherwise the decorative garnet
           alternation (matches the header card above it) rather than plain
           teal, since Tutors right below stays teal. */}
-      <div className={`card flex flex-col gap-4 p-5 ${entryFormOverdue ? "card-red" : ""}`}>
+      <div id="entry-form" className={`card flex flex-col gap-4 p-5 scroll-mt-6 ${entryFormOverdue ? "card-red" : ""}`}>
         <div>
           <h2 className="font-serif text-h3 font-semibold text-ink">Entry form</h2>
           <p className="mt-1 text-body text-muted">
