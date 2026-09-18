@@ -3040,9 +3040,14 @@ async function main() {
     { d: 14, b: 8, type: "input_session", title: "Drilling technique", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["2d", "2g", "5c"] },
     { d: 14, b: 9, type: "input_session", title: "Syllabus planning \u00b7 DEF", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 15, b: 1, type: "milestone", title: "Late start \u00b7 10:00\u201310:45", tag: "individual", detail: null, linked: null, tp: null },
-    { d: 15, b: 2, type: "input_session", title: "Supervised review \u2014 presenting language", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
-    { d: 15, b: 3, type: "input_session", title: "Supervised review \u2014 phonology", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
-    { d: 15, b: 4, type: "input_session", title: "Supervised review \u2014 classroom management", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    // supervised_session, not input_session. Both screens built for these
+    // read that type -- the tutor's supervised-review page and the
+    // candidate's /supervised/[eventId] -- so while they were typed as input
+    // sessions all three were invisible to the very pages that manage them,
+    // and inflated every count of input sessions instead (Ramy, 18 Sep 2026).
+    { d: 15, b: 2, type: "supervised_session", title: "Supervised review \u2014 presenting language", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 3, type: "supervised_session", title: "Supervised review \u2014 phonology", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 4, type: "supervised_session", title: "Supervised review \u2014 classroom management", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
     { d: 15, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 15, b: 6, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },
     { d: 15, b: 7, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },
