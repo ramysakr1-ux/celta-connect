@@ -21,6 +21,7 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import { seedStage2Demo } from "./lib/stage2-demo.mjs";
 import { seedStage3Demo } from "./lib/stage3-demo.mjs";
+import { seedSupervisedReviewDemo } from "./lib/supervised-review-demo.mjs";
 import { seedFinalDayDemo } from "./lib/final-day-demo.mjs";
 import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
 import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
@@ -3369,6 +3370,19 @@ async function main() {
   } else {
     console.log(`Stage 3 not seeded -- the course does not reach day 15 (${stage3Date}) until later.`);
   }
+  // The supervised review task, once day 15 has been reached -- the three
+  // sessions sit there. Seeded 18 Sep 2026, after the task turned out to have
+  // no door at all and so no completion anywhere (1dc23a95).
+  if (reached(stage3Date)) {
+    const review = await seedSupervisedReviewDemo(supabase, {
+      courseId: course.id,
+      traineeIds: Object.values(trainees),
+      mctId: trainerId,
+      now: recordNow,
+    });
+    console.log(`supervised review: ${review.written} completions across ${review.sessions} sessions`);
+  }
+
   if (STAGE === "finished") {
     // A finished course has had its final day: grades, both signatures on the
     // CELTA 5's last page, reports released the morning after (14.4).
