@@ -83,7 +83,14 @@ for (const [door, cards] of byDoor) {
     // by the sign-in above.
     if (!card.to) { if (VERBOSE) console.log(`  ok   ${card.href}\n         -> ${entry.status} ${entry.landed}`); continue; }
     const target = card.to.replace(/\{me\}/g, entry.landed.split("/")[2] ?? "");
-    const r = await walk(BASE + target, new Map(jar));
+    // {course} is resolved by the demo route from the database, not by
+    // anything this script can see, so those cards go the long way round --
+    // through the door itself, spending a magic link. There are a handful of
+    // them; going the long way for all 140 is what rate-limited the first
+    // version of this script into reporting 48 false failures.
+    const r = target.includes("{")
+      ? await walk(BASE + card.href, new Map())
+      : await walk(BASE + target, new Map(jar));
     const ok = r.status === 200 && !r.landed.startsWith("/login");
     if (!ok) bad.push({ href: card.href, ...r });
     if (VERBOSE || !ok) console.log(`  ${ok ? "ok  " : "BAD "} ${card.href}\n         -> ${r.status} ${r.landed}`);
