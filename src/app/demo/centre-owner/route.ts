@@ -1,5 +1,6 @@
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 import { parseDemoDay } from "@/lib/demo-clock";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 // Lands on the Centre Owner screen itself, not on Centre Management.
 //
@@ -13,10 +14,23 @@ import { parseDemoDay } from "@/lib/demo-clock";
 //
 // Same account, different destination -- the owner screen is a place, not a
 // separate login.
+//
+// `?to=` lets one card send this account somewhere other than its own
+// landing. The Course Story's "Creates the course" card names the New
+// course wizard in its own subtitle and used to link here with no `to`,
+// which put the visitor on the owner's dashboard -- a screen with no
+// course-creation action on it at all -- instead of the wizard itself.
+// Diane holds course.create as a centre owner, so /centre/courses/new is
+// hers to open. Ramy, 18 Sep 2026: "I click Create the course... it takes
+// me to the centre owner landing page." Restricted to same-origin paths by
+// safeRedirectPath, same guard the sign-in page uses for its own `next`.
+//
 // `?day=N` pins the demo clock before the magic-link hop
 // (for-claude-code-demo-clock.md). No day means the real clock, and it clears
 // any day a previous link left behind.
 export async function GET(request: Request) {
-  const day = parseDemoDay(new URL(request.url).searchParams.get("day"));
-  return mintDemoMagicLink("demo-centre-admin@celtaconnect.com", "/centre/owner", day);
+  const url = new URL(request.url);
+  const day = parseDemoDay(url.searchParams.get("day"));
+  const to = safeRedirectPath(url.searchParams.get("to"), "/centre/owner");
+  return mintDemoMagicLink("demo-centre-admin@celtaconnect.com", to, day);
 }
