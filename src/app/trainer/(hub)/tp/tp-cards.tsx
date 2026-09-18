@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { OwedLesson, TodaySession, TomorrowLine } from "@/lib/tp-queue";
+import { SELF_EVAL_DUE_CLOCK } from "@/lib/tp-queue";
 import { AIM_TYPE_LABELS, AIM_TYPE_STYLE, type AimType } from "@/lib/aim-type";
 import { formatCalendarDate, formatDate, formatTime } from "@/lib/format-date";
 
@@ -149,7 +150,7 @@ export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: s
           value={
             lesson.selfEval.receivedAt
               ? `In · ${formatDate(lesson.selfEval.receivedAt, timeZone, { weekday: "short", month: undefined })} ${formatTime(lesson.selfEval.receivedAt, timeZone)}`
-              : "Not yet · due 22:00 tonight"
+              : `Not yet · due ${SELF_EVAL_DUE_CLOCK} tonight`
           }
           tone={lesson.selfEval.receivedAt ? undefined : "amber"}
         />

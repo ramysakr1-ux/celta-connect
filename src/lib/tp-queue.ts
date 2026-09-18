@@ -1,4 +1,14 @@
 import { distinctTpDates, halfTpDates, rotationPosition, type TpTimetableEvent } from "@/lib/rotation";
+
+// When a candidate's self-evaluation is due, on the day they taught.
+//
+// 18:00 is the design's own figure (design_handoff_course_story: "Due 18:00
+// · before feedback") and the end of the timetabled day. The code had
+// 22:00 with no source behind it, and Ramy on 19 Sep 2026: "what kind of
+// course is the self-eval due at 10 p.m.?" The trainee-interface spec fixes
+// the principle rather than the hour: it is "written before feedback is
+// visible, so it's an independent account, not a reply."
+export const SELF_EVAL_DUE_CLOCK = "18:00";
 import type { AimType } from "@/lib/aim-type";
 
 // design_handoff_teaching_practice_v2 (Ramy, 6 Sep 2026). The tab answers
@@ -252,7 +262,7 @@ export function buildTpQueue(input: {
       ageHours,
       isLate: ageHours > sameDayHours,
       notes: { count: lessonNotes.length, criteria },
-      selfEval: { receivedAt: selfEval?.submitted_at ?? null, dueAt: selfEval?.submitted_at ? null : `${taughtDate}T22:00` },
+      selfEval: { receivedAt: selfEval?.submitted_at ?? null, dueAt: selfEval?.submitted_at ? null : `${taughtDate}T${SELF_EVAL_DUE_CLOCK}` },
       draft: fb && (fb.pointCount > 0 || fb.criteriaCount > 0) ? { points: fb.pointCount, criteriaTagged: fb.criteriaCount } : null,
       // Worth seeing before writing: an earlier lesson graded not to
       // standard. Same TP or later is not a warning about this one.
@@ -298,7 +308,7 @@ export function buildTpQueue(input: {
           point: pointOf(plan),
           state,
           liveNotesCount: (notesBy.get(`${key}-${g.tutorProfileId ?? viewerId}`) ?? []).length,
-          selfEvalDueAt: selfEvalBy.get(key)?.submitted_at ? null : "22:00",
+          selfEvalDueAt: selfEvalBy.get(key)?.submitted_at ? null : SELF_EVAL_DUE_CLOCK,
           inQueue: owedAll.some((o) => o.traineeId === m.traineeId && o.tpNumber === tpNumber),
         };
       });
