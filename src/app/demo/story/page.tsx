@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Wordmark } from "@/components/wordmark";
+import { HeaderCredit } from "@/components/designer-credit";
 import { StoryArrows } from "@/app/demo/story/story-arrows";
-import { C, GLASS, L, laneOrder, phases, type LaneKey } from "@/app/demo/story/story-data";
+import { C, EXTRA_DOORS, GLASS, L, laneOrder, phases, type LaneKey } from "@/app/demo/story/story-data";
 import { getDemoPeople } from "@/app/demo/story/demo-people";
 
 // The Course Story: one page, the whole course, every card a door into the
@@ -57,6 +58,9 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, whiteSpace: "nowrap" }}>
           <Wordmark size="header-compact" onDark />
+          {/* The mark and the credit are identical on every screen (Ramy,
+              1 Sep 2026), and this page is a landing of its own. */}
+          <HeaderCredit onDark landingPath="/demo/story" />
           <div style={{ width: 1, height: 18, background: "oklch(100% 0 0 / 0.18)" }} />
           <div className="text-label font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(80% 0.03 75)" }}>
             The course, day by day
@@ -88,6 +92,35 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
               >
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: l.colour, boxShadow: "0 0 0 1.5px oklch(100% 0 0 / 0.55)" }} />
                 {l.label}
+              </a>
+            );
+          })}
+          {/* The doors that are people rather than lanes, each beside the lane
+              it belongs to (story-data's EXTRA_DOORS). */}
+          {EXTRA_DOORS.map((door) => {
+            const active = on(door.lane);
+            return (
+              <a
+                key={door.label}
+                href={door.demo}
+                target="_blank"
+                rel="noopener"
+                className="wash text-label font-bold tracking-[0.1em] uppercase"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  height: 26,
+                  padding: "0 10px",
+                  borderRadius: 999,
+                  border: `1px solid ${active ? "oklch(98% 0.006 85)" : "oklch(100% 0 0 / 0.25)"}`,
+                  background: active ? "oklch(98% 0.006 85)" : "transparent",
+                  color: active ? INK : "oklch(80% 0.03 75)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: L[door.lane].colour, boxShadow: "0 0 0 1.5px oklch(100% 0 0 / 0.55)" }} />
+                {door.label}
               </a>
             );
           })}

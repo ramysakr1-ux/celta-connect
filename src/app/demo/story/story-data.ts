@@ -38,6 +38,21 @@ export const GLASS: Record<LaneKey, string> = {
   assessor: 'linear-gradient(160deg, oklch(96% 0.045 80 / 0.8), oklch(96% 0.045 80 / 0.4))',
 };
 export const laneOrder: LaneKey[] = ['centre', 'tutors', 'candidate', 'volunteer', 'assessor'];
+
+// A sixth door in the header that is not a sixth lane.
+//
+// The centre lane is four jobs in one row -- owner, manager, course admin,
+// admissions -- and its door opens as the centre manager, which is right for
+// most of the row. But the owner's own screen (the role builder, the
+// custodial powers, branch visibility) had no door on this page at all, and
+// the first card in the story is the owner creating the course. Ramy, 18 Sep
+// 2026: "add centre owner too."
+//
+// Deliberately NOT in laneOrder: that list draws the grid's rows, and the
+// owner is a person in the centre row, not a row of their own.
+export const EXTRA_DOORS: { after: LaneKey; lane: LaneKey; label: string; demo: string }[] = [
+  { after: 'centre', lane: 'centre', label: 'Centre owner', demo: '/demo/centre-owner' },
+];
 // node: [title, sub, cycle|null, flow|null, destination|null]
 // id/to draw the arrows: `to` names the card this one hands off to.
 //
