@@ -85,6 +85,17 @@ const FEEDBACK_DAYS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16];
 const WRITTEN_FEEDBACK_ONLY_DAYS = [17, 18]; // TP8 -- design's own "Final TP, no live session"
 const SUPERVISED_PLANNING_DAYS = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13]; // rm/"Supervised"
 const BOOKABLE_PLANNING_DAYS = [15, 16, 17]; // iw/"Bookable" -- design shifts category in week 4
+// Days 9, 10 and 15 had no planning band at all, so the timetable simply
+// stopped after the afternoon and a candidate reading it saw a gap with no
+// name. There IS still planning happening on all three -- there is teaching
+// to come -- it is just not supervised any more, which is the middle step of
+// the band's own progression from Supervised to Bookable. Ramy, 18 Sep 2026:
+// "unsupervised".
+//
+// Days 19 and 20 are deliberately still bare: TP8 is the last assessed
+// lesson, so on the assessor's visit day there is nothing left to plan, and
+// day 20 is over by mid-afternoon.
+const UNSUPERVISED_PLANNING_DAYS = [8, 9, 14];
 
 const FEEDBACK_AND_LESSON_PLANNING: SkeletonEventDraft[] = [
   ...FEEDBACK_DAYS.map((day) => ({
@@ -118,6 +129,14 @@ const FEEDBACK_AND_LESSON_PLANNING: SkeletonEventDraft[] = [
     time: "16:45",
     tag: "individual",
     detail: "Bookable",
+  })),
+  ...UNSUPERVISED_PLANNING_DAYS.map((day) => ({
+    type: "supervised_session" as const,
+    title: "Lesson planning",
+    position: pos(day),
+    time: "16:45",
+    tag: "individual",
+    detail: "Unsupervised",
   })),
 ];
 

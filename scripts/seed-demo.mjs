@@ -3078,13 +3078,18 @@ async function main() {
     // The wider profession, after the last TP and beside Professional
     // development -- where the handoff puts it.
     { d: 19, b: 8, type: "input_session", title: "Teaching exam classes", tag: "whole_group", detail: null, linked: null, tp: null, criteria: ["1a", "5c"], slug: "teaching-exam-classes" },
-    { d: 20, b: 1, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 2, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 3, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 4, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    // Day 20 used to be SIX rows all called "Course close", one per band,
+    // every one typed input_session -- so the last day read as six identical
+    // sessions, and every count of input sessions on the course was six too
+    // high (the TinT workspace and the candidate's Resource Hub both filter
+    // on that type). Ramy, 18 Sep 2026: "we have like four or five input
+    // sessions about the last day, which is obviously not an input session."
+    //
+    // The last day is one whole-cohort close and nothing else timetabled.
+    // Empty bands are normal here -- day 19's band 7 is one -- and an empty
+    // afternoon on the final day is the truth rather than a gap.
+    { d: 20, b: 4, type: "milestone", title: "Course close", tag: "whole_group", detail: "Whole cohort \u00b7 final feedback", linked: null, tp: null },
     { d: 20, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
-    { d: 20, b: 6, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
-    { d: 20, b: 7, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
   ];
 
   // NO group-B TP rows. Ramy, 6 Sep 2026: "we have two groups of six, A, B, C
