@@ -1,3 +1,4 @@
+import { supervisedReviewTopic } from "@/lib/supervised-quiz-content";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -207,7 +208,18 @@ export default async function TraineeTimetablePage({
   const sheetHrefByEventId = new Map<string, string>([
     ...(stage2Blocks ?? []).map((b) => [b.timetable_event_id, `/portfolio/${traineeId}/stage2-tutorial/${b.id}`] as [string, string]),
     ...(consultationBlocks ?? []).map((b) => [b.timetable_event_id, `/portfolio/${traineeId}/consultation/${b.id}`] as [string, string]),
+    // The supervised review task. Its page, its quiz, its scoring and its
+    // submit have all existed since the feature shipped -- and nothing in
+    // Connect linked to them, so no candidate could ever reach the task and
+    // not one completion was ever written (found 18 Sep 2026, walking the
+    // demo's empty Supervised review page with Ramy). The completions below
+    // were already being loaded on this page and then never used; now they
+    // decide what the door says.
+    ...allEvents
+      .filter((e) => e.type === "supervised_session" && supervisedReviewTopic(e.title))
+      .map((e) => [e.id, `/portfolio/${traineeId}/supervised/${e.id}`] as [string, string]),
   ]);
+  const completionByEventId = new Map((supervisedCompletions ?? []).map((c) => [c.timetable_event_id, c]));
   const eventMeta: Record<
     string,
     {
@@ -217,11 +229,21 @@ export default async function TraineeTimetablePage({
       groupName: string | null;
       volunteerAttendance: { expected: number; total: number } | null;
       sheetHref: string | null;
+      sheetLabel?: string;
     }
   > = {};
   for (const event of allEvents) {
+    // A review the candidate has already submitted is still worth opening --
+    // it shows their score and what they wrote -- so the door stays and
+    // changes its words rather than disappearing.
+    const review = supervisedReviewTopic(event.title) ? completionByEventId.get(event.id) : null;
     eventMeta[event.id] = {
       sheetHref: sheetHrefByEventId.get(event.id) ?? null,
+      sheetLabel: supervisedReviewTopic(event.title)
+        ? review?.submitted_at
+          ? "See what you submitted"
+          : "Open the review task"
+        : undefined,
       groupName: event.type === "tp" && event.tp_group_scope_id ? (tpGroupNameById.get(event.tp_group_scope_id) ?? null) : null,
       mine: isMineEvent(event),
       ownTpSlot: isOwnTpSlot(event),
