@@ -38,6 +38,14 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
 
   return (
     <div style={{ fontFamily: "var(--font-karla), Karla, Helvetica, sans-serif", color: INK, background: "oklch(92.5% 0.012 85)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      {/* Cards navigate in this tab, not a new one (Ramy, 18 Sep 2026: "I
+          click on something it opens a page and then I have to close the page
+          and just go back to the demo"). The handoff opened every card in a
+          new tab, which was right while there was no way back; now every demo
+          shell carries the pill that returns here, so a tab per card is a tab
+          to close. The lane doors in the header below still open new tabs --
+          those are "go and be this person for a while", not "look at this
+          screen". */}
       {/* Sticky dark header: the mark, the eyebrow, and the five lanes as doors. */}
       <div
         style={{
@@ -159,7 +167,8 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
               ))}
             </div>
             <div className="text-meta" style={{ color: MUTED }}>
-              Cards open in a new tab; the demo centre is seeded and safe to click through.
+              Every card opens the screen it names; the demo pill in that screen's header brings you back here. The demo
+              centre is seeded and safe to click through.
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -274,8 +283,6 @@ export default async function CourseStoryPage({ searchParams }: { searchParams: 
                           <a
                             key={n.title + n.sub}
                             href={href}
-                            target="_blank"
-                            rel="noopener"
                             data-node={n.id || undefined}
                             data-to={n.to || undefined}
                             data-cyc={spine}

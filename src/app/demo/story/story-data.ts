@@ -76,7 +76,7 @@ const VOL = (lvl: string) => N(`In class · ${lvl}`, 'Join link opens 10 min bef
 // ones -- through the curated title->slug list, never a fuzzy match, for
 // exactly the reason that file gives: guessing wrong points a candidate at
 // the wrong content. A title with no session stays on the tutor's hub.
-const INPUT = (a: string, b?: string) => N(`Input · ${a}`, b ? `then ${b}` : 'Whole cohort', null, null, inputSessionSlugForTitle(a) ? `/input-sessions/${inputSessionSlugForTitle(a)}` : null);
+const INPUT = (a: string, b?: string) => N(`Input · ${a}`, b ? `then ${b}` : 'Whole cohort', null, null, inputSessionSlugForTitle(a) ? `/input-sessions/${inputSessionSlugForTitle(a)}?back=/demo/story` : null);
 
 export const phases: StoryPhase[] = [
   { title: 'Before the course', sub: 'Weeks before Day 1 · the centre fills the course and sets it up', days: [

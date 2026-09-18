@@ -29,7 +29,15 @@ export default async function InputSessionPage({
     session.profile.role === "trainer" || session.profile.role === "admin" || session.profile.role === "platform_owner";
 
   const backHref = back && back.startsWith("/") && !back.startsWith("//") ? back : "/input-sessions";
-  const backLabel = backHref === "/input-sessions" ? "Input sessions" : "Resource hub";
+  const backLabel =
+    backHref === "/input-sessions"
+      ? "Input sessions"
+      : // The Course Story sends people here too, and this page sits outside
+        // every shell, so it is the one card destination with no demo pill to
+        // return by (found 18 Sep 2026 by checking all 24).
+        backHref === "/demo/story"
+        ? "The course, day by day"
+        : "Resource hub";
 
   return (
     <div className="input-session p-6 sm:p-10">
