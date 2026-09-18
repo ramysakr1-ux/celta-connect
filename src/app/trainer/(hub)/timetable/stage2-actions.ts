@@ -63,7 +63,7 @@ export async function createStage2Block(_prevState: FormState, formData: FormDat
     })
     .select("id")
     .single();
-  if (eventError || !event) return { error: "Could not add the timetable slot." };
+  if (eventError || !event) return { error: demoOr(eventError, "Could not add the timetable slot.") };
 
   const { data: block, error: blockError } = await supabase
     .from("stage2_tutorial_blocks")
@@ -76,7 +76,7 @@ export async function createStage2Block(_prevState: FormState, formData: FormDat
     })
     .select("id")
     .single();
-  if (blockError || !block) return { error: "Could not create the booking sheet." };
+  if (blockError || !block) return { error: demoOr(blockError, "Could not create the booking sheet.") };
 
   const { error: rpcError } = await supabase.rpc("set_stage2_slot_count", {
     p_block_id: block.id,

@@ -1,5 +1,6 @@
 "use server";
 
+import { demoOr } from "@/lib/demo-guard";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
@@ -189,7 +190,7 @@ export async function submitFolClaim(_prevState: FolFormState, formData: FormDat
     if (insertError.code === "23505") {
       return { error: "That problem's already been claimed. Pick a different specific structure or sound.", warning: null };
 }
-    return { error: "Could not save the claim. Try again.", warning: null };
+    return { error: demoOr(insertError, "Could not save the claim. Try again."), warning: null };
   }
 
   revalidatePath(`/portfolio/${trainee.id}`, "layout");

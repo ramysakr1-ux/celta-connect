@@ -198,7 +198,7 @@ export async function submitObservationTask(
     .single();
 
   if (observationError || !observation) {
-    return { error: "Could not save. Try again." };
+    return { error: demoOr(observationError, "Could not save. Try again.") };
   }
 
   const { error: submissionError } = await supabase.from("observation_task_submissions").insert({

@@ -64,7 +64,7 @@ export async function openCase(_prevState: FormState, formData: FormData): Promi
     })
     .select("id")
     .single();
-  if (caseError || !newCase) return { error: "Could not open the case. Try again." };
+  if (caseError || !newCase) return { error: demoOr(caseError, "Could not open the case. Try again.") };
 
   const { error: pauseError } = await supabase
     .from("assignments")
@@ -243,7 +243,7 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
       })
       .select("id")
       .single();
-    if (reflectionError || !reflection) return { error: "Case was decided, but the reflection assignment could not be created." };
+    if (reflectionError || !reflection) return { error: demoOr(reflectionError, "Case was decided, but the reflection assignment could not be created.") };
     reflectionAssignmentId = reflection.id;
   } else {
     // Doesn't fail the assignment -- clear the pause and touch nothing

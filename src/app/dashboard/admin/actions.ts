@@ -315,7 +315,13 @@ export async function duplicateCourse(
     .single();
 
   if (createError || !newCourse) {
-    return { error: "Could not create the course. Try again." };
+    // The demo refuses every write, and it should say so in those words
+    // rather than as a failure the reader might retry (Ramy, 18 Sep 2026,
+    // duplicating on the demo: "could not create the course, try again...
+    // is it because this is all just imaginary stuff"). demoOr passes any
+    // real error straight through to the sentence after it.
+    console.error("[dashboard/admin:duplicateCourse]", createError);
+    return { error: demoOr(createError, "Could not create the course. Try again.") };
   }
 
   // Timetable: shift every event by the same day-offset from the OLD

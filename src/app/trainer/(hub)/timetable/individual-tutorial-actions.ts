@@ -116,7 +116,7 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
       })
       .select("id")
       .single();
-    if (eventError || !event) return { error: "Could not add the timetable slot." };
+    if (eventError || !event) return { error: demoOr(eventError, "Could not add the timetable slot.") };
 
     const { error: inviteError } = await supabase.from("individual_tutorial_invites").insert({
       course_id: courseId,

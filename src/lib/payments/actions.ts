@@ -77,7 +77,7 @@ export async function createPaymentPlan(_prevState: PaymentFormState, formData: 
     })
     .select("id")
     .single();
-  if (planError || !plan) return { error: "Could not create the payment plan. An applicant can only have one plan at a time." };
+  if (planError || !plan) return { error: demoOr(planError, "Could not create the payment plan. An applicant can only have one plan at a time.") };
 
   // Equal split, last instalment absorbs the rounding remainder so the
   // instalments always sum to exactly total_amount.

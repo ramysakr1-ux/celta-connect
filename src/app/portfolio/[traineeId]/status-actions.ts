@@ -175,7 +175,7 @@ export async function markForRestart(
       .eq("id", traineeId),
   ]);
   if (transferError || statusError) {
-    return { error: "Could not record the restart. Try again." };
+    return { error: demoOr(transferError, "Could not record the restart. Try again.") };
   }
 
   revalidatePath(`/portfolio/${traineeId}`);
@@ -363,7 +363,7 @@ export async function markForDeferral(
       .eq("id", traineeId),
   ]);
   if (transferError || statusError) {
-    return { error: "Could not record the deferral. Try again." };
+    return { error: demoOr(transferError, "Could not record the deferral. Try again.") };
   }
 
   if (requestId) {

@@ -119,7 +119,7 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
     })
     .select("id")
     .single();
-  if (importError || !importRow) return { error: "Could not start the import. Nothing was created." };
+  if (importError || !importRow) return { error: demoOr(importError, "Could not start the import. Nothing was created.") };
 
   const admin = createAdminClient();
   const expiresAt = endOfCourseDay(course.end_date, (await getCachedCenter(centerId))?.time_zone);

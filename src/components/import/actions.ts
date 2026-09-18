@@ -131,7 +131,7 @@ export async function commitImport(_prev: CommitImportState, formData: FormData)
     })
     .select("id")
     .single();
-  if (importError || !importRow) return { error: "Could not start the import. Nothing was created." };
+  if (importError || !importRow) return { error: demoOr(importError, "Could not start the import. Nothing was created.") };
 
   // `applicants` has SELECT and UPDATE policies but deliberately NO INSERT
   // policy (migration 0081) -- every write goes through the admin client after

@@ -197,7 +197,7 @@ export async function markFilmedObservationTaskComplete(_prevState: FormState, f
     })
     .select("id")
     .single();
-  if (obsError || !observation) return { error: "Could not log this observation. Try again." };
+  if (obsError || !observation) return { error: demoOr(obsError, "Could not log this observation. Try again.") };
 
   await ensureResponseRow(supabase, taskId, user.id);
   const { error } = await supabase

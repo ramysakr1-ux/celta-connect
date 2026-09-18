@@ -50,7 +50,7 @@ export async function linkVolunteerPeople(
       .insert({ center_id: params.centerId })
       .select("id")
       .single();
-    if (createError || !created) return { error: "Could not link them. Try again." };
+    if (createError || !created) return { error: demoOr(createError, "Could not link them. Try again.") };
     personId = created.id;
   }
 
