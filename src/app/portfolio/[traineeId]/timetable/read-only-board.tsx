@@ -1,5 +1,6 @@
 "use client";
 
+import { tileShowsOwnTime } from "@/lib/timetable-own-time";
 import { useMemo, useState } from "react";
 import { buildDayRows, bandIndexFor, categorize, isEventLive, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
 import { CATEGORY_STYLE, toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
@@ -618,9 +619,12 @@ function SessionTile({
           icon off the floor of a fixed tile. */}
       {event.detail ? (
         <span className="line-clamp-2 text-micro leading-[1.3] text-muted">{event.detail}</span>
-      ) : letters || groupName || event.event_time ? (
+      ) : letters || groupName || (event.event_time && tileShowsOwnTime(event.tag)) ? (
+        // The time only where it is the tile's own fact -- a per-person
+        // booking -- since the band already shows it; the same rule as the
+        // tutor's board (19 Sep 2026).
         <span className="text-micro leading-[1.3] text-muted">
-          {[event.event_time?.slice(0, 5), groupName, letters].filter(Boolean).join(" · ")}
+          {[tileShowsOwnTime(event.tag) ? event.event_time?.slice(0, 5) : null, groupName, letters].filter(Boolean).join(" · ")}
         </span>
       ) : null}
       {youTeach ? <span className="pill pill-neutral mt-auto text-micro">You teach</span> : null}

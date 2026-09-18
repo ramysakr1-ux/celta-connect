@@ -1,5 +1,6 @@
 "use client";
 
+import { tileShowsOwnTime } from "@/lib/timetable-own-time";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
@@ -402,9 +403,21 @@ export function DragBoard({
                           >
                             <div className="flex items-center gap-1">
                               {event.zoom_url ? <CameraIcon /> : null}
-                              <span className="truncate text-label font-medium text-ink">{event.title}</span>
+                              {/* Two lines, not one: `truncate` cut "Supervised review --
+                                  presenting language" to "Supervised review" and left
+                                  Ramy asking what the tile was (19 Sep 2026). The tile
+                                  is a fixed height with room for two. */}
+                              <span className="line-clamp-2 text-label font-medium leading-[1.25] text-ink">{event.title}</span>
                             </div>
-                            {event.event_time ? <span className="text-micro text-muted">{event.event_time.slice(0, 5)}</span> : null}
+                            {/* The band already says the time, so a tile repeats it
+                                only when the time is the tile's own fact -- a booked
+                                slot with one person in it (consultation, tutorial,
+                                bookable planning). Ramy, 19 Sep 2026: "we can have
+                                time for consultations or tutorials, but not for
+                                inputs", and it must be consistent. */}
+                            {event.event_time && tileShowsOwnTime(event.tag) ? (
+                              <span className="text-micro text-muted">{event.event_time.slice(0, 5)}</span>
+                            ) : null}
                             {live && event.zoom_url ? (
                               <a
                                 href={event.zoom_url}
