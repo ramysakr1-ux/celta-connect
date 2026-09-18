@@ -32,6 +32,25 @@ import { appendicesFor } from "./lib/assignment-appendix-materials.mjs";
 import { renderAppendixPdf } from "./lib/appendix-pdf.mjs";
 
 const env = fs.readFileSync(".env.local", "utf8");
+// The curated timetable-title -> input-session-slug list lives in
+// src/lib/input-session-registry-links.ts, deliberately hand-confirmed: "NOT
+// a fuzzy/automatic string match -- guessing wrong here would silently point
+// a candidate at the wrong content." Read from that one file rather than
+// keeping a second copy in step with it. A parse that finds nothing simply
+// leaves every slug null, which is where the seed already was.
+const CURATED_SLUGS = (() => {
+  try {
+    const src = fs.readFileSync("src/lib/input-session-registry-links.ts", "utf8");
+    const body = src.slice(src.indexOf("TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG"));
+    const map = {};
+    for (const [, title, slug] of body.slice(0, body.indexOf("};")).matchAll(/"([^"]+)"\s*:\s*"([^"]+)"/g)) map[title] = slug;
+    return map;
+  } catch {
+    return {};
+  }
+})();
+const curatedSlugForTitle = (title) => CURATED_SLUGS[title] ?? null;
+
 const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
 const key = env.match(/SUPABASE_SERVICE_ROLE_KEY=(.+)/)[1].trim();
 const supabase = createClient(url, key);
@@ -3227,7 +3246,13 @@ async function main() {
         // Which non-TP sessions volunteer students may see materials for --
         // the demo lesson, the unassessed teach and the introduction, so the
         // Share materials page has something to show (5 Sep 2026).
-        registry_slug: e.slug ?? null,
+        // A row may name its slug, but almost none did: 25 of the demo's
+        // input sessions matched one of the 21 built sessions by title and
+        // opened nothing, because the slug had to be typed on each row by
+        // hand and was not (Ramy, 18 Sep 2026: "there are a lot of stale
+        // inputs"). The curated title->slug list is the one place those
+        // matches are confirmed, so read it rather than re-typing it here.
+        registry_slug: e.slug ?? curatedSlugForTitle(e.title) ?? null,
         input_session_criteria: e.criteria ?? [],
         shares_materials: e.type !== "tp" && Boolean(e.shares),
         created_by: trainerId,
