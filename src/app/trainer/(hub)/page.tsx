@@ -484,7 +484,10 @@ export default async function TodayPage() {
     // taught_at is a timestamptz, not a date -- slice to the date part so the
     // string compare below stays a real date compare.
     const taughtDate = lesson.taught_at?.slice(0, 10);
-    if (!hasFeedback && taughtDate) {
+    // As of today -- the demo's record clock writes the whole course at
+    // once, and this read "taught Thu 24 Sept" on the Friday before; a real
+    // course never has a future taught_at (Ramy, 20 Sep 2026).
+    if (!hasFeedback && taughtDate && taughtDate <= today) {
       const existing = unsentByTrainee.get(lesson.trainee_id);
       if (!existing || taughtDate > existing) unsentByTrainee.set(lesson.trainee_id, taughtDate);
     }
