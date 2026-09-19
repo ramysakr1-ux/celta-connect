@@ -357,6 +357,11 @@ async function main() {
       is_demo: true,
       address: "Beyoglu, Istanbul",
       time_zone: "Europe/Istanbul",
+      // The column's default is 160 h (0146). A four-week course banks at
+      // most 36 h, so at 160 no demo volunteer ever neared the first
+      // milestone and the certificate door never showed. Ramy, 20 Sep 2026:
+      // "lower it to 30 on the demo." Real centres keep their own setting.
+      volunteer_certificate_hours_threshold: 30,
     })
     .select("id")
     .single();
@@ -673,6 +678,7 @@ async function main() {
       is_demo: true,
       address: "Silver Lake, Los Angeles, CA",
       time_zone: "America/Los_Angeles",
+      volunteer_certificate_hours_threshold: 30,
     })
     .select("id")
     .single();
