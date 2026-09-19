@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, getPortfolioViewer } from "@/lib/auth/portfolio-access";
 import { formatDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
+import { asOf, onOrBefore } from "@/lib/as-of";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
@@ -52,7 +54,8 @@ export default async function CandidateLettersPage({ params }: { params: Promise
   // The centre's zone. A letter is issued, and an application marked, where
   // the centre is -- rendering in the runtime's showed the wrong day abroad.
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
-  const [{ data: letters }, { data: cases }] = await Promise.all([
+  const today = await demoToday(timeZone, trainee.course_id ?? undefined);
+  const [{ data: lettersRaw }, { data: casesRaw }] = await Promise.all([
     admin
       .from("formal_letters")
       .select("id, letter_type, issued_at, acknowledged_at")
@@ -65,7 +68,15 @@ export default async function CandidateLettersPage({ params }: { params: Promise
       .order("opened_at", { ascending: false }),
   ]);
 
-  const nothing = (letters ?? []).length === 0 && (cases ?? []).length === 0;
+  // As of today (src/lib/as-of.ts): on the demo the record clock issues a
+  // letter after the visit, and it sat on the file a week early.
+  const letters = (lettersRaw ?? [])
+    .filter((l) => onOrBefore(l.issued_at, today))
+    .map((l) => ({ ...l, acknowledged_at: asOf(l.acknowledged_at, today) }));
+  const cases = (casesRaw ?? [])
+    .filter((c) => onOrBefore(c.opened_at, today))
+    .map((c) => ({ ...c, candidate_account_recorded_at: asOf(c.candidate_account_recorded_at, today) }));
+  const nothing = letters.length === 0 && cases.length === 0;
 
   return (
     <div className="flex flex-col gap-5">

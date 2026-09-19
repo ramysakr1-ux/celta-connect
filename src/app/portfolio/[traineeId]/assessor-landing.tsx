@@ -6,7 +6,7 @@ import { AMBER, FAINT, INK, MUTED, TEAL } from "@/components/assessor/tokens";
 import { halfOwningDate, halfTpDates } from "@/lib/rotation";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { demoToday } from "@/lib/demo-clock";
-import { assignmentAsOf } from "@/lib/as-of";
+import { assignmentAsOf, onOrBefore } from "@/lib/as-of";
 import { courseElapsedFraction } from "@/lib/course-progress";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -153,8 +153,10 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   const arrangements = (person?.special_consideration_arrangements ?? []) as string[];
   const hasDeclaration = arrangements.length > 0 || Boolean((person?.special_consideration ?? "").trim());
 
-  const letterCount = (letters ?? []).length;
-  const caseCount = (malpractice ?? []).length;
+  // As of today: a letter issued, or a case opened, after today is not on
+  // the file yet.
+  const letterCount = (letters ?? []).filter((l) => onOrBefore(l.issued_at, today)).length;
+  const caseCount = (malpractice ?? []).filter((c) => onOrBefore(c.opened_at, today)).length;
   const formalRecordCount = letterCount + caseCount;
 
   const totalHours = course?.total_hours ?? 120;

@@ -6,7 +6,8 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { assignmentGradeCeiling } from "@/lib/provisional-grade";
 import { demoToday } from "@/lib/demo-clock";
-import { onOrBefore, assignmentAsOf } from "@/lib/as-of";
+import { onOrBefore, asOf, assignmentAsOf } from "@/lib/as-of";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // Handbook 12.1.3: "The candidate portfolios should be up-to-date on the day
 // of the assessment." Up to date, not finished -- the visit is mid-course
@@ -112,7 +113,18 @@ export async function computeAssessorReadiness(
   const { data: coursebooks } = usedBookIds.length ? await supabase.from("tp_coursebooks").select("id, level").in("id", usedBookIds) : { data: [] };
   const coursebookLevelById = new Map((coursebooks ?? []).map((c) => [c.id, c.level]));
 
-  const recordByTrainee = new Map((records ?? []).map((r) => [r.trainee_id, r]));
+  // As of today: a stage signed after today is not signed yet.
+  const recordByTrainee = new Map(
+    (records ?? []).map((r) => [
+      r.trainee_id,
+      {
+        ...r,
+        stage2_completed_at: asOf(r.stage2_completed_at, today),
+        trainee_signoff_stage2_at: asOf(r.trainee_signoff_stage2_at, today),
+        stage3_finalized_at: asOf(r.stage3_finalized_at, today),
+      },
+    ])
+  );
 
   const issues: ReadinessIssue[] = [];
   let portfoliosCompleteCount = 0;
@@ -279,7 +291,18 @@ export async function buildCandidateCards(
   const { data: coursebooks } = usedBookIds.length ? await supabase.from("tp_coursebooks").select("id, level").in("id", usedBookIds) : { data: [] };
   const coursebookLevelById = new Map((coursebooks ?? []).map((c) => [c.id, c.level]));
 
-  const recordByTrainee = new Map((records ?? []).map((r) => [r.trainee_id, r]));
+  // As of today: a stage signed after today is not signed yet.
+  const recordByTrainee = new Map(
+    (records ?? []).map((r) => [
+      r.trainee_id,
+      {
+        ...r,
+        stage2_completed_at: asOf(r.stage2_completed_at, today),
+        trainee_signoff_stage2_at: asOf(r.trainee_signoff_stage2_at, today),
+        stage3_finalized_at: asOf(r.stage3_finalized_at, today),
+      },
+    ])
+  );
 
   return (trainees ?? []).map((trainee) => {
     const record = recordByTrainee.get(trainee.id);
@@ -348,7 +371,11 @@ export async function buildCandidateCards(
             ? "resubmission outstanding"
             : "resubmission awaiting marking"
           : round === "not_submitted"
-            ? "not yet submitted"
+            ? unresolved.due_date && unresolved.due_date > today
+              // Not yet due is not an issue: "Skills not yet submitted" on
+              // the 20th read as a problem when it was due on the 21st.
+              ? `due ${formatCalendarDate(unresolved.due_date, { day: "numeric", month: "short" })}`
+              : "not yet submitted"
             : "awaiting marking";
         flaggedIssue = `${unresolved.assignment_type} ${state}`;
       }
