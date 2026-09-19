@@ -812,12 +812,18 @@ export default async function ResourceHubPage({
               </div>
             ) : key === "written_assignments" ? (
               <div className="flex flex-col gap-4">
-                <PlainCategoryGrid resources={byCategory.get("written_assignments") ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+                {/* The briefs below are the shelf; an empty note above them
+                    read "5 items · Nothing here yet" (20 Sep 2026). */}
+                {(byCategory.get("written_assignments") ?? []).length > 0 || (briefs ?? []).length === 0 ? (
+                  <PlainCategoryGrid resources={byCategory.get("written_assignments") ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+                ) : null}
                 <AssignmentBriefsSection briefs={briefs ?? []} />
               </div>
             ) : key === "cambridge_documentation" ? (
               <div className="flex flex-col gap-4">
-                <PlainCategoryGrid resources={byCategory.get("cambridge_documentation") ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+                {(byCategory.get("cambridge_documentation") ?? []).length > 0 ? (
+                  <PlainCategoryGrid resources={byCategory.get("cambridge_documentation") ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+                ) : null}
                 <CambridgeDocumentsShelf docs={cambridgeDocs} editable={false} />
               </div>
             ) : key === "tp_points" ? (

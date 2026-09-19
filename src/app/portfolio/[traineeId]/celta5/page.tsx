@@ -180,7 +180,7 @@ export default async function PortfolioCelta5Page({
         ? supabase.from("centers").select("name, center_number, is_uk_centre, time_zone, stage3_for_all_candidates").eq("id", viewer.center_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.course_id
-        ? supabase.from("course_tutors").select("profile_id").eq("course_id", viewer.course_id).is("left_at", null)
+        ? supabase.from("course_tutors").select("profile_id").eq("course_id", viewer.course_id).is("left_at", null).in("tutor_role", ["main_course_tutor", "assistant_course_tutor"])
         : Promise.resolve({ data: [] }),
       viewer?.course_id
         ? supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", viewer.course_id).order("created_at")
@@ -1093,7 +1093,9 @@ export default async function PortfolioCelta5Page({
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const [{ data: courseTutorRows }, { data: obsTasks }, { data: obsTaskSubmissions }, { data: criteriaTags }] = await Promise.all([
     trainee.course_id
-      ? supabase.from("course_tutors").select("profile_id").eq("course_id", trainee.course_id).is("left_at", null)
+      // The booklet's "Tutors" line: the people who tutored, not the external
+      // assessor or the course administrator, who sit on course_tutors too.
+      ? supabase.from("course_tutors").select("profile_id").eq("course_id", trainee.course_id).is("left_at", null).in("tutor_role", ["main_course_tutor", "assistant_course_tutor"])
       : Promise.resolve({ data: [] }),
     trainee.course_id
       ? supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", trainee.course_id).order("created_at")

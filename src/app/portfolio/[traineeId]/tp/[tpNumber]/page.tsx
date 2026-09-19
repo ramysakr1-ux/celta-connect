@@ -217,7 +217,9 @@ export default async function TpDetailPage({
   //
   // The candidate's own lesson date and TP group narrow it to their slot, the
   // same derivation tpLessonDate uses.
-  if (trainee.course_id && lessonDate) {
+  // A lesson already taught has no one still to reply for (the walk read
+  // "8 volunteers · nobody has replied yet" on TP6, two days after it).
+  if (trainee.course_id && lessonDate && !lessonTaught) {
     const { data: membership } = await admin
       .from("course_subgroup_members")
       .select("subgroup_id")

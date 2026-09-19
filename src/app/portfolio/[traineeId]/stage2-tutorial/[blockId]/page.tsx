@@ -8,6 +8,9 @@ import { BookSlotButton } from "@/app/portfolio/[traineeId]/stage2-tutorial/[blo
 import { releaseStage2Slot } from "@/app/trainer/(hub)/timetable/stage2-actions";
 import { formatCalendarDate } from "@/lib/format-date";
 import { glassTile } from "@/lib/timetable-category-style";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 // Trainee-facing side of the Stage 2 tutorial booking sheet (§3a). Access
 // is enforced by RLS, not by traineeId in the URL -- a candidate only ever
@@ -38,7 +41,10 @@ export default async function TraineeStage2TutorialPage({
 
   const myProfileId = session.profile.id;
   const mySlot = (slots ?? []).find((s) => s.trainee_id === myProfileId);
-  const hasOpenSlot = (slots ?? []).some((s) => !s.trainee_id);
+  // A sheet whose day has passed is a record, not a booking form.
+  const today = await demoToday((await getCachedCenter(session.profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  const passed = Boolean(event?.event_date && event.event_date < today);
+  const hasOpenSlot = !passed && (slots ?? []).some((s) => !s.trainee_id);
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,9 +58,9 @@ export default async function TraineeStage2TutorialPage({
           {event ? `${formatCalendarDate(event.event_date, { weekday: "long" })} · ${event.event_time?.slice(0, 5) ?? ""}` : "Stage 2 tutorials"}
         </h1>
         <p className="mt-2 text-body text-muted">
-          Around 15–20 min each, starting from {event?.event_time?.slice(0, 5)}. Running a few minutes over is
-          normal -- check with your group before you assume you&apos;re late. One booking each -- pick a position
-          below, or release it if your plans change.
+          {passed
+            ? `Around 15–20 min each, from ${event?.event_time?.slice(0, 5) ?? ""}. These tutorials have been held -- this is the record of who booked which position.`
+            : `Around 15–20 min each, starting from ${event?.event_time?.slice(0, 5) ?? ""}. Running a few minutes over is normal -- check with your group before you assume you're late. One booking each -- pick a position below, or release it if your plans change.`}
         </p>
       </div>
 
@@ -70,7 +76,7 @@ export default async function TraineeStage2TutorialPage({
                     <span className={`text-body ${isMine ? "font-semibold text-primary" : "text-muted"}`}>
                       {isMine ? "You" : (nameById.get(s.trainee_id) ?? "Unknown")}
                     </span>
-                    {isMine ? (
+                    {isMine && !passed ? (
                       <form action={releaseStage2Slot}>
                         <input type="hidden" name="slot_id" value={s.id} />
                         <input type="hidden" name="block_id" value={blockId} />

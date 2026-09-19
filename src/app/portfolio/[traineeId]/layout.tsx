@@ -268,7 +268,9 @@ export default async function PortfolioLayout({
           .eq("event_date", today)
       : Promise.resolve({ data: [] }),
   ]);
-  const quietHoursNote = computeQuietHoursNote((todaysEvents ?? []).map((e) => e.event_time), new Date(), today, timeZone);
+  // The demo clock's instant, not the wall clock's: a demo day read from a
+  // later real day had every session "ended a while ago" at 10:00.
+  const quietHoursNote = computeQuietHoursNote((todaysEvents ?? []).map((e) => e.event_time), demoInstant, today, timeZone);
 
   // Tasks answered, not sections self-ticked -- same shared
   // responseIsAnswered the task page, the Hub door and the roster use, so

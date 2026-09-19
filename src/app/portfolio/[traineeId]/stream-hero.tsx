@@ -93,7 +93,10 @@ export function StreamHero({
     : null;
 
   // Part 5: the next non-lunch slot's category decides the side card's tint.
-  const upcoming = day.slots.filter((s) => s.category !== "lu" && s.endsAtMs > now && s.id !== slot?.id).slice(0, 3);
+  // Only what involves me -- the same "mine" the timetable's toggle uses.
+  // Without it, the card listed the other candidates' Stage 3 tutorials as
+  // "next for you" (trainee walk, 20 Sep 2026).
+  const upcoming = day.slots.filter((s) => s.mine && s.category !== "lu" && s.endsAtMs > now && s.id !== slot?.id).slice(0, 3);
 
   // Two columns only when there is something in the second one. Late in the
   // day every remaining session is behind you, "Next for you" drops, and a

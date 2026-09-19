@@ -483,6 +483,7 @@ async function main() {
   const { data: course, error: courseErr } = await supabase
     .from("courses")
     .insert({
+      course_code: "C9/2026", // the centre's own course number -- the CELTA 5 cover prints it
       center_id: center.id,
       name: "CELTA Demo Course",
       start_date: startDate,
@@ -1492,7 +1493,12 @@ async function main() {
     }
     const aim = assigned.main_lesson_aim;
     // The level that was actually taught, traced through the assigned point.
-    let level = "Elementary (A2)";
+    // A self-chosen TP7/8 has no point to trace, and defaulted to A2 for
+    // everyone -- Group A's second half is B1+ (trainee walk, 20 Sep 2026).
+    const ownGroup = traineeDefs.find((d) => trainees[d.name] === traineeId)?.group;
+    const firstLevelOf = (g) => SCHEDULE[`Group ${g}`]?.[1] ?? "A2";
+    const halfLevel = ownGroup ? (tpNumber <= 4 ? firstLevelOf(ownGroup) : firstLevelOf(ownGroup) === "A2" ? "B1+" : "A2") : "A2";
+    let level = halfLevel === "A2" ? "Elementary (A2)" : `Lower-intermediate (${halfLevel})`;
     if (assigned.tp_point_id) {
       const { data: pt } = await supabase.from("tp_points").select("tp_coursebook_id").eq("id", assigned.tp_point_id).maybeSingle();
       const { data: cbk } = pt ? await supabase.from("tp_coursebooks").select("level").eq("id", pt.tp_coursebook_id).maybeSingle() : { data: null };
@@ -3885,11 +3891,15 @@ async function main() {
   // later (migration 0093) and the card filters on it, so an announcement
   // without sent_at is invisible however good it looks in the table.
   {
-    const hoursAgo = (n) => new Date(nowMs() - n * 3600000).toISOString();
+    // Anchored to the earlier of the record clock and the real clock: under
+    // --full the record clock sits after the course, and "20 hours ago" from
+    // there was a week in the future -- every announcement read "just now"
+    // on every demo day (trainee walk, 20 Sep 2026).
+    const hoursAgo = (n) => new Date(Math.min(nowMs(), Date.now()) - n * 3600000).toISOString();
     const posts = [
       { pinned: true, title: "Reading for tomorrow is chapter 4 only, not 4 and 5", body: "Apologies for the confusion in yesterday's handout. Chapter 4 only. If you have already read 5, no harm done.", h: 20 },
       { pinned: false, title: "Observation slots for Thursday are open", body: "Six slots, first come first served. Sign up on the timetable -- two of you still need a second observation before the end of week 3.", h: 3 },
-      { pinned: false, title: "Assignment 2 briefs are in Resources", body: "Focus on the Learner. The brief, the marking criteria and last course's worked example are all in the Resource Hub.", h: 52 },
+      { pinned: false, title: "Assignment 1 brief is in Resources", body: "Focus on the Learner. The brief, the marking criteria and last course's worked example are all in the Resource Hub.", h: 52 },
     ];
     const { error } = await supabase.from("course_broadcasts").insert(
       posts.map((p) => ({

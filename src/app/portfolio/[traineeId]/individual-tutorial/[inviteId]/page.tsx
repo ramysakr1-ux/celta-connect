@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
+import { formatCalendarDate } from "@/lib/format-date";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -44,7 +45,7 @@ export default async function TraineeIndividualTutorialPage({
       <div className="plain-card flex flex-col gap-3">
         <p className="text-label text-muted">{label} tutorial</p>
         <h1 className="font-serif text-h2 text-ink">
-          {event?.event_date}
+          {event?.event_date ? formatCalendarDate(event.event_date, { weekday: "long", day: "numeric", month: "long" }) : ""}
           {event?.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}
         </h1>
         <p className="text-body text-muted">Your tutor has set this time individually for you. Confirm below.</p>

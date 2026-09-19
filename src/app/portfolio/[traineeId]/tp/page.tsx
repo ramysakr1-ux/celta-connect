@@ -240,10 +240,14 @@ export default async function TpHubPage({
         .eq("trainee_id", traineeId)
         .eq("tp_number", mostRecentFeedbackTp)
         .maybeSingle();
+      // The same point starred under planning and teaching is one point,
+      // not two lines (trainee walk, 20 Sep 2026).
       carriedForward = [
         ...(fullFeedback?.action_points_planning ?? []).filter((p) => p.starred),
         ...(fullFeedback?.action_points_teaching ?? []).filter((p) => p.starred),
-      ].map((p) => p.text);
+      ]
+        .map((p) => p.text)
+        .filter((text, i, all) => all.indexOf(text) === i);
     }
   }
 

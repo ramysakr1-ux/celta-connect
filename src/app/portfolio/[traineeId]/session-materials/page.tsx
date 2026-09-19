@@ -43,6 +43,9 @@ export default async function TraineeSessionMaterialsPage({
     .from("course_timetable_events")
     .select("id, title, event_date")
     .eq("course_id", courseId)
+    // The sessions a candidate teaches unassessed (0296) -- not the tutors'
+    // course introduction or demo lessons, which the list used to offer.
+    .eq("type", "unassessed_tp")
     .eq("shares_materials", true)
     .order("event_date");
 
@@ -62,10 +65,10 @@ export default async function TraineeSessionMaterialsPage({
     <div className="flex flex-col gap-5">
       <div>
         <p className="text-label font-semibold tracking-[0.1em] text-muted uppercase">Session materials</p>
-        <h1 className="font-serif text-h1 text-ink">Share materials for a session</h1>
+        <h1 className="font-serif text-h1 text-ink">Share materials for your unassessed teaching</h1>
         <p className="mt-1 max-w-2xl text-body text-muted">
-          For anything that isn&apos;t a graded TP -- a demo lesson. Volunteer students see whatever the session is titled on the
-          timetable, with whatever you attach here.
+          For the slots you teach that aren&apos;t graded TPs -- the getting-to-know-you activity and the unassessed teach.
+          Volunteer students see whatever the session is titled on the timetable, with whatever you attach here.
         </p>
       </div>
 

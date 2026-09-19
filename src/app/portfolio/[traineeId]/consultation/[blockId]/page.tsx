@@ -8,6 +8,9 @@ import { BookConsultationButton } from "@/app/portfolio/[traineeId]/consultation
 import { releaseConsultationSlot } from "@/app/trainer/(hub)/timetable/consultation-actions";
 import { shortDate, shortTime } from "@/lib/tutorials-section";
 import { glassTile } from "@/lib/timetable-category-style";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { demoToday } from "@/lib/demo-clock";
 
 // Candidate side of a consultation sheet (migration 0275). Visibility is
 // RLS's: a candidate sees every block on their own course. Whether they
@@ -40,7 +43,12 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
   const nameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
 
   const mySlots = (slots ?? []).filter((s) => s.trainee_id === myProfileId);
-  const hasOpenSlot = (slots ?? []).some((s) => !s.trainee_id);
+  // Once the day has passed the sheet is a record: nothing to book or
+  // release (the walk offered "Book next open position" on a consultation
+  // four days gone, 20 Sep 2026).
+  const today = await demoToday((await getCachedCenter(session.profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  const passed = Boolean(event?.event_date && event.event_date < today);
+  const hasOpenSlot = !passed && (slots ?? []).some((s) => !s.trainee_id);
   const slotMinutes = block.slot_length_minutes;
   const startMinutes = event?.event_time ? Number(event.event_time.slice(0, 2)) * 60 + Number(event.event_time.slice(3, 5)) : 0;
   const timeAt = (position: number) => {
@@ -62,8 +70,9 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
           {tutor?.full_name ?? "Your tutor"} · {event ? `${shortDate(event.event_date)} ${shortTime(event.event_time)}` : ""}
         </h1>
         <p className="mt-2 text-body text-muted">
-          Positions of {slotMinutes} minutes, in order from {shortTime(event?.event_time)}. Book one if you want to talk something through --
-          an assignment, a lesson, anything on the course. Release it if your plans change.
+          {passed
+            ? `Positions of ${slotMinutes} minutes, in order from ${shortTime(event?.event_time)}. This consultation has passed -- what is here is the record of who booked.`
+            : `Positions of ${slotMinutes} minutes, in order from ${shortTime(event?.event_time)}. Book one if you want to talk something through -- an assignment, a lesson, anything on the course. Release it if your plans change.`}
         </p>
       </div>
 
@@ -79,7 +88,7 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
                 {s.trainee_id ? (
                   <div className="flex items-center gap-3">
                     <span className={`text-body ${isMine ? "font-semibold text-primary" : "text-muted"}`}>{isMine ? "You" : (nameById.get(s.trainee_id) ?? "Booked")}</span>
-                    {isMine ? (
+                    {isMine && !passed ? (
                       <form action={releaseConsultationSlot}>
                         <input type="hidden" name="slot_id" value={s.id} />
                         <input type="hidden" name="block_id" value={blockId} />
@@ -101,7 +110,7 @@ export default async function TraineeConsultationPage({ params }: { params: Prom
 
       {hasOpenSlot ? (
         <BookConsultationButton blockId={blockId} assignments={(assignments ?? []).map((a) => a.assignment_type)} ownTutor={ownTutor} />
-      ) : mySlots.length === 0 ? (
+      ) : mySlots.length === 0 && !passed ? (
         <p className="text-body text-muted">No open positions left on this sheet.</p>
       ) : null}
     </div>
