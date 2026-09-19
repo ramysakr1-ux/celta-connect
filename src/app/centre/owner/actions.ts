@@ -283,3 +283,32 @@ export async function reassignUnownedCourse(_prev: ReassignState, formData: Form
   revalidatePath("/centre/owner");
   return { error: null, ok: `${course.name} is now administered by ${person?.full_name ?? "them"}.` };
 }
+
+// The other half of addCustomRole. Only a role nobody holds can go -- the
+// people come off it on the Roles tab first, so a removal never silently
+// strips anyone's access. Its overrides go with it; the owner log keeps
+// what it was (Ramy, 20 Sep 2026: "yes, add the remove role action").
+export async function removeCustomRole(_prevState: OwnerActionState, formData: FormData): Promise<OwnerActionState> {
+  const { profile, centerId, demo } = await requireOwner();
+  if (demo) return { error: demo };
+  const roleKey = (formData.get("role_key") as string | null)?.trim();
+  if (!roleKey) return { error: "Which role?" };
+  if (CENTRE_ROLES.includes(roleKey as CentreRole)) return { error: "Built-in roles can't be removed." };
+
+  const admin = createAdminClient();
+  const { data: role } = await admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId).eq("role_key", roleKey).maybeSingle();
+  if (!role) return { error: "That role isn't one of this centre's." };
+  const { count: holders } = await admin.from("centre_roles").select("id", { count: "exact", head: true }).eq("center_id", centerId).eq("role", roleKey).is("revoked_at", null);
+  if (holders && holders > 0) {
+    return { error: `${holders === 1 ? "One person holds" : `${holders} people hold`} this role -- remove it from them on the Roles tab first.` };
+  }
+  const { data: overrides } = await admin.from("centre_permission_overrides").select("capability_key, granted_level").eq("center_id", centerId).eq("role_key", roleKey);
+  await admin.from("centre_permission_overrides").delete().eq("center_id", centerId).eq("role_key", roleKey);
+  const { error } = await admin.from("centre_custom_roles").delete().eq("center_id", centerId).eq("role_key", roleKey);
+  if (error) return { error: "Could not remove that role. Nothing was changed." };
+
+  await logOwnerAction(centerId, profile.id, "custom_role.remove", "centre_custom_roles", { roleKey, label: role.label, overrides: overrides ?? [] });
+  revalidatePath("/centre/owner");
+  revalidatePath("/centre/roles");
+  return { error: null };
+}

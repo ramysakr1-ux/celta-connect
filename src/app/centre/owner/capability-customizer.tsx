@@ -10,6 +10,7 @@ import {
 import { CapabilityPill } from "@/app/centre/owner/capability-pill";
 import { AddCapabilityForm } from "@/app/centre/owner/add-capability-form";
 import { AddRoleForm } from "@/app/centre/owner/add-role-form";
+import { RemoveRoleForm } from "@/app/centre/owner/remove-role-form";
 import { resetCapabilityOverrides } from "@/app/centre/owner/actions";
 
 const BUILT_IN_ROLE_COLOR: Record<string, string> = {
@@ -48,7 +49,7 @@ export function CapabilityCustomizer({
 }) {
   const roleCols = [
     ...CENTRE_ROLES.map((r) => ({ key: r as string, label: CENTRE_ROLE_LABELS[r], color: BUILT_IN_ROLE_COLOR[r] })),
-    ...customRoles.map((r) => ({ key: r.role_key, label: r.label, color: CUSTOM_ROLE_COLOR })),
+    ...customRoles.map((r) => ({ key: r.role_key, label: r.label, color: CUSTOM_ROLE_COLOR, custom: true })),
   ];
   // describeRoleCapabilities already knows every built-in Capability on its
   // own -- only the genuinely custom rows need passing in, or a built-in
@@ -112,6 +113,7 @@ export function CapabilityCustomizer({
               {roleCols.map((rc) => (
                 <th key={rc.key} className="border-b px-3 py-3 text-center text-[11px] font-bold" style={{ color: rc.color, background: "var(--owner-parchment)", borderColor: "var(--owner-line)" }}>
                   {rc.label}
+                  {"custom" in rc && rc.custom ? <RemoveRoleForm roleKey={rc.key} label={rc.label} /> : null}
                 </th>
               ))}
             </tr>
