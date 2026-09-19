@@ -2,6 +2,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Stops a demo door from silently taking a real person's session.
@@ -47,4 +48,24 @@ export async function demoWouldReplaceRealSession(request: Request): Promise<Nex
   to.searchParams.set("name", profile.full_name ?? "your account");
   if (centre?.name) to.searchParams.set("centre", centre.name);
   return NextResponse.redirect(to);
+}
+
+/**
+ * The two token doors (assessor, volunteer) mint a cookie rather than a
+ * magic link, so unlike the other demo doors nothing replaced the real
+ * session: the interstitial said "this signs you out of your own account"
+ * and then did not. Signed in as a centre owner elsewhere, the assessor pack
+ * opened but every candidate card 404'd -- the portfolio saw a real viewer,
+ * read through that viewer's RLS, and found no such trainee (assessor walk,
+ * 20 Sep 2026). Local scope: this browser's cookies only, not the person's
+ * other devices.
+ */
+export async function dropRealSession(): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    if (data.user) await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    // No session to drop, or cookies not writable here: the door still opens.
+  }
 }

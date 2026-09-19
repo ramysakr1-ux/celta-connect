@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { pickDemoCourse } from "@/lib/demo-course";
 import { DEMO_DAY_COOKIE, parseDemoDay } from "@/lib/demo-clock";
 import { demoTokenDestination } from "@/lib/demo/demo-destination";
-import { demoWouldReplaceRealSession } from "@/lib/demo/demo-session-guard";
+import { demoWouldReplaceRealSession, dropRealSession } from "@/lib/demo/demo-session-guard";
 
 // Sixth demo entry point (the original five -- centre-admin, course-admin,
 // volunteer, trainer, trainee -- didn't include this one). Assessors never
@@ -30,6 +30,7 @@ export async function GET(request: Request) {
   // (demo-session-guard.ts).
   const swap = await demoWouldReplaceRealSession(request);
   if (swap) return swap;
+  await dropRealSession();
   const admin = createAdminClient();
   // ?to= is a path UNDER this pack's token root, so a card can open the
   // lesson plans or the marking guidance and can never point at another

@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { pickDemoCourse } from "@/lib/demo-course";
 import { DEMO_DAY_COOKIE, parseDemoDay } from "@/lib/demo-clock";
 import { demoTokenDestination } from "@/lib/demo/demo-destination";
-import { demoWouldReplaceRealSession } from "@/lib/demo/demo-session-guard";
+import { demoWouldReplaceRealSession, dropRealSession } from "@/lib/demo/demo-session-guard";
 
 // Volunteer students never get a real Supabase Auth account (migration
 // 0030) -- so unlike the other four demo entries, this one doesn't mint a
@@ -25,6 +25,7 @@ export async function GET(request: Request) {
   // (demo-session-guard.ts).
   const swap = await demoWouldReplaceRealSession(request);
   if (swap) return swap;
+  await dropRealSession();
   const admin = createAdminClient();
   // ?to= is a path under this volunteer's own token root (demo-destination.ts).
   const to = new URL(request.url).searchParams.get("to");
