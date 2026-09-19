@@ -39,6 +39,7 @@ import { LanguageAnalysisReadOnly } from "@/components/language-analysis-read-on
 import { levelKey } from "@/lib/volunteer-class-session";
 import { RoomHead } from "@/components/room-head";
 import { demoToday } from "@/lib/demo-clock";
+import { asOf, onOrBefore } from "@/lib/as-of";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 
@@ -186,7 +187,7 @@ export default async function TpDetailPage({
     );
   }
 
-  const [{ data: assignment }, { data: plan }, { data: googleConnection }, { data: center }] = await Promise.all([
+  const [{ data: assignmentRaw }, { data: planRaw }, { data: googleConnection }, { data: center }] = await Promise.all([
     supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId).eq("tp_number", tpNumber).maybeSingle(),
     supabase.from("tp_plans").select("*").eq("trainee_id", traineeId).eq("tp_number", tpNumber).maybeSingle(),
     admin.from("center_google_connections").select("center_id").eq("center_id", trainee.center_id).maybeSingle(),
@@ -204,6 +205,10 @@ export default async function TpDetailPage({
   // taught_at still counts, for a lesson taught early or logged by hand.
   const lessonDate = trainee.course_id ? await tpLessonDate(supabase, trainee.course_id, traineeId, tpNumber) : null;
   const centreToday = await demoToday((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  // As of today (src/lib/as-of.ts): a plan the record clock submitted next
+  // week is a draft today, and its lesson is not yet taught.
+  const assignment = assignmentRaw ? { ...assignmentRaw, taught_at: asOf(assignmentRaw.taught_at, centreToday) } : null;
+  const plan = planRaw ? { ...planRaw, submitted_at: asOf(planRaw.submitted_at, centreToday) } : null;
   const lessonTaught = Boolean(assignment?.taught_at) || Boolean(lessonDate && lessonDate <= centreToday);
 
   let volunteerAttendance: { expected: number; total: number } | null = null;
@@ -304,7 +309,7 @@ export default async function TpDetailPage({
     ? await admin.from("peer_observation_notes").select("note_1, note_2").eq("sheet_id", peerSheet.id)
     : { data: [] };
 
-  const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluation }, { data: feedback }] = plan
+  const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluationRaw }, { data: feedbackRaw }] = plan
     ? await Promise.all([
         supabase.from("tp_language_analyses").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
         supabase.from("tp_materials").select("*").eq("tp_plan_id", plan.id).order("created_at"),
@@ -312,6 +317,10 @@ export default async function TpDetailPage({
         supabase.from("tp_feedback").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
       ])
     : [{ data: null }, { data: [] }, { data: null }, { data: null }];
+  // Feedback released next week is not released; a self-evaluation submitted
+  // next week is still being written (src/lib/as-of.ts).
+  const selfEvaluation = selfEvaluationRaw ? { ...selfEvaluationRaw, submitted_at: asOf(selfEvaluationRaw.submitted_at, centreToday) } : null;
+  const feedback = feedbackRaw && onOrBefore(feedbackRaw.submitted_at, centreToday) ? feedbackRaw : null;
 
   let previousActionPoints: string[] = [];
   // Personal Aims' own carried suggestion is planning-scoped only (a

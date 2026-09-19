@@ -11,6 +11,7 @@ import type { Database } from "@/lib/supabase/types";
 import { formatCalendarDate } from "@/lib/format-date";
 import { RoomHead, ROOM_BUTTON, ROOM_PRIMARY } from "@/components/room-head";
 import { demoToday } from "@/lib/demo-clock";
+import { asOf, onOrBefore } from "@/lib/as-of";
 
 type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
 
@@ -123,7 +124,7 @@ export default async function TpHubPage({
     if (!trainee || trainee.course_id !== assessorCourseId) notFound();
   }
 
-  const [{ data: plans }, { data: lessons }, { data: tpPlans }, { data: selfEvaluations }, { data: feedbackRows }, { data: assignments }] =
+  const [{ data: plansRaw }, { data: lessonsRaw }, { data: tpPlansRaw }, { data: selfEvaluationsRaw }, { data: feedbackRowsRaw }, { data: assignments }] =
     await Promise.all([
       supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId),
       supabase.from("tp_lessons").select("*").eq("trainee_id", traineeId).not("tp_number", "is", null),
@@ -140,6 +141,13 @@ export default async function TpHubPage({
   // this page's first center/timezone fetch just to swap DEFAULT_TIMEZONE
   // for the real one.
   const today = await demoToday(DEFAULT_TIMEZONE);
+  // As of today (src/lib/as-of.ts): the record clock writes the whole course
+  // at once, and this page read "8 of 8 taught" on day 15.
+  const plans = (plansRaw ?? []).map((p) => ({ ...p, taught_at: asOf(p.taught_at, today) }));
+  const lessons = (lessonsRaw ?? []).filter((l) => onOrBefore(l.lesson_date, today));
+  const tpPlans = (tpPlansRaw ?? []).map((p) => ({ ...p, submitted_at: asOf(p.submitted_at, today) }));
+  const selfEvaluations = (selfEvaluationsRaw ?? []).map((p) => ({ ...p, submitted_at: asOf(p.submitted_at, today) }));
+  const feedbackRows = (feedbackRowsRaw ?? []).filter((f) => onOrBefore(f.submitted_at, today));
 
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const lessonByTpNumber = new Map((lessons ?? []).map((l) => [l.tp_number as number, l]));

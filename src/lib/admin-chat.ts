@@ -67,7 +67,9 @@ export async function getAdminChatRooms(profileId: string, centerIds: string[]):
         .from("staff_channel_members")
         .upsert({ channel_id: channel.id, profile_id: profileId }, { onConflict: "channel_id,profile_id" });
 
-      return { channelId: channel.id, name: channel.name ?? name, centerId: centre.id };
+      // The centre's CURRENT name: the stored one is from the day the room
+      // was made, and Elmswood's still said "My Center" (20 Sep 2026).
+      return { channelId: channel.id, name, centerId: centre.id };
     })
   );
 

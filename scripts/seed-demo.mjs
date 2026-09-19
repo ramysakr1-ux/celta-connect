@@ -26,6 +26,8 @@ import { seedFinalDayDemo } from "./lib/final-day-demo.mjs";
 import { seedPreCourseDemo } from "./lib/pre-course-demo.mjs";
 import { seedObservationTasksDemo } from "./lib/observation-tasks-demo.mjs";
 import { seedVolunteerPoolDemo } from "./lib/volunteer-pool-demo.mjs";
+import { seedResourceHubDemo } from "./lib/resource-hub-demo.mjs";
+import { seedFilmedObservationsDemo } from "./lib/filmed-observations-demo.mjs";
 import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
 import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
@@ -349,7 +351,9 @@ async function main() {
       // different zones still exercise every date helper's explicit-timezone
       // contract. Renaming this one costs nothing: it was always fiction.
       name: "Connect CELTA Istanbul",
-      center_number: "DEMO-IST",
+      // Five characters, the way Cambridge issues them -- "DEMO-IST" overflowed
+      // the CELTA 5 cover's boxes (Ramy, 20 Sep 2026).
+      center_number: "TR093",
       is_demo: true,
       address: "Beyoglu, Istanbul",
       time_zone: "Europe/Istanbul",
@@ -665,7 +669,7 @@ async function main() {
     .from("centers")
     .insert({
       name: "Connect CELTA Los Angeles",
-      center_number: "DEMO-LA",
+      center_number: "US071",
       is_demo: true,
       address: "Silver Lake, Los Angeles, CA",
       time_zone: "America/Los_Angeles",
@@ -3435,7 +3439,7 @@ async function main() {
     tutorSignatureByGroup: { A: "M. Webb", B: "J. Blake" },
     tutorNameByGroup: { A: "Marcus Webb", B: "Jordan Blake" },
     course: { name: course.name, start_date: startDate, end_date: endDate },
-    center: { name: center.name, center_number: "DEMO-IST" },
+    center: { name: center.name, center_number: "TR093" },
   });
   console.log("Stage 3: three invites, three records, two fail letters on day 15");
   } else {
@@ -3597,6 +3601,22 @@ async function main() {
     if (error) console.warn("  filmed observation tasks:", error.message);
   }
   console.log("filmed observations:", foSessionRows.length, "recordings,", breakRows.length, "breaks,", taskRows.length, "tasks");
+  // Watched and answered, for the sessions already held -- "0 of 5 tasks
+  // done" for everyone on day 15 was a demo nobody had watched (20 Sep 2026).
+  {
+    const fo = await seedFilmedObservationsDemo(supabase, {
+      courseId: course.id,
+      trainees: traineeDefs.map((def) => ({ id: trainees[def.name], name: def.name, withdrawn: Boolean(def.withdrawn) })),
+      today: isoOf(recordNow),
+    });
+    console.log(`filmed observations watched: ${fo.sessions} sessions, ${fo.responses} completed tasks`);
+  }
+  // The library: Cambridge documents copied from Elmswood's shelf, a reading
+  // list, the named slots, and the centre's admin chat room (20 Sep 2026).
+  {
+    const hub = await seedResourceHubDemo(supabase, { centerId: center.id, uploadedBy: trainerId, nowIso: beforeStart(10, "11:00") });
+    console.log(`resource hub: ${hub.copied} Cambridge files copied (${hub.skipped} skipped), ${hub.reading} reading, ${hub.slots} slots, admin room ${hub.adminRoom ? "ready" : "not created"}`);
+  }
 
   // --- Volunteer: token-based, no real login (migration 0030). Seeded
   // already past the one-time signup screen so the demo lands straight on

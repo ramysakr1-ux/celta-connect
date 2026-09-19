@@ -15,6 +15,7 @@ import { resolveBrief } from "@/lib/assignment-brief";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { demoToday } from "@/lib/demo-clock";
+import { assignmentAsOf } from "@/lib/as-of";
 
 // The candidate's document, and the assessor's read-only record of it.
 //
@@ -49,8 +50,10 @@ export default async function AssignmentDetailPage({
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
-  const { data: assignment } = await supabase.from("assignments").select("*").eq("id", assignmentId).maybeSingle();
-  if (!assignment || assignment.trainee_id !== traineeId) notFound();
+  const { data: assignmentRaw } = await supabase.from("assignments").select("*").eq("id", assignmentId).maybeSingle();
+  if (!assignmentRaw || assignmentRaw.trainee_id !== traineeId) notFound();
+  // As of today (src/lib/as-of.ts).
+  const assignment = assignmentAsOf(assignmentRaw, await demoToday((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE));
 
   const criteria = await getAssignmentCriteria(supabase, trainee.center_id, assignment.assignment_type);
 

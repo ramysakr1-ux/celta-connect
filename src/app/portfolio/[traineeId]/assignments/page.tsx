@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { assignmentAsOf } from "@/lib/as-of";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -76,7 +77,10 @@ export default async function AssignmentsPage({
   const releaseFor = (assignmentType: string) =>
     isStaffViewer || !clock || clock.isOpen(assignmentType) ? null : (clock.releaseByType.get(assignmentType) ?? null);
 
-  const { data: assignmentsRaw } = await supabase.from("assignments").select("*").eq("trainee_id", traineeId);
+  const { data: assignmentsFetched } = await supabase.from("assignments").select("*").eq("trainee_id", traineeId);
+  // As of today (src/lib/as-of.ts): rounds submitted or marked after today
+  // read as they stood today.
+  const assignmentsRaw = (assignmentsFetched ?? []).map((a) => assignmentAsOf(a, today));
   // build-spec.md "Assignment 5": "not numbered as a Cambridge assignment
   // in the candidate's workspace... keep it visually distinct from the
   // four" -- and "does not count toward the 3-of-4 rule". Split out here

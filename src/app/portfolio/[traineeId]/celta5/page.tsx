@@ -57,6 +57,8 @@ import { computeStage3Status } from "@/lib/stage3-status";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { RoomHead } from "@/components/room-head";
 import { demoToday } from "@/lib/demo-clock";
+import { asOf, onOrBefore, assignmentAsOf } from "@/lib/as-of";
+import { courseElapsedFraction } from "@/lib/course-progress";
 
 // CELTA 5's own wording for the overall-progress options (p.19, p.24).
 // The booklet prints the sentence, not the enum, and "not recorded" is a
@@ -144,7 +146,7 @@ export default async function PortfolioCelta5Page({
       { data: timetableEvents },
       { data: plans },
       { data: subgroupMember },
-      { data: assignments },
+      { data: assignmentsRaw },
       { data: course },
       { data: center },
       { data: courseTutorRows },
@@ -152,7 +154,7 @@ export default async function PortfolioCelta5Page({
       { data: obsTaskSubmissions },
       { data: tutorialInvites },
       { data: peerNotes },
-      { data: tpLessons },
+      { data: tpLessonsRaw },
       { data: traineeAbsences },
     ] = await Promise.all([
       supabase.rpc("get_my_celta5_record"),
@@ -170,7 +172,7 @@ export default async function PortfolioCelta5Page({
       supabase
         .from("assignments")
         .select(
-          "assignment_type, first_status, resubmission_status, resubmission_outcome, final_grade, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at"
+          "assignment_type, first_status, resubmission_status, resubmission_outcome, final_grade, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at, first_submitted_at, resubmission_submitted_at, first_marks_saved_at, resubmission_marks_saved_at"
         )
         .eq("trainee_id", traineeId),
       viewer?.course_id
@@ -246,22 +248,27 @@ export default async function PortfolioCelta5Page({
     const byCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m]));
     const candidateRatedCount = CELTA_CRITERIA_CODES.filter((c) => byCode.get(c)?.candidate_status).length;
     const tutorRatedCount = CELTA_CRITERIA_CODES.filter((c) => byCode.get(c)?.tutor_status_stage2).length;
-    const stage2Submitted = !!record.stage2_candidate_submitted_at;
-    const stage1And2Released = !!record.stage2_completed_at;
-    const finalReleased = !!record.trainer_signoff_final_at;
+    // As of today (src/lib/as-of.ts): the record clock writes the whole
+    // course at once; day 15 read 120/120 hours, 4/4 graded, signed off.
+    const c5Today = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
+    const assignments = (assignmentsRaw ?? []).map((a) => assignmentAsOf(a, c5Today));
+    const tpLessons = (tpLessonsRaw ?? []).filter((l) => onOrBefore(l.lesson_date, c5Today));
+    const stage2Submitted = onOrBefore(record.stage2_candidate_submitted_at, c5Today);
+    const stage1And2Released = onOrBefore(record.stage2_completed_at, c5Today);
+    const finalReleased = onOrBefore(record.trainer_signoff_final_at, c5Today);
     // "Both signed" specifically means the candidate's own final sign-off
     // (trainee_signoff_stage2_at, set by signOffStage2 below), not just the
     // tutor's release of the matrix -- release makes the sign-off button
     // available, it isn't the signature itself.
     const bothSigned = !!record.trainee_signoff_stage2_at;
 
-    const taughtTpNumbers = new Set((plans ?? []).filter((p) => p.taught_at).map((p) => p.tp_number));
+    const taughtTpNumbers = new Set((plans ?? []).filter((p) => onOrBefore(p.taught_at, c5Today)).map((p) => p.tp_number));
     const assignmentStatusByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
     // Ramy, 28 Aug 2026: "the logic behind everything" -- was the server's
     // UTC date; currentTpRound below already reads the centre's real
     // time_zone the correct way, this call was just missed.
     const progressIssues = computeProgressIssues({
-      today: await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE),
+      today: c5Today,
       timetableEvents: timetableEvents ?? [],
       taughtTpNumbers,
       assignmentStatusByType,
@@ -314,9 +321,14 @@ export default async function PortfolioCelta5Page({
     // same queries the rest of this page already runs -- nothing here is a
     // second source of truth for a number shown elsewhere.
     const totalCourseHours = course?.total_hours ?? null;
+    // Hours attended is a running total with no dates on it; as of today it
+    // cannot exceed the hours the course has taught so far.
+    const hoursSoFar =
+      totalCourseHours && course?.start_date && course?.end_date ? Math.round(totalCourseHours * courseElapsedFraction(course.start_date, course.end_date, c5Today)) : null;
+    const hoursAttendedAsOf = record.hours_attended == null ? null : hoursSoFar == null ? record.hours_attended : Math.min(record.hours_attended, hoursSoFar);
     const attendancePct =
-      totalCourseHours && record.hours_attended != null
-        ? Math.round((record.hours_attended / totalCourseHours) * 100)
+      totalCourseHours && hoursAttendedAsOf != null
+        ? Math.round((hoursAttendedAsOf / totalCourseHours) * 100)
         : null;
     const assignmentsGraded = (assignments ?? []).filter(
       (a) => a.first_status === "approved" || a.resubmission_status === "approved" || a.first_status === "resubmission_required"
@@ -343,7 +355,7 @@ export default async function PortfolioCelta5Page({
       {
         label: "Attendance",
         value: attendancePct != null ? `${attendancePct}%` : "—",
-        detail: `${record.hours_attended ?? 0} / ${totalCourseHours ?? "—"} hours attended`,
+        detail: `${hoursAttendedAsOf ?? 0} / ${totalCourseHours ?? "—"} hours attended`,
         state: (attendancePct != null && attendancePct >= 100 ? "met" : "neutral") as "met" | "short" | "neutral",
       },
       {

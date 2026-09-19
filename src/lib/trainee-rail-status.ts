@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { onOrBefore, assignmentAsOf } from "@/lib/as-of";
 import type { Database } from "@/lib/supabase/types";
 import { halfTpDates, rotationPosition, type TpTimetableEvent } from "@/lib/rotation";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
@@ -90,7 +91,7 @@ export async function buildRailStatus({
   const [{ data: subgroupMember }, { data: assignments }, { data: plans }, { data: invites }, { data: todaysEvents }] =
     await Promise.all([
       supabase.from("course_subgroup_members").select("subgroup_id, base_slot").eq("trainee_id", traineeId).maybeSingle(),
-      supabase.from("assignments").select("assignment_type, due_date, first_status").eq("trainee_id", traineeId),
+      supabase.from("assignments").select("assignment_type, due_date, first_status, first_submitted_at, resubmission_status, resubmission_submitted_at, first_outcome_signed_at, first_marks_saved_at, resubmission_outcome_signed_at, resubmission_marks_saved_at").eq("trainee_id", traineeId),
       supabase.from("plan_assignments").select("tp_number, taught_at, short_title").eq("trainee_id", traineeId),
       supabase
         .from("individual_tutorial_invites")
@@ -118,7 +119,9 @@ export async function buildRailStatus({
   const teachesToday = halfDates.includes(todayIso);
   const tpToday = teachesToday ? halfDates.indexOf(todayIso) + 1 : null;
 
-  const untaught = (plans ?? []).filter((p) => !p.taught_at).sort((a, b) => a.tp_number - b.tp_number);
+  // As of today (src/lib/as-of.ts): a lesson the record clock has already
+  // marked taught next week is still ahead of this candidate.
+  const untaught = (plans ?? []).filter((p) => !onOrBefore(p.taught_at, todayIso)).sort((a, b) => a.tp_number - b.tp_number);
 
   // Split the untaught plans by whether their day has been and gone. taught_at
   // is written when the trainer logs the outcome, not when the date arrives, so
@@ -220,6 +223,7 @@ export async function buildRailStatus({
 
   // Written Assignments -- the only door that ever turns garnet.
   const outstanding = (assignments ?? [])
+    .map((a) => assignmentAsOf(a, todayIso))
     .filter((a) => a.first_status === "not_submitted" && a.due_date)
     .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
   const soonest = outstanding[0] ?? null;

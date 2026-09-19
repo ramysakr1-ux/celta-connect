@@ -97,7 +97,11 @@ export function TrainerTabs({
     ? [TABS[0], ATTENDANCE_REGISTER_TAB, ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB]
     : tourMode
       ? [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB]
-      : [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB];
+      : // Resource hub is in the v4 header (project_trainer_today_v4_rebuild)
+        // and fell out of this list in 7ecd09a2, the commit that built the
+        // header; nothing else linked to /trainer/resource-hub, so tutors
+        // had no door to it for a fortnight (Ramy, 20 Sep 2026).
+        [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], TABS[5], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB];
 
   return (
     // scroll-row, not overflow-hidden: the tabs that do not fit are still

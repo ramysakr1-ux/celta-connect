@@ -16,6 +16,7 @@ import { buildHeroState, type TeachingOn } from "@/app/portfolio/[traineeId]/str
 import { buildWaitingList, type WaitingItem } from "@/app/portfolio/[traineeId]/waiting-list";
 import { classLessons, levelKey } from "@/lib/volunteer-class-session";
 import { demoToday, demoNow } from "@/lib/demo-clock";
+import { onOrBefore, assignmentAsOf } from "@/lib/as-of";
 
 
 // Same pattern as fol-spot-check/page.tsx's own local relativeTime -- kept
@@ -69,6 +70,7 @@ export async function TodayTab({
   viewerIsCandidate?: boolean;
 }) {
   const today = await demoToday(timeZone);
+  const nowIso = (await demoNow(timeZone)).toISOString();
   const tomorrow = addDaysIso(today, 1);
 
   const [
@@ -77,7 +79,7 @@ export async function TodayTab({
     { data: tpPlans },
     { data: selfEvaluations },
     { data: feedbackRows },
-    { data: assignments },
+    { data: assignmentsRaw },
     { data: subgroupMember },
     { data: observations },
   ] = await Promise.all([
@@ -89,7 +91,7 @@ export async function TodayTab({
     supabase.from("tp_plans").select("tp_number, submitted_at").eq("trainee_id", traineeId),
     supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("tp_number, grade, submitted_at").eq("trainee_id", traineeId),
-    supabase.from("assignments").select("id, assignment_type, first_status, due_date").eq("trainee_id", traineeId),
+    supabase.from("assignments").select("id, assignment_type, first_status, due_date, first_submitted_at, resubmission_status, resubmission_submitted_at, first_outcome_signed_at, first_marks_saved_at, resubmission_outcome_signed_at, resubmission_marks_saved_at").eq("trainee_id", traineeId),
     supabase.from("course_subgroup_members").select("subgroup_id, base_slot").eq("trainee_id", traineeId).maybeSingle(),
     supabase.from("observations").select("length_minutes, filmed").eq("trainee_id", traineeId),
   ]);
@@ -110,7 +112,10 @@ export async function TodayTab({
     .from("course_broadcasts")
     .select("id, title, body, pinned, created_at, author_id")
     .eq("course_id", courseId)
-    .not("sent_at", "is", null);
+    .not("sent_at", "is", null)
+    // As of the demo instant -- a post the record clock sent next week is
+    // not on the wall yet (src/lib/as-of.ts).
+    .lte("sent_at", nowIso);
   const scopeFilters = [
     "and(visible_to_trainee_id.is.null,visible_to_tp_group_id.is.null,visible_to_subgroup_id.is.null)",
     `visible_to_trainee_id.eq.${traineeId}`,
@@ -260,6 +265,8 @@ export async function TodayTab({
   const huntFoundCount = (huntProgress ?? []).length;
   const scavengerDone = huntFoundCount >= SCAVENGER_HUNT_QUESTIONS.length;
 
+  // Assignment state as of today (src/lib/as-of.ts).
+  const assignments = (assignmentsRaw ?? []).map((a) => assignmentAsOf(a, today));
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const tpPlanByTpNumber = new Map((tpPlans ?? []).map((p) => [p.tp_number, p]));
   const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
@@ -294,7 +301,7 @@ export async function TodayTab({
     const tpIndex = halfDates.indexOf(dateIso);
     const tpNumber = tpIndex >= 0 ? tpIndex + 1 : null;
     const plan = tpNumber ? planByTpNumber.get(tpNumber) : null;
-    if (!tpNumber || !plan || plan.taught_at || (members ?? []).length === 0) return null;
+    if (!tpNumber || !plan || onOrBefore(plan.taught_at, today) || (members ?? []).length === 0) return null;
 
     const size = (members ?? []).length;
     const order = rotationPosition(subgroupMember.base_slot, size, tpNumber) + 1;
@@ -505,7 +512,7 @@ export async function TodayTab({
       if (halfDates[i] <= tomorrow) continue;
       const tpNumber = i + 1;
       const plan = planByTpNumber.get(tpNumber);
-      if (plan && !plan.taught_at) return computeTeachingFor(halfDates[i]);
+      if (plan && !onOrBefore(plan.taught_at, today)) return computeTeachingFor(halfDates[i]);
     }
     return null;
   }
@@ -529,7 +536,7 @@ export async function TodayTab({
     !preCourse && !teachingToday && !teachingTomorrow && !teachingNext
       ? (await getHalfDates()).reduce<number[]>((acc, date, i) => {
           const plan = planByTpNumber.get(i + 1);
-          if (date < today && plan && !plan.taught_at) acc.push(i + 1);
+          if (date < today && plan && !onOrBefore(plan.taught_at, today)) acc.push(i + 1);
           return acc;
         }, [])
       : [];
@@ -561,7 +568,7 @@ export async function TodayTab({
     unrecordedLabel,
     unrecordedTps,
     hasTeachingSchedule: Boolean(subgroupMember && subgroupRow?.half_order),
-    tpsTaught: (plans ?? []).filter((p) => p.taught_at).length,
+    tpsTaught: (plans ?? []).filter((p) => onOrBefore(p.taught_at, today)).length,
     gtkyAssignment,
   });
 
