@@ -20,8 +20,11 @@ import { demoToday, demoNow } from "@/lib/demo-clock";
 
 // Same pattern as fol-spot-check/page.tsx's own local relativeTime -- kept
 // page-local rather than shared, matching that precedent, for a 6-line helper.
-function relativeTime(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
+// Against the demo clock's instant, not the wall clock's: on a pinned demo
+// day the wall clock is later, and a post from "this morning" read
+// "1 day ago" (trainee walk, 20 Sep 2026).
+function relativeTime(iso: string, nowMs: number): string {
+  const diffMs = nowMs - new Date(iso).getTime();
   const minutes = Math.floor(diffMs / 60_000);
   if (minutes < 60) return minutes <= 1 ? "just now" : `${minutes} minutes ago`;
   const hours = Math.floor(minutes / 60);
@@ -805,7 +808,7 @@ export async function TodayTab({
                   </p>
                   {unread && b.body ? <p className="mt-[3px] text-meta leading-relaxed text-ink">{b.body}</p> : null}
                   <p className="mt-[3px] text-meta text-muted">
-                    {authorNameById.get(b.author_id ?? "") ?? "Your tutor"} · {relativeTime(b.created_at)}
+                    {authorNameById.get(b.author_id ?? "") ?? "Your tutor"} · {relativeTime(b.created_at, serverNowMs)}
                   </p>
                 </div>
               );
