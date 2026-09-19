@@ -674,7 +674,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     .filter(Boolean)
     .join(" · ");
   const topicLabel = nextClassTeachers.find((t) => t.topic)?.topic ?? null;
-  const teachersLabel = nextClassTeachers.length > 0 ? nextClassTeachers.map((t) => t.name).join(" and ") : null;
+  // "Amara Okafor, Daniel Kim and Priya Sharma" -- three names joined by
+  // "and" twice read as a list nobody would write (volunteer walk, 20 Sep
+  // 2026). NextClassFacts keys "Teachers" off the " and ".
+  const teacherNames = nextClassTeachers.map((t) => t.name);
+  const teachersLabel =
+    teacherNames.length > 1 ? `${teacherNames.slice(0, -1).join(", ")} and ${teacherNames[teacherNames.length - 1]}` : (teacherNames[0] ?? null);
 
   return (
     <div className="hover-trainee flex min-h-screen flex-col items-center bg-background px-4 py-8 md:py-12">
