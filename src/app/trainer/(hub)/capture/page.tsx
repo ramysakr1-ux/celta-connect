@@ -23,7 +23,7 @@ export default async function CapturePage() {
   const { data: roster } = trainer.course_id
     ? await supabase
         .from("profiles")
-        .select("id, full_name")
+        .select("id, full_name, course_status")
         .eq("course_id", trainer.course_id)
         .eq("role", "trainee")
         .order("full_name")
@@ -39,6 +39,10 @@ export default async function CapturePage() {
     : { data: [] };
 
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
+  // A note captured before a withdrawal keeps its name above; the list of
+  // who you can capture against is the active cohort (a withdrawn candidate
+  // was offered here on day 15, 19 Sep 2026).
+  const activeRoster = (roster ?? []).filter((r) => r.course_status === "active");
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
@@ -51,7 +55,7 @@ export default async function CapturePage() {
         </p>
       </div>
 
-      <CaptureForm roster={roster ?? []} tpNumbers={TP_NUMBERS} />
+      <CaptureForm roster={activeRoster} tpNumbers={TP_NUMBERS} />
 
       {recentNotes && recentNotes.length > 0 ? (
         <div className="sheet">

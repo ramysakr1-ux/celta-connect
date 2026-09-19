@@ -6,6 +6,7 @@ import { computeCourseDayProgress } from "@/lib/course-day";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { demoToday } from "@/lib/demo-clock";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // specs/for-claude-code-fol-spot-check.md, extending
 // for-claude-code-fol-pooled-evidence.md's "Trainer UX / Days 2-9": "a spot-
@@ -45,8 +46,11 @@ export default async function FolSpotCheckPage() {
   // The centre's day, not the UTC day, so the countdown does not slip a day
   // every evening (12 Sep 2026).
   const today = await demoToday((await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE);
+  // Signed: negative once it has happened. This was clamped at 0, so from
+  // day 11 to the end of the course the header read "Divergence session
+  // today" (19 Sep 2026, on day 15).
   const daysUntilDivergence = divergenceDate
-    ? Math.max(0, Math.round((new Date(divergenceDate).getTime() - new Date(today).getTime()) / 86_400_000))
+    ? Math.round((new Date(divergenceDate).getTime() - new Date(today).getTime()) / 86_400_000)
     : null;
 
   type Row = { name: string; grammarCount: number; pronCount: number; lastLoggedAt: string | null };
@@ -89,10 +93,12 @@ export default async function FolSpotCheckPage() {
           <p className="text-body text-muted">
             {dayProgress ? `Day ${dayProgress.currentDay} of ${dayProgress.totalDays}` : null}
             {dayProgress && daysUntilDivergence !== null ? " · " : null}
-            {daysUntilDivergence !== null
+            {daysUntilDivergence !== null && divergenceDate
               ? daysUntilDivergence === 0
                 ? "Divergence session today"
-                : `${daysUntilDivergence} day${daysUntilDivergence === 1 ? "" : "s"} until the divergence session`
+                : daysUntilDivergence < 0
+                  ? `Divergence session held ${formatCalendarDate(divergenceDate, { weekday: "short", day: "numeric", month: "short" })}`
+                  : `${daysUntilDivergence} day${daysUntilDivergence === 1 ? "" : "s"} until the divergence session`
               : null}
           </p>
         </div>

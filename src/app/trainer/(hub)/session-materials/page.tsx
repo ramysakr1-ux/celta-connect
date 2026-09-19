@@ -42,6 +42,9 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
     // Nobody shares materials for lunch, and a deadline is not a session.
     .neq("tag", "lunch")
     .not("type", "in", '("assignment_due","resubmission_due")')
+    // "Assignment 3 (Skills) set" is a milestone with no time -- not a
+    // session anyone attends (19 Sep 2026).
+    .not("event_time", "is", null)
     .order("event_date")
     .order("event_time");
 

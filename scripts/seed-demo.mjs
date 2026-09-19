@@ -954,18 +954,26 @@ async function main() {
   // Connect on the Friday, the tutor picked for the rest on the Monday --
   // three weeks in, "0 of 12 have chosen" was a demo that had never had a
   // day one. Likewise the scavenger hunt, which nobody had ever finished.
+  // 19 Sep 2026, walking the tutor's GTKY page: every candidate sat in
+  // "inter", but Group A opens on Roadmap A2 (SCHEDULE below) -- half the
+  // cohort was offered activities for a level they were not teaching. The
+  // band now follows the group's first level, the way resolveGtkyAssignments
+  // reads it off TP1's coursebook: A2 -> elem, B1+ -> inter.
   const GTKY_BANK_BY_BAND = {
+    elem: ["find_someone_who", "find_your_other_half", "draw_your_name"],
     inter: ["star_facts", "a_minute_of_questions", "hunt_the_teacher"],
   };
-  const GTKY_BAND = "inter";
-  const gtkyPool = GTKY_BANK_BY_BAND[GTKY_BAND];
+  const gtkyBandForGroup = (group) => (group === "A" ? "elem" : "inter");
   const dayOneIso = startDate;
   const dayOne = new Date(`${dayOneIso}T14:00:00`);
   const fridayBefore = new Date(dayOne); fridayBefore.setDate(fridayBefore.getDate() - 3); fridayBefore.setHours(17, 0, 0, 0);
   const pastDayOne = STAGE !== "precourse";
-  const traineeList = Object.values(trainees);
+  const traineeList = traineeDefs.map((def) => trainees[def.name]);
   await supabase.from("gtky_assignments").insert(
-    traineeList.map((traineeId, i) => {
+    traineeDefs.map((def, i) => {
+      const traineeId = trainees[def.name];
+      const band = gtkyBandForGroup(def.group);
+      const gtkyPool = GTKY_BANK_BY_BAND[band];
       // Rotate the trio so the running order differs candidate to candidate.
       const offered = [gtkyPool[i % 3], gtkyPool[(i + 1) % 3], gtkyPool[(i + 2) % 3]];
       // Nine picked themselves before the Friday deadline; the tutor picked
@@ -977,7 +985,7 @@ async function main() {
         center_id: center.id,
         course_id: course.id,
         trainee_id: traineeId,
-        level_band: GTKY_BAND,
+        level_band: band,
         offered_slugs: offered,
         chosen_slug: chosen,
         chosen_at: chosen ? (selfPicked ? fridayBefore : dayOne).toISOString() : null,
@@ -3457,7 +3465,9 @@ async function main() {
     // book Jordan; day 14's is Syllabus planning for DEF, so ABC can book
     // Marcus -- the two half-group sessions leave the other half its
     // consultation hour.
-    [trainerId, "Jordan Blake", 13, 9, 4, ["Amara Okafor"]],
+    // Three positions of 15 min fill the 45-minute band; four put the last
+    // one at 18:00, after the day ends (19 Sep 2026).
+    [trainerId, "Jordan Blake", 13, 9, 3, ["Amara Okafor"]],
     [trainer2Id, "Marcus Webb", 14, 9, 3, []],
   ]) {
     const { data: ev } = await supabase
@@ -3627,10 +3637,25 @@ async function main() {
     // Emeka is Intermediate and Grace Elementary -- these two were the
     // wrong way round, so the pooled log filed every error against the
     // class the learner is not in (walked 15 Sep 2026).
-    const folLearners = [
-      { id: volunteer.id, tpClass: "B1+" },
-      { id: graceVolunteer.id, tpClass: "A2" },
-    ];
+    // 19 Sep 2026: tp_class was the class LEVEL ("A2", "B1+"), but the
+    // candidate's own FOL form writes the subgroup's name ("Group A -- Day
+    // A") and the tutor's spot check keys on the same -- so the roster
+    // counted 2 entries a head while the spot check read every class as
+    // Empty. The name now, and the learner is the class that group taught
+    // in its first half (SCHEDULE: A on A2 with Grace, B on B1+ with
+    // Emeka), TP1-4 only so every entry sits inside the FOL window (days
+    // 2-9) and is dated on the day of the TP it came from.
+    const folLearnerForGroup = { A: graceVolunteer.id, B: volunteer.id };
+    const subgroupNameFor = (def) => `Group ${def.group} -- Day ${def.half === 1 ? "A" : "B"}`;
+    const { data: folTpRows } = await supabase
+      .from("course_timetable_events")
+      .select("event_date, linked_tp_number")
+      .eq("course_id", course.id)
+      .eq("type", "tp")
+      .lte("linked_tp_number", 4)
+      .order("event_date");
+    const folTpDate = {};
+    for (const r of folTpRows ?? []) folTpDate[r.linked_tp_number] ??= r.event_date;
     const FOL_ERRORS = [
       { problem_type: "grammar", note: '"She don\'t like coffee" -- third-person -s dropped in the present simple.' },
       { problem_type: "grammar", note: '"I have seen him yesterday" -- present perfect used with a finished-time adverbial.' },
@@ -3647,16 +3672,18 @@ async function main() {
       .forEach((def, i) => {
         for (let k = 0; k < 2; k += 1) {
           const e = FOL_ERRORS[(i * 2 + k) % FOL_ERRORS.length];
-          const learner = folLearners[(i + k) % folLearners.length];
+          const tpNumber = 1 + ((i + k) % 4); // TP1-4, the first half, inside the FOL window
+          const tpDate = folTpDate[tpNumber];
           folRows.push({
             center_id: center.id,
             course_id: course.id,
             logged_by_candidate_id: trainees[def.name],
-            learner_id: learner.id,
-            tp_class: learner.tpClass,
-            tp_number: 3 + ((i + k) % 3), // TP3-5, already taught by now
+            learner_id: folLearnerForGroup[def.group],
+            tp_class: subgroupNameFor(def),
+            tp_number: tpNumber,
             problem_type: e.problem_type,
             note: e.note,
+            logged_at: tpDate && `${tpDate}T13:15:00` <= isoOf(recordNow) ? new Date(`${tpDate}T13:15:00`).toISOString() : stamp,
           });
         }
       });

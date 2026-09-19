@@ -963,5 +963,9 @@ export function gtkyLevelBandFromCourseLevel(level: string): GtkyLevelBand | nul
   // "{title} ({level})"). Trim/uppercase defensively rather than assume
   // callers always pass it exactly as stored.
   const code = level.trim().toUpperCase();
-  return CEFR_CODE_TO_BAND[code] ?? null;
+  // "B1+" (Speakout B1+, Roadmap B1+) had no entry, so a group whose TP1
+  // coursebook is B1+ resolved to null and got no offer at all -- found on
+  // the demo centre's own coursebook, 19 Sep 2026. A "+" code without its
+  // own band takes the base code's; A2+ keeps its own ("pre") above.
+  return CEFR_CODE_TO_BAND[code] ?? (code.endsWith("+") ? CEFR_CODE_TO_BAND[code.slice(0, -1)] : undefined) ?? null;
 }
