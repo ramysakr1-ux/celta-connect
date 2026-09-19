@@ -23,6 +23,7 @@ import { Panel, DocRow } from "@/components/assessor/panel";
 import { CandidateCard } from "@/components/assessor/candidate-card";
 import { AMBER, CREAM, GOLD, INK, MUTED, TEAL, WARM } from "@/components/assessor/tokens";
 import { demoToday } from "@/lib/demo-clock";
+import { asOf, onOrBefore } from "@/lib/as-of";
 import { DemoDayTag } from "@/components/demo-day-tag";
 
 // The assessor's palette lives in components/assessor/tokens.ts now -- one
@@ -110,17 +111,19 @@ export default async function AssessorPage({
     .select("assignment_type, second_marker_recorded_at")
     .eq("course_id", courseId)
     .neq("assignment_type", "Plagiarism Reflection");
-  const doubleMarkedByType = new Map<string, number>();
-  for (const r of doubleMarkRows ?? []) {
-    if (r.second_marker_recorded_at) doubleMarkedByType.set(r.assignment_type, (doubleMarkedByType.get(r.assignment_type) ?? 0) + 1);
-  }
-  const hasDoubleMarking = doubleMarkedByType.size > 0;
-
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = await demoToday(timeZone, courseId);
+
+  // As of today (src/lib/as-of.ts): a countersign dated after today has
+  // not happened yet (assessor walk, 20 Sep 2026).
+  const doubleMarkedByType = new Map<string, number>();
+  for (const r of doubleMarkRows ?? []) {
+    if (onOrBefore(r.second_marker_recorded_at, today)) doubleMarkedByType.set(r.assignment_type, (doubleMarkedByType.get(r.assignment_type) ?? 0) + 1);
+  }
+  const hasDoubleMarking = doubleMarkedByType.size > 0;
 
   // MCT-set, not computed from assessor_visit_date -- see migration 0127.
   // Same rule the grades report works to, or the pack and the tutors' own
@@ -133,7 +136,7 @@ export default async function AssessorPage({
   const sendByDate = provisionalDeadline.dueDate;
   const daysOut = sendByDate ? Math.ceil((new Date(`${sendByDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000) : null;
 
-  const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }, { data: malpracticeCases }] = await Promise.all([
+  const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }, { data: malpracticeCasesRaw }] = await Promise.all([
     // Only people with an actual teaching/assessing role. A course_tutors row
     // can carry a null tutor_role -- the course administrator is approved on
     // the course but is not on the teaching roster (see the seed's own note) --
@@ -174,6 +177,24 @@ export default async function AssessorPage({
       .order("opened_at", { ascending: false }),
   ]);
 
+  // As of today: a case opened after today is not a case yet, and a step
+  // dated after today has not been taken (the pack read "Decided 25 Sept"
+  // on the 20th -- assessor walk, 20 Sep 2026).
+  const malpracticeCases = (malpracticeCasesRaw ?? [])
+    .filter((c) => onOrBefore(c.opened_at, today))
+    .map((c) => {
+      const accountAt = asOf(c.candidate_account_recorded_at, today);
+      const decidedAt = asOf(c.decided_at, today);
+      return {
+        ...c,
+        candidate_account_recorded_at: accountAt,
+        candidate_account: accountAt ? c.candidate_account : null,
+        decided_at: decidedAt,
+        decision_notes: decidedAt ? c.decision_notes : null,
+        outcome: decidedAt ? c.outcome : null,
+        status: decidedAt ? c.status : "open",
+      };
+    });
   const malpracticeTraineeIds = [...new Set((malpracticeCases ?? []).map((c) => c.trainee_id))];
   const { data: malpracticeTrainees } =
     malpracticeTraineeIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", malpracticeTraineeIds) : { data: [] };
@@ -316,7 +337,8 @@ export default async function AssessorPage({
     visitHalf && course.assessor_visit_date
       ? halfTpDates(allCourseTpEvents, visitHalf).indexOf(course.assessor_visit_date) + 1
       : 0;
-  const teachingOrderNames: string[] = [];
+  const teachingOrderNames: (string | null)[] = [];
+  const visitLessonCount = () => teachingOrderNames.filter(Boolean).length;
   const visitTeachingIds: string[] = [];
   if (visitHalf && visitTpNumber > 0) {
     const halfSubgroupIds = (visitSubgroups ?? []).filter((sg) => sg.half_order === visitHalf).map((sg) => sg.id);
@@ -336,10 +358,11 @@ export default async function AssessorPage({
           order: rotationPosition(m.base_slot, sizeBySubgroup.get(m.subgroup_id) ?? 1, visitTpNumber) + 1,
         };
       })
-      .filter((x): x is { traineeId: string; name: string; order: number } => Boolean(x.name))
       .sort((a, b) => a.order - b.order);
+    // The seat stays in the order (dropping it shifted every later name
+    // into the wrong slot); only the name goes.
     teachingOrderNames.push(...ordered.map((o) => o.name));
-    visitTeachingIds.push(...ordered.map((o) => o.traineeId));
+    visitTeachingIds.push(...ordered.filter((o) => o.name).map((o) => o.traineeId));
   }
   // How many of the day's teachers have actually submitted a plan. The panel
   // used to assert "All N carry a lesson plan" from the slot count alone --
@@ -882,7 +905,12 @@ export default async function AssessorPage({
                                   nth TP slot of the day belongs to the nth
                                   candidate in the rotation order. */}
                               {e.type === "tp"
-                                ? (teachingOrderNames[visitDayEvents.filter((x, j) => x.type === "tp" && j < i).length] ?? e.title)
+                                ? (() => {
+                                    const idx = visitDayEvents.filter((x, j) => x.type === "tp" && j < i).length;
+                                    return idx < teachingOrderNames.length
+                                      ? (teachingOrderNames[idx] ?? "No lesson -- this seat's candidate has withdrawn")
+                                      : e.title;
+                                  })()
                                 : e.title}
                             </span>
                             {/* for-claude-code-assessor-pack-decisions.md §2: "a
@@ -957,13 +985,13 @@ export default async function AssessorPage({
                       is agreed with the centre on the day, and all of them carry a
                       lesson plan for exactly that reason -- but the panel should not
                       read as three observations. */}
-                  {teachingOrderNames.length > 2 ? (
+                  {visitLessonCount() > 2 ? (
                     <span style={{ fontSize: "var(--text-label)", lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(88% 0.016 82)" }}>
-                      You co-observe <strong style={{ color: INK }}>two</strong> of the {teachingOrderNames.length} lessons above
+                      You co-observe <strong style={{ color: INK }}>two</strong> of the {visitLessonCount()} lessons above
                       (Handbook 14.2), agreed with the centre.{" "}
-                      {visitPlansIn >= teachingOrderNames.length
-                        ? `All ${teachingOrderNames.length} lesson plans are in, since the choice can change on the day.`
-                        : `${visitPlansIn} of ${teachingOrderNames.length} lesson plans are in so far -- 14.1 allows the rest to be handed over at the start of the lesson.`}
+                      {visitPlansIn >= visitLessonCount()
+                        ? `All ${visitLessonCount()} lesson plans are in, since the choice can change on the day.`
+                        : `${visitPlansIn} of ${visitLessonCount()} lesson plans are in so far -- 14.1 allows the rest to be handed over at the start of the lesson.`}
                     </span>
                   ) : null}
 

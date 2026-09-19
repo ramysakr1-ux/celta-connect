@@ -6,7 +6,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { assignmentGradeCeiling } from "@/lib/provisional-grade";
 import { demoToday } from "@/lib/demo-clock";
-import { onOrBefore } from "@/lib/as-of";
+import { onOrBefore, assignmentAsOf } from "@/lib/as-of";
 
 // Handbook 12.1.3: "The candidate portfolios should be up-to-date on the day
 // of the assessment." Up to date, not finished -- the visit is mid-course
@@ -122,12 +122,16 @@ export async function computeAssessorReadiness(
 
   for (const trainee of trainees ?? []) {
     const record = recordByTrainee.get(trainee.id);
-    const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
+    const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id).map((a) => assignmentAsOf(a, today));
     const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && onOrBefore(p.taught_at, today));
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
     hoursAssessedTotal += assessedTp.hoursAssessed;
-    if (record?.provisional_grade) gradesEnteredCount += 1;
-    if (record?.provisional_approved_at) gradesApprovedCount += 1;
+    // As of today: on the demo the record clock enters and approves every
+    // grade on day 17, and the pack read "10 of 11 confirmed" three days
+    // before they were due (assessor walk, 20 Sep 2026).
+    const enteredStamp = record?.provisional_set_at ?? record?.provisional_approved_at ?? null;
+    if (record?.provisional_grade && (!enteredStamp || onOrBefore(enteredStamp, today))) gradesEnteredCount += 1;
+    if (onOrBefore(record?.provisional_approved_at, today)) gradesApprovedCount += 1;
 
     let complete = true;
 
@@ -279,7 +283,7 @@ export async function buildCandidateCards(
 
   return (trainees ?? []).map((trainee) => {
     const record = recordByTrainee.get(trainee.id);
-    const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
+    const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id).map((a) => assignmentAsOf(a, today));
     const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && onOrBefore(p.taught_at, today));
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
 
@@ -356,7 +360,10 @@ export async function buildCandidateCards(
       tpsTaught: assessedTp.tpsTaught,
       hoursAssessed: assessedTp.hoursAssessed,
       levels: assessedTp.levels,
-      provisionalLabel: record?.provisional_grade
+      // The pack's own words: "the MCT approves all before it's sent and
+      // recorded here" -- a proposal the MCT has not approved (or, as of
+      // today, has not approved yet) is not the assessor's to see.
+      provisionalLabel: record?.provisional_grade && onOrBefore(record.provisional_approved_at, today)
         ? record.provisional_grade_upper
           ? `${record.provisional_grade} / ${record.provisional_grade_upper}`
           : record.provisional_grade
