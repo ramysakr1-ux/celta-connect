@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ASSIGNMENT_ORDER } from "@/lib/assignment-info";
 import { requireRole } from "@/lib/auth/require-role";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can, canView } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { disconnectGoogleDrive, updateAutoTagCriteria } from "@/app/dashboard/admin/settings/actions";
 import { CenterProfileForm } from "@/app/dashboard/admin/settings/center-profile-form";
@@ -48,6 +50,16 @@ export default async function AdminSettingsPage({
   searchParams: Promise<{ google_connected?: string; google_error?: string }>;
 }) {
   const profile = await requireRole("admin");
+  // Two of these sections are the centre's, not a course's: the profile and
+  // the Drive connection sit behind centre.settings.edit, which a course
+  // administrator does not hold. The page showed them the centre-number
+  // form with a Save button anyway (course admin walk, 20 Sep 2026). A
+  // legacy flat admin (no centre roles) keeps full access, as elsewhere.
+  const roleCtx = await getCentreRoleContext(profile);
+  const centreSettings = {
+    view: roleCtx.roles.length === 0 || canView(roleCtx.roles, "centre.settings.edit", roleCtx.overrides),
+    edit: roleCtx.roles.length === 0 || can(roleCtx.roles, "centre.settings.edit", roleCtx.overrides),
+  };
   // For the one timestamp on the page. toLocaleString() with no arguments
   // rendered it as "9/6/2026, 5:12:33 PM" at UTC (audit, 6 Sep 2026).
   const timeZone = (await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
@@ -165,7 +177,7 @@ export default async function AdminSettingsPage({
   // "A red dot flag if something there needs attention." Each reads real
   // state -- a flag that is sometimes wrong is worse than none, because people
   // stop trusting it and then miss the one that mattered.
-  const settingsNavItems = SETTINGS_NAV_BASE.map((item) => {
+  const settingsNavItems = SETTINGS_NAV_BASE.filter((item) => centreSettings.view || (item.href !== "#centre-profile" && item.href !== "#google-drive")).map((item) => {
     let needsAttention: string | null = null;
     if (item.href === "#centre-profile" && center?.center_number?.startsWith("PENDING-")) {
       needsAttention = "The Cambridge centre number is still a placeholder, and it prints on every report.";
@@ -199,6 +211,7 @@ export default async function AdminSettingsPage({
         <SettingsNav items={settingsNavItems} />
 
         <div className="flex flex-col gap-5">
+          {centreSettings.view ? (
           <div id="centre-profile" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Centre profile</h2>
             <p className="mt-2 text-body text-muted">
@@ -217,6 +230,7 @@ export default async function AdminSettingsPage({
               />
             </div>
           </div>
+          ) : null}
 
           <div id="auto-tagging" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">TP feedback tagging</h2>
@@ -236,6 +250,7 @@ export default async function AdminSettingsPage({
             </form>
           </div>
 
+          {centreSettings.view ? (
           <div id="google-drive" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Google Drive</h2>
             <p className="mt-2 text-body text-muted">
@@ -279,6 +294,7 @@ export default async function AdminSettingsPage({
               </a>
             )}
           </div>
+          ) : null}
 
           <div id="feedback-style" className="card scroll-mt-6 p-5">
             <h2 className="font-serif text-h3 font-semibold text-ink">Feedback Style Examples</h2>

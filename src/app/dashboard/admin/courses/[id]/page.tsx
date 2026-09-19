@@ -76,10 +76,13 @@ export default async function CourseAdminDetailPage({
 
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
   const { data: tutorProfiles } = tutorProfileIds.length
-    ? await supabase.from("profiles").select("id, full_name, email").in("id", tutorProfileIds)
+    ? await supabase.from("profiles").select("id, full_name, email, role").in("id", tutorProfileIds)
     : { data: [] };
   const profileById = new Map((tutorProfiles ?? []).map((p) => [p.id, p]));
-  const tutors = (tutorRows ?? []).map((t) => ({
+  // The course administrator's own course_tutors row (no tutor role, an
+  // admin profile) is scope, not a tutor -- it listed the administrator
+  // among the Tutors with a role picker (20 Sep 2026).
+  const tutors = (tutorRows ?? []).filter((t) => t.tutor_role || profileById.get(t.profile_id)?.role === "trainer").map((t) => ({
     courseTutorId: t.id,
     profileId: t.profile_id,
     name: profileById.get(t.profile_id)?.full_name ?? "Unknown",

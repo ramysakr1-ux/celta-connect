@@ -135,6 +135,11 @@ export default async function TodayPage() {
 
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
+    // A centre-side person (course administrator, owner) who reaches the hub
+    // without a course of their own has a home of their own: the course
+    // administration page. "No course assigned" under an MCT pill was what
+    // the demo course admin saw here (20 Sep 2026).
+    if (trainer && trainer.role !== "trainer") redirect("/dashboard/admin");
     return <div className="sheet text-body text-muted">No course assigned.</div>;
   }
   // Reads go through the service role: the tutor is on this course by
