@@ -144,7 +144,10 @@ export default async function AdminSettingsPage({
       courseName: course.name,
       deliveryMode: course.delivery_mode as DeliveryMode,
       tutors: (tutorRows ?? [])
-        .filter((t) => t.course_id === course.id)
+        // The course administrator's own course_tutors row carries no tutor
+        // role and no trainer profile -- it read "Unknown · No role set" in
+        // the Tutors table (20 Sep 2026).
+        .filter((t) => t.course_id === course.id && (t.tutor_role || trainerNameById.has(t.profile_id)))
         .map((t) => ({
           id: t.id,
           tutorName: trainerNameById.get(t.profile_id) ?? "Unknown",

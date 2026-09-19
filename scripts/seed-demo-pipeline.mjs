@@ -62,6 +62,7 @@ const ELT_EXPERIENCE = [
   "A summer school in Brighton, four weeks, as an activity leader who also covered two lessons a day.",
   "None at all, which is why I am applying.",
 ];
+const WRITING_TYPES = ["descriptive", "argumentative", "narrative", "argumentative", "descriptive", "argumentative", "descriptive"];
 const WRITING_TASKS = [
   "The teacher I remember best was Mr Okonkwo, who taught me history when I was fourteen. What he did, I now realise, was very simple: he never answered a question straight away. He would say \"what do you think?\" and then wait, and the silence was long enough that somebody always filled it. He also wrote almost nothing on the board -- three or four words a lesson -- and yet I can still picture those words. I think he understood that what you work out for yourself you keep, and what you are told you lose by Friday.\n\nIf I taught, I would want to do the same thing: hold back, let the room do the work, and trust that the quiet is not empty.",
   "Can anyone learn a language as an adult? I want to say yes, but honestly the answer is \"yes, but not the way children do, and not without wanting to.\" I learned Spanish at twenty-six, living in Bilbao, and the thing that made the difference was not the classes but having to buy bread. Adults have advantages children lack: they know what a verb is, they can ask for a rule, they can be embarrassed and survive it. What they do not have is time and the freedom to be wrong in public. A good course, I think, gives them that freedom back for a few hours a week.",
@@ -346,6 +347,7 @@ for (const [centre, course, names, stages] of [
   const questions = questionsByCentre.get(centre.id) ?? [];
   const { data: prompts } = await supabase.from("application_writing_prompts").select("id, prompt_type").eq("center_id", centre.id).eq("active", true);
   const promptId = (i) => (prompts && prompts.length > 0 ? prompts[i % prompts.length].id : null);
+  const promptIdForType = (type) => prompts?.find((p) => p.prompt_type === type)?.id ?? null;
 
   for (let i = 0; i < names.length; i++) {
     const [full_name, slug] = names[i];
@@ -369,7 +371,9 @@ for (const [centre, course, names, stages] of [
     const { row, interviewed, marked } = profileFor(i, stage, daysAgo);
     row.time_zone = HOME_ZONES[slug] ?? null;
     if (tutor && marked) { row.marked_by = tutor.id; row.task_feedback_edited_by = tutor.id; }
-    row.writing_task_prompt_id = promptId(i);
+    // The prompt the text actually answers -- Mateo's file showed the
+    // descriptive prompt over an argumentative answer (20 Sep 2026).
+    row.writing_task_prompt_id = promptIdForType(WRITING_TYPES[i % WRITING_TYPES.length]) ?? promptId(i);
 
     let applicantId = exists?.id ?? null;
     if (exists) {

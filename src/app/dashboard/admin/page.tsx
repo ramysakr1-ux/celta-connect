@@ -86,6 +86,16 @@ export default async function AdminDashboardPage({
   const today = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
 
   const courseIds = (courses ?? []).map((c) => c.id);
+
+  // Who tutors each course: course_tutors with a teaching role. Counting
+
+  // profiles by role put the course administrator and the external assessor
+
+  // in "4 tutors" (20 Sep 2026).
+
+  const { data: tutorRows } = courseIds.length > 0 ? await supabase.from("course_tutors").select("course_id, tutor_role").in("course_id", courseIds).is("left_at", null) : { data: [] };
+
+  const TEACHING_ROLES = new Set(["main_course_tutor", "assistant_course_tutor", "teaching_practice_tutor", "input_session_tutor"]);
   const { data: applicants } = courseIds.length
     ? await supabase.from("applicants").select("intake_course_id, stage, special_requirements").in("intake_course_id", courseIds)
     : { data: [] };
@@ -102,7 +112,9 @@ export default async function AdminDashboardPage({
   const [[tpPoints, briefs, resources, styleExamples, coursebooks], recentChanges] = await Promise.all([
     Promise.all([
     supabase.from("tp_points").select("id", { count: "exact", head: true }).in("center_id", scope),
-    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).in("center_id", scope),
+    // The four Cambridge briefs only -- the Plagiarism Reflection brief made
+    // this read "5 of 4 uploaded" (20 Sep 2026).
+    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).in("center_id", scope).in("assignment_type", [...ASSIGNMENT_ORDER]),
     supabase.from("resources").select("id", { count: "exact", head: true }).in("center_id", scope),
     supabase.from("feedback_style_examples").select("id", { count: "exact", head: true }).in("center_id", scope),
     supabase.from("tp_coursebooks").select("id", { count: "exact", head: true }).in("center_id", scope),
@@ -154,7 +166,7 @@ export default async function AdminDashboardPage({
         return group === "interviewing" ? course.accepting_applications : !course.accepting_applications;
       })
       .map((course) => {
-        const tutors = (people ?? []).filter((p) => p.course_id === course.id && (p.role === "trainer" || p.role === "admin")).length;
+        const tutors = (tutorRows ?? []).filter((r) => r.course_id === course.id && r.tutor_role && TEACHING_ROLES.has(r.tutor_role)).length;
         const candidates = (people ?? []).filter((p) => p.course_id === course.id && p.role === "trainee").length;
         const hasEvents = (eventDatesByCourse.get(course.id) ?? []).length > 0;
 

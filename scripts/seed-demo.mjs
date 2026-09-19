@@ -3984,31 +3984,27 @@ async function main() {
   // one applicant paid in full, one mid-instalment-plan with an overdue
   // payment, so the payments view shows both a green and a pending state
   // (src/lib/payments/applicant-payment-state.ts's derived states). ---
-  const { data: applicants } = await supabase
-    .from("applicants")
-    .insert([
-      {
-        center_id: center.id,
-        intake_course_id: course.id,
-        full_name: "Noor Iqbal",
-        email: "demo-applicant-noor@celtaconnect.com",
-        stage: "accepted",
-        deposit_amount: 500,
-        deposit_paid_at: new Date(nowMs() - 40 * 86400000).toISOString(),
-      },
-      {
-        center_id: center.id,
-        intake_course_id: course.id,
-        full_name: "Ben Foster",
-        email: "demo-applicant-ben@celtaconnect.com",
-        stage: "accepted",
-        deposit_amount: 500,
-        deposit_paid_at: new Date(nowMs() - 35 * 86400000).toISOString(),
-      },
-      // The applicant the JOURNEY walks is added below, not here -- it has to
-      // check first. See the note on journeyApplicant.
-    ])
-    .select("id, full_name");
+  // The pipeline (scripts/seed-demo-pipeline.mjs, run above) already filed
+  // Noor and Ben with their interviews and tasks. This inserted them AGAIN
+  // for the payments story, so the pipeline listed each of them twice
+  // (20 Sep 2026). Now: find the file, set the payment fields on it.
+  const applicants = [];
+  for (const person of [
+    { full_name: "Noor Iqbal", email: "demo-applicant-noor@celtaconnect.com", deposit_paid_at: new Date(nowMs() - 40 * 86400000).toISOString() },
+    { full_name: "Ben Foster", email: "demo-applicant-ben@celtaconnect.com", deposit_paid_at: new Date(nowMs() - 35 * 86400000).toISOString() },
+  ]) {
+    const fields = { stage: "accepted", deposit_amount: 500, deposit_paid_at: person.deposit_paid_at };
+    const { data: existing } = await supabase.from("applicants").select("id").eq("email", person.email).eq("center_id", center.id).order("created_at", { ascending: true }).limit(1).maybeSingle();
+    if (existing) {
+      await supabase.from("applicants").update(fields).eq("id", existing.id);
+      // One payment plan per person: the pipeline's, if it made one, gives way to the story below.
+      await supabase.from("payment_plans").delete().eq("applicant_id", existing.id);
+      applicants.push({ id: existing.id, full_name: person.full_name });
+    } else {
+      const { data: created } = await supabase.from("applicants").insert({ center_id: center.id, intake_course_id: course.id, full_name: person.full_name, email: person.email, ...fields }).select("id, full_name").single();
+      applicants.push(created);
+    }
+  }
 
   // The applicant the JOURNEY walks -- distinct from the two above, which
   // exist for the payments views.
@@ -4307,6 +4303,22 @@ async function main() {
     console.log(`language analyses: ${la.written} written, ${la.kept} already written and left alone, ${la.skipped} skills lessons with none`);
   }
 
+  // Every course at a centre has its administrator in scope: the owner's
+  // page listed "3 courses with no administrator" because only the running
+  // course had a course_administrator_scope row (20 Sep 2026). Tom for the
+  // Istanbul courses, Kenji for Los Angeles -- by role, so a reseed or a new
+  // course picks the right person without naming them here.
+  {
+    const { data: demoCentres } = await supabase.from("centers").select("id").eq("is_demo", true);
+    const demoCentreIds = (demoCentres ?? []).map((c) => c.id);
+    const { data: adminRoles } = await supabase.from("centre_roles").select("id, center_id").eq("role", "course_administrator").is("revoked_at", null).in("center_id", demoCentreIds);
+    const { data: allCourses } = await supabase.from("courses").select("id, center_id").in("center_id", demoCentreIds);
+    const scopeRows = (allCourses ?? []).flatMap((c) => (adminRoles ?? []).filter((r) => r.center_id === c.center_id).map((r) => ({ centre_role_id: r.id, course_id: c.id })));
+    if (scopeRows.length > 0) {
+      const { error: scopeErr } = await supabase.from("course_administrator_scope").upsert(scopeRows, { onConflict: "centre_role_id,course_id", ignoreDuplicates: true });
+      if (scopeErr) console.warn("  administrator scope:", scopeErr.message); else console.log(`administrator scope: ${scopeRows.length} course/administrator pairs`);
+    }
+  }
   console.log("DEMO SEED COMPLETE");
   console.log("center_id=" + center.id);
   console.log("course_id=" + course.id);

@@ -187,8 +187,8 @@ export function CreateCourseForm({ centres, defaultCentreId }: { centres: Wizard
           <label className="text-meta font-semibold text-ink">Cambridge centre number</label>
           <p className="text-body text-ink">{centerNumber ?? "Not set"}</p>
           <p className="text-label text-muted">
-            Prefilled from {centres.length > 1 ? "the centre you chose" : "the centre profile"} and locked here — change it in Centre
-            Management, not per course.
+            Prefilled from {centres.length > 1 ? "the centre you chose" : "the centre profile"} and locked here — it is set once for
+            the centre under Course admin › Settings › Centre profile, never per course.
           </p>
         </div>
 

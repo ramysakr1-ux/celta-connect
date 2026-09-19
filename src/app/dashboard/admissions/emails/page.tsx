@@ -111,7 +111,7 @@ export default async function EmailDeliveryPage({
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.course_code ?? c.name} {c.start_date ? `— ${formatCalendarDate(c.start_date, { day: "numeric", month: "short", year: "numeric" })}` : ""}
+                  {c.course_code ? `${c.name} (${c.course_code})` : c.name} {c.start_date ? `— ${formatCalendarDate(c.start_date, { day: "numeric", month: "short", year: "numeric" })}` : ""}
                 </option>
               ))}
             </select>
@@ -160,7 +160,7 @@ export default async function EmailDeliveryPage({
           <div>Status</div>
         </div>
         {(emails ?? []).length === 0 ? (
-          <p className="px-4 py-6 text-body text-muted">No emails sent for {course.course_code ?? course.name} yet.</p>
+          <p className="px-4 py-6 text-body text-muted">No emails sent for {course.name} yet.</p>
         ) : (
           (emails ?? []).map((email) => {
             const tone = STATUS_TONE[email.status] ?? STATUS_TONE.sent;

@@ -107,7 +107,7 @@ export default async function CentreOverviewPage({
     assessorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", assessorProfileIds) : { data: [] };
   const assessorNameById = new Map((assessorProfiles ?? []).map((p) => [p.id, p.full_name]));
   const assessorHistory = computeAssessorCentreHistory(
-    (courses ?? []).map((c) => ({ id: c.id, label: c.course_code ?? c.name, start_date: c.start_date, end_date: c.end_date })),
+    (courses ?? []).map((c) => ({ id: c.id, label: c.course_code ? `${c.name} (${c.course_code})` : c.name, start_date: c.start_date, end_date: c.end_date })),
     (assessorLinkRows ?? []).map((r) => ({
       profileId: r.profile_id,
       name: assessorNameById.get(r.profile_id) ?? "Unknown",

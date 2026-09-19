@@ -57,7 +57,7 @@ export default async function AssessorHistoryPage({
   const assessorEmailById = new Map((assessorProfiles ?? []).map((p) => [p.id, p.email]));
 
   const history = computeAssessorCentreHistory(
-    (courses ?? []).map((c) => ({ id: c.id, label: c.course_code ?? c.name, start_date: c.start_date, end_date: c.end_date })),
+    (courses ?? []).map((c) => ({ id: c.id, label: c.course_code ? `${c.name} (${c.course_code})` : c.name, start_date: c.start_date, end_date: c.end_date })),
     (assessorLinkRows ?? []).map((r) => ({
       profileId: r.profile_id,
       name: assessorNameById.get(r.profile_id) ?? "Unknown",

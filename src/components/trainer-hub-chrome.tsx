@@ -203,7 +203,7 @@ export async function TrainerHubChrome({
           .select("id, name, course_code, is_part_time")
           .in("id", linkedCourseIds);
         switcherCourses = (linkedCourses ?? [])
-          .map((c) => ({ id: c.id, label: c.course_code ?? c.name, isPartTime: c.is_part_time }))
+          .map((c) => ({ id: c.id, label: c.name, isPartTime: c.is_part_time }))
           .sort((a, b) => a.label.localeCompare(b.label));
       }
     }

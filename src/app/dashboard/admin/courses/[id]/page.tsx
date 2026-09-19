@@ -97,7 +97,7 @@ export default async function CourseAdminDetailPage({
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   // The Centre Grade form in Appian (migration 0289) -- shared with the MCT,
   // whoever submits it marks it. Cast: the generated type lags the migration.
-  const gradeFormSubmittedAt = (course as { grade_form_submitted_at?: string | null }).grade_form_submitted_at ?? null;
+  const gradeFormSubmittedAtRaw = (course as { grade_form_submitted_at?: string | null }).grade_form_submitted_at ?? null;
   const gradeFormSubmittedBy = (course as { grade_form_submitted_by?: string | null }).grade_form_submitted_by ?? null;
   const { data: gradeFormMarker } = gradeFormSubmittedBy
     ? await supabase.from("profiles").select("full_name").eq("id", gradeFormSubmittedBy).maybeSingle()
@@ -110,6 +110,9 @@ export default async function CourseAdminDetailPage({
     ? await supabase.from("profiles").select("full_name").eq("id", approvalSubmittedBy).maybeSingle()
     : { data: null };
   const today = await demoToday(timeZone);
+  // As of today (src/lib/as-of.ts): the demo's record clock marks the grade
+  // form submitted on day 17; on day 15 that is not yet.
+  const gradeFormSubmittedAt = gradeFormSubmittedAtRaw && gradeFormSubmittedAtRaw.slice(0, 10) <= today ? gradeFormSubmittedAtRaw : null;
   // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
   // reached from says "17 Aug – 11 Sept" (audit, 6 Sep 2026).
   const calendarDay = (iso: string) => formatCalendarDate(iso, { day: "numeric", month: "short", year: "numeric" });

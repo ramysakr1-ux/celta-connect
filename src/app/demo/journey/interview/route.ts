@@ -35,17 +35,34 @@ export async function GET() {
   // Un-book anything a previous visitor booked, then open a fresh slot two
   // days out so there's always something pickable.
   await admin.from("interview_slots").update({ booked_applicant_id: null }).eq("booked_applicant_id", applicant.id);
-  const slotDate = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
-  await admin.from("interview_slots").insert({
-    center_id: applicant.center_id,
-    intake_course_id: applicant.intake_course_id,
-    interviewer_id: mct.id,
-    slot_date: slotDate,
-    slot_time: "10:00",
-    duration_minutes: 30,
-    mode: "online",
-    created_by: mct.id,
-  });
+  // The next weekday two days out -- and only if that slot is not already
+  // there. This inserted a fresh 10:00 slot on every visit, Sundays
+  // included, and the admissions week read thirteen identical slots
+  // (20 Sep 2026).
+  const slotDay = new Date(Date.now() + 2 * 86400000);
+  while (slotDay.getUTCDay() === 0 || slotDay.getUTCDay() === 6) slotDay.setUTCDate(slotDay.getUTCDate() + 1);
+  const slotDate = slotDay.toISOString().slice(0, 10);
+  const { data: existingSlot } = await admin
+    .from("interview_slots")
+    .select("id")
+    .eq("intake_course_id", applicant.intake_course_id)
+    .eq("slot_date", slotDate)
+    .eq("slot_time", "10:00:00")
+    .is("booked_applicant_id", null)
+    .limit(1)
+    .maybeSingle();
+  if (!existingSlot) {
+    await admin.from("interview_slots").insert({
+      center_id: applicant.center_id,
+      intake_course_id: applicant.intake_course_id,
+      interviewer_id: mct.id,
+      slot_date: slotDate,
+      slot_time: "10:00",
+      duration_minutes: 30,
+      mode: "online",
+      created_by: mct.id,
+    });
+  }
 
   const token = crypto.randomUUID();
   const { error } = await admin

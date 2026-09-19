@@ -16,9 +16,11 @@ async function requireOwner() {
   // demo's write-blocking trigger never sees -- so the role builder, custom
   // roles and branch visibility all persisted on the shared demo. One
   // chokepoint, since they all come through here.
+  // Returned, not thrown: a throw inside a server action is a 500, and the
+  // installed app showed "This page couldn't load" the moment a demo owner
+  // clicked a pill in the Role builder (Ramy, 20 Sep 2026).
   const demo = await refuseIfDemoCentre(centerId);
-  if (demo) throw new Error(demo);
-  return { profile, centerId, ctx };
+  return { profile, centerId, ctx, demo };
 }
 
 async function logOwnerAction(centerId: string, actorId: string, action: string, targetTable: string, detail: Record<string, unknown>) {
@@ -35,7 +37,8 @@ export interface OwnerActionState {
 // "Downtown can see Riverside" and "Riverside can see Downtown" are two
 // separate rows.
 export async function setBranchVisibility(formData: FormData): Promise<void> {
-  const { profile, centerId } = await requireOwner();
+  const { profile, centerId, demo } = await requireOwner();
+  if (demo) return;
   const viewerCenterId = formData.get("viewer_center_id");
   const targetCenterId = formData.get("target_center_id");
   const visibility = formData.get("visibility");
@@ -81,7 +84,8 @@ export async function setBranchVisibility(formData: FormData): Promise<void> {
 // already "none" -- e.g. tightening Course administrator's course.
 // editRecord down to None has to actually say so, not just be absent.
 export async function cycleCapabilityOverride(formData: FormData): Promise<void> {
-  const { profile, centerId } = await requireOwner();
+  const { profile, centerId, demo } = await requireOwner();
+  if (demo) return;
   const roleKey = formData.get("role_key");
   const capabilityKey = formData.get("capability_key");
   const currentLevel = formData.get("current_level");
@@ -121,7 +125,8 @@ export async function cycleCapabilityOverride(formData: FormData): Promise<void>
 // other owner intervention. Custom roles and capabilities are untouched --
 // those are things the owner deliberately created, not drift.
 export async function resetCapabilityOverrides(formData: FormData): Promise<void> {
-  const { profile, centerId } = await requireOwner();
+  const { profile, centerId, demo } = await requireOwner();
+  if (demo) return;
   const roleKey = formData.get("role_key");
 
   const admin = createAdminClient();
@@ -139,7 +144,8 @@ export async function resetCapabilityOverrides(formData: FormData): Promise<void
 }
 
 export async function addCustomCapability(_prevState: OwnerActionState, formData: FormData): Promise<OwnerActionState> {
-  const { profile, centerId } = await requireOwner();
+  const { profile, centerId, demo } = await requireOwner();
+  if (demo) return { error: demo };
   const label = (formData.get("label") as string | null)?.trim();
   const grantToRole = formData.get("grant_to_role") as string | null;
   if (!label) return { error: "Name the capability first." };
@@ -171,7 +177,8 @@ export async function addCustomCapability(_prevState: OwnerActionState, formData
 }
 
 export async function addCustomRole(_prevState: OwnerActionState, formData: FormData): Promise<OwnerActionState> {
-  const { profile, centerId } = await requireOwner();
+  const { profile, centerId, demo } = await requireOwner();
+  if (demo) return { error: demo };
   const label = (formData.get("label") as string | null)?.trim();
   if (!label) return { error: "Name the role first." };
 
@@ -212,7 +219,8 @@ export interface ReassignState {
  * rather than in the render that drew the button.
  */
 export async function reassignUnownedCourse(_prev: ReassignState, formData: FormData): Promise<ReassignState> {
-  const { profile } = await requireOwner();
+  const { profile, demo } = await requireOwner();
+  if (demo) return { error: demo, ok: null };
   const courseId = formData.get("courseId");
   const centreRoleId = formData.get("centreRoleId");
   if (typeof courseId !== "string" || typeof centreRoleId !== "string" || !courseId || !centreRoleId) {

@@ -60,7 +60,7 @@ export function ProfileDriveForm({
             value={centerNumber}
             className="rounded-[6px] border border-border bg-surface-muted/50 px-3 py-2 text-muted"
           />
-          <p className="text-label text-muted">Set by Cambridge, not editable here.</p>
+          <p className="text-label text-muted">Set by Cambridge. Change it under Course admin › Settings › Centre profile, not here.</p>
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
