@@ -5,6 +5,11 @@ import { Figure } from "@/components/assessor/figure";
 import { AMBER, FAINT, INK, MUTED, TEAL } from "@/components/assessor/tokens";
 import { halfOwningDate, halfTpDates } from "@/lib/rotation";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { demoToday } from "@/lib/demo-clock";
+import { assignmentAsOf } from "@/lib/as-of";
+import { courseElapsedFraction } from "@/lib/course-progress";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Ramy, 30 Aug 2026, specifying this after seeing both mock options: "click
 // on the candidate card, it opens the portfolio, and then we have a
@@ -42,12 +47,15 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   const traineeName = person?.full_name ?? "This candidate";
   const isWithdrawn = person?.course_status === "withdrawn";
 
-  const [{ data: course }, { data: record }, cards, { data: assignments }, { data: pctResponses }, { data: letters }, { data: malpractice }] =
+  const [{ data: course }, { data: record }, cards, { data: assignmentRows }, { data: pctResponses }, { data: letters }, { data: malpractice }] =
     await Promise.all([
-      admin.from("courses").select("name, total_hours, assessor_visit_date, center_id").eq("id", courseId).maybeSingle(),
+      admin.from("courses").select("name, total_hours, assessor_visit_date, center_id, start_date, end_date").eq("id", courseId).maybeSingle(),
       admin.from("celta5_records").select("hours_attended").eq("trainee_id", traineeId).maybeSingle(),
       buildCandidateCards(admin, courseId),
-      admin.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
+      admin
+        .from("assignments")
+        .select("assignment_type, first_status, first_submitted_at, resubmission_status, resubmission_submitted_at")
+        .eq("trainee_id", traineeId),
       // Answered sections only -- the section TOTAL lives on the centre, which
       // isn't known until `course` resolves, and "N answered" is the honest
       // number anyway: a centre can add sections after a candidate finishes.
@@ -62,6 +70,12 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
       admin.from("malpractice_cases").select("id, opened_at").eq("trainee_id", traineeId),
     ]);
   const card = cards.find((c) => c.traineeId === traineeId) ?? null;
+  // As of today (src/lib/as-of.ts): on the demo the record clock has every
+  // assignment passed and every hour attended before the visit (assessor
+  // walk, 20 Sep 2026).
+  const timeZone = course ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+  const today = await demoToday(timeZone, courseId);
+  const assignments = (assignmentRows ?? []).map((a) => assignmentAsOf(a, today));
 
   // Which TP this candidate teaches on the visit day -- the same rotation
   // derivation the assessor's "Lesson plans for the day" page makes, since no
@@ -143,8 +157,11 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   const caseCount = (malpractice ?? []).length;
   const formalRecordCount = letterCount + caseCount;
 
-  const hoursAttended = record?.hours_attended ?? 0;
   const totalHours = course?.total_hours ?? 120;
+  // Hours attended is a running total with no dates on it; as of today it
+  // cannot exceed the hours the course has taught so far.
+  const hoursSoFar = course?.start_date && course?.end_date ? Math.round(totalHours * courseElapsedFraction(course.start_date, course.end_date, today)) : totalHours;
+  const hoursAttended = Math.min(record?.hours_attended ?? 0, hoursSoFar);
 
   return (
     <div className="flex flex-col gap-5">

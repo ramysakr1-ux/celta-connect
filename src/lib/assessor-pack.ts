@@ -6,6 +6,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { assignmentGradeCeiling } from "@/lib/provisional-grade";
 import { demoToday } from "@/lib/demo-clock";
+import { onOrBefore } from "@/lib/as-of";
 
 // Handbook 12.1.3: "The candidate portfolios should be up-to-date on the day
 // of the assessment." Up to date, not finished -- the visit is mid-course
@@ -22,6 +23,15 @@ import { demoToday } from "@/lib/demo-clock";
 async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: string): Promise<string> {
   const { data: course } = await supabase.from("courses").select("assessor_visit_date, center_id").eq("id", courseId).maybeSingle();
   if (course?.assessor_visit_date) return course.assessor_visit_date;
+  const timeZone = course?.center_id ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+  return await demoToday(timeZone);
+}
+
+// Today in the centre's zone, for what has been TAUGHT: a lesson dated
+// after today is not taught, whatever the record clock wrote (the pack read
+// "8/8 TPs" beside a roster reading 6 -- assessor walk, 20 Sep 2026).
+async function courseToday(supabase: SupabaseClient<Database>, courseId: string): Promise<string> {
+  const { data: course } = await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle();
   const timeZone = course?.center_id ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
   return await demoToday(timeZone);
 }
@@ -74,11 +84,12 @@ export async function computeAssessorReadiness(
     return { ready: true, issues: [], totalCandidates: 0, portfoliosCompleteCount: 0, hoursAssessedTotal: 0, gradesEnteredCount: 0, gradesApprovedCount: 0 };
   }
 
-  const [{ data: records }, { data: assignments }, { data: planAssignments }, cutoff] = await Promise.all([
+  const [{ data: records }, { data: assignments }, { data: planAssignments }, cutoff, today] = await Promise.all([
     supabase.from("celta5_records").select("*").eq("course_id", courseId),
     supabase.from("assignments").select("*").in("trainee_id", traineeIds),
     supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
     assignmentCutoff(supabase, courseId),
+    courseToday(supabase, courseId),
   ]);
 
   // Perf, 6 Sep 2026: these two were `select(...)` with NO filter at all --
@@ -112,7 +123,7 @@ export async function computeAssessorReadiness(
   for (const trainee of trainees ?? []) {
     const record = recordByTrainee.get(trainee.id);
     const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
-    const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
+    const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && onOrBefore(p.taught_at, today));
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
     hoursAssessedTotal += assessedTp.hoursAssessed;
     if (record?.provisional_grade) gradesEnteredCount += 1;
@@ -225,6 +236,7 @@ export async function buildCandidateCards(
   if (traineeIds.length === 0) return [];
 
   const cutoff = await assignmentCutoff(supabase, courseId);
+  const today = await courseToday(supabase, courseId);
   const [{ data: records }, { data: assignments }, , { data: planAssignments }, { data: subgroups }, { data: tpGroups }] = await Promise.all([
     supabase.from("celta5_records").select("*").eq("course_id", courseId),
     supabase.from("assignments").select("*").in("trainee_id", traineeIds),
@@ -268,7 +280,7 @@ export async function buildCandidateCards(
   return (trainees ?? []).map((trainee) => {
     const record = recordByTrainee.get(trainee.id);
     const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
-    const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
+    const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && onOrBefore(p.taught_at, today));
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
 
     const stage3Open = Boolean(record?.stage3_tutorial_required && !record.stage3_finalized_at);

@@ -7,6 +7,8 @@ import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
+import { asOf } from "@/lib/as-of";
 import { doubleMarkingPerAssignment } from "@/lib/assessor-requirements";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
 import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
@@ -37,6 +39,7 @@ export default async function AssessorDoubleMarkingPage() {
   const { data: course } = await admin.from("courses").select("name, center_id").eq("id", courseId).maybeSingle();
   if (!course) redirect("/login?error=assessor_link_invalid");
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = await demoToday(timeZone, courseId);
 
   const [{ data: trainees }, { data: assignments }] = await Promise.all([
     admin.from("profiles").select("id, full_name, course_status").eq("course_id", courseId).eq("role", "trainee"),
@@ -59,7 +62,12 @@ export default async function AssessorDoubleMarkingPage() {
   const { data: tutors } = tutorIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", tutorIds) : { data: null };
   const tutorName = new Map((tutors ?? []).map((t) => [t.id, t.full_name]));
 
-  const rows = (assignments ?? []).filter((a) => activeIds.has(a.trainee_id));
+  // As of today (src/lib/as-of.ts): the demo's record clock second-marks
+  // after the visit, and those checks read as dated 25-29 Sept before they
+  // had happened (assessor walk, 20 Sep 2026).
+  const rows = (assignments ?? [])
+    .filter((a) => activeIds.has(a.trainee_id))
+    .map((a) => ({ ...a, second_marker_recorded_at: asOf(a.second_marker_recorded_at, today) }));
   const anyRecorded = rows.some((a) => a.second_marker_recorded_at);
 
   return (

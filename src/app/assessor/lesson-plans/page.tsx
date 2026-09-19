@@ -68,7 +68,7 @@ export default async function AssessorLessonPlansPage() {
   const traineeIds = (members ?? []).map((m) => m.trainee_id);
   const [{ data: people }, { data: plans }] = await Promise.all([
     traineeIds.length > 0
-      ? admin.from("profiles").select("id, full_name").in("id", traineeIds)
+      ? admin.from("profiles").select("id, full_name, course_status").in("id", traineeIds)
       : Promise.resolve({ data: null }),
     traineeIds.length > 0 && tpNumber > 0
       ? admin
@@ -78,13 +78,15 @@ export default async function AssessorLessonPlansPage() {
           .in("trainee_id", traineeIds)
       : Promise.resolve({ data: null }),
   ]);
-  const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
+  const nameById = new Map((people ?? []).filter((p) => p.course_status !== "withdrawn").map((p) => [p.id, p.full_name]));
   const planByTrainee = new Map((plans ?? []).map((p) => [p.trainee_id, p]));
   const subgroupSizeById = new Map(
     subgroupIds.map((id) => [id, (members ?? []).filter((m) => m.subgroup_id === id).length])
   );
 
   const teaching = (members ?? [])
+    // A withdrawn candidate keeps the seat, not the lesson (20 Sep 2026).
+    .filter((m) => nameById.has(m.trainee_id))
     .map((m) => ({
       traineeId: m.trainee_id,
       name: nameById.get(m.trainee_id) ?? "Unknown",

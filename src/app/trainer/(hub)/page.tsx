@@ -755,7 +755,7 @@ export default async function TodayPage() {
       // assignment short ("5 short" where the real answer is four).
       if (a.assignment_type === "Plagiarism Reflection") continue;
       types.add(a.assignment_type);
-      if (a.second_marker_recorded_at) byType.set(a.assignment_type, (byType.get(a.assignment_type) ?? 0) + 1);
+      if (a.second_marker_recorded_at && a.second_marker_recorded_at.slice(0, 10) <= today) byType.set(a.assignment_type, (byType.get(a.assignment_type) ?? 0) + 1);
     }
     problems.push(...doubleMarkingProblems({ candidateCount: rows.length, today, endDate: course?.end_date ?? null, doubleMarkedByType: byType, assignmentTypes: [...types] }));
     problems.push(...entryFormProblems({ today, startDate: course?.start_date ?? null, deliveryMode: course?.delivery_mode ?? null, entryFormSentAt: course?.entry_form_sent_at ?? null }));

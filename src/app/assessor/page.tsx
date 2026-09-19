@@ -325,11 +325,17 @@ export default async function AssessorPage({
       halfSubgroupIds.map((id) => [id, members.filter((m) => m.subgroup_id === id).length])
     );
     const ordered = members
-      .map((m) => ({
-        traineeId: m.trainee_id,
-        name: candidates.find((c) => c.traineeId === m.trainee_id)?.name ?? null,
-        order: rotationPosition(m.base_slot, sizeBySubgroup.get(m.subgroup_id) ?? 1, visitTpNumber) + 1,
-      }))
+      .map((m) => {
+        // A withdrawn candidate keeps their subgroup seat for the record but
+        // teaches nothing: the visit day listed Marek at 10:00 with no plan
+        // (assessor walk, 20 Sep 2026).
+        const c = candidates.find((x) => x.traineeId === m.trainee_id);
+        return {
+          traineeId: m.trainee_id,
+          name: c && c.courseStatus !== "withdrawn" ? c.name : null,
+          order: rotationPosition(m.base_slot, sizeBySubgroup.get(m.subgroup_id) ?? 1, visitTpNumber) + 1,
+        };
+      })
       .filter((x): x is { traineeId: string; name: string; order: number } => Boolean(x.name))
       .sort((a, b) => a.order - b.order);
     teachingOrderNames.push(...ordered.map((o) => o.name));
@@ -657,7 +663,10 @@ export default async function AssessorPage({
           // report "opens once the centre has submitted" it, with no way to
           // know whether they had.
           gradeFormNote={(() => {
-            const at = (course as { grade_form_submitted_at?: string | null }).grade_form_submitted_at ?? null;
+            // As of today (src/lib/as-of.ts): the demo's record clock marks it
+            // submitted on day 17.
+            const atRaw = (course as { grade_form_submitted_at?: string | null }).grade_form_submitted_at ?? null;
+            const at = atRaw && atRaw.slice(0, 10) <= today ? atRaw : null;
             return at
               ? `The centre marked it submitted ${formatDate(at, timeZone, { year: "numeric" })}.`
               : "The centre has not yet marked it as submitted -- if the report will not open, ask them.";
