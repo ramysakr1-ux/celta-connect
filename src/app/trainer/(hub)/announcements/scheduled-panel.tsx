@@ -18,6 +18,7 @@ interface TimetableEventOption {
   title: string;
   event_date: string;
   event_time: string | null;
+  detail?: string | null;
 }
 
 export interface ScheduledRowData {

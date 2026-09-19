@@ -157,6 +157,10 @@ export interface QueueEvent {
   detail: string | null;
   type: string;
   title: string | null;
+  /** Which TP group the row belongs to; two groups teach in parallel on
+   *  every TP day (project_timetable_model), so a date has two rows per
+   *  time. Optional for callers that predate it. */
+  tp_group_scope_id?: string | null;
 }
 
 function pointOf(plan: QueuePlan | undefined): QueuePoint {
@@ -221,6 +225,22 @@ export function buildTpQueue(input: {
     eventsByDate.set(e.event_date, [...(eventsByDate.get(e.event_date) ?? []), e]);
   }
   for (const list of eventsByDate.values()) list.sort((a, b) => (a.event_time ?? "").localeCompare(b.event_time ?? ""));
+  // The slots a group teaches on a date, in order. Indexing the date's whole
+  // list put the second candidate at the first one's time (10:00, 10:00,
+  // 10:45 -- tutor walk, 19 Sep 2026) because the other group's rows sit at
+  // the same hours. Own scope where the rows carry one; one row per time
+  // either way.
+  const slotEventsFor = (date: string, tpGroupId: string | null): QueueEvent[] => {
+    const all = eventsByDate.get(date) ?? [];
+    const scoped = tpGroupId && all.some((e) => e.tp_group_scope_id) ? all.filter((e) => e.tp_group_scope_id === tpGroupId) : all;
+    const seen = new Set<string>();
+    return scoped.filter((e) => {
+      const t = e.event_time ?? "";
+      if (seen.has(t)) return false;
+      seen.add(t);
+      return true;
+    });
+  };
 
   // ---- owed ----------------------------------------------------------
   const owedAll: OwedLesson[] = [];
@@ -232,7 +252,7 @@ export function buildTpQueue(input: {
 
     const group = groupOfTrainee.get(p.trainee_id);
     const taughtDate = p.taught_at.slice(0, 10);
-    const dayEvents = eventsByDate.get(taughtDate) ?? [];
+    const dayEvents = slotEventsFor(taughtDate, group?.tpGroupId ?? null);
     // Which slot of that day this candidate taught, by rotation position.
     const slotIndex =
       group && group.halfOrder
@@ -293,7 +313,7 @@ export function buildTpQueue(input: {
     const idxToday = dates.indexOf(today);
     const tpNumber = idxToday >= 0 ? idxToday + 1 : -1;
     if (idxToday >= 0 && tpNumber >= 1 && !todaySession) {
-      const dayEvents = eventsByDate.get(today) ?? [];
+      const dayEvents = slotEventsFor(today, g.tpGroupId);
       const ordered = [...g.members].sort(
         (a, b) => rotationPosition(a.baseSlot, g.members.length, tpNumber) - rotationPosition(b.baseSlot, g.members.length, tpNumber)
       );
@@ -341,7 +361,7 @@ export function buildTpQueue(input: {
       const ordered = [...g.members].sort(
         (a, b) => rotationPosition(a.baseSlot, g.members.length, tpNext) - rotationPosition(b.baseSlot, g.members.length, tpNext)
       );
-      const dayEvents = eventsByDate.get(nextDate) ?? [];
+      const dayEvents = slotEventsFor(nextDate, g.tpGroupId);
       const isTomorrow = (Date.parse(`${nextDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000 === 1;
       tomorrowLine = {
         date: nextDate,

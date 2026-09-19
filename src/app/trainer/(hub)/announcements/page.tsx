@@ -37,7 +37,7 @@ export default async function AnnouncementsPage() {
       supabase.from("courses").select("assessor_visit_date").eq("id", courseId).maybeSingle(),
       supabase
         .from("course_timetable_events")
-        .select("id, title, event_date, event_time")
+        .select("id, title, event_date, event_time, detail")
         .eq("course_id", courseId)
         .gte("event_date", today)
         .order("event_date")

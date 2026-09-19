@@ -39,7 +39,7 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
     supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
     supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
-    supabase.from("course_timetable_events").select("id, event_date, event_time, detail, type, title").eq("course_id", courseId).order("event_date").order("event_time"),
+    supabase.from("course_timetable_events").select("id, event_date, event_time, detail, type, title, tp_group_scope_id").eq("course_id", courseId).order("event_date").order("event_time"),
     supabase.from("centers").select("feedback_same_day_hours").eq("id", trainer.center_id).maybeSingle(),
     supabase.from("courses").select("start_date, end_date, course_code, name").eq("id", courseId).maybeSingle(),
   ]);

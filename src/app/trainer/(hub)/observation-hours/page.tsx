@@ -28,7 +28,9 @@ export default async function ObservationHoursPage() {
   const supabase = await createClient();
 
   const [{ data: trainees }, { data: observations }, { data: obsTasks }, { data: filmedSessions }, { data: peerSheets }] = await Promise.all([
-    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
+    // The six-hour requirement is checked on the active cohort; a withdrawn
+    // candidate made it "12 candidates" (19 Sep 2026).
+    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").eq("course_status", "active").order("full_name"),
     supabase
       .from("observations")
       .select("id, trainee_id, observation_date, length_minutes, level, learners_present, lesson_focus, filmed, mode")
