@@ -153,9 +153,19 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
   const otherTutor = queue.othersOwed[0]?.tutorName ?? null;
   const otherGroup = queue.othersOwed[0]?.groupName ?? null;
 
+  // "Nothing owed" with the count in it. Ramy, 19 Sep 2026, on a Saturday
+  // after week 3: "what does that mean? Eight TPs are done?" -- it read as
+  // the whole course finished. It names how many rounds have been taught
+  // and what comes next.
+  const taughtRounds = new Set((plans ?? []).filter((p) => p.taught_at && p.taught_at.slice(0, 10) <= today).map((p) => p.tp_number)).size;
+  const nextLine = queue.tomorrow ? ` -- next is TP${queue.tomorrow.tpNumber} on ${queue.tomorrow.label === "Tomorrow" ? "tomorrow" : queue.tomorrow.label}` : "";
+  const nothingOwed =
+    taughtRounds === 0
+      ? `Nothing owed. No lessons have been taught yet${nextLine}.`
+      : `Nothing owed. All ${taughtRounds} lesson${taughtRounds === 1 ? "" : "s"} taught so far ${taughtRounds === 1 ? "has" : "have"} your feedback${nextLine}.`;
   const debtLine =
     shown.length === 0
-      ? "Nothing owed."
+      ? nothingOwed
       : `You owe written feedback on ${shown.length} lesson${shown.length === 1 ? "" : "s"}${lateCount > 0 ? `, ${lateCount} past the same-day rule` : ""}.`;
 
   return (
@@ -228,7 +238,7 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
         </div>
       ) : (
         <div className="rounded-[6px] border border-border bg-card px-5 py-6">
-          <p className="font-serif text-h2 text-muted italic">Nothing owed. Every taught lesson has your feedback.</p>
+          <p className="font-serif text-h2 text-muted italic">{nothingOwed}</p>
         </div>
       )}
 
