@@ -8,7 +8,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
 import { demoToday } from "@/lib/demo-clock";
-import { asOf } from "@/lib/as-of";
+import { asOf, assignmentAsOf } from "@/lib/as-of";
 import { doubleMarkingPerAssignment } from "@/lib/assessor-requirements";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
 import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
@@ -46,7 +46,7 @@ export default async function AssessorDoubleMarkingPage() {
     admin
       .from("assignments")
       .select(
-        "id, trainee_id, assignment_type, first_status, resubmission_status, resubmission_outcome, final_grade, marker_id, second_marker_id, second_marker_recorded_at"
+        "id, trainee_id, assignment_type, first_status, first_submitted_at, first_outcome_signed_at, first_marks_saved_at, resubmission_status, resubmission_submitted_at, resubmission_outcome_signed_at, resubmission_marks_saved_at, resubmission_outcome, final_grade, marker_id, second_marker_id, second_marker_recorded_at"
       )
       .eq("course_id", courseId)
       .neq("assignment_type", "Plagiarism Reflection"),
@@ -67,7 +67,7 @@ export default async function AssessorDoubleMarkingPage() {
   // had happened (assessor walk, 20 Sep 2026).
   const rows = (assignments ?? [])
     .filter((a) => activeIds.has(a.trainee_id))
-    .map((a) => ({ ...a, second_marker_recorded_at: asOf(a.second_marker_recorded_at, today) }));
+    .map((a) => ({ ...assignmentAsOf(a, today), second_marker_recorded_at: asOf(a.second_marker_recorded_at, today) }));
   const anyRecorded = rows.some((a) => a.second_marker_recorded_at);
 
   return (

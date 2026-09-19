@@ -2482,7 +2482,12 @@ async function main() {
     // the blind second marker on already-passed first submissions. The seed
     // wrote none of this, so the MCT's §11 compliance nudge read the centre
     // as behind on double-marking it had in fact done.
-    const doubleMarkAt = daysAgoIso(3);
+    // --full: countersigned the day after the first marking (due day + 2 at
+    // 17:00), so the record is there for the assessor on the visit day. A
+    // record-clock "three days ago" dated every check 25 Sept, after the
+    // course had ended, and the visit read "No second marking has been
+    // recorded on this course yet" (assessor walk, 20 Sep 2026).
+    const doubleMarkAtFor = (type, half) => (FULL ? atDay(DUE_DAY(type, half) + 2, "17:00") : daysAgoIso(3));
     const doubleMarkSample = [
       ["Amara Okafor", "Focus on Learner"],
       ["Priya Sharma", "Focus on Learner"],
@@ -2494,6 +2499,7 @@ async function main() {
     for (const [name, type] of doubleMarkSample) {
       const id = assignmentIds[name]?.[type];
       if (!id) continue;
+      const doubleMarkAt = doubleMarkAtFor(type, halfOf(name));
       await supabase
         .from("assignments")
         .update({
