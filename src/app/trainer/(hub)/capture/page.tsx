@@ -4,6 +4,7 @@ import { CaptureForm } from "@/app/trainer/(hub)/capture/capture-form";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatTime } from "@/lib/format-date";
+import { demoToday } from "@/lib/demo-clock";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -29,7 +30,7 @@ export default async function CapturePage() {
         .order("full_name")
     : { data: [] };
 
-  const { data: recentNotes } = trainer.course_id
+  const { data: recentNotesAll } = trainer.course_id
     ? await supabase
         .from("tp_capture_notes")
         .select("id, trainee_id, tp_number, text, captured_at")
@@ -38,6 +39,10 @@ export default async function CapturePage() {
         .limit(10)
     : { data: [] };
 
+  // As of today -- the demo's record clock captures notes for lessons not
+  // yet taught (Ramy, 20 Sep 2026); a real course has none.
+  const today = await demoToday(timeZone);
+  const recentNotes = (recentNotesAll ?? []).filter((n) => n.captured_at.slice(0, 10) <= today);
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
   // A note captured before a withdrawal keeps its name above; the list of
   // who you can capture against is the active cohort (a withdrawn candidate

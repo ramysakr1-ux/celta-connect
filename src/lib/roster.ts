@@ -136,7 +136,7 @@ interface RosterBundle {
   filmed_events: { id: string }[];
   filmed_sessions: { id: string }[];
   course: Pick<T["courses"]["Row"], "total_hours" | "center_id" | "start_date" | "end_date"> | null;
-  taught_plans: Pick<T["plan_assignments"]["Row"], "trainee_id" | "tp_number">[];
+  taught_plans: Pick<T["plan_assignments"]["Row"], "trainee_id" | "tp_number" | "taught_at">[];
   feedback: Pick<T["tp_feedback"]["Row"], "trainee_id" | "tp_number" | "grade" | "submitted_at" | "strengths_planning" | "strengths_teaching" | "action_points_planning" | "action_points_teaching">[];
   assignments: Pick<T["assignments"]["Row"], "trainee_id" | "assignment_type" | "first_status" | "resubmission_status" | "due_date" | "first_submitted_at" | "resubmission_submitted_at">[];
   celta5_records: Pick<T["celta5_records"]["Row"], "trainee_id" | "hours_attended" | "provisional_grade" | "provisional_grade_upper" | "stage1_completed_at" | "stage2_candidate_submitted_at" | "stage2_completed_at" | "stage2_moved_earlier_at" | "stage2_moved_earlier_reason" | "trainee_signoff_final_at" | "trainer_signoff_final_at" | "stage3_tutorial_required" | "stage3_finalized_at" | "stage3_moved_earlier_at" | "stage3_moved_earlier_reason">[];
@@ -232,7 +232,7 @@ export async function fetchRosterRows(
           // pre-rebuild trainer page and reads as permanently empty for any
           // course run through the live app (same dead-table bug already
           // fixed for the CELTA5 record's own "hrs assessed" stat).
-          supabase.from("plan_assignments").select("trainee_id, tp_number").eq("course_id", courseId).not("taught_at", "is", null),
+          supabase.from("plan_assignments").select("trainee_id, tp_number, taught_at").eq("course_id", courseId).not("taught_at", "is", null),
           supabase
             .from("tp_feedback")
             .select(
@@ -362,12 +362,16 @@ export async function fetchRosterRows(
   const folAverage =
     traineeIds.length > 0 ? [...folCountsByTrainee.values()].reduce((sum, n) => sum + n, 0) / traineeIds.length : 0;
 
+  // As of today: the demo's record clock writes the whole course at once,
+  // so "TPs passed 8 of 8" showed on day 15. A real course never has a
+  // future taught_at or submitted_at (Ramy, 20 Sep 2026).
+  const asOf = (stamp: string | null) => Boolean(stamp) && (stamp as string).slice(0, 10) <= today;
   return (trainees ?? []).map((trainee) => {
-    const tpsTaught = (taughtPlans ?? []).filter((p) => p.trainee_id === trainee.id).length;
+    const tpsTaught = (taughtPlans ?? []).filter((p) => p.trainee_id === trainee.id && asOf(p.taught_at)).length;
     const assessedHrs = (tpsTaught * TP_LESSON_LENGTH_MINUTES) / 60;
 
     const tpsPassed = (feedbackRows ?? []).filter(
-      (f) => f.trainee_id === trainee.id && f.submitted_at && f.grade !== "not_to_standard"
+      (f) => f.trainee_id === trainee.id && asOf(f.submitted_at) && f.grade !== "not_to_standard"
     ).length;
 
     const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
@@ -432,7 +436,7 @@ export async function fetchRosterRows(
     const supervisedDone = traineeSupervised.filter((c) => c.submitted_at).length;
     const supervisedSecondsSpent = traineeSupervised.reduce((sum, c) => sum + (c.time_spent_seconds ?? 0), 0);
 
-    const taughtTpNumbers = (taughtPlans ?? []).filter((p) => p.trainee_id === trainee.id).map((p) => p.tp_number);
+    const taughtTpNumbers = (taughtPlans ?? []).filter((p) => p.trainee_id === trainee.id && asOf(p.taught_at)).map((p) => p.tp_number);
     const planSubmittedTpNumbers = new Set(
       (tpPlans ?? []).filter((p) => p.trainee_id === trainee.id && p.submitted_at).map((p) => p.tp_number)
     );

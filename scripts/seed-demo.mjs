@@ -23,6 +23,9 @@ import { seedStage2Demo } from "./lib/stage2-demo.mjs";
 import { seedStage3Demo } from "./lib/stage3-demo.mjs";
 import { seedSupervisedReviewDemo } from "./lib/supervised-review-demo.mjs";
 import { seedFinalDayDemo } from "./lib/final-day-demo.mjs";
+import { seedPreCourseDemo } from "./lib/pre-course-demo.mjs";
+import { seedObservationTasksDemo } from "./lib/observation-tasks-demo.mjs";
+import { seedVolunteerPoolDemo } from "./lib/volunteer-pool-demo.mjs";
 import { applyLessonPlans } from "./lib/apply-lesson-plans.mjs";
 import { applyLanguageAnalyses } from "./lib/apply-language-analyses.mjs";
 import { DEFAULT_BRIEFS, publishMissingBriefs } from "./lib/default-briefs.mjs";
@@ -993,6 +996,18 @@ async function main() {
     })
   );
   console.log("gtky assignments: offered to", traineeList.length, "trainees", pastDayOne ? "(choices made)" : "(still open)");
+
+  // The pre-course task, answered. Every candidate read "0 of 50" on the
+  // tutor's page three weeks in (Ramy, 20 Sep 2026); the answers live in
+  // scripts/lib/pre-course-demo.mjs, done in the fortnight before day one.
+  {
+    const pre = await seedPreCourseDemo(supabase, {
+      centerId: center.id,
+      trainees: traineeDefs.map((def) => ({ id: trainees[def.name], name: def.name })),
+      answeredAt: beforeStart(4, "20:30"),
+    });
+    console.log(`pre-course task: ${pre.answers} answers across ${pre.candidates} candidates, ${pre.tasks} tasks`);
+  }
 
   // The "find your way around Connect" hunt from the welcome email -- six
   // questions, done in the first days. Most found all six; a couple stopped
@@ -2679,6 +2694,16 @@ async function main() {
       const { error: obsErr } = await supabase.from("observations").insert(observationRows);
       if (obsErr) throw obsErr;
       console.log(`observation hours seeded: ${observationRows.length} rows for ${i} candidates`);
+      // Directed observation tasks (0101) -- "0 assigned" until 20 Sep 2026.
+      const ot = await seedObservationTasksDemo(supabase, {
+        courseId: course.id,
+        trainees: traineeDefs.map((def) => ({ id: trainees[def.name], name: def.name, group: def.group, withdrawn: Boolean(def.withdrawn) })),
+        createdBy: trainerId,
+        today: isoOf(recordNow),
+        courseDay: (n) => courseDay(startDate, n),
+        atDay,
+      });
+      console.log(`observation tasks: ${ot.tasks} set, ${ot.submissions} submissions`);
     } else {
       console.log("observation hours not seeded -- the course has not started.");
     }
@@ -4137,6 +4162,18 @@ async function main() {
     );
   }
   console.log("volunteer v2: emails + person link + 9 prior hours + RSVP replies for", emekaLesson?.event_date ?? "no upcoming TP");
+
+  // The rest of the pool -- seven more per level, so the class-size warning
+  // stops firing and every register has a class in it (Ramy, 20 Sep 2026).
+  // Attendance and replies run to the real calendar, as Emeka's RSVP does.
+  const pool = await seedVolunteerPoolDemo(supabase, {
+    courseId: course.id,
+    centerId: center.id,
+    today: todayIsoV2,
+    signedUpAt: FULL ? beforeStart(12, "18:00") : new Date(nowMs() - 16 * 86400000).toISOString(),
+    nowIso: new Date(nowMs()).toISOString(),
+  });
+  console.log(`volunteer pool: ${pool.people} more students, ${pool.attendance} attendance rows, ${pool.replies} replies`);
 
   // Emeka's sign-up recording -- so the student card's Listen player and
   // "Transcript on file" line have something real behind them (Ramy,

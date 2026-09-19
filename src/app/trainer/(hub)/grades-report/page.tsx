@@ -85,17 +85,17 @@ export default async function GradesReportPage() {
     .maybeSingle();
   const assessorVisitDateForCourse = visitRow?.assessor_visit_date ?? null;
 
+  // The centre's own day -- worked out here rather than in the banner, which
+  // is a client component and would otherwise disagree with the server about
+  // the date near midnight. The cohort rows read "as of" it too.
+  const gradesTimeZone = (trainer?.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const gradesToday = await demoToday(gradesTimeZone);
   const { courseName, provisionalDueAt, provisionalDueDerived, rows: cohortRows } = await computeCohortRows(
     supabase,
     courseId,
-    { approvedOnly: !trainer }
+    { approvedOnly: !trainer, today: gradesToday }
   );
-  // How far the provisional deadline is, counted in the centre's own day --
-  // worked out here rather than in the banner, which is a client component
-  // and would otherwise disagree with the server about the date near
-  // midnight. Negative means overdue.
-  const gradesTimeZone = (trainer?.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
-  const gradesToday = await demoToday(gradesTimeZone);
+  // How far the provisional deadline is. Negative means overdue.
   const provisionalDaysOut = provisionalDueAt
     ? Math.ceil((new Date(`${provisionalDueAt.slice(0, 10)}T00:00:00`).getTime() - new Date(`${gradesToday}T00:00:00`).getTime()) / 86400000)
     : null;
@@ -315,7 +315,7 @@ export default async function GradesReportPage() {
             );
             const isBorderline = wasSlashed || gradeMoved;
             const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
-            const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
+            const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at && p.taught_at.slice(0, 10) <= gradesToday);
             const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
             // Ramy, 30 Aug 2026: the proposed-by line carries "the level of
             // the group and the tutor name", not a group name -- "there's no

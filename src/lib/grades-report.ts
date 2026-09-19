@@ -28,7 +28,13 @@ export async function computeCohortRows(
    * working note, were visible to the assessor the moment they were typed.
    * With this on, an unapproved candidate reads "Not yet sent" instead.
    */
-  opts?: { approvedOnly?: boolean }
+  opts?: {
+    approvedOnly?: boolean;
+    /** Course-local date; lessons taught after it are not yet taught. The
+     *  demo's record clock writes the whole course at once, so without this
+     *  day 15 read "0 TPs left to teach" (Ramy, 20 Sep 2026). */
+    today?: string;
+  }
 ): Promise<{
   courseName: string;
   provisionalDueAt: string | null;
@@ -77,7 +83,9 @@ export async function computeCohortRows(
     const record = recordByTrainee.get(trainee.id) ?? null;
     const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
     const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
-    const taughtForTrainee = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at).length;
+    const taughtForTrainee = (planAssignments ?? []).filter(
+      (p) => p.trainee_id === trainee.id && p.taught_at && (!opts?.today || p.taught_at.slice(0, 10) <= opts.today)
+    ).length;
 
     let outstanding = "";
     if (!record) {

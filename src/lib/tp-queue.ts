@@ -246,6 +246,11 @@ export function buildTpQueue(input: {
   const owedAll: OwedLesson[] = [];
   for (const p of plans) {
     if (!p.taught_at) continue;
+    // As of today. The demo's record clock writes the whole course at once
+    // (project_demo_clock), so a lesson dated next Thursday read "Just
+    // ended" on the Friday before; a real course never has a future
+    // taught_at, so this costs it nothing (Ramy, 20 Sep 2026).
+    if (p.taught_at.slice(0, 10) > today) continue;
     const key = `${p.trainee_id}-${p.tp_number}`;
     const fb = feedbackBy.get(key);
     if (fb?.submitted_at) continue; // published -- drops off

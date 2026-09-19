@@ -21,6 +21,24 @@ import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 //
 // So the register gets its own room, reached from the session's own tile on
 // the board every tutor already reads.
+// The class's own students first, the other room's after. Still every name
+// (see the note by the level below); with eight a level the A2 register was
+// eight Intermediate names deep before its own class began (20 Sep 2026).
+// Level is free text on the volunteer, so this is a best guess, never a
+// filter: an unmatched level sorts with the class, not away from it.
+function ownClassFirst<V extends { name: string; level: string | null }>(volunteers: V[], classLevel: string | null): V[] {
+  const wanted = (classLevel ?? "").trim().toLowerCase();
+  if (!wanted) return volunteers;
+  const other = (level: string | null) => {
+    const l = (level ?? "").trim().toLowerCase();
+    if (!l) return false;
+    if (wanted.startsWith("a2")) return l.startsWith("inter") || l.startsWith("b");
+    if (wanted.startsWith("b1")) return l.startsWith("elem") || l.startsWith("begin") || l.startsWith("a");
+    return false;
+  };
+  return [...volunteers].sort((a, b) => Number(other(a.level)) - Number(other(b.level)) || a.name.localeCompare(b.name));
+}
+
 export default async function RegisterPage({ params }: { params: Promise<{ eventId: string }> }) {
   const trainer = await requireRole(["trainer", "admin"]);
   const { eventId } = await params;
@@ -71,7 +89,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ event
           <p className="text-body text-muted">No volunteer students on this course yet.</p>
         ) : (
           <div className="flex flex-col divide-y divide-border-faint">
-            {(volunteers ?? []).map((v) => (
+            {ownClassFirst(volunteers ?? [], event.detail).map((v) => (
               <label key={v.id} className="wash flex items-center gap-3 rounded-[8px] px-2 py-2.5 text-body text-ink">
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attended.has(v.id)} className="size-4" />
                 <span className="flex-1">
