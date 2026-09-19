@@ -37,10 +37,14 @@ export function CapabilityCustomizer({
   overrides,
   customRoles,
   capabilityRows,
+  demoNote = null,
 }: {
   overrides: OverrideMatrix;
   customRoles: { role_key: string; label: string }[];
   capabilityRows: { key: string; label: string }[];
+  /** Shown on the demo, where a pill stays put: the reason, in a line
+   *  (Ramy, 20 Sep 2026: "role picker still doesn't work"). */
+  demoNote?: string | null;
 }) {
   const roleCols = [
     ...CENTRE_ROLES.map((r) => ({ key: r as string, label: CENTRE_ROLE_LABELS[r], color: BUILT_IN_ROLE_COLOR[r] })),
@@ -71,6 +75,11 @@ export function CapabilityCustomizer({
           Role builder
         </span>
       </div>
+      {demoNote ? (
+        <p className="rounded-lg px-4 py-2.5 text-[12.5px]" style={{ background: "var(--owner-garnet-soft)", border: "1px solid var(--owner-line)", color: "var(--owner-garnet)" }}>
+          {demoNote}
+        </p>
+      ) : null}
 
       <div className="rounded-lg px-5 py-[17px]" style={{ background: "var(--owner-garnet-soft)", border: "1px solid var(--owner-line)" }}>
         <p className="owner-eyebrow mb-2.5" style={{ color: "var(--owner-garnet)" }}>

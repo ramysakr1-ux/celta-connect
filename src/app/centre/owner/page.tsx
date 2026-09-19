@@ -17,7 +17,7 @@ import { BranchChip } from "@/components/branch-chip";
 import { HeaderCredit } from "@/components/designer-credit";
 import { OwnerRegisterStyles } from "@/app/centre/owner/owner-register";
 import { InstallPrompt } from "@/components/install-prompt";
-import { demoToday } from "@/lib/demo-clock";
+import { demoToday, viewerIsOnDemoCentre } from "@/lib/demo-clock";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -276,7 +276,16 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             table with a column per role -- on a phone it says so instead of
             shipping cramped (build-spec §7). */}
         <LaptopOnlyGate task="Shaping roles">
-          <CapabilityCustomizer overrides={ctx.overrides} customRoles={customRoles ?? []} capabilityRows={capabilityRows} />
+          <CapabilityCustomizer
+            overrides={ctx.overrides}
+            customRoles={customRoles ?? []}
+            capabilityRows={capabilityRows}
+            demoNote={
+              (await viewerIsOnDemoCentre())
+                ? "This is the demo centre, which is read-only: the pills, new roles and new capabilities here don't save. On your own centre they do."
+                : null
+            }
+          />
         </LaptopOnlyGate>
 
         <div className="owner-card flex flex-col gap-4 px-7 py-6">
