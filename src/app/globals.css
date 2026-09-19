@@ -1453,3 +1453,11 @@ button:where(.plain-card, .sheet, .card, .tile):hover {
     0%, 100% { opacity: 1; }
   }
 }
+
+/* A room read at view level (src/components/room-readonly.tsx): its forms
+   are shown, not offered. Links and non-form buttons (tabs, expanders)
+   still work; anything that would submit does not. */
+.room-readonly form :is(input, select, textarea, button) {
+  pointer-events: none;
+  opacity: 0.55;
+}
