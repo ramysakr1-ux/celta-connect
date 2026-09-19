@@ -558,6 +558,7 @@ export async function TodayTab({
     unrecordedLabel,
     unrecordedTps,
     hasTeachingSchedule: Boolean(subgroupMember && subgroupRow?.half_order),
+    tpsTaught: (plans ?? []).filter((p) => p.taught_at).length,
     gtkyAssignment,
   });
 

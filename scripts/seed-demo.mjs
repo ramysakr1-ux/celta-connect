@@ -2372,7 +2372,10 @@ async function main() {
         // credited with) and the referencing one it turned on; the language
         // and word-count criteria are unaffected by it.
         first_criteria_marks: criteriaMarks("LRT", ["analysis", "terminology", "reference_materials"]),
-        tutor_feedback:
+        // The candidate's card reads first_overall_comment (tutor_feedback is
+        // the old field nothing reads); with only the old one set, Kofi's
+        // failed round said "No feedback yet" (trainee walk, 20 Sep 2026).
+        first_overall_comment:
           "A plagiarism case on this submission was upheld. The assignment fails this round and must be resubmitted in your own words, with sources cited. See the decision on your record, and complete the Plagiarism Reflection that has been set.",
       })
       .select("id")
@@ -3896,10 +3899,17 @@ async function main() {
     // there was a week in the future -- every announcement read "just now"
     // on every demo day (trainee walk, 20 Sep 2026).
     const hoursAgo = (n) => new Date(Math.min(nowMs(), Date.now()) - n * 3600000).toISOString();
+    // Pinned to course days, not to the clock the seed ran on: the demo is
+    // read at ?day=N, and a post stamped "now" is ahead of every demo day
+    // and reads "just now" on all of them (trainee walk, 20 Sep 2026).
+    // Day 15 -- the story's default -- sees "this morning", "yesterday",
+    // "3 days ago". A stage that has not reached the day falls back to the
+    // record clock.
+    const onDay = (day, hhmm, fallbackHours) => (reached(courseDay(startDate, day)) ? atDay(day, hhmm) : hoursAgo(fallbackHours));
     const posts = [
-      { pinned: true, title: "Reading for tomorrow is chapter 4 only, not 4 and 5", body: "Apologies for the confusion in yesterday's handout. Chapter 4 only. If you have already read 5, no harm done.", h: 20 },
-      { pinned: false, title: "Observation slots for Thursday are open", body: "Six slots, first come first served. Sign up on the timetable -- two of you still need a second observation before the end of week 3.", h: 3 },
-      { pinned: false, title: "Assignment 1 brief is in Resources", body: "Focus on the Learner. The brief, the marking criteria and last course's worked example are all in the Resource Hub.", h: 52 },
+      { pinned: true, title: "Reading for tomorrow is chapter 4 only, not 4 and 5", body: "Apologies for the confusion in yesterday's handout. Chapter 4 only. If you have already read 5, no harm done.", at: onDay(14, "17:20", 20) },
+      { pinned: false, title: "Observation slots for Thursday are open", body: "Six slots, first come first served. Sign up on the timetable -- two of you still need a second observation before the end of week 3.", at: onDay(15, "09:10", 3) },
+      { pinned: false, title: "Assignment 1 brief is in Resources", body: "Focus on the Learner. The brief, the marking criteria and last course's worked example are all in the Resource Hub.", at: onDay(12, "16:40", 52) },
     ];
     const { error } = await supabase.from("course_broadcasts").insert(
       posts.map((p) => ({
@@ -3908,8 +3918,8 @@ async function main() {
         title: p.title,
         body: p.body,
         pinned: p.pinned,
-        created_at: hoursAgo(p.h),
-        sent_at: hoursAgo(p.h),
+        created_at: p.at,
+        sent_at: p.at,
       }))
     );
     if (error) console.warn("  announcements:", error.message);

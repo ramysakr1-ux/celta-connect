@@ -212,7 +212,11 @@ export async function buildRailStatus({
             live: false,
             urgent: false,
           }
-        : { status: "All your TPs are taught", live: false, urgent: false };
+        : (plans ?? []).some((p) => p.taught_at)
+          ? { status: "All your TPs are taught", live: false, urgent: false }
+          : // A withdrawn candidate with nothing assigned read "All your TPs
+            // are taught" above a record of 0 of 8 (trainee walk, 20 Sep 2026).
+            { status: "No teaching practice recorded", live: false, urgent: false };
 
   // Written Assignments -- the only door that ever turns garnet.
   const outstanding = (assignments ?? [])

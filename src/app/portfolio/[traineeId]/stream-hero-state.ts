@@ -32,6 +32,7 @@ export type HeroKind =
   | "teaching_next"
   | "teaching_unrecorded"
   | "teaching_done"
+  | "teaching_none"
   | "teaching_unscheduled"
   | "course_finished"
   | "precourse_gtky";
@@ -65,6 +66,7 @@ export function buildHeroState({
   unrecordedLabel,
   unrecordedTps,
   hasTeachingSchedule,
+  tpsTaught,
   gtkyAssignment,
 }: {
   traineeId: string;
@@ -78,6 +80,10 @@ export function buildHeroState({
   /** The candidate is in a subgroup with a half order -- so "all taught" can
    *  mean it, rather than meaning the lookup came back empty. */
   hasTeachingSchedule: boolean;
+  /** Lessons actually taught. "All your TPs are taught" needs at least one;
+   *  a withdrawn candidate with nothing assigned used to get it over a
+   *  record of 0 of 8 (trainee walk, 20 Sep 2026). */
+  tpsTaught: number;
   gtkyAssignment: { chosen_slug: string | null } | null;
 }): { kind: HeroKind; generic: HeroContent | null } {
   const heroKind: HeroKind = postCourse
@@ -93,7 +99,9 @@ export function buildHeroState({
           : unrecordedLabel
             ? "teaching_unrecorded"
             : hasTeachingSchedule
-              ? "teaching_done"
+              ? tpsTaught > 0
+                ? "teaching_done"
+                : "teaching_none"
               : "teaching_unscheduled";
   const generic: HeroContent | null =
     heroKind === "course_finished"
@@ -191,6 +199,14 @@ export function buildHeroState({
                 label: "Teaching practice",
                 big: "All your TPs are taught",
                 bigSub: "Nothing left to teach -- see My teaching for the full record.",
+                ctaHref: `/portfolio/${traineeId}/tp`,
+                ctaLabel: "My teaching",
+              }
+          : heroKind === "teaching_none"
+            ? {
+                label: "Teaching practice",
+                big: "No teaching practice recorded",
+                bigSub: "Nothing has been assigned to you or taught yet -- your tutor sets the TP points.",
                 ctaHref: `/portfolio/${traineeId}/tp`,
                 ctaLabel: "My teaching",
               }

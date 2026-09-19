@@ -222,6 +222,10 @@ function AssignmentCard({
           <span className="pill pill-neutral">Not yet open</span>
         ) : result === "fail" ? (
           <span className="pill pill-danger">Fail</span>
+        ) : a.first_status === "resubmission_required" && a.resubmission_status === "approved" ? (
+          // The outcome, not the history: a passed resubmission read
+          // "Resubmission required" at the top of its card (20 Sep 2026).
+          <span className="pill pill-success">Pass on resubmission</span>
         ) : (
           <span className={`pill ${STATUS_PILL_CLASS[a.first_status]}`}>{STATUS_LABEL[a.first_status]}</span>
         )}
