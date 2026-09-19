@@ -149,7 +149,7 @@ export default async function AdmissionsPipelinePage({
                   href={`/dashboard/admissions/pipeline?course=${c.id}`}
                   className={`rounded-full px-3 py-1 text-label font-semibold ${c.id === activeCourseId ? "bg-primary text-primary-foreground" : "border border-border text-muted hover:border-primary wash"}`}
                 >
-                  {c.course_code || c.name}
+                  {c.course_code ? `${c.name} (${c.course_code})` : c.name}
                 </Link>
               ))}
             </div>
@@ -199,7 +199,7 @@ export default async function AdmissionsPipelinePage({
                 <tr key={c.id} className="lift">
                   <td>
                     <Link href={`/dashboard/admissions/pipeline?course=${c.id}`} className="font-medium text-ink hover:underline">
-                      {c.course_code || c.name}
+                      {c.course_code ? `${c.name} (${c.course_code})` : c.name}
                     </Link>
                     <p className="text-label text-muted">starts {formatCalendarDate(c.start_date, { year: "numeric" })}</p>
                   </td>
