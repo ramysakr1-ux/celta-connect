@@ -365,7 +365,10 @@ export async function fetchRosterRows(
   // As of today: the demo's record clock writes the whole course at once,
   // so "TPs passed 8 of 8" showed on day 15. A real course never has a
   // future taught_at or submitted_at (Ramy, 20 Sep 2026).
-  const asOf = (stamp: string | null) => Boolean(stamp) && (stamp as string).slice(0, 10) <= today;
+  // A bundle from before migration 0309 carries no date on its taught plans
+  // (undefined, not null): count those as taught, as they always were,
+  // rather than dropping every TP and reading 0.00 assessed hours.
+  const asOf = (stamp: string | null | undefined) => (stamp === undefined ? true : Boolean(stamp) && (stamp as string).slice(0, 10) <= today);
   return (trainees ?? []).map((trainee) => {
     const tpsTaught = (taughtPlans ?? []).filter((p) => p.trainee_id === trainee.id && asOf(p.taught_at)).length;
     const assessedHrs = (tpsTaught * TP_LESSON_LENGTH_MINUTES) / 60;
