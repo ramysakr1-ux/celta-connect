@@ -167,7 +167,11 @@ export function doubleMarkingProblems(input: {
   return [
     {
       tag: "Double-marking",
-      message: `${short.length} assignment${short.length === 1 ? "" : "s"} short of the double-marking quota with ${daysLeft <= 0 ? "no" : daysLeft} day${daysLeft === 1 ? "" : "s"} left`,
+      // `short` is a list of assignment TYPES, so "2 assignments short" read
+      // as two scripts when it meant two of the four assignments were under
+      // quota -- with LfC 0/4 and Skills 0/4 beside it, eight short (tutor
+      // walk, 20 Sep 2026). Name them instead.
+      message: `${short.map((x) => x.t).join(" and ")} below the double-marking quota with ${daysLeft <= 0 ? "no" : daysLeft} day${daysLeft === 1 ? "" : "s"} left`,
       detail: short.map((x) => `${x.t} ${x.done}/${quota}`).join(" · "),
       href: "/trainer/roster",
       cite: "9.2.3",

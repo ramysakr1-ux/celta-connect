@@ -1790,7 +1790,7 @@ async function main() {
     course_id: course.id,
     trainee_id: trainees["Daniel Kim"],
     route: "tutor",
-    body: "I'm finding the pace hard to keep up with after the resubmission -- could we find some extra time to go through concept-checking together before TP5?",
+    body: "I'm finding the pace hard to keep up with after the resubmission -- could we find some extra time to go through concept-checking together before my next TP?",
     anonymous: false,
   });
 

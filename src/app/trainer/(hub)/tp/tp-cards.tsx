@@ -252,7 +252,7 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
 
       {tomorrow ? (
         <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 ${today ? "border-t border-border-faint pt-3" : ""}`}>
-          <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">Tomorrow</span>
+          <span className="text-label font-bold tracking-[0.08em] text-muted uppercase">{tomorrow.label}</span>
           <span className="text-meta text-ink">
             {formatCalendarDate(tomorrow.date, { weekday: "short", day: "numeric" })} · TP{tomorrow.tpNumber} · {tomorrow.groupName}
             {tomorrow.level ? ` · ${tomorrow.level}` : ""}

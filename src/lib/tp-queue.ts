@@ -82,6 +82,10 @@ export interface TomorrowSlot {
 
 export interface TomorrowLine {
   date: string;
+  /** "Tomorrow" when it is; the weekday when the next teaching day is not
+   *  the next calendar day -- a Friday's next TP day is Monday, and the card
+   *  used to head it "Tomorrow" regardless (tutor walk, 20 Sep 2026). */
+  label: string;
   tpNumber: number;
   groupName: string;
   level: string | null;
@@ -338,8 +342,10 @@ export function buildTpQueue(input: {
         (a, b) => rotationPosition(a.baseSlot, g.members.length, tpNext) - rotationPosition(b.baseSlot, g.members.length, tpNext)
       );
       const dayEvents = eventsByDate.get(nextDate) ?? [];
+      const isTomorrow = (Date.parse(`${nextDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000 === 1;
       tomorrowLine = {
         date: nextDate,
+        label: isTomorrow ? "Tomorrow" : new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(new Date(`${nextDate}T12:00:00Z`)),
         tpNumber: tpNext,
         groupName: g.groupName,
         level: pointOf(planBy.get(`${ordered[0]?.traineeId}-${tpNext}`)).level,

@@ -160,7 +160,13 @@ export default async function TrainerRosterPage() {
     deliveryMode = courseRow?.delivery_mode ?? "f2f";
 
     const profileById = new Map((tutorProfiles ?? []).map((p) => [p.id, p]));
-    rosterTutors = (tutorRows ?? []).map((t) => ({
+    // A course_tutors row with no tutor_role is not a tutor: the permission
+    // layer writes one for a Course administrator -- "approved on this
+    // course, but not on the teaching roster" (migration 0103). The centre's
+    // course page stopped listing them as "Role not set" on 15 Sep 2026; this
+    // list still did, with a Remove button beside the course admin's name
+    // (tutor walk, 20 Sep 2026).
+    rosterTutors = (tutorRows ?? []).filter((t) => t.tutor_role).map((t) => ({
       courseTutorId: t.id,
       profileId: t.profile_id,
       name: profileById.get(t.profile_id)?.full_name ?? "Unknown",

@@ -609,8 +609,11 @@ export default async function TodayPage() {
   // ---- Flagged: only who is in trouble. rows.slice(0, 6) -- the first six
   // of the roster -- is gone; Ramy, 4 Sep 2026: "if something is flagged, it
   // should be in the cohort. Otherwise just use the roster."
+  // Active only, like the Needs-you items above and every Handbook count on
+  // this page. The withdrawn candidate was being flagged for attendance he
+  // stopped having a reason to keep (tutor walk, 20 Sep 2026).
   const flagged = rows
-    .filter((r) => inScope(r.id))
+    .filter((r) => inScope(r.id) && r.courseStatus === "active")
     .map((r) => {
       const reasons: { text: string; tone: "red" | "gold" }[] = [];
       if (r.attendancePct < 80) reasons.push({ text: `Attendance ${Math.round(r.attendancePct)}% · below threshold`, tone: "red" });
@@ -1052,7 +1055,7 @@ export default async function TodayPage() {
                 <div className="flex items-baseline gap-2.5">
                   <h3 className="font-serif text-h2 font-semibold text-ink-warm">Flagged candidates</h3>
                   <span className="text-meta text-muted">
-                    {flagged.length} of {rows.filter((r) => inScope(r.id)).length}
+                    {flagged.length} of {rows.filter((r) => inScope(r.id) && r.courseStatus === "active").length}
                   </span>
                 </div>
                 <Link href="/trainer/roster" className="text-meta text-muted hover:underline">
