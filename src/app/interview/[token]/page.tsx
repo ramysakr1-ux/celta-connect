@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { getPickerTimeOptions, hasBookableOption, flagNoInterviewSlots } from "@/lib/interview-slot-picker";
@@ -48,7 +49,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
       .eq("booked_applicant_id", applicant.id)
       .maybeSingle();
     return (
-      <Shell>
+      <Shell courseId={applicant.intake_course_id}>
         <p className="mt-4 text-body text-ink">
           {applicant.full_name}, you&apos;re booked in{bookedSlot ? "" : " -- we'll confirm the details by email"}.
         </p>
@@ -89,7 +90,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
   }
 
   return (
-    <Shell>
+    <Shell courseId={applicant.intake_course_id}>
       <p className="mt-4 text-body text-ink">
         {applicant.full_name}, thank you for the written tasks — we have read them and we would like to meet you
         {course ? ` about ${course.name}` : ""}.
@@ -123,11 +124,14 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
 // Neither state of this gate carries a teal primary -- the slots are outlined
 // rows and Reschedule is a secondary -- so the sheet's rule is gold (Ramy,
 // 26 Aug 2026; gates spec A1).
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, courseId }: { children: React.ReactNode; courseId?: string | null }) {
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
       <div className="sheet-entry sheet-entry-gold p-8">
+        <div className="flex justify-end">
+          <DemoDayTag courseId={courseId ?? undefined} />
+        </div>
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>

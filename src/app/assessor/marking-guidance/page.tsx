@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssessorPreview } from "@/lib/auth/portfolio-access";
@@ -51,6 +52,9 @@ export default async function AssessorMarkingGuidancePage() {
           back to the pack overview at all. */}
       <AssessorReadOnlyBanner />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingBottom: 10 }}>
+          <DemoDayTag courseId={courseId} />
+        </div>
         <div className="frame" style={{ padding: 24 }}>
           <AssessorHead
             eyebrow="Assessor access — read-only · marking guidance"

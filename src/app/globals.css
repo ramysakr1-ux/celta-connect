@@ -1231,14 +1231,24 @@ h6 {
    .lift-strong inherited that and lost it when it was written inside one
    (caught on production: the tile's z-index moved on hover, its transform
    did not). */
-.lift {
+/* Automatic for the common case, so the rule cannot be forgotten: a card
+   that IS a link lifts, a card that IS a button washes, whether or not the
+   element carries the class. The classes remain for rows and for anything
+   that is not a card. Ramy, 20 Sep 2026: "why does the hovering keep
+   disappearing? we just keep fixing it, and then it disappears again" --
+   because it was opt-in, one class per element, and every rebuilt screen
+   started without it. :where() keeps these at zero specificity, so an
+   explicit class or utility still wins. */
+.lift,
+a:where(.plain-card, .sheet, .card, .tile) {
   transition:
     transform 200ms var(--ease-lift),
     box-shadow 200ms ease,
     border-color 200ms ease;
 }
 
-.lift:hover {
+.lift:hover,
+a:where(.plain-card, .sheet, .card, .tile):hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lift);
 }
@@ -1266,7 +1276,8 @@ h6 {
   z-index: 2;
 }
 
-.wash {
+.wash,
+button:where(.plain-card, .sheet, .card, .tile) {
   transition: background-color 120ms ease;
 }
 
@@ -1274,7 +1285,8 @@ h6 {
    rule regardless of source order, so a button that also carries its own
    hover background utility would otherwise swallow the wash with no
    visible effect (found live on 27 Aug 2026 by reading computed styles). */
-.wash:hover {
+.wash:hover,
+button:where(.plain-card, .sheet, .card, .tile):hover {
   background-color: var(--hover-fill, var(--area-hover-fill, color-mix(in oklab, var(--color-primary) 30%, var(--color-card)))) !important;
 }
 

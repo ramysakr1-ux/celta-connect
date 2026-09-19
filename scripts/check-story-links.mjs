@@ -44,7 +44,10 @@ async function walk(url, jar) {
     status = res.status;
     drink(jar, res);
     const loc = res.headers.get("location");
-    if (!loc) return { status, landed: url.replace(BASE, "") };
+    // The way back: every page a demo viewer lands on carries the Demo tag,
+    // a link to /demo/story (Ramy, 20 Sep 2026: "half the pages don't have
+    // it. So I couldn't get back to the demo").
+    if (!loc) { const html = (res.headers.get("content-type") ?? "").includes("text/html") ? await res.text() : null; return { status, landed: url.replace(BASE, ""), tagged: html === null ? true : html.includes('href="/demo/story"') }; }
     url = new URL(loc, url).toString();
   }
   return { status, landed: `${url.replace(BASE, "")} (too many redirects)` };
@@ -65,12 +68,14 @@ for (const href of hrefs) {
 console.log(`${hrefs.length} card destinations behind ${byDoor.size} doors\n`);
 
 const bad = [];
+const untagged = [];
 let checked = 0;
 for (const [door, cards] of byDoor) {
   const jar = new Map();
   // Sign in through the door once, on whichever day the first card names.
   const entry = await walk(`${BASE}${door}${cards[0].day ? `?day=${cards[0].day}` : ""}`, jar);
   const signedIn = entry.status === 200 && !entry.landed.startsWith("/login");
+  if (signedIn && entry.tagged === false) untagged.push(entry.landed);
   if (!signedIn) {
     bad.push({ href: door, ...entry });
     console.log(`  BAD  ${door}\n         -> ${entry.status} ${entry.landed}  (the door itself)`);
@@ -93,11 +98,15 @@ for (const [door, cards] of byDoor) {
       : await walk(BASE + target, new Map(jar));
     const ok = r.status === 200 && !r.landed.startsWith("/login");
     if (!ok) bad.push({ href: card.href, ...r });
-    if (VERBOSE || !ok) console.log(`  ${ok ? "ok  " : "BAD "} ${card.href}\n         -> ${r.status} ${r.landed}`);
+    else if (r.tagged === false) untagged.push(r.landed);
+    if (VERBOSE || !ok) console.log(`  ${ok ? "ok  " : "BAD "} ${card.href}\n         -> ${r.status} ${r.landed}${r.tagged === false ? "  (NO DEMO TAG)" : ""}`);
   }
 }
 
 console.log();
-if (bad.length === 0) { console.log(`All ${checked} card destinations land. All clear.`); process.exit(0); }
+const missing = [...new Set(untagged)];
+if (missing.length > 0) console.log(`${missing.length} landed pages have no Demo tag (no way back to /demo/story):\n  ${missing.join("\n  ")}\n`);
+if (bad.length === 0 && missing.length === 0) { console.log(`All ${checked} card destinations land, every one with the way back. All clear.`); process.exit(0); }
+if (bad.length === 0) { console.log(`All ${checked} card destinations land, but ${missing.length} pages have no Demo tag.`); process.exit(1); }
 console.log(`${bad.length} of ${checked} card destinations do not land.`);
 process.exit(1);

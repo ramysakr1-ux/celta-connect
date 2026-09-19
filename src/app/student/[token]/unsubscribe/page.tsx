@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { UnsubscribeButton } from "@/app/student/[token]/unsubscribe/unsubscribe-button";
@@ -15,7 +16,7 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
 
   const { data: accessToken } = await admin
     .from("course_access_tokens")
-    .select("volunteer_student_id, expires_at")
+    .select("volunteer_student_id, expires_at, course_id")
     .eq("token", token)
     .eq("role", "volunteer_student")
     .maybeSingle();
@@ -37,6 +38,9 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
         {/* No teal primary on this screen -- the one control is an outlined
             toggle -- so the rule is gold (Ramy, 26 Aug 2026). */}
         <div className="sheet-entry sheet-entry-gold p-8 text-center">
+          <div className="flex justify-end">
+            <DemoDayTag courseId={accessToken.course_id} />
+          </div>
           <Link href="/" className="inline-block hover:opacity-80">
             <Wordmark size="hero" />
           </Link>

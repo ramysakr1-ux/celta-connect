@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { OfferAcceptForm } from "@/app/offer/[token]/offer-accept-form";
@@ -55,6 +56,9 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
       <div className="sheet-entry p-8">
+        <div className="flex justify-end">
+          <DemoDayTag courseId={applicant.intake_course_id ?? undefined} />
+        </div>
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>

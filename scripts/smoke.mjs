@@ -86,7 +86,7 @@ async function visit(jar, urlPath, maxHops = 8) {
     }
     const type = res.headers.get("content-type") ?? "";
     const body = type.includes("text") || type.includes("json") ? await res.text() : "";
-    return { status: res.status, finalUrl: url, body };
+    return { status: res.status, finalUrl: url, body, contentType: res.headers.get("content-type") ?? "" };
   }
   return { status: 0, finalUrl: url, error: `more than ${maxHops} redirects`, body: "" };
 }
@@ -343,6 +343,10 @@ for (const role of ROLES) {
     checked += 1;
     const why = judge(role.name, route, url, res);
     if (why) failures.push({ role: role.name, route: url, why });
+    // The way back. A demo viewer must be able to return to /demo/story from
+    // every page: Ramy, 20 Sep 2026, mid-demo -- "half the pages don't have
+    // it. So I couldn't get back to the demo."
+    else if (role.door.startsWith("/demo/") && (res.contentType ?? "text/html").includes("text/html") && !res.body.includes('href="/demo/story"')) failures.push({ role: role.name, route: url, why: "no Demo tag -- no way back to /demo/story" });
     else ok += 1;
     if (VERBOSE) console.log(`  ${role.name} ${String(res.status).padEnd(4)} ${url}${why ? `  <-- ${why}` : ""}`);
   }

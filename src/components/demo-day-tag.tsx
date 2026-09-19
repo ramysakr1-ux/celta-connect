@@ -14,15 +14,19 @@ import { courseIsDemo, demoClockTag, viewerIsOnDemoCentre } from "@/lib/demo-clo
 export async function DemoDayTag({
   courseId,
   tone = "light",
+  force = false,
 }: {
   /** A token viewer's course (assessor, volunteer); omit when signed in. */
   courseId?: string;
   tone?: "dark" | "light";
+  /** A page that is demo by construction (/demo/journey/*): no viewer, no
+   *  course, still a way back to the story. */
+  force?: boolean;
 }) {
   // Shown for anyone inside the demo, not only when a ?day= is pinned: it is
   // the way back as well as the label, and a demo viewer on the real clock
   // needs the door just as much.
-  const tag = (await demoClockTag(courseId)) ?? ((courseId ? await courseIsDemo(courseId) : await viewerIsOnDemoCentre()) ? "Demo" : null);
+  const tag = (await demoClockTag(courseId)) ?? ((force || (courseId ? await courseIsDemo(courseId) : await viewerIsOnDemoCentre())) ? "Demo" : null);
   if (!tag) return null;
   // Ramy, 18 Sep 2026, after a Course Story card had taken him into Course
   // Admin: "I want to get back to the day by day demo page... and I can't, so

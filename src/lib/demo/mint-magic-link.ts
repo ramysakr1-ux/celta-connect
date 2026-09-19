@@ -1,5 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
+import { ACT_PREVIEW_COOKIE } from "@/lib/act-preview";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEMO_DAY_COOKIE } from "@/lib/demo-clock";
 
@@ -73,6 +74,10 @@ export async function mintDemoMagicLink(
   confirmUrl.searchParams.set("type", "magiclink");
   confirmUrl.searchParams.set("next", typeof next === "function" ? next(profile.id) : next);
   const response = NextResponse.redirect(confirmUrl);
+  // A demo door opens the role fresh. The MCT's "preview as ACT" cookie
+  // outlived the session it was set in, so /demo/trainer kept landing in
+  // the ACT preview -- in front of an audience (Ramy, 20 Sep 2026).
+  response.cookies.delete(ACT_PREVIEW_COOKIE);
   // The demo clock rides a cookie rather than the URL, so it survives the
   // magic-link hop (mint -> confirm -> landing) and every click after it.
   // Setting it to null clears it, which is how a link with no ?day= puts a

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { DemoDayTag } from "@/components/demo-day-tag";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssessorPreview } from "@/lib/auth/portfolio-access";
@@ -64,6 +65,10 @@ export default async function AssessorDoubleMarkingPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-background)" }}>
       <AssessorReadOnlyBanner subject="the course" />
+      {/* The way back for a demo viewer (Ramy, 20 Sep 2026). */}
+      <div style={{ display: "flex", justifyContent: "flex-end", maxWidth: 1040, margin: "0 auto", padding: "10px 24px 0" }}>
+        <DemoDayTag courseId={courseId} />
+      </div>
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div className="frame" style={{ padding: 24 }}>
           <AssessorHead
