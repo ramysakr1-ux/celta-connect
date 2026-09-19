@@ -5,7 +5,7 @@ import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signa
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
 import type { CohortSheetRow } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
-import type { Database } from "@/lib/supabase/types";
+import type { Database, FinalGrade } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
@@ -120,6 +120,9 @@ export async function computeCohortRows(
       name: trainee.full_name,
       tpGlyphs: mapTpFeedbackToGlyphRow(traineeFeedback),
       provisionalLabel: provisionalLabel(record),
+      // Only a confirmed grade counts as settled for an assessor's copy; the
+      // MCT sees proposed ones too.
+      provisionalGrade: record?.provisional_grade && (!approvedOnly || record.provisional_approved_at) ? (record.provisional_grade as FinalGrade) : null,
       recommendedGrade: record?.final_recommended_grade ?? null,
       outstanding,
       wasSlashed: Boolean(record?.provisional_grade_upper),

@@ -29,6 +29,9 @@ export interface CohortSheetRow {
   name: string;
   tpGlyphs: TpGlyphSlot[];
   provisionalLabel: string;
+  /** The provisional grade as stored, for the settled count while no final
+   *  grade exists yet; null when nobody has proposed one. */
+  provisionalGrade: FinalGrade | null;
   recommendedGrade: FinalGrade | null;
   outstanding: string;
   wasSlashed: boolean;
@@ -95,11 +98,18 @@ export function CohortSheet({
 
   const undecidedRows = rows.filter((r) => r.wasSlashed && !r.justified);
   const settledRows = rows.filter((r) => !(r.wasSlashed && !r.justified));
+  // Which grade the box counts. The final recommended grade once anyone has
+  // one (the end of the course); until then the provisional, so the box
+  // agrees with the banner beside it instead of reading "Settled 10 / Not
+  // yet graded 10" on day 15 (Ramy, 20 Sep 2026: "go with 1").
+  const countingFinal = rows.some((r) => r.recommendedGrade);
+  const settledGrade = (r: CohortSheetRow): FinalGrade | null =>
+    countingFinal ? r.recommendedGrade : r.withdrawn ? "Withdrawn" : r.provisionalGrade;
   const settledCounts = SETTLED_BANDS.map((band) => ({
     band,
-    count: settledRows.filter((r) => r.recommendedGrade === band).length,
+    count: settledRows.filter((r) => settledGrade(r) === band).length,
   }));
-  const notYetGradedCount = settledRows.filter((r) => !r.recommendedGrade).length;
+  const notYetGradedCount = settledRows.filter((r) => !settledGrade(r)).length;
 
   return (
     <div className="sheet flex flex-col gap-4">
@@ -199,6 +209,7 @@ export function CohortSheet({
         <div className="rounded-[6px] border border-border">
           <p className="border-b border-border px-4 py-2 text-micro font-semibold uppercase tracking-[0.12em] text-muted">
             Settled · {settledRows.length}
+            <span className="ml-2 normal-case tracking-normal text-muted">{countingFinal ? "final grades" : "provisional grades"}</span>
           </p>
           <div className="divide-y divide-border-faint">
             {settledCounts.map(({ band, count }) => (
