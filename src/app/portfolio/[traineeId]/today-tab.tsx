@@ -110,7 +110,7 @@ export async function TodayTab({
   const subgroupTpGroupId = subgroupRow?.tp_group_id ?? null;
   let broadcastsQuery = supabase
     .from("course_broadcasts")
-    .select("id, title, body, pinned, created_at, author_id")
+    .select("id, title, body, pinned, created_at, sent_at, author_id")
     .eq("course_id", courseId)
     .not("sent_at", "is", null)
     // As of the demo instant -- a post the record clock sent next week is
@@ -815,7 +815,7 @@ export async function TodayTab({
                   </p>
                   {unread && b.body ? <p className="mt-[3px] text-meta leading-relaxed text-ink">{b.body}</p> : null}
                   <p className="mt-[3px] text-meta text-muted">
-                    {authorNameById.get(b.author_id ?? "") ?? "Your tutor"} · {relativeTime(b.created_at, serverNowMs)}
+                    {authorNameById.get(b.author_id ?? "") ?? "Your tutor"} · {relativeTime(b.sent_at ?? b.created_at, serverNowMs)}
                   </p>
                 </div>
               );
