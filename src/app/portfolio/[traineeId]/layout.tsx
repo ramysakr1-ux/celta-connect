@@ -702,7 +702,8 @@ export default async function PortfolioLayout({
           same fix, as the Centre settings bar on 26 Aug. */}
       <footer className={`mt-auto flex flex-col items-center gap-3 py-8 text-center text-label text-muted ${showTraineeNav ? "pb-40 md:pb-24" : ""}`}>
         <span>
-          {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]
+          {/* Ramy, 20 Sep 2026: the "Workspace link <id>" tail read like a debug string to a candidate -- gone. */}
+          {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null]
             .filter(Boolean)
             .join(" · ")}
         </span>
