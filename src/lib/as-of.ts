@@ -68,3 +68,46 @@ export function assignmentAsOf<
   }
   return out as A;
 }
+
+/** A CELTA 5 record as of `today`: a provisional grade proposed or approved after today, and a
+ *  grade form marked submitted after today, are not there yet. The --full seed writes the whole
+ *  course at once; the grade form said "confirmed by the MCT" on day 15 for an approval dated
+ *  day 17 (tutor walk, 20 Sep 2026). */
+export function celta5AsOf<
+  T extends {
+    provisional_grade?: string | null;
+    provisional_grade_upper?: string | null;
+    provisional_upgrade_conditions?: string | null;
+    provisional_proposed_by?: string | null;
+    provisional_set_at?: string | null;
+    provisional_approved_at?: string | null;
+    provisional_approved_by?: string | null;
+    grade_form_submitted_at?: string | null;
+    grade_form_submitted_by?: string | null;
+    grade_approval_form_submitted_at?: string | null;
+    grade_approval_form_submitted_by?: string | null;
+  },
+>(r: T, today: string): T {
+  const out = { ...r };
+  if (out.provisional_set_at && !onOrBefore(out.provisional_set_at, today)) {
+    out.provisional_grade = null;
+    out.provisional_grade_upper = null;
+    out.provisional_upgrade_conditions = null;
+    out.provisional_proposed_by = null;
+    out.provisional_set_at = null;
+  }
+  if (out.provisional_approved_at && !onOrBefore(out.provisional_approved_at, today)) {
+    out.provisional_approved_at = null;
+    out.provisional_approved_by = null;
+  }
+  if (out.grade_form_submitted_at && !onOrBefore(out.grade_form_submitted_at, today)) {
+    out.grade_form_submitted_at = null;
+    out.grade_form_submitted_by = null;
+  }
+  if (out.grade_approval_form_submitted_at && !onOrBefore(out.grade_approval_form_submitted_at, today)) {
+    out.grade_approval_form_submitted_at = null;
+    out.grade_approval_form_submitted_by = null;
+  }
+  return out;
+}
+

@@ -27,6 +27,7 @@ import { DayBar, type DayBarItem } from "@/components/day-bar";
 import { sixHoursProblems, stage2Problems, stage3Problems, failLetterProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, cohortSizeProblems, tpClassSizeProblems, tpLevelProblems, contactHoursProblems, contactMinutesFromTimetable, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP } from "@/lib/hub-accent";
 import { demoToday, demoNow } from "@/lib/demo-clock";
+import { celta5AsOf } from "@/lib/as-of";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -236,7 +237,7 @@ export default async function TodayPage() {
     ? await Promise.all([
         Promise.resolve({ data: TB.feedback }),
         Promise.resolve({ data: TB.unreviewed_findings }),
-        Promise.resolve({ data: isMct ? TB.celta5 : [] }),
+        Promise.resolve({ data: isMct ? TB.celta5.map((x) => celta5AsOf(x, today)) : [] }),
         visitDayPromise,
         Promise.resolve({ data: TB.members }),
         Promise.resolve({ data: TB.books }),
@@ -253,7 +254,7 @@ export default async function TodayPage() {
         ? supabase.from("plagiarism_scanner_findings").select("assignment_id").in("assignment_id", (courseAssignments ?? []).map((a) => a.id)).is("reviewed_at", null)
         : Promise.resolve({ data: [] as { assignment_id: string }[] }),
       isMct && traineeIds.length > 0
-        ? supabase.from("celta5_records").select("provisional_grade, provisional_approved_at, final_recommended_grade").in("trainee_id", traineeIds)
+        ? supabase.from("celta5_records").select("provisional_grade, provisional_approved_at, final_recommended_grade").in("trainee_id", traineeIds).then((r) => ({ ...r, data: (r.data ?? []).map((x) => celta5AsOf(x, today)) }))
         : Promise.resolve({ data: [] as { provisional_grade: string | null; provisional_approved_at: string | null; final_recommended_grade: string | null }[] }),
       visitDayPromise,
       subIds.length > 0

@@ -41,6 +41,7 @@ import type { CriteriaRating } from "@/lib/supabase/types";
 import { FinalReportFields } from "@/app/trainer/(hub)/grades-report/final-report-fields";
 import { appianHref } from "@/lib/appian";
 import { demoToday } from "@/lib/demo-clock";
+import { asOf, celta5AsOf } from "@/lib/as-of";
 
 // Assessor-facing compiled Grades Report -- the whole cohort in one
 // continuous document, matching the shape of a real center's actual
@@ -111,13 +112,13 @@ export default async function GradesReportPage() {
     grade_approval_form_submitted_at?: string | null;
     grade_approval_form_submitted_by?: string | null;
   } | null;
-  const gradeFormSubmittedAt = gradeForm?.grade_form_submitted_at ?? null;
+  const gradeFormSubmittedAt = asOf(gradeForm?.grade_form_submitted_at ?? null, gradesToday);
   const { data: gradeFormMarker } = gradeForm?.grade_form_submitted_by
     ? await createAdminClient().from("profiles").select("full_name").eq("id", gradeForm.grade_form_submitted_by).maybeSingle()
     : { data: null };
   // And the last step of 14.4 (migration 0290): after the assessor's report,
   // the centre confirms the finals on the centre grade approval form.
-  const approvalSubmittedAt = gradeForm?.grade_approval_form_submitted_at ?? null;
+  const approvalSubmittedAt = asOf(gradeForm?.grade_approval_form_submitted_at ?? null, gradesToday);
   const { data: approvalMarker } = gradeForm?.grade_approval_form_submitted_by
     ? await createAdminClient().from("profiles").select("full_name").eq("id", gradeForm.grade_approval_form_submitted_by).maybeSingle()
     : { data: null };
@@ -157,7 +158,7 @@ export default async function GradesReportPage() {
   const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: planAssignments }, { data: writtenAssignments }] =
     traineeIds.length > 0
       ? await Promise.all([
-          supabase.from("celta5_records").select("*").eq("course_id", courseId),
+          supabase.from("celta5_records").select("*").eq("course_id", courseId).then((r) => ({ ...r, data: (r.data ?? []).map((x) => celta5AsOf(x, gradesToday)) })),
           supabase
             .from("celta5_matrix")
             .select("trainee_id, criteria_code, tutor_status_stage2, tutor_status_stage3")

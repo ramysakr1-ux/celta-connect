@@ -1792,6 +1792,8 @@ async function main() {
       // were due today. Confirmed wherever a grade exists; the one ungraded
       // candidate (Ruben) stays unconfirmed, which is the honest state of the
       // one case the grading meeting has not settled.
+      // The proposal is dated too (day 15, the tutors' own halves), so a day-15 reading shows the grade proposed and awaiting the MCT.
+      provisional_set_at: def.grade || def.withdrawn ? (FULL ? atDay(15, "14:00") : new Date(nowMs() - 3 * 86400000).toISOString()) : null,
       provisional_approved_at: def.grade || def.withdrawn ? (FULL ? atDay(17, "16:30") : new Date(nowMs() - 1 * 86400000).toISOString()) : null,
       };
     })
