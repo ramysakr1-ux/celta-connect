@@ -27,7 +27,7 @@ export default async function ObservationTasksPage() {
       .select("id, title, instructions, created_at")
       .eq("course_id", trainer.course_id)
       .order("created_at", { ascending: false }),
-    supabase.from("profiles").select("id, full_name").eq("course_id", trainer.course_id).eq("role", "trainee").order("full_name"),
+    supabase.from("profiles").select("id, full_name").eq("course_id", trainer.course_id).eq("role", "trainee").neq("course_status", "withdrawn").order("full_name"),
   ]);
 
   const taskIds = (tasks ?? []).map((t) => t.id);

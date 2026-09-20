@@ -9,6 +9,7 @@ import { ScheduledPanel, type ScheduledRowData } from "@/app/trainer/(hub)/annou
 import { formatCalendarDate, formatCalendarDateObject } from "@/lib/format-date";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
 import { demoToday } from "@/lib/demo-clock";
+import { onOrBefore } from "@/lib/as-of";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -164,7 +165,8 @@ export default async function AnnouncementsPage() {
       : (upcomingEvents ?? []);
 
   const scheduled = (broadcasts ?? []).filter((b) => !b.sent_at);
-  const posted = (broadcasts ?? []).filter((b) => b.sent_at);
+  // As of today: the record clock writes the whole course, and "Posted" listed 25-29 Sept sends on the 18th.
+  const posted = (broadcasts ?? []).filter((b) => b.sent_at && onOrBefore(b.sent_at, today));
 
   const anchorEventIds = [...new Set(scheduled.map((b) => b.anchor_event_id).filter((id): id is string => !!id))];
   const { data: anchorEvents } =

@@ -358,7 +358,9 @@ export default async function TrainerRotationPage() {
               />
             ) : (
               <div className="sheet p-5 text-body text-muted">
-                No upcoming TP day scheduled -- add one on the Timetable page.
+                {nextDate && nextTpNumber >= 7
+                  ? `TP${nextTpNumber} is next -- candidates choose their own aims for TP7 and TP8, so there is no running order to set here (see TP7/8 aim constraints).`
+                  : "No upcoming TP day scheduled -- add one on the Timetable page."}
               </div>
             )}
           </div>
