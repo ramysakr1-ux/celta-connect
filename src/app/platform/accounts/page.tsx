@@ -8,12 +8,12 @@ import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDateTime } from "@/lib/format-date";
 
 // specs/for-claude-code-command-center-belongs-in-connect.md: this is Connect's
-// own revenue/accounts view for the platform owner, not a Connect Hub screen --
+// own revenue/accounts view for the platform owner, not a Connect Lite screen --
 // see that spec (and specs/command-center-visual-reference.html, which turned
 // out not to match the spec's own description of it -- built to the spec's
 // "What to build" list instead, adapting to Connect's design system rather
 // than copying either). Connect's own data (centres, subscriptions, invoices)
-// is wired for real; Connect Hub and Affina have no reporting mechanism yet
+// is wired for real; Connect Lite and Affina have no reporting mechanism yet
 // (that's a separate, later piece of work) so their cards stay illustrative.
 //
 // Moved from /platform/command-center to /platform/accounts, 2026-08-25
@@ -198,7 +198,7 @@ export default async function CommandCenterPage() {
             so they say it in words, on a dashed edge. */}
         <div className="card card-gold border-dashed p-5">
           <p className="mb-1 text-micro font-bold tracking-[0.1em] text-muted uppercase">Illustrative</p>
-          <p className="text-label font-semibold uppercase tracking-wide text-muted">Connect Hub</p>
+          <p className="text-label font-semibold uppercase tracking-wide text-muted">Connect Lite</p>
           <p className="mt-1.5 text-h2 font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-body text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
