@@ -85,8 +85,10 @@ export async function seedVolunteerPoolDemo(supabase, { courseId, centerId, toda
       role: "volunteer_student",
       volunteer_student_id: vs.id,
       expires_at: new Date(new Date(nowIso).getTime() + 5 * 365 * 86400000).toISOString(),
-      // Most have opened their link at some point; a couple never have.
-      last_opened_at: i % 5 === 4 ? null : nowIso,
+      // Most have opened their link at some point; a couple never have. Dated
+      // when they signed up, not "now": on a pinned demo day the real clock is
+      // later, and the smoke test read "Opened 19 sep" on the 18th.
+      last_opened_at: i % 5 === 4 ? null : signedUpAt,
     });
 
     // Attendance: the lessons of their class already taught. Full days,

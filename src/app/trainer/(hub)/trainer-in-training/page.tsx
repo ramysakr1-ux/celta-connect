@@ -1,3 +1,5 @@
+import { demoToday } from "@/lib/demo-clock";
+import { asOf } from "@/lib/as-of";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +30,7 @@ export default async function TrainerInTrainingPage() {
   if (!trainer && !assessorCourseId) redirect("/login");
 
   const timeZone = (trainer ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const today = await demoToday(timeZone);
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
     return <div className="sheet p-6 text-body text-muted">No course assigned.</div>;
@@ -167,15 +170,15 @@ export default async function TrainerInTrainingPage() {
                   <dd className="text-ink">{record?.scheme ?? "Not recorded"}</dd>
                   <dt className="text-muted">Assessor day</dt>
                   <dd className="text-ink">
-                    {record?.assessor_day_completed_at
-                      ? `Completed ${formatDate(record.assessor_day_completed_at, timeZone)}`
-                      : record?.assessor_day_booked_at
-                        ? `Booked ${formatDate(record.assessor_day_booked_at, timeZone)}`
+                    {asOf(record?.assessor_day_completed_at, today)
+                      ? `Completed ${formatDate(asOf(record?.assessor_day_completed_at, today), timeZone)}`
+                      : asOf(record?.assessor_day_booked_at, today)
+                        ? `Booked ${formatDate(asOf(record?.assessor_day_booked_at, today), timeZone)}`
                         : "Not booked"}
                   </dd>
                   <dt className="text-muted">Portfolio</dt>
                   <dd className="text-ink">
-                    {record?.portfolio_submitted_at ? `Submitted ${formatDate(record.portfolio_submitted_at, timeZone)}` : "Not submitted"}
+                    {asOf(record?.portfolio_submitted_at, today) ? `Submitted ${formatDate(asOf(record?.portfolio_submitted_at, today), timeZone)}` : "Not submitted"}
                   </dd>
                   <dt className="text-muted">Outcome</dt>
                   <dd className="text-ink">{record?.outcome?.replace(/_/g, " ") ?? "Not decided"}</dd>

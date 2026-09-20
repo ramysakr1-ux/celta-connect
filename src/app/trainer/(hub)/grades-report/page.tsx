@@ -619,7 +619,7 @@ export default async function GradesReportPage() {
           <CertificateCheckCard courseId={courseId} candidates={certificateCandidates} />
           <CloseOutCard
             courseId={courseId}
-            cambridgeGradesConfirmedAt={courseRow?.cambridge_grades_confirmed_at ?? null}
+            cambridgeGradesConfirmedAt={asOf(courseRow?.cambridge_grades_confirmed_at ?? null, gradesToday)}
             blockingReasons={blockingReasons}
             closeOut={closeOut}
           />

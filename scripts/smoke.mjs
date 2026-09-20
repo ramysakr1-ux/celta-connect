@@ -42,6 +42,10 @@ const arg = (name, fallback = null) => {
 const BASE = (arg("base") ?? process.env.SMOKE_BASE ?? "http://localhost:3000").replace(/\/$/, "");
 const ONLY_ROLE = arg("role");
 const VERBOSE = process.argv.includes("--verbose");
+// The demo day every role is read on. Pinned, so the future-date check below
+// has a fixed "today" to judge against (Ramy, 20 Sep 2026: "add the
+// future-date check to the smoke test").
+const DAY = Number(arg("day", "15"));
 
 // ---------------------------------------------------------------- cookies ---
 // Node's fetch has no cookie jar and every one of these sessions is a cookie.
@@ -216,7 +220,14 @@ async function fixtures() {
   const enrolledApplicant = await one("applicants", "resulting_trainee_id", (q) =>
     q.not("resulting_trainee_id", "is", null).eq("intake_course_id", course?.id));
 
+  // The calendar date of demo day N: the N-th distinct timetable date, which is
+  // exactly what demo-clock.ts's dateForCourseDay does.
+  const { data: dateRows } = await db.from("course_timetable_events").select("event_date").eq("course_id", course?.id).order("event_date", { ascending: true });
+  const dates = [...new Set((dateRows ?? []).map((r) => r.event_date))].sort();
+  const demoDate = dates[Math.min(Math.max(DAY, 1), dates.length) - 1] ?? today;
+
   return {
+    demoDate,
     traineeId: trainee?.id ?? null,
     assignmentTemplateId: template?.id ?? null,
     coursebookId: coursebook?.id ?? null,
@@ -268,6 +279,53 @@ const ERROR_MARKERS = [
   "Application error: a server-side exception",
 ];
 
+// ------------------------------------------------------ future-dated records ---
+// The demo course is seeded with the whole course written at once (the record
+// clock), so any page that does not read "as of today" shows the end of the
+// course on day 15 -- "Marked submitted 22 Sept" on the 18th, "Posted" lists
+// of 29 Sept sends. Both walks on 20 Sep 2026 found a dozen of these one page
+// at a time. This is the mechanical net: a past-tense claim ("submitted",
+// "filed", "sent", ...) followed within a phrase by a date later than the
+// pinned demo day fails the page. A plain future date does not -- deadlines,
+// the visit, "opens on Monday" are what a course is made of.
+const MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 };
+const PAST_CLAIM = /(?<!\d\s)(?<!\d)\b(sent|submitted|resubmitted|marked|returned|filed|approved|confirmed|issued|signed|logged|posted|attended|taught|completed|watched|acknowledged|received|closed|held|given|granted|recorded|uploaded|released|actioned|rotated|joined|opened|decided|countersigned|initialled|assigned|set)\b/i;
+const FUTURE_WORDS = /\b(due|until|opens?|expires?|stops|ready|deadline|before|starts?|next|tomorrow|left|visits?|scheduled|will|coming|reopens?|closes|ends?|from|between)\b/i;
+function visibleText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;|&#160;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ");
+}
+// Pages on the real clock, not the course's demo day: the admissions pipeline
+// is a next intake seeded relative to today, and its 'Released 20 September'
+// is true on the day it was seeded.
+const REAL_CLOCK_PAGES = [/^\/dashboard\/admissions\//, /^\/centre\/admissions/];
+function futureDatedClaims(html, demoDate) {
+  const text = visibleText(html);
+  const [dy, dm, dd] = demoDate.split("-").map(Number);
+  const demo = dy * 10000 + dm * 100 + dd;
+  const hits = [];
+  const re = /\b(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?(?:\s+(\d{4}))?\b|\b(\d{4})-(\d{2})-(\d{2})\b/gi;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    let y, mo, d;
+    if (m[4]) { y = Number(m[4]); mo = Number(m[5]); d = Number(m[6]); }
+    else { d = Number(m[1]); mo = MONTHS[m[2].toLowerCase()]; y = m[3] ? Number(m[3]) : dy; }
+    if (!mo || y * 10000 + mo * 100 + d <= demo) continue;
+    // The phrase this date sits in: back to the nearest break, at most 60 chars.
+    const before = text.slice(Math.max(0, m.index - 60), m.index);
+    const phrase = before.split(/[.,·|\u2014\u2013]|--|\s{2,}/).pop() ?? before;
+    if (!PAST_CLAIM.test(phrase) || FUTURE_WORDS.test(phrase)) continue;
+    hits.push(`${phrase.trim()} ${m[0]}`.trim());
+    if (hits.length >= 3) break;
+  }
+  return hits;
+}
+
 function judge(role, route, url, res) {
   const landed = new URL(res.finalUrl).pathname;
   if (res.error) return `request failed -- ${res.error}`;
@@ -289,7 +347,7 @@ let checked = 0;
 const skipped = [];
 
 console.log(`smoke: ${BASE}`);
-console.log(`${routes.length} routes on disk, ${ROLES.length} roles\n`);
+console.log(`${routes.length} routes on disk, ${ROLES.length} roles, demo day ${DAY} = ${f.demoDate}\n`);
 
 // Public first -- no session, so a page that leaks past the login wall shows up
 // as a 200 here rather than hiding behind somebody's cookies.
@@ -327,7 +385,7 @@ console.log(`${routes.length} routes on disk, ${ROLES.length} roles\n`);
 for (const role of ROLES) {
   if (ONLY_ROLE && role.name !== ONLY_ROLE) continue;
   const jar = new Jar();
-  const entry = await visit(jar, role.door);
+  const entry = await visit(jar, `${role.door}${role.door.includes("?") ? "&" : "?"}day=${DAY}`);
   if (entry.status !== 200) {
     failures.push({ role: role.name, route: role.door, why: `could not sign in -- HTTP ${entry.status}` });
     console.log(`${role.name.padEnd(13)} COULD NOT SIGN IN`);
@@ -347,7 +405,11 @@ for (const role of ROLES) {
     // every page: Ramy, 20 Sep 2026, mid-demo -- "half the pages don't have
     // it. So I couldn't get back to the demo."
     else if (role.door.startsWith("/demo/") && (res.contentType ?? "text/html").includes("text/html") && !res.body.includes('href="/demo/story"')) failures.push({ role: role.name, route: url, why: "no Demo tag -- no way back to /demo/story" });
-    else ok += 1;
+    else {
+      const claims = (res.contentType ?? "text/html").includes("text/html") && !REAL_CLOCK_PAGES.some((re) => re.test(url)) ? futureDatedClaims(res.body, f.demoDate) : [];
+      if (claims.length > 0) failures.push({ role: role.name, route: url, why: `future-dated record on day ${DAY} (${f.demoDate}): ${claims.map((c) => `"${c}"`).join(" / ")}` });
+      else ok += 1;
+    }
     if (VERBOSE) console.log(`  ${role.name} ${String(res.status).padEnd(4)} ${url}${why ? `  <-- ${why}` : ""}`);
   }
   console.log(`${role.name.padEnd(13)} ${String(ok).padStart(3)} ok, ${String(mine.length - ok - 0).padStart(2)} not ok/skipped of ${mine.length}`);

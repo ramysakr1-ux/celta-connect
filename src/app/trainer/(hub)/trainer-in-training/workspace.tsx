@@ -1,4 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+// As of today: the record clock dates the post-course essay 24 Sept (smoke test, 20 Sep 2026).
+import { demoToday } from "@/lib/demo-clock";
+import { asOf } from "@/lib/as-of";
 import type { Database } from "@/lib/supabase/types";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import {
@@ -431,7 +434,7 @@ export async function TitWorkspace({
       <section>
         <h3 className="text-label font-semibold tracking-[0.08em] text-muted uppercase">Post-course reflective essay</h3>
         <div className="mt-2">
-          <ReflectiveEssayForm titRecordId={titRecord.id} essay={titRecord.reflective_essay} submittedAt={titRecord.reflective_essay_submitted_at} />
+          <ReflectiveEssayForm titRecordId={titRecord.id} essay={titRecord.reflective_essay} submittedAt={asOf(titRecord.reflective_essay_submitted_at, await demoToday(timeZone))} />
         </div>
       </section>
 

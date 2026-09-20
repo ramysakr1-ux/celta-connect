@@ -1,3 +1,4 @@
+import { asOf } from "@/lib/as-of";
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -313,8 +314,10 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   const { data: gradeFormMarker } = course?.grade_form_submitted_by
     ? await supabase.from("profiles").select("full_name").eq("id", course.grade_form_submitted_by).maybeSingle()
     : { data: null };
-  const gradeFormSubmittedLabel = course?.grade_form_submitted_at
-    ? `${formatDate(course.grade_form_submitted_at, timeZone, { year: "numeric" })}${gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""}`
+  // As of today: the record clock marks the Appian form submitted on day 17 (smoke test, 20 Sep 2026).
+  const gradeFormSubmittedAtAsOf = asOf(course?.grade_form_submitted_at ?? null, today);
+  const gradeFormSubmittedLabel = gradeFormSubmittedAtAsOf
+    ? `${formatDate(gradeFormSubmittedAtAsOf, timeZone, { year: "numeric" })}${gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""}`
     : null;
 
   // §14.1 "application files" -- what selection left on record for this
