@@ -21,7 +21,7 @@ const HOVER = "var(--color-card-inset)";
 export function ProductSwitcher({ connectHref }: { connectHref: string }) {
   const products = [
     // Renamed Connect Lite 20 Sep 2026 (Ramy); the repo and its Pages URL keep the old name until he renames the repo.
-    { name: "Connect Lite", href: "https://ramysakr1-ux.github.io/connect-Hub/", color: "oklch(0.45 0.15 27)", initial: "L" },
+    { name: "Connect Lite", href: "https://ramysakr1-ux.github.io/connect-Hub/14_owner.html", color: "oklch(0.45 0.15 27)", initial: "L" },
     { name: "Connect", href: connectHref, color: "oklch(0.38 0.072 195)", initial: "C" },
     { name: "Affina", href: "https://app.affina.com.tr", color: "oklch(0.5 0.11 155)", initial: "A" },
   ];
