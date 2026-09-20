@@ -1,3 +1,4 @@
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
@@ -80,6 +81,20 @@ export const viewerIsOnDemoCentre = cache(async (): Promise<boolean> => {
   return Boolean(data?.is_demo);
 });
 
+/** A token viewer (the assessor's link) has no profile, so the check above says
+ *  no -- and every page that asks the clock without naming the course fell back
+ *  to the real day while the page's own reading used the pinned one (two clocks
+ *  on one page: assessor re-walk, 20 Sep 2026). The assessor cookie names the
+ *  course; if that course is a demo one, the pinned day applies. */
+const tokenViewerIsOnDemoCourse = cache(async (): Promise<boolean> => {
+  try {
+    const id = await getAssessorCourseId();
+    return id ? await courseIsDemo(id) : false;
+  } catch {
+    return false;
+  }
+});
+
 /** The demo course the clock counts against -- its distinct timetabled dates. */
 const demoCourseDates = cache(async (courseId?: string): Promise<string[]> => {
   const admin = createAdminClient();
@@ -131,7 +146,7 @@ export async function demoNow(timeZone: string = DEFAULT_TIMEZONE, courseId?: st
   const day = await demoDay();
   if (day === null) return real;
 
-  const allowed = courseId ? await courseIsDemo(courseId) : await viewerIsOnDemoCentre();
+  const allowed = courseId ? await courseIsDemo(courseId) : (await viewerIsOnDemoCentre()) || (await tokenViewerIsOnDemoCourse());
   if (!allowed) return real;
 
   const target = dateForCourseDay(await demoCourseDates(courseId), day);
@@ -155,6 +170,6 @@ export async function demoToday(timeZone: string = DEFAULT_TIMEZONE, courseId?: 
 export async function demoClockTag(courseId?: string): Promise<string | null> {
   const day = await demoDay();
   if (day === null) return null;
-  const allowed = courseId ? await courseIsDemo(courseId) : await viewerIsOnDemoCentre();
+  const allowed = courseId ? await courseIsDemo(courseId) : (await viewerIsOnDemoCentre()) || (await tokenViewerIsOnDemoCourse());
   return allowed ? `Demo · Day ${day}` : null;
 }
