@@ -403,7 +403,7 @@ for (const [centre, course, names, stages] of [
         const when = ago(Math.max(daysAgo - 4, 1));
         const { error } = await supabase.from("interview_records").insert({
           applicant_id: applicantId,
-          fixed_questions: questions.map((q, k) => ({ question_id: q.id, question_text: q.question_text, answer_text: FIXED_ANSWERS[(k + i) % FIXED_ANSWERS.length] })),
+          fixed_questions: questions.map((q, k) => ({ question_id: q.id, question_text: q.question_text, answer_text: FIXED_ANSWERS[k % FIXED_ANSWERS.length] } // aligned to the question -- rotating by applicant put the driving story under "Talk me through a lesson" (assessor re-walk, 20 Sep 2026))),
           drawn_questions: [{
             question_text: "Your task corrected the first error but not the second -- talk me through the second sentence again.",
             answer_text: "I'd say it's about something that started in 2019 and is still true, so it wants the present perfect. I wasn't sure of the name when I wrote it.",

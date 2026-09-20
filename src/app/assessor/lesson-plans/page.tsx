@@ -128,7 +128,7 @@ export default async function AssessorLessonPlansPage() {
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 26 }}>{
-            teaching.map((t) => (
+            teaching.map((t, i) => (
               <div key={t.traineeId} className="card" style={{ padding: 16 }}>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
@@ -138,7 +138,7 @@ export default async function AssessorLessonPlansPage() {
                         color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums",
                       }}
                     >
-                      {t.order}
+                      {i + 1}
                     </span>
                     <AssessorSubHead>{t.name}</AssessorSubHead>
                   </div>
