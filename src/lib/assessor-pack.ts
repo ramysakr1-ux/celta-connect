@@ -25,7 +25,10 @@ async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: st
   const { data: course } = await supabase.from("courses").select("assessor_visit_date, center_id").eq("id", courseId).maybeSingle();
   if (course?.assessor_visit_date) return course.assessor_visit_date;
   const timeZone = course?.center_id ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
-  return await demoToday(timeZone);
+  // The course id is how a token viewer proves the demo clock applies -- without it a
+  // signed-out assessor read the REAL day here while the page read the pinned one
+  // ("0 of 11 confirmed, 1 day overdue" and "6/8 TPs" on day 18; assessor re-walk, 20 Sep 2026).
+  return await demoToday(timeZone, courseId);
 }
 
 // Today in the centre's zone, for what has been TAUGHT: a lesson dated
@@ -34,7 +37,10 @@ async function assignmentCutoff(supabase: SupabaseClient<Database>, courseId: st
 async function courseToday(supabase: SupabaseClient<Database>, courseId: string): Promise<string> {
   const { data: course } = await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle();
   const timeZone = course?.center_id ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
-  return await demoToday(timeZone);
+  // The course id is how a token viewer proves the demo clock applies -- without it a
+  // signed-out assessor read the REAL day here while the page read the pinned one
+  // ("0 of 11 confirmed, 1 day overdue" and "6/8 TPs" on day 18; assessor re-walk, 20 Sep 2026).
+  return await demoToday(timeZone, courseId);
 }
 
 function dueByCutoff(a: { due_date: string | null }, cutoff: string): boolean {
