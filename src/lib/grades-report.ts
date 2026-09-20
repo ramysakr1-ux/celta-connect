@@ -1,5 +1,6 @@
 import "server-only";
 import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
+import { onOrBefore } from "@/lib/as-of";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signatures";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
@@ -130,7 +131,8 @@ export async function computeCohortRows(
       stage3Status: !record?.stage3_tutorial_required ? "not_required" : record.stage3_finalized_at ? "given" : "not_given",
       tpsRemaining: Math.max(8 - taughtForTrainee, 0),
       hasProvisional: Boolean(record?.provisional_grade) && (!approvedOnly || Boolean(record?.provisional_approved_at)),
-      provisionalApproved: Boolean(record?.provisional_approved_at),
+      // As of opts.today, like the grade form page itself (the banner said 10 of 11 confirmed for approvals dated day 17).
+      provisionalApproved: Boolean(record?.provisional_approved_at && (!opts?.today || onOrBefore(record.provisional_approved_at, opts.today))),
       withdrawn: trainee.course_status === "withdrawn",
     };
   });
