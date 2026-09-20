@@ -1099,7 +1099,10 @@ export default async function PortfolioCelta5Page({
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
-  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE));
+  // One today for the staff branch too (Ramy, 20 Sep 2026: "do it"): the tutor's reading of a
+  // candidate's booklet counts lessons taught as of today, like the roster and the grade form.
+  const staffToday = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], staffToday);
 
   // remaining-compliance.md item 4: CELTA 5 front matter (candidate name,
   // centre number, tutors) populated from real data, never typed by hand.
@@ -1124,7 +1127,7 @@ export default async function PortfolioCelta5Page({
     tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: [] };
   const tutorNames = (tutorProfiles ?? []).map((t) => t.full_name);
 
-  const taughtAssignments = (planAssignments ?? []).filter((p) => p.taught_at);
+  const taughtAssignments = (planAssignments ?? []).filter((p) => onOrBefore(p.taught_at, staffToday));
   const tpPointIdsForLevels = [...new Set(taughtAssignments.map((p) => p.tp_point_id).filter((id): id is string => !!id))];
   const { data: tpPointsForLevels } =
     tpPointIdsForLevels.length > 0
@@ -1767,7 +1770,7 @@ export default async function PortfolioCelta5Page({
         trainerFullName={viewer?.full_name ?? ""}
         trainerSignatureName={viewer?.signature_name ?? null}
         timeZone={timeZone}
-        assessedHoursSoFar={((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60}
+        assessedHoursSoFar={(taughtAssignments.length * TP_LESSON_LENGTH_MINUTES) / 60}
       />
 
       <div>
@@ -1791,7 +1794,7 @@ export default async function PortfolioCelta5Page({
         trainerSignatureName={viewer?.signature_name ?? null}
         timeZone={timeZone}
         mandatoryReason={staffStage3Status?.mandatory ? staffStage3Status.reason : null}
-        assessedHoursSoFar={((planAssignments ?? []).filter((p) => p.taught_at).length * TP_LESSON_LENGTH_MINUTES) / 60}
+        assessedHoursSoFar={(taughtAssignments.length * TP_LESSON_LENGTH_MINUTES) / 60}
       />
 
       {record.stage3_tutorial_required ? (
