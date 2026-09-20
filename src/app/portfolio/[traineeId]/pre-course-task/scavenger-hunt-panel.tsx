@@ -9,7 +9,7 @@ import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 // to four hours of work and doubled the scrolling to read the task. The six
 // questions run as a wrapping row; the progress bar and the count keep their
 // place at the top.
-export function ScavengerHuntPanel({ foundKeys }: { foundKeys: Set<string> }) {
+export function ScavengerHuntPanel({ foundKeys, courseStarted = false }: { foundKeys: Set<string>; courseStarted?: boolean }) {
   const found = SCAVENGER_HUNT_QUESTIONS.filter((q) => foundKeys.has(q.key)).length;
   const total = SCAVENGER_HUNT_QUESTIONS.length;
 
@@ -21,7 +21,9 @@ export function ScavengerHuntPanel({ foundKeys }: { foundKeys: Set<string> }) {
           {found} of {total} found
           {" \u00b7 "}
           {found === total
-            ? "all six, nothing else to do here before Monday"
+            ? courseStarted
+              ? "all six found"
+              : "all six, nothing else to do here before Monday"
             : "a short tour, not a test -- these resolve on their own once you visit each place"}
         </p>
       </div>

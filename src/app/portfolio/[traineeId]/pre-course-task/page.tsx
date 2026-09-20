@@ -109,7 +109,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
           of scrolling." The task is the four-hour piece of work and the
           hunt is six lines, so the hunt is a strip above it now and the task
           has the width. A deliberate departure from the handoff, his call. */}
-      <ScavengerHuntPanel foundKeys={huntFoundKeys} />
+      <ScavengerHuntPanel foundKeys={huntFoundKeys} courseStarted={!!course?.start_date && today >= course.start_date} />
       <PreCourseTaskSections
         cambridgeSections={cambridgeSections}
         supplementSections={supplementSections}

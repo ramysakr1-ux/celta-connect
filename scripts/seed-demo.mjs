@@ -921,6 +921,9 @@ async function main() {
       email: def.email,
       full_name: def.name,
       role: "trainee",
+      // A candidate signs the Stage 1/2 records with a fixed signature (profiles.signature_name); the
+      // seed left it null, so the withdrawal form asked a day-15 candidate to "set your signature".
+      signature_name: def.withdrawn ? null : def.name,
       center_id: center.id,
       course_id: course.id,
       course_status: def.withdrawn ? "withdrawn" : "active",

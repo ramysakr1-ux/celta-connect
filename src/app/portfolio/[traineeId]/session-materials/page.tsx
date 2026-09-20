@@ -41,7 +41,7 @@ export default async function TraineeSessionMaterialsPage({
 
   const { data: events } = await supabase
     .from("course_timetable_events")
-    .select("id, title, event_date")
+    .select("id, title, event_date, event_time")
     .eq("course_id", courseId)
     // The sessions a candidate teaches unassessed (0296) -- not the tutors'
     // course introduction or demo lessons, which the list used to offer.
@@ -79,7 +79,7 @@ export default async function TraineeSessionMaterialsPage({
             <option value="">Choose a session…</option>
             {(events ?? []).map((e) => (
               <option key={e.id} value={e.id}>
-                {dateLabel(e.event_date)} — {e.title}
+                {dateLabel(e.event_date)}{e.event_time ? ` ${e.event_time.slice(0, 5)}` : ""} — {e.title}
               </option>
             ))}
           </select>
