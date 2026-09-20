@@ -215,7 +215,9 @@ export default async function PortfolioCelta5Page({
       return <div className="plain-card p-6 text-body text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
     }
 
-    const taughtAssignments = (plans ?? []).filter((p) => p.taught_at);
+    // As of today too (Ramy, 20 Sep 2026): this read said 6.00 / 6.00 assessed hours with two TPs still to teach.
+    const c5Today = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
+    const taughtAssignments = (plans ?? []).filter((p) => onOrBefore(p.taught_at, c5Today));
     const tpPointIds = [...new Set(taughtAssignments.map((p) => p.tp_point_id).filter((id): id is string => !!id))];
     const { data: tpPointsForLevels } =
       tpPointIds.length > 0
@@ -250,7 +252,6 @@ export default async function PortfolioCelta5Page({
     const tutorRatedCount = CELTA_CRITERIA_CODES.filter((c) => byCode.get(c)?.tutor_status_stage2).length;
     // As of today (src/lib/as-of.ts): the record clock writes the whole
     // course at once; day 15 read 120/120 hours, 4/4 graded, signed off.
-    const c5Today = await demoToday(center?.time_zone ?? DEFAULT_TIMEZONE);
     const assignments = (assignmentsRaw ?? []).map((a) => assignmentAsOf(a, c5Today));
     const tpLessons = (tpLessonsRaw ?? []).filter((l) => onOrBefore(l.lesson_date, c5Today));
     const stage2Submitted = onOrBefore(record.stage2_candidate_submitted_at, c5Today);
