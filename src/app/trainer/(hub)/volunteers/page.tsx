@@ -222,7 +222,8 @@ export default async function VolunteersPage() {
       name: v.name,
       level: v.level,
       email: v.email,
-      joinedAt: v.created_at.slice(0, 10),
+      // The day they signed up, not the day the row was written (a pool topped up live read "joined Sat 19 Sept" on the 18th).
+      joinedAt: (v.signup_completed_at ?? v.created_at).slice(0, 10),
       signupCompleted: Boolean(v.signup_completed_at),
       token: tok?.token ?? null,
       lastOpenedAt: tok?.last_opened_at ?? null,
