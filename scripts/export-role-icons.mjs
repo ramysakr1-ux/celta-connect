@@ -19,7 +19,7 @@ const fontkit = createRequire(import.meta.url)("fontkit");
 
 const SRC = "design-sources/role-shortcut-icons";
 const OUT = "public/icons";
-const SLUGS = ["candidate", "trainer-mct", "trainer-act", "volunteer", "student", "centre"];
+const SLUGS = ["candidate", "trainer-mct", "trainer-act", "volunteer", "student", "centre", "owner"];
 const font = fontkit.openSync(path.join(SRC, "karla-700.ttf"));
 
 function letterToPath(svg) {

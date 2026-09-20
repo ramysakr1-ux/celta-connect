@@ -4,8 +4,23 @@
     {
       "name": "celta-connect-dev",
       "runtimeExecutable": "/Users/work/CELTA connect-code prompt/.claude/run-npm.sh",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "connect-lite",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "/Users/work/connect-Hub"
+      ],
+      "port": 8765
     }
   ]
 }

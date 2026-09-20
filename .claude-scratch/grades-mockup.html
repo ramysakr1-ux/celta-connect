@@ -1,0 +1,159 @@
+<title>Grades on the Tracker</title>
+<style>
+  :root{
+    --sand:oklch(92.5% 0.012 85); --card:oklch(97.6% 0.01 85); --line:oklch(89.5% 0.012 82); --line2:oklch(93% 0.01 82);
+    --ink:oklch(23.5% 0.017 65); --deep:oklch(30% 0.042 58); --mut:oklch(51% 0.017 70); --mut2:oklch(60% 0.017 70); --faint:oklch(76% 0.012 82);
+    --quiet:oklch(55% 0.014 78); --red:oklch(46% 0.17 25); --red-bg:oklch(92% 0.05 25); --amb:oklch(45% 0.11 65); --amb-bg:oklch(94% 0.055 78);
+    --blu:oklch(40% 0.09 235); --blu-bg:oklch(94.5% 0.03 232); --grn:oklch(38% 0.085 155); --grn-bg:oklch(94% 0.04 155);
+    --purp:oklch(45% 0.15 300); --teal:oklch(37.5% 0.058 195); --paper:oklch(99.5% 0.004 90); --page:oklch(96% 0.006 85);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--page); font-family:Karla, Helvetica, sans-serif; color:var(--ink); padding:32px 16px 64px;}
+  .wrap{max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:32px;}
+
+  .intro{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 22px;}
+  .intro h1{font-family:Newsreader, Georgia, serif; font-size:22px; font-weight:700; color:var(--deep); margin:0 0 8px;}
+  .intro p{font-size:13.5px; line-height:1.55; color:var(--mut); margin:0 0 8px;}
+  .intro p:last-child{margin-bottom:0;}
+  .intro code{background:var(--sand); padding:1px 5px; border-radius:4px; font-size:12.5px;}
+  .intro .from-doc{border-left:3px solid var(--amb); padding-left:12px; margin:14px 0; font-size:12.5px; color:var(--ink); font-style:italic;}
+
+  .screen-label{display:flex; align-items:baseline; gap:8px; margin-bottom:10px;}
+  .screen-label .n{font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--teal); background:var(--paper); border:1px solid var(--teal); border-radius:20px; padding:3px 9px;}
+  .screen-label .t{font-size:12px; font-weight:600; color:var(--mut);}
+
+  /* ---- candidate tracker detail panel (screen 7), copied verbatim ---- */
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 22px;}
+  .kicker{font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--mut2); margin:0 0 4px;}
+  .d-title{font-family:Newsreader, Georgia, serif; font-size:20px; font-weight:700; line-height:1.2; color:var(--deep); margin:0 0 14px;}
+  .facts{display:flex; flex-direction:column; gap:9px;}
+  .fact{display:flex; gap:12px; align-items:baseline;}
+  .fact .k{width:110px; flex:none; font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:oklch(62% 0.017 70);}
+  .fact .k .when{display:block; text-transform:none; letter-spacing:0; font-weight:500; font-size:9.5px; color:var(--faint); margin-top:1px;}
+  .fact .v{font-size:11.5px; line-height:1.45; color:oklch(28% 0.018 66);}
+  .fact .v.red{color:var(--red); font-weight:600;}
+  .new-row{background:oklch(96.5% 0.03 155 / 0.5); margin:0 -8px; padding:7px 8px; border-radius:6px;}
+
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:var(--paper);}
+  .sg{font-family:inherit; font-size:11px; font-weight:500; padding:4px 10px; border:none; border-right:1px solid var(--line); background:transparent; color:var(--mut); cursor:pointer; white-space:nowrap;}
+  .sg:last-child{border-right:none;}
+  .sg:hover{color:var(--ink);}
+  .sg.on{font-weight:700; color:var(--ink); background:var(--sand);}
+  .sg.on.set-GIVEN, .sg.on.set-STD{background:var(--blu-bg); color:var(--blu);}
+  .sg.on.set-NOTSTD{background:var(--red-bg); color:var(--red);}
+  .sg.on.set-ABOVE{background:var(--grn-bg); color:var(--grn);}
+
+  /* a real <select> dropdown -- "they choose from a dropdown menu" */
+  .grade-select{font-family:inherit; font-size:12px; font-weight:600; padding:6px 30px 6px 10px; border-radius:6px; border:1.5px solid var(--line); background-color:var(--paper); color:var(--ink); cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%23767066"/></svg>'); background-repeat:no-repeat; background-position:right 10px center; min-width:150px;}
+  .grade-select.g-FAIL{background-color:var(--red-bg); color:var(--red); border-color:transparent;}
+  .grade-select.g-PASS, .grade-select.g-PASSB{background-color:var(--blu-bg); color:var(--blu); border-color:transparent;}
+  .grade-select.g-PASSA{background-color:var(--grn-bg); color:var(--grn); border-color:transparent;}
+  .grade-select.g-slash{background-color:var(--amb-bg); color:var(--amb); border-color:transparent;}
+  .grade-select.g-unset{color:var(--mut2); font-weight:500;}
+
+  .toggle-note{font-size:11px; color:var(--mut2); margin-top:14px; padding-top:12px; border-top:1px dashed var(--line2);}
+
+  /* ---- assessor pack list table + facts (screen 12), copied verbatim ---- */
+  .pack table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .pack th{text-align:left; font-size:9.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--mut2); padding:8px 10px; border-bottom:1px solid var(--line);}
+  .pack td{padding:10px 10px; border-bottom:1px solid var(--line2); vertical-align:top;}
+  .pack .name{font-weight:700; color:var(--deep);}
+  .sub{font-size:0.78rem; color:var(--mut); margin-top:2px;}
+  .standing{display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:0.05em; padding:5px 10px; border-radius:20px; background:var(--sand); color:var(--mut);}
+  .standing.tk-std{background:oklch(95% 0.02 155); color:var(--grn);}
+
+  .caption{font-size:12px; color:var(--mut2); text-align:center; margin-top:-16px;}
+</style>
+
+<div class="wrap">
+
+  <div class="intro">
+    <h1>What "grades" would look like</h1>
+    <p>Grounded in the real Word document, C13/2026 provisionals — a plain dropdown, not
+    Connect's propose-then-MCT-confirms flow, since Lite has no MCT/tutor distinction to hang
+    that on. Two values a tutor picks, riding in the same <code>tracker</code> record Stage&nbsp;1/2/3
+    already use — no new store or backend plumbing.</p>
+    <div class="from-doc">"On the left you have the provisional grade, comments referencing the
+    criteria, strengths and action points in planning and teaching. After the assessor meeting we
+    fill out the part on the right — that's the final."</div>
+    <p>Only the two grade values travel into Lite. The strengths, action points, and the write-up
+    behind them stay exactly where they are now — nothing about that document moves.</p>
+  </div>
+
+  <div>
+    <div class="screen-label"><span class="n">Screen 7</span><span class="t">Candidate tracker — record panel, tutor view</span></div>
+    <div class="panel">
+      <div class="kicker">Teaching practice</div>
+      <div class="d-title">Kagan Yıldız</div>
+      <div class="facts">
+        <div class="fact new-row"><div class="k">Provisional grade<span class="when">going in</span></div><div class="v">
+          <select class="grade-select g-slash">
+            <option>Fail</option><option>Pass</option><option selected>Pass / Pass B</option>
+            <option>Pass B</option><option>Pass B / Pass A</option><option>Pass A</option><option>Fail / Pass</option><option>— not set</option>
+          </select>
+        </div></div>
+        <div class="fact new-row"><div class="k">Final grade<span class="when">after the visit</span></div><div class="v">
+          <select class="grade-select g-unset">
+            <option selected>— not set</option><option>Fail</option><option>Pass</option><option>Pass B</option><option>Pass A</option>
+          </select>
+        </div></div>
+        <div class="fact"><div class="k">Stage 1</div><div class="v">
+          <span class="seg"><button class="sg on set-GIVEN">record done</button><button class="sg">not yet</button></span>
+        </div></div>
+        <div class="fact"><div class="k">Stage 2</div><div class="v">
+          <span class="seg"><button class="sg">not std</button><button class="sg on set-STD">std</button><button class="sg">above</button><button class="sg">not held</button></span>
+        </div></div>
+        <div class="fact"><div class="k">Fail letter</div><div class="v">Not issued</div></div>
+      </div>
+      <div class="toggle-note">Picking a value saves it right away — no separate save button, same as every other field on this screen. Provisional carries the slashed values (Fail/Pass, Pass/Pass B, Pass B/Pass A) for a grade still undecided between two bands; Final is always a single decided grade, since by definition it isn't provisional any more.</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="screen-label"><span class="n">Screen 7</span><span class="t">Same panel, after the assessor's visit — Final now set</span></div>
+    <div class="panel">
+      <div class="kicker">Teaching practice</div>
+      <div class="d-title">Kagan Yıldız</div>
+      <div class="facts">
+        <div class="fact new-row"><div class="k">Provisional grade<span class="when">going in</span></div><div class="v"><span style="font-size:12px;font-weight:600;">Pass / Pass B</span></div></div>
+        <div class="fact new-row"><div class="k">Final grade<span class="when">after the visit</span></div><div class="v"><select class="grade-select g-PASS"><option selected>Pass</option></select></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="screen-label"><span class="n">Screen 7 / 12</span><span class="t">Assessor / candidate view — read-only, plain text</span></div>
+    <div class="panel">
+      <div class="kicker">Teaching practice</div>
+      <div class="d-title">Kagan Yıldız</div>
+      <div class="facts">
+        <div class="fact new-row"><div class="k">Provisional grade</div><div class="v" style="font-weight:700;">Pass / Pass B</div></div>
+        <div class="fact new-row"><div class="k">Final grade</div><div class="v" style="color:var(--mut2);">not set</div></div>
+        <div class="fact"><div class="k">Stage 1</div><div class="v">record done</div></div>
+        <div class="fact"><div class="k">Stage 2</div><div class="v">std</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="screen-label"><span class="n">Screen 12</span><span class="t">Assessor pack — candidate list</span></div>
+    <div class="panel pack">
+      <table>
+        <tr><th>Candidate</th><th>Teaching practice</th><th>Standing</th></tr>
+        <tr>
+          <td><div class="name">Kagan Yıldız</div><div class="sub">Group A</div></td>
+          <td>7 of 8 · TP7 to standard</td>
+          <td><span class="standing tk-std">TO STANDARD</span><div class="sub">Provisional: Pass / Pass B</div></td>
+        </tr>
+        <tr>
+          <td><div class="name">Serap Kaya</div><div class="sub">Group A</div></td>
+          <td>8 of 8 · TP8 to standard</td>
+          <td><span class="standing tk-std">TO STANDARD</span><div class="sub" style="font-weight:700;">Final: Pass B</div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <p class="caption">Final, once set, replaces the Provisional line entirely — never both at once.</p>
+
+</div>

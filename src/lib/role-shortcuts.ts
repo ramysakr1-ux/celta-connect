@@ -18,6 +18,17 @@ export const ROLE_SHORTCUTS = {
   "trainer-act": { label: "Tutor", startUrl: "/trainer", theme: "#885627", description: "Today, the roster and the timetable." },
   student: { label: "Student", startUrl: "/student", theme: "#0f4a4b", description: "Your classes, materials and hours." },
   centre: { label: "Centre", startUrl: "/centre", theme: "#241d16", description: "Courses, people and money at your centre." },
+  // The platform owner, added 21 Sep 2026: Ramy's saved shortcut opened
+  // someone else's room ("my home screen shortcut logs me in as a trainee
+  // rather than to the command center"). Command Center declared no manifest
+  // of its own, so installing from its own header handed out the generic
+  // Connect app, whose start_url is the front door -- not this room.
+  //
+  // The only tile in the set that is not a role at a centre, and the only one
+  // on a gold ground rather than a dark one, because that is what it is: the
+  // platform, not a centre. Badge "C" as in Command Center -- Candidate's C
+  // sits on deep brown and the two cannot be confused.
+  owner: { label: "Command Center", startUrl: "/platform/command-center", theme: "#bc7300", description: "Every centre, every course, the whole platform." },
 } as const;
 export type RoleShortcut = keyof typeof ROLE_SHORTCUTS;
 

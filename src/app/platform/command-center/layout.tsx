@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { InstallPrompt } from "@/components/install-prompt";
 import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
@@ -36,6 +37,13 @@ const SAND = "var(--color-background)";
 const BORDER = "var(--color-border)";
 const INK = "var(--color-ink)";
 const MUTED = "var(--color-muted)";
+
+// Saving Command Center to the dock has to give you Command Center. Without
+// this line the pill in its own header (below) installed the generic Connect
+// app, whose start_url is the front door, so the saved shortcut opened
+// whichever room the front door resolved to -- for Ramy on 21 Sep 2026, a
+// trainee's. Every other landing already names its own manifest this way.
+export const metadata: Metadata = { manifest: "/shortcuts/owner/manifest.webmanifest" };
 
 export default async function CommandCenterLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireRole("platform_owner");
