@@ -1,3 +1,4 @@
+import { onOrBefore } from "@/lib/as-of";
 import Link from "next/link";
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
@@ -300,7 +301,7 @@ export default async function TrainerTimetablePage({
   for (const sl of consultationSlots ?? []) consultationSlotsByBlock.set(sl.block_id, [...(consultationSlotsByBlock.get(sl.block_id) ?? []), sl]);
   const submittedByTrainee = new Map<string, string[]>();
   for (const a of traineeAssignments ?? []) {
-    if (a.first_submitted_at) submittedByTrainee.set(a.trainee_id, [...(submittedByTrainee.get(a.trainee_id) ?? []), a.assignment_type]);
+    if (a.first_submitted_at && onOrBefore(a.first_submitted_at, today)) submittedByTrainee.set(a.trainee_id, [...(submittedByTrainee.get(a.trainee_id) ?? []), a.assignment_type]);
   }
   const whenLabel = (eventId: string, minutes?: number) => {
     const ev = blockEventById.get(eventId);

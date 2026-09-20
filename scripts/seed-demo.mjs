@@ -3136,9 +3136,9 @@ async function main() {
     // candidate's /supervised/[eventId] -- so while they were typed as input
     // sessions all three were invisible to the very pages that manage them,
     // and inflated every count of input sessions instead (Ramy, 18 Sep 2026).
-    { d: 15, b: 2, type: "supervised_session", title: "Supervised review \u2014 presenting language", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
-    { d: 15, b: 3, type: "supervised_session", title: "Supervised review \u2014 phonology", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
-    { d: 15, b: 4, type: "supervised_session", title: "Supervised review \u2014 classroom management", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 2, type: "supervised_session", title: "Supervised review \u2014 presenting language", tag: "whole_group", detail: "Candidates submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 3, type: "supervised_session", title: "Supervised review \u2014 phonology", tag: "whole_group", detail: "Candidates submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 4, type: "supervised_session", title: "Supervised review \u2014 classroom management", tag: "whole_group", detail: "Candidates submit for tutor check", linked: null, tp: null },
     { d: 15, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 15, b: 6, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },
     { d: 15, b: 7, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },

@@ -1,3 +1,4 @@
+import { demoNow } from "@/lib/demo-clock";
 import Link from "next/link";
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
@@ -30,7 +31,9 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
 
   const center = await getCachedCenter(trainer.center_id);
   const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
-  const now = new Date();
+  // The demo instant, not the wall clock: on a pinned demo day the wall clock is a different
+  // weekday, and the queue headed Monday's TP7 "Tomorrow" on a Friday (tutor walk, 20 Sep 2026).
+  const now = await demoNow(timeZone);
   const today = toLocalIso(now, timeZone);
 
   const [isMct, wholeCourseChosen, { data: subgroupRows }, { data: tpGroupRows }, { data: roster }, { data: events }, { data: centerSettings }, { data: course }] = await Promise.all([
@@ -158,7 +161,7 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
   // the whole course finished. It names how many rounds have been taught
   // and what comes next.
   const taughtRounds = new Set((plans ?? []).filter((p) => p.taught_at && p.taught_at.slice(0, 10) <= today).map((p) => p.tp_number)).size;
-  const nextLine = queue.tomorrow ? ` -- next is TP${queue.tomorrow.tpNumber} on ${queue.tomorrow.label === "Tomorrow" ? "tomorrow" : queue.tomorrow.label}` : "";
+  const nextLine = queue.tomorrow ? ` -- next is TP${queue.tomorrow.tpNumber} ${queue.tomorrow.label === "Tomorrow" ? "tomorrow" : `on ${queue.tomorrow.label}`}` : "";
   const nothingOwed =
     taughtRounds === 0
       ? `Nothing owed. No lessons have been taught yet${nextLine}.`

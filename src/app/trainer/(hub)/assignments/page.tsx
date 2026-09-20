@@ -22,6 +22,7 @@ import { BORDER, CARD, FAINT, GARNET, GOLD_INK, INK, INK_WARM, MUTED, SHEET, TEA
 import { PageHead } from "@/app/trainer/(hub)/page-head";
 import type { Database } from "@/lib/supabase/types";
 import { demoToday } from "@/lib/demo-clock";
+import { assignmentAsOf } from "@/lib/as-of";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 
@@ -126,7 +127,9 @@ export default async function TrainerAssignmentsBoardPage() {
   // The active cohort is the denominator everywhere Cambridge counts.
   const active = (trainees ?? []).filter((t) => t.course_status !== "withdrawn");
   const activeIds = new Set(active.map((t) => t.id));
-  const rows = (assignmentRows ?? []).filter((a) => activeIds.has(a.trainee_id));
+  // As of today (src/lib/as-of.ts): the record clock writes the whole course at once, and this
+  // page said "LfC: 11 closed" on day 15 while the candidates were still writing it (tutor walk, 20 Sep 2026).
+  const rows = (assignmentRows ?? []).filter((a) => activeIds.has(a.trainee_id)).map((a) => assignmentAsOf(a, today));
 
   const tutorIds = [...new Set(rows.flatMap((a) => [a.marker_id, a.second_marker_id]).filter((x): x is string => Boolean(x)))];
   const { data: tutors } = tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: null };

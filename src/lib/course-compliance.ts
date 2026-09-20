@@ -3,6 +3,11 @@ import { doubleMarkingPerAssignment } from "@/lib/assessor-requirements";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
+
+// "A, B and C", never "A and B and C" (MCT landing, 20 Sep 2026).
+function listWords(xs: string[]): string {
+  return xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+}
 import { formatCalendarDate } from "@/lib/format-date";
 
 // What the course cannot satisfy as planned.
@@ -171,7 +176,7 @@ export function doubleMarkingProblems(input: {
       // as two scripts when it meant two of the four assignments were under
       // quota -- with LfC 0/4 and Skills 0/4 beside it, eight short (tutor
       // walk, 20 Sep 2026). Name them instead.
-      message: `${short.map((x) => x.t).join(" and ")} below the double-marking quota with ${daysLeft <= 0 ? "no" : daysLeft} day${daysLeft === 1 ? "" : "s"} left`,
+      message: `${listWords(short.map((x) => x.t))} below the double-marking quota with ${daysLeft <= 0 ? "no" : daysLeft} day${daysLeft === 1 ? "" : "s"} left`,
       detail: short.map((x) => `${x.t} ${x.done}/${quota}`).join(" · "),
       href: "/trainer/roster",
       cite: "9.2.3",
