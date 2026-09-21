@@ -114,6 +114,11 @@ export default function TeachingProductiveSkillsSession() {
   const showSpeaking = lens !== "Writing";
   const showWriting = lens !== "Speaking";
   const keep = (l: Lane) => l === "both" || (l === "speaking" && showSpeaking) || (l === "writing" && showWriting);
+  // The agenda counts follow the lens, as they do in Ramy's original: narrowing
+  // to one skill hides terms and a whole task column, so a fixed "8 terms / 10
+  // task types" would be describing a session the reader is not looking at.
+  const termCount = TERMS.filter((t) => keep(t.lane)).length;
+  const taskCount = (showSpeaking ? SPEAKING_TASKS.length : 0) + (showWriting ? WRITING_TASKS.length : 0);
 
   return (
     <SessionShell
@@ -123,8 +128,8 @@ export default function TeachingProductiveSkillsSession() {
       agenda={[
         { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–5", spine: "var(--color-primary)", title: "Preparing — both skills" },
-        { time: "5–13", spine: "var(--color-primary)", title: "Useful language: 8 terms" },
-        { time: "13–20", spine: "var(--color-primary)", title: "Task: 10 task types" },
+        { time: "5–13", spine: "var(--color-primary)", title: `Useful language: ${termCount} terms` },
+        { time: "13–20", spine: "var(--color-primary)", title: `Task: ${taskCount} task types` },
         { time: "20–28", spine: "var(--color-primary)", title: "Task: read and check" },
         { time: "28–36", spine: "var(--color-primary)", title: "Detail + classify feedback" },
         { time: "36–43", spine: "var(--color-muted)", title: "Debrief: order the stages" },
