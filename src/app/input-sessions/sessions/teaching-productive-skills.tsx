@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { SessionShell } from "@/components/input-sessions/session-shell";
 import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/trainer-notes";
 import { RevealCard } from "@/components/input-sessions/reveal-card";
@@ -84,19 +83,12 @@ const SHUFFLED = ["Task", "Lead-in", "Feedback", "Useful language", "Preparing t
 
 const NOTES = [
   { label: "Correct order", text: "Lead-in → Preparing to speak or write → Useful language → Task → Feedback. Same shape as Lesson framework's productive skills slot — say so explicitly at the reveal; trainees should recognise it." },
-  { label: "Alongside the single-skill sessions", text: "Teaching speaking and Teaching writing stay in the library and are unchanged. Use the lens control to give this session a single skill's emphasis where a cohort has already had one of them." },
+  { label: "Alongside the single-skill sessions", text: "Teaching speaking and Teaching writing stay in the library and are unchanged. Run whichever suits the cohort; this one makes the case that the shape is shared, so it always shows both skills." },
   { label: "Feedback classify answers", text: "1 task achievement, 2 language, 3 task achievement / participation, 4 task achievement, 5 language (register), 6 language (positive)." },
   { label: "Push past \"process is better\"", text: "Most CELTA writing lessons blend product and process, and a low-level group often needs a model to imitate before process stages make sense." },
   { label: "Stage 2 is the point", text: "It only works if trainees think of something real for both skills — don't let them skip to Stage 3. The point is to feel content arriving before language." },
   { label: "Communicative is not correction-free", text: "Watch for trainees conflating \"communicative\" with \"no correction at all\" — delayed correction is about timing, not avoidance. Writing makes this concrete: the draft survives, so the correction has somewhere to go." },
 ];
-
-// The lens dims one skill so a single-skill cohort can run the same session
-// narrower. It is the trainee's control as much as the trainer's, so it is
-// not gated -- it changes what is shown, not what is given away.
-function useLens() {
-  return useState<"Both" | "Speaking" | "Writing">("Both");
-}
 
 function TaskColumn({ heading, tasks }: { heading: string; tasks: typeof SPEAKING_TASKS }) {
   return (
@@ -110,16 +102,6 @@ function TaskColumn({ heading, tasks }: { heading: string; tasks: typeof SPEAKIN
 }
 
 export default function TeachingProductiveSkillsSession() {
-  const [lens, setLens] = useLens();
-  const showSpeaking = lens !== "Writing";
-  const showWriting = lens !== "Speaking";
-  const keep = (l: Lane) => l === "both" || (l === "speaking" && showSpeaking) || (l === "writing" && showWriting);
-  // The agenda counts follow the lens, as they do in Ramy's original: narrowing
-  // to one skill hides terms and a whole task column, so a fixed "8 terms / 10
-  // task types" would be describing a session the reader is not looking at.
-  const termCount = TERMS.filter((t) => keep(t.lane)).length;
-  const taskCount = (showSpeaking ? SPEAKING_TASKS.length : 0) + (showWriting ? WRITING_TASKS.length : 0);
-
   return (
     <SessionShell
       slug="teaching-productive-skills"
@@ -128,8 +110,8 @@ export default function TeachingProductiveSkillsSession() {
       agenda={[
         { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–5", spine: "var(--color-primary)", title: "Preparing — both skills" },
-        { time: "5–13", spine: "var(--color-primary)", title: `Useful language: ${termCount} terms` },
-        { time: "13–20", spine: "var(--color-primary)", title: `Task: ${taskCount} task types` },
+        { time: "5–13", spine: "var(--color-primary)", title: "Useful language: 8 terms" },
+        { time: "13–20", spine: "var(--color-primary)", title: "Task: 10 task types" },
         { time: "20–28", spine: "var(--color-primary)", title: "Task: read and check" },
         { time: "28–36", spine: "var(--color-primary)", title: "Detail + classify feedback" },
         { time: "36–43", spine: "var(--color-muted)", title: "Debrief: order the stages" },
@@ -139,28 +121,8 @@ export default function TeachingProductiveSkillsSession() {
       <RunningThisSession>
         Don&apos;t name &quot;the productive skills framework&quot; until the debrief — trainees should feel the shape
         before they see it. Do name product and process explicitly once the read-and-check stage lands; that is the one
-        place the two skills genuinely part company. The lens control below dims one skill so a single-skill cohort can
-        run the same session narrower.
+        place the two skills genuinely part company.
       </RunningThisSession>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-label font-semibold text-muted">Lens</span>
-        {(["Both", "Speaking", "Writing"] as const).map((l) => (
-          <button
-            key={l}
-            type="button"
-            onClick={() => setLens(l)}
-            className={`h-[30px] rounded-full border px-3.5 text-label font-semibold ${
-              lens === l ? "border-ink bg-ink/5 text-ink" : "border-border bg-card text-muted"
-            }`}
-          >
-            {l}
-          </button>
-        ))}
-        <span className="text-label text-muted">
-          {lens === "Both" ? "Everything shown — the full session." : `${lens} only — the other skill is hidden.`}
-        </span>
-      </div>
 
       <div className="flex flex-col gap-1.5">
         <SessionLabel>Stage 1 · Lead-in · 2 minutes</SessionLabel>
@@ -177,24 +139,20 @@ export default function TeachingProductiveSkillsSession() {
 
       <div className="flex flex-col gap-2.5">
         <SessionLabel>Stage 2 · Preparing — one prompt per skill · 3 minutes</SessionLabel>
-        {showSpeaking ? (
-          <div className="rounded-[8px] border border-border bg-card p-3.5">
-            <p className="text-label font-bold uppercase tracking-[0.08em] text-muted">Speaking</p>
+        <div className="rounded-[8px] border border-border bg-card p-3.5">
+          <p className="text-label font-bold uppercase tracking-[0.08em] text-muted">Speaking</p>
             <p className="text-meta leading-relaxed text-ink">
               Think of a real opinion or story you&apos;d actually want to share about your journey into teaching. A
-              minute alone, then tell a partner.
-            </p>
-          </div>
-        ) : null}
-        {showWriting ? (
-          <div className="rounded-[8px] border border-border bg-card p-3.5">
-            <p className="text-label font-bold uppercase tracking-[0.08em] text-muted">Writing</p>
-            <p className="text-meta leading-relaxed text-ink">
-              Think of the last piece of writing you did that actually mattered — a job application, a difficult email, a
-              complaint. Did you write it once, or several times? A minute alone, then compare with a partner.
-            </p>
-          </div>
-        ) : null}
+            minute alone, then tell a partner.
+          </p>
+        </div>
+        <div className="rounded-[8px] border border-border bg-card p-3.5">
+          <p className="text-label font-bold uppercase tracking-[0.08em] text-muted">Writing</p>
+          <p className="text-meta leading-relaxed text-ink">
+            Think of the last piece of writing you did that actually mattered — a job application, a difficult email, a
+            complaint. Did you write it once, or several times? A minute alone, then compare with a partner.
+          </p>
+        </div>
         <p className="text-label text-muted">
           Don&apos;t write anything down yet. Notice that you had something to say before you had any language for it.
         </p>
@@ -202,7 +160,7 @@ export default function TeachingProductiveSkillsSession() {
 
       <div className="flex flex-col gap-1.5">
         <SessionLabel>Stage 3 · Useful language — the terms you&apos;ll need · 8 minutes</SessionLabel>
-        <MatchTermsExercise terms={TERMS.filter((t) => keep(t.lane)).map(({ term, definition }) => ({ term, definition }))} />
+        <MatchTermsExercise terms={TERMS.map(({ term, definition }) => ({ term, definition }))} />
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -212,8 +170,8 @@ export default function TeachingProductiveSkillsSession() {
           the one, and suit teaching the other? Click each to see what it&apos;s for, then tell your partner which
           you&apos;d pick and why.
         </p>
-        {showSpeaking ? <TaskColumn heading="Speaking tasks" tasks={SPEAKING_TASKS} /> : null}
-        {showWriting ? <TaskColumn heading="Writing tasks" tasks={WRITING_TASKS} /> : null}
+        <TaskColumn heading="Speaking tasks" tasks={SPEAKING_TASKS} />
+        <TaskColumn heading="Writing tasks" tasks={WRITING_TASKS} />
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -268,7 +226,7 @@ export default function TeachingProductiveSkillsSession() {
           Six things a teacher notices while monitoring — three from a speaking task, three from a writing task. The
           split works the same way in both. Click your answer for each.
         </p>
-        {SCENARIOS.filter((s) => keep(s.lane)).map((s) => (
+        {SCENARIOS.map((s) => (
           <div key={s.text} className="flex flex-col gap-1">
             <p className="text-label font-bold uppercase tracking-[0.08em] text-muted">{s.lane}</p>
             <ChoiceScenarioCard
