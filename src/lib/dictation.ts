@@ -103,8 +103,28 @@ export function applyPunctuationCommands(text: string): string {
   return result.replace(/[ \t]+([.,!?:;)])/g, "$1").replace(/[ \t]{2,}/g, " ");
 }
 
+/**
+ * WebKit defines webkitSpeechRecognition but cannot honour it the way this
+ * engine needs. It ends the session after a single utterance and only allows
+ * start() inside a user gesture, so the restart in recognition.onend is
+ * refused and dictation dies after one phrase — and the wake word, which needs
+ * the microphone held open, can never work at all. Every browser on iOS and
+ * iPadOS is WebKit, Chrome and Firefox included, so the check is the engine,
+ * not the brand. Checked 21 Sep 2026 after Ramy hit it in Safari.
+ */
+function isWebKitEngine(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  // iPadOS reports itself as a Mac; the touch points give it away.
+  if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return true;
+  return /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR|Firefox/.test(ua);
+}
+
 export function dictationSupported(): boolean {
-  return typeof window !== "undefined" && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+  if (typeof window === "undefined") return false;
+  if (isWebKitEngine()) return false;
+  return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
 export interface DictationSession {

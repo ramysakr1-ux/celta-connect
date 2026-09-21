@@ -220,7 +220,7 @@ export function DictateButton({
   const onBand = variant !== "bar";
 
   const label = !supported
-    ? "Not supported here"
+    ? "Dictation needs Chrome or Edge"
     : listening
       ? "Listening — Esc or say \u201cstop dictation\u201d"
       : fieldLabel
@@ -240,7 +240,13 @@ export function DictateButton({
       onClick={toggle}
       disabled={!supported}
       aria-pressed={listening}
-      title={listening && fieldLabel ? `Dictating into ${fieldLabel}` : undefined}
+      title={
+        !supported
+          ? "Safari — and every browser on iPhone and iPad — uses WebKit, which will not hold the microphone open for dictation."
+          : listening && fieldLabel
+            ? `Dictating into ${fieldLabel}`
+            : undefined
+      }
       className="inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-full border-2 font-bold disabled:opacity-60"
       style={{
         ...style,
