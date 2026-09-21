@@ -42,6 +42,12 @@ export const INPUT_SESSIONS: InputSessionMeta[] = [
   { slug: "classroom-arrangements", title: "Classroom arrangements and material use", minutes: "45 min", kind: "Classroom skills · day one, second slot" },
   { slug: "teaching-speaking", title: "Teaching speaking", minutes: "45 min", kind: "Loop input · 1 of 2 productive skills" },
   { slug: "teaching-writing", title: "Teaching writing", minutes: "45 min", kind: "Loop input · 2 of 2 productive skills" },
+  // Ramy's own standalone, ported 21 Sep 2026. It runs the productive-skills
+  // shape ONCE with both skills inside it, where the two above take a skill
+  // each. Its own trainer notes claimed it replaced them; he overruled that
+  // the same day -- "leave the other two sessions as they are" -- so all three
+  // stay and a course picks whichever suits its timetable.
+  { slug: "teaching-productive-skills", title: "Teaching productive skills — one shape, two skills", minutes: "45 min", kind: "Loop input · both productive skills together" },
   // design_handoff_input_sessions_2 §2 -- the two genuinely new sessions.
   { slug: "phonology-sounds", title: "Phonology: sounds", minutes: "60 min", kind: "Phonology, spoken aloud · 2 of the sounds pair" },
   { slug: "teaching-exam-classes", title: "Teaching exam classes", minutes: "50 min", kind: "The wider profession · last week" },
