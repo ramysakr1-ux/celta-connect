@@ -60,7 +60,24 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
 // The "Running this session" box near the top -- separate from the
 // end-of-session trainer notes since it's meant to be read before
 // starting, not toggled/hidden.
+//
+// STAFF ONLY, same as TrainerNotes (Ramy, 21 Sep 2026: "make sure that all
+// the trainer notes there are hidden -- that was meant to be the plan from
+// the start"). "Not toggled/hidden" meant it should not sit behind a pill for
+// the trainer reading it; it never meant candidates should read it. 28 of the
+// 31 sessions carry one and every one is written TO the trainer ABOUT the
+// room -- "project it, or have trainees open it on their own devices", "do
+// not let the session become a feedback session about their teaching",
+// "trainees will reach for them constantly; that's the point of banning
+// them". Two give away the very answer the session withholds: functional
+// language and the productive skills session both say "don't name it until
+// the debrief", which is the whole point of a loop input.
+//
+// audience.tsx defaults to staff:false, so a session rendered outside the
+// provider shows no box -- the safe direction to fail, as with the notes.
 export function RunningThisSession({ children }: { children: React.ReactNode }) {
+  const staff = useIsStaffReader();
+  if (!staff) return null;
   return (
     <div className="flex flex-col gap-1.5 rounded-[8px] border border-border bg-muted/10 p-4">
       <p className="flex items-center gap-1.5 text-label font-bold uppercase tracking-[0.08em] text-muted">
