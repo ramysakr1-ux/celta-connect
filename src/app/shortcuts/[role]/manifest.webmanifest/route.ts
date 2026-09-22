@@ -28,7 +28,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ role
       // makes the manifest invalid, which Chrome answers with silence: no
       // install event, no dialog, the pill left showing the gesture note
       // (Ramy, 17 Sep 2026: "still getting the tutorial").
-      scope: "/",
+      //
+      // Each role's own tree rather than "/" since 22 Sep 2026: a scope of "/"
+      // on every manifest meant one installed Connect app blocked the install
+      // offer for all the others, everywhere. See ROLE_SHORTCUTS.
+      scope: r.scope,
       // standalone, with minimal-ui asked for on top. Chrome on macOS will not
       // install a plain minimal-ui manifest at all -- no address-bar icon, no
       // install event -- which is what stopped every "add to home screen" on

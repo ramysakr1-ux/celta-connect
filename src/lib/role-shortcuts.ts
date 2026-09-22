@@ -12,12 +12,30 @@
 // is no such room in Connect -- the volunteer student's shortcut is the
 // per-token student manifest, which uses the student set below. Its icons
 // are exported all the same so the set stays whole.
+// `scope` is what lets two of these live side by side. Chrome will not offer
+// to install a page an installed app's scope already covers, so while every
+// manifest here said scope "/" the first Connect app installed -- of any role
+// -- silenced the offer on every page of the site. Measured 22 Sep 2026: with
+// the generic app installed the install event never fired on production and
+// fired at once when it was removed. Distinct scopes are how an origin carries
+// several apps at all (gmail and calendar on google.com are the everyday
+// example), so each role is scoped to its own tree.
+//
+// Two rules, and the manifest is invalid if either is broken: startUrl must
+// sit inside scope, and a scope is a path PREFIX, not a list.
+//
+// The candidate is the exception and stays at "/". Their workspace genuinely
+// spans two trees -- /dashboard for the plan, the assignments and CELTA 5,
+// /portfolio for the record -- and a scope can only name one. Scoping them to
+// either would put the other outside the app window on the first click. So a
+// candidate installs one app, which is all they need, and the pill explains
+// itself if they somehow want a second (install-prompt.tsx).
 export const ROLE_SHORTCUTS = {
-  candidate: { label: "Candidate", startUrl: "/dashboard", theme: "#3e2818", description: "Your course, day by day." },
-  "trainer-mct": { label: "Tutor", startUrl: "/trainer", theme: "#862723", description: "Today, the roster and the timetable." },
-  "trainer-act": { label: "Tutor", startUrl: "/trainer", theme: "#885627", description: "Today, the roster and the timetable." },
-  student: { label: "Student", startUrl: "/student", theme: "#0f4a4b", description: "Your classes, materials and hours." },
-  centre: { label: "Centre", startUrl: "/centre", theme: "#241d16", description: "Courses, people and money at your centre." },
+  candidate: { label: "Candidate", startUrl: "/dashboard", scope: "/", theme: "#3e2818", description: "Your course, day by day." },
+  "trainer-mct": { label: "Tutor", startUrl: "/trainer", scope: "/trainer", theme: "#862723", description: "Today, the roster and the timetable." },
+  "trainer-act": { label: "Tutor", startUrl: "/trainer", scope: "/trainer", theme: "#885627", description: "Today, the roster and the timetable." },
+  student: { label: "Student", startUrl: "/student", scope: "/student", theme: "#0f4a4b", description: "Your classes, materials and hours." },
+  centre: { label: "Centre", startUrl: "/centre", scope: "/centre", theme: "#241d16", description: "Courses, people and money at your centre." },
   // The platform owner, added 21 Sep 2026: Ramy's saved shortcut opened
   // someone else's room ("my home screen shortcut logs me in as a trainee
   // rather than to the command center"). Command Center declared no manifest
@@ -28,7 +46,9 @@ export const ROLE_SHORTCUTS = {
   // on a gold ground rather than a dark one, because that is what it is: the
   // platform, not a centre. Badge "C" as in Command Center -- Candidate's C
   // sits on deep brown and the two cannot be confused.
-  owner: { label: "Command Center", startUrl: "/platform/command-center", theme: "#bc7300", description: "Every centre, every course, the whole platform." },
+  // Scoped to /platform, not to the room itself, so the Command Center's own
+  // sub-pages stay inside the installed window.
+  owner: { label: "Command Center", startUrl: "/platform/command-center", scope: "/platform", theme: "#bc7300", description: "Every centre, every course, the whole platform." },
 } as const;
 export type RoleShortcut = keyof typeof ROLE_SHORTCUTS;
 
