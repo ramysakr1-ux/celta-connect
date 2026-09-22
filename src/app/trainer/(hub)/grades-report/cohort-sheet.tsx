@@ -110,6 +110,13 @@ export function CohortSheet({
     count: settledRows.filter((r) => settledGrade(r) === band).length,
   }));
   const notYetGradedCount = settledRows.filter((r) => !settledGrade(r)).length;
+  // settledRows is "everyone not undecided", which is not the same as everyone
+  // settled: it carries the ungraded too, so the box read "Settled · 10
+  // provisional grades" above a list whose own last line said "Not yet graded
+  // 1" (walked 23 Sep 2026). Count the grades, so the heading is the sum of
+  // the bands beneath it and the ungraded read as what is still outstanding.
+  // Withdrawn stays in: it is a settled outcome, and Cambridge wants it filed.
+  const settledGradedCount = settledRows.length - notYetGradedCount;
 
   return (
     <div className="sheet flex flex-col gap-4">
@@ -208,7 +215,7 @@ export function CohortSheet({
         {/* Settled */}
         <div className="rounded-[6px] border border-border">
           <p className="border-b border-border px-4 py-2 text-micro font-semibold uppercase tracking-[0.12em] text-muted">
-            Settled · {settledRows.length}
+            Settled · {settledGradedCount}
             <span className="ml-2 normal-case tracking-normal text-muted">{countingFinal ? "final grades" : "provisional grades"}</span>
           </p>
           <div className="divide-y divide-border-faint">

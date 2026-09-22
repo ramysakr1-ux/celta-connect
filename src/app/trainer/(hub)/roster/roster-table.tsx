@@ -90,7 +90,11 @@ export function RosterTable({
   const [filter, setFilter] = useState<Filter | null>(null);
   const active = rows.filter((r) => !isCourseStatusReadOnly(r.courseStatus));
   const tiles: { key: Filter; n: number; label: string; sub: string }[] = [
-    { key: "risk", n: active.filter((r) => matches(r, "risk")).length, label: "At risk", sub: "attendance, hours or criteria" },
+    // Names what computeAtRiskReasons actually reads. It said "attendance,
+    // hours or criteria" and at-risk has never looked at either of the first
+    // two (src/lib/at-risk.ts is the single definition, shared with Today):
+    // attendance is its own alert on the hub, not a reason here.
+    { key: "risk", n: active.filter((r) => matches(r, "risk")).length, label: "At risk", sub: "TP feedback or a missed assignment" },
     { key: "resub", n: active.filter((r) => matches(r, "resub")).length, label: "Resubmissions", sub: "assignments to re-mark" },
     { key: "ontrack", n: active.filter((r) => matches(r, "ontrack")).length, label: "On track", sub: `of ${active.length} active candidate${active.length === 1 ? "" : "s"}` },
     { key: "passab", n: active.filter((r) => matches(r, "passab")).length, label: "Pass A / B", sub: weekLabel ? `provisional, ${weekLabel}` : "provisional" },

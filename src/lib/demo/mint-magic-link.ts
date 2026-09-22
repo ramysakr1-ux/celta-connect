@@ -36,7 +36,15 @@ export async function mintDemoMagicLink(
   //
   // It also affects every magic link, invite, offer and interview email,
   // since they all build their URLs the same way.
-  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
+  // A SITE_URL with no scheme is not a base URL: new URL("/auth/confirm",
+  // "celtaconnect.com") throws ERR_INVALID_URL, and because that throw is
+  // above every try/catch here, each /demo/<role> answered 500 rather than
+  // signing the visitor in -- an env typo taking out the whole demo door
+  // (walked 23 Sep 2026). Read a bare host as a host instead of dying on it.
+  const rawSiteUrl = process.env.SITE_URL?.trim() || "http://localhost:3000";
+  const siteUrl = /^https?:\/\//i.test(rawSiteUrl)
+    ? rawSiteUrl
+    : `${/^(localhost|127\.0\.0\.1)([:/]|$)/i.test(rawSiteUrl) ? "http" : "https"}://${rawSiteUrl}`;
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
 
   // Look the account up by its email, then confirm the centre it belongs to
