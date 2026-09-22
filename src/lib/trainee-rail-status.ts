@@ -116,8 +116,16 @@ export async function buildRailStatus({
       [])
     : [];
   const halfDates = subgroup?.half_order ? halfTpDates(allTpEvents, subgroup.half_order) : [];
-  const teachesToday = halfDates.includes(todayIso);
-  const tpToday = teachesToday ? halfDates.indexOf(todayIso) + 1 : null;
+  // A TP day for my HALF is not a lesson for ME once my plan for that round is
+  // taught. Asking only whether the half teaches today told a candidate who had
+  // finished all eight "You teach 10:45" while the Course Stream beside it said
+  // "Not teaching today · all your TPs are taught" (walked 23 Sep 2026). The
+  // extra test is the one the hero has always applied (today-tab.tsx's
+  // computeTeachingFor), so the two now answer the question the same way.
+  const tpTodayNumber = halfDates.includes(todayIso) ? halfDates.indexOf(todayIso) + 1 : null;
+  const planToday = tpTodayNumber === null ? null : (plans ?? []).find((p) => p.tp_number === tpTodayNumber) ?? null;
+  const teachesToday = planToday !== null && !onOrBefore(planToday.taught_at, todayIso);
+  const tpToday = teachesToday ? tpTodayNumber : null;
 
   // As of today (src/lib/as-of.ts): a lesson the record clock has already
   // marked taught next week is still ahead of this candidate.
