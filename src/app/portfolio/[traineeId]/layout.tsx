@@ -520,7 +520,13 @@ export default async function PortfolioLayout({
                     shell's landing. */}
                 <HeaderCredit onDark landingPath={`/portfolio/${trainee.id}`} />
                 <div className="min-w-0 flex-1 md:hidden" />
-                <div className="flex shrink-0 items-center gap-2.5 md:order-3">
+                {/* Wraps inside itself on a phone. The demo tag and the
+                    install pill joined this cluster after it was written, and
+                    an unshrinkable row of them pushed the document to 417px on
+                    a 375px screen, so the workspace scrolled sideways (walked
+                    23 Sep 2026). Unchanged from md up, where the row has the
+                    space it was designed for. */}
+                <div className="flex flex-wrap items-center justify-end gap-2.5 md:order-3 md:shrink-0 md:flex-nowrap">
                   <DemoDayTag tone="dark" />
                   {showTraineeNav ? <InstallPrompt variant="pill" tone="dark" /> : null}
                   <TraineeHeaderCorner

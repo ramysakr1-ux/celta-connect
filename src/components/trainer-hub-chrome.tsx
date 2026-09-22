@@ -264,7 +264,14 @@ export async function TrainerHubChrome({
             </Link>
           ) : null}
           <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} hideBelowMd={phoneBar} />
-          <div className="flex shrink-0 items-center gap-[11px]">
+          {/* Wraps inside itself below sm, and only below sm. The row above
+              already drops this cluster onto a second line, and the note there
+              budgets it at ~272px -- but the demo tag and the install pill
+              joined it afterwards and it measures 447px, so on a 375px screen
+              a shrink-0 cluster pushed the whole document to 470px and the
+              hub scrolled sideways (walked 23 Sep 2026). From sm up it is the
+              single unshrinkable row it always was. */}
+          <div className="flex flex-wrap items-center gap-[11px] sm:shrink-0 sm:flex-nowrap">
             {/* The demo clock, if one is pinned -- it moves what this whole
                 shell calls today, so it is named beside the role pill. */}
             <DemoDayTag />
