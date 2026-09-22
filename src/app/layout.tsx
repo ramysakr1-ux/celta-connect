@@ -67,10 +67,22 @@ export default function RootLayout({
             and the pill picks it up on mount (install-prompt.tsx). Ramy,
             17 Sep 2026: "I'm getting a tutorial instead of a home screen
             button." */}
+        {/* And the service worker has to be REGISTERED for Chrome to fire that
+            event at all: its install criteria want a service worker with a
+            fetch handler, which is the only reason public/sw.js has one (see
+            the comment there). It was registered nowhere but inside the push
+            button — which renders on the student page and the staff chat
+            drawer and nowhere else — so on the Command Center, the trainer
+            hub, the centre console and the candidate's own rooms Chrome never
+            fired beforeinstallprompt, and the pill could only ever open the
+            gesture note. Ramy, 22 Sep 2026: "why can't I add the command
+            center to the home screen." Registered for every page here, on
+            load so it never competes with the first paint. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__connectInstallPrompt=e;});",
+              "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__connectInstallPrompt=e;});" +
+              "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}",
           }}
         />
       </head>
