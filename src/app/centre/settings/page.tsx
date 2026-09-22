@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDateTime } from "@/lib/format-date";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
+import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 import { ZoomConnectionForm } from "@/app/centre/settings/zoom-connection-form";
 import { CentreProfileReadOnly } from "@/app/centre/settings/profile-read-only";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
@@ -180,6 +181,7 @@ export default async function CentreSettingsPage({
                 appianUrl={center.appian_url}
                 filmsTpSessions={center.films_tp_sessions}
                 driveConnection={driveConnection}
+                timeZoneOptions={TIMEZONE_OPTIONS}
               />
               <ZoomConnectionForm connection={zoomConnection} connected={zoom_connected === "1"} error={zoom_error} timeZone={center.time_zone} />
             </div>

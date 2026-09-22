@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DemoDayTag } from "@/components/demo-day-tag";
 import { ApplicationForm } from "@/components/apply/application-form";
+import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +122,7 @@ export default async function DemoApplyPage({
       </div>
       <div className="frame w-full max-w-xl p-3">
         <ApplicationForm
+          timeZoneOptions={TIMEZONE_OPTIONS}
           centerId={center.id}
           centerName={center.name}
           centerLogoUrl={center.logo_url}

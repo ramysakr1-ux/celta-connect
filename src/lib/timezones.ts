@@ -26,7 +26,18 @@ function offsetLabel(minutes: number): string {
   return `UTC${sign}${h}:${m}`;
 }
 
-export const TIMEZONE_OPTIONS: { value: string; label: string }[] = Intl.supportedValuesOf("timeZone")
+export type TimeZoneOption = { value: string; label: string };
+
+// SERVER ONLY in anything that hydrates. Two things here differ between the
+// Node process and the browser: Intl.supportedValuesOf returns whatever zone
+// list that runtime's ICU was built with, and the offsets are taken against
+// `new Date()` at module-eval time -- on the server that is whenever the
+// process booted, which may be on the other side of a DST change. A <select>
+// built from this on both sides therefore hydrated with different <option>s
+// and threw React #418 on /centre/settings (walked 23 Sep 2026). Build the
+// list in the server component and pass it down, so the client renders the
+// array it was sent rather than computing a second one.
+export const TIMEZONE_OPTIONS: TimeZoneOption[] = Intl.supportedValuesOf("timeZone")
   .map((value) => ({ value, offsetMinutes: offsetMinutesFor(value) }))
   .sort((a, b) => a.offsetMinutes - b.offsetMinutes || a.value.localeCompare(b.value))
   .map(({ value, offsetMinutes }) => ({

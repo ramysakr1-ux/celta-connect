@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { updateCentreProfile, type FormState } from "@/app/centre/settings/actions";
 import { disconnectGoogleDrive } from "@/app/dashboard/admin/settings/actions";
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
-import { TIMEZONE_OPTIONS } from "@/lib/timezones";
+import type { TimeZoneOption } from "@/lib/timezones";
 import { formatDateTime } from "@/lib/format-date";
 
 const initialState: FormState = { error: null };
@@ -19,6 +19,7 @@ export function ProfileDriveForm({
   appianUrl,
   filmsTpSessions,
   driveConnection,
+  timeZoneOptions,
 }: {
   name: string;
   centerNumber: string;
@@ -29,6 +30,8 @@ export function ProfileDriveForm({
   appianUrl: string | null;
   filmsTpSessions: boolean;
   driveConnection: { connected_at: string; template_doc_id: string | null; output_folder_id: string | null } | null;
+  /** Built on the server -- see the note in @/lib/timezones. */
+  timeZoneOptions: TimeZoneOption[];
 }) {
   const [state, action, pending] = useActionState(updateCentreProfile, initialState);
 
@@ -100,7 +103,7 @@ export function ProfileDriveForm({
             defaultValue={timeZone}
             className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           >
-            {TIMEZONE_OPTIONS.map((tz) => (
+            {timeZoneOptions.map((tz) => (
               <option key={tz.value} value={tz.value}>
                 {tz.label}
               </option>

@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedRealCenter } from "@/lib/supabase/cached-queries";
 import { ApplicationForm } from "@/components/apply/application-form";
+import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 
 // "The intake dropdown shows real availability... the number is always the
 // true one." Without this, Next.js statically prerenders the page at build
@@ -113,6 +114,7 @@ export default async function ApplyPage({
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-xl p-3">
         <ApplicationForm
+          timeZoneOptions={TIMEZONE_OPTIONS}
           centerId={center.id}
           centerName={center.name}
           centerLogoUrl={center.logo_url}

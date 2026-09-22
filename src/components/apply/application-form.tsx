@@ -10,7 +10,7 @@ import {
   buildCourseCommitments,
 } from "@/lib/course-commitments";
 import { DELIVERY_MODE_LABEL } from "@/lib/delivery-mode";
-import { TIMEZONE_OPTIONS } from "@/lib/timezones";
+import type { TimeZoneOption } from "@/lib/timezones";
 import { Wordmark } from "@/components/wordmark";
 import { formatCalendarDate } from "@/lib/format-date";
 import { MobileFormWizard } from "@/components/mobile-form-wizard";
@@ -49,6 +49,7 @@ export function ApplicationForm({
   prompts,
   speakingPrompts,
   preselectedCourseId,
+  timeZoneOptions,
 }: {
   centerId: string;
   centerName: string;
@@ -57,6 +58,8 @@ export function ApplicationForm({
   prompts: WritingPrompt[];
   speakingPrompts: SpeakingPrompt[];
   preselectedCourseId?: string;
+  /** Built on the server -- see the note in @/lib/timezones. */
+  timeZoneOptions: TimeZoneOption[];
 }) {
   const [state, action, pending] = useActionState(
     submitApplication,
@@ -263,7 +266,7 @@ export function ApplicationForm({
               <option value="" disabled>
                 Choose your time zone
               </option>
-              {TIMEZONE_OPTIONS.map((tz) => (
+              {timeZoneOptions.map((tz) => (
                 <option key={tz.value} value={tz.value}>
                   {tz.label}
                 </option>
