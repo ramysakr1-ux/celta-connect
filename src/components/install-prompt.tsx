@@ -116,6 +116,8 @@ export function InstallPrompt({
   // Chrome's answer to "is this app already installed?", asked from an
   // ordinary tab. See the effect below.
   const [alreadyInstalled, setAlreadyInstalled] = useState(false);
+  // A DIFFERENT Connect app is installed, so Chrome will not offer this one.
+  const [otherAppInstalled, setOtherAppInstalled] = useState(false);
   const [promptFired, setPromptFired] = useState(false);
   const [showIosSteps, setShowIosSteps] = useState(false);
   const [snoozedNow, setSnoozedNow] = useState(false);
@@ -146,20 +148,38 @@ export function InstallPrompt({
   // pill fell through to the gesture note and read as a tutorial for a door
   // the person had already walked through (Ramy, 17 Sep 2026, four times).
   //
-  // getInstalledRelatedApps is the one API that answers it. It only returns
-  // apps the manifest itself names, which is why every manifest now carries a
-  // related_applications entry pointing at its own URL. Chrome and Edge only;
-  // everywhere else this stays false and nothing changes.
+  // getInstalledRelatedApps is the one API that answers it, and every manifest
+  // now names ALL of Connect's manifests rather than only itself
+  // (connectRelatedApplications), so the answer distinguishes two cases that
+  // look identical from here and need opposite wording:
+  //
+  //   this app installed  -> there is nothing to offer; the pill goes.
+  //   ANOTHER Connect app -> Chrome will not offer a second app over a page
+  //                          the first one's scope already covers, and every
+  //                          manifest declares scope "/". So the offer cannot
+  //                          work until that other app goes, and saying so is
+  //                          the only useful thing the pill can do.
+  //
+  // The second case is the one that ran from 17 to 22 Sep 2026: the generic
+  // Connect app was installed, the pill could not see it because it only
+  // asked about its own manifest, and every click fell through to a gesture
+  // note that described a door Chrome was never going to open.
+  //
+  // Chrome and Edge only; everywhere else both stay false and nothing changes.
   useEffect(() => {
     const nav = navigator as Navigator & {
-      getInstalledRelatedApps?: () => Promise<Array<{ platform?: string }>>;
+      getInstalledRelatedApps?: () => Promise<Array<{ platform?: string; url?: string }>>;
     };
     if (typeof nav.getInstalledRelatedApps !== "function") return;
     let cancelled = false;
     nav
       .getInstalledRelatedApps()
       .then((apps) => {
-        if (!cancelled && apps.length > 0) setAlreadyInstalled(true);
+        if (cancelled || apps.length === 0) return;
+        const mine = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')?.href;
+        const isMine = (u?: string) => !!u && !!mine && new URL(u, location.href).href === mine;
+        if (apps.some((a) => isMine(a.url))) setAlreadyInstalled(true);
+        else setOtherAppInstalled(true);
       })
       .catch(() => {
         // Not a secure context, in an iframe, or the call is unavailable --
@@ -218,7 +238,17 @@ export function InstallPrompt({
     setSnoozedNow(true);
   }
 
-  const gesture =
+  const gesture = otherAppInstalled ? (
+    <>
+      Another Connect app is already installed on this computer, and Chrome will
+      not add a second one while it is there. Remove it first &mdash; open{" "}
+      <span className="font-semibold text-ink">chrome://apps</span>, right-click{" "}
+      <span className="font-semibold text-ink">Connect</span> and choose{" "}
+      <span className="font-semibold text-ink">Remove from Chrome</span> &mdash; then
+      reload this page and the button will work. Dragging the app to the Trash is
+      not enough; Chrome keeps its own record.
+    </>
+  ) :
     route === "ios" ? (
       <>
         Tap <span className="font-semibold text-ink">Share</span>, then{" "}
@@ -258,7 +288,7 @@ export function InstallPrompt({
           type="button"
           onClick={handleInstallClick}
           aria-expanded={showIosSteps}
-          aria-label="Add Connect to your home screen"
+          aria-label={otherAppInstalled ? "Why Connect cannot be added yet" : "Add Connect to your home screen"}
           className="eyebrow wash inline-flex h-[26px] items-center gap-1.5 rounded-full border px-2.5 text-micro whitespace-nowrap"
           style={
             dark
@@ -270,7 +300,10 @@ export function InstallPrompt({
             <rect x="5" y="2" width="14" height="20" rx="2" />
             <path d="M12 7v6m0 0 2.5-2.5M12 13l-2.5-2.5" />
           </svg>
-          <span className="hidden sm:inline">Add to home screen</span>
+          {/* The label has to be answerable by the click. Offering "Add to home
+              screen" when Chrome has already refused is the promise that sent
+              Ramy round in circles for five days. */}
+          <span className="hidden sm:inline">{otherAppInstalled ? "Why can\u2019t I add this?" : "Add to home screen"}</span>
           <span className="sm:hidden">Install</span>
         </button>
         {showIosSteps ? (

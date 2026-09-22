@@ -1,4 +1,4 @@
-import { ROLE_SHORTCUTS, SPLASH_BACKGROUND, isRoleShortcut, roleShortcutIcons } from "@/lib/role-shortcuts";
+import { ROLE_SHORTCUTS, SPLASH_BACKGROUND, connectRelatedApplications, isRoleShortcut, roleShortcutIcons } from "@/lib/role-shortcuts";
 
 // One manifest per role (design_handoff_role_shortcuts §2). The app-wide
 // manifest.ts stays the generic Connect a plain visitor gets; each landing
@@ -13,10 +13,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ role
   const { role } = await params;
   if (!isRoleShortcut(role)) return new Response("Not found", { status: 404 });
   const r = ROLE_SHORTCUTS[role];
-  // This manifest's own absolute URL, taken from the request so it can never
-  // disagree with the host the page was served from (apex vs www would make
-  // the match below silently fail). See related_applications.
-  const selfUrl = new URL(request.url).href;
+  // Taken from the request so it can never disagree with the host the page was
+  // served from (apex vs www would make the related_applications match below
+  // silently fail).
+  const origin = new URL(request.url).origin;
   return Response.json(
     {
       name: `Connect — ${r.label}`,
@@ -47,7 +47,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ role
       // someone who already had the app -- clicking it then fell through to
       // the gesture note. Ramy, 17 Sep 2026: "I'm getting a tutorial instead
       // of a home screen button."
-      related_applications: [{ platform: "webapp", url: selfUrl }],
+      related_applications: connectRelatedApplications(origin),
     },
     {
       headers: {

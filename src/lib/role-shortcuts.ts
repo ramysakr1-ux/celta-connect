@@ -36,6 +36,32 @@ export type RoleShortcut = keyof typeof ROLE_SHORTCUTS;
  *  screen opens on the page ground the app then paints. */
 export const SPLASH_BACKGROUND = "#eae6dd";
 
+/** Every Connect manifest, as `related_applications` entries.
+ *
+ *  Each manifest used to name only ITSELF, which answers "is THIS app
+ *  installed" and nothing else. That is not the question the pill needs
+ *  answered. Chrome will not offer to install a page already covered by an
+ *  installed app, and every one of these declares scope "/" -- so one
+ *  installed Connect app, of any role, silently stops the offer on every page
+ *  of the site. The pill could not see that (it only ever asked about its own
+ *  manifest), so it went on offering, the click fell through to the gesture
+ *  note, and there was nothing to tell anyone why. Ramy hit exactly this from
+ *  17 to 22 Sep 2026 with the generic Connect installed: measured, the install
+ *  event fired on localhost and never on production, and started firing on
+ *  production the moment that app was properly removed.
+ *
+ *  Naming all of them means getInstalledRelatedApps() answers "which Connect
+ *  app is installed", which is what install-prompt.tsx needs to tell the two
+ *  cases apart. prefer_related_applications stays unset, so this changes
+ *  nothing about installability itself.
+ *
+ *  The student's per-token manifest cannot be enumerated and is left out; a
+ *  volunteer holding one is offered the token link, not a second app. */
+export function connectRelatedApplications(origin: string) {
+  const at = (path: string) => ({ platform: "webapp", url: `${origin}${path}` });
+  return [at("/manifest.webmanifest"), ...Object.keys(ROLE_SHORTCUTS).map((r) => at(`/shortcuts/${r}/manifest.webmanifest`))];
+}
+
 export function roleShortcutIcons(slug: RoleShortcut | "volunteer") {
   const at = (px: number) => `/icons/connect-${slug}-${px}.png`;
   return [

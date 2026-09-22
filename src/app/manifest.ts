@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SPLASH_BACKGROUND } from "@/lib/role-shortcuts";
+import { SPLASH_BACKGROUND, connectRelatedApplications } from "@/lib/role-shortcuts";
 
 // Apex redirects to www (it is what stripped the cron Authorization header
 // on 1 Sep 2026), so www is canonical here.
@@ -30,13 +30,14 @@ export default function manifest(): MetadataRoute.Manifest {
     // Aug 2026, so every splash screen opened a shade lighter than the app.
     background_color: SPLASH_BACKGROUND,
     theme_color: "#3e2818", // --color-ink-warm, same tile color as the app icon
-    // The manifest names itself, so a page can ask Chrome whether this app is
-    // already installed (navigator.getInstalledRelatedApps in
-    // install-prompt.tsx). No request object reaches this file convention, so
-    // the host comes from the environment; it must be the canonical one the
-    // app is served from, or the match silently fails and the pill simply
-    // keeps showing, as it did before.
-    related_applications: [{ platform: "webapp", url: `${SITE_ORIGIN}/manifest.webmanifest` }],
+    // Every Connect manifest, not just this one, so a page can ask Chrome
+    // WHICH Connect app is installed rather than only whether this one is
+    // (navigator.getInstalledRelatedApps in install-prompt.tsx; see
+    // connectRelatedApplications). No request object reaches this file
+    // convention, so the host comes from the environment; it must be the
+    // canonical one the app is served from, or the match silently fails and
+    // the pill simply keeps showing, as it did before.
+    related_applications: connectRelatedApplications(SITE_ORIGIN),
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
