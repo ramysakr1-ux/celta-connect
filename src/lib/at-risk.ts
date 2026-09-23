@@ -8,19 +8,34 @@ export type AtRiskReason =
   | "attendance_below_threshold";
 
 /**
- * The centre's line, NOT Cambridge's -- Cambridge sets no percentage anywhere.
- * CELTA 5 (July 2023) p9 states "100% attendance is expected", and the
- * Administration Handbook June 2025 §7.5 says candidates "are expected to
- * attend the whole course" and that absence "may jeopardise their chances of
- * successfully meeting the assessment criteria", without ever naming a figure.
- * The Handbook's only hard numbers are elsewhere: a candidate who has not
- * completed the six hours' teaching practice, or who has incomplete written
- * assignments, "can be considered for the award only in exceptional
- * circumstances" (§7.5). So this threshold is a house rule for raising a flag
- * early, and it lives here as one constant so the hub and the roster cannot
- * drift apart on it.
+ * The centre's attendance policy, and Cambridge puts it there on purpose:
+ * CELTA 5 p3 lists "the attendance policy" among the things the CENTRE sets
+ * out in the candidate agreement.
+ *
+ * Cambridge itself names no percentage anywhere. CELTA 5 p9 (identical in the
+ * May and July 2023 editions) says "100% attendance is expected. However, in
+ * the event of unavoidable absence such as illness, family bereavement or
+ * unexpected family commitment, this must be recorded ... and the work from
+ * the session missed must be made up", and Administration Handbook June 2025
+ * §7.5 says candidates "are expected to attend the whole course" and that
+ * absence "may jeopardise their chances of successfully meeting the assessment
+ * criteria". Neither gives a figure; the Handbook's only hard numbers are the
+ * six hours' teaching practice and the written assignments.
+ *
+ * Ramy, 23 Sep 2026: "for the trainees it's 100% and if there are absences
+ * exceeding 10% even with a doctor report they will it will be flagged." So
+ * the line is below 90%, and documentation does NOT suppress it -- a recorded
+ * reason changes what the centre does about the absence, not whether anyone is
+ * told about it. It RAISES A FLAG and forces nothing: an at-risk reason is only
+ * ever sorted, counted and displayed, never a gate.
+ *
+ * 80% is not this rule and never was -- that is the VOLUNTEER students' line,
+ * 160 of 200 hours for their certificate of attendance
+ * (CERTIFICATE_HOURS_THRESHOLD, and centers.volunteer_certificate_hours_threshold
+ * behind it). Here 80% is only the red band on the roster row's three-tone
+ * attendance colour (red < 80, gold < 90, teal >= 90).
  */
-export const ATTENDANCE_AT_RISK_PCT = 80;
+export const ATTENDANCE_AT_RISK_PCT = 90;
 
 export interface AtRiskFeedbackInput {
   tp_number: number;
