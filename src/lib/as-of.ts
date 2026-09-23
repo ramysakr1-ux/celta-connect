@@ -35,6 +35,13 @@ export function assignmentAsOf<
   } & Partial<Record<string, unknown>>,
 >(a: A, today: string): A {
   const out: Record<string, unknown> = { ...a };
+  // Up here, not at the bottom: the round logic below returns early on three
+  // separate paths, and a call after them runs on none of the ones that
+  // matter. Every LRT row in the demo took an early return, so the first
+  // version of this cleared nothing at all. It touches only the
+  // second-marking stamps, which clearRound never writes, so the order
+  // between them does not matter -- only that this always runs.
+  clearFutureSecondMarking(out, a, today);
   const clearRound = (round: Round, unsubmitted: boolean) => {
     out[`${round}_status`] = unsubmitted ? "not_submitted" : "submitted";
     if (unsubmitted) {
@@ -66,7 +73,6 @@ export function assignmentAsOf<
   } else if (a.resubmission_status === "approved" && resubMarkStamp && !onOrBefore(resubMarkStamp, today)) {
     clearRound("resubmission", false);
   }
-  clearFutureSecondMarking(out, a, today);
   return out as A;
 }
 
