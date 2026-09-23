@@ -2,7 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { resolveTimeBands } from "@/lib/timetable-grid";
-import { isFeedbackSession } from "@/lib/feedback-session";
+import { isFeedbackSession, isObservableFeedbackSession, isWrittenFeedbackOnly } from "@/lib/feedback-session";
 
 // Ramy, 30 Aug 2026: "the assessor meeting... it's been announced, there's a
 // countdown for it, it's one of the announcements made by the MCT. And then
@@ -24,9 +24,10 @@ import { isFeedbackSession } from "@/lib/feedback-session";
 // document rather than the cohort's.
 
 /**
- * Matched on rather than a marker column, the same way today-tab.tsx already
- * identifies the day's "Feedback" session by exact title. A course has at
- * most one of these.
+ * Matched on by title rather than a marker column. A course has at most one of
+ * these, and unlike the feedback session -- which got its own type in 0311
+ * because three different titles all meant it -- the assessor meeting is
+ * created by one function, with one title, and read back by the same one.
  */
 export const ASSESSOR_MEETING_TITLE = "Assessor meeting";
 
@@ -70,7 +71,7 @@ export async function syncAssessorMeetingEvent(
     supabase.from("courses").select("time_bands").eq("id", courseId).maybeSingle(),
     supabase
       .from("course_timetable_events")
-      .select("title, event_time")
+      .select("type, title, event_time")
       .eq("course_id", courseId)
       .eq("event_date", visitDate),
   ]);
@@ -98,13 +99,13 @@ export async function syncAssessorMeetingEvent(
  */
 function pickMeetingTime(
   courseTimeBands: Database["public"]["Tables"]["courses"]["Row"]["time_bands"] | undefined,
-  dayEvents: { title: string | null; event_time: string | null }[]
+  dayEvents: { type: string | null; title: string | null; event_time: string | null }[]
 ): string {
   const bands = resolveTimeBands(courseTimeBands);
   const lastBand = bands[bands.length - 1].start;
 
   const feedback = dayEvents
-    .filter((e) => isFeedbackSession(e.title) && e.event_time)
+    .filter((e) => isFeedbackSession(e) && e.event_time)
     .map((e) => (e.event_time ?? "").slice(0, 5))
     .sort()
     .pop();
@@ -150,7 +151,10 @@ export async function assessorVisitDayProblem(
  * should observe the feedback from a previous teaching practice session" --
  * so a visit day with lessons but no Feedback session is workable, just worth
  * saying out loud while the timetable can still change. Ramy, 12 Sep 2026.
- * The day's Feedback session is identified by title, as pickMeetingTime does.
+ *
+ * "Observe the feedback" means a session to sit in, so this asks
+ * isObservableFeedbackSession, not isFeedbackSession: a written-only day has a
+ * feedback session and still gives the assessor nothing to watch.
  */
 export async function assessorVisitDayNote(
   supabase: SupabaseClient<Database>,
@@ -160,11 +164,21 @@ export async function assessorVisitDayNote(
   if (!visitDate) return null;
   const { data: dayEvents } = await supabase
     .from("course_timetable_events")
-    .select("type, title")
+    .select("type, title, feedback_written_only")
     .eq("course_id", courseId)
     .eq("event_date", visitDate);
   const events = dayEvents ?? [];
   if (!events.some((e) => e.type === "tp")) return null; // the refusal above covers this
-  if (events.some((e) => isFeedbackSession(e.title))) return null;
-  return "No Feedback session is timetabled on the visit date. The assessor observes the feedback on the day, or an earlier session's if it is delayed (Handbook 14.2) -- worth adding one while the timetable can still change.";
+  if (events.some((e) => isObservableFeedbackSession(e))) return null;
+
+  // Two ways to have nothing to observe, and they are not the same problem to
+  // the person reading this. Before 0311 the second one could not be seen at
+  // all: the generator writes a written-only day as title "Feedback", which
+  // the old title test matched, so this note stayed silent on exactly the day
+  // it was written for -- the last TP day, which is where an assessor visit
+  // most often lands.
+  const writtenOnly = events.some((e) => isWrittenFeedbackOnly(e));
+  return writtenOnly
+    ? "The only feedback timetabled on the visit date is written -- there is no live session for the assessor to sit in. Handbook 14.2 has them observe the feedback, or an earlier session's if it is delayed, so this is worth a look while the timetable can still change."
+    : "No Feedback session is timetabled on the visit date. The assessor observes the feedback on the day, or an earlier session's if it is delayed (Handbook 14.2) -- worth adding one while the timetable can still change.";
 }

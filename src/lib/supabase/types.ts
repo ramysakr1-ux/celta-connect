@@ -2701,7 +2701,7 @@ export interface Database {
         Row: {
           id: string;
           course_id: string;
-          type: "input_session" | "tp" | "unassessed_tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
+          type: "input_session" | "tp" | "unassessed_tp" | "feedback" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
           title: string;
           event_date: string;
           event_time: string | null;
@@ -2719,6 +2719,11 @@ export interface Database {
           is_asynchronous: boolean;
           linked_live_session_event_id: string | null;
           input_session_criteria: string[];
+          // Migration 0311 -- feedback rows only: the feedback is written, with
+          // no live session to attend or for an assessor to observe
+          // (Handbook 14.2). The session still exists and still shows on the
+          // candidate's day; what differs is that nobody can sit in it.
+          feedback_written_only: boolean;
           // Migration 0301 -- which Connect Native input session this slot
           // opens (src/app/input-sessions/registry.ts), chosen by a tutor.
           // Null falls back to the title map in
@@ -2734,7 +2739,7 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]> & {
           course_id: string;
-          type: "input_session" | "tp" | "unassessed_tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
+          type: "input_session" | "tp" | "unassessed_tp" | "feedback" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
           title: string;
           event_date: string;
         };
