@@ -206,8 +206,20 @@ export function CohortSheet({
           )}
           {undecidedRows.length > 0 ? (
             <p className="border-t border-border-faint px-4 py-2.5 text-label leading-relaxed text-muted">
-              Admin Handbook 10.2: a fail-risk letter must be issued with at least two assessed lessons still to
-              teach -- issued from each candidate&apos;s own CELTA 5 page, not from here.
+              {/* Cambridge's own strength, not a firmer one. Handbook 10.2:
+                  "Potential Fail candidates SHOULD also be issued with a Fail
+                  letter... This should be issued sufficiently in advance of the
+                  end of the course, IDEALLY with at least two lessons left to
+                  teach." This line said "must be issued with at least two
+                  assessed lessons still to teach", which turns a recommendation
+                  into a requirement and says "assessed lessons" where the
+                  Handbook says "lessons" -- so on a course past that point it
+                  read as a breached obligation rather than late guidance.
+                  src/lib/letters/fail-risk.ts had the quote right all along
+                  (walk, 23 Sep 2026). */}
+              Admin Handbook 10.2: a potential Fail candidate should be issued with a fail-risk letter, ideally
+              with at least two lessons left to teach -- issued from each candidate&apos;s own CELTA 5 page, not
+              from here.
             </p>
           ) : null}
         </div>
