@@ -81,7 +81,17 @@ export function computeHeadlineStats(
     inputTotalCount: inputEvents.length,
     inputObservedPct: inputEvents.length > 0 ? Math.round((inputObserved.length / inputEvents.length) * 100) : 0,
     inputAsyncCount,
-    inputAsyncPct: inputObserved.length > 0 ? Math.round((inputAsyncCount / inputObserved.length) * 100) : 0,
+    // Against the COURSE, like inputObservedPct beside it -- not against what
+    // has been observed so far. TinT Handbook 2026 p7 sets both figures on the
+    // same basis: "observation of 80% of a CELTA course... Asynchronous
+    // observation of up to 10% OF THE COURSE is possible where necessary".
+    //
+    // Dividing by observed-so-far made the ceiling strictest at the start,
+    // when the least is known: a TinT who has watched 10 of 33 sessions with
+    // 2 async read 20% and tripped the alarm, where the course basis reads 6%
+    // and is fine. It can only ever over-report, never under-report, so the
+    // alarm it raises mid-course is the false kind (walk, 23 Sep 2026).
+    inputAsyncPct: inputEvents.length > 0 ? Math.round((inputAsyncCount / inputEvents.length) * 100) : 0,
     tpObservedCount,
     tpTotalCount: tpEvents.length,
     tpObservedPct: tpEvents.length > 0 ? Math.round((tpObservedCount / tpEvents.length) * 100) : 0,

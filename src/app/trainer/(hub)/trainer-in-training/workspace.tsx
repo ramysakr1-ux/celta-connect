@@ -186,7 +186,7 @@ export async function TitWorkspace({
           detail={`${stats.inputObservedCount} of ${stats.inputTotalCount} · ${stats.inputAsyncPct}% async`}
           warning={
             stats.inputAsyncPct > INPUT_ASYNC_MAX_PCT
-              ? `Over the ${INPUT_ASYNC_MAX_PCT}% asynchronous ceiling (${stats.inputAsyncCount} of ${stats.inputObservedCount} observed sessions)`
+              ? `Over the ${INPUT_ASYNC_MAX_PCT}% asynchronous ceiling (${stats.inputAsyncCount} of ${stats.inputTotalCount} input sessions on the course)`
               : null
           }
         />
