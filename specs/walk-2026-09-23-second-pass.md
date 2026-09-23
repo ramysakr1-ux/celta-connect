@@ -35,6 +35,8 @@ into each uncompiled page — nothing to do with the code. It takes
 | `37cfdf27` | **Teaching Practice listed the same withdrawn candidate among today's observers and gave him tomorrow's 10:00 TP8 slot, "no plan yet, due 09:00".** He STAYS in `members` — the rotation is `rotationPosition(baseSlot, members.length, tp)`, so removing him would slide every other candidate onto the wrong slot time, and a mid-course withdrawal may still have taught lessons whose feedback is owed. Marked instead, and excluded from the two things still ahead of him. The tomorrow filter runs AFTER the map, because the slot time is `dayEvents[i]`. |
 | `3a32d62f` | Today said "14:15 Feedback · Written feedback only"; the TP tab said "Feedback session · All three, A2 · Reveal peer notes after" for the same slot. The card asserted both lines as constants. It now uses the event's own title and detail. |
 | `8453fdf0` | Six places decided whether a row is the TP feedback session, three different ways — `title === "Feedback"` in the timetable (x2), the trainee's rail and the assessor day (x2), `startsWith("feedback")` in the TP queue. They agree on today's data and disagree the moment a centre writes "Feedback - Group A". One shared predicate, the looser of the two. |
+| `f47316e9` | The grade form told a tutor "Admin Handbook 10.2: a fail-risk letter **must** be issued with **at least two assessed lessons** still to teach". 10.2, continuing onto printed page 31, says potential Fail candidates "**should** also be issued with a Fail letter... **ideally** with at least two **lessons** left to teach". Two overstatements in one line, and on a course past that point it read as a breached obligation rather than late guidance. `src/lib/letters/fail-risk.ts` had quoted it correctly all along, one file away from the screen that got it wrong. |
+| `a6e6edf8` | **The TinT asynchronous ceiling was measured against the wrong denominator.** TinT Handbook 2026 p7 puts both figures on one basis — "observation of 80% of a CELTA course... Asynchronous observation of up to 10% OF THE COURSE". `inputObservedPct` divided by the course's input sessions; `inputAsyncPct`, the line below it on the same card, divided by sessions observed so far. The error only runs one way: strictest at the start, when least is known. A TinT who had watched 10 of 33 with 2 async read 20% and tripped the alarm, where the course basis reads 6%. The demo's real breach still trips (5 of 33 = 15%). |
 
 ## Checked and NOT bugs — do not re-raise
 
@@ -61,12 +63,33 @@ into each uncompiled page — nothing to do with the code. It takes
   `/demo/centre-admin` (it mints `demo-centre-manager@...`). My URL, not a
   missing route.
 
+- **The grade form and the TinT card, walked after the first write-up**
+  (`f47316e9`, `a6e6edf8`) — see the table. Both were Cambridge wording or
+  arithmetic, neither visible to any automated check.
+- **Handbook 10.2 carries two unrelated rules** and both citations of it in
+  the app are right: the roster cites it for Stage 2 at the halfway point
+  ("after 3 hours' TP"), the grade form for the fail letter. It is
+  "Tutorials and records of progress", and it runs across printed pages
+  30-31.
+- **TinT: TP and feedback can never be asynchronous** (TinT Handbook p7,
+  same sentence as the 10% ceiling). Already correct — those rows pass
+  `showAsync={false}` and the heading says so. The server action would
+  still accept `asynchronous=on` for a TP event from a crafted POST; the
+  UI never offers it, so this is hardening, not a bug.
+- **Resource hub chips with no number** (Input sessions, Centre documents)
+  are deliberate: "A count appears only when there is something to count",
+  because every count reading 0 on a fresh course looked broken rather
+  than empty.
+
 ## Open
 
 - **`next/font/google` fails production builds intermittently.** One
   deploy this afternoon errored on "next/font/google queries have exactly
   one entry" fetching Newsreader in `src/app/layout.tsx`; another failed
-  the same way five hours earlier. Local builds pass every time. A
+  the same way five hours earlier, and a LOCAL build failed on it too when
+  the walk resumed — so it is not a Vercel-only flake. Two immediate
+  retries then passed, which is the signature of a network flake fetching
+  the faces at build time. A
   production deploy that depends on a font CDN at build time can fail for
   reasons that have nothing to do with the commit. Self-hosting the two
   faces would remove the dependency.
