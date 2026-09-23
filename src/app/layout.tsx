@@ -1,33 +1,59 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Karla, Instrument_Serif, Instrument_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const newsreader = Newsreader({
+// Self-hosted, not next/font/google. The Google loader fetches the faces at
+// BUILD time, so every production build depended on a network call that
+// sometimes did not answer: three builds failed on 23 Sep 2026 with
+// "next/font/google queries have exactly one entry" -- two on Vercel, one
+// locally -- and immediate retries passed each time. A deploy that can fail
+// for reasons unrelated to the commit is the thing being removed here.
+//
+// Files, licence and how to replace one: src/app/fonts/README.md. The weight
+// ranges and font-stretch below are Google's own @font-face descriptors for
+// the latin subset, copied rather than guessed, and each file is the variable
+// font where one exists -- so one file covers every weight the app asks for.
+//
+// The CSS variable names are unchanged, which is the whole contract with
+// globals.css and the Wordmark; nothing downstream knows where the bytes come
+// from.
+const newsreader = localFont({
+  src: "./fonts/newsreader.woff2",
   variable: "--font-newsreader",
-  subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: "200 800",
+  style: "normal",
+  display: "swap",
 });
 
-const karla = Karla({
+const karla = localFont({
+  src: "./fonts/karla.woff2",
   variable: "--font-karla",
-  subsets: ["latin"],
+  weight: "200 800",
+  style: "normal",
+  display: "swap",
 });
 
 // Logo-only typefaces (Ramy's brand handoff) -- deliberately not the app's
 // general font-serif/font-sans (Newsreader/Karla stay everywhere else).
 // Scoped to the Wordmark component alone via these CSS variables so the
 // mark is pixel-accurate to the handoff without re-typesetting the app.
-const instrumentSerif = Instrument_Serif({
+const instrumentSerif = localFont({
+  src: "./fonts/instrument-serif-italic.woff2",
   variable: "--font-instrument-serif",
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["italic"],
+  weight: "400",
+  // Instrument Serif is only ever used italic here, and the file IS the
+  // italic cut -- declaring it normal would let the browser synthesise a
+  // second, slanted-again italic on top of it.
+  style: "italic",
+  display: "swap",
 });
 
-const instrumentSans = Instrument_Sans({
+const instrumentSans = localFont({
+  src: "./fonts/instrument-sans.woff2",
   variable: "--font-instrument-sans",
-  subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: "400 700",
+  style: "normal",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
