@@ -10,6 +10,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
+import { signOut } from "@/app/login/actions";
 import { buildRailStatus, type RailStatus } from "@/lib/trainee-rail-status";
 import { getTraineeStreamDayOrNext, type TraineeDayView } from "@/lib/trainee-day";
 import { HeaderDayBar } from "@/app/portfolio/[traineeId]/header-day-bar";
@@ -535,6 +536,23 @@ export default async function PortfolioLayout({
                     courseDayProgress={courseDayProgress}
                     pagePalette={ownNotebook ? pagePalette : null}
                   />
+                  {/* Ramy, 23 Sep 2026, the third shell with the same fault:
+                      signOut lived only in the centre and dashboard layouts,
+                      and a candidate is bounced off both -- so a candidate on a
+                      shared centre machine could not end their session at all.
+                      Their own view only: a tutor reading this page is in the
+                      trainer frame and has the door there, and an assessor
+                      holds a link rather than an account. */}
+                  {showTraineeNav && viewer ? (
+                    <form action={signOut} className="shrink-0">
+                      <button
+                        type="submit"
+                        className="cursor-pointer text-label font-semibold text-[oklch(88%_0.02_85)] transition-opacity hover:opacity-70"
+                      >
+                        Sign out
+                      </button>
+                    </form>
+                  ) : null}
                 </div>
               </div>
               {/* On a day with nothing timetabled the bar draws the NEXT day,
