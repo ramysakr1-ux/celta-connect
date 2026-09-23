@@ -2,7 +2,13 @@
 import { formatDate, formatDateTime } from "@/lib/format-date";
 
 import { useActionState } from "react";
-import { invitePlatformOwner, revokePlatformOwnerInvite, type PlatformAccessFormState } from "@/app/centre/settings/platform-access-actions";
+import {
+  invitePlatformOwner,
+  revokePlatformOwnerInvite,
+  grantAccessRequest,
+  declineAccessRequest,
+  type PlatformAccessFormState,
+} from "@/app/centre/settings/platform-access-actions";
 
 const initial: PlatformAccessFormState = { error: null };
 
@@ -11,6 +17,12 @@ export interface PlatformAccessRow {
   invitedAt: string;
   note: string | null;
   status: "active" | "revoked";
+}
+
+export interface AccessRequestRow {
+  id: string;
+  requestedAt: string;
+  note: string | null;
 }
 
 export interface AccessLogRow {
@@ -26,10 +38,13 @@ export interface AccessLogRow {
 // silent/backdoor viewing."
 export function PlatformAccessTab({
   invite,
+  request,
   accessLog,
   timeZone,
 }: {
   invite: PlatformAccessRow | null;
+  /** An unanswered request to be let in (migration 0310), if there is one. */
+  request: AccessRequestRow | null;
   accessLog: AccessLogRow[];
   /** The centre's zone: every timestamp here is an instant, written the way a person says it. */
   timeZone: string;
@@ -45,6 +60,37 @@ export function PlatformAccessTab({
           logged here, permanently.
         </p>
       </div>
+
+      {/* The question comes before the state it would change. Connect's owner
+          can ask to be let in now (23 Sep 2026); the answer stays here, and
+          granting writes exactly the standing invite below, so a visit made
+          under it is logged the same way. */}
+      {request && !invite ? (
+        <div className="sheet flex items-start justify-between gap-4">
+          <div>
+            <p className="text-body font-medium text-ink">Connect has asked to be let in</p>
+            <p className="mt-1 text-label text-muted">
+              Asked {formatDate(request.requestedAt, timeZone, { year: "numeric" })}
+              {request.note ? ` — ${request.note}` : ""}. Saying yes gives standing access until you revoke it, and every visit is
+              logged below.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            <form action={declineAccessRequest}>
+              <input type="hidden" name="request_id" value={request.id} />
+              <button type="submit" className="cursor-pointer text-label text-muted hover:underline">
+                No
+              </button>
+            </form>
+            <form action={grantAccessRequest}>
+              <input type="hidden" name="request_id" value={request.id} />
+              <button type="submit" className="cursor-pointer rounded-full bg-primary px-3.5 py-1.5 text-label font-bold text-primary-foreground">
+                Let them in
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : null}
 
       {invite ? (
         <div className="sheet flex items-start justify-between gap-4">

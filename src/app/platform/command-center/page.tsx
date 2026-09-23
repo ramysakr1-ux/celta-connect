@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { getPulseStripStats } from "@/app/platform/command-center/pulse-strip-data";
 import { PulseStrip } from "@/app/platform/command-center/pulse-strip";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requestCentreAccess } from "@/app/platform/actions";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatCurrency } from "@/lib/money-by-currency";
 import { formatCalendarDate } from "@/lib/format-date";
@@ -98,6 +99,36 @@ export default async function CommandCenterOverviewPage() {
   for (const t of trainees ?? []) {
     traineeCountByCenterId.set(t.center_id, (traineeCountByCenterId.get(t.center_id) ?? 0) + 1);
   }
+
+  // How MUCH, for centres that have not let us in -- counts carry no names.
+  // This is the whole of what a centre discloses without an invite, and the
+  // table below is built so there is nowhere for a name to leak into.
+  const courseCountByCenterId = new Map<string, number>();
+  const runningCountByCenterId = new Map<string, number>();
+  const finishedCountByCenterId = new Map<string, number>();
+  for (const c of coursesList) {
+    const today = todayByCenterId.get(c.center_id) ?? toLocalIso(now, DEFAULT_TIMEZONE);
+    courseCountByCenterId.set(c.center_id, (courseCountByCenterId.get(c.center_id) ?? 0) + 1);
+    if (c.start_date <= today && c.end_date >= today) {
+      runningCountByCenterId.set(c.center_id, (runningCountByCenterId.get(c.center_id) ?? 0) + 1);
+    } else if (c.end_date < today) {
+      finishedCountByCenterId.set(c.center_id, (finishedCountByCenterId.get(c.center_id) ?? 0) + 1);
+    }
+  }
+
+  // Centres that have already been asked, so the door reads "Asked" rather
+  // than inviting a second identical question.
+  const { data: openRequests } = await admin
+    .from("platform_access_requests")
+    .select("center_id")
+    .is("resolved_at", null);
+  const askedCenterIds = new Set((openRequests ?? []).map((r) => r.center_id));
+
+  // Yours first -- the ones you can act on -- then everywhere else.
+  const myCentres = centersList.filter((c) => accessibleCenterIds.has(c.id));
+  const otherCentres = centersList.filter((c) => !accessibleCenterIds.has(c.id));
+  const otherCourseCount = otherCentres.reduce((n, c) => n + (courseCountByCenterId.get(c.id) ?? 0), 0);
+  const otherRunningCount = otherCentres.reduce((n, c) => n + (runningCountByCenterId.get(c.id) ?? 0), 0);
 
   const centerNameById = new Map(centersList.map((c) => [c.id, c.name]));
   const myCourses = (tutorLinks ?? [])
@@ -229,6 +260,13 @@ export default async function CommandCenterOverviewPage() {
               </Link>
             </div>
             <div>
+              {/* Yours, then everywhere else. One flat list named every
+                  centre's running course, including centres whose own row two
+                  cells along said "No access" -- so the table broke the
+                  promise its own footer made (walked 23 Sep 2026). The split
+                  makes the rule structural: a course name can only be rendered
+                  in the first group, because the second group's row has
+                  nowhere to put one. */}
               <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-rule-gold">
                 {["Centre", "Active course", "Trainees", ""].map((h) => (
                   <div key={h} className="px-5 py-4 text-micro font-bold uppercase tracking-[0.08em] text-muted">
@@ -236,23 +274,14 @@ export default async function CommandCenterOverviewPage() {
                   </div>
                 ))}
               </div>
-              {/* The rule belongs to the ROW, not to the four cells. Each cell
-                  used to carry its own border-b while the row was
-                  items-center, so a cell only as tall as its text drew its
-                  border higher than the cell holding a pill: one rule
-                  rendering as four staggered segments. Ramy, 3 Sep 2026: "the
-                  lines are broken... I just don't like looking at the centre
-                  cards." last:border-b-0 because the footer below draws its
-                  own border-t, and the two together doubled the rule at the
-                  bottom of the table. */}
-              {centersList.map((c) => {
-                const access = ownedCenterIds.has(c.id) ? "Owner" : invitedByCenterId.has(c.id) ? "Invited" : null;
+              {/* The rule belongs to the ROW, not to the four cells (Ramy,
+                  3 Sep 2026: "the lines are broken"). */}
+              {myCentres.map((c) => {
+                const access = ownedCenterIds.has(c.id) ? "Owner" : "Invited";
                 const running = runningCourseByCenterId.get(c.id) ?? false;
+                const finished = finishedCountByCenterId.get(c.id) ?? 0;
                 return (
-                  <div
-                    key={c.id}
-                    className="hover-ring grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
-                  >
+                  <div key={c.id} className="hover-ring grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft">
                     <div className="px-5 py-[15px] text-body font-semibold text-ink">
                       {c.name}
                       {c.is_demo ? <span className="ml-2 text-label font-normal text-muted">(demo)</span> : null}
@@ -260,34 +289,70 @@ export default async function CommandCenterOverviewPage() {
                     <div className="px-5 py-[15px]">
                       <span
                         className={`inline-block rounded-full px-[11px] py-1 text-label font-bold ${
- running ? "bg-status-on-track-bg text-status-on-track-text" : "bg-surface-muted text-muted"
+                          running ? "bg-status-on-track-bg text-status-on-track-text" : "bg-surface-muted text-muted"
                         }`}
                       >
-                        {running ? (courseLabelByCenterId.get(c.id) ?? "Active course now") : "No active course"}
+                        {running ? (courseLabelByCenterId.get(c.id) ?? "Active course now") : "Nothing running"}
                       </span>
+                      {finished > 0 ? <span className="ml-2 text-label text-muted">{finished} finished</span> : null}
                     </div>
-                    <div className="px-5 py-[15px] text-body text-ink">
-                      {access && traineeCountByCenterId.has(c.id) ? traineeCountByCenterId.get(c.id) : "—"}
-                    </div>
+                    <div className="px-5 py-[15px] text-body tabular-nums text-ink">{traineeCountByCenterId.get(c.id) ?? "—"}</div>
                     <div className="px-5 py-[15px] text-right">
-                      {access ? (
-                        <>
-                          <span className={`mr-3 text-label font-bold ${access === "Owner" ? "text-primary" : "text-muted"}`}>{access}</span>
-                          <Link href={access === "Owner" ? "/centre" : `/platform/command-center/enter/${c.id}`} className="text-label font-bold text-primary">
-                            Open
-                          </Link>
-                        </>
-                      ) : (
-                        <span className="text-label text-muted">No access</span>
-                      )}
+                      <span className={`mr-3 text-label font-bold ${access === "Owner" ? "text-primary" : "text-muted"}`}>{access}</span>
+                      <Link href={access === "Owner" ? "/centre" : `/platform/command-center/enter/${c.id}`} className="text-label font-bold text-primary">
+                        Open
+                      </Link>
                     </div>
                   </div>
                 );
               })}
+
+              {otherCentres.length > 0 ? (
+                <>
+                  <div className="flex items-baseline justify-between border-b border-rule-gold bg-surface-muted px-5 py-3">
+                    <span className="text-micro font-bold uppercase tracking-[0.08em] text-muted">Everywhere else on Connect</span>
+                    <span className="text-label tabular-nums text-muted">
+                      {otherCentres.length} centre{otherCentres.length === 1 ? "" : "s"} · {otherCourseCount} course
+                      {otherCourseCount === 1 ? "" : "s"} · {otherRunningCount} running
+                    </span>
+                  </div>
+                  {otherCentres.map((c) => {
+                    const courses = courseCountByCenterId.get(c.id) ?? 0;
+                    const running = runningCountByCenterId.get(c.id) ?? 0;
+                    const asked = askedCenterIds.has(c.id);
+                    return (
+                      <div key={c.id} className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0">
+                        <div className="px-5 py-[15px] text-body font-semibold text-ink">
+                          {c.name}
+                          {c.is_demo ? <span className="ml-2 text-label font-normal text-muted">(demo)</span> : null}
+                        </div>
+                        <div className="px-5 py-[15px] text-body tabular-nums text-muted">
+                          {courses === 0 ? "No courses" : `${courses} course${courses === 1 ? "" : "s"}`}
+                        </div>
+                        <div className="px-5 py-[15px] text-body tabular-nums text-muted">{running > 0 ? `${running} running` : "—"}</div>
+                        <div className="px-5 py-[15px] text-right">
+                          {asked ? (
+                            <span className="text-label text-muted" title="Asked — they have not answered yet">
+                              Asked
+                            </span>
+                          ) : (
+                            <form action={requestCentreAccess} className="inline">
+                              <input type="hidden" name="center_id" value={c.id} />
+                              <button type="submit" className="cursor-pointer text-label font-bold text-primary hover:underline">
+                                Ask to be let in
+                              </button>
+                            </form>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : null}
             </div>
             <div className="border-t border-rule-gold px-5 py-4 text-label text-muted">
-              Owner access is disclosed to the centre on their side. Centres you haven&apos;t been invited into show only what they&apos;ve chosen to make
-              visible — no silent viewing.
+              Counts, not contents. You can see how much is happening at any centre on Connect; reading a centre&apos;s own work needs their
+              invitation, and every visit under it is logged on their side. Nothing here is read silently.
             </div>
           </div>
 

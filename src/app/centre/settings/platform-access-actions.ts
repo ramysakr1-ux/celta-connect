@@ -66,3 +66,62 @@ export async function revokePlatformOwnerInvite(formData: FormData): Promise<voi
 
   revalidatePath("/centre/settings");
 }
+
+/**
+ * Answer a request from Connect's platform owner to be let in.
+ *
+ * Migration 0310 gave the owner a way to ASK; this is the half that matters,
+ * because the answer stays the centre's. Granting writes the same standing
+ * invite the centre could always have written by hand, so every visit made
+ * under it is logged on this page exactly as before. Declining closes the
+ * question and leaves nothing behind.
+ */
+async function answerAccessRequest(formData: FormData, outcome: "granted" | "declined"): Promise<void> {
+  const session = await getCurrentProfile();
+  if (!session?.profile) return;
+  const requestId = formData.get("request_id");
+  if (typeof requestId !== "string") return;
+
+  const admin = createAdminClient();
+  // Whose request is this? Read the centre off the ROW and check the
+  // capability there -- the same fault revokePlatformOwnerInvite above had,
+  // where a manager at one centre could answer for another (walked 15 Sep).
+  const { data: request } = await admin
+    .from("platform_access_requests")
+    .select("id, center_id, resolved_at")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (!request || request.resolved_at) return;
+  if (!(await canAtCentre(session.profile, "centre.settings.edit", request.center_id))) return;
+
+  if (outcome === "granted") {
+    const { data: existing } = await admin
+      .from("platform_owner_invites")
+      .select("id")
+      .eq("center_id", request.center_id)
+      .is("revoked_at", null)
+      .maybeSingle();
+    if (!existing) {
+      await admin.from("platform_owner_invites").insert({
+        center_id: request.center_id,
+        invited_by: session.profile.id,
+        note: "In answer to a request from Connect",
+      });
+    }
+  }
+
+  await admin
+    .from("platform_access_requests")
+    .update({ resolved_at: new Date().toISOString(), resolved_by: session.profile.id, outcome })
+    .eq("id", request.id);
+
+  revalidatePath("/centre/settings");
+}
+
+export async function grantAccessRequest(formData: FormData): Promise<void> {
+  await answerAccessRequest(formData, "granted");
+}
+
+export async function declineAccessRequest(formData: FormData): Promise<void> {
+  await answerAccessRequest(formData, "declined");
+}

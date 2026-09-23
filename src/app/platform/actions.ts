@@ -82,3 +82,51 @@ export async function changeUserRole(_prev: ChangeRoleState, formData: FormData)
   revalidatePath("/platform/command-center");
   return { notice: `${target.full_name} is now ${role}.` };
 }
+
+/**
+ * Ask a centre to let the platform owner in.
+ *
+ * The other direction of migration 0208's invite, which only a centre could
+ * ever start. Without this the command centre said "No access" beside a centre
+ * and stopped, so arranging maintenance access meant leaving Connect and
+ * emailing somebody (Ramy, 23 Sep 2026: "ask to be let in is good, build it").
+ *
+ * It grants nothing. It writes a question the centre answers on their own
+ * Connect access settings, and answering it yes is still their act.
+ */
+export async function requestCentreAccess(formData: FormData): Promise<void> {
+  const profile = await requireRole("platform_owner");
+  const centerId = String(formData.get("center_id") ?? "");
+  if (!centerId) return;
+
+  const admin = createAdminClient();
+
+  // Already in? Then there is nothing to ask for, and the row would sit
+  // unanswered on their settings for ever.
+  const { data: invite } = await admin
+    .from("platform_owner_invites")
+    .select("id")
+    .eq("center_id", centerId)
+    .is("revoked_at", null)
+    .maybeSingle();
+  if (invite) return;
+
+  // One open question per centre. The partial unique index enforces this too;
+  // this is the friendly half, so a second click is a no-op rather than an
+  // error the owner has to read.
+  const { data: open } = await admin
+    .from("platform_access_requests")
+    .select("id")
+    .eq("center_id", centerId)
+    .is("resolved_at", null)
+    .maybeSingle();
+  if (open) return;
+
+  await admin.from("platform_access_requests").insert({
+    center_id: centerId,
+    requested_by: profile.id,
+    note: String(formData.get("note") ?? "").trim() || null,
+  });
+
+  revalidatePath("/platform/command-center");
+}

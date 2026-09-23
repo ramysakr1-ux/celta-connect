@@ -3306,6 +3306,23 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["platform_demo_login_links"]["Row"]>;
         Relationships: [];
       };
+      platform_access_requests: {
+        Row: {
+          id: string;
+          center_id: string;
+          requested_by: string | null;
+          requested_at: string;
+          note: string | null;
+          resolved_at: string | null;
+          resolved_by: string | null;
+          outcome: "granted" | "declined" | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_access_requests"]["Row"]> & {
+          center_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_access_requests"]["Row"]>;
+        Relationships: [];
+      };
       platform_owner_invites: {
         Row: {
           id: string;

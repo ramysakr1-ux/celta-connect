@@ -13,7 +13,7 @@ import { CentreProfileReadOnly } from "@/app/centre/settings/profile-read-only";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
-import { PlatformAccessTab, type PlatformAccessRow, type AccessLogRow } from "@/app/centre/settings/platform-access-tab";
+import { PlatformAccessTab, type PlatformAccessRow, type AccessLogRow, type AccessRequestRow } from "@/app/centre/settings/platform-access-tab";
 import { ProviderList } from "@/app/centre/payments/provider-list";
 import { MoneyPanels } from "@/app/centre/payments/money-panels";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
@@ -60,6 +60,7 @@ export default async function CentreSettingsPage({
     { data: customRoles },
     { data: platformInvite },
     { data: platformAccessLog },
+    { data: accessRequest },
   ] = await Promise.all([
     admin
       .from("centers")
@@ -95,6 +96,8 @@ export default async function CentreSettingsPage({
     admin.from("platform_owner_invites").select("id, invited_at, note, revoked_at").eq("center_id", centerId).order("invited_at", { ascending: false }).limit(1).maybeSingle(),
     // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("platform_owner_access_log").select("id, accessed_at, page").eq("center_id", centerId).order("accessed_at", { ascending: false }).limit(50),
+    // single-centre: the unanswered request to be let in, if Connect has asked (migration 0310)
+    admin.from("platform_access_requests").select("id, requested_at, note").eq("center_id", centerId).is("resolved_at", null).maybeSingle(),
   ]);
 
   if (!center) redirect("/centre");
@@ -154,6 +157,9 @@ export default async function CentreSettingsPage({
       ? { id: platformInvite.id, invitedAt: platformInvite.invited_at, note: platformInvite.note, status: "active" }
       : null;
   const platformAccessLogRows: AccessLogRow[] = (platformAccessLog ?? []).map((a) => ({ id: a.id, accessedAt: a.accessed_at, page: a.page }));
+  const accessRequestRow: AccessRequestRow | null = accessRequest
+    ? { id: accessRequest.id, requestedAt: accessRequest.requested_at, note: accessRequest.note }
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -256,7 +262,7 @@ export default async function CentreSettingsPage({
           />
         }
         support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} timeZone={center.time_zone} />}
-        platform={<PlatformAccessTab invite={platformInviteRow} accessLog={platformAccessLogRows} timeZone={center.time_zone} />}
+        platform={<PlatformAccessTab invite={platformInviteRow} request={accessRequestRow} accessLog={platformAccessLogRows} timeZone={center.time_zone} />}
       />
     </div>
   );
