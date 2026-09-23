@@ -83,16 +83,24 @@ into each uncompiled page — nothing to do with the code. It takes
 
 ## Open
 
-- **`next/font/google` fails production builds intermittently.** One
-  deploy this afternoon errored on "next/font/google queries have exactly
-  one entry" fetching Newsreader in `src/app/layout.tsx`; another failed
-  the same way five hours earlier, and a LOCAL build failed on it too when
-  the walk resumed — so it is not a Vercel-only flake. Two immediate
-  retries then passed, which is the signature of a network flake fetching
-  the faces at build time. A
-  production deploy that depends on a font CDN at build time can fail for
-  reasons that have nothing to do with the commit. Self-hosting the two
-  faces would remove the dependency.
+- ~~**`next/font/google` fails production builds intermittently.**~~
+  **CLOSED `aac33040` — the four faces are self-hosted.** The Google loader
+  fetches them at BUILD time, so every production build depended on a
+  network call that sometimes did not answer: three failures today, two on
+  Vercel and one locally, each followed by a passing retry. Downloaded as
+  the latin subset only (matching the `subsets: ["latin"]` already asked
+  for) and as the variable font where one exists, so one file covers every
+  weight: newsreader 132KB, instrument-sans 57KB, karla 32KB,
+  instrument-serif-italic 16KB. The weight ranges and `font-stretch` are
+  Google's own descriptors read from the css2 API, not guessed, and
+  Instrument Serif is declared **italic** because the file is the italic
+  cut — calling it normal lets the browser synthesise a second slant.
+  The CSS variable names are untouched, which is the whole contract with
+  globals.css and the Wordmark. Verified live: all four register with the
+  right ranges, the wordmark still paints Instrument Serif italic 400, and
+  **zero** `fonts.gstatic.com` / `fonts.googleapis.com` references survive
+  in the build output or on the page. All four are SIL OFL 1.1; licence and
+  copyright lines are in `src/app/fonts/`.
 - **Feedback sessions are still identified by title.** The type column
   cannot answer it — "Feedback" and "Written feedback only" are both
   `supervised_session`. A dedicated type is the real fix, as migration
