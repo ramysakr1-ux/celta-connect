@@ -101,11 +101,35 @@ into each uncompiled page — nothing to do with the code. It takes
   **zero** `fonts.gstatic.com` / `fonts.googleapis.com` references survive
   in the build output or on the page. All four are SIL OFL 1.1; licence and
   copyright lines are in `src/app/fonts/`.
-- **Feedback sessions are still identified by title.** The type column
-  cannot answer it — "Feedback" and "Written feedback only" are both
-  `supervised_session`. A dedicated type is the real fix, as migration
-  0296 did for the unassessed teaching slot. `8453fdf0` only makes every
-  room ask the same question.
+- ~~**Feedback sessions are still identified by title.**~~
+  **CLOSED — migration `0311` gave it a type** (`8a035f83`, restoring
+  `0fe15372`). Four shapes were in the table and all four real: `Feedback /
+  Self-evaluations lead`, `Feedback / Written feedback only` from the
+  generator, `Written feedback only / Final TP, no live session` from the
+  seed, and `Giving feedback on tasks` — an INPUT session about feedback
+  that must never match. `includes` caught the fourth, `startsWith` missed
+  the third. Worse, generator and seed disagreed, so the assessor's
+  visit-day note fired on a seeded course and stayed silent on a generated
+  one — on the last TP day, which is where a visit lands.
+  Two facts, two columns: `type = 'feedback'` and `feedback_written_only`.
+  A written-only day keeps the feedback type deliberately — the candidate
+  must still see it; what differs is that nobody can sit in it — so
+  `isFeedbackSession` asks whether it exists and
+  `isObservableFeedbackSession` whether anyone can attend, which is what
+  Handbook 14.2 wants. The note now names which of the two problems it
+  found.
+  **The lesson that cost the most here: a migration reporting the right
+  numbers is not proof it ran on the right database.** Two runs from the
+  SQL editor returned `32 4 0 1` against a database that was not this one.
+  `supabase_migrations.schema_migrations` tracks only to 0264 while the
+  repo is at 0311 — everything since has been applied by hand — so that
+  table cannot tell you what has landed either. Check over a direct
+  Postgres connection (`information_schema.columns`, `pg_constraint`), not
+  through PostgREST, whose stale schema cache looks identical to a
+  migration that never ran. Code that needs a migration must not be pushed
+  until that check passes; this one was, and was reverted within minutes
+  because `timetable-skeleton` inserting `type='feedback'` against the old
+  CHECK would have broken timetable generation for every new course.
 - **The walkthrough course still has `accepting_applications` set** on a
   course that ended 18 Sept. Harmless now the guard is in, and it is
   Ramy's own private course, so the flag is his to clear.
