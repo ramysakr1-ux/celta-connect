@@ -84,6 +84,12 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <div style={{ fontSize: "var(--text-label)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>Command center</div>
           {/* Landing only: this layout wraps people, money, centres, access
               and the enter screens too (Ramy, 16 Sep 2026). */}
+          {/* The only credit in this shell. A footer one used to sit at the
+              foot of the page as well -- Ramy, 2 Sep 2026: "I don't need my
+              credit to be there ... at least put it at the bottom" -- from
+              before this header credit existed. With both, it read twice.
+              Ramy, 23 Sep 2026: "I don't need the credit at the bottom of
+              Command Center. We already have it on top." */}
           <HeaderCredit onDark landingPath="/platform/command-center" />
         </div>
         <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
@@ -141,14 +147,6 @@ export default async function CommandCenterLayout({ children }: { children: Reac
         {children}
       </div>
 
-      {/* Ramy, 2 Sep 2026: "I don't need my credit to be there. It's my
-          command center. I built it. At least put it at the bottom or
-          something. Doesn't have to be in my face." */}
-      <div style={{ borderTop: `1px solid ${BORDER}`, padding: "12px 40px", display: "flex", justifyContent: "flex-end" }}>
-        <span style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: "var(--text-label)", color: "oklch(64% 0.014 72)" }}>
-          designed and built by Ramy
-        </span>
-      </div>
     </div>
   );
 }
