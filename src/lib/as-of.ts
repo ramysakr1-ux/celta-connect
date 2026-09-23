@@ -56,7 +56,22 @@ export function assignmentAsOf<
     if ("final_grade" in out) out.final_grade = null;
   };
   const firstMarked = a.first_status === "approved" || a.first_status === "resubmission_required";
-  const firstMarkStamp = (a.first_outcome_signed_at as string | null | undefined) ?? (a.first_marks_saved_at as string | null | undefined) ?? null;
+  // When the TUTOR marked it, which is first_marks_saved_at.
+  //
+  // This used to prefer first_outcome_signed_at, which is not a marking stamp
+  // at all: it is the CANDIDATE's acknowledgement of the outcome -- the eighth
+  // of the CELTA 5's eight signatures, signed in their own name, the morning
+  // after the tutor released the work. Preferring it meant a marked assignment
+  // read as "awaiting marking" until the candidate signed for it, to the
+  // candidate AND to the tutor's board. On the demo that was 5 of the 6 LRTs
+  // marked by day 18, while an announcement in the same page told the
+  // candidate their feedback was ready (walk, 23 Sep 2026).
+  //
+  // Backwards, too: a candidate has to SEE the mark in order to sign it, so
+  // gating the mark on the signature hides the thing the signature is for.
+  // The signature is kept as a fallback for a row marked before
+  // first_marks_saved_at existed.
+  const firstMarkStamp = (a.first_marks_saved_at as string | null | undefined) ?? (a.first_outcome_signed_at as string | null | undefined) ?? null;
   if (a.first_submitted_at && !onOrBefore(a.first_submitted_at, today)) {
     clearRound("first", true);
     clearRound("resubmission", true);
@@ -67,7 +82,8 @@ export function assignmentAsOf<
     clearRound("resubmission", true);
     return out as A;
   }
-  const resubMarkStamp = (a.resubmission_outcome_signed_at as string | null | undefined) ?? (a.resubmission_marks_saved_at as string | null | undefined) ?? null;
+  // Same inversion, same fix, for the resubmission round.
+  const resubMarkStamp = (a.resubmission_marks_saved_at as string | null | undefined) ?? (a.resubmission_outcome_signed_at as string | null | undefined) ?? null;
   if (a.resubmission_submitted_at && !onOrBefore(a.resubmission_submitted_at, today)) {
     clearRound("resubmission", true);
   } else if (a.resubmission_status === "approved" && resubMarkStamp && !onOrBefore(resubMarkStamp, today)) {
