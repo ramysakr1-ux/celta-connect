@@ -140,7 +140,15 @@ export default async function TrainerRosterPage() {
   // Array.prototype.sort is stable, so the alphabetical order from
   // fetchRosterRows survives inside each half.
   const sortedRows = [...rows].sort((a, b) => Number(b.atRiskReasons.length > 0) - Number(a.atRiskReasons.length > 0));
-  const atRiskCount = rows.filter((r) => r.atRiskReasons.length > 0).length;
+  // Withdrawn and deferred candidates are excluded, exactly as roster-table's
+  // own summary tiles exclude them. They were not, so the heading read
+  // "6 of 12 candidates · Group B · 3 at risk" above a tile saying "2 At risk"
+  // and a table showing two flags -- the third was Marek Kowalski, who left in
+  // week 2, still counted at risk of failing a course he is no longer on
+  // (walk, 23 Sep 2026). A candidate whose record is closed cannot be at risk.
+  const atRiskCount = rows.filter(
+    (r) => r.atRiskReasons.length > 0 && !isCourseStatusReadOnly(r.courseStatus),
+  ).length;
 
   // for-claude-code-course-admin.md's "Course workspace -- invitations and
   // roster": already live for Course Admin (dashboard/admin/courses/[id]);
