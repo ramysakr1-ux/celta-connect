@@ -1,6 +1,7 @@
 "use server";
 
 import { demoOr } from "@/lib/demo-guard";
+import { ASSESSOR_LINK_BACKSTOP_DAYS, assessorLinkBackstop } from "@/lib/assessor-link";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -41,16 +42,8 @@ export async function toggleAssessorSelection(formData: FormData): Promise<void>
 // It used to die two weeks after the course end -- the report window
 // Administration Handbook June 2025 §15 gives an assessor. That window is
 // about when the REPORT is due, not when access should stop, and the pack is
-// gone from Connect at close-out anyway: wipe.ts deletes every
-// course_access_tokens row for the course along with the rest of the working
-// data. Ramy, 18 Sep 2026: "the link could expire with the migration of the
-// files or could expire with the termination of the course files on Connect...
-// they can always access the centre" -- the centre keeps the pack as PDFs, so
-// nothing is lost when this link goes.
-//
-// So the wipe is the real end, and this is only a backstop for a course whose
-// close-out never runs, where a token would otherwise have no end at all.
-const ASSESSOR_LINK_BACKSTOP_DAYS = 90;
+// The rule, and why it is a backstop rather than the real end, is in
+// @/lib/assessor-link -- shared with the pack header, which states it.
 
 export interface AssessorTokenResult {
   token: string | null;
@@ -96,8 +89,9 @@ export async function getOrCreateAssessorToken(): Promise<AssessorTokenResult> {
   if (!course) return { token: null, error: "Could not find your course.", readinessIssues: null };
 
   // The backstop date only. In practice close-out ends this link earlier, by
-  // deleting the token with the rest of the course's working data -- see the
-  // constant above.
+  // deleting the token with the rest of the course's working data -- see
+  // @/lib/assessor-link. Applied to the end of the course DAY in the centre's
+  // own zone, which is why this does not use assessorLinkBackstop.
   const expiresAt = new Date(
     new Date(endOfCourseDay(course.end_date, (await getCachedCenter(trainer.center_id))?.time_zone)).getTime() +
       ASSESSOR_LINK_BACKSTOP_DAYS * 86400000
@@ -162,7 +156,7 @@ export async function sendAssessorInviteEmail(
   // the honest answer is a event rather than a date: the centre exports the
   // course to its own records and the working copy on Connect is deleted.
   const accessEndsLabel = `When the centre's records are exported and this course is cleared from Connect \u2014 at the latest ${formatCalendarDateObject(
-    new Date(new Date(`${course.end_date}T00:00:00`).getTime() + ASSESSOR_LINK_BACKSTOP_DAYS * 86400000),
+    assessorLinkBackstop(course.end_date),
     { day: "numeric", month: "short" }
   )}`;
 

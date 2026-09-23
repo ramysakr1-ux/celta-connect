@@ -10,7 +10,8 @@ import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { formatCalendarDate, formatDate } from "@/lib/format-date";
+import { formatCalendarDate, formatCalendarDateObject, formatDate } from "@/lib/format-date";
+import { assessorLinkBackstop } from "@/lib/assessor-link";
 import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
@@ -520,7 +521,15 @@ export default async function AssessorPage({
           </a>
         ) : accessToken ? (
           <span style={{ fontSize: "var(--text-label)", color: "oklch(76% 0.02 80)", flex: "none" }}>
-            Link expires {formatDate(accessToken.expires_at, timeZone, { year: "numeric" })}
+            {/* The honest answer is an event, not a date: close-out deletes this
+                token with the rest of the course's working data, and the centre
+                keeps the pack as PDFs. Printing the token's own expires_at made
+                the demo say "Link expires 18 Sept 2027" -- a year out from
+                whenever the token was minted, contradicting the rule this very
+                page cites. Same wording the invitation email uses. */}
+            {course.end_date
+              ? `Access ends at close-out \u2014 at the latest ${formatCalendarDateObject(assessorLinkBackstop(course.end_date), { day: "numeric", month: "short", year: "numeric" })}`
+              : `Link expires ${formatDate(accessToken.expires_at, timeZone, { year: "numeric" })}`}
           </span>
         ) : null}
       </div>
