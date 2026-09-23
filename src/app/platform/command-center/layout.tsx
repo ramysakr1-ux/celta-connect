@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { InstallPrompt } from "@/components/install-prompt";
 import { HeaderCredit } from "@/components/designer-credit";
+import { signOut } from "@/app/login/actions";
 import { HeaderClock } from "@/components/header-clock";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -99,6 +100,20 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <InstallPrompt variant="pill" />
           <ProductSwitcher connectHref={connectHref} />
           <CreateMenu />
+          {/* Ramy, 23 Sep 2026: "I don't have a logged in page anymore. I just
+              go straight to it ... How can I sign out?" There was no way out
+              from here at all. signOut was rendered only in the centre and
+              dashboard layouts, and the platform owner's own home is this
+              shell -- celtaconnect.com lands them here, so they could never
+              reach either of those doors without editing the URL. */}
+          <form action={signOut}>
+            <button
+              type="submit"
+              style={{ fontSize: "var(--text-meta)", color: MUTED, background: "none", border: 0, padding: 0, cursor: "pointer" }}
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
 

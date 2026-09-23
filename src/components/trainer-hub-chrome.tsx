@@ -23,6 +23,7 @@ import { getCourseTutorRole } from "@/lib/course-tutor-role";
 import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP, HUB_TEAL } from "@/lib/hub-accent";
 import { CentreTimeZoneProvider } from "@/components/centre-time-zone";
 import { InstallPrompt } from "@/components/install-prompt";
+import { signOut } from "@/app/login/actions";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -343,6 +344,23 @@ export async function TrainerHubChrome({
                 shapes, and took a name that says what it does. Two doors to
                 a one-card room, one of them vaguely labelled, was worse than
                 one door in the right place. */}
+            {/* Ramy, 23 Sep 2026, after the same fault on the command centre:
+                a tutor had no way out either. signOut was rendered only in the
+                centre and dashboard layouts, and a trainer is bounced away from
+                both -- so on a shared centre machine the only way to end a
+                session was to clear the cookie. Real staff only: an assessor or
+                a volunteer holds a link, not an account, and a demo visitor has
+                nothing of their own to sign out of. */}
+            {isRealStaff ? (
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="cursor-pointer text-label font-semibold text-muted transition-colors hover:text-ink"
+                >
+                  Sign out
+                </button>
+              </form>
+            ) : null}
           </div>
         </div>
       </header>
