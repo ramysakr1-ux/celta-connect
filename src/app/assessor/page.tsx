@@ -834,8 +834,18 @@ export default async function AssessorPage({
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                 <span style={{ fontSize: "var(--text-label)", color: MUTED }}>
                   {/* Explicit {" "} -- the plain source space after the
-                      expression was being dropped, rendering "12candidates". */}
-                  Showing {visibleCandidates.length} of {candidates.length}{" "}
+                      expression was being dropped, rendering "12candidates".
+
+                      The denominator is the ACTIVE count, because that is the
+                      pool the centre chose from: a withdrawn candidate was
+                      never a candidate for this visit. It read "4 of 12" four
+                      lines under a Handbook line reading "The centre has put 4
+                      of 11 forward" -- the same 4, counted two ways on one
+                      screen (walk, 23 Sep 2026). The full-cohort link keeps
+                      the 12: that view exists partly so the assessor can reach
+                      the withdrawn candidate's documentation, which 14.2 and
+                      14.1 both ask them to check. */}
+                  Showing {visibleCandidates.length} of {wantsFullCohort ? candidates.length : activeCandidateCount}{" "}
                   candidates -- the centre&apos;s selection for this visit.
                 </span>
                 <Link

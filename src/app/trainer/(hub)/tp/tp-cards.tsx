@@ -263,9 +263,9 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
           </span>
           {tomorrow.slots.map((s) => (
             <span key={s.traineeName} className="flex items-center gap-1.5 text-meta text-muted">
-              <span className="block size-1.5 rounded-full" style={{ background: s.planSubmitted ? "var(--color-ink)" : AMBER }} />
+              <span className="block size-1.5 rounded-full" style={{ background: s.withdrawn ? "var(--color-border)" : s.planSubmitted ? "var(--color-ink)" : AMBER }} />
               {s.start ? `${s.start} ` : ""}
-              {s.traineeName} · {s.planSubmitted ? "plan in" : `no plan yet, due ${s.planDueAt}`}
+              {s.withdrawn ? "No lesson -- this seat's candidate has withdrawn" : <>{s.traineeName} · {s.planSubmitted ? "plan in" : `no plan yet, due ${s.planDueAt}`}</>}
             </span>
           ))}
           <span className="ml-auto text-label text-muted">Same-day rule and slot lengths are centre settings.</span>

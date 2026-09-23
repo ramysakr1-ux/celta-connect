@@ -86,6 +86,9 @@ export interface TomorrowSlot {
   traineeName: string;
   planSubmitted: boolean;
   planDueAt: string | null;
+  /** Their record is closed, so nobody teaches this slot. The seat is still
+   *  shown rather than dropped -- see the note on the tomorrow block below. */
+  withdrawn: boolean;
 }
 
 export interface TomorrowLine {
@@ -401,18 +404,21 @@ export function buildTpQueue(input: {
         groupName: g.groupName,
         level: pointOf(planBy.get(`${ordered[0]?.traineeId}-${tpNext}`)).level,
         tutorName: g.tutorName,
-        // The slot time is dayEvents[i], so the index has to be taken while
-        // the rotation is still whole; a withdrawn candidate is dropped after
-        // that, or everyone behind them slides onto the wrong time.
-        slots: ordered
-          .map((m, i) => ({ m, start: dayEvents[i]?.event_time?.slice(0, 5) ?? null }))
-          .filter(({ m }) => !m.withdrawn)
-          .map(({ m, start }) => ({
-            start,
-            traineeName: m.fullName,
-            planSubmitted: Boolean(planBy.get(`${m.traineeId}-${tpNext}`)),
-            planDueAt: "09:00",
-          })),
+        // The seat of a withdrawn candidate is KEPT and marked, not dropped.
+        //
+        // It was dropped at first, which stopped the tutor being chased for a
+        // plan from someone who had left -- but it also left an unexplained
+        // hole in the morning. The assessor's own pack has always named that
+        // seat ("No lesson -- this seat's candidate has withdrawn"), and a
+        // tutor deserves the same answer rather than a gap they have to work
+        // out (walk, 23 Sep 2026).
+        slots: ordered.map((m, i) => ({
+          start: dayEvents[i]?.event_time?.slice(0, 5) ?? null,
+          traineeName: m.fullName,
+          planSubmitted: Boolean(planBy.get(`${m.traineeId}-${tpNext}`)),
+          planDueAt: "09:00",
+          withdrawn: Boolean(m.withdrawn),
+        })),
       };
     }
   }
