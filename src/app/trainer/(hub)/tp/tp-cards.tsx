@@ -241,9 +241,12 @@ export function TodayCard({ today, tomorrow }: { today: TodaySession | null; tom
                   <span className="text-meta font-bold tabular-nums text-ink">{today.feedbackSessionAt ?? "--"}</span>
                   <span className="text-micro tracking-[0.06em] text-muted uppercase">next</span>
                 </span>
-                <span className="truncate text-meta font-semibold text-ink">Feedback session</span>
+                <span className="truncate text-meta font-semibold text-ink">{today.feedbackSessionTitle ?? "Feedback session"}</span>
                 <span className="truncate text-meta text-muted">All three{today.room ? `, ${today.room}` : ""}</span>
-                <span className="truncate text-label text-muted">Reveal peer notes after</span>
+                {/* The timetable's own words. "Reveal peer notes after" is only
+                    true of a live session, and the last TP day's event says
+                    "Written feedback only". */}
+                <span className="truncate text-label text-muted">{today.feedbackSessionNote ?? "Reveal peer notes after"}</span>
               </div>
             </div>
           </div>

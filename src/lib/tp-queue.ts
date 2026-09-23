@@ -70,6 +70,13 @@ export interface TodaySession {
   observerNames: string[];
   peerTaskCriteria: string[];
   feedbackSessionAt: string | null;
+  /** The feedback event's own title and detail from the timetable. The card
+   *  used to assert "Feedback session / Reveal peer notes after" whatever the
+   *  timetable said, so on the last TP day it promised a live session and peer
+   *  notes against an event reading "Written feedback only" (walk, 23 Sep
+   *  2026). Today's page had it right; this tab did not. */
+  feedbackSessionTitle: string | null;
+  feedbackSessionNote: string | null;
   slots: TodaySlot[];
 }
 
@@ -370,6 +377,8 @@ export function buildTpQueue(input: {
         observerNames: (otherHalf?.members ?? []).filter((m) => !m.withdrawn).map((m) => m.fullName),
         peerTaskCriteria: input.peerTaskCriteria ?? [],
         feedbackSessionAt: feedbackEvent?.event_time?.slice(0, 5) ?? null,
+        feedbackSessionTitle: feedbackEvent?.title ?? null,
+        feedbackSessionNote: feedbackEvent?.detail ?? null,
         slots,
       };
     }
