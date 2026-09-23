@@ -130,6 +130,14 @@ into each uncompiled page — nothing to do with the code. It takes
   until that check passes; this one was, and was reverted within minutes
   because `timetable-skeleton` inserting `type='feedback'` against the old
   CHECK would have broken timetable generation for every new course.
-- **The walkthrough course still has `accepting_applications` set** on a
-  course that ended 18 Sept. Harmless now the guard is in, and it is
-  Ramy's own private course, so the flag is his to clear.
+- ~~**The walkthrough course still has `accepting_applications` set**~~
+  **CLOSED** — turned off on Ramy's instruction. No course that has ended
+  is flagged open any more.
+
+  It comes back on a re-clone: `clone-walkthrough-course.mjs` copies the
+  demo course row wholesale (`select("*")` then `remapRow`), and the demo
+  course is deliberately `accepting_applications: true`. Ramy: "leave it."
+  Harmless either way — the date guard keeps a finished course off
+  `/apply` whatever the flag says.
+
+**Nothing is open from this walk.**
