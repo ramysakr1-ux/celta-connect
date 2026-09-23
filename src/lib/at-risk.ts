@@ -4,7 +4,23 @@ export type AtRiskReason =
   | "back_to_back_fails"
   | "self_contradiction"
   | "missing_must_submit"
-  | "repeating_action_point";
+  | "repeating_action_point"
+  | "attendance_below_threshold";
+
+/**
+ * The centre's line, NOT Cambridge's -- Cambridge sets no percentage anywhere.
+ * CELTA 5 (July 2023) p9 states "100% attendance is expected", and the
+ * Administration Handbook June 2025 §7.5 says candidates "are expected to
+ * attend the whole course" and that absence "may jeopardise their chances of
+ * successfully meeting the assessment criteria", without ever naming a figure.
+ * The Handbook's only hard numbers are elsewhere: a candidate who has not
+ * completed the six hours' teaching practice, or who has incomplete written
+ * assignments, "can be considered for the award only in exceptional
+ * circumstances" (§7.5). So this threshold is a house rule for raising a flag
+ * early, and it lives here as one constant so the hub and the roster cannot
+ * drift apart on it.
+ */
+export const ATTENDANCE_AT_RISK_PCT = 80;
 
 export interface AtRiskFeedbackInput {
   tp_number: number;
@@ -29,9 +45,18 @@ const codesOf = (points: FeedbackPoint[]): string[] => points.flatMap((p) => p.c
 export function computeAtRiskReasons(
   feedback: AtRiskFeedbackInput[],
   assignments: AtRiskAssignmentInput[],
-  today: string
+  today: string,
+  /** Percent of expected hours attended so far. Omit where it is not known. */
+  attendancePct?: number | null
 ): AtRiskReason[] {
   const reasons = new Set<AtRiskReason>();
+
+  // Ramy, 23 Sep 2026: "attendance should make someone at risk." Until this,
+  // at-risk read only feedback and assignments, so a candidate below the
+  // threshold was counted On track on the roster while the hub flagged them.
+  if (typeof attendancePct === "number" && attendancePct < ATTENDANCE_AT_RISK_PCT) {
+    reasons.add("attendance_below_threshold");
+  }
 
   const submitted = feedback
     .filter((f) => f.submitted_at)
@@ -87,4 +112,5 @@ export const AT_RISK_LABELS: Record<AtRiskReason, string> = {
   self_contradiction: "Feedback marks the same criterion as both a strength and an action point",
   missing_must_submit: "Overdue assignment never submitted",
   repeating_action_point: "Same action point recurring across TPs",
+  attendance_below_threshold: `Attendance below ${ATTENDANCE_AT_RISK_PCT}%`,
 };

@@ -432,7 +432,8 @@ export async function fetchRosterRows(
     const atRiskReasons = computeAtRiskReasons(
       (feedbackRows ?? []).filter((f) => f.trainee_id === trainee.id),
       traineeAssignments,
-      today
+      today,
+      attendancePct
     );
 
     const traineeSupervised = (supervisedCompletions ?? []).filter((c) => c.trainee_id === trainee.id);

@@ -586,24 +586,22 @@ export default async function TodayPage() {
       badge: "AR",
       due: "Now",
       title: `At risk — ${r.name}`,
-      meta: r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join(" · "),
+      meta: r.atRiskReasons
+        .map((reason) =>
+          reason === "attendance_below_threshold"
+            ? `${AT_RISK_LABELS[reason]} — ${Math.round(r.attendancePct)}%`
+            : AT_RISK_LABELS[reason]
+        )
+        .join(" · "),
       href: `/portfolio/${r.id}`,
       destructive: true,
     });
   }
 
-  const atRisk = activeRows.filter((r) => r.attendancePct < 80);
-  for (const r of atRisk) {
-    alerts.push({
-      kind: "candidate",
-      badge: `${Math.round(r.attendancePct)}%`,
-      due: "Now",
-      title: `Attendance below 80% — ${r.name}`,
-      meta: `${r.attendancePct}%`,
-      href: `/portfolio/${r.id}`,
-      destructive: true,
-    });
-  }
+  // Attendance used to raise its own alert here. It is an at-risk reason now
+  // (Ramy, 23 Sep 2026), so the At risk alert above already carries it and a
+  // second one would name the same candidate twice on the same list. The
+  // percentage itself is not lost -- the At risk meta prints it.
 
   // Ramy, 5 Sep 2026: an ACT may post announcements to their own group.
   const canAnnounce = isMct || (scopedGroupIds?.size ?? 0) > 0;
@@ -625,8 +623,14 @@ export default async function TodayPage() {
     .filter((r) => inScope(r.id) && r.courseStatus === "active")
     .map((r) => {
       const reasons: { text: string; tone: "red" | "gold" }[] = [];
-      if (r.attendancePct < 80) reasons.push({ text: `Attendance ${Math.round(r.attendancePct)}% · below threshold`, tone: "red" });
-      if (r.atRiskReasons.length > 0) reasons.push({ text: r.atRiskReasons.map((x) => AT_RISK_LABELS[x]).join(" · "), tone: "red" });
+      // Attendance is inside atRiskReasons now, so it prints once, from there.
+      if (r.atRiskReasons.length > 0)
+        reasons.push({
+          text: r.atRiskReasons
+            .map((x) => (x === "attendance_below_threshold" ? `${AT_RISK_LABELS[x]} — ${Math.round(r.attendancePct)}%` : AT_RISK_LABELS[x]))
+            .join(" · "),
+          tone: "red",
+        });
       if (r.tpStagesBehind > 0) reasons.push({ text: `Behind — ${r.tpStagesBehind} TP stage${r.tpStagesBehind === 1 ? "" : "s"}`, tone: "gold" });
       return { id: r.id, name: r.name, reasons };
     })
