@@ -7,6 +7,7 @@ import { isSupportedTimeZone } from "@/lib/interview-time";
 import { inferCourseCommitmentsMode, buildCourseCommitments, courseCommitmentsToPlainText } from "@/lib/course-commitments";
 import { MARKETING_SOURCES, type MarketingSource } from "@/lib/marketing-source";
 import { transcribeAudio } from "@/lib/openai/transcribe";
+import { intakeHasFinished } from "@/lib/intake-window";
 
 // Public, unauthenticated, and every submission triggers a real AI triage
 // call plus a real email to an attacker-controlled address -- 5 per hour
@@ -74,12 +75,25 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   }
   await admin.from("apply_ip_attempts").insert({ ip_address: ip });
 
-  const { data: course } = await admin
-    .from("courses")
-    .select("id, name, center_id, accepting_applications, delivery_mode, start_date, end_date")
-    .eq("id", intakeCourseId)
-    .maybeSingle();
-  if (!course || course.center_id !== centerId || !course.accepting_applications) {
+  // Two independent lookups, so one round trip rather than two. The zone is
+  // the centre's, and it is needed to read a date-only end_date correctly.
+  const [{ data: course }, { data: centreZone }] = await Promise.all([
+    admin
+      .from("courses")
+      .select("id, name, center_id, accepting_applications, delivery_mode, start_date, end_date")
+      .eq("id", intakeCourseId)
+      .maybeSingle(),
+    admin.from("centers").select("time_zone").eq("id", centerId).maybeSingle(),
+  ]);
+  // The same two tests the dropdown applies, because the dropdown is not the
+  // only way in: /apply?course=<id> preselects an intake, so a stale link to a
+  // course that has since finished would otherwise submit against it.
+  if (
+    !course ||
+    course.center_id !== centerId ||
+    !course.accepting_applications ||
+    intakeHasFinished(course.end_date, centreZone?.time_zone)
+  ) {
     return { error: "That course isn't open for applications right now. Refresh and try again.", submitted: false };
   }
 

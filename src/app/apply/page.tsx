@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedRealCenter } from "@/lib/supabase/cached-queries";
 import { ApplicationForm } from "@/components/apply/application-form";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
+import { centreToday } from "@/lib/intake-window";
 
 // "The intake dropdown shows real availability... the number is always the
 // true one." Without this, Next.js statically prerenders the page at build
@@ -57,6 +58,11 @@ export default async function ApplyPage({
       .select("id, name, start_date, end_date, delivery_mode, application_cap")
       .eq("center_id", center.id)
       .eq("accepting_applications", true)
+      // ...and has not already finished. The flag alone let a course that
+      // ended on 18 Sept sit here on 23 Sept labelled "places available" --
+      // see src/lib/intake-window.ts. end_date is NOT NULL, so this needs no
+      // null arm.
+      .gte("end_date", centreToday(center.time_zone))
       .order("start_date", { ascending: true }),
     admin
       .from("application_writing_prompts")
