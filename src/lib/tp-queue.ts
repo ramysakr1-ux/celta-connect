@@ -105,6 +105,22 @@ export interface QueueMember {
   traineeId: string;
   fullName: string;
   baseSlot: number;
+  /**
+   * Withdrawn, deferred -- a candidate whose record is closed.
+   *
+   * They STAY in `members`. The rotation is computed from `baseSlot` against
+   * `members.length` (rotationPosition), so dropping one here would shift
+   * every remaining candidate's slot onto the wrong time -- and their own
+   * lessons already taught are still owed feedback, which the owed grid reads
+   * from `plans` by way of this list.
+   *
+   * What they are excluded from is anything still to come: they are not
+   * observing today's session and they are not teaching tomorrow. The demo
+   * had Marek Kowalski, who left in week 2, listed as an observer and
+   * scheduled for TP8 the next morning with "no plan yet, due 09:00"
+   * (walk, 23 Sep 2026).
+   */
+  withdrawn?: boolean;
 }
 
 export interface QueueGroup {
@@ -351,7 +367,7 @@ export function buildTpQueue(input: {
         groupName: g.groupName,
         level: pointOf(planBy.get(`${ordered[0]?.traineeId}-${tpNumber}`)).level,
         room: dayEvents[0]?.detail ?? null,
-        observerNames: (otherHalf?.members ?? []).map((m) => m.fullName),
+        observerNames: (otherHalf?.members ?? []).filter((m) => !m.withdrawn).map((m) => m.fullName),
         peerTaskCriteria: input.peerTaskCriteria ?? [],
         feedbackSessionAt: feedbackEvent?.event_time?.slice(0, 5) ?? null,
         slots,
@@ -375,15 +391,18 @@ export function buildTpQueue(input: {
         groupName: g.groupName,
         level: pointOf(planBy.get(`${ordered[0]?.traineeId}-${tpNext}`)).level,
         tutorName: g.tutorName,
-        slots: ordered.map((m, i) => {
-          const plan = planBy.get(`${m.traineeId}-${tpNext}`);
-          return {
-            start: dayEvents[i]?.event_time?.slice(0, 5) ?? null,
+        // The slot time is dayEvents[i], so the index has to be taken while
+        // the rotation is still whole; a withdrawn candidate is dropped after
+        // that, or everyone behind them slides onto the wrong time.
+        slots: ordered
+          .map((m, i) => ({ m, start: dayEvents[i]?.event_time?.slice(0, 5) ?? null }))
+          .filter(({ m }) => !m.withdrawn)
+          .map(({ m, start }) => ({
+            start,
             traineeName: m.fullName,
-            planSubmitted: Boolean(plan),
+            planSubmitted: Boolean(planBy.get(`${m.traineeId}-${tpNext}`)),
             planDueAt: "09:00",
-          };
-        }),
+          })),
       };
     }
   }

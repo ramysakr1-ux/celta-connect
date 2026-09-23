@@ -1,3 +1,4 @@
+import { isCourseStatusReadOnly } from "@/lib/course-status";
 import { demoNow } from "@/lib/demo-clock";
 import Link from "next/link";
 import { hubReadClient } from "@/lib/supabase/hub-read";
@@ -8,7 +9,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { isMctView } from "@/lib/act-preview";
 import { seesWholeCourse } from "@/lib/hub-scope";
-import { buildTpQueue, type QueueGroup } from "@/lib/tp-queue";
+import { buildTpQueue, type QueueGroup, type QueueMember } from "@/lib/tp-queue";
 import { OwedCard, TodayCard } from "@/app/trainer/(hub)/tp/tp-cards";
 import { computeWeekOf } from "@/lib/course-progress";
 import type { AimType } from "@/lib/aim-type";
@@ -41,7 +42,10 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
     seesWholeCourse(),
     supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
     supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
-    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
+    // course_status too: a withdrawn candidate keeps their place in the
+    // rotation (the slot times are computed from it) but is not observing
+    // today and is not teaching tomorrow -- see QueueMember.withdrawn.
+    supabase.from("profiles").select("id, full_name, course_status").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("course_timetable_events").select("id, event_date, event_time, detail, type, title, tp_group_scope_id").eq("course_id", courseId).order("event_date").order("event_time"),
     supabase.from("centers").select("feedback_same_day_hours").eq("id", trainer.center_id).maybeSingle(),
     supabase.from("courses").select("start_date, end_date, course_code, name").eq("id", courseId).maybeSingle(),
@@ -80,13 +84,19 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
   const levelByPoint = new Map((points ?? []).map((p) => [p.id, levelByBook.get(p.tp_coursebook_id) ?? null]));
 
   const nameById = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
+  const withdrawnById = new Map((roster ?? []).map((r) => [r.id, isCourseStatusReadOnly(r.course_status)]));
   const tutorNameById = new Map((tutorProfiles ?? []).map((t) => [t.id, t.full_name]));
   const tpGroupById = new Map((tpGroupRows ?? []).map((g) => [g.id, g]));
-  const membersBySubgroup = new Map<string, { traineeId: string; fullName: string; baseSlot: number }[]>();
+  const membersBySubgroup = new Map<string, QueueMember[]>();
   for (const m of memberRows ?? []) {
     membersBySubgroup.set(m.subgroup_id, [
       ...(membersBySubgroup.get(m.subgroup_id) ?? []),
-      { traineeId: m.trainee_id, fullName: nameById.get(m.trainee_id) ?? "Unknown", baseSlot: m.base_slot },
+      {
+        traineeId: m.trainee_id,
+        fullName: nameById.get(m.trainee_id) ?? "Unknown",
+        baseSlot: m.base_slot,
+        withdrawn: withdrawnById.get(m.trainee_id) ?? false,
+      },
     ]);
   }
 
