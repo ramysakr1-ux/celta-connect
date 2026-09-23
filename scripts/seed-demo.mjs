@@ -413,6 +413,22 @@ async function main() {
   const nowMs = () => recordNow.getTime();
   /** A timestamp on course day n (teaching days, 1-based), centre-local wall time. */
   const atDay = (n, hhmm = "09:00") => new Date(`${courseDay(startDate, n)}T${hhmm}:00`).toISOString();
+  /**
+   * The same, but never past the course's last teaching day.
+   *
+   * The assignment schedule puts LfC's deadline on day 19 and LRT's on 17/18,
+   * and the record builders then add to that: a resubmission is countersigned
+   * `due + 5` and a sampled script `due + 2`. On a twenty-day course those run
+   * off the end -- Ines Marchetti's LRT countersign landed on 29 September,
+   * four days AFTER the course finished (walk, 23 Sep 2026).
+   *
+   * It is not only an odd-looking date. Every reader of the record is now as-of
+   * (src/lib/as-of.ts), so a stamp past the end is invisible for ever: the
+   * double-marking sample could never reach the §9.2.3 quota of four, not on
+   * the assessor's visit day and not at close-out, and a fail sat permanently
+   * "outside the sample".
+   */
+  const atDayCapped = (n, hhmm = "09:00") => atDay(Math.min(n, 20), hhmm);
   const beforeStart = (days, hhmm = "09:00") => new Date(new Date(`${startDate}T${hhmm}:00`).getTime() - days * 86400000).toISOString();
   if (FULL) console.log(`--full: the record runs to ${endDate}; record clock ${isoOf(recordNow)}`);
   // Nothing that only happens once a course is under way should be written
@@ -1996,8 +2012,8 @@ async function main() {
       const out = {};
       const late = name === "Tomas Novak" ? 1 : 0;
       if (state.first_submitted_at) out.first_submitted_at = atDay(dueDay + late, late ? "14:10" : "09:30");
-      if (state.resubmission_submitted_at) out.resubmission_submitted_at = atDay(dueDay + 4, "09:30");
-      const signed = state.resubmission_submitted_at ? atDay(dueDay + 5, "17:00") : atDay(dueDay + 1, "17:00");
+      if (state.resubmission_submitted_at) out.resubmission_submitted_at = atDayCapped(dueDay + 4, "09:30");
+      const signed = state.resubmission_submitted_at ? atDayCapped(dueDay + 5, "17:00") : atDayCapped(dueDay + 1, "17:00");
       for (const k of ["second_marker_recorded_at", "first_initialled_at", "second_initialled_at"]) if (state[k]) out[k] = signed;
       return out;
     };
@@ -2140,21 +2156,21 @@ async function main() {
             // requires typed twice.
             first_outcome_signed_at:
               state.first_status === "approved" || state.first_status === "resubmission_required"
-                ? atDay(DUE_DAY(assignment_type, def.half) + 2, "08:40")
+                ? atDayCapped(DUE_DAY(assignment_type, def.half) + 2, "08:40")
                 : undefined,
             first_outcome_signature_name:
               state.first_status === "approved" || state.first_status === "resubmission_required" ? name : undefined,
             resubmission_outcome_signed_at:
-              state.resubmission_status === "approved" ? atDay(DUE_DAY(assignment_type, def.half) + 6, "08:40") : undefined,
+              state.resubmission_status === "approved" ? atDayCapped(DUE_DAY(assignment_type, def.half) + 6, "08:40") : undefined,
             resubmission_outcome_signature_name: state.resubmission_status === "approved" ? name : undefined,
             // Marked the day after the deadline, at the hour calendarise
             // already uses for a tutor's own signing.
             first_marks_saved_at:
               state.first_status === "approved" || state.first_status === "resubmission_required"
-                ? atDay(DUE_DAY(assignment_type, def.half) + 1, "17:00")
+                ? atDayCapped(DUE_DAY(assignment_type, def.half) + 1, "17:00")
                 : undefined,
             resubmission_marks_saved_at:
-              state.resubmission_status === "approved" ? atDay(DUE_DAY(assignment_type, def.half) + 5, "17:00") : undefined,
+              state.resubmission_status === "approved" ? atDayCapped(DUE_DAY(assignment_type, def.half) + 5, "17:00") : undefined,
             // The marking screen will not release a round without an overall
             // comment ("Write the overall comment" is a blocker), so a seeded
             // round that has been marked must carry one too -- otherwise the
@@ -2498,7 +2514,7 @@ async function main() {
     // record-clock "three days ago" dated every check 25 Sept, after the
     // course had ended, and the visit read "No second marking has been
     // recorded on this course yet" (assessor walk, 20 Sep 2026).
-    const doubleMarkAtFor = (type, half) => (FULL ? atDay(DUE_DAY(type, half) + 2, "17:00") : daysAgoIso(3));
+    const doubleMarkAtFor = (type, half) => (FULL ? atDayCapped(DUE_DAY(type, half) + 2, "17:00") : daysAgoIso(3));
     const doubleMarkSample = [
       ["Amara Okafor", "Focus on Learner"],
       ["Priya Sharma", "Focus on Learner"],
