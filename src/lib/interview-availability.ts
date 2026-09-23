@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { toLocalIso, DEFAULT_TIMEZONE, zonedTimeToUtc } from "@/lib/timetable-grid";
+import { intakeHasFinished } from "@/lib/intake-window";
 
 export interface AvailabilityPattern {
   interviewer_id: string;
@@ -130,13 +131,22 @@ export async function regenerateSlotsForInterviewer(
       .maybeSingle(),
     supabase.from("interview_availability_patterns").select("*").eq("interviewer_id", interviewerId).eq("active", true),
     supabase.from("interview_blocks").select("*").eq("center_id", centerId).or(`interviewer_id.eq.${interviewerId},interviewer_id.is.null`),
-    supabase.from("courses").select("id").eq("center_id", centerId).eq("accepting_applications", true),
+    supabase.from("courses").select("id, end_date").eq("center_id", centerId).eq("accepting_applications", true),
   ]);
   if (!center) return { error: "Centre not found." };
-  if (!openIntakes || openIntakes.length === 0) return { error: "No intake is currently accepting applications." };
 
   const now = new Date();
   const todayIso = toLocalIso(now, center.time_zone ?? DEFAULT_TIMEZONE);
+
+  // ...and that has not already finished. Every slot below is generated for a
+  // date in the FUTURE, so an intake whose end date has passed would pin a run
+  // of future interview slots to a course that is over. accepting_applications
+  // does not come off by itself at the end date -- see src/lib/intake-window.ts
+  // and the /apply fault it was written for (23 Sep 2026).
+  const liveIntakes = (openIntakes ?? []).filter(
+    (c) => !intakeHasFinished(c.end_date, center.time_zone),
+  );
+  if (liveIntakes.length === 0) return { error: "No intake is currently accepting applications." };
 
   const { error: deleteError } = await supabase
     .from("interview_slots")
@@ -157,7 +167,7 @@ export async function regenerateSlotsForInterviewer(
   for (const pattern of patterns ?? []) {
     const slots = computeGeneratedSlots(pattern, settings, blocks ?? [], now, center.time_zone ?? DEFAULT_TIMEZONE);
     for (const s of slots) {
-      for (const intake of openIntakes) {
+      for (const intake of liveIntakes) {
         rows.push({
           center_id: centerId,
           intake_course_id: intake.id,
