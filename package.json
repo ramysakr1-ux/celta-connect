@@ -17,7 +17,8 @@
     "check:browser": "node scripts/browser-check.mjs",
     "check:journeys": "node scripts/journeys.mjs",
     "gen:types": "bash scripts/gen-types.sh",
-    "check:story": "node scripts/check-story-links.mjs"
+    "check:story": "node scripts/check-story-links.mjs",
+    "check:migrations": "node scripts/check-migration-ledger.mjs --objects"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
