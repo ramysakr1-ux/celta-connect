@@ -367,7 +367,7 @@ export function buildTpQueue(input: {
       });
       // The feedback session that closes the day, from the timetable's own
       // convention (timetable-skeleton.ts titles it "Feedback").
-      const feedbackEvent = events.find((e) => e.event_date === today && isFeedbackSession(e));
+      const feedbackEvent = events.find((e) => e.event_date === today && isFeedbackSession(e.title));
       const otherHalf = groups.find((x) => x.tpGroupId && x.tpGroupId === g.tpGroupId && x.subgroupId !== g.subgroupId);
       todaySession = {
         date: today,

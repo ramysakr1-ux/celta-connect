@@ -23,7 +23,7 @@ export interface FormState {
   error: string | null;
 }
 
-const EVENT_TYPES = ["input_session", "tp", "unassessed_tp", "feedback", "assignment_due", "resubmission_due", "milestone", "supervised_session"] as const;
+const EVENT_TYPES = ["input_session", "tp", "unassessed_tp", "assignment_due", "resubmission_due", "milestone", "supervised_session"] as const;
 
 // Free-typed, comma/space separated ("4c, 5f") rather than a 41-item picker
 // -- this is a one-time data-entry pass against material the trainer
@@ -409,7 +409,6 @@ const CANCEL_EVENT_TYPE_LABEL: Record<(typeof EVENT_TYPES)[number], string> = {
   input_session: "Input session",
   tp: "TP",
   unassessed_tp: "Unassessed teaching",
-  feedback: "TP feedback",
   assignment_due: "Assignment deadline",
   resubmission_due: "Resubmission deadline",
   milestone: "Session",

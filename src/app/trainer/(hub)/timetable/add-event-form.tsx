@@ -9,7 +9,6 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
   tp: "Teaching practice",
   unassessed_tp: "Unassessed teaching (no plan or feedback)",
-  feedback: "TP feedback",
   assignment_due: "Assignment due",
   resubmission_due: "Resubmission due",
   milestone: "Milestone",

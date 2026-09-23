@@ -25,13 +25,6 @@ export interface SkeletonEventDraft {
    */
   detail?: string;
   /**
-   * Feedback drafts only (migration 0311): the feedback is written, with no
-   * live session to attend. It used to live in `detail` as the words "Written
-   * feedback only", which meant an assessor-visit check reading the title saw
-   * an ordinary feedback session and said nothing.
-   */
-  feedbackWrittenOnly?: boolean;
-  /**
    * "Every sub-criterion names the session that teaches it" --
    * project_spec_audit_2026-08-18's assessment-model.md link 1, seeded
    * from Ramy's INPUT_WEEKS mapping (2026-08-18): the exact CELTA
@@ -105,12 +98,8 @@ const BOOKABLE_PLANNING_DAYS = [15, 16, 17]; // iw/"Bookable" -- design shifts c
 const UNSUPERVISED_PLANNING_DAYS = [8, 9, 14];
 
 const FEEDBACK_AND_LESSON_PLANNING: SkeletonEventDraft[] = [
-  // Typed, not titled (migration 0311). These two blocks used to be
-  // indistinguishable from each other and from "Lesson planning" below except
-  // by reading the words, which is how a written-only day came to look like an
-  // ordinary feedback session to the assessor check.
   ...FEEDBACK_DAYS.map((day) => ({
-    type: "feedback" as const,
+    type: "supervised_session" as const,
     title: "Feedback",
     position: pos(day),
     time: "12:20",
@@ -118,13 +107,12 @@ const FEEDBACK_AND_LESSON_PLANNING: SkeletonEventDraft[] = [
     detail: "Self-evaluations lead",
   })),
   ...WRITTEN_FEEDBACK_ONLY_DAYS.map((day) => ({
-    type: "feedback" as const,
+    type: "supervised_session" as const,
     title: "Feedback",
     position: pos(day),
     time: "12:20",
     tag: "supervised",
     detail: "Written feedback only",
-    feedbackWrittenOnly: true,
   })),
   ...SUPERVISED_PLANNING_DAYS.map((day) => ({
     type: "supervised_session" as const,
@@ -838,7 +826,6 @@ export function buildSkeletonEvents(
       event_time: draft.time ?? null,
       tag: draft.tag ?? null,
       detail: draft.detail ?? null,
-      feedback_written_only: draft.feedbackWrittenOnly ?? false,
       linked_assignment_type: draft.linkedAssignmentType ?? null,
       linked_tp_number: draft.linkedTpNumber ?? null,
       input_session_criteria: draft.inputSessionCriteria ?? [],

@@ -546,7 +546,7 @@ export default async function TrainerTimetablePage({
         (event.event_date === assessorVisitDate &&
         (event.type === "tp" ||
           (event.type === "supervised_session" &&
-            (isFeedbackSession(event) || (event.title ?? "").toLowerCase().includes("assessor")))))
+            (isFeedbackSession(event.title) || (event.title ?? "").toLowerCase().includes("assessor")))))
       : event.type !== "tp"
         ? true
         : // A TP row names the group it belongs to, and on a two-group course
@@ -816,7 +816,7 @@ function gradingMeetingTime(
   const bands = resolveTimeBands(courseTimeBands);
   const onDay = events.filter((e) => e.event_date === visitDate && e.event_time);
   const anchor = onDay
-    .filter((e) => (e.title ?? "").toLowerCase().includes("assessor") || isFeedbackSession(e))
+    .filter((e) => (e.title ?? "").toLowerCase().includes("assessor") || isFeedbackSession(e.title))
     .map((e) => (e.event_time ?? "").slice(0, 5))
     .sort()
     .pop();

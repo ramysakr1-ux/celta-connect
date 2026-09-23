@@ -1,43 +1,30 @@
 /**
- * Is this timetable row the TP feedback session?
+ * Is this timetable event the TP feedback session?
  *
- * It reads the row's TYPE. Migration 0311 gave the feedback session its own
- * type, for the same reason 0296 gave one to the unassessed teaching slot: a
- * kind of session is not a word in a title.
+ * Six places asked this question and three different ways: `title ===
+ * "Feedback"` in the timetable, the trainee's rail and the assessor day, and
+ * `title.toLowerCase().startsWith("feedback")` in the TP queue. On the demo
+ * they agree, because every feedback row is titled exactly "Feedback". On a
+ * centre that writes "Feedback — Group A" they would not: the TP tab would
+ * show a feedback session while the Assessor tab warned that none was
+ * timetabled on the visit day (walk, 23 Sep 2026).
  *
- * What this replaced, and why the title could never answer it. Three shapes
- * all meant "feedback session" -- `Feedback / Self-evaluations lead`,
- * `Feedback / Written feedback only` from the generator, and
- * `Written feedback only / Final TP, no live session` from the seed -- while
- * `Giving feedback on tasks` is an INPUT session about feedback and must not
- * match. Any `includes('feedback')` caught the input session; `startsWith`
- * avoided that but missed the third shape. Six call sites had settled on three
- * different tests between them (8453fdf0 made them agree; it could not make
- * them right).
+ * The rule is the looser of the two, which is a superset of the stricter one,
+ * so nothing that matched before stops matching.
+ *
+ * It has to be `startsWith`, not `includes`. Two real titles show why:
+ * "Giving feedback on tasks" is an INPUT SESSION about feedback, not a
+ * feedback session, and "Written feedback only" is the last TP day's row,
+ * which exists precisely to say there is no session to observe. Matching
+ * either would tell an assessor they could watch feedback when they cannot --
+ * the thing Handbook 14.2 requires them to do.
+ *
+ * Title matching is itself the weak part. The type column does not carry it
+ * (both "Feedback" and "Written feedback only" are `supervised_session`), so
+ * a dedicated type is the real answer, as migration 0296 did for the
+ * unassessed teaching slot. Until then, at least every room asks the same
+ * question.
  */
-export function isFeedbackSession(event: { type?: string | null }): boolean {
-  return event.type === "feedback";
-}
-
-/**
- * ...and is it written-only, with no live session to attend?
- *
- * Kept separate from the type on purpose. A written-only day IS still the
- * feedback session -- the candidate has to see it on their day -- but there is
- * nothing for an assessor to observe, which Handbook 14.2 requires of them:
- * "The assessor then observes the feedback."
- *
- * So the two questions have two answers. `isFeedbackSession` asks whether the
- * session exists; this asks whether anyone can sit in it.
- */
-export function isWrittenFeedbackOnly(event: { type?: string | null; feedback_written_only?: boolean | null }): boolean {
-  return isFeedbackSession(event) && event.feedback_written_only === true;
-}
-
-/** A feedback session someone can actually attend or observe. */
-export function isObservableFeedbackSession(event: {
-  type?: string | null;
-  feedback_written_only?: boolean | null;
-}): boolean {
-  return isFeedbackSession(event) && !isWrittenFeedbackOnly(event);
+export function isFeedbackSession(title: string | null | undefined): boolean {
+  return (title ?? "").toLowerCase().startsWith("feedback");
 }
