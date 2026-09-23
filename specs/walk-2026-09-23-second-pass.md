@@ -38,6 +38,8 @@ into each uncompiled page — nothing to do with the code. It takes
 | `f47316e9` | The grade form told a tutor "Admin Handbook 10.2: a fail-risk letter **must** be issued with **at least two assessed lessons** still to teach". 10.2, continuing onto printed page 31, says potential Fail candidates "**should** also be issued with a Fail letter... **ideally** with at least two **lessons** left to teach". Two overstatements in one line, and on a course past that point it read as a breached obligation rather than late guidance. `src/lib/letters/fail-risk.ts` had quoted it correctly all along, one file away from the screen that got it wrong. |
 | `a6e6edf8` | **The TinT asynchronous ceiling was measured against the wrong denominator.** TinT Handbook 2026 p7 puts both figures on one basis — "observation of 80% of a CELTA course... Asynchronous observation of up to 10% OF THE COURSE". `inputObservedPct` divided by the course's input sessions; `inputAsyncPct`, the line below it on the same card, divided by sessions observed so far. The error only runs one way: strictest at the start, when least is known. A TinT who had watched 10 of 33 with 2 async read 20% and tripped the alarm, where the course basis reads 6%. The demo's real breach still trips (5 of 33 = 15%). |
 | `1c32837c` | **A marked assignment read as "awaiting marking" until the candidate signed for it.** `assignmentAsOf` took the marking stamp as `first_outcome_signed_at ?? first_marks_saved_at`, and the first of those is not a marking stamp: it is the CANDIDATE's acknowledgement of the outcome — the eighth of the CELTA 5's eight signatures, in their own name, seeded for the morning after the tutor releases. So between marking and signing the work read as unmarked to BOTH of them — 5 of the 6 LRTs marked by day 18, the trainer's board saying "10 to mark" when 4 were owed, and the candidate's own page carrying an announcement from the same tutor saying "Language Related Tasks feedback is ready". Open the tab it points at and the work was awaiting marking. Backwards as well as wrong: a candidate has to SEE a mark in order to sign it. |
+| `1c5385f1` | **The assessor pack counted the same four candidates two ways on one screen** — "The centre has put 4 of **11** forward" in the Handbook lines, and four lines below, "Showing 4 of **12**". `activeCandidateCount` drives the requirement lines and the double-marking quota; the selection strip used `candidates.length`, which includes the candidate who withdrew in week 2 and was never in the pool the centre chose from. The full-cohort link keeps its 12 deliberately: that view is partly how the assessor reaches the withdrawn candidate's documentation, which 14.1 and 14.2 both require. |
+| `1c5385f1` | **And a correction to `37cfdf27`.** Dropping the withdrawn candidate's seat from the tutor's "tomorrow" list stopped them being chased for a plan from someone who had left, but left an unexplained hole in the morning. The assessor's pack has always named that seat — "No lesson -- this seat's candidate has withdrawn" — and the tutor now gets the same sentence, with a grey dot rather than the amber one that means a missing plan. Found by reading the assessor's view and the tutor's view of the same morning side by side. |
 
 ## Checked and NOT bugs — do not re-raise
 
@@ -81,6 +83,15 @@ into each uncompiled page — nothing to do with the code. It takes
   are deliberate: "A count appears only when there is something to count",
   because every count reading 0 on a fresh course looked broken rather
   than empty.
+
+- **Trainer notes stay staff-only across the whole input-session library.**
+  Swept all 27 sessions a trainee can open, from a trainee session, for
+  "running this session" / "trainer note" / "staff only" and the like: zero
+  leaks. The gate added after 28 of 31 were found ungated is holding.
+- **The candidate's CELTA 5 and TP record reconcile** with the trainer's
+  grade form: 8 TP grades identical (`S+ S S+ S S+ S+ S S+`), 8 x 45 min =
+  6.0 hrs, attendance 108/120 = 90%, observation 9/6 with filmed capped at
+  3 (Handbook 10.1), and no grade column on the candidate's side by design.
 
 ## Open
 
