@@ -6,6 +6,7 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { formatCalendarDate } from "@/lib/format-date";
 import { computeCourseState, type CourseState } from "@/lib/course-progress";
+import { isFeedbackSession } from "@/lib/feedback-session";
 
 // The status line under each door in the trainee's rail.
 //
@@ -152,7 +153,7 @@ export async function buildRailStatus({
 
   const times = (todaysEvents ?? []).map((e) => e.event_time).filter((t): t is string => Boolean(t));
   const firstTime = times.length > 0 ? times.slice().sort()[0].slice(0, 5) : null;
-  const feedback = (todaysEvents ?? []).find((e) => e.title === "Feedback" && e.event_time)?.event_time?.slice(0, 5) ?? null;
+  const feedback = (todaysEvents ?? []).find((e) => isFeedbackSession(e.title) && e.event_time)?.event_time?.slice(0, 5) ?? null;
   // The candidate's OWN slot, not simply the day's first TP row. With two
   // groups teaching six lessons a day, "the first TP event today" was
   // whichever row the query happened to return, so the rail told a candidate

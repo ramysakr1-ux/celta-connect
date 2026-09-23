@@ -10,6 +10,7 @@ import { distinctTpDates, halfTpDates, rotationPosition, type TpTimetableEvent }
 // visible, so it's an independent account, not a reply."
 export const SELF_EVAL_DUE_CLOCK = "18:00";
 import type { AimType } from "@/lib/aim-type";
+import { isFeedbackSession } from "@/lib/feedback-session";
 
 // design_handoff_teaching_practice_v2 (Ramy, 6 Sep 2026). The tab answers
 // one question -- "which lessons do I owe written feedback on" -- so the
@@ -366,7 +367,7 @@ export function buildTpQueue(input: {
       });
       // The feedback session that closes the day, from the timetable's own
       // convention (timetable-skeleton.ts titles it "Feedback").
-      const feedbackEvent = events.find((e) => e.event_date === today && (e.title ?? "").toLowerCase().startsWith("feedback"));
+      const feedbackEvent = events.find((e) => e.event_date === today && isFeedbackSession(e.title));
       const otherHalf = groups.find((x) => x.tpGroupId && x.tpGroupId === g.tpGroupId && x.subgroupId !== g.subgroupId);
       todaySession = {
         date: today,

@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { resolveTimeBands } from "@/lib/timetable-grid";
+import { isFeedbackSession } from "@/lib/feedback-session";
 
 // Ramy, 30 Aug 2026: "the assessor meeting... it's been announced, there's a
 // countdown for it, it's one of the announcements made by the MCT. And then
@@ -103,7 +104,7 @@ function pickMeetingTime(
   const lastBand = bands[bands.length - 1].start;
 
   const feedback = dayEvents
-    .filter((e) => e.title === "Feedback" && e.event_time)
+    .filter((e) => isFeedbackSession(e.title) && e.event_time)
     .map((e) => (e.event_time ?? "").slice(0, 5))
     .sort()
     .pop();
@@ -164,6 +165,6 @@ export async function assessorVisitDayNote(
     .eq("event_date", visitDate);
   const events = dayEvents ?? [];
   if (!events.some((e) => e.type === "tp")) return null; // the refusal above covers this
-  if (events.some((e) => e.title === "Feedback")) return null;
+  if (events.some((e) => isFeedbackSession(e.title))) return null;
   return "No Feedback session is timetabled on the visit date. The assessor observes the feedback on the day, or an earlier session's if it is delayed (Handbook 14.2) -- worth adding one while the timetable can still change.";
 }

@@ -27,6 +27,7 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { oneTpCardPerSlot } from "@/lib/timetable-one-per-slot";
 import { formatCalendarDate } from "@/lib/format-date";
 import { demoToday } from "@/lib/demo-clock";
+import { isFeedbackSession } from "@/lib/feedback-session";
 
 // for-claude-code-timetable-edit-vs-view.md: DragBoard (editing) and the
 // glass-card view (for-claude-code-timetable-view.md) are two different
@@ -545,7 +546,7 @@ export default async function TrainerTimetablePage({
         (event.event_date === assessorVisitDate &&
         (event.type === "tp" ||
           (event.type === "supervised_session" &&
-            (event.title === "Feedback" || (event.title ?? "").toLowerCase().includes("assessor")))))
+            (isFeedbackSession(event.title) || (event.title ?? "").toLowerCase().includes("assessor")))))
       : event.type !== "tp"
         ? true
         : // A TP row names the group it belongs to, and on a two-group course
@@ -815,7 +816,7 @@ function gradingMeetingTime(
   const bands = resolveTimeBands(courseTimeBands);
   const onDay = events.filter((e) => e.event_date === visitDate && e.event_time);
   const anchor = onDay
-    .filter((e) => (e.title ?? "").toLowerCase().includes("assessor") || e.title === "Feedback")
+    .filter((e) => (e.title ?? "").toLowerCase().includes("assessor") || isFeedbackSession(e.title))
     .map((e) => (e.event_time ?? "").slice(0, 5))
     .sort()
     .pop();
