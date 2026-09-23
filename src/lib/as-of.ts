@@ -66,7 +66,37 @@ export function assignmentAsOf<
   } else if (a.resubmission_status === "approved" && resubMarkStamp && !onOrBefore(resubMarkStamp, today)) {
     clearRound("resubmission", false);
   }
+  clearFutureSecondMarking(out, a, today);
   return out as A;
+}
+
+/**
+ * Second marking, as of today.
+ *
+ * This belongs here rather than at a call site, and it is here BECAUSE it was
+ * at a call site: /assessor/double-marking spread its own
+ * `second_marker_recorded_at: asOf(...)` over the result of assignmentAsOf,
+ * and the trainer's own Assignments board -- which calls assignmentAsOf and
+ * nothing else -- did not. So on demo day 18 the board read "Language Related
+ * Tasks 4 of 4 settled" from second marks stamped 24, 25 and 29 September, one
+ * of them four days after the course ends, while Today's compliance banner
+ * (which does filter on <= today) said "LRT 0/4" in the next room.
+ *
+ * `second_marker_id` is deliberately KEPT. It carries no stamp of its own, and
+ * naming who will second-mark a script is not a claim that they have done it --
+ * with the stamps cleared the sample reads "in progress", which is the truth on
+ * the day.
+ */
+function clearFutureSecondMarking(
+  out: Record<string, unknown>,
+  a: Partial<Record<string, unknown>>,
+  today: string,
+): void {
+  const recorded = a.second_marker_recorded_at as string | null | undefined;
+  if (!recorded || onOrBefore(recorded, today)) return;
+  for (const k of ["second_marker_recorded_at", "second_marks_recorded_at", "first_initialled_at", "second_initialled_at"]) {
+    if (k in out) out[k] = null;
+  }
 }
 
 /** A CELTA 5 record as of `today`: a provisional grade proposed or approved after today, and a

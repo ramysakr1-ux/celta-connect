@@ -8,7 +8,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
 import { demoToday } from "@/lib/demo-clock";
-import { asOf, assignmentAsOf } from "@/lib/as-of";
+import { assignmentAsOf } from "@/lib/as-of";
 import { doubleMarkingPerAssignment } from "@/lib/assessor-requirements";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_RESULT_LABEL, resolveAssignmentResult } from "@/lib/assignment-info";
 import { AssessorHead, AssessorSubHead } from "@/components/assessor/assessor-head";
@@ -67,7 +67,10 @@ export default async function AssessorDoubleMarkingPage() {
   // had happened (assessor walk, 20 Sep 2026).
   const rows = (assignments ?? [])
     .filter((a) => activeIds.has(a.trainee_id))
-    .map((a) => ({ ...assignmentAsOf(a, today), second_marker_recorded_at: asOf(a.second_marker_recorded_at, today) }));
+    // assignmentAsOf now clears a second-marking stamp dated after today, so
+    // this page no longer patches it on the way past -- that hand-patch was
+    // the reason the trainer's own board disagreed with this record.
+    .map((a) => assignmentAsOf(a, today));
   const anyRecorded = rows.some((a) => a.second_marker_recorded_at);
 
   return (
