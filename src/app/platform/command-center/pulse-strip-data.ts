@@ -44,7 +44,17 @@ export async function getPulseStripStats(profileId: string): Promise<PulseStripS
     centresRunningNow,
     activeTraineesAccessible: (trainees ?? []).length,
     coursesRunningNow: runningCourses.length,
-    courseRunningLabel: runningCourses[0]?.name ?? "",
+    // The COUNT is platform-wide on purpose -- Ramy, 23 Sep 2026: "I should be
+    // able to see everything ... I could just see them as numbers as well."
+    // The NAME is not a number. Naming a course at a centre that has not let
+    // us in is the one thing the Centres table below this strip now refuses to
+    // do, under copy that says "counts, not contents", so the strip cannot go
+    // on doing it two rows above. Named only where we are actually in.
+    courseRunningLabel:
+      runningCourses.find((c) => accessibleCenterIds.has(c.center_id))?.name ??
+      (runningCourses.length > 0
+        ? `at ${new Set(runningCourses.map((c) => c.center_id)).size} centre${new Set(runningCourses.map((c) => c.center_id)).size === 1 ? "" : "s"}`
+        : ""),
     openSupportThreads: (supportMessages ?? []).filter((m) => !m.read_at).length,
   };
 }
