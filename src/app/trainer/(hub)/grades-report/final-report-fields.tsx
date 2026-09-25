@@ -7,6 +7,14 @@ import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
+/* The two headings here are Appian's own, read off the centre's screen on
+   25 Sep 2026 -- not the Handbook's, which calls the first "update on
+   strengths and areas for development". Appian says "action points", and the
+   form a centre fills in wins. The evidence heading is deliberately NOT the
+   provisional one: "evidence NEEDED for a Pass / Higher Grade" before the
+   assessment, "what evidence WAS PROVIDED for a Higher Grade" after it.
+   Ramy, same day: "just get everything from Appian, don't worry about the
+   handbook." */
 const initialState: FormState = { error: null };
 
 // Plain textareas here, not the tone-rewriting one used elsewhere in the
@@ -76,9 +84,9 @@ export function FinalReportFields({
             <span className="text-meta text-muted italic">Not yet recorded</span>
           )}
         </div>
-        <ReadBlock label="Update on strengths and areas for development" value={update} required />
+        <ReadBlock label="Update on strengths and action points" value={update} required />
         {isBorderline ? (
-          <ReadBlock label="What evidence was provided for a pass/higher" value={evidence} />
+          <ReadBlock label="What evidence was provided for a Higher Grade (if applicable)" value={evidence} />
         ) : null}
         {handover ? (
           <div className="flex justify-start">
@@ -116,7 +124,7 @@ export function FinalReportFields({
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`upd-${record.trainee_id}`} className="text-label font-bold tracking-[0.1em] text-gold uppercase">
-          Update on strengths and areas for development
+          Update on strengths and action points
         </label>
         <p className="text-label leading-[1.45] text-muted">
           Required on the Assessor Report for every candidate &mdash; including extensions, deferrals and withdrawals
@@ -131,29 +139,28 @@ export function FinalReportFields({
         />
       </div>
 
-      {isBorderline ? (
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={`evi-${record.trainee_id}`} className="text-label font-bold tracking-[0.1em] text-gold uppercase">
-            What evidence was provided for a pass/higher
-          </label>
-          <p className="text-label leading-[1.45] text-muted">
-            Answers the conditions set at the provisional stage. Optional in Appian, but 15.2 asks for it on any borderline
-            candidate so the final grade has a recorded justification.
-          </p>
-          <textarea
-            id={`evi-${record.trainee_id}`}
-            name="final_higher_grade_evidence"
-            rows={3}
-            defaultValue={evidence}
-            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-meta text-ink outline-none focus:border-primary"
-          />
-        </div>
-      ) : (
-        /* Not borderline, so the field is not asked for -- but the value must
-           still survive a save, or a candidate who was borderline and later
-           was not would silently lose what the tutor wrote. */
-        <input type="hidden" name="final_higher_grade_evidence" value={evidence} />
-      )}
+      {/* Appian puts this beside the update, on every candidate, and lets its
+          own "(if applicable)" do the conditional work -- so it is shown here
+          the same way rather than gated on a borderline (Ramy, 25 Sep 2026:
+          same structure, same logic as the form). The hint still says when it
+          is wanted, so a straight pass leaves it empty. */}
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`evi-${record.trainee_id}`} className="text-label font-bold tracking-[0.1em] text-gold uppercase">
+          What evidence was provided for a Higher Grade (if applicable)
+        </label>
+        <p className="text-label leading-[1.45] text-muted">
+          {isBorderline
+            ? "Answers the conditions set at the provisional stage \u2014 this candidate was borderline, so the final grade needs a recorded justification."
+            : "Leave empty where the grade did not move."}
+        </p>
+        <textarea
+          id={`evi-${record.trainee_id}`}
+          name="final_higher_grade_evidence"
+          rows={3}
+          defaultValue={evidence}
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-meta text-ink outline-none focus:border-primary"
+        />
+      </div>
 
       {state.error ? <p className="text-body text-destructive">{state.error}</p> : null}
 
