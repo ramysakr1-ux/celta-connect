@@ -196,7 +196,26 @@ export function LessonPlanForm({
     // Stages past the end of the sequence are KEPT, with everything typed in them.
     const extra = procedure.slice(framework.stages.length);
     setProcedure([
-      ...framework.stages.map((stage, i) => ({ ...(procedure[i] ?? emptyProcedureRow()), stage: stage.name })),
+      ...framework.stages.map((stage, i) => {
+        const row = procedure[i] ?? emptyProcedureRow();
+        // The interaction pattern and the timing describe THE STAGE, so when
+        // the stage changes they go with it. They used to stay: switch a plan
+        // from Receptive skills to PPP and row 2's "Prediction task · OC ·
+        // 7 min" became "Present: clarify and focus on TL · OC · 7 min" -- a
+        // pattern and a timing nobody chose for that stage, sitting in the
+        // plan ready to be submitted. From outside that is indistinguishable
+        // from the sequence having FILLED IN an interaction pattern, which is
+        // how it was reported (Ramy, 25 Sep 2026); the sequences carry no
+        // interaction value at all. Fixed first in Connect Lite, 26 Sep.
+        //
+        // A stage whose name does not change -- Lead-in is in every sequence
+        // -- keeps both, because it is the same stage. The trainee's own aim
+        // stays either way: it is their prose, not a picked value.
+        const same = row.stage.trim().toLowerCase() === stage.name.trim().toLowerCase();
+        return same
+          ? { ...row, stage: stage.name }
+          : { ...row, stage: stage.name, interaction: "", time: "" };
+      }),
       ...extra,
     ]);
     setAimHints([...framework.stages.map((s) => s.aim), ...extra.map(() => "")]);
@@ -763,6 +782,22 @@ function LessonSequencePicker({
               onClick={() => onPick(f.name)}
             />
           ))}
+          {/* Lite asks before it replaces, because it has an Apply button to
+              ask on. This is a menu and applies on the pick, so the
+              consequence is written where the pick happens instead. */}
+          <p
+            style={{
+              borderTop: `1px solid ${FAINT}`,
+              margin: "6px 0 0",
+              padding: "7px 9px 2px",
+              fontSize: "var(--text-micro)",
+              lineHeight: 1.45,
+              color: MUTED,
+            }}
+          >
+            Changing the sequence renames the stages. A stage whose name changes gives up its time and
+            interaction pattern with it — they described the old stage.
+          </p>
         </div>
       ) : null}
     </div>
