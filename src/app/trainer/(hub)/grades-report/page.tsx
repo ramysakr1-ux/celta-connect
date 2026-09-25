@@ -28,6 +28,7 @@ const overrideOf = (r: unknown): string | null =>
 const overrideByOf = (r: unknown): string | null =>
   (r as Celta5OverrideCols | null)?.assignment_fail_override_by ?? null;
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
+import { CourseGradeFormFields } from "./course-grade-form-fields";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
 import { markGradeFormSubmitted, markGradeApprovalFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
@@ -281,6 +282,17 @@ export default async function GradesReportPage() {
           did not (Handbook 14.4).
         </p>
       </div>
+
+      {/* Cambridge's form opens with four fields about the course before it
+          reaches a single candidate (migration 0313), so they open this screen
+          too. Written by the MCT or whoever holds the centre — the same gate as
+          the Appian submission ticks — because they belong to the course, not
+          to a person. */}
+      <CourseGradeFormFields
+        courseId={courseId}
+        course={gradeFormCourse as Record<string, unknown> | null}
+        editable={Boolean(trainer)}
+      />
 
       {(trainees ?? []).length === 0 ? (
         <div className="sheet text-body text-muted">No candidates on this course yet.</div>

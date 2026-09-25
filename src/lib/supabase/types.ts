@@ -324,6 +324,14 @@ export interface Database {
           grade_approval_form_submitted_by: string | null;
           grade_form_submitted_at: string | null;
           grade_form_submitted_by: string | null;
+          // The course-level half of the Cambridge Centre Grade Form, read off
+          // the live form in Appian on 25 Sep 2026 (migration 0313). Four
+          // required free-text fields about the course itself, before the form
+          // reaches any candidate.
+          grade_form_teaching_practice: string | null;
+          grade_form_tp_supervision: string | null;
+          grade_form_tutorials: string | null;
+          grade_form_additional_comments: string | null;
           center_id: string;
           name: string;
           start_date: string;

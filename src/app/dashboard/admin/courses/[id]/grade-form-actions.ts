@@ -103,3 +103,82 @@ export async function markGradeApprovalFormSubmitted(formData: FormData): Promis
     logKey: "grade_approval_form",
   });
 }
+
+// ---------------------------------------------------------------------------
+// The course-level half of the Centre Grade Form (migration 0313).
+//
+// Read off the live form in Appian against TR073-C17/2026 on 25 Sep 2026: it
+// opens with four required free-text fields about the course itself, before it
+// reaches a single candidate. They belong to the course, so one person writing
+// them writes them for everyone -- which is why this goes through the same
+// MCT-or-holds-the-centre gate as the submission ticks above, and leaves the
+// same footprint in the management log.
+
+const COURSE_GRADE_FIELDS = {
+  grade_form_teaching_practice: "Teaching Practice",
+  grade_form_tp_supervision: "Teaching Practice Supervision and Feedback",
+  grade_form_tutorials: "Tutorials",
+  grade_form_additional_comments: "Additional Comments",
+} as const;
+
+export type CourseGradeField = keyof typeof COURSE_GRADE_FIELDS;
+
+// Cambridge's own limit on each of the four, stated on the form itself.
+const FIELD_LIMIT = 2000;
+
+export async function updateCourseGradeFormField(
+  _prevState: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const actor = await requireCapabilityOrTrainer("courseAdmin.invite");
+  const courseId = formData.get("course_id");
+  const field = formData.get("field");
+  const value = formData.get("value");
+  if (typeof courseId !== "string" || !courseId) return { error: "Something went wrong. Refresh and try again." };
+  if (typeof field !== "string" || !(field in COURSE_GRADE_FIELDS)) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+  const text = typeof value === "string" ? value.trim() : "";
+  if (text.length > FIELD_LIMIT) {
+    return { error: `Cambridge allows ${FIELD_LIMIT} characters here; that is ${text.length}.` };
+  }
+
+  const supabase = await createClient();
+  const { data: courseRaw } = await supabase.from("courses").select("*").eq("id", courseId).maybeSingle();
+  const course = courseRaw as ({ id: string; center_id: string } & Record<string, unknown>) | null;
+  if (!course) return { error: "Something went wrong. Refresh and try again." };
+
+  const allowed =
+    actor.role === "trainer" ? await isMctOfCourse(actor, courseId) : await holdsCentre(actor, course.center_id);
+  if (!allowed) return { error: "You cannot edit the grade form for this course." };
+
+  const previous = (course[field] as string | null | undefined) ?? null;
+  const next = text || null;
+  if (previous === next) return { error: null };
+
+  const { error } = await supabase
+    .from("courses")
+    .update({ [field]: next } as never)
+    .eq("id", courseId);
+
+  if (error) {
+    console.error("[dashboard/admin/courses/[id]/grade-form-actions.ts:updateCourseGradeFormField]", error);
+    return { error: "Could not save. Try again." };
+  }
+
+  await logManagementAction({
+    actorId: actor.id,
+    centerId: course.center_id,
+    courseId,
+    action: "grade_form.course_field",
+    targetTable: "courses",
+    targetId: courseId,
+    previousValue: previous,
+    newValue: next,
+    detail: { field: COURSE_GRADE_FIELDS[field as CourseGradeField] },
+  });
+
+  revalidatePath("/trainer/grades-report");
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  return { error: null };
+}
