@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { updateProvisionalGrade, approveProvisionalGrade, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import { AssignmentFailOverride } from "@/app/trainer/(hub)/grades-report/assignment-fail-override";
-import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
+import { PROVISIONAL_SLOTS, PROVISIONAL_OUTCOMES } from "@/lib/provisional-grade";
 import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
@@ -13,8 +13,10 @@ const initialState: FormState = { error: null };
 // Derived, not re-listed: PROVISIONAL_SLOTS stays the one place a valid slot
 // is defined, and is what the server action validates against. A slot added
 // there lands in the right group here without anyone remembering to.
-const STRAIGHT_GRADES = PROVISIONAL_SLOTS.filter((o) => !o.includes("/") && o !== "Withdrawn");
+const OUTCOMES: readonly string[] = PROVISIONAL_OUTCOMES;
+const STRAIGHT_GRADES = PROVISIONAL_SLOTS.filter((o) => !o.includes("/") && !OUTCOMES.includes(o));
 const BORDERLINE_GRADES = PROVISIONAL_SLOTS.filter((o) => o.includes("/"));
+const OUTCOME_SLOTS = PROVISIONAL_SLOTS.filter((o) => OUTCOMES.includes(o));
 
 function Divider() {
   return <span aria-hidden className="mx-0.5 h-4 w-px shrink-0 bg-border" />;
@@ -108,9 +110,10 @@ export function ProvisionalGradeForm({
             pass, fail pass pass, pass b pass pass a withdrawn. Why is it
             messy?"
 
-            They are not eight equal things. Four are grades, three are the
-            borderlines BETWEEN consecutive grades, and Withdrawn is not a
-            grade at all. So the row is grouped that way, the label moves out
+            They are not ten equal things. Four are grades, three are the
+            borderlines BETWEEN consecutive grades, and Withdrawn, Extension
+            and Deferral are not grades at all -- they are how a course can
+            end without one. So the row is grouped that way, the label moves out
             of the row to give the options the full width, and the slash in a
             paired option is dimmed so "Pass B/Pass A" reads as one token
             rather than two grades sitting next to each other. */}
@@ -134,7 +137,9 @@ export function ProvisionalGradeForm({
             <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} blockedReason={eligibility?.blocked.includes(opt) ? eligibility.reason : null} />
           ))}
           <Divider />
-          <SlotPill opt="Withdrawn" slot={slot} setSlot={setSlot} blockedReason={eligibility?.blocked.includes("Withdrawn") ? eligibility.reason : null} />
+          {OUTCOME_SLOTS.map((opt) => (
+            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} blockedReason={eligibility?.blocked.includes(opt) ? eligibility.reason : null} />
+          ))}
         </div>
         {/* Says WHY, rather than leaving a struck-through pill unexplained.
             Cambridge's rule caps what may be recommended; it never says which

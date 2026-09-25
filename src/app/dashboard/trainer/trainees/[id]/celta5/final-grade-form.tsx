@@ -103,7 +103,7 @@ export function FinalGradeForm({
           <option value="Fail">Fail</option>
           <option value="Withdrawn">Withdrawn</option>
           <option value="Extension">Extension</option>
-          <option value="Deferred">Deferred</option>
+          <option value="Deferral">Deferred</option>
         </select>
       </div>
 

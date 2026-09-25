@@ -593,7 +593,7 @@ export async function updateFinalGrade(
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferred"] as const;
+  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferral"] as const;
   const grade =
     typeof finalGrade === "string" && (validGrades as readonly string[]).includes(finalGrade)
       ? (finalGrade as (typeof validGrades)[number])
@@ -614,7 +614,7 @@ export async function updateFinalGrade(
   // (and the same recorded override lifts): one failed written assignment
   // rules out Pass A; more than one rules out a Pass at all. The final
   // grade skipped this check until 12 Sep 2026.
-  if (grade && grade !== "Withdrawn" && grade !== "Extension" && grade !== "Deferred") {
+  if (grade && grade !== "Withdrawn" && grade !== "Extension" && grade !== "Deferral") {
     const [{ data: written }, { data: overrideRow }] = await Promise.all([
       supabase.from("assignments").select("final_grade, resubmission_outcome").eq("trainee_id", traineeId),
       supabase.from("celta5_records").select("assignment_fail_override_reason").eq("trainee_id", traineeId).maybeSingle(),
@@ -651,7 +651,7 @@ export async function updateFinalGrade(
   return { error: null };
 }
 
-const PROVISIONAL_GRADES = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn"] as const;
+const PROVISIONAL_GRADES = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferral"] as const;
 
 // Only these 3 adjacent pairs are real "slashed, undecided" states --
 // specs/README.md's own rule: "Provisional grades with a slash (Fail/Pass,
@@ -1036,7 +1036,7 @@ export async function updateFinalReportFields(
   // been doing this for fifteen years." Same validation and the same
   // milestone check as updateFinalGrade, which still serves the CELTA 5
   // record's own fuller form.
-  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferred"] as const;
+  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferral"] as const;
   const gradeRaw = formData.get("final_recommended_grade");
   const grade =
     typeof gradeRaw === "string" && (validGrades as readonly string[]).includes(gradeRaw)
@@ -1163,7 +1163,7 @@ export async function releaseAllFinalReports(_prevState: FormState, formData: Fo
     .not("final_recommended_grade", "is", null)
     .neq("final_recommended_grade", "Withdrawn")
     .neq("final_recommended_grade", "Extension")
-    .neq("final_recommended_grade", "Deferred")
+    .neq("final_recommended_grade", "Deferral")
     .not("trainer_signoff_final_at", "is", null)
     .is("final_report_released_at", null);
 

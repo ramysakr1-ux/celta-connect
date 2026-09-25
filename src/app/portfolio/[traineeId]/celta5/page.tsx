@@ -1801,7 +1801,7 @@ export default async function PortfolioCelta5Page({
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
       ) : null}
 
-      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferral" && record.trainer_signoff_final_at ? (
         <div className="plain-card flex items-center justify-between gap-3">
           <p className="text-ink">Final report ready to download.</p>
           <a
@@ -1817,7 +1817,7 @@ export default async function PortfolioCelta5Page({
 
       <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={timeZone} />
 
-      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferral" && record.trainer_signoff_final_at ? (
         <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} timeZone={timeZone} />
       ) : null}
 

@@ -218,7 +218,7 @@ if (record) {
   if (
     record.trainer_signoff_final_at &&
     record.final_recommended_grade &&
-    !["Withdrawn", "Extension", "Deferred"].includes(record.final_recommended_grade)
+    !["Withdrawn", "Extension", "Deferral"].includes(record.final_recommended_grade)
   ) {
     const buffer = await renderFinalReportBuffer({
     timeZone: center?.time_zone ?? DEFAULT_TIMEZONE,

@@ -388,7 +388,7 @@ export default async function Celta5RecordPage({
           {record.final_recommended_grade &&
           record.final_recommended_grade !== "Withdrawn" &&
           record.final_recommended_grade !== "Extension" &&
-          record.final_recommended_grade !== "Deferred" &&
+          record.final_recommended_grade !== "Deferral" &&
           record.trainer_signoff_final_at ? (
             <div className="mt-4">
               <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} timeZone={timeZone} />

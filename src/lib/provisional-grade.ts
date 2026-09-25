@@ -11,7 +11,15 @@ export const PROVISIONAL_SLOTS = [
   "Pass B/Pass A",
   "Pass A",
   "Withdrawn",
+  "Extension",
+  "Deferral",
 ] as const;
+
+/** The three that are OUTCOMES, not grades. Cambridge's own provisional
+ *  dropdown carries all three (read in Appian, 25 Sep 2026), but nothing that
+ *  reasons about grades should treat them as one: a failed written assignment
+ *  cannot take a withdrawal away, and they never pair into a slash. */
+export const PROVISIONAL_OUTCOMES = ["Withdrawn", "Extension", "Deferral"] as const;
 
 /**
  * Which provisional grades a candidate's WRITTEN ASSIGNMENTS have ruled out.
@@ -70,9 +78,12 @@ export function assignmentGradeCeiling(
   if (failCount > 1) {
     return {
       failCount,
-      // Withdrawn stays available: a missing portfolio is Withdrawn, not
-      // Fail, and that is a different rule in the same list.
-      blocked: PROVISIONAL_SLOTS.filter((o) => o !== "Fail" && o !== "Withdrawn"),
+      // The outcomes stay available: a missing portfolio is Withdrawn, not
+      // Fail, and an extension or deferral is not a grade a failed assignment
+      // can rule out. That is a different rule in the same list.
+      blocked: PROVISIONAL_SLOTS.filter(
+        (o) => o !== "Fail" && !(PROVISIONAL_OUTCOMES as readonly string[]).includes(o)
+      ),
       reason: `${failCount} failed written assignments — not eligible for a Pass (Handbook eligibility).`,
       overridden: false,
     };

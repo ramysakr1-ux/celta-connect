@@ -26,7 +26,10 @@ export type SubmissionStatus =
 export type CriteriaRating = "S+" | "S" | "N" | "X";
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 export type PassFail = "pass" | "fail";
-export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension" | "Deferred";
+// Cambridge's own word is "Deferral", not "Deferred" -- its provisional and
+// final dropdowns both say so (Appian, read 25 Sep 2026). Renamed then; no
+// stored value had to move, because none carried the old spelling.
+export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension" | "Deferral";
 export type CourseStatus = "active" | "withdrawn" | "deferred" | "restarting" | "extension";
 
 // specs/build-spec.md §2 "Export is the mirror" -- the three-layer close-out

@@ -19,7 +19,7 @@ const GRADE_PILL_CLASS: Record<FinalGrade, string> = {
   Fail: "pill-danger",
   Withdrawn: "pill-neutral",
   Extension: "pill-info",
-  Deferred: "pill-neutral",
+  Deferral: "pill-neutral",
 };
 
 export type Stage3Status = "not_required" | "not_given" | "given";

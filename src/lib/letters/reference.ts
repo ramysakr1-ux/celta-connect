@@ -13,7 +13,7 @@ import { formatCalendarDate } from "@/lib/format-date";
 // grade not one of the three non-outcomes), so "closed" here means the
 // tutor has genuinely finalized the record, not that course_close_outs has
 // reached any particular status.
-const NON_OUTCOME_GRADES = new Set(["Withdrawn", "Extension", "Deferred"]);
+const NON_OUTCOME_GRADES = new Set(["Withdrawn", "Extension", "Deferral"]);
 
 export function isReferenceLetterEligible(record: {
   final_recommended_grade: string | null;
