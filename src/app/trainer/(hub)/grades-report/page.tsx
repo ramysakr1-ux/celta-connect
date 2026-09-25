@@ -416,7 +416,7 @@ export default async function GradesReportPage() {
                     <CriteriaList
                       traineeId={trainee.id}
                       list="planningStrengths"
-                      label="Strengths in planning"
+                      label="Planning: Strengths"
                       labelClass="text-primary"
                       source="matrix · S+"
                       items={planningStrengths}
@@ -426,7 +426,7 @@ export default async function GradesReportPage() {
                     <CriteriaList
                       traineeId={trainee.id}
                       list="planningActionPoints"
-                      label="Action points in planning"
+                      label="Planning: Areas for development"
                       labelClass="text-status-warning-text"
                       source="matrix · N"
                       items={planningActionPoints}
@@ -436,7 +436,7 @@ export default async function GradesReportPage() {
                     <CriteriaList
                       traineeId={trainee.id}
                       list="teachingStrengths"
-                      label="Strengths in teaching"
+                      label="Teaching: Strengths"
                       labelClass="text-primary"
                       source="matrix · S+"
                       items={teachingStrengths}
@@ -446,7 +446,7 @@ export default async function GradesReportPage() {
                     <CriteriaList
                       traineeId={trainee.id}
                       list="teachingActionPoints"
-                      label="Action points in teaching"
+                      label="Teaching: Areas for development"
                       labelClass="text-status-warning-text"
                       source="matrix · N"
                       items={teachingActionPoints}
@@ -466,16 +466,21 @@ export default async function GradesReportPage() {
                         heading itself says "(if applicable)", and applicable
                         means slashed.
 
-                        The heading reads "pass/higher", not C14_GREEN's "a
-                        higher grade", on his correction the same day: a slash
-                        is not always Pass/Pass B. A Fail/Pass candidate needs
-                        evidence for a PASS, and "higher grade" reads as
+                        The heading is now copied off the live Cambridge
+                        Centre Grade Form in Appian, read against
+                        TR073-C17/2026 on 25 Sep 2026, where it is the last
+                        field on a candidate's card and the only one with no
+                        asterisk. It happens to settle an older argument the
+                        same way: "pass/higher", not just "a higher grade" --
+                        a slash is not always Pass/Pass B. A Fail/Pass
+                        candidate needs evidence for a PASS, and "higher
+                        grade" alone reads as
                         nonsense on their report. One heading covers both. */}
                     {wasSlashed ? (
                     <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card-inset p-3">
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-label font-bold tracking-[0.12em] text-muted uppercase">
-                          Evidence needed for a pass/higher (if applicable)
+                          Evidence needed for a Pass / Higher Grade (if applicable)
                         </span>
                         {record?.provisional_upgrade_conditions ? (
                           <CopyField value={record.provisional_upgrade_conditions} label="Evidence needed" />
